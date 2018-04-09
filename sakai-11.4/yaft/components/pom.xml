@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	
+  	<modelVersion>4.0.0</modelVersion>
+
+  	<name>YAFT PACK</name>
+  	<groupId>org.sakaiproject.yaft</groupId>
+  	<artifactId>yaft-pack</artifactId>
+
+  	<packaging>sakai-component</packaging>
+  	
+  	<parent>
+    	<artifactId>yaft</artifactId>
+    	<groupId>org.sakaiproject.yaft</groupId>
+    	<version>1.3.0-SNAPSHOT</version>
+  	</parent>
+  	
+  	<properties>
+    	<deploy.target>components</deploy.target>
+  	</properties>
+  	<dependencies>
+    <dependency>
+      <groupId>org.sakaiproject.yaft</groupId>
+      <artifactId>yaft-impl</artifactId>
+	  <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.sakaiproject.yaft</groupId>
+          <artifactId>yaft-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  	</dependencies>
+</project>

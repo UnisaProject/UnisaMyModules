@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2009 The Sakai Foundation
+
+    Licensed under the Educational Community License, Version 1.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.opensource.org/licenses/ecl1.php
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+   <bean id="yaft_overview" class="org.sakaiproject.component.app.help.model.ResourceBean">
+      <property name="docId"><value>yaft_overview</value></property>
+      <property name="name"><value>Discussions Overview</value></property>
+      <property name="location"><value>/sakai_yaft/overview.html</value></property>
+      <property name="defaultForTool"><value>sakai.yaft</value></property>
+   </bean>
+
+   <bean id="yaft_permissions" class="org.sakaiproject.component.app.help.model.ResourceBean">
+      <property name="docId"><value>yaft_permissions</value></property>
+      <property name="name"><value>Discussions Permissions</value></property>
+      <property name="location"><value>/sakai_yaft/permissions.html</value></property>
+   </bean>
+
+   <bean id="yaft_pebble" class="org.sakaiproject.component.app.help.model.ResourceBean">
+      <property name="docId"><value>yaft_pebble</value></property>
+      <property name="name"><value>Discussions Pebble Trail</value></property>
+      <property name="location"><value>/sakai_yaft/pebble_trail.html</value></property>
+   </bean>
+
+   <bean id="yaft_forum" class="org.sakaiproject.component.app.help.model.ResourceBean">
+      <property name="docId"><value>yaft_forum</value></property>
+      <property name="name"><value>Discussions Forum</value></property>
+      <property name="location"><value>/sakai_yaft/forum.html</value></property>
+   </bean>
+
+    <bean id="org.sakaiproject.api.app.help.TableOfContents" 
+          class="org.sakaiproject.component.app.help.model.TableOfContentsBean">
+      <property name="name"><value>root</value></property>
+      <property name="categories">
+         <list>
+            <bean id="yaftCategory" class="org.sakaiproject.component.app.help.model.CategoryBean">
+               <property name="name"><value>Discussions</value></property>
+               <property name="resources">
+                  <list>
+                     <ref bean="yaft_overview"/>
+                     <ref bean="yaft_permissions"/>
+                     <ref bean="yaft_pebble"/>
+                     <ref bean="yaft_forum"/>
+                  </list>
+               </property>
+            </bean>
+           </list>
+         </property>
+       </bean>
+</beans>

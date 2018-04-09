@@ -1,0 +1,88 @@
+<!--
+
+    Copyright 2009 The Sakai Foundation
+
+    Licensed under the Educational Community License, Version 1.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.opensource.org/licenses/ecl1.php
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  
+      xmlns="http://www.w3.org/1999/xhtml"  
+      xml:lang="en"  
+      lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="/library/skin/tool_base.css" />
+<link rel="stylesheet" type="text/css" href="/yaft-tool/lib/jquery-ui/css/smoothness/jquery-ui-1.8.9.custom.css" />
+<link rel="stylesheet" type="text/css" href="/prufile2-tool/css/profile2-profile-entity.css" media="all" />
+<link rel="stylesheet" type="text/css" href="/yaft-tool/css/yaft.css" />
+<script type="text/javascript" src="/library/js/headscripts.js"></script>
+<script type="text/javascript" src="/profile2-tool/javascript/profile2-eb.js"></script>
+<script type="text/javascript" src="/yaft-tool/yaft-translations.js"></script>
+<script type="text/javascript" src="/yaft-tool/lib/all.js"></script>
+<script type="text/javascript" src="/yaft-tool/lib/yaftutils.js"></script>
+<script type="text/javascript" src="/yaft-tool/lib/sakaiutils.js"></script>
+<script type="text/javascript" src="/yaft-tool/lib/yaftpermissions.js"></script>
+</head>
+<body>
+<script>
+    var arg = SAKAIUTILS.getParameters();
+    $.ajax({
+        url: '/library/skin/'+arg['skin']+'/tool.css',
+        dataType: 'text/css',
+        success: function(data, textStatus) {
+            $('head').append('<style type="text/css" rel="stylesheet">'+data+'</style>');
+        }
+    });
+</script>
+
+<div class="portletBody">
+
+<div id="synoptic-yaft_container">
+	<div id="synoptic_yaft_content"></div>
+</div>
+
+<!--  Templates Start -->
+
+<div id="synoptic_yaft_content_template" style="display:none"><!--
+<table id="yaft_active_discussion_table" class="listHier">
+	<thead>
+	<tr>
+		<th align="left">${yaft_discussion_label}</th>
+		<th align="left">${yaft_last_message_label}</th>
+		<th align="left">${yaft_subject_label}</th>
+	</tr>
+	</thead>
+	<tbody>
+	{for discussion in discussions}
+   	<tr class="yaft_active_discussion_row">
+		<td style="max-width:250px;"><a href="${discussion.url}" onclick="window.open('${discussion.url}','discussion','location=0,width=500,height=400,resizable=1,scrollbars=1,toolbar=0,menubar=0'); return false;" title="${yaft_discussion_link_tooltip}">${discussion.subject}</a></td>
+		<td>${new Date(discussion.lastMessageDate).toLocaleString()}</td>
+		<td>${discussion.latestMessageSubject}</td>
+	</tr>
+	{/for}
+	</tbody>
+</table>
+-->
+</div>
+
+<!--  Templates End -->
+
+</div> <!-- /portletBody-->
+
+<script type="text/javascript" language="JavaScript" src="/yaft-tool/js/synoptic-yaft.js"></script>
+<link rel="stylesheet" type="text/css" href="/yaft-tool/css/jquery.cluetip.css" />
+
+</body>
+</html>
