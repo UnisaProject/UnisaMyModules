@@ -116,6 +116,9 @@
                 <module>velocity</module>
                 <module>web</module>
                 <module>webservices</module>
+				<!-- UNISA CHANGES -->
+				<module>yaft</module> <!-- contrib tool -->
+				<!-- END OF UNISA CHANGES -->
             </modules>
         </profile>
         <profile>
