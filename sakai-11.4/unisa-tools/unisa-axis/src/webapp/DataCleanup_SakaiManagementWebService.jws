@@ -1,0 +1,393 @@
+import java.sql.Types;
+import org.apache.commons.collections.map.ListOrderedMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+
+
+import org.w3c.dom.*;
+
+import org.apache.axis.AxisFault;
+import org.apache.axis.utils.JavaUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.email.api.EmailService;
+import org.sakaiproject.email.api.Attachment;
+import org.sakaiproject.email.api.RecipientType;
+import org.sakaiproject.event.cover.UsageSessionService;
+import org.sakaiproject.event.api.UsageSession;
+
+import za.ac.unisa.lms.db.StudentSystemDAO;
+import za.ac.unisa.lms.db.SakaiDAO;
+
+
+/**
+This webservice is used to delete old data from old sites
+tool: Sakai Management
+
+Sonette start with webservice 30 May 2017
+*/
+public class DataCleanup_SakaiManagementWebService {
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	private EmailService emailService;
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// QUERIES
+
+	// ----- Delete for table SAKAI_SITE_PROPERTY
+	String DELETE_SAKAI_SITE_PROP = " DELETE FROM SAKAI_SITE_PROPERTY"+ 
+							" WHERE   SITE_ID = ?";
+
+	// ----- Delete for table SAKAI_SITE_HISTORY
+	String DELETE_SAKAI_SITE_HIST = " DELETE FROM SAKAI_SITE_HISTORY"+ 
+									" WHERE  SITE_ID = ?";
+									
+	// ----- Delete for table SAKAI_SITE_GROUP_PROPERTY
+	String DELETE_SITE_GROUP_PROPERTY = " DELETE FROM SAKAI_SITE_GROUP_PROPERTY"+
+										" WHERE  SITE_ID = ?";
+										
+	// ----- Delete for table SAKAI_SITE_GROUP
+	String DELETE_SITE_GROUP = " DELETE FROM SAKAI_SITE_GROUP"+
+							   " WHERE  SITE_ID = ?";
+
+	// ----- delete from table SAKAI_SITE_TOOL_PROPERTY
+	String DELETE_SITE_TOOL_PROP = " DELETE FROM SAKAI_SITE_TOOL_PROPERTY"+
+								   " WHERE  SITE_ID = ?";
+				
+	// ----- delete from table SAKAI_SITE_TOOL
+	String DELETE_SITE_TOOL = " DELETE FROM SAKAI_SITE_TOOL"+
+							  " WHERE  SITE_ID = ?";
+
+	// ----- delete from table SAKAI_SITE_PAGE_PROPERTY
+	String DELETE_SITE_PAGE_PROPERTY = " DELETE FROM SAKAI_SITE_PAGE_PROPERTY"+
+							  			" WHERE  SITE_ID = ?";
+				
+	// ----- delete from table SAKAI_SITE_PAGE
+	String DELETE_SITE_PAGE = " DELETE FROM SAKAI_SITE_PAGE"+
+							  " WHERE  SITE_ID = ?";
+				
+	// ----- delete from table SAKAI_SITE_USER
+	String DELETE_SITE_USER = " DELETE FROM SAKAI_SITE_USER"+
+							  " WHERE  SITE_ID = ?";						  
+
+	// ----- delete from table SAKAI_USER_PROPERTY
+	String DELETE_USER_PROPERTY = " DELETE FROM SAKAI_USER_PROPERTY"+
+							      " WHERE  SITE_ID = ?";						  
+				
+	// ----- delete from table SAKAI_USER
+	String DELETE_USER = " DELETE FROM SAKAI_USER"+
+						 " WHERE  SITE_ID = ?";			
+				
+	// ----- delete from table SAKAI_SYLLABUS_ATTACH
+	String DELETE_SYLLABUS_ATTACH = " DELETE FROM SAKAI_SYLLABUS_ATTACH"+
+        							" WHERE  SyLLABUSID IN ("+
+        									 " select ID from SAKAI_SYLLABUS_data"+
+        									 " where  surrogatekey in ("+
+        										" select ID FROM SAKAI_SYLLABUS_ITEM WHERE CONTEXTID = ?))";
+			
+							      				
+	// ----- delete from table SAKAI_SYLLABUS_DATA
+	String DELETE_SYLLABUS_DATA = " DELETE FROM SAKAI_SYLLABUS_data"+
+								  " WHERE  surrogatekey in (select ID FROM SAKAI_SYLLABUS_ITEM WHERE CONTEXTID = ?)";			
+				
+	// ----- delete from table SAKAI_SYLLABUS_ITEM
+	String DELETE_SYLLABUS_ITEM = " DELETE FROM SAKAI_SYLLABUS_ITEM"+
+								  " WHERE  CONTEXTID = ?";			
+					
+	// ----- delete from table SAKAI_PRIVACY_RECORD
+	String DELETE_PRIVACY_RECORD = " DELETE FROM SAKAI_PRIVACY_RECORD"+
+								  " WHERE  CONTEXTID = '/site/'||?";			
+
+				
+	// ----- **LAST** delete from table SAKAI_SITE
+	String DELETE_SAKAI_SITE = " DELETE FROM SAKAI_SITE"+
+							   " WHERE  SITE_ID = ?";
+
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	/** Actual method to do the site management data cleanup
+		Input:
+		1) year
+		2) semester period
+    */
+	public String dataCleanup(String academicYear, String semesterPeriod )throws AxisFault {
+	
+		// ----- variables
+		StringBuffer yearSemester = new StringBuffer();
+    	StringBuffer result = new StringBuffer();
+    	String serverUrl = ServerConfigurationService.getString("serverUrl");
+	
+		// ----- Set yearSemester YY-S1
+	    yearSemester.append(academicYear.substring(2,4));
+    	yearSemester.append('-');
+    	yearSemester.append(semesterPeriod);
+		
+		// ----- get serverUrl (myDev, myQa, myUnisa or localhost)
+		if (serverUrl.equals("http://localhost:8080")) {
+			serverUrl = "https://mydev.unisa.ac.za";
+		} 
+		serverUrl = "http://163.200.82.234:8020/portal";
+	
+	
+		// ----- Retrieve sites where data must be deleted
+		String RETRIEVE_SITES2 = " SELECT sakai_site.site_id AS SITEID "+ 
+								" FROM   sakai_site "+
+								//" WHERE  sakai_site.site_id like ('%"+yearSemester.toString()+"%') ";
+								" WHERE   sakai_site.site_id = 'BSM3702-16-S1'"; //hardcoded for testing
+
+		JdbcTemplate jdt1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+		try {
+               
+            List recordsSites = jdt1.queryForList(RETRIEVE_SITES2,
+                       new Object[] {});
+			Iterator recordsSites_it = recordsSites.iterator();
+					
+			// ----- For each site retrieved
+			while (recordsSites_it.hasNext()) {
+				ListOrderedMap record_Site = (ListOrderedMap) recordsSites_it.next();
+					
+				StringBuffer siteId = new StringBuffer();
+						                                                                                
+				siteId.append(record_Site.get("SITEID").toString());
+				System.out.println(">>>>>>>>>>>>>>>>>>>>> contentCleanup <<>> SiteId = "+siteId.toString());
+									
+				result.append("<br>*");
+				result.append(siteId.toString());
+
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_SITE_PROPERTY
+				JdbcTemplate jdt_Delete1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					int nrOfRecordsDeleted1 = jdt_Delete1.update(DELETE_SAKAI_SITE_PROP,
+						new Object[] {siteId.toString()});
+					System.out.println(">>>>>>>>>>>>>>>>>>>>> contentCleanup <<>> SAKAI_SITE_PROPERTY records deleted "+nrOfRecordsDeleted1);
+				} catch (Exception e) { //jdt_Delete1
+					System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table SAKAI_SITE_PROPERTY error "+e);
+					//result.append("<br> ----- delete from table SAKAI_SITE_PROPERTY ERROR ----- ");
+					//result.append(siteId.toString());
+					//result.append(e);
+				} //jdt_Delete1.update		
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_SITE_HISTORY
+				JdbcTemplate jdt_Delete2 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete2.update(DELETE_SAKAI_SITE_HIST,
+					new Object[] {siteId.toString()});
+				} catch (Exception e) { //jdt_Delete2
+					System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table SAKAI_SITE_HISTORY error "+e);
+					//result.append("<br> ----- delete from table SAKAI_SITE_HISTORY ERROR ----- ");
+					//result.append(siteId.toString());
+					//result.append(e);
+				} //jdt_Delete.update	
+				
+
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_SITE_GROUP_PROPERTY				
+				JdbcTemplate jdt_Delete3 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete3.update(DELETE_SITE_GROUP_PROPERTY,
+					new Object[] {siteId.toString()});
+				} catch (Exception e) { //jdt_Delete3
+					System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table DELETE_SITE_GROUP_PROPERTY error "+e);
+					//result.append("<br> ----- delete from table DELETE_SITE_GROUP_PROPERTY ERROR ----- ");
+					//result.append(siteId.toString());
+					//result.append(e);
+				} //jdt_Delete3.update	
+							
+				// ----- -----------------------------------------------								
+				// ----- delete from table SAKAI_SITE_GROUP
+				JdbcTemplate jdt_Delete4 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete4.update(DELETE_SITE_GROUP,
+					new Object[] {siteId.toString()});
+				} catch (Exception e) { //jdt_Delete4
+					System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table DELETE_SITE_GROUP error "+e);
+					//result.append("<br> ----- delete from table DELETE_SITE_GROUP ERROR ----- ");
+					//result.append(siteId.toString());
+					//result.append(e);
+				} //jdt_Delete4.update
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_SITE_TOOL_PROPERTY
+				JdbcTemplate jdt_Delete5 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete5.update(DELETE_SITE_TOOL_PROP,
+					new Object[] {siteId.toString()});
+				} catch (Exception e) { //jdt_Delete5
+					System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table DELETE_SITE_TOOL_PROP error "+e);
+					//result.append("<br> ----- delete from table DELETE_SITE_TOOL_PROP ERROR ----- ");
+					//result.append(siteId.toString());
+					//result.append(e);
+				} //jdt_Delete5.update
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_SITE_TOOL
+				JdbcTemplate jdt_Delete6 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete6.update(DELETE_SITE_TOOL,
+					new Object[] {siteId.toString()});
+				} catch (Exception e) { //jdt_Delete6
+					System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table DELETE_SITE_TOOL error "+e);
+					//result.append("<br> ----- delete from table DELETE_SITE_TOOL ERROR ----- ");
+					//result.append(siteId.toString());
+					//result.append(e);
+				} //jdt_Delete5.update
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_SITE_PAGE_PROPERTY
+				JdbcTemplate jdt_Delete7 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete7.update(DELETE_SITE_PAGE_PROPERTY,
+					new Object[] {siteId.toString()});
+				} catch (Exception e) { //jdt_Delete7
+					System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table DELETE_SITE_PAGE_PROP error "+e);
+					//result.append("<br> ----- delete from table DELETE_SITE_PAGE_PROP ERROR ----- ");
+					//result.append(siteId.toString());
+					//result.append(e);
+				} //jdt_Delete7.update
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_SITE_PAGE
+				JdbcTemplate jdt_Delete8 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete8.update(DELETE_SITE_PAGE,
+					new Object[] {siteId.toString()});
+				} catch (Exception e) { //jdt_Delete8
+					System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table DELETE_SITE_PAGE error "+e);
+					//result.append("<br> ----- delete from table DELETE_SITE_PAGE ERROR ----- ");
+					//result.append(siteId.toString());
+					//result.append(e);
+				} //jdt_Delete8.update
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_SITE_USER
+				JdbcTemplate jdt_Delete9 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete9.update(DELETE_SITE_USER,
+					new Object[] {siteId.toString()});
+				} catch (Exception e) { //jdt_Delete9
+					System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table DELETE_SITE_USER error "+e);
+					//result.append("<br> ----- delete from table DELETE_SITE_USER ERROR ----- ");
+					//result.append(siteId.toString());
+					//result.append(e);
+				} //jdt_Delete9.update
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_USER_PROPERTY
+				// Do not delete
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_USER
+				// do not delete
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_SYLLABUS_ATTACH
+				JdbcTemplate jdt_Delete10 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete10.update(DELETE_SYLLABUS_ATTACH,
+					new Object[] {siteId.toString()});
+				} catch (Exception e) { //jdt_Delete10
+					System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table DELETE_SYLLABUS_ATTACH error "+e);
+					//result.append("<br> ----- delete from table DELETE_SYLLABUS_ATTACH ERROR ----- ");
+					//result.append(siteId.toString());
+					//result.append(e);
+				} //jdt_Delete10.update
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_SYLLABUS_DATA
+				JdbcTemplate jdt_Delete11 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete11.update(DELETE_SYLLABUS_DATA,
+					new Object[] {siteId.toString()});
+				} catch (Exception e) { //jdt_Delete11
+					System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table DELETE_SYLLABUS_ATTACH error "+e);
+					//result.append("<br> ----- delete from table DELETE_SYLLABUS_DATA ERROR ----- ");
+					//result.append(siteId.toString());
+					//result.append(e);
+				} //jdt_Delete11.update
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_SYLLABUS_ITEM
+				JdbcTemplate jdt_Delete12 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete12.update(DELETE_SYLLABUS_ITEM,
+					new Object[] {siteId.toString()});
+				} catch (Exception e) { //jdt_Delete12
+					System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table DELETE_SYLLABUS_ITEM error "+e);
+					//result.append("<br> ----- delete from table DELETE_SYLLABUS_ITEM ERROR ----- ");
+					//result.append(siteId.toString());
+					//result.append(e);
+				} //jdt_Delete12.update
+				
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_PRIVACY_RECORD
+				JdbcTemplate jdt_Delete14 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete14.update(DELETE_PRIVACY_RECORD,
+					new Object[] {siteId.toString()});
+				} catch (Exception e) { //jdt_Delete14
+					System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table DELETE_PRIVACY_RECORD error "+e);
+					//result.append("<br> ----- delete from table DELETE_PRIVACY_RECORD ERROR ----- ");
+					//result.append(siteId.toString());
+					//result.append(e);
+				} //jdt_Delete13.update
+				
+				// ----- -----------------------------------------------
+				// ----- **LAST** delete from table SAKAI_SITE
+				JdbcTemplate jdt_Delete13 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete13.update(DELETE_SAKAI_SITE,
+					new Object[] {siteId.toString()});
+				} catch (Exception e) { //jdt_Delete13
+					System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table DELETE_SAKAI_SITE error "+e);
+					//result.append("<br> ----- delete from table DELETE_SAKAI_SITE ERROR ----- ");
+					//result.append(siteId.toString());
+					//result.append(e);
+				} //jdt_Delete13.update
+
+			} // end of while (recordsSites_it.hasNext()) {
+				
+		} catch (Exception e) { // end of try recordsSites (RETRIEVE_SITE2)
+			System.out.println("***** Data_Cleanup_SakaiSiteManagement: delete from table SAKAI_SITE_PROPERTY error "+e);
+			//result.append("<br> ----- delete from table SAKAI_SITE_PROPERTY ERROR ----- ");
+			//result.append(siteId.toString());
+			//result.append(e);
+		} //jdt_Delete1.update
+	
+		return "";
+	} // end of dataCleanup
+
+} // end of ContentCleanupWebService

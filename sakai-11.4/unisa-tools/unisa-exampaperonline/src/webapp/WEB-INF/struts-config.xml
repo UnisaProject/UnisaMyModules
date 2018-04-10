@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	<form-bean name="examPaperOnlineForm" 
+		 	type="za.ac.unisa.lms.tools.exampaperonline.forms.ExamPaperOnlineForm" />
+	</form-beans>
+	
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.exampaperonline.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/examPaperOnline.do?action=initial"
+				contextRelative="true" />
+		</action>
+			<action
+			name="examPaperOnlineForm"
+			attribute="examPaperOnlineForm"
+			parameter="action"
+			path="/examPaperOnline"
+			type="za.ac.unisa.lms.tools.exampaperonline.actions.ExamPaperOnlineAction"
+			validate="false">
+			<forward
+				name="input"
+				path="/WEB-INF/jsp/input.jsp"
+				contextRelative="true" />
+			<forward
+				name="display"
+				path="/WEB-INF/jsp/display.jsp"
+				contextRelative="true" />		
+			<forward
+				name="upload"
+				path="/uploadDocument.do?action=initial"
+				contextRelative="true" />	
+			<forward
+				name="retrieve"
+				path="/retrieveDocument.do?action=initial"
+				contextRelative="true" />
+			<forward
+				name="recover"
+				path="/recoverDocument.do?action=initial"
+				contextRelative="true" />	
+			<forward
+				name="retract"
+				path="/retractDocument.do?action=initial"
+				contextRelative="true" />	
+			<forward
+				name="listdocs"
+				path="/listDocument.do?action=initial"
+				contextRelative="true" />
+			<forward
+				name="audit"
+				path="/auditTrail.do?action=initial"
+				contextRelative="true" />		
+			<forward
+				name="printinstr"
+				path="/printInstruction.do?action=initial"
+				contextRelative="true" />	
+			<forward
+				name="reset"
+				path="/resetDocument.do?action=initial"
+				contextRelative="true" />		
+		</action>  
+		<action
+			name="examPaperOnlineForm"
+			attribute="examPaperOnlineForm"
+			parameter="action"
+			path="/uploadDocument"
+			type="za.ac.unisa.lms.tools.exampaperonline.actions.UploadDocumentAction"
+			validate="false">
+			<forward
+				name="uploadStep1"
+				path="/WEB-INF/jsp/uploadStep1.jsp"
+				contextRelative="true" />	
+			<forward
+				name="uploadStep2"
+				path="/WEB-INF/jsp/uploadStep2.jsp"
+				contextRelative="true" />	
+			<forward
+				name="uploadStep3"
+				path="/WEB-INF/jsp/uploadStep3.jsp"
+				contextRelative="true" />				
+			<forward
+				name="cancel"
+				path="/WEB-INF/jsp/input.jsp"
+				contextRelative="true" />			
+			<forward
+				name="listdocs"
+				path="/listDocument.do?action=initial"
+				contextRelative="true" />		
+		</action>    
+		<action
+			name="examPaperOnlineForm"
+			attribute="examPaperOnlineForm"
+			parameter="action"
+			path="/retrieveDocument"
+			type="za.ac.unisa.lms.tools.exampaperonline.actions.RetrieveDocumentAction"
+			validate="false">
+			<forward
+				name="retrieveStep1"
+				path="/WEB-INF/jsp/retrieveStep1.jsp"
+				contextRelative="true" />	
+			<forward
+				name="retrieveStep2"
+				path="/WEB-INF/jsp/retrieveStep2.jsp"
+				contextRelative="true" />					
+			<forward
+				name="cancel"
+				path="/WEB-INF/jsp/input.jsp"
+				contextRelative="true" />	
+			<forward
+				name="displayList"
+				path="/retrieveDocument.do?action=displayList"
+				contextRelative="true" />				
+		</action>    
+		<action
+			name="examPaperOnlineForm"
+			attribute="examPaperOnlineForm"
+			parameter="action"
+			path="/recoverDocument"
+			type="za.ac.unisa.lms.tools.exampaperonline.actions.RecoverDocumentAction"
+			validate="false">
+			<forward
+				name="recoverStep1"
+				path="/WEB-INF/jsp/recoverStep1.jsp"
+				contextRelative="true" />	
+			<forward
+				name="recoverStep2"
+				path="/WEB-INF/jsp/recoverStep2.jsp"
+				contextRelative="true" />					
+			<forward
+				name="cancel"
+				path="/WEB-INF/jsp/input.jsp"
+				contextRelative="true" />	
+			<forward
+				name="displayList"
+				path="/recoverDocument.do?action=displayList"
+				contextRelative="true" />				
+		</action>    
+		<action
+			name="examPaperOnlineForm"
+			attribute="examPaperOnlineForm"
+			parameter="action"
+			path="/listDocument"
+			type="za.ac.unisa.lms.tools.exampaperonline.actions.ListDocumentAction"
+			validate="false">
+			<forward
+				name="listDocsStep1"
+				path="/WEB-INF/jsp/listDocsStep1.jsp"
+				contextRelative="true" />	
+			<forward
+				name="listDocsStep2"
+				path="/WEB-INF/jsp/listDocsStep2.jsp"
+				contextRelative="true" />							
+			<forward
+				name="cancel"
+				path="/WEB-INF/jsp/input.jsp"
+				contextRelative="true" />	
+			<forward
+				name="displayList"
+				path="/listDocument.do?action=displayList"
+				contextRelative="true" />		
+			<forward
+				name="printinstr"
+				path="/test/displayPrintInstructions.jsp"
+				contextRelative="true" />			
+		</action>    
+		<action
+			name="examPaperOnlineForm"
+			attribute="examPaperOnlineForm"
+			parameter="action"
+			path="/retractDocument"
+			type="za.ac.unisa.lms.tools.exampaperonline.actions.RetractDocumentAction"
+			validate="false">
+			<forward
+				name="retractStep1"
+				path="/WEB-INF/jsp/retractStep1.jsp"
+				contextRelative="true" />	
+			<forward
+				name="retractStep2"
+				path="/WEB-INF/jsp/retractStep2.jsp"
+				contextRelative="true" />							
+			<forward
+				name="cancel"
+				path="/WEB-INF/jsp/input.jsp"
+				contextRelative="true" />	
+			<forward
+				name="displayList"
+				path="/retractDocument.do?action=displayList"
+				contextRelative="true" />				
+		</action>    
+		<action
+			name="examPaperOnlineForm"
+			attribute="examPaperOnlineForm"
+			parameter="action"
+			path="/resetDocument"
+			type="za.ac.unisa.lms.tools.exampaperonline.actions.ResetDocumentAction"
+			validate="false">
+			<forward
+				name="resetStep1"
+				path="/WEB-INF/jsp/resetStep1.jsp"
+				contextRelative="true" />	
+			<forward
+				name="resetStep2"
+				path="/WEB-INF/jsp/resetStep2.jsp"
+				contextRelative="true" />
+			<forward
+				name="resetStep3"
+				path="/WEB-INF/jsp/resetStep3.jsp"
+				contextRelative="true" />							
+			<forward
+				name="cancel"
+				path="/WEB-INF/jsp/input.jsp"
+				contextRelative="true" />	
+			<forward
+				name="displayList"
+				path="/resetDocument.do?action=displayList"
+				contextRelative="true" />				
+		</action>    
+		<action
+			name="examPaperOnlineForm"
+			attribute="examPaperOnlineForm"
+			parameter="action"
+			path="/auditTrail"
+			type="za.ac.unisa.lms.tools.exampaperonline.actions.AuditTrailAction"
+			validate="false">
+			<forward
+				name="displayAuditTrail"
+				path="/WEB-INF/jsp/displayAuditTrail.jsp"
+				contextRelative="true" />									
+			<forward
+				name="cancel"
+				path="/WEB-INF/jsp/input.jsp"
+				contextRelative="true" />						
+		</action>    
+		<action
+			name="examPaperOnlineForm"
+			attribute="examPaperOnlineForm"
+			parameter="action"
+			path="/printInstruction"
+			type="za.ac.unisa.lms.tools.exampaperonline.actions.PrintInstructionAction"
+			validate="false">
+			<forward
+				name="displayPrintinstr"
+				path="/test/displayPrintInstructions.jsp"
+				contextRelative="true" />	
+			<forward
+				name="cancel"
+				path="/WEB-INF/jsp/input.jsp"
+				contextRelative="true" />			
+			<forward
+				name="listdocs"
+				path="/listDocument.do?action=initial"
+				contextRelative="true" />					
+		</action>    
+	</action-mappings>	
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.exampaperonline.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

@@ -1,0 +1,157 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <name>BlogWow Tool</name>
+  <groupId>org.sakaiproject</groupId>
+  <artifactId>sakai-blogwow-tool</artifactId>
+  <description>
+      This project creates a WAR containing the BlogWow Tool for Sakai.
+   </description>
+  <packaging>war</packaging>
+  <parent>
+    <groupId>org.sakaiproject</groupId>
+    <artifactId>sakai-blogwow-base</artifactId>
+    <version>0.9.9</version>
+<!--blogwow.version-->
+  </parent>
+  <properties>
+   <!-- <sakairsf.sakai.version>2.2.x</sakairsf.sakai.version>
+    <rsfutil.version>0.7.4</rsfutil.version>-->
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.sakaiproject.kernel</groupId>
+      <artifactId>sakai-kernel-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.sakaiproject.kernel</groupId>
+      <artifactId>sakai-component-manager</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.sakaiproject.kernel</groupId>
+      <artifactId>sakai-kernel-util</artifactId>
+    </dependency>
+<!-- internal -->
+    <dependency>
+      <groupId>org.sakaiproject</groupId>
+      <artifactId>sakai-blogwow-api</artifactId>
+    </dependency>
+	 <!-- Sakai RSF dependency -->
+		<dependency>
+			<groupId>uk.org.ponder.sakairsf</groupId>
+			<artifactId>sakairsf</artifactId>
+            		<version>${sakairsf.version}</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.ponder.sakairsf</groupId>
+			<artifactId>SakaiRSFComponents-evolvers</artifactId>
+            		<version>${sakairsf.components.version}</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>uk.org.ponder.sakairsf</groupId>
+			<artifactId>SakaiRSFComponents-templates</artifactId>
+            		<version>${sakairsf.components.version}</version>
+			<type>war</type>
+		</dependency>
+<!-- RSF
+    <dependency>
+      <groupId>uk.org.ponder.sakairsf</groupId>
+      <artifactId>SakaiRSFComponents-templates</artifactId>
+      <version>${rsfutil.version}-sakai_${sakairsf.sakai.version}</version>
+      <type>war</type>
+    </dependency>
+    <dependency>
+      <groupId>uk.org.ponder.sakairsf</groupId>
+      <artifactId>SakaiRSFComponents-evolvers</artifactId>
+      <version>${rsfutil.version}-sakai_${sakairsf.sakai.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>uk.org.ponder.sakairsf</groupId>
+      <artifactId>sakairsf</artifactId>
+      <version>${rsfutil.version}-sakai_${sakairsf.sakai.version}</version>
+      <type>jar</type>
+    </dependency>   -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+<!-- Sakai dependencies (all RSF apps must have this) -->
+<!--org.sakaiprojectsakai-util${sakai.version}-->
+<!-- Other sakai dependencies added in by Georgia Tech -->
+<!--org.sakaiprojectsakai-util-api-->
+<!--org.sakaiprojectsakai-component-->
+<!--org.sakaiprojectsakai-authz-api-->
+    <dependency>
+      <groupId>org.sakaiproject.entitybroker</groupId>
+      <artifactId>entitybroker-api</artifactId>
+    </dependency>
+<!--org.sakaiprojectsakai-component-api-->
+<!--org.sakaiprojectsakai-tool-api-->
+<!--org.sakaiprojectsakai-user-api-->
+<!--org.sakaiprojectsakai-entity-api-->
+<!--org.sakaiprojectsakai-site-api-->
+<!--org.sakaiprojectsakai-content-api-->
+<!-- Apache commons dependencies -->
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.1</version>
+      <scope>provided</scope>
+    </dependency>
+<!-- Spring dependency -->
+    <dependency>
+      <groupId>${sakai.spring.groupId}</groupId>
+      <artifactId>${sakai.spring.artifactId}</artifactId>
+      <version>${sakai.spring.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeTypes>war</includeTypes>
+              <outputDirectory>${project.build.directory}/webapp/</outputDirectory>
+              <overWriteReleases>true</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>2.1-beta-1</version> <!-- Need beta-1 for overlay exclusions -->
+        <configuration>
+          <overlays>
+            <overlay>
+              <groupId>uk.org.ponder.sakairsf</groupId>
+              <artifactId>SakaiRSFComponents-templates</artifactId>
+              <type>war</type>
+              <excludes>
+                <exclude>WEB-INF/lib/*</exclude>
+              </excludes>
+            </overlay>
+          </overlays>
+        </configuration>
+       </plugin>
+    </plugins>
+  </build>
+</project>

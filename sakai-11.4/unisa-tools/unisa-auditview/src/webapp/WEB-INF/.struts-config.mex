@@ -1,0 +1,68 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="15,15" dimension="281,176" />
+  <StrutsActivity path="/auditView.do" location="120,300" dimension="391,104" />
+  <StrutsActivity path="/auditView" location="950,150" dimension="99,53" />
+  <StrutsActivity path="/WEB-INF/jsp/auditView.jsp" location="630,210" dimension="199,53" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="405,90" dimension="150,49" />
+  <StrutsTransition id="/jsp/auditView.jsp,null,/auditView.do,2" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="630,416" />
+      <AbsolutePoint location="390,416" />
+      <AbsolutePoint location="315,404" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/auditView.do,start,/WEB-INF/jsp/auditView.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="315,300" />
+      <AbsolutePoint location="315,236" />
+      <AbsolutePoint location="630,236" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/WEB-INF/jsp/auditView.jsp,null,/auditView.do,2" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="729,263" />
+      <AbsolutePoint location="729,352" />
+      <AbsolutePoint location="511,352" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/auditView.do,display,/WEB-INF/jsp/auditView.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="511,322" />
+      <AbsolutePoint location="699,322" />
+      <AbsolutePoint location="699,263" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/auditView.do,start,/jsp/auditView.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="511,352" />
+      <AbsolutePoint location="701,307" />
+      <AbsolutePoint location="701,390" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/form/auditView.jsp,null,/auditView.do,2" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="727,203" />
+      <AbsolutePoint location="727,307" />
+      <AbsolutePoint location="511,352" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/auditView.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="155,191" />
+      <AbsolutePoint location="155,300" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/auditView.do,start,/WEB-INF/jsp/default.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="420,300" />
+      <AbsolutePoint location="420,139" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/auditView.do,start,/form/auditView.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="315,300" />
+      <AbsolutePoint location="390,176" />
+      <AbsolutePoint location="650,176" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>unisa-changes-base</artifactId>
+    <groupId>org.sakaiproject</groupId>
+    <version>10.5</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <name>Unisa Overlay on Syllabus </name>
+  <groupId>unisa.overlays.syllabus</groupId>
+  <artifactId>unisa-overlays-syllabus</artifactId>
+  <packaging>pom</packaging>
+  <modules>  
+	<module>syllabus-app</module>
+  </modules>
+</project>

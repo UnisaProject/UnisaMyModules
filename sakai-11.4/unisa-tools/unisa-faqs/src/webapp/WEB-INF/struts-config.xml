@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+
+		<form-bean name="faqContentForm"
+			type="za.ac.unisa.lms.tools.faqs.forms.FAQContentForm" />
+		<form-bean name="faqCategoryForm"
+			type="za.ac.unisa.lms.tools.faqs.forms.FAQCategoryForm" />
+		<form-bean name="faqListForm"
+			type="za.ac.unisa.lms.tools.faqs.forms.FAQListForm" />
+    <form-bean name="faqCopyForm" type="za.ac.unisa.lms.tools.faqs.forms.FAQCopyForm" />
+
+
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards>
+
+
+
+	</global-forwards>
+
+	<action-mappings>
+		<action parameter="action" path="/default"
+			type="za.ac.unisa.lms.tools.faqs.actions.DefaultAction">
+			<forward name="default" path="/faqlist.do?action=view"
+				contextRelative="true" />
+		</action>
+
+		<action attribute="faqCategoryForm" name="faqCategoryForm"
+			parameter="action" path="/faqcategory" scope="request"
+			type="za.ac.unisa.lms.tools.faqs.actions.FAQCategoryAction"
+			validate="false">
+			<forward name="save" path="/default.do"
+				contextRelative="true" />
+			<forward name="cancels" path="/default.do"
+				contextRelative="true" />
+			<forward name="inputcategory"
+				path="/WEB-INF/jsp/inputfaqcategory.jsp" contextRelative="true" />
+			<forward name="editcategory"
+				path="/WEB-INF/jsp/editfaqcategory.jsp" contextRelative="true" />
+			<forward name="saveeditcategory"
+				path="/default.do" contextRelative="true" />
+			<forward name="canceleditcategory"
+				path="/default.do" contextRelative="true" />
+		</action>
+
+		<action attribute="faqContentForm" name="faqContentForm"
+			parameter="action" path="/faqcontent" scope="request"
+			type="za.ac.unisa.lms.tools.faqs.actions.FAQContentAction"
+			validate="false">
+			<forward name="input"
+				path="/WEB-INF/jsp/inputfaqcontent.jsp" contextRelative="true" />
+			<forward name="save" path="/default.do"
+				contextRelative="true" />
+			<forward name="cancel" path="/default.do"
+				contextRelative="true" />
+			<forward name="editfaq" path="/default.do"
+				contextRelative="true" />
+			<forward name="view" path="/WEB-INF/jsp/viewspecificfaq.jsp"
+				contextRelative="true" />
+			<forward name="edit" path="/WEB-INF/jsp/editfaqcontent.jsp"
+				contextRelative="true" />
+		</action>
+
+		<action attribute="faqListForm" name="faqListForm"
+			parameter="action" path="/faqlist" scope="session"
+			type="za.ac.unisa.lms.tools.faqs.actions.FAQListAction"
+			validate="false">
+			<forward name="view" path="/WEB-INF/jsp/viewfaqlist.jsp"
+				contextRelative="true" />
+			<forward name="confirmremove" path="/WEB-INF/jsp/confirmremove.jsp"
+				contextRelative="true" />
+		</action>
+<!--
+		<action attribute="faqCategoryForm" name="faqCategoryForm"
+			parameter="action" path="/faqlist" scope="session"
+			type="za.ac.unisa.lms.tools.faqs.actions.FAQCategoryAction"
+			validate="false">
+			<forward name="save" path="/WEB-INF/jsp/viewfaqlist.jsp"
+				contextRelative="true" />
+			<forward name="confirmremove" path="/WEB-INF/jsp/confirmremove.jsp"
+				contextRelative="true" />
+		</action>
+-->
+    <action
+      attribute="faqCopyForm" name="faqCopyForm" scope="request"
+      parameter="action" validate="false"
+      path="/faqcopy"
+      type="za.ac.unisa.lms.tools.faqs.actions.FaqCopy">
+      <forward
+        name="copiedforward"
+        path="/WEB-INF/jsp/copied.jsp"
+        contextRelative="true" />
+    </action>
+
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.faqs.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+	</plug-in>
+</struts-config>

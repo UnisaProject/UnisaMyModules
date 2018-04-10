@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		<form-bean name="broadbandRequestForm" 
+		 	type="za.ac.unisa.lms.tools.broadbandrequest.forms.BroadbandRequestForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.broadbandrequest.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/broadbandRequest.do?act=initial"
+				contextRelative="true" />
+		</action>
+		<action
+			name="broadbandRequestForm"
+			attribute="broadbandRequestForm"
+			parameter="act"
+			path="/broadbandRequest"
+			type="za.ac.unisa.lms.tools.broadbandrequest.actions.BroadbandRequestAction"
+			validate="false">
+			<forward
+				name="requestList"
+				path="/WEB-INF/jsp/requestList.jsp"
+				contextRelative="true" />
+			<forward
+				name="viewRequest"
+				path="/WEB-INF/jsp/viewRequest.jsp"
+				contextRelative="true" />	
+			<forward
+				name="confirmCancellation"
+				path="/WEB-INF/jsp/confirmCancellation.jsp"
+				contextRelative="true" />	
+			<forward
+				name="requestPackageStep1"
+				path="/WEB-INF/jsp/requestPackageStep1.jsp"
+				contextRelative="true" />
+			<forward
+				name="requestPackageStep2"
+				path="/WEB-INF/jsp/requestPackageStep2.jsp"
+				contextRelative="true" />	
+			<forward
+				name="paymentConfirmation"
+				path="/WEB-INF/jsp/paymentConfirmation.jsp"
+				contextRelative="true" />
+			<forward
+				name="paymentInformation"
+				path="/WEB-INF/jsp/paymentInformation.jsp"
+				contextRelative="true" />	
+			<forward
+				name="paymentAtSpInfo"
+				path="/WEB-INF/jsp/paymentAtSpInfo.jsp"
+				contextRelative="true" />	
+			<forward
+				name="errorPage"
+				path="/WEB-INF/jsp/errorPage.jsp"
+				contextRelative="true" />		
+			<forward
+				name="cancel"
+				path="/WEB-INF/jsp/requestList.jsp"
+				contextRelative="true" />
+		</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.broadbandrequest.ApplicationResources" />	
+</struts-config>

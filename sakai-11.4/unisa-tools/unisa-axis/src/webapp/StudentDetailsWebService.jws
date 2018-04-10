@@ -1,0 +1,320 @@
+import java.sql.Types;
+import org.apache.commons.collections.map.ListOrderedMap;
+import java.util.Iterator;
+import java.util.List;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import org.apache.axis.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import org.sakaiproject.event.cover.UsageSessionService;
+import org.sakaiproject.event.api.UsageSession;
+import org.sakaiproject.component.cover.ServerConfigurationService;
+
+import za.ac.unisa.lms.db.StudentSystemDAO;
+
+
+public class StudentDetailsWebService {
+
+   org.w3c.dom.Document doc;
+	public NodeList textLNList;
+	public NodeList textFNList;
+	String urlf;
+
+	public String userAgent = "Student Details";
+	// set the homepage to use as link
+		private String serverPath = ServerConfigurationService.getServerUrl();
+
+	private UsageSession usageSession;
+
+	private static final String validStudentQuery = "select 1 from stu where nr = ?";
+
+	private static final String studentBioQuery = "select nr,surname,previous_surname,first_names,birth_date,"
+			+ " address_line_1 as Adr1, "
+			+ " ADDRESS_LINE_2, ADDRESS_LINE_3,"
+			+ " ADDRESS_LINE_4, ADDRESS_LINE_5, ADDRESS_LINE_6,"
+			+ " lpad(POSTAL_CODE,4,0) as Postal, "
+			+ " email_address as Email,"
+			+ " home_number as Home, "
+			+ " work_number as Work, "
+			+ " cell_number as Cell "
+			+ " from stu,adr,adrph"
+			+ " where nr = ?"
+			+ " and nr=adr.reference_no"
+			+ " and FK_ADRCATYPFK_ADRC =1"
+			+ " and FK_ADRCATYPFK_ADRT =1"
+			+ " and adrph.reference_no(+)=nr"
+			+ " and FK_ADRCATCODE(+) = 1";
+
+	private static final String studentMatricQuery = "select "
+			+ " FK_MVKCODE, GRADE, MARK" + " from mtrres" + " where fk_mtrfk_stunr = ?";
+
+	private static final String mbListQuery = "select "
+		+ "FK_STUDENT_NR, AMOUNT as bedrag" + " from stuxtn " + " where fk_stud_acc_class='MR' "
+		+ " and bundle_date =? "
+		+ " and reference=?";
+
+
+
+	private String validateStudentNr(String studentNr, String ip)
+			throws AxisFault {
+
+		if (ip != null || !(ip.equals(""))) {
+			usageSession = UsageSessionService.startSession(studentNr, ip,
+					userAgent);
+		}
+		JdbcTemplate jdt = new JdbcTemplate(new StudentSystemDAO()
+				.getDataSource());
+
+		try {
+			Integer.parseInt(studentNr);
+		} catch (Exception e) {
+			throw new AxisFault(
+					"The student number you have entered is not valid.\n"
+							+ "Please check and try again.");
+		}
+
+		try {
+			List records = jdt.queryForList(validStudentQuery,
+					new Object[] { new Integer(studentNr) },
+					new int[] { Types.NUMERIC });
+			if (records.size() == 0) {
+				throw new Exception(
+						"The student number you have entered is not valid.\n"
+								+ "Please check and try again.");
+			} else {
+				if (ip != null) {
+					return usageSession.getId();
+				} else {
+					return "";
+				}
+			}
+		} catch (AxisFault af) {
+			throw af;
+		} catch (Exception e) {
+			throw new AxisFault(e.getMessage());
+		}
+
+	}			
+			
+	public String getStudentMatricBoard(String studentNr, String ip)
+			throws AxisFault {
+
+		String sessionId = validateStudentNr(studentNr, ip);
+
+		JdbcTemplate jdt = new JdbcTemplate(new StudentSystemDAO()
+				.getDataSource());
+		Log log = LogFactory.getLog(this.getClass());
+
+
+		String csv = "";
+
+		try {
+
+			List records = jdt.queryForList(studentBioQuery,
+					new Object[] { new Integer(studentNr) },
+					new int[] { Types.NUMERIC });
+
+			Iterator recordsI = records.iterator();
+			if (recordsI.hasNext()) {
+
+				ListOrderedMap record = (ListOrderedMap) recordsI.next();
+				csv = record.get("NR") + ",";
+				csv = csv + record.get("SURNAME") + ",";
+				csv = csv + record.get("PREVIOUS_SURNAME") + ",";
+				csv = csv + record.get("FIRST_NAMES") + ",";
+				csv = csv + record.get("BIRTH_DATE")+ ",";
+				csv = csv + record.get("ADR1") + ",";
+				csv = csv + record.get("ADDRESS_LINE_2") + ",";
+				csv = csv + record.get("ADDRESS_LINE_3") + ",";
+				csv = csv + record.get("ADDRESS_LINE_4") + ",";
+				csv = csv + record.get("ADDRESS_LINE_5") + ",";
+				csv = csv + record.get("ADDRESS_LINE_6") + ",";
+				csv = csv + record.get("POSTAL") + ",";
+				csv = csv + record.get("EMAIL") + ",";
+				csv = csv + record.get("HOME") + ",";
+				csv = csv + record.get("WORK") + ",";
+				csv = csv + record.get("CELL") ;
+
+			}
+
+			List records2 = jdt.queryForList(studentMatricQuery,
+					new Object[] { new Integer(studentNr) },
+					new int[] { Types.NUMERIC });
+
+			recordsI = records2.iterator();
+			while (recordsI.hasNext()) {
+				ListOrderedMap record = (ListOrderedMap) recordsI.next();
+				csv = csv + "," + record.get("FK_MVKCODE") + ",";
+				csv = csv + record.get("GRADE") + ",";
+				csv = csv + record.get("MARK") ;
+			}
+			if ("".equals(csv)) {
+				throw new Exception("No matric details found for student.");
+			}
+			return csv;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e);
+			throw new AxisFault(e.getMessage());
+		}
+	}
+  private boolean validateStudentNr(String studentNr)
+			throws AxisFault {
+			JdbcTemplate jdt = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+			try {
+			Integer.parseInt(studentNr);
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+		
+			try {
+			List records = jdt.queryForList(validStudentQuery,
+					new Object[] { new Integer(studentNr) }	);
+			if (records.size() == 0) {
+					return false;
+			}
+			} catch (Exception e) {
+				e.printStackTrace();
+				}
+		return true;
+		}
+		
+     public String getDocumentListAsXml(String studentNr) throws AxisFault {     
+        boolean valid = validateStudentNr(studentNr); 
+        if(valid==false){
+        return "<studentdocuments/>";
+        }else
+   		try { 
+			String xmlList = serverPath+"/mbclient/?studentNumber="+studentNr;
+			URL url = new URL(xmlList);
+			DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+			InputStream stream = (InputStream) url.openStream();
+			doc = docBuilder.parse(stream);
+			doc.getDocumentElement().normalize();
+			
+			NodeList listOfStudentDocumnet = doc.getElementsByTagName("studentdocument");
+		 	urlf = "<studentdocuments>";
+			for (int s = 0; s < listOfStudentDocumnet.getLength(); s++) {
+			
+				Node firstDocTypeNode = listOfStudentDocumnet.item(s);
+				
+				if (firstDocTypeNode.getNodeType() == Node.ELEMENT_NODE) {
+
+					Element firstElement = (Element) firstDocTypeNode;
+
+					NodeList firstNameList = firstElement.getElementsByTagName("doctype");
+					Element firstNameElement = (Element) firstNameList.item(0);
+					textFNList = firstNameElement.getChildNodes();
+					NodeList lastNameList = firstElement.getElementsByTagName("docid");
+					
+					Element lastNameElement = (Element) lastNameList.item(0);
+					textLNList = lastNameElement.getChildNodes();
+					
+					urlf +="<studentdocument><doctype>"+ ((Node)textLNList.item(0)).getNodeValue().trim()+ "</doctype>";
+					urlf +="<docid>"+ ((Node)textFNList.item(0)).getNodeValue().trim()+"</docid>";
+					urlf +="<docurl>"+serverPath+"/mbclient/?ID="+((Node)textLNList.item(0)).getNodeValue().trim()+"</docurl></studentdocument>";
+				}					
+			}
+			urlf +="</studentdocuments>";
+		}
+			catch (Exception e) {
+				e.printStackTrace();
+				  return "<studentdocuments/>";
+				}
+			return urlf;
+
+     }
+
+public String getListMatricBoard(String yearRequested, String listNr, String ip)
+	throws AxisFault {
+
+
+
+		JdbcTemplate jdt = new JdbcTemplate(new StudentSystemDAO()
+				.getDataSource());
+		Log log = LogFactory.getLog(this.getClass());
+
+
+		String csv = "";
+		boolean found = false;
+
+		try {
+
+			if (yearRequested.length()!=11){
+				throw new Exception("Date input error: wrong format");
+			}
+			List records = jdt.queryForList(mbListQuery,
+			new Object[] { new String(yearRequested), new String(listNr) },
+			new int[] { Types.VARCHAR,Types.VARCHAR });
+
+			Iterator recordsI = records.iterator();
+			while (recordsI.hasNext()) {
+
+				ListOrderedMap record = (ListOrderedMap) recordsI.next();
+				csv = csv + record.get("FK_STUDENT_NR") + ",";
+				csv = csv + record.get("BEDRAG") + ",";
+				found = true;
+
+			}
+
+		if(!found){
+			// read history records- only valid for 2010 records for 2011 as Shelley set ALL previous records as acad year 2010
+		String inputYear = "";
+		if (yearRequested.length()==11){
+			inputYear= yearRequested.substring(7);
+		}else{
+			throw new Exception("Date input error: wrong format");
+		}
+		//System.out.print("year="+inputYear);
+		String mbHistListQuery = "select "
+			+ " FK_ACCHSTMK_STUDENT_NR,AMOUNT from xtnhst "
+			+ " where FK_ACCHSTFK_FNACTPCODE='MR' "
+			+ " and FK_ACCHSTMK_ACADEMIC_YEAR=?"
+      		+ " and REFERENCE=?"
+      		+ " and BUNDLE_DATE = ?";
+      		  
+		  List histRecords = jdt.queryForList(mbHistListQuery,
+			new Object[] { new String(inputYear), new String(listNr),new String(yearRequested) },
+			new int[] { Types.VARCHAR,Types.VARCHAR,Types.VARCHAR });
+
+			Iterator histRecordsI = histRecords.iterator();
+			while (histRecordsI.hasNext()) {
+
+				ListOrderedMap histRecord = (ListOrderedMap) histRecordsI.next();
+				csv = csv + histRecord.get("FK_ACCHSTMK_STUDENT_NR") + ",";
+				csv = csv + histRecord.get("AMOUNT") + ",";
+			}
+		}
+		
+
+		if ("".equals(csv)) {
+			throw new Exception("No students found for list.");
+		}
+		return csv;
+
+} catch (Exception e) {
+	e.printStackTrace();
+	log.error(e);
+	throw new AxisFault(e.getMessage());
+}
+}
+
+}
+

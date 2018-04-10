@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.maintainstaff"
+		title="Unisa Maintain Staff"
+		description="Unisa Maintain Staff Roles and Functions">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

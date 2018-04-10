@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>unisa-changes-base</artifactId>
+    <groupId>org.sakaiproject</groupId>
+    <version>10.5</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <name>Unisa Overlay on Rwiki </name>
+  <groupId>unisa.overlays.rwiki</groupId>
+  <artifactId>unisa-overlays-rwiki</artifactId>
+  <packaging>pom</packaging>
+  <modules>  
+	<module>rwiki-tool/tool</module>
+  </modules>
+</project>

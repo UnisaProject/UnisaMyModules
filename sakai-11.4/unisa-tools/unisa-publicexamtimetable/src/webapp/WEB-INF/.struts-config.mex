@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="242,88" />
+  <StrutsActivity path="/examtimetable.do" location="15,240" dimension="423,100" />
+  <StrutsActivity path="/WEB-INF/jsp/examtimetable.jsp" location="570,120" dimension="221,52" />
+  <StrutsActivity path="/WEB-INF/jsp/viewtimetable.jsp" location="660,330" dimension="216,52" />
+  <StrutsActivity path="/WEB-INF/jsp/subjectinput.jsp" location="105,450" dimension="206,52" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="350,50" dimension="150,49" />
+  <StrutsTransition id="/examtimetable.do,timetableforward,/WEB-INF/jsp/examtimetable.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="438,270" />
+      <AbsolutePoint location="675,270" />
+      <AbsolutePoint location="675,172" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/examtimetable.do,backforward,staffdev.unisa.ac.za,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="256,340" />
+      <AbsolutePoint location="256,397" />
+      <AbsolutePoint location="950,397" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/examtimetable.do,subjectinputforward,/WEB-INF/jsp/subjectinput.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="226,340" />
+      <AbsolutePoint location="226,450" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/examtimetable.do,timetableviewforward,/WEB-INF/jsp/viewtimetable.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="438,300" />
+      <AbsolutePoint location="768,300" />
+      <AbsolutePoint location="768,330" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/examtimetable.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="171,138" />
+      <AbsolutePoint location="171,240" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>
+

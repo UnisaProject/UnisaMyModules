@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.biodetails"
+		title="Biographic Details"
+		description="Tool to allow viewing and changing of student biographic details">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>base</artifactId>
+    <groupId>org.sakaiproject</groupId>
+    <version>10.5</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <name>Unisa Changes Project</name>
+  <groupId>org.sakaiproject</groupId>
+  <artifactId>unisa-changes-base</artifactId>
+  <packaging>pom</packaging>
+  <modules>  
+	<module>overlays/announcement</module>
+	<module>overlays/assignment</module>
+	<module>overlays/bbb-tool</module>
+	<module>overlays/calendar</module>
+	<module>overlays/chat</module>
+	<module>overlays/content</module>
+	<module>overlays/gradebook</module>
+    <module>overlays/mailarchive</module>
+	<module>overlays/podcasts</module>
+	<module>overlays/polls</module>
+	<module>overlays/qna</module> 
+	<module>overlays/reference</module>
+    <module>overlays/rwiki</module>
+     <module>overlays/osp</module>
+	<module>overlays/sam</module>
+	<module>overlays/sections</module>
+	<module>overlays/site-manage</module>
+	<module>overlays/syllabus</module>
+	<module>overlays/web</module>
+  </modules>
+</project>

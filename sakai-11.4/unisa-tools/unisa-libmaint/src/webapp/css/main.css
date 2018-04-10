@@ -1,0 +1,101 @@
+/* TopFrame CSS */
+body {
+	margin					: 0;
+	margin-left				: 1px;
+	margin-top				: 5px;
+	font-family				: Arial;
+	font-size				: 9pt;
+	background				: green;
+	background-repeat		: repeat-x;
+}
+
+a:hover {
+   color: #002469;
+}
+
+a:visited {
+    color: #002469;
+}
+
+a:link {
+    color: #002469;
+}
+
+.linktodiary {
+	position 				: absolute;
+	right 					: 178;
+	top 					: 53;
+}
+
+th {
+	color					: #6B7B9C;
+	font-family				: Arial;
+	font-size				: 13px;
+	text-align				: left;
+}
+
+td {
+	vertical-align			: top;
+	font-size				: 9pt;
+}
+
+td aap {
+	color					: #808281;
+	text-decoration			: none;
+	text-align				: left;
+}
+
+.dotsLeft {
+	border-left				: 1px;
+	border-left-style		: dotted;
+	width					: 6px;
+}
+
+.mainLinks a {
+	font-size				: 9pt;
+	background-repeat 		: no-repeat;
+	background-position		: left;
+	color 					: #666666;
+	text-decoration 		: none;
+}
+
+.mainLinks a:link {
+	background-repeat 		: no-repeat;
+	background-position		: left;
+	color 					: #666666;
+	text-decoration 		: none;
+}
+
+.mainLinks a:hover {
+	background-repeat 		: no-repeat;
+	background-position		: left;
+	color 					: #666666;
+	text-decoration 		: none;
+}
+
+.mainLinks a:visited {
+	background-repeat 		: no-repeat;
+	background-position		: left;
+	color 					: #666666;
+	text-decoration 		: none;
+}
+
+.announcement {
+	font-family				: Arial;
+	font-size				: 9pt;
+	color					: #808281;
+}
+
+.newsText {
+	color					: #FFFFFF;
+	font-family				: Arial;
+	font-size				: 11px;
+}
+
+.newsText a{
+	color					: #FFFFFF;
+	font-family				: Arial;
+	font-size				: 11px;
+	text-decoration			: none;
+	font-weight				: bold;
+}

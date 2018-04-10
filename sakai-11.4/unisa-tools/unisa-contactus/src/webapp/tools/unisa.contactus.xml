@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.contactus"
+		title="Unisa Contact Us"
+		description="Contact us applications for students to contact us">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

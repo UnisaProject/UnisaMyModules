@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		<form-bean name="tutoringPlanForm" 
+		 	type="za.ac.unisa.lms.tools.tutoringplan.forms.TutoringPlanForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.tutoringplan.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/tutoringPlan.do?action=initial"
+				contextRelative="true" />
+		</action>
+	
+		<action
+			name="tutoringPlanForm"
+			attribute="tutoringPlanForm"
+			parameter="action"
+			path="/tutoringPlan"
+			type="za.ac.unisa.lms.tools.tutoringplan.actions.TutoringPlanAction"
+			validate="false">
+			<forward
+				name="inputTutoringPlan"
+				path="/WEB-INF/jsp/inputTutoringPlan.jsp"
+				contextRelative="true" />
+			<forward
+				name="displayTutoringPlan"
+				path="/WEB-INF/jsp/displayTutoringPlan.jsp"
+				contextRelative="true" />
+			<forward
+				name="displayTutoringMode"
+				path="/WEB-INF/jsp/displayTutoringMode.jsp"
+				contextRelative="true" />	
+			<forward
+				name="displayAuditTrail"
+				path="/WEB-INF/jsp/displayAuditTrail.jsp"
+				contextRelative="true" />		
+			<forward
+				name="cancel"
+				path="/WEB-INF/jsp/inputTutoringPlan.jsp"
+				contextRelative="true" />
+		</action>
+		<action
+			name="tutoringPlanForm"
+			attribute="tutoringPlanForm"
+			parameter="action"
+			path="/tutoringPlanDetails"
+			type="za.ac.unisa.lms.tools.tutoringplan.actions.TutoringPlanDetailAction"
+			validate="false">
+			<forward
+				name="inputDetailList"
+				path="/WEB-INF/jsp/inputDetailList.jsp"
+				contextRelative="true" />	
+			<forward
+				name="displayDetailList"
+				path="/WEB-INF/jsp/displayDetailList.jsp"
+				contextRelative="true" />		
+			<forward
+				name="cancel"
+				path="/WEB-INF/jsp/inputTutoringPlan.jsp"
+				contextRelative="true" />
+			<forward
+				name="home"
+				path="/WEB-INF/jsp/inputTutoringPlan.jsp"
+				contextRelative="true" />
+		</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.tutoringplan.ApplicationResources" />
+	
+</struts-config>

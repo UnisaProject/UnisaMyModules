@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="sakai-struts-example"
+  id="myeclipse.1125472788031"
+  context-root="/sakai-struts-example"
+  j2ee-spec="1.3"
+  archive="sakai-struts-example.war">
+  <attributes>
+    <attribute name="webrootdir" value="/src/webapp" />
+  </attributes>
+</project-module>
+

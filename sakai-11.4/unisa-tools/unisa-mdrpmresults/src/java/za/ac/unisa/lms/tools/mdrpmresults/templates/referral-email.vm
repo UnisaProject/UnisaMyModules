@@ -1,0 +1,20 @@
+
+<HTML>
+  <BODY>
+	<BR />
+	Dear Colleague
+	
+	<BR />
+	<p> 
+	
+	A new or amended title and/or supervisor from $studentNumber $studentName for the $qualCode $qualDesc
+	has been referred to you for consideration.</p>
+	
+	<p>Please log on to myUnisa and follow the steps to approve the supervisor and/or title.</p> 
+	
+	Kind regards<BR />
+	$staffName
+	
+	<br>
+ </BODY>
+</HTML>

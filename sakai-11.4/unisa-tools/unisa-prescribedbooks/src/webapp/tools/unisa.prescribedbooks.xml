@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.prescribedbooks"
+		title="Prescribed Books"
+		description="Prescribed Books tool">
+       <category name="course" />
+		<category name="onlcourse" />
+	</tool>
+</registration>

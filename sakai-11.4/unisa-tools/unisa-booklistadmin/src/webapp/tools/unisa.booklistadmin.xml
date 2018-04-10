@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.booklistadmin"
+		title="Book List Admin"
+		description="">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

@@ -1,0 +1,106 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="242,88" />
+  <StrutsActivity path="/CreditCardPayment.do" location="45,195" dimension="361,88" />
+  <StrutsActivity path="/displayFinancialDetails.do" location="855,150" dimension="365,88" />
+  <StrutsActivity path="/WEB-INF/jsp/otherpayment.jsp" location="510,180" dimension="184,49" />
+  <StrutsActivity path="/WEB-INF/jsp/creditform.jsp" location="30,315" dimension="165,49" />
+  <StrutsActivity path="/WEB-INF/jsp/payment.jsp" location="465,375" dimension="158,49" />
+  <StrutsActivity path="/WEB-INF/jsp/confirmpayment.jsp" location="15,435" dimension="193,49" />
+  <StrutsActivity path="/WEB-INF/jsp/financialDetailsInput.jsp" location="1020,345" dimension="213,49" />
+  <StrutsActivity path="/WEB-INF/jsp/displayPreviousFinancialDetails.jsp" location="285,450" dimension="263,49" />
+  <StrutsActivity path="/WEB-INF/jsp/displayPreviousFinancialDetailsInput.jsp" location="650,550" dimension="289,49" />
+  <StrutsActivity path="/WEB-INF/jsp/displayFinancialDetails.jsp" location="600,30" dimension="222,49" />
+  <StrutsActivity path="/WEB-INF/jsp/paymentindex.jsp" location="255,315" dimension="184,49" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="350,50" dimension="150,49" />
+  <StrutsActivity path="/WEB-INF/jsp/invaliduser.jsp" location="950,450" dimension="167,49" />
+  <StrutsTransition id="/CreditCardPayment.do,paymentConfirm,/WEB-INF/jsp/confirmpayment.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="45,239" />
+      <AbsolutePoint location="-60,239" />
+      <AbsolutePoint location="-60,459" />
+      <AbsolutePoint location="15,459" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayFinancialDetails.do,displayFinancialDetails,/WEB-INF/jsp/displayFinancialDetails.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1037,150" />
+      <AbsolutePoint location="1037,54" />
+      <AbsolutePoint location="822,54" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/CreditCardPayment.do,paymentSuccess,/WEB-INF/jsp/payment.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="406,253" />
+      <AbsolutePoint location="544,253" />
+      <AbsolutePoint location="544,375" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayFinancialDetails.do,displayPFD,/WEB-INF/jsp/displayPreviousFinancialDetails.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="885,238" />
+      <AbsolutePoint location="885,474" />
+      <AbsolutePoint location="548,474" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/WEB-INF/jsp/creditform.jsp,null,/CreditCardPayment.do,2" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="112,315" />
+      <AbsolutePoint location="112,283" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/CreditCardPayment.do,paymentInput,/WEB-INF/jsp/creditform.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="180,283" />
+      <AbsolutePoint location="180,315" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayFinancialDetails.do,displayPFDI,/WEB-INF/jsp/displayPreviousFinancialDetailsInput.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="855,195" />
+      <AbsolutePoint location="794,195" />
+      <AbsolutePoint location="794,550" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/WEB-INF/jsp/financialDetailsInput.jsp,null,/displayFinancialDetails.do,2" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1126,345" />
+      <AbsolutePoint location="1126,238" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/CreditCardPayment.do,paymentOther,/WEB-INF/jsp/otherpayment.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="406,214" />
+      <AbsolutePoint location="510,214" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/CreditCardPayment.do,invaliduser,/WEB-INF/jsp/invaliduser.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="45,209" />
+      <AbsolutePoint location="-135,209" />
+      <AbsolutePoint location="-135,674" />
+      <AbsolutePoint location="1033,674" />
+      <AbsolutePoint location="1033,499" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/displayFinancialDetails.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="171,138" />
+      <AbsolutePoint location="171,165" />
+      <AbsolutePoint location="855,165" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/CreditCardPayment.do,paymentCancel,/displayFinancialDetails.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="225,283" />
+      <AbsolutePoint location="225,298" />
+      <AbsolutePoint location="1006,298" />
+      <AbsolutePoint location="1006,238" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayFinancialDetails.do,financialDetailsInput,/WEB-INF/jsp/financialDetailsInput.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1156,238" />
+      <AbsolutePoint location="1156,345" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

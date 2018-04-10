@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		<form-bean name="unmarkAssFollowUpForm" 
+		 	type="za.ac.unisa.lms.tools.unmarkassfollowup.forms.UnmarkAssFollowUpForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.unmarkassfollowup.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/unmarkAssFollowUp.do?action=initial"
+				contextRelative="true" />
+		</action>
+		<action
+			name="unmarkAssFollowUpForm"
+			attribute="unmarkAssFollowUpForm"
+			parameter="action"
+			path="/unmarkAssFollowUp"
+			type="za.ac.unisa.lms.tools.unmarkassfollowup.actions.UnmarkAssFollowUpAction"
+			validate="false">
+			<forward
+				name="input"
+				path="/WEB-INF/jsp/input.jsp"
+				contextRelative="true" />
+			<forward
+				name="detail"
+				path="/WEB-INF/jsp/detailList.jsp"
+				contextRelative="true" />
+			<forward
+				name="detailDirect"
+				path="/unmarkAssFollowUp.do?action=detailList"
+				contextRelative="true" />
+			<forward
+				name="summary"
+				path="/WEB-INF/jsp/summaryList.jsp"
+				contextRelative="true" />	
+			<forward
+				name="summaryDirect"
+				path="/unmarkAssFollowUp.do?action=summaryList"
+				contextRelative="true" />	
+			<forward
+				name="email"
+				path="/WEB-INF/jsp/emailInput.jsp"
+				contextRelative="true" />	
+			<forward
+				name="userUnknown"
+				path="/WEB-INF/jsp/userunknown.jsp"
+				contextRelative="true" />	
+			<forward
+				name="cancel"
+				path="/unmarkAssFollowUp.do?action=initial"
+				contextRelative="true" />			
+		</action>  
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.unmarkassfollowup.ApplicationResources" />
+</struts-config>

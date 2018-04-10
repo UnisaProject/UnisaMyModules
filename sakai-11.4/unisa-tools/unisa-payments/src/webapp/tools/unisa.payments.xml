@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.payments"
+		title="Payments"
+		description="Student Payments To Unisa">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

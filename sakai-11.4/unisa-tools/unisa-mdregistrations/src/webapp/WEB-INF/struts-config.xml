@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		<form-bean name="mdRegistrationsForm" type="za.ac.unisa.lms.tools.mdregistrations.forms.MdRegistrationsForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.mdregistrations.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/mdregistrations.do?action=walkthrough"    
+        		contextRelative="true" />
+<!--				path="/WEB-INF/jsp/default.jsp"
+				contextRelative="true" />   -->
+		</action>
+		<action
+      		attribute="mdRegistrationsForm"
+      		name="mdRegistrationsForm"
+      		parameter="action"
+      		path="/mdregistrations"
+      		type="za.ac.unisa.lms.tools.mdregistrations.actions.MdRegistrationsAction"
+      		validate="false">
+       		<forward
+        		name="walkthroughforward"
+        		path="/WEB-INF/jsp/walkthrough.jsp"
+        		contextRelative="true" />
+      		<forward
+        		name="display"
+        		path="/WEB-INF/jsp/mdregister0.jsp"
+        		contextRelative="true" />
+        	<forward
+				name="step1forward"
+				path="/WEB-INF/jsp/mdregister1.jsp"
+				contextRelative="true" />
+			<forward
+				name="stepCourierforward"
+				path="/WEB-INF/jsp/mdregistercourier.jsp"
+				contextRelative="true" />
+       	 	<forward
+       		 	name="searchforward"
+       			path="/WEB-INF/jsp/search.jsp"
+       		 	contextRelative="true" />
+        	<forward
+				name="step2forward"
+				path="/WEB-INF/jsp/mdregister2.jsp"
+				contextRelative="true" />
+        	<forward
+				name="step3forward"
+				path="/WEB-INF/jsp/mdregister3.jsp"
+				contextRelative="true" />
+        	<forward
+				name="step4forward"
+				path="/WEB-INF/jsp/mddeclare.jsp"
+				contextRelative="true" />
+        	<forward
+				name="nosuccessforward"
+				path="/WEB-INF/jsp/mdsuccessno.jsp"
+				contextRelative="true" />
+        	<forward
+				name="tempsuccessforward"
+				path="/WEB-INF/jsp/mdsuccesstmp.jsp"
+				contextRelative="true" />
+        	<forward
+				name="successforward"
+				path="/WEB-INF/jsp/mdsuccess.jsp"
+				contextRelative="true" />				
+		</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.mdregistrations.ApplicationResources" />
+
+	<!--  Validator plugin -->
+ <!--  	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>      -->  
+</struts-config>

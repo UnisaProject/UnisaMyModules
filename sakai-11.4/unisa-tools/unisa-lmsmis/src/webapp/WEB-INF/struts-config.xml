@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	     	<form-bean name="misForm" type="za.ac.unisa.lms.tools.lmsmis.forms.misForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.lmsmis.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/misAction.do?action=misoverview"
+				contextRelative="true" />
+		</action>
+		<action
+			name= "misForm"
+			parameter="action"
+			path="/misAction"
+			type="za.ac.unisa.lms.tools.lmsmis.actions.misAction">
+            <forward
+      			name="misoverview"
+		        path="/WEB-INF/jsp/misOverview.jsp"
+		        contextRelative="true" />
+            <forward
+      			name="misadminannual"
+		        path="/WEB-INF/jsp/misAdminCommActionsAnnual.jsp"
+		        contextRelative="true" />
+   			<forward
+      			name="misadminmonthly"
+		        path="/WEB-INF/jsp/misAdminCommActionsMonthly.jsp"
+		        contextRelative="true" />
+		        <forward
+      			name="misadminannual"
+		        path="/WEB-INF/jsp/misAdminCommActionsAnnual.jsp"
+		        contextRelative="true" />
+		    <forward
+      			name="misteachmonthly"
+		        path="/WEB-INF/jsp/misTeachingToolsMonthly.jsp"
+		        contextRelative="true" />
+		    <forward
+      			name="misteachannual"
+		        path="/WEB-INF/jsp/misTeachingToolsAnnual.jsp"
+		        contextRelative="true" />
+		</action>
+
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.lmsmis.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

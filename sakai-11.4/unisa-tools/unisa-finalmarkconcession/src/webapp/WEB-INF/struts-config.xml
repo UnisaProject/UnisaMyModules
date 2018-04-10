@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	<form-bean name="finalMarkConcessionForm" 
+				type="za.ac.unisa.lms.tools.finalmarkconcession.forms.FinalMarkConcessionForm"/>
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.finalmarkconcession.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/finalMarkConcession.do?act=initial" 
+				contextRelative="true" />
+		</action>
+		<action 
+			name="finalMarkConcessionForm" 
+			attribute="finalMarkConcessionForm" 
+			parameter="act"
+			path="/finalMarkConcession"
+			type="za.ac.unisa.lms.tools.finalmarkconcession.actions.FinalMarkConcessionAction"
+			validate="false">
+		<forward
+			name="input"
+			path="/WEB-INF/jsp/input.jsp"
+				contextRelative="true" />	
+		<forward
+			name="inputViewFiStudentList"
+			path="/WEB-INF/jsp/inputViewFiStudentList.jsp"
+				contextRelative="true" />
+		<forward
+			name="viewFiStudentList"
+			path="/WEB-INF/jsp/viewFiStudentList.jsp"
+				contextRelative="true" />	
+		<forward
+			name="editFiStudentList"
+			path="/WEB-INF/jsp/editFiStudentList.jsp"
+				contextRelative="true" />		
+		<forward
+			name="initialGroupAssignment"
+			path="/WEB-INF/jsp/initialGroupAssignment.jsp"
+				contextRelative="true" />
+		<forward
+			name="display"
+			path="/WEB-INF/jsp/displayFiStudents.jsp"
+				contextRelative="true" />	
+		<forward
+			name="editConcessionForm"
+			path="/WEB-INF/jsp/editConcessionForm.jsp"
+				contextRelative="true" />
+		<forward
+			name="viewConcessionForm"
+			path="/WEB-INF/jsp/viewConcessionForm.jsp"
+				contextRelative="true" />
+		<forward	
+			name="requestAuthorisation"
+			path="/WEB-INF/jsp/requestCodAuthorisation.jsp"
+				contextRelative="true" />
+		<forward	
+			name="displayErrorPage"
+			path="/WEB-INF/jsp/errorPage.jsp"
+				contextRelative="true" />
+		<forward	
+			name="fiAssignmentSelection"
+			path="/WEB-INF/jsp/fiAssignmentSelection.jsp"
+				contextRelative="true" />
+		<forward	
+			name="confirmChanges"
+			path="/WEB-INF/jsp/confirmChanges.jsp"
+				contextRelative="true" />
+		<forward	
+			name="cancelRequest"
+			path="/WEB-INF/jsp/cancelRequest.jsp"
+				contextRelative="true" />
+		<forward	
+			name="batchMarksUpload"
+			path="/WEB-INF/jsp/batchMarksUpload.jsp"
+				contextRelative="true" />
+		<forward	
+			name="batchCodAuthReq"			
+			path="/WEB-INF/jsp/batchCodAuthReq.jsp"
+				contextRelative="true" />
+		<forward	
+			name="batchCodConfirmAuthRequest"			
+			path="/WEB-INF/jsp/batchCodConfirmAuthRequest.jsp"
+				contextRelative="true" />
+		<forward
+				name="codAuthorisation"				
+				path="/authorisation.do?act=codAuthRequestList"
+				contextRelative="true" />	
+		<forward
+				name="deanAuthorisation"				
+				path="/authorisation.do?act=deanAuthRequestList"
+				contextRelative="true" />	
+		<forward	
+			name="home"
+			path="/finalMarkConcession.do?act=initial"
+				contextRelative="true" />
+		</action>
+		<action
+			name="finalMarkConcessionForm"
+			attribute="finalMarkConcessionForm"
+			parameter="act"
+			path="/authorisation"
+			type="za.ac.unisa.lms.tools.finalmarkconcession.actions.AuthorisationAction"
+			validate="false">
+			<forward
+				name="authRequestList"
+				path="/WEB-INF/jsp/authRequestList.jsp"
+				contextRelative="true" />			
+			<forward
+				name="multiRejectPage"
+				path="/WEB-INF/jsp/multiRejectPage.jsp"
+				contextRelative="true" />
+			<forward
+				name="multiAuthorisationPage"
+				path="/WEB-INF/jsp/multiAuthorisationPage.jsp"
+				contextRelative="true" />
+			<forward
+				name="viewConcessionForm"
+				path="/WEB-INF/jsp/viewForm.jsp"
+				contextRelative="true" />
+			<forward
+				name="cancel"				
+				path="/finalMarkConcession.do?act=initial"
+				contextRelative="true" />	
+		</action>
+	</action-mappings>
+	
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.finalmarkconcession.ApplicationResources" />	
+</struts-config>

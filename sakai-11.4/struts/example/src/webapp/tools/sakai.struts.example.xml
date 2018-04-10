@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="sakai.struts.example"
+		title="UNISA - Struts Example"
+		description="Sakai Struts Demo.">
+		<category name="sakai.sample" />
+	</tool>
+</registration>

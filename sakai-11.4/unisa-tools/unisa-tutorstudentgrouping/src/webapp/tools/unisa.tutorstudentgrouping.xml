@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.tutorstudentgrouping"
+		title="Tutor-Student grouping management"
+		description="Tutor-Student grouping management">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

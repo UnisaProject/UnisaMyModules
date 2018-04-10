@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans >
+    <form-bean name="creditCardPaymentForm" type="za.ac.unisa.lms.tools.payments.forms.CreditCardPaymentForm" />
+    <form-bean name="displayFinancialDetailsForm" type="za.ac.unisa.lms.tools.payments.forms.DisplayFinancialDetailsForm" />
+    
+    
+
+  </form-beans>
+
+  <global-exceptions />
+  <global-forwards />
+  <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.payments.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/displayFinancialDetails.do?action=input"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="creditCardPaymentForm"
+      input="/WEB-INF/jsp/creditform.jsp"
+      name="creditCardPaymentForm"
+      parameter="action"
+      path="/CreditCardPayment"
+      type="za.ac.unisa.lms.tools.payments.actions.CreditCardPaymentAction"
+      validate="false">
+      <forward name="invaliduser" path="/WEB-INF/jsp/invaliduser.jsp" />
+      <forward
+        name="paymentOther"
+        path="/WEB-INF/jsp/otherpayment.jsp"
+        contextRelative="true" />
+      <forward
+        name="paymentCancel"
+        path="/displayFinancialDetails.do?action=input"
+        contextRelative="true" />
+      <forward
+        name="paymentConfirm"
+        path="/WEB-INF/jsp/confirmpayment.jsp"
+        contextRelative="true" />
+      <forward
+        name="paymentSuccess"
+        path="/WEB-INF/jsp/payment.jsp"
+        contextRelative="true" />
+      <forward
+        name="paymentInput"
+        path="/WEB-INF/jsp/creditform.jsp"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="displayFinancialDetailsForm"
+      input="/WEB-INF/jsp/financialDetailsInput.jsp"
+      name="displayFinancialDetailsForm"
+      parameter="action"
+      path="/displayFinancialDetails"
+      type="za.ac.unisa.lms.tools.payments.actions.DisplayFinancialDetailsAction"
+      validate="false">
+      <forward name="financialDetailsInput" path="/WEB-INF/jsp/financialDetailsInput.jsp" />
+      <forward name="displayPFD" path="/WEB-INF/jsp/displayPreviousFinancialDetails.jsp" />
+      <forward name="displayPFDI" path="/WEB-INF/jsp/displayPreviousFinancialDetailsInput.jsp" />
+      <forward name="displayFinancialDetails" path="/WEB-INF/jsp/displayFinancialDetails.jsp" />
+    </action>
+    
+
+  </action-mappings>
+
+  <message-resources parameter="za.ac.unisa.lms.tools.payments.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property property="pathnames" value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property property="stopOnFirstError" value="true"/>
+	</plug-in>
+</struts-config>
+

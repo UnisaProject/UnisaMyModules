@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans >
+    <form-bean name="acadQualRecord" type="za.ac.unisa.lms.tools.acadhistory.forms.AcadQualRecord" />
+    <form-bean name="acadHistoryDisplayForm" type="za.ac.unisa.lms.tools.acadhistory.forms.AcadHistoryDisplayForm" />
+  </form-beans>
+
+  <global-exceptions />
+  <global-forwards />
+  <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.acadhistory.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/displayAcadHistory.do?action=input"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="acadHistoryDisplayForm"
+      input="/WEB-INF/jsp/acadHistoryInput.jsp"
+      name="acadHistoryDisplayForm"
+      parameter="action"
+      path="/displayAcadHistory"
+      type="za.ac.unisa.lms.tools.acadhistory.actions.DisplayAcadHistoryAction"
+      validate="false">
+      <forward
+        name="displayAcadHistory"
+        path="/WEB-INF/jsp/displayAcadHistory.jsp"
+        contextRelative="true" />
+      <forward
+        name="displayAcadStudyUnit"
+        path="/WEB-INF/jsp/displayAcadStudyUnit.jsp"
+        contextRelative="true" />
+      <forward
+        name="acadHistoryInput"
+        path="/WEB-INF/jsp/acadHistoryInput.jsp"
+        contextRelative="true" />
+        <forward
+        name="home"
+        path="/displayAcadHistory.do?action=input"
+        contextRelative="true" />
+    </action>
+
+
+  </action-mappings>
+  <message-resources parameter="za.ac.unisa.lms.tools.acadhistory.ApplicationResources" />
+  <!--  Validator plugin -->
+  <plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property property="pathnames" value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+	</plug-in>
+
+</struts-config>
+

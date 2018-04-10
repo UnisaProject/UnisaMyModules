@@ -1,0 +1,105 @@
+
+import org.apache.axis.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.site.api.Site;
+import org.sakaiproject.site.api.SitePage;
+import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.site.api.ToolConfiguration;
+import org.sakaiproject.tool.api.Session;
+import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.tool.api.Tool;
+import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.Xml;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
+/**
+ * UnipooleScript.jws
+ *
+ * A set of administrative web services for Sakai
+ *
+ */
+public class ToolData {
+
+    private static final Log LOG = LogFactory.getLog(ToolData.class);
+    private SessionManager sessionManager;
+    private SiteService siteService;
+    private ToolManager toolManager;
+
+    /**
+     * Setup dependencies
+     */
+    public ToolData() {
+        sessionManager = (SessionManager) ComponentManager.get(SessionManager.class.getName());
+        siteService = (SiteService) ComponentManager.get(SiteService.class.getName());
+        toolManager = (ToolManager) ComponentManager.get(ToolManager.class.getName());
+    }
+
+    /**
+     * Get the Session related to the given sessionid
+     *
+     * @param sessionid	the id of the session to retrieve
+     * @return	the session, if it is active
+     * @throws AxisFault	if session is inactive
+     */
+    private Session establishSession(String sessionid) throws AxisFault {
+        Session s = sessionManager.getSession(sessionid);
+
+        if (s == null) {
+            throw new AxisFault("Session \"" + sessionid + "\" is not active");
+        }
+        s.setActive();
+        sessionManager.setCurrentSession(s);
+        return s;
+    }
+
+    /**
+     * Retrieve a tool when given the sessionId and the toolId
+     *
+     * @param sessionId
+     * @param toolId
+     * @return xml representation of the tool.
+     */
+    public String getTool(String sessionId, String siteId, String pageId, String toolId,String sakaiToolId) throws AxisFault {
+        Session session = establishSession(sessionId);
+        try {
+            Site site;
+            site = siteService.getSite(siteId);
+            SitePage page = site.getPage(pageId);
+            ToolConfiguration toolConfig = page.getTool(sakaiToolId);
+        } catch (Exception e) {
+            
+        }
+        Document dom = Xml.createDocument();
+        try {
+            Tool tool = toolManager.getTool(toolId);
+            Node list = dom.createElement("list");
+            dom.appendChild(list);
+
+            Node item = dom.createElement("item");
+            Node id = dom.createElement("id");
+            id.appendChild(dom.createTextNode(tool.getId()));
+            item.appendChild(id);
+
+            Node home = dom.createElement("home");
+            home.appendChild(dom.createTextNode(tool.getHome()));
+            item.appendChild(home);
+
+            Node title = dom.createElement("title");
+            title.appendChild(dom.createTextNode(tool.getTitle()));
+            item.appendChild(title);
+
+            Node description = dom.createElement("description");
+            description.appendChild(dom.createTextNode(tool.getDescription()));
+            item.appendChild(description);
+            list.appendChild(item);
+
+            return Xml.writeDocumentToString(dom);
+        } catch (Exception e) {
+            LOG.error("WS getTool(): " + e.getClass().getName() + " : ", e);
+        }
+        return Xml.writeDocumentToString(dom);
+    }
+}

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		 <form-bean name="examPaperCoverDocketForm" 
+		 	type="za.ac.unisa.lms.tools.exampapers.forms.ExamPaperCoverDocketForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.exampapers.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/examPaperCoverDocket.do?action=initial"
+				contextRelative="true" />
+		</action>
+		<action
+			name="examPaperCoverDocketForm"
+			attribute="examPaperCoverDocketForm"
+			parameter="action"
+			path="/examPaperCoverDocket"
+			type="za.ac.unisa.lms.tools.exampapers.actions.ExamPaperCoverDocketAction"
+			validate="false">
+			<forward
+				name="inputexampaper"
+				path="/WEB-INF/jsp/exampaperinputany.jsp"
+				contextRelative="true" />
+			<forward
+				name="inputexampaperany"
+				path="/WEB-INF/jsp/exampaperinputany.jsp"
+				contextRelative="true" />	
+			<forward
+				name="step1"
+				path="/WEB-INF/jsp/step1.jsp"
+				contextRelative="true" />
+			<forward
+				name="step2"
+				path="/WEB-INF/jsp/step2.jsp"
+				contextRelative="true" />
+			<forward
+				name="step3"
+				path="/WEB-INF/jsp/step3.jsp"
+				contextRelative="true" />
+			<forward
+				name="invaliduser"
+				path="/WEB-INF/jsp/invaliduser.jsp"
+				contextRelative="true" />
+			<forward
+				name="cancel"
+				path="/WEB-INF/jsp/exampaperinputany.jsp"
+				contextRelative="true" />
+		</action>	
+		<action
+			name="examPaperCoverDocketForm"
+			attribute="examPaperCoverDocketForm"
+			parameter="action"
+			path="/managementInfo"
+			type="za.ac.unisa.lms.tools.exampapers.actions.ManagementInformationAction"
+			validate="false">
+			<forward
+				name="input"
+				path="/WEB-INF/jsp/managementinfoinput.jsp"
+				contextRelative="true" />
+			<forward
+				name="cancel"
+				path="/examPaperCoverDocket.do?action=initial"
+				contextRelative="true" />	
+			<forward
+				name="instruction"
+				path="/WEB-INF/html/delimitedfileinstructions.html"
+				contextRelative="true" />			
+		</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.exampapers.ApplicationResources" />
+		
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>	
+	
+</struts-config>

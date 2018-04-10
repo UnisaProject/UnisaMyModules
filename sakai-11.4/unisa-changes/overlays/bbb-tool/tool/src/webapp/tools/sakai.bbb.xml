@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<registration>
+    <tool id="sakai.bbb" 
+    	title="Meetings" 
+    	description="Sakai Interface onto the BigBlueButton conferencing tool">
+		<category name="course" />
+		<category name="onlcourse" />
+		<category name="Postgraduate"/>
+		<category name="project" />
+    
+    	<!-- category name="course" />
+        <category name="project" /-->
+    </tool>
+</registration>

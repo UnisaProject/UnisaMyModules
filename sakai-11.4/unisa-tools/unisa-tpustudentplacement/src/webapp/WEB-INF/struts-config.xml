@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		<form-bean name="studentPlacementForm" 
+		 	type="za.ac.unisa.lms.tools.tpustudentplacement.forms.StudentPlacementForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.tpustudentplacement.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/studentPlacement.do?action=initial"
+				contextRelative="true" />
+		</action>
+		<action
+			name="studentPlacementForm"
+			attribute="studentPlacementForm"
+			parameter="action"
+			path="/studentPlacement"
+			type="za.ac.unisa.lms.tools.tpustudentplacement.actions.StudentPlacementAction"
+			validate="false">
+			<forward
+				name="listLogs"
+				path="/WEB-INF/jsp/listPlacementLog.jsp"
+				contextRelative="true" />
+			<forward
+				name="editPrelimPlacement"
+				path="/WEB-INF/jsp/editStudentPlacement.jsp"
+				contextRelative="true" />
+			<forward
+				name="listPlacement"
+				path="/WEB-INF/jsp/listPlacement.jsp"
+				contextRelative="true" />
+			<forward
+				name="listStudentPlacement"
+				path="/WEB-INF/jsp/listStudentPlacement.jsp"
+				contextRelative="true" />	
+			<forward
+				name="editStudentPlacement"
+				path="/WEB-INF/jsp/editStudentPlacement.jsp"
+				contextRelative="true" />
+			<forward
+				name="inputStudentPlacement"
+				path="/WEB-INF/jsp/inputStudentPlacement.jsp"
+				contextRelative="true" />
+			<forward
+				name="inputCorrespondence"
+				path="/WEB-INF/jsp/inputCorrespondence.jsp"
+				contextRelative="true" />
+			<forward
+				name="studentLetter"
+				path="/WEB-INF/jsp/studentLetter.jsp"
+				contextRelative="true" />	
+			<forward
+				name="schoolLetter"
+				path="/WEB-INF/jsp/schoolLetter.jsp"
+				contextRelative="true" />	
+			<forward
+				name="studentContactDetails"
+				path="/WEB-INF/jsp/studentContactDetails.jsp"
+				contextRelative="true" />
+			<forward
+				name="searchSchool"
+				path="/schoolMaintenance.do?action=initial"
+				contextRelative="true" />	
+			<forward
+				name="searchSupervisor"
+				path="/supervisorMaintenance.do?action=initial"
+				contextRelative="true" />	
+			<forward
+				name="userUnknown"
+				path="/WEB-INF/jsp/userunknown.jsp"
+				contextRelative="true" />	
+			<forward
+				name="listPrelimPlacement"
+				path="/WEB-INF/jsp/listPlacement.jsp"
+				contextRelative="true" />		
+			<forward
+				name="listMentor"
+				path="/mentorMaintenance.do?action=listMentors"
+				contextRelative="true" />						
+		</action>  
+		<action
+			name="studentPlacementForm"
+			attribute="studentPlacementForm"
+			parameter="action"
+			path="/managementInfo"
+			type="za.ac.unisa.lms.tools.tpustudentplacement.actions.ManagementInfoAction"
+			validate="false">
+			<forward
+				name="inputPlacement"
+				path="/WEB-INF/jsp/inputPlacement.jsp"
+				contextRelative="true" />	
+			<forward
+				name="listPlacement"
+				path="/WEB-INF/jsp/listPlacement.jsp"
+				contextRelative="true" />
+			<forward
+				name="inputStudentPlacement"
+				path="/WEB-INF/jsp/inputStudentPlacement.jsp"
+				contextRelative="true" />	
+			<forward
+				name="searchSchool"
+				path="/schoolMaintenance.do?action=initial"
+				contextRelative="true" />	
+			<forward
+				name="searchSupervisor"
+				path="/supervisorMaintenance.do?action=initial"
+				contextRelative="true" />	
+			<forward
+				name="userUnknown"
+				path="/WEB-INF/jsp/userunknown.jsp"
+				contextRelative="true" />	
+			<forward
+				name="listPrelimPlacement"
+				path="/WEB-INF/jsp/listPlacement.jsp"
+				contextRelative="true" />
+											
+		</action>  
+		<action
+			name="studentPlacementForm"
+			attribute="studentPlacementForm"
+			parameter="action"
+			path="/schoolMaintenance"
+			type="za.ac.unisa.lms.tools.tpustudentplacement.actions.SchoolMaintenanceAction"
+			validate="false">
+			<forward
+				name="inputSchool"
+				path="/WEB-INF/jsp/inputSchool.jsp"
+				contextRelative="true" />	
+			<forward
+				name="listSchool"
+				path="/WEB-INF/jsp/listSchool.jsp"
+				contextRelative="true" />	
+			<forward
+				name="editSchool"
+				path="/WEB-INF/jsp/editSchool.jsp"
+				contextRelative="true" />		
+			<forward
+				name="searchPostalCode"
+				path="/postalCodeSearch.do?action=initial"
+				contextRelative="true" />		
+			<forward
+				name="searchDistrict"
+				path="/districtMaintenance.do?action=initial"
+				contextRelative="true" />	
+			<forward
+				name="editStudentPlacement"
+				path="/WEB-INF/jsp/editStudentPlacement.jsp"
+				contextRelative="true" />
+			<forward
+				name="editSupervisor"
+				path="/WEB-INF/jsp/editSupervisor.jsp"
+				contextRelative="true" />
+			<forward
+				name="inputStudentPlacement"
+				path="/WEB-INF/jsp/inputStudentPlacement.jsp"
+				contextRelative="true" />	
+			<forward
+				name="inputPlacement"
+				path="/WEB-INF/jsp/inputPlacement.jsp"
+				contextRelative="true" />	
+			<forward
+				name="listPlacement"
+				path="/WEB-INF/jsp/listPlacement.jsp"
+				contextRelative="true" />	
+			<forward
+				name="listPrelimPlacement"
+				path="/WEB-INF/jsp/listPlacement.jsp"
+				contextRelative="true" />
+			<forward
+				name="initial"
+				path="/studentPlacement.do?action=initial"
+				contextRelative="true" />			
+			<forward
+				name="userUnknown"
+				path="/WEB-INF/jsp/userunknown.jsp"
+				contextRelative="true" />	
+		<forward
+				name="editPrelimPlacement"
+				path="/WEB-INF/jsp/editStudentPlacement.jsp"
+				contextRelative="true" />	
+				<forward
+				name="inputMentor"
+				path="/WEB-INF/jsp/inputMentor.jsp"
+				contextRelative="true" />		
+			<forward
+				name="listMentor"
+				path="/WEB-INF/jsp/listMentor.jsp"
+				contextRelative="true" />		
+									
+		</action>  
+		<action
+			name="studentPlacementForm"
+			attribute="studentPlacementForm"
+			parameter="action"
+			path="/supervisorMaintenance"
+			type="za.ac.unisa.lms.tools.tpustudentplacement.actions.SupervisorMaintenanceAction"
+			validate="false">
+			<forward
+				name="emaillog"
+				path="/WEB-INF/jsp/listSupervisorEmailLog.jsp"
+				contextRelative="true" />	
+			<forward
+				name="editPrelimPlacement"
+				path="/WEB-INF/jsp/editStudentPlacement.jsp"
+				contextRelative="true" />
+			<forward
+				name="inputSupervisor"
+				path="/WEB-INF/jsp/inputSupervisor.jsp"
+				contextRelative="true" />	
+			<forward
+				name="listSupervisor"
+				path="/WEB-INF/jsp/listSupervisor.jsp"
+				contextRelative="true" />	
+			<forward
+				name="editSupervisor"
+				path="/WEB-INF/jsp/editSupervisor.jsp"
+				contextRelative="true" />
+			<forward
+				name="addSupervisorArea"
+				path="/WEB-INF/jsp/addSupervisorArea.jsp"
+				contextRelative="true" />	
+			<forward
+				name="editStudentPlacement"
+				path="/WEB-INF/jsp/editStudentPlacement.jsp"
+				contextRelative="true"/>						
+			<forward
+				name="searchPostalCode"
+				path="/postalCodeSearch.do?action=initial"
+				contextRelative="true" />
+			<forward
+				name="inputStudentPlacement"
+				path="/WEB-INF/jsp/inputStudentPlacement.jsp"
+				contextRelative="true" />	
+			<forward
+				name="inputPlacement"
+				path="/WEB-INF/jsp/inputPlacement.jsp"
+				contextRelative="true" />	
+			<forward
+				name="listPlacement"
+				path="/WEB-INF/jsp/listPlacement.jsp"
+				contextRelative="true" />
+			<forward
+				name="searchDistrict"
+				path="/districtMaintenance.do?action=initial"
+				contextRelative="true" />				
+			<forward
+				name="initial"
+				path="/studentPlacement.do?action=initial"
+				contextRelative="true" />			
+			<forward
+				name="userUnknown"
+				path="/WEB-INF/jsp/userunknown.jsp"
+				contextRelative="true" />
+				<forward
+				name="adjustStudentAllowed"
+				path="/WEB-INF/jsp/adjustStudentAllocationAllowed.jsp"
+				contextRelative="true" />
+			<forward
+				name="listPrelimPlacement"
+				path="/WEB-INF/jsp/listPlacement.jsp"
+				contextRelative="true" />	
+												
+		</action>  
+		<action
+			name="studentPlacementForm"
+			attribute="studentPlacementForm"
+			parameter="action"
+			path="/districtMaintenance"
+			type="za.ac.unisa.lms.tools.tpustudentplacement.actions.DistrictMaintenanceAction"
+			validate="false">
+			<forward
+				name="inputDistrict"
+				path="/WEB-INF/jsp/inputDistrict.jsp"
+				contextRelative="true" />
+			<forward
+				name="listDistrict"
+				path="/WEB-INF/jsp/listDistrict.jsp"
+				contextRelative="true" />		
+			<forward
+				name="editDistrict"
+				path="/WEB-INF/jsp/editDistrict.jsp"
+				contextRelative="true" />			
+			<forward
+				name="editSchool"
+				path="/WEB-INF/jsp/editSchool.jsp"
+				contextRelative="true" />	
+			<forward
+				name="inputSupervisor"
+				path="/WEB-INF/jsp/inputSupervisor.jsp"
+				contextRelative="true" />
+			<forward
+				name="listSupervisor"
+				path="/WEB-INF/jsp/listSupervisor.jsp"
+				contextRelative="true" />
+			<forward
+				name="addSupervisorArea"
+				path="/WEB-INF/jsp/addSupervisorArea.jsp"
+				contextRelative="true" />
+			<forward
+				name="inputSchool"
+				path="/WEB-INF/jsp/inputSchool.jsp"
+				contextRelative="true" />
+			<forward
+				name="listSchool"
+				path="/WEB-INF/jsp/listSchool.jsp"
+				contextRelative="true" />
+			<forward
+				name="initial"
+				path="/studentPlacement.do?action=initial"
+				contextRelative="true" />			
+			<forward
+				name="userUnknown"
+				path="/WEB-INF/jsp/userunknown.jsp"
+				contextRelative="true" />								
+		</action>
+		<action
+			name="studentPlacementForm"
+			attribute="studentPlacementForm"
+			parameter="action"
+			path="/postalCodeSearch"
+			type="za.ac.unisa.lms.tools.tpustudentplacement.actions.PostalCodeSearchAction"
+			validate="false">
+			<forward
+				name="searchPostalCode"
+				path="/WEB-INF/jsp/searchPostalCode.jsp"
+				contextRelative="true" />
+			<forward
+				name="editSchool"
+				path="/WEB-INF/jsp/editSchool.jsp"
+				contextRelative="true" />
+			<forward
+				name="editSupervisor"
+				path="/WEB-INF/jsp/editSupervisor.jsp"
+				contextRelative="true" />	
+		</action> 
+		<action
+			name="studentPlacementForm"
+			attribute="studentPlacementForm"
+			parameter="action"
+			path="/coordinatorMaintenance"
+			type="za.ac.unisa.lms.tools.tpustudentplacement.actions.CoordinatorMaintenanceAction"
+			validate="false">
+			<forward
+				name="inputCoordinator"
+				path="/WEB-INF/jsp/inputCoordinator.jsp"
+				contextRelative="true" />
+			<forward
+				name="listCoordinator"
+				path="/WEB-INF/jsp/listCoordinator.jsp"
+				contextRelative="true" />
+			<forward
+				name="displayCoordinator"
+				path="/WEB-INF/jsp/displayCoordinator.jsp"
+				contextRelative="true" />	
+			<forward
+				name="addCoordinator"
+				path="/WEB-INF/jsp/addCoordinator.jsp"
+				contextRelative="true" />	
+				<forward
+				name="editCoordinator"
+				path="/WEB-INF/jsp/editCoordinator.jsp"
+				contextRelative="true" />	
+			<forward
+				name="inputStudentPlacement"
+				path="/WEB-INF/jsp/inputStudentPlacement.jsp"
+				contextRelative="true" />	
+		</action>
+		<action
+			name="studentPlacementForm"
+			attribute="studentPlacementForm"
+			parameter="action"
+			path="/placementLogMaintenance"
+			type="za.ac.unisa.lms.tools.tpustudentplacement.actions.PlacementLogMaintenanceAction"
+			validate="false">
+			<forward
+				name="displayLogEntry"
+				path="/WEB-INF/jsp/placementLogEntryDetails.jsp"
+				contextRelative="true" />	
+			<forward
+				name="listLogs"
+				path="/WEB-INF/jsp/listPlacementLog.jsp"
+				contextRelative="true" />
+			<forward
+				name="displayCorrInput"
+				path="/WEB-INF/jsp/inputCorrespondence.jsp"
+				contextRelative="true" />
+			<forward
+				name="listStudentPlacement"
+				path="/WEB-INF/jsp/listStudentPlacement.jsp"
+				contextRelative="true" />
+				<forward
+				name="inputStudentPlacement"
+				path="/WEB-INF/jsp/inputStudentPlacement.jsp"
+				contextRelative="true" />	
+						
+		</action> 
+		<action
+			name="studentPlacementForm"
+			attribute="studentPlacementForm"
+			parameter="action"
+			path="/mentorMaintenance"
+			type="za.ac.unisa.lms.tools.tpustudentplacement.actions.MentorMaintenanceAction"
+			validate="false">
+			<forward
+				name="inputMentor"
+				path="/WEB-INF/jsp/inputMentor.jsp"
+				contextRelative="true" />
+			<forward
+				name="listMentor"
+				path="/WEB-INF/jsp/listMentor.jsp"
+				contextRelative="true" />
+			
+			<forward
+				name="searchSchool"
+				path="/schoolMaintenance.do?action=initial"
+				contextRelative="true" />	
+				<forward
+				name="errMentor"
+				path="/WEB-INF/jsp/userunknown.jsp"/>
+			<forward
+				name="inputStudentPlacement"
+				path="/WEB-INF/jsp/inputStudentPlacement.jsp"
+				contextRelative="true" />
+			<forward
+				name="editStudentPlacement"
+				path="/WEB-INF/jsp/editStudentPlacement.jsp"
+				contextRelative="true" />		
+		</action> 
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.tpustudentplacement.ApplicationResources" />	
+</struts-config>

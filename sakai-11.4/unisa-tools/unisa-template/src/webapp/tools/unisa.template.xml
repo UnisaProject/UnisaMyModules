@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.template"
+		title=""
+		description="">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

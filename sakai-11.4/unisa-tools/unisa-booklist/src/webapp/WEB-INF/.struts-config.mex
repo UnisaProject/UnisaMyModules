@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="242,88" />
+  <StrutsActivity path="/nosite.do" location="50,250" dimension="318,100" />
+  <StrutsActivity path="/WEB-INF/jsp/viewlist.jsp" location="105,405" dimension="179,52" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="350,50" dimension="150,49" />
+  <StrutsActivity path="/WEB-INF/jsp/displaystudent.jsp" location="780,285" dimension="186,49" />
+  <StrutsActivity path="/WEB-INF/jsp/displayemail.jsp" location="870,210" dimension="173,49" />
+  <StrutsActivity path="/WEB-INF/jsp/displaylecturer.jsp" location="480,285" dimension="186,49" />
+  <StrutsTransition id="/nosite.do,viewforward,/WEB-INF/jsp/viewlist.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="209,350" />
+      <AbsolutePoint location="209,405" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/nosite.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="171,138" />
+      <AbsolutePoint location="171,250" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>
+

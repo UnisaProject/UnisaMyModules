@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.studentemail"
+		title="Course Contact"
+		description="Student E-Mail for students and lecturers">
+		<category name="unisa.tools" />
+		<category name="course" />
+		<category name="onlcourse" />
+	</tool>
+</registration>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans >
+    <form-bean name="creditCardPaymentForm" type="za.ac.unisa.lms.tools.creditcardpayment.forms.CreditCardPaymentForm" />
+
+  </form-beans>
+
+  <global-exceptions />
+  <global-forwards />
+  <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.creditcardpayment.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/creditCardPayment.do?action=studentInput"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="creditCardPaymentForm"
+      name="creditCardPaymentForm"
+      parameter="action"
+      path="/creditCardPayment"
+      type="za.ac.unisa.lms.tools.creditcardpayment.actions.CreditCardPaymentAction"
+      validate="false">
+      <forward name="invaliduser" path="/WEB-INF/jsp/invaliduser.jsp" />
+       <forward
+        name="nonTpPayment"
+        path="/WEB-INF/jsp/nonTpPayment.jsp"
+        contextRelative="true" />
+      <forward
+        name="tpPayment"
+        path="/WEB-INF/jsp/tpPayment.jsp"
+        contextRelative="true" />
+      <forward
+        name="applyPayment"
+        path="/WEB-INF/jsp/applyPayment.jsp"
+        contextRelative="true" />
+      <forward
+        name="paymentConfirm"
+        path="/WEB-INF/jsp/confirmpayment.jsp"
+        contextRelative="true" />
+      <forward
+        name="summary"
+        path="/WEB-INF/jsp/summary.jsp"
+        contextRelative="true" />
+      <forward
+        name="qualInput"
+        path="/WEB-INF/jsp/qualinput.jsp"
+        contextRelative="true" />
+      <forward
+        name="studentInput"
+        path="/WEB-INF/jsp/studentinput.jsp"
+        contextRelative="true" />
+      <forward
+        name="home"
+        path="/creditCardPayment.do?action=studentInput"
+        contextRelative="true" />
+    </action>
+
+  </action-mappings>
+
+  <message-resources parameter="za.ac.unisa.lms.tools.creditcardpayment.ApplicationResources" />
+
+  </struts-config>

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>unisa-changes-base</artifactId>
+    <groupId>org.sakaiproject</groupId>
+    <version>10.5</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <name>Unisa Overlay on Calendar </name>
+  <groupId>unisa.overlays.calendar</groupId>
+  <artifactId>unisa-overlays-calendar</artifactId>
+  <packaging>pom</packaging>
+  <modules>  
+	<module>calendar-impl/pack</module>
+	<module>calendar-tool/tool</module>
+	<module>calendar-summary-tool/tool</module>
+  </modules>
+</project>

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.studyquotation"
+		title="Study Fees Quotation"
+		description="Student Academic History : Study Fees Quotation">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

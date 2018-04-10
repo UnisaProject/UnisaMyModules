@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <parent>
+    <artifactId>unisa-util-base</artifactId>
+    <groupId>org.sakaiproject</groupId>
+    <version>10.5</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.sakaiproject</groupId>
+  <artifactId>unisa-javaproxies</artifactId>
+  <name>unisa-javaproxies</name>
+  <inceptionYear>2003</inceptionYear>
+  <organization>
+    <name>University of Michigan</name>
+    <url>http://sakaiproject.org/</url>
+  </organization>
+  <build>
+    <resources>
+      <resource>
+        <directory>${basedir}/src/java</directory>
+      </resource>
+    </resources>
+  </build>
+  <dependencies>
+    		<dependency>
+			<groupId>allfusion</groupId>
+			<artifactId>genrt</artifactId>
+			<version>80</version>
+		</dependency>
+  </dependencies>
+</project>

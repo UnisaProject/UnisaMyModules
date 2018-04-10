@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.smsenquiry"
+		title="SMS Enquiry"
+		description="">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

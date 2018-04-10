@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	    <form-bean name="bookMenuForm" type="za.ac.unisa.lms.tools.pbooks.forms.BookMenuForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.pbooks.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/prebook.do?action=viewBookMenu"
+				contextRelative="true" />
+		</action>
+		<action
+			parameter="action"
+			path="/prebook"
+			name="bookMenuForm"
+			scope="session"
+			type="za.ac.unisa.lms.tools.pbooks.actions.PrebookAction"
+			validate="false">
+			<forward
+					name="showprebooks"
+					path="/WEB-INF/jsp/showbooks.jsp"
+					contextRelative="true" />
+		    <forward
+					name="confirmBooks"
+					path="/prebook.do?action=confirmBooks"
+					contextRelative="true" />
+			<forward
+				name="bookmenu"
+				path="/WEB-INF/jsp/bookmenu.jsp"
+				contextRelative="true" />
+			<forward
+				    name="showbookmenu"
+				    path="/WEB-INF/jsp/bookmenu.jsp"
+				    contextRelative="true" />
+			<forward
+				name="bookconfirm"
+				path="/WEB-INF/jsp/confirmbookstatus.jsp"
+				contextRelative="true" />
+			<forward
+				name="searchform"
+				path="/WEB-INF/jsp/searchbook.jsp"
+				contextRelative="true" />
+			<forward
+				name="coursenote"
+				path="/WEB-INF/jsp/addcoursenote.jsp"
+				contextRelative="true" />
+			<forward
+				name="bookreuse"
+				path="/WEB-INF/jsp/reusebooks.jsp"
+				contextRelative="true" />
+			<forward
+				name="declarenopbooks"
+				path="/WEB-INF/jsp/declarenopbooks.jsp"
+				contextRelative="true" />
+			<forward
+				name="bookfind"
+				path="/WEB-INF/jsp/booknotfound.jsp"
+				contextRelative="true" />
+			<forward
+				name="newbookadd"
+				path="/WEB-INF/jsp/addnewbook.jsp"
+				contextRelative="true" />
+			<forward
+				name="bookremove"
+				path="/WEB-INF/jsp/removebook.jsp"
+				contextRelative="true" />
+			<forward
+				name="confirmbyacademicform"
+				path="/WEB-INF/jsp/confirmbyacademic.jsp"
+				contextRelative="true" />
+			<forward
+				name="hodapproval"
+				path="/WEB-INF/jsp/hodapproval.jsp"
+				contextRelative="true" />
+		    <forward
+				name="mainWinSecPage"
+				path="/WEB-INF/jsp/mainWinSecPage.jsp"
+				contextRelative="true" />
+			<forward
+				name="confirmbstatus"
+				path="/WEB-INF/jsp/confirmbookstatus.jsp"
+				contextRelative="true" />
+				<forward
+				name="booklistDisplay"
+				path="/WEB-INF/jsp/booklistDisplay.jsp"
+				contextRelative="true" />
+			<forward
+				name="editTutorCount"
+				path="/WEB-INF/jsp/editTutorCount.jsp"
+				contextRelative="true" />	
+				
+		</action>
+		<action
+			name="bookMenuForm"
+			attribute="bookMenuForm"
+			parameter="action"
+			path="/authorisation"
+			scope="session"
+			type="za.ac.unisa.lms.tools.pbooks.actions.AuthorisationAction"
+			validate="false">
+			<forward
+				name="viewBookMenu"				
+				path="/prebook.do?action=viewBookMenu"
+				contextRelative="true" />  
+				<forward 
+				name="schdirmainview" 
+				path="/WEB-INF/jsp/schdirmainview.jsp"
+				contextRelative="true" />	
+				<forward 
+				name="courselist"
+				path="/WEB-INF/jsp/courselist.jsp"
+				contextRelative="true" />	
+				<forward 
+				name="sddisplayoptions"
+				path="/WEB-INF/jsp/sddisplayoptions.jsp"
+				contextRelative="true" />	
+				<forward 
+				name="searchcourse"
+				path="/WEB-INF/jsp/searchcourse.jsp"
+				contextRelative="true" />	
+				<forward 
+				name="authRequestList"
+				path="/WEB-INF/jsp/authRequestList.jsp"
+				contextRelative="true" />	
+				<forward
+				name="codAuthorize"
+				path="/WEB-INF/jsp/codAuthorize.jsp" 
+				contextRelative="true" />
+				<forward
+				name="modulesperdept"
+				path="/WEB-INF/jsp/modulesperdept.jsp"
+				contextRelative="true" />	
+				<forward
+				name="confirmSendBack"
+				path="/WEB-INF/jsp/confirmSendBack.jsp"
+				contextRelative="true" />	
+				<forward
+				name="codselectacadyear"
+				path="/WEB-INF/jsp/codSelectAcadYear.jsp"
+				contextRelative="true" />
+				<forward
+				name="dissAuthorize"
+				path="/WEB-INF/jsp/dissAuthorize.jsp"
+				contextRelative="true" />
+								
+			</action>
+			
+			<action
+			name="bookMenuForm"
+			attribute="bookMenuForm"
+			parameter="action"
+			path="/deanAuthorisation"
+			scope="session"
+			type="za.ac.unisa.lms.tools.pbooks.actions.DeanAuthorisationAction"
+			validate="false">
+			<forward
+				name="viewBookMenu"				
+				path="/prebook.do?action=viewBookMenu"
+				contextRelative="true" /> 
+				<forward
+				name="deanviewstep1"
+				path="/WEB-INF/jsp/deanviewstep1.jsp"
+				contextRelative="true" />
+				<forward
+				name="deansearchcourse"
+				path="/WEB-INF/jsp/deansearchcourse.jsp"
+				contextRelative="true" />
+				<forward
+				name="deandisplayoptions"
+				path="/WEB-INF/jsp/deandisplayoptions.jsp"
+				contextRelative="true" />
+				<forward
+				name="deanmainview"
+				path="/WEB-INF/jsp/deanMainView.jsp"
+				contextRelative="true" />
+				<forward 
+				name="searchcourse"
+				path="/WEB-INF/jsp/searchcourse.jsp"
+				contextRelative="true" />	
+				<forward
+				name="deanRequestList"
+				path="/WEB-INF/jsp/deanRequestList.jsp"
+				contextRelative="true" />
+				<forward
+				name="deancourselist"
+				path="/WEB-INF/jsp/deancourselist.jsp"
+				contextRelative="true" />
+				<forward
+				name="deanAuthorize"
+				path="/WEB-INF/jsp/deanAuthorize.jsp"
+				contextRelative="true" />
+				<forward
+				name="deanconfirmAuthorize"
+				path="/WEB-INF/jsp/deanconfirmAuthorize.jsp"
+				contextRelative="true" />
+				<forward
+				name="deanconfirmSendBack"
+				path="/WEB-INF/jsp/deanconfirmSendBack.jsp"
+				contextRelative="true" />
+				<forward
+				name="deanacadyearselect"
+				path="/WEB-INF/jsp/deanAcadYearSelect.jsp"
+				contextRelative="true" />
+				
+				</action>
+				
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.pbooks.ApplicationResources" />
+
+	
+</struts-config>

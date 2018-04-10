@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <name>Blog Wow!</name>
+  <groupId>org.sakaiproject</groupId>
+  <artifactId>sakai-blogwow-base</artifactId>
+  <version>0.9.9</version>
+<!--blogwow.version-->
+  <packaging>pom</packaging>
+  <parent>
+    <artifactId>master</artifactId>
+    <groupId>org.sakaiproject</groupId>
+     <version>10.5</version>
+<!--    <version>${sakai.version}</version>-->
+<!--    <version>SNAPSHOT</version>-->
+    <relativePath>../master/pom.xml</relativePath>
+  </parent>
+  <properties>
+    <sakai.generic-dao.version>0.9.11</sakai.generic-dao.version>
+  </properties>
+<!-- handles the management of all related dependencies -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.sakaiproject</groupId>
+        <artifactId>sakai-blogwow-api</artifactId>
+        <version>0.9.9</version>
+<!--blogwow.version-->
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.sakaiproject</groupId>
+        <artifactId>sakai-blogwow-impl</artifactId>
+        <version>0.9.9</version>
+<!--blogwow.version-->
+      </dependency>
+<!-- needed until EB is in the Sakai master dependency management -->
+      <dependency>
+        <groupId>org.sakaiproject.entitybroker</groupId>
+        <artifactId>entitybroker-api</artifactId>
+        <version>1.3.6</version>
+        <scope>provided</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <scm>
+    <connection>scm:svn:https://source.sakaiproject.org/contrib/programmerscafe/blogwow/tags/0.9.9</connection>
+    <developerConnection>scm:svn:https://source.sakaiproject.org/contrib/programmerscafe/blogwow/tags/0.9.9</developerConnection>
+    <url>https://source.sakaiproject.org/contrib/programmerscafe/blogwow/tags/0.9.9</url>
+  </scm>
+  <profiles>
+    <profile>
+      <id>full</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>api</module>
+        <module>impl</module>
+        <module>pack</module>
+        <module>tool</module>
+        <module>help</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>tool</id>
+      <modules>
+        <module>tool</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>api</id>
+      <modules>
+        <module>api</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>ddl</id>
+      <modules>
+        <module>impl/src/ddl</module>
+      </modules>
+    </profile>
+  </profiles>
+<!-- ensure 2.5.0 jars can be found -->
+  <repositories>
+    <repository>
+      <id>sakai-maven</id>
+      <name>Sakai Maven Repo</name>
+      <layout>default</layout>
+      <url>http://source.sakaiproject.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>default</id>
+      <name>Maven Repository Switchboard</name>
+      <layout>default</layout>
+      <url>http://repo1.maven.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+</project>

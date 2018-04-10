@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.mdactivity"
+		title="M&amp;D Student Activity"
+		description="M and D Student Activity Logging by Lecturer">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

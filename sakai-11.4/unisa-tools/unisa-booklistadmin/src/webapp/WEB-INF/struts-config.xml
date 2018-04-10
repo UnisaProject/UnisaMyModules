@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	 <form-bean name="booklistAdminForm" type="za.ac.unisa.lms.tools.booklistadmin.forms.BooklistAdminForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.booklistadmin.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/booklistadmin.do?action=mainview"
+				contextRelative="true" />
+				
+		</action>
+		
+			<action
+			parameter="action"
+			path="/booklistadmin"
+			name="booklistAdminForm"
+			type="za.ac.unisa.lms.tools.booklistadmin.actions.BooklistadminAction"
+			validate="false">
+			
+			<forward
+					name="confirmscreen"
+					path="/WEB-INF/jsp/yearRemComfirmScrn.jsp"
+					contextRelative="true" />
+			<forward
+					name="confirmscreenreleasedates"
+					path="/WEB-INF/jsp/confirmScreenForReleaseDates.jsp"
+					contextRelative="true" />
+			<forward
+					name="submissiondates"
+					path="/WEB-INF/jsp/submissionsdates.jsp"
+					contextRelative="true" />
+					<forward
+					name="confirmscreen"
+					path="/WEB-INF/jsp/removeReleaseDateConfirmScrn.jsp"
+					contextRelative="true" />
+			
+			<forward
+					name="releasedates"
+					path="/WEB-INF/jsp/releasedates.jsp"
+					contextRelative="true" />
+			<forward
+					name="mainview"
+					path="/WEB-INF/jsp/adminmenu.jsp"
+					contextRelative="true" />
+					<forward
+				     name="declarenopbooks"
+				     path="/WEB-INF/jsp/declarenopbooks.jsp"
+				     contextRelative="true" />
+					<forward
+					name="selectcourse"
+					path="/WEB-INF/jsp/viewcourse.jsp"
+					contextRelative="true" />  				
+					<forward
+					name="displaybooklist"
+					path="/WEB-INF/jsp/booklistdisplay.jsp"
+					contextRelative="true" />
+					<forward
+				    name="coursenote"
+				    path="/WEB-INF/jsp/addcoursenote.jsp"
+				    contextRelative="true" />
+				    <forward
+			     	name="bookremove"
+			     	path="/WEB-INF/jsp/removebook.jsp"
+			    	contextRelative="true" />
+			    	<forward
+				     name="newbookadd"
+				     path="/WEB-INF/jsp/addnewbook.jsp"
+				     contextRelative="true" />
+				     <forward
+				    name="searchform"
+				    path="/WEB-INF/jsp/searchbook.jsp"
+				    contextRelative="true" />
+				      <forward
+				    name="searchcourse"
+				    path="/WEB-INF/jsp/searchcourse.jsp"
+				    contextRelative="true" />
+				    <forward
+				     name="bookfind"
+				    path="/WEB-INF/jsp/bookListForReuse.jsp"
+				      contextRelative="true" />
+				      <forward
+				         name="bookreuse"
+				         path="/WEB-INF/jsp/reusebooks.jsp"
+				        contextRelative="true" />
+				        <forward
+				           name="confirmbyadmin"
+				           path="/WEB-INF/jsp/confirmbyadmin.jsp"
+				               contextRelative="true" />
+				                <forward
+				           name="generatelist"
+				           path="/WEB-INF/jsp/generatelist.jsp"
+				               contextRelative="true" />
+				           <forward
+				           name="addlawreport"
+				           path="/WEB-INF/jsp/addLawReport.jsp"
+				               contextRelative="true" />
+				           <forward
+				               name="addjournal"
+				               path="/WEB-INF/jsp/addJournal.jsp"
+				               contextRelative="true" />
+				           <forward
+				                  name="addbookchapter"
+				                  path="/WEB-INF/jsp/addBookChapter.jsp"
+				                  contextRelative="true" />
+					</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.booklistadmin.ApplicationResources" />
+
+	</struts-config>

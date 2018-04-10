@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans >
+    <form-bean name="contactusform" type="za.ac.unisa.lms.tools.contactus.forms.ContactUsForm" />
+
+  </form-beans>
+
+  <global-exceptions />
+  <global-forwards />
+  <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.contactus.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/contactusaction.do?action=chooseCategory"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="contactusform"
+      name="contactusform"
+      parameter="action"
+      path="/contactusaction"
+      type="za.ac.unisa.lms.tools.contactus.actions.ContactUsAction">
+      <forward
+        name="thankyou"
+        path="/WEB-INF/jsp/thankyou.jsp"
+        contextRelative="true" />
+      <forward
+        name="studentviewc2c"
+        path="/WEB-INF/jsp/studentviewc2c.jsp"
+        contextRelative="true" />
+      <forward
+        name="studentviewc3"
+        path="/WEB-INF/jsp/studentviewc3.jsp"
+        contextRelative="true" />
+      <forward
+        name="studentviewa"
+        path="/WEB-INF/jsp/studentviewa.jsp"
+        contextRelative="true" />
+      <forward
+        name="studentviewb2"
+        path="/WEB-INF/jsp/studentviewb2.jsp"
+        contextRelative="true" />
+      <forward
+        name="registrationlink"
+        path="http://registration.unisa.ac.za/info/index.html"
+        redirect="true" />
+      <forward
+        name="studentviewc2a"
+        path="/WEB-INF/jsp/studentviewc2a.jsp"
+        contextRelative="true" />
+      <forward
+        name="studentviewc4"
+        path="/WEB-INF/jsp/studentviewc4.jsp"
+        contextRelative="true" />
+      <forward
+        name="studentviewe"
+        path="/WEB-INF/jsp/studentviewe.jsp"
+        contextRelative="true" />
+      <forward
+        name="studentviewc1"
+        path="/WEB-INF/jsp/studentviewc1.jsp"
+        contextRelative="true" />
+      <forward
+        name="studentviewd"
+        path="/WEB-INF/jsp/studentviewd.jsp"
+        contextRelative="true" />
+      <forward
+        name="studentviewb"
+        path="/WEB-INF/jsp/studentviewb.jsp"
+        contextRelative="true" />
+      <forward
+        name="registration.unisa"
+        path="http://registration.unisa.ac.za/info/index.html"
+        redirect="true" />
+    </action>
+
+  </action-mappings>
+
+  <message-resources parameter="za.ac.unisa.lms.tools.contactus.ApplicationResources" />
+</struts-config>
+

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.canceluser"
+		title="Cancel student's myUnisa user account"
+		description="">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

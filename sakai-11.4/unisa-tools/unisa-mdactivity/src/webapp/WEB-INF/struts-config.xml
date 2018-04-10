@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		<form-bean name="mdActivityForm" type="za.ac.unisa.lms.tools.mdactivity.forms.MdActivityForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.mdactivity.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/displaymdactivity.do?act=inputstep1"
+				contextRelative="true" />
+		</action>
+		<action
+    	 	 attribute="mdActivityForm"
+    	 	 name="mdActivityForm"
+     		 parameter="act"
+     	 	 path="/displaymdactivity"
+     	 	 type="za.ac.unisa.lms.tools.mdactivity.actions.DisplayMdActivityAction"
+     		 validate="false">
+      	<forward
+      	 	 name="invaliduser"
+        	 path="/WEB-INF/jsp/lecturersOnly.jsp"
+       		 contextRelative="true" />
+      	<forward
+       		 name="step1forward"
+       		 path="/WEB-INF/jsp/inputstep1.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="step2forward"
+       		 path="/WEB-INF/jsp/inputstep2.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="displayforward"
+       		 path="/WEB-INF/jsp/displaymdactivity.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="addforward"
+       		 path="/WEB-INF/jsp/addmdactivity.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="editforward"
+       		 path="/WEB-INF/jsp/editmdactivity.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="cancelforward"
+       		 path="/WEB-INF/jsp/inputstep1.jsp"
+       		 contextRelative="true" />
+       		 <forward
+       		 name="home"
+       		 path="/displaymdactivity.do?act=inputstep1"
+       		 contextRelative="true" />
+    </action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.mdactivity.ApplicationResources" />
+ 	<!--  Validator plugin -->
+  	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property property="pathnames" value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+	</plug-in>
+
+
+</struts-config>

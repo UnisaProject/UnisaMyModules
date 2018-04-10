@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	 <form-beans >
+        <form-bean name="graduationCeremonyForm" type="za.ac.unisa.lms.tools.graduationceremony.forms.GraduationCeremonyForm" />
+    </form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.graduationceremony.actions.DefaultAction">
+      		<forward
+        		name="default"
+        		path="/graduationceremony.do?action=studinput"
+        		contextRelative="true" />
+<!-- 			<forward
+				name="default"
+				path="/WEB-INF/jsp/default.jsp"
+				contextRelative="true" />			-->
+		</action>
+   		<action
+      		attribute="graduationCeremonyForm"
+      		name="graduationCeremonyForm"
+      		parameter="action"
+      		path="/graduationceremony"
+      		type="za.ac.unisa.lms.tools.graduationceremony.actions.GraduationCeremonyAction"
+      		validate="false">
+      		<forward
+        		name="display"
+        		path="/WEB-INF/jsp/graduationceremonyapply.jsp"
+        		contextRelative="true" />
+        	<forward
+				name="graduation-all"
+				path="/WEB-INF/jsp/graduationceremonyall.jsp"
+				contextRelative="true" />
+        	<forward
+				name="graduation-display"
+				path="/WEB-INF/jsp/graduationceremonydisplay.jsp"
+				contextRelative="true" />
+			<forward
+				name="graduation-no"
+				path="/WEB-INF/jsp/nograduation.jsp"
+				contextRelative="true" />
+			<forward
+				name="graduation-dress"
+				path="/WEB-INF/jsp/dressorder.jsp"
+				contextRelative="true" />
+    	</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.graduationceremony.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

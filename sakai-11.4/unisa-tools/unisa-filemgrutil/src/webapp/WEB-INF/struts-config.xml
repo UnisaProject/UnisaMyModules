@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+    	<form-bean name="utilDetailsForm" type="za.ac.unisa.lms.tools.filemgrutil.forms.UtilDetailsForm" />
+    	
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.filemgrutil.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/filemanager.do?action=displayMainPage"
+				contextRelative="true" />
+		</action>
+		<action
+			parameter="action"
+			attribute="utilDetailsForm" 
+			name="utilDetailsForm"
+			path="/filemanager"			
+			scope="session"
+			type="za.ac.unisa.lms.tools.filemgrutil.actions.FilemanagerUtilAction"
+			validate="false">
+			<forward
+				name="mainforward"
+				path="/WEB-INF/jsp/main.jsp"
+				contextRelative="true" />
+			<forward
+				name="webidforward"
+				path="/WEB-INF/jsp/promptwebid.jsp"
+				contextRelative="true" />
+				<forward
+				name="success"
+				path="/WEB-INF/jsp/success.jsp"
+				contextRelative="true" />	
+				
+		</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.filemgrutil.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>
