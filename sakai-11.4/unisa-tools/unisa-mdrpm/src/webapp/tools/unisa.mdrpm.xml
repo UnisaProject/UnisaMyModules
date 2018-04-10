@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.mdrpm"
+		title="M and D Research Proposal Module"
+		description="M and D Research Proposal Module">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

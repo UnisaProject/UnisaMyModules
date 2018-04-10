@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.faqs"
+		title="FAQs"
+		description="Frequently Asked Questions">
+		<category name="course" />
+		<category name="project" />
+		<category name="onlcourse" />
+		<category name="onlgroup" />
+		<category name="group" />
+		<category name="PostGraduate" />
+	</tool>
+</registration>

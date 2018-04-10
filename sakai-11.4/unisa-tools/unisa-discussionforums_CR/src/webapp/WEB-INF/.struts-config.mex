@@ -1,0 +1,91 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="242,88" />
+  <StrutsActivity path="/forums.do" location="60,195" dimension="308,88" />
+  <StrutsActivity path="/forumtopic.do" location="840,120" dimension="352,88" />
+  <StrutsActivity path="/topicmessage.do" location="50,450" dimension="362,88" />
+  <StrutsActivity path="/WEB-INF/jsp/createforum.jsp" location="555,225" dimension="175,49" />
+  <StrutsActivity path="/WEB-INF/jsp/viewforums.jsp" location="120,330" dimension="171,49" />
+  <StrutsActivity path="/WEB-INF/jsp/viewtopics.jsp" location="1050,405" dimension="166,49" />
+  <StrutsActivity path="/WEB-INF/jsp/createtopic.jsp" location="350,350" dimension="170,49" />
+  <StrutsActivity path="/WEB-INF/jsp/viewmessages.jsp" location="650,350" dimension="185,49" />
+  <StrutsActivity path="forumtopic.do.do" location="650,450" dimension="122,75" />
+  <StrutsActivity path="forumtopic.do.do.do" location="950,550" dimension="140,75" />
+  <StrutsActivity path="/WEB-INF/jsp/deleteforum.jsp" />
+  <StrutsActivity path="/WEB-INF/jsp/deletetopic.jsp" />
+  <StrutsActivity path="/WEB-INF/jsp/deletemessage.jsp" />
+  <StrutsTransition id="/default.do,default,/forums.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="171,138" />
+      <AbsolutePoint location="171,195" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/topicmessage.do,showmessagesforward,/WEB-INF/jsp/viewmessages.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="412,464" />
+      <AbsolutePoint location="742,464" />
+      <AbsolutePoint location="742,399" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/forumtopic.do,topicdeleteforward,/WEB-INF/jsp/deletetopic.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1016,164" />
+      <AbsolutePoint location="0,0" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/forumtopic.do,createtopicforward,/WEB-INF/jsp/createtopic.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="840,164" />
+      <AbsolutePoint location="435,164" />
+      <AbsolutePoint location="435,350" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/forums.do,forumlistforward,/WEB-INF/jsp/viewforums.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="214,239" />
+      <AbsolutePoint location="205,354" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/topicmessage.do,messagedeleteforward,/WEB-INF/jsp/deletemessage.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="231,494" />
+      <AbsolutePoint location="0,0" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/forumtopic.do,returntoforumforward,/WEB-INF/jsp/viewforums.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="986,208" />
+      <AbsolutePoint location="986,345" />
+      <AbsolutePoint location="291,345" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/forumtopic.do,showtopicforward,/WEB-INF/jsp/viewtopics.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1065,208" />
+      <AbsolutePoint location="1065,405" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/forums.do,deleteforumconfirmforward,/WEB-INF/jsp/deleteforum.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="214,239" />
+      <AbsolutePoint location="0,0" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/forums.do,createforumforward,/WEB-INF/jsp/createforum.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="368,240" />
+      <AbsolutePoint location="555,240" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/forumtopic.do,returntoforumforward,/forums.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1016,164" />
+      <AbsolutePoint location="214,239" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/topicmessage.do,showtopicforward,forumtopic.do.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="231,494" />
+      <AbsolutePoint location="0,0" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

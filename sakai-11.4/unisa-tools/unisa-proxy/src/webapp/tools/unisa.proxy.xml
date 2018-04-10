@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<registration>
+<!-- Renamed to Assignments form 2.8.0 (Takes default tool name, otherwise we have to do a huge update to all course sites)-->
+	<tool
+		id="unisa.proxy"
+		title="Assignments"
+		description="Tool to proxy external content into a portlet">
+		<category name="unisa.tools" />
+		<configuration name="base" value=""/>
+		<configuration name="url" value=""/>
+		<configuration name="parms" value=""/>
+		<configuration name="permParm" value=""/>
+		<configuration name="cookieUserID" value=""/>
+		<configuration name="cookieEmail" value=""/>
+
+	</tool>
+</registration>

@@ -1,0 +1,149 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="242,88" />
+  <StrutsActivity path="/satbookMonthly.do" location="60,195" dimension="331,88" />
+  <StrutsActivity path="/satbookDaily.do" location="60,330" dimension="316,88" />
+  <StrutsActivity path="/satbookBooking.do" location="60,480" dimension="330,88" />
+  <StrutsActivity path="/satbookAdmin.do" location="705,150" dimension="322,88" />
+  <StrutsActivity path="/WEB-INF/jsp/monthlyview.jsp" location="465,135" dimension="176,49" />
+  <StrutsActivity path="/WEB-INF/jsp/adminmenu.jsp" location="1140,270" dimension="170,49" />
+  <StrutsActivity path="/WEB-INF/jsp/dailyview.jsp" location="480,345" dimension="160,49" />
+  <StrutsActivity path="/WEB-INF/jsp/admininstitutions.jsp" location="1140,150" dimension="196,49" />
+  <StrutsActivity path="/WEB-INF/jsp/sendgroupemail.jsp" location="1140,630" dimension="191,49" />
+  <StrutsActivity path="/WEB-INF/jsp/admininstitutionsedit.jsp" location="650,550" dimension="214,49" />
+  <StrutsActivity path="/WEB-INF/jsp/emailschedule.jsp" location="1140,690" dimension="182,49" />
+  <StrutsActivity path="/WEB-INF/jsp/adminassistants.jsp" location="1140,450" dimension="192,49" />
+  <StrutsActivity path="/WEB-INF/jsp/adminclassrooms.jsp" location="1140,390" dimension="196,49" />
+  <StrutsActivity path="/WEB-INF/jsp/adminlecturers.jsp" location="1140,330" dimension="186,49" />
+  <StrutsActivity path="/WEB-INF/jsp/admininstitutiondays.jsp" location="1140,210" dimension="214,49" />
+  <StrutsActivity path="/WEB-INF/jsp/adminmaterial.jsp" location="1140,570" dimension="182,49" />
+  <StrutsActivity path="/WEB-INF/jsp/adminlecturersedit.jsp" location="615,255" dimension="204,49" />
+  <StrutsActivity path="/WEB-INF/jsp/adminassistanttype.jsp" location="1140,510" dimension="209,49" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="350,50" dimension="150,49" />
+  <StrutsTransition id="/satbookAdmin.do,admininstitutiondays,/WEB-INF/jsp/admininstitutiondays.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="866,150" />
+      <AbsolutePoint location="866,-25" />
+      <AbsolutePoint location="1351,-25" />
+      <AbsolutePoint location="1351,210" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookAdmin.do,adminlecturers,/WEB-INF/jsp/adminlecturers.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="999,238" />
+      <AbsolutePoint location="999,360" />
+      <AbsolutePoint location="1140,360" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookAdmin.do,adminassistanttype,/WEB-INF/jsp/adminassistanttype.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="896,150" />
+      <AbsolutePoint location="896,65" />
+      <AbsolutePoint location="1441,65" />
+      <AbsolutePoint location="1441,534" />
+      <AbsolutePoint location="1349,534" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookMonthly.do,monthlyview,/WEB-INF/jsp/monthlyview.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="255,195" />
+      <AbsolutePoint location="255,159" />
+      <AbsolutePoint location="465,159" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/satbookMonthly.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="225,138" />
+      <AbsolutePoint location="225,195" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookAdmin.do,adminmenu,/WEB-INF/jsp/adminmenu.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1027,225" />
+      <AbsolutePoint location="1072,225" />
+      <AbsolutePoint location="1072,289" />
+      <AbsolutePoint location="1140,289" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookAdmin.do,admininstitutions,/WEB-INF/jsp/admininstitutions.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1027,154" />
+      <AbsolutePoint location="1140,154" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookAdmin.do,satbookmonthlyfw,/satbookMonthly.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="705,210" />
+      <AbsolutePoint location="391,210" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookDaily.do,dailyview,/WEB-INF/jsp/dailyview.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="376,374" />
+      <AbsolutePoint location="480,374" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookAdmin.do,sendgroupemail,/WEB-INF/jsp/sendgroupemail.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="909,238" />
+      <AbsolutePoint location="909,654" />
+      <AbsolutePoint location="1140,654" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookMonthly.do,dailyview,/WEB-INF/jsp/dailyview.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="391,270" />
+      <AbsolutePoint location="560,270" />
+      <AbsolutePoint location="560,345" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookAdmin.do,adminlecturersedit,/WEB-INF/jsp/adminlecturersedit.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="804,238" />
+      <AbsolutePoint location="804,255" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookAdmin.do,admininstitutionsedit,/WEB-INF/jsp/admininstitutionsedit.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="849,238" />
+      <AbsolutePoint location="849,550" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookAdmin.do,adminmaterial,/WEB-INF/jsp/adminmaterial.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1027,184" />
+      <AbsolutePoint location="1102,184" />
+      <AbsolutePoint location="1102,584" />
+      <AbsolutePoint location="1140,584" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookMonthly.do,adminmenu,/WEB-INF/jsp/adminmenu.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="365,195" />
+      <AbsolutePoint location="365,114" />
+      <AbsolutePoint location="1381,114" />
+      <AbsolutePoint location="1381,294" />
+      <AbsolutePoint location="1310,294" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookAdmin.do,adminclassrooms,/WEB-INF/jsp/adminclassrooms.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="969,238" />
+      <AbsolutePoint location="969,403" />
+      <AbsolutePoint location="1140,403" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookAdmin.do,adminassistants,/WEB-INF/jsp/adminassistants.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="939,238" />
+      <AbsolutePoint location="939,465" />
+      <AbsolutePoint location="1140,465" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/satbookAdmin.do,emailschedule,/WEB-INF/jsp/emailschedule.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="879,238" />
+      <AbsolutePoint location="879,714" />
+      <AbsolutePoint location="1140,714" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

@@ -1,0 +1,162 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="242,88" />
+  <StrutsActivity path="/displayRegDetails.do" location="30,255" dimension="454,112" />
+  <StrutsActivity path="/additions.do" location="555,255" dimension="395,112" />
+  <StrutsActivity path="/cancel.do" location="45,540" dimension="381,112" />
+  <StrutsActivity path="/exchange.do" location="855,645" dimension="400,112" />
+  <StrutsActivity path="/WEB-INF/jsp/displayRegDetails.jsp" location="240,420" dimension="264,55" />
+  <StrutsActivity path="/WEB-INF/jsp/studentsOnly.jsp" location="300,150" dimension="232,55" />
+  <StrutsActivity path="/WEB-INF/jsp/oneSubmission.jsp" location="885,135" dimension="247,55" />
+  <StrutsActivity path="/WEB-INF/jsp/additionsStep3.jsp" location="705,495" dimension="244,55" />
+  <StrutsActivity path="/WEB-INF/jsp/additionsStep2a.jsp" location="555,60" dimension="252,55" />
+  <StrutsActivity path="/WEB-INF/jsp/additionsClosed.jsp" location="780,420" dimension="251,55" />
+  <StrutsActivity path="/WEB-INF/jsp/confirmAddition.jsp" location="525,570" dimension="248,55" />
+  <StrutsActivity path="/WEB-INF/jsp/additionsStep2b.jsp" location="1050,405" dimension="252,55" />
+  <StrutsActivity path="/WEB-INF/jsp/additionSaved.jsp" location="1110,240" dimension="240,55" />
+  <StrutsActivity path="/WEB-INF/jsp/additionsStep1.jsp" location="825,60" dimension="244,55" />
+  <StrutsActivity path="/WEB-INF/jsp/confirmCancel.jsp" location="120,765" dimension="241,55" />
+  <StrutsActivity path="/WEB-INF/jsp/cancelSaved.jsp" location="330,690" dimension="231,55" />
+  <StrutsActivity path="/WEB-INF/jsp/cancelStep1.jsp" location="-30,690" dimension="228,55" />
+  <StrutsActivity path="/WEB-INF/jsp/confirmExchange.jsp" location="825,945" dimension="260,55" />
+  <StrutsActivity path="/WEB-INF/jsp/exchangesaved.jsp" location="50,950" dimension="249,55" />
+  <StrutsActivity path="/WEB-INF/jsp/exchangestep1.jsp" location="950,850" dimension="246,55" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="330,60" dimension="150,49" />
+  <StrutsActivity path="/WEB-INF/jsp/notregistered.jsp" location="-165,420" dimension="233,55" />
+  <StrutsTransition id="/exchange.do,saved,/WEB-INF/jsp/exchangesaved.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="855,705" />
+      <AbsolutePoint location="666,705" />
+      <AbsolutePoint location="666,977" />
+      <AbsolutePoint location="299,977" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayRegDetails.do,display,/WEB-INF/jsp/displayRegDetails.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="257,367" />
+      <AbsolutePoint location="257,420" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/additions.do,step2b,/WEB-INF/jsp/additionsStep2b.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="950,341" />
+      <AbsolutePoint location="1176,341" />
+      <AbsolutePoint location="1176,405" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/additions.do,step1,/WEB-INF/jsp/additionsStep1.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="840,255" />
+      <AbsolutePoint location="840,115" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/exchange.do,cancel,/WEB-INF/jsp/displayRegDetails.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="855,675" />
+      <AbsolutePoint location="441,675" />
+      <AbsolutePoint location="441,475" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/exchange.do,step1,/WEB-INF/jsp/exchangestep1.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1055,757" />
+      <AbsolutePoint location="1055,850" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/additions.do,step2a,/WEB-INF/jsp/additionsStep2a.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="752,255" />
+      <AbsolutePoint location="752,115" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/additions.do,home,/displayRegDetails.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="555,311" />
+      <AbsolutePoint location="484,311" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/additions.do,oneSubmission,/WEB-INF/jsp/oneSubmission.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="900,255" />
+      <AbsolutePoint location="900,190" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/exchange.do,confirm,/WEB-INF/jsp/confirmExchange.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="935,757" />
+      <AbsolutePoint location="935,945" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/cancel.do,step1,/WEB-INF/jsp/cancelStep1.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="183,652" />
+      <AbsolutePoint location="183,690" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/cancel.do,cancel,/WEB-INF/jsp/displayRegDetails.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="255,540" />
+      <AbsolutePoint location="255,475" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/additions.do,saved,/WEB-INF/jsp/additionSaved.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="950,280" />
+      <AbsolutePoint location="1110,280" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/additions.do,closed,/WEB-INF/jsp/additionsClosed.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="795,367" />
+      <AbsolutePoint location="795,420" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/cancel.do,saved,/WEB-INF/jsp/cancelSaved.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="345,652" />
+      <AbsolutePoint location="345,690" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/additions.do,cancel,/WEB-INF/jsp/displayRegDetails.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="615,367" />
+      <AbsolutePoint location="615,445" />
+      <AbsolutePoint location="504,445" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayRegDetails.do,notregistered,/WEB-INF/jsp/notregistered.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="53,367" />
+      <AbsolutePoint location="53,420" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/cancel.do,confirm,/WEB-INF/jsp/confirmCancel.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="235,652" />
+      <AbsolutePoint location="235,765" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayRegDetails.do,invaliduser,/WEB-INF/jsp/studentsOnly.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="315,255" />
+      <AbsolutePoint location="315,205" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/additions.do,step3,/WEB-INF/jsp/additionsStep3.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="722,367" />
+      <AbsolutePoint location="722,495" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/additions.do,confirm,/WEB-INF/jsp/confirmAddition.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="690,367" />
+      <AbsolutePoint location="690,570" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/displayRegDetails.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="171,138" />
+      <AbsolutePoint location="171,255" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

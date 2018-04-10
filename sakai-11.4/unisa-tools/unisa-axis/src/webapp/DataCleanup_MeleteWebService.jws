@@ -1,0 +1,318 @@
+import java.sql.Types;
+import org.apache.commons.collections.map.ListOrderedMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+
+
+import org.w3c.dom.*;
+
+import org.apache.axis.AxisFault;
+import org.apache.axis.utils.JavaUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.email.api.EmailService;
+import org.sakaiproject.email.api.Attachment;
+import org.sakaiproject.email.api.RecipientType;
+import org.sakaiproject.event.cover.UsageSessionService;
+import org.sakaiproject.event.api.UsageSession;
+
+import za.ac.unisa.lms.db.StudentSystemDAO;
+import za.ac.unisa.lms.db.SakaiDAO;
+
+
+/**
+This webservice is used to delete old data from old sites
+tool: Sakai Melete (Learning units)
+
+Sonette start with webservice 20 June 2017
+*/
+public class DataCleanup_MeleteWebService {
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	private EmailService emailService;
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// QUERIES
+
+	// ----- -----------------------------------------------
+	// ----- delete from table MELETE_RESOURCE
+	String DELETE_MELETE_RESOURCE = " DELETE FROM MELETE_RESOURCE"+
+									" WHERE  resource_Id IN (SELECT resource_id"+ 
+                       				"                        FROM   melete_section_resource"+ 
+                       				"                        WHERE  section_id IN (SELECT section_id"+ 
+                                    "											   FROM   melete_section"+ 
+                                    "   										   WHERE  module_id =?))";
+
+	// ----- -----------------------------------------------
+	// ----- delete from table MELETE_SECTION_RESOURCE
+	String DELETE_MELETE_SECTION_RESOURCE = " DELETE FROM MELETE_SECTION_RESOURCE"+
+                       						" WHERE  section_id IN (SELECT section_id"+ 
+                                    		"   				    FROM   melete_section"+ 
+                                    		"   					WHERE  module_id =?))";
+
+	// ----- -----------------------------------------------
+	// ----- delete from table MELETE_SECTION_TRACK_VIEW
+	String DELETE_MELETE_SECTION_TRACK_VIEW = " DELETE FROM MELETE_SECTION_TRACK_VIEW"+
+                       						" WHERE  section_id IN (SELECT section_id"+ 
+                                    		"   				    FROM   melete_section"+ 
+                                    		"   					WHERE  module_id =?))";
+
+	// ----- -----------------------------------------------
+	// ----- delete from table MELETE_SECTION_BKUP
+	String DELETE_MELETE_SECTION_BKUP = " DELETE FROM MELETE_SECTION_BKUP"+
+                       						" WHERE  section_id IN (SELECT section_id"+ 
+                                    		"   				    FROM   melete_section"+ 
+                                    		"   					WHERE  module_id =?))";
+
+	// ----- -----------------------------------------------
+	// ----- delete from table MELETE_SECTION
+	String DELETE_MELETE_SECTION = " DELETE FROM MELETE_SECTION"+
+                       			   " WHERE  module_id = ?"; 
+
+	// ----- -----------------------------------------------
+	// ----- delete from table MELETE_MODULE_SHDATES
+	String DELETE_MELETE_MODULE_SHDATES = " DELETE FROM MELETE_MODULE_SHDATES"+
+                       			   		  " WHERE  module_id = ?"; 
+
+	// ----- -----------------------------------------------
+	// ----- delete from table MELETE_MODULE_BKUP
+	String DELETE_MELETE_MODULE_BKUP= " DELETE FROM MELETE_MODULE_BKUP"+
+                       			   	  " WHERE  module_id = ?"; 
+
+
+	// ----- -----------------------------------------------
+	// ----- delete from table MELETE_MODULE_SEQXML
+	String DELETE_MELETE_MODULE_SEQXML= " DELETE FROM MELETE_MODULE_SEQXML"+
+                       			   	    " WHERE  module_id = ?"; 
+
+
+	// ----- -----------------------------------------------
+	// ----- delete from table MELETE_SPECIAL_ACCESS
+	String DELETE_MELETE_SPECIAL_ACCESS= " DELETE FROM MELETE_SPECIAL_ACCESS"+
+                       			   	    " WHERE  module_id = ?"; 
+
+	// ----- -----------------------------------------------
+	// ----- delete from table MELETE_MODULE
+	String DELETE_MELETE_MODULE= " DELETE FROM MELETE_MODULE"+
+                       	   	     " WHERE  module_id = ?"; 
+
+	// ----- -----------------------------------------------
+	// ----- delete from table MELETE_COURSE_MODULE
+	String DELETE_MELETE_COURSE_MODULE= " DELETE FROM MELETE_COURSE_MODULE"+
+                       	   	     	    " WHERE  module_id = ?"; 
+
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	/** Actual method to do the site melete data cleanup
+		Input:
+		1) year
+		2) semester
+    */
+	public void dataCleanupPerYearSemester(String academicYear, String semesterPeriod)throws AxisFault {
+	
+		// ----- variables
+		StringBuffer yearSemester = new StringBuffer();
+    		
+		// ----- Set yearSemester YY-S1
+	    yearSemester.append(academicYear.substring(2,4));
+    	yearSemester.append('-');
+    	yearSemester.append(semesterPeriod);
+		
+    	StringBuffer result = new StringBuffer();
+    	String serverUrl = ServerConfigurationService.getString("serverUrl");
+		
+		// ----- get serverUrl (myDev, myQa, myUnisa or localhost)
+		if (serverUrl.equals("http://localhost:8080")) {
+			serverUrl = "https://mydev.unisa.ac.za";
+		} 
+		serverUrl = "http://163.200.82.234:8020/portal";
+		
+		// ----- Retrieve melete modules where data must be deleted
+		String RETRIEVE_MODULES = " SELECT MODULE_ID "+
+								  " FROM   MELETE_COURSE_MODULE"+
+								  " WHERE  COURSE_ID LIKE ('%"+yearSemester+"%')";
+		
+		System.out.println(">>>>>>>>>> DataCleanup_MeleteWebService retrieve_modules "+RETRIEVE_MODULES);		
+		
+		JdbcTemplate jdt1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+		try {
+               
+            List recordsMeleteModule = jdt1.queryForList(RETRIEVE_MODULES,
+                       new Object[] {});
+			Iterator recordsMeleteModule_it = recordsMeleteModule.iterator();
+					
+			// ----- For each site retrieved
+			while (recordsMeleteModule_it.hasNext()) {
+				ListOrderedMap record_Module = (ListOrderedMap) recordsMeleteModule_it.next();
+					
+				StringBuffer moduleId = new StringBuffer();
+						                                                                                
+				moduleId.append(record_Module.get("MODULE_ID").toString());
+				System.out.println(">>>>>>>>>> DataCleanup_MeleteWebService module= "+moduleId.toString());
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table MELETE_RESOURCE
+				JdbcTemplate jdt_Delete1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete1.update(DELETE_MELETE_RESOURCE,
+					new Object[] {moduleId.toString()});
+					System.out.println(">>>>>>> DELETE_MELETE_RESOURCE:" +moduleId.toString());
+				} catch (Exception e) { //jdt_Delete1
+					System.out.println("***** DataCleanup_MeleteWebService: delete from table SAKAI_MELETE_RESOURCE error "+e);
+				} //jdt_Delete1
+				
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table MELETE_SECTION_RESOURCE
+				JdbcTemplate jdt_Delete2 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete2.update(DELETE_MELETE_SECTION_RESOURCE,
+					new Object[] {moduleId.toString()});
+					System.out.println(">>>>>>> DELETE_MELETE_SECTION_RESOURCE:" +moduleId.toString());
+				} catch (Exception e) { //jdt_Delete2
+					System.out.println("***** DataCleanup_MeleteWebService: delete from table SAKAI_MELETE_SECTION_RESOURCE error "+e);
+				} //jdt_Delete2
+
+				// ----- -----------------------------------------------
+				// ----- delete from table MELETE_SECTION_TRACK_VIEW
+				JdbcTemplate jdt_Delete3 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete3.update(DELETE_MELETE_SECTION_TRACK_VIEW,
+					new Object[] {moduleId.toString()});
+					System.out.println(">>>>>>> DELETE_MELETE_SECTION_TRACK_VIEW:" +moduleId.toString());
+				} catch (Exception e) { //jdt_Delete3
+					System.out.println("***** DataCleanup_MeleteWebService: delete from table SAKAI_MELETE_SECTION_TRACK_VIEW error "+e);
+				} //jdt_Delete3
+
+				// ----- -----------------------------------------------
+				// ----- delete from table MELETE_SECTION_BKUP
+				JdbcTemplate jdt_Delete4 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete4.update(DELETE_MELETE_SECTION_BKUP,
+					new Object[] {moduleId.toString()});
+					System.out.println(">>>>>>> DELETE_MELETE_SECTION_BKUP:" +moduleId.toString());
+				} catch (Exception e) { //jdt_Delete4
+					System.out.println("***** DataCleanup_MeleteWebService: delete from table DELETE_MELETE_SECTION_BKUP error "+e);
+				} //jdt_Delete4
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table MELETE_SECTION
+				JdbcTemplate jdt_Delete5 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete5.update(DELETE_MELETE_SECTION,
+					new Object[] {moduleId.toString()});
+					System.out.println(">>>>>>> DELETE_MELETE_SECTION:" +moduleId.toString());
+				} catch (Exception e) { //jdt_Delete5
+					System.out.println("***** DataCleanup_MeleteWebService: delete from table DELETE_MELETE_SECTION error "+e);
+				} //jdt_Delete5
+				
+
+				// ----- -----------------------------------------------
+				// ----- delete from table MELETE_MODULE_SHDATES
+				JdbcTemplate jdt_Delete6 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete6.update(DELETE_MELETE_MODULE_SHDATES,
+					new Object[] {moduleId.toString()});
+					System.out.println(">>>>>>> DELETE_MELETE_MODULE_SHDATES:" +moduleId.toString());
+				} catch (Exception e) { //jdt_Delete6
+					System.out.println("***** DataCleanup_MeleteWebService: delete from table DELETE_MELETE_MODULE_SHDATES error "+e);
+				} //jdt_Delete6
+
+				// ----- -----------------------------------------------
+				// ----- delete from table MELETE_MODULE_BKUP
+				JdbcTemplate jdt_Delete7 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete7.update(DELETE_MELETE_MODULE_BKUP,
+					new Object[] {moduleId.toString()});
+					System.out.println(">>>>>>> DELETE_MELETE_MODULE_BKUP:" +moduleId.toString());
+				} catch (Exception e) { //jdt_Delete7
+					System.out.println("***** DataCleanup_MeleteWebService: delete from table DELETE_MELETE_MODULE_BKUP error "+e);
+				} //jdt_Delete7
+
+
+				// ----- -----------------------------------------------
+				// ----- delete from table MELETE_MODULE_SEQXML
+				JdbcTemplate jdt_Delete8 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete8.update(DELETE_MELETE_MODULE_SEQXML,
+					new Object[] {moduleId.toString()});
+					System.out.println(">>>>>>> DELETE_MELETE_MODULE_SEQXML:" +moduleId.toString());
+				} catch (Exception e) { //jdt_Delete8
+					System.out.println("***** DataCleanup_MeleteWebService: delete from table DELETE_MELETE_MODULE_SEQXML error "+e);
+				} //jdt_Delete8
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table MELETE_SPECIAL_ACCESS
+				JdbcTemplate jdt_Delete9 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete9.update(DELETE_MELETE_SPECIAL_ACCESS,
+					new Object[] {moduleId.toString()});
+					System.out.println(">>>>>>> DELETE_MELETE_SPECIAL_ACCESS:" +moduleId.toString());
+				} catch (Exception e) { //jdt_Delete9
+					System.out.println("***** DataCleanup_MeleteWebService: delete from table DELETE_MELETE_SPECIAL_ACCESS error "+e);
+				} //jdt_Delete9
+
+				// ----- -----------------------------------------------
+				// ----- delete from table MELETE_MODULE
+				JdbcTemplate jdt_Delete10 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete10.update(DELETE_MELETE_MODULE,
+					new Object[] {moduleId.toString()});
+					System.out.println(">>>>>>> DELETE_MELETE_MODULE:" +moduleId.toString());
+				} catch (Exception e) { //jdt_Delete10
+					System.out.println("***** DataCleanup_MeleteWebService: delete from table DELETE_MELETE_MODULE error "+e);
+				} //jdt_Delete10
+
+				// ----- -----------------------------------------------
+				// ----- delete from table MELETE_COURSE_MODULE
+				JdbcTemplate jdt_Delete11 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete11.update(DELETE_MELETE_COURSE_MODULE,
+					new Object[] {moduleId.toString()});
+					System.out.println(">>>>>>> DELETE_MELETE_COURSE_MODULE:" +moduleId.toString());
+				} catch (Exception e) { //jdt_Delete11
+					System.out.println("***** DataCleanup_MeleteWebService: delete from table DELETE_MELETE_COURSE_MODULE error "+e);
+				} //jdt_Delete11
+
+			} // end of while (recordsMeleteModule_it.hasNext())
+		
+		} catch (Exception e) { // end of try recordsRealmKey
+			System.out.println("***** DataCleanup_SakaiRealms: delete from table SAKAI_SITE_PROPERTY error "+e);
+		} //jdt1 recordsRealmKey		
+		
+		
+	} // end of dataCleanupPerYearSemester
+
+
+} // end of DataCleanup_MeleteWebService

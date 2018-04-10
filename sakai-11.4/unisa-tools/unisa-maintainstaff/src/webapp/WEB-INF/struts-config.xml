@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+   <data-sources />
+   <form-beans >
+    <form-bean name="hoddisplayform" type="za.ac.unisa.lms.tools.maintainstaff.forms.HodDisplayForm" />
+    <form-bean name="mainForm" type="za.ac.unisa.lms.tools.maintainstaff.forms.MainForm" />
+    <form-bean name="department" type="za.ac.unisa.lms.tools.maintainstaff.forms.DepartmentRecord"></form-bean>
+    <form-bean name="courseForm" type="za.ac.unisa.lms.tools.maintainstaff.forms.CourseForm"></form-bean>   
+    <form-bean name="personForm" type="za.ac.unisa.lms.tools.maintainstaff.forms.PersonForm"></form-bean>
+   </form-beans>
+  
+   <global-exceptions />
+   <global-forwards />
+   <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.maintainstaff.actions.DefaultAction">
+       <forward
+        name="default"
+        path="/main.do?act=mainDisplay"
+        contextRelative="true" />
+        
+    </action>
+    
+	<action
+		attribute="mainForm"
+		input="/WEB-INF/jsp/mainview.jsp"
+		name="mainForm"
+		parameter="act"
+		path="/main"
+		scope="session"
+		type="za.ac.unisa.lms.tools.maintainstaff.actions.MainAction"
+		validate="false">
+        
+		<forward name="mainDisplay" path="/WEB-INF/jsp/mainview.jsp" contextRelative="true"/>
+		<forward name="courseDisplay" path="/course.do?act=courseDisplay" contextRelative="true" />
+		<forward name="personDisplay" path="/person.do?act=personDisplay" contextRelative="true" />
+		<forward name="addCourseSite" path="/course.do?act=addCourse" contextRelative="true" />
+		<forward name="copyCourseSite" path="/WEB-INF/jsp/copycourse.jsp" contextRelative="true" />
+		<forward name="copyCourseSiteConfirm" path="/WEB-INF/jsp/copycourseconfirm.jsp" contextRelative="true" />
+		<forward name="displayPerDpt" path="/WEB-INF/jsp/displayperdpt.jsp" contextRelative="true" />
+		<forward name="hodDisplay" path="/myUnisaHod.do?action=hodDisplay" contextRelative="true"/>
+		
+	</action>
+    
+    <action
+		attribute="courseForm"
+		input="/WEB-INF/jsp/courseview.jsp"
+		name="courseForm"
+		parameter="act"
+		path="/course"
+		scope="session"
+		type="za.ac.unisa.lms.tools.maintainstaff.actions.CourseAction"
+		validate="false">
+        
+		<forward name="courseDisplay" path="/WEB-INF/jsp/courseview.jsp" contextRelative="true"/>
+		<forward name="courseDisplay2" path="/course.do?act=courseDisplay" contextRelative="true" />
+		<forward name="courseConfirmRemove" path="/WEB-INF/jsp/confirmremove.jsp" contextRelative="true"/>
+		<forward name="mainDisplay" path="/WEB-INF/jsp/mainview.jsp" contextRelative="true"/>
+		<forward name="addCourseSite" path="/WEB-INF/jsp/addcoursesite.jsp" contextRelative="true"/>
+		<forward name="addCourseSiteConfirm" path="/WEB-INF/jsp/addcoursesiteconfirm.jsp" contextRelative="true"/>
+		<forward name="addPersons" path="/WEB-INF/jsp/addpersons.jsp" contextRelative="true"/>
+		<forward name="addPersonsVerify2" path="/WEB-INF/jsp/addpersonsconfirm.jsp" contextRelative="true"/>
+		<forward name="addCourseVerify2" path="/course.do?act=addCourseVerify" contextRelative="true"/>
+		<forward name="addPersonsVerify1" path="/course.do?act=addPersonsVerify" contextRelative="true" />
+		<forward name="updatePrimLecturer" path="/WEB-INF/jsp/updateprimlecturer.jsp" contextRelative="true"/>
+		<forward name="viewLogs" path="/WEB-INF/jsp/viewlogs.jsp" contextRelative="true"/>
+   
+	</action>
+	
+	<action
+		attribute="personForm"
+		input="/WEB-INF/jsp/personview.jsp"
+		name="personForm"
+		parameter="act"
+		path="/person"
+		scope="session"
+		type="za.ac.unisa.lms.tools.maintainstaff.actions.PersonAction"
+		validate="false">
+        
+		<forward name="personDisplay" path="/WEB-INF/jsp/personview.jsp" contextRelative="true"/>
+		<forward name="personConfirmRemove" path="/WEB-INF/jsp/confirmpersonremove.jsp" contextRelative="true"/>
+		<forward name="mainDisplay" path="/WEB-INF/jsp/mainview.jsp" contextRelative="true"/>
+		<forward name="addPerson" path="/WEB-INF/jsp/addpersontocourse.jsp" contextRelative="true"/>
+		<forward name="addPersonConfirm" path="/WEB-INF/jsp/addpersontocourseconfirm.jsp" contextRelative="true"/>
+   		<forward name="personLogs" path="/WEB-INF/jsp/personlogs.jsp" contextRelative="true"/>
+	</action>
+    
+     <action
+      attribute="hoddisplayform" 
+      input="/WEB-INF/jsp/hoddisplay.jsp"
+      name="hoddisplayform"
+      parameter="action"
+      path="/myUnisaHod"
+      scope="session"
+      type="za.ac.unisa.lms.tools.maintainstaff.actions.MyUnisaHodAction"
+      validate="false">
+        
+      <forward name="step1" path="/WEB-INF/jsp/hodstep1.jsp" contextRelative="true"/>
+      <forward name="saveStandin" path="/WEB-INF/jsp/saveStandin.jsp" contextRelative="true"/>
+      <forward name="removeStandin" path="/WEB-INF/jsp/removeStandin.jsp" contextRelative="true"/>
+      <forward name="mainDisplay" path="/WEB-INF/jsp/mainview.jsp" contextRelative="true"/>
+     
+      </action>
+      
+    </action-mappings>
+    <message-resources parameter="za.ac.unisa.lms.tools.maintainstaff.ApplicationResources"/>
+     
+</struts-config>

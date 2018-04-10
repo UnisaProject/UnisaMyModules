@@ -1,0 +1,37 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="242,88" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="350,50" dimension="150,49" />
+  <StrutsActivity path="/changepassword.do" location="345,330" dimension="380,88" />
+  <StrutsActivity path="/WEB-INF/jsp/changepassword.jsp" location="350,150" dimension="197,49" />
+  <StrutsTransition id="/default.do,default,changepassword.do.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="171,138" />
+      <AbsolutePoint location="171,250" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/WEB-INF/jsp/changepassword.jsp,null,/changepassword.do,2" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="448,199" />
+      <AbsolutePoint location="448,330" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/changepassword.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="171,138" />
+      <AbsolutePoint location="171,374" />
+      <AbsolutePoint location="345,374" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/WEB-INF/jsp/default.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="292,84" />
+      <AbsolutePoint location="350,84" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/changepassword.do,display,/WEB-INF/jsp/changepassword.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="532,330" />
+      <AbsolutePoint location="532,199" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.finalmarkconcession"
+		title="Final Year Student Concession"
+		description="Final Year Student Concession">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

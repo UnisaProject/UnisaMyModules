@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans >
+		<form-bean
+			name="bioDetailsForm"
+			type="za.ac.unisa.lms.tools.biodetails.forms.BioDetailsForm" />
+		<form-bean
+			name="addressDetailsForm"
+			type="za.ac.unisa.lms.tools.biodetails.forms.AddressDetailsForm" />
+		<form-bean
+			name="examcentreform"
+			type = "za.ac.unisa.lms.tools.biodetails.forms.ExamCentreForm" />
+	</form-beans>
+	<global-exceptions />
+	<global-forwards />
+	<action-mappings >
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.biodetails.actions.DefaultAction">
+      <forward name="default" path="/displayBioDetails.do?action=displayBioDetails" />
+		</action>
+		<action
+			attribute="bioDetailsForm"
+			name="bioDetailsForm"
+			parameter="action"
+			path="/displayBioDetails"
+			type="za.ac.unisa.lms.tools.biodetails.actions.BioDetailsAction"
+			validate="false">
+			<forward
+				name="invaliduser"
+				path="/WEB-INF/jsp/studentsOnly.jsp"
+				contextRelative="true" />
+			<forward
+				name="display"
+				path="/WEB-INF/jsp/displayBioDetails.jsp"
+				contextRelative="true" />
+			<forward
+        		name="home"
+       			 path="/displayBioDetails.do?action=displayBioDetails"
+       			 contextRelative="true" />
+		</action>
+		<action
+      		attribute="bioDetailsForm"
+      		input="/WEB-INF/jsp/updateContactDetails.jsp"
+     		name="bioDetailsForm"
+      		parameter="action"
+      		path="/contactDetailsAction"
+      		type="za.ac.unisa.lms.tools.biodetails.actions.ContactDetailsAction"
+      		validate="false">
+      	<forward
+        	name="display"
+        	path="/WEB-INF/jsp/updateContactDetails.jsp"
+        	contextRelative="true" />
+      	<forward
+        	name="home"
+        	path="/displayBioDetails.do?action=displayBioDetails"
+        	contextRelative="true" />      
+      	<forward
+        	name="cancel"
+        	path="/displayBioDetails.do?action=displayBioDetails"
+        	contextRelative="true" />
+    </action>
+	<action
+      		attribute="bioDetailsForm"
+      		input="/WEB-INF/jsp/examcentreinput.jsp"
+     		name="bioDetailsForm"
+      		parameter="action"
+      		path="/examcentreaction"
+      		type="za.ac.unisa.lms.tools.biodetails.actions.ExamCentreAction"
+      		validate="false">
+      	<forward
+        	name="display"
+        	path="/WEB-INF/jsp/examcentreinput.jsp"
+        	contextRelative="true" />
+      	<forward
+        	name="cancel"
+        	path="/displayBioDetails.do?action=displayBioDetails"
+        	contextRelative="true" />
+    </action>
+	<action
+      		attribute="bioDetailsForm"
+      		name="bioDetailsForm"
+      		parameter="action"
+      		path="/addressDetails"
+      		type="za.ac.unisa.lms.tools.biodetails.actions.AddressDetailsAction"
+      		validate="false">
+     	 <forward
+        	name="physical"
+        	path="/WEB-INF/jsp/addressphysical.jsp"
+        	contextRelative="true" />
+      <forward
+        name="courier"
+        path="/WEB-INF/jsp/addresscourier.jsp"
+        contextRelative="true" />
+      <forward
+        name="confirmcourier"
+        path="/WEB-INF/jsp/confirmationcou.jsp"
+        contextRelative="true" />
+      <forward
+        name="search"
+        path="/WEB-INF/jsp/search.jsp"
+        contextRelative="true" />
+      <forward
+        name="advisor"
+        path="/WEB-INF/jsp/advisor.jsp"
+        contextRelative="true" />
+      <forward
+        name="confirm"
+        path="/WEB-INF/jsp/confirmation.jsp"
+        contextRelative="true" />
+      <forward
+        name="step2"
+        path="/WEB-INF/jsp/addressstep2.jsp"
+        contextRelative="true" />
+      <forward
+        name="confirmphysical"
+        path="/WEB-INF/jsp/confirmationphy.jsp"
+        contextRelative="true" />
+      <forward
+        name="cancel"
+        path="/displayBioDetails.do?action=displayBioDetails"
+        contextRelative="true" />
+      <forward
+        name="home"
+        path="/displayBioDetails.do?action=displayBioDetails"
+        contextRelative="true" />
+      <forward
+        name="step1"
+        path="/WEB-INF/jsp/addressstep1.jsp"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="bioDetailsForm"
+      name="bioDetailsForm"
+      parameter="action"
+      path="/emailoptionsaction"
+      type="za.ac.unisa.lms.tools.biodetails.actions.EmailOptionsAction">
+      <forward
+        name="display"
+        path="/WEB-INF/jsp/emailoptionsinput.jsp"
+        contextRelative="true" />
+      <forward
+        name="cancel"
+        path="/displayBioDetails.do?action=displayBioDetails"
+        contextRelative="true" />
+    </action>
+    <action
+      parameter="action"
+      path="/verifyemail"
+      type="za.ac.unisa.lms.tools.biodetails.actions.VerifyEmailAddressAction">
+      <forward name="verified" path="/WEB-INF/jsp/verified.jsp" />
+    </action>
+	</action-mappings>
+	<message-resources parameter="za.ac.unisa.lms.tools.biodetails.ApplicationResources" />
+ 	<!--  Validator plugin -->
+	<plug-in
+		className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+	</plug-in>
+</struts-config>
+

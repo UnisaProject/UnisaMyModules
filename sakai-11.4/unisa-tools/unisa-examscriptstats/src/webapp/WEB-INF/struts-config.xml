@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	<form-bean name="examScriptStatsForm" 
+		 	type="za.ac.unisa.lms.tools.examscriptstats.forms.ExamScriptStatsForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.examscriptstats.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/examScriptStats.do?action=initial"
+				contextRelative="true" />
+		</action>
+		<action
+			name="examScriptStatsForm"
+			attribute="examScriptStatsForm"
+			parameter="action"
+			path="/examScriptStats"
+			type="za.ac.unisa.lms.tools.examscriptstats.actions.ExamScriptStatsAction"
+			validate="false">
+			<forward
+				name="input"
+				path="/WEB-INF/jsp/inputExamPaper.jsp"
+				contextRelative="true" />
+				<forward
+				name="displayExamScriptsStats"
+				path="/WEB-INF/jsp/displayExamScriptStats.jsp"
+				contextRelative="true" />
+				<forward
+				name="displayStudentScripts"
+				path="/WEB-INF/jsp/displayStudentScripts.jsp"
+				contextRelative="true" />
+				
+		</action>    
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.examscriptstats.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

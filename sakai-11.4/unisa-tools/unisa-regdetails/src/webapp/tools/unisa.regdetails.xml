@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.regdetails"
+		title="Registration Details"
+		description="Student registration details display and change">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

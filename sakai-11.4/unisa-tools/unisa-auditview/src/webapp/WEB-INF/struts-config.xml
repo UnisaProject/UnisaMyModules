@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans >
+    <form-bean name="auditViewForm" type="za.ac.unisa.lms.tools.auditview.forms.AuditViewForm" />
+
+  </form-beans>
+
+  <global-exceptions />
+  <global-forwards />
+  <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.auditview.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/auditView.do?action=start"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="auditViewForm"
+      input="/WEB-INF/jsp/auditView.jsp"
+      name="auditViewForm"
+      parameter="action"
+      path="/auditView"
+      scope="session"
+      type="za.ac.unisa.lms.tools.auditview.actions.AuditViewAction"
+      validate="false">
+      <forward
+        name="display"
+        path="/WEB-INF/jsp/auditView.jsp"
+        contextRelative="true" />
+      <forward
+        name="start"
+        path="/WEB-INF/jsp/default.jsp"
+        contextRelative="true" />
+    </action>
+  </action-mappings>
+
+  <message-resources parameter="za.ac.unisa.lms.tools.auditview.ApplicationResources" />
+</struts-config>
+

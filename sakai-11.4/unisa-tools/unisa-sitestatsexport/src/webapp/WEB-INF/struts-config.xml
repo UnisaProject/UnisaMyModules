@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	  <form-bean name="sitestatsexportForm" type="za.ac.unisa.lms.tools.sitestatsexport.forms.SitestatsexportForm" />
+	</form-beans>
+	
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="act"
+			path="/default"
+			type="za.ac.unisa.lms.tools.sitestatsexport.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/sitestatsexport.do?act=mainview"
+				contextRelative="false" />
+		</action>
+		  <action
+      attribute="sitestatsexportForm"
+      name="sitestatsexportForm"
+      parameter="act"
+      path="/sitestatsexport"
+      scope="session"
+      type="za.ac.unisa.lms.tools.sitestatsexport.actions.SitestatsexportAction">
+      <forward
+        name="viewforward"
+        path="/WEB-INF/jsp/sitestatsexport.jsp?act=mainView"
+        contextRelative="true" />
+        </action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.sitestatsexport.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

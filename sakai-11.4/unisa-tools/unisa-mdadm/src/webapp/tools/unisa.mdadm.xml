@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.mdadm"
+		title="New M&amp;D Admissions"
+		description="New M&amp;D Admissions">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

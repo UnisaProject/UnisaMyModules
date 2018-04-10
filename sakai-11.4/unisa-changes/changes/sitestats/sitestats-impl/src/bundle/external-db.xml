@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+	<!-- Session Factory -->
+	<bean id="externalSitestatsSessionFactory"
+		class="org.sakaiproject.springframework.orm.hibernate.impl.ClassicLocalSessionFactoryBeanHibernate31"
+		lazy-init="true">
+		<property name="mappingResources" ref="org.sakaiproject.sitestats.HibernateMappings"/>
+		<property name="hibernateProperties" ref="org.sakaiproject.sitestats.externalDbHibernateProperties"/>
+		<property name="dataSource" ref="org.sakaiproject.sitestats.externalDbDataSource"/>
+		<property name="schemaUpdate" value="@{sitestats.externalDb.auto.ddl}"/>
+		
+		<property name="cacheProvider" ref="org.hibernate.cache.SitestatsCacheProvider"/>
+	</bean>
+	
+	<bean id="org.hibernate.cache.SitestatsCacheProvider"
+		class="org.sakaiproject.springframework.orm.hibernate.SakaiCacheProvider"
+		init-method="init" destroy-method="destroy">
+		<property name="memoryService" ref="org.sakaiproject.memory.api.MemoryService" />
+		<property name="defaultCacheName" value="org.sakaiproject.springframework.orm.hibernate.L2Cache" />
+	</bean>
+	
+	<!-- Transaction Manager -->
+	<bean id="externalSitestatsTransactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager"
+		lazy-init="true">
+		<property name="sessionFactory">
+			<ref bean="externalSitestatsSessionFactory" />
+		</property>
+	</bean>
+	
+	
+	<!-- Hibernate Properties -->
+	<bean id="org.sakaiproject.sitestats.externalDbHibernateProperties"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean"
+		lazy-init="true" depends-on="sitestatsDbPropertyConfigurer">
+		<property name="properties">
+			<props>
+				<prop key="hibernate.dialect">@{sitestats.externalDb.hibernate.dialect}</prop>
+				<prop key="hibernate.query.factory_class">org.hibernate.hql.ast.ASTQueryTranslatorFactory</prop>
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+				<prop key="hibernate.query.substitutions">
+					true 1, false 0, yes 'Y', no 'N'
+				</prop>
+				<prop key="hibernate.jdbc.use_streams_for_binary">true</prop>
+				<prop key="hibernate.cache.use_query_cache">true</prop>
+			</props>
+		</property>
+	</bean>
+	
+	
+	<!-- Data Source -->
+	<bean id="org.sakaiproject.sitestats.externalDbDataSource" 
+		class="org.apache.commons.dbcp.BasicDataSource"
+		lazy-init="true">
+		<property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+		<property name="url" value="jdbc:hsqldb:mem:sitestats_db"/>
+		<property name="username" value="sa"/>
+		<property name="password" value=""/>
+		
+		<!--Unisa change -->
+		<!--  The initial number of connections that are created when the pool is started. -->
+		<property name="initialSize">
+			<value>10</value>
+		</property>
+		
+		<!-- The maximum number of active connections that can be allocated from this pool at the same time, or negative for no limit. -->
+		<property name="maxActive">
+			<value>250</value>
+		</property>
+
+		<!-- The maximum number of active connections that can remain idle in the pool, without extra ones being released, or negative for no limit. -->
+		<property name="maxIdle">
+			<value>10</value>
+		</property>
+
+		<!-- The minimum number of active connections that can remain idle in the pool, without extra ones being created, or 0 to create none. -->
+		<property name="minIdle">
+			<value>10</value>
+		</property>
+
+		<!-- The maximum number of milliseconds that the pool will wait (when there
+		  are no available connections) for a connection to be returned before
+		  throwing an exception, or -1 to wait indefinitely. -->
+		<property name="maxWait">
+			<value>300000</value>
+		</property>
+		
+
+		<!--  The indication of whether objects will be validated before being
+		  borrowed from the pool. If the object fails to validate, it will be
+		  dropped from the pool, and we will attempt to borrow another.
+		  Note: this has been shown to cause performance problems with Oracle (leave it false) -->
+		<property name="testOnBorrow">
+			<value>false</value>
+		</property>
+
+		<!-- The indication of whether objects will be validated before being
+		  returned to the pool. -->
+		<property name="testOnReturn">
+			<value>false</value>
+		</property>
+		
+			<!-- The indication of whether objects will be validated by the idle object
+		  evictor (if any). If an object fails to validate, it will be dropped from
+		  the pool. -->
+		<property name="testWhileIdle">
+			<value>false</value>
+		</property>
+		
+			<!-- The default auto-commit state of connections created by this pool. -->
+		<property name="defaultAutoCommit">
+			<value>false</value>
+		</property>
+		
+	<!-- Prepared statement pooling for this pool. -->
+		<property name="poolPreparedStatements">
+			<value>false</value>
+		</property>
+    <!-- The maximum number of open statements that can be allocated from the
+		  statement pool at the same time, or zero for no limit. Since a connection
+		  usually only uses one or two statements at a time, this is mostly used to
+		  help detect resource leaks. -->
+		<property name="maxOpenPreparedStatements">
+			<value>0</value>
+		</property>
+		
+			<!-- The minimum amount of time an object may sit idle in the pool before it
+		  is eligable for eviction by the idle object evictor (if any). -->
+		<property name="minEvictableIdleTimeMillis">
+			<value>600000</value>
+		</property>
+		
+		<!-- The number of milliseconds to sleep between runs of the idle object
+		  evictor thread. When non-positive, no idle object evictor thread will be
+		  run. -->
+ 		<property name="timeBetweenEvictionRunsMillis">
+			<value>300000</value>
+		</property>
+		
+		<!-- The number of objects to examine during each run of the idle object
+		  evictor thread (if any). -->
+		<property name="numTestsPerEvictionRun">
+			<value>50</value>
+		</property>
+		
+	</bean>
+			
+</beans>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+	<!--  WARNING: dont not use this bean for production as DriverManagerDataSource do not use connection
+	      pools BUT create new db connections on every call -->
+	<!-- bean id="za.ac.unisa.lms.db.BaseStudentSystemDataSource"
+		abstract="true" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName"><value>oracle.jdbc.OracleDriver</value></property>
+		<property name="url"><value>jdbc:oracle:thin:@hpstdv:1521:dev</value></property>
+		<property name="username"><value>sakaid</value></property>
+		<property name="password"><value>sak_dev</value></property>
+	</bean -->
+
+	<bean id="za.ac.unisa.lms.db.BaseMSSQLServerDataSource"
+		abstract="true" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName"><value>com.inet.tds.TdsDriver</value></property>
+		<property name="url"><value></value></property>
+		<property name="username"><value></value></property>
+		<property name="password"><value></value></property>
+	</bean>
+
+	<bean id="za.ac.unisa.lms.db.BaseStudentSystemDataSource"
+		abstract="true" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+
+		<property name="driverClassName"><value>oracle.jdbc.OracleDriver</value></property>
+		<property name="url"><value>jdbc:oracle:thin:@stdbdv:1521:dev</value></property>
+		<property name="username"><value>sakaid</value></property>
+		<property name="password"><value>sak_dev</value></property>
+		<property name="initialSize"><value>50</value></property>
+		<property name="maxActive"><value>50</value></property>
+		<property name="maxIdle"><value>50</value></property>
+		<property name="minIdle"><value>10</value></property>
+		<property name="maxWait"><value>15000</value></property>
+		<property name="numTestsPerEvictionRun"><value>1</value></property>
+		<property name="testOnBorrow"><value>false</value></property>
+		<property name="testOnReturn"><value>false</value></property>
+		<property name="testWhileIdle"><value>false</value></property>
+		<property name="validationQuery"><value>select * from dual</value></property>
+		<property name="defaultAutoCommit"><value>false</value></property>
+		<property name="defaultReadOnly"><value>false</value></property>
+		<property name="poolPreparedStatements"><value>false</value></property>
+		<property name="maxOpenPreparedStatements"><value>0</value></property>
+		<property name="minEvictableIdleTimeMillis"><value>1800000</value></property>
+		<property name="timeBetweenEvictionRunsMillis"><value>900000</value></property>
+		<property name="defaultTransactionIsolation">
+			<bean
+				class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+				<property name="staticField">
+					<value>java.sql.Connection.TRANSACTION_READ_COMMITTED</value>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<!-- bean id="za.ac.unisa.lms.db.BaseStudentSystemDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName">
+		    <value>java:/comp/env/jdbc/unisadb</value>
+		</property>
+	</bean -->
+
+	<bean id="za.ac.unisa.lms.db.StudentSystemDataSource"
+		parent="za.ac.unisa.lms.db.BaseStudentSystemDataSource">
+	</bean>
+
+	<bean id="za.ac.unisa.lms.db.MSSQLServerDataSource.persdb"
+		parent="za.ac.unisa.lms.db.BaseMSSQLServerDataSource">
+		<property name="url"><value>jdbc:inetdae:sqlunisa.unisa.ac.za:1433?database=persdb</value></property>
+		<property name="username"><value>myunisa</value></property>
+		<property name="password"><value>unisa</value></property>
+	</bean>
+	
+	<bean id="za.ac.unisa.lms.db.MSSQLServerDataSource.libresource"
+		parent="za.ac.unisa.lms.db.BaseMSSQLServerDataSource">
+		<property name="url"><value>jdbc:inetdae:163.200.219.156:1433?database=libresource</value></property>
+		<property name="username"><value>syzelle</value></property>
+		<property name="password"><value>unisa123</value></property>
+	</bean>
+	<!-- bean id="za.ac.unisa.lms.db.MSSQLServerDataSource.libresource"
+		parent="za.ac.unisa.lms.db.BaseMSSQLServerDataSource">
+		<property name="url"><value>jdbc:jtds:sqlserver://163.200.219.156/libresource</value></property>
+		<property name="username"><value>syzelle</value></property>
+		<property name="password"><value>unisa123</value></property>
+	</bean -->
+</beans>

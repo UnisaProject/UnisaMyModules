@@ -1,0 +1,163 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="-30,45" dimension="242,88" />
+  <StrutsActivity path="/displayBioDetails.do" location="-30,165" dimension="307,88" />
+  <StrutsActivity path="/contactDetailsAction.do" location="345,165" dimension="331,88" />
+  <StrutsActivity path="/examcentreaction.do" location="-90,480" dimension="320,88" />
+  <StrutsActivity path="/addressDetails.do" location="345,-45" dimension="332,88" />
+  <StrutsActivity path="/emailoptionsaction.do" location="495,390" dimension="322,88" />
+  <StrutsActivity path="/verifyemail.do" location="870,375" dimension="420,112" />
+  <StrutsActivity path="/WEB-INF/jsp/displayBioDetails.jsp" location="480,300" dimension="195,49" />
+  <StrutsActivity path="/WEB-INF/jsp/studentsOnly.jsp" location="-60,300" dimension="180,49" />
+  <StrutsActivity path="/WEB-INF/jsp/updateContactDetails.jsp" location="765,180" dimension="220,49" />
+  <StrutsActivity path="/WEB-INF/jsp/examcentreinput.jsp" location="300,510" dimension="197,49" />
+  <StrutsActivity path="/WEB-INF/jsp/search.jsp" location="630,90" dimension="148,49" />
+  <StrutsActivity path="/WEB-INF/jsp/addressphysical.jsp" location="900,-135" dimension="251,55" />
+  <StrutsActivity path="/WEB-INF/jsp/advisor.jsp" location="165,-105" dimension="151,49" />
+  <StrutsActivity path="/WEB-INF/jsp/addressstep2.jsp" location="600,-150" dimension="235,55" />
+  <StrutsActivity path="/WEB-INF/jsp/confirmation.jsp" location="765,-45" dimension="227,55" />
+  <StrutsActivity path="/WEB-INF/jsp/confirmationphy.jsp" location="300,90" dimension="250,55" />
+  <StrutsActivity path="/WEB-INF/jsp/addressstep1.jsp" location="360,-165" dimension="235,55" />
+  <StrutsActivity path="/WEB-INF/jsp/emailoptionsinput.jsp" location="660,525" dimension="199,49" />
+  <StrutsActivity path="/WEB-INF/jsp/verified.jsp" location="950,550" dimension="195,55" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="-75,-105" dimension="150,49" />
+  <StrutsTransition id="/addressDetails.do,physical,/WEB-INF/jsp/addressphysical.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="677,29" />
+      <AbsolutePoint location="1025,29" />
+      <AbsolutePoint location="1025,-80" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/WEB-INF/jsp/examcentreinput.jsp,null,/examcentreaction.do,2" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="300,534" />
+      <AbsolutePoint location="230,534" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/addressDetails.do,confirmphysical,/WEB-INF/jsp/confirmationphy.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="511,43" />
+      <AbsolutePoint location="511,90" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactDetailsAction.do,cancel,/WEB-INF/jsp/displayBioDetails.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="540,253" />
+      <AbsolutePoint location="540,300" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/addressDetails.do,search,/WEB-INF/jsp/search.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="645,43" />
+      <AbsolutePoint location="645,90" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/addressDetails.do,home,/displayBioDetails.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="345,-1" />
+      <AbsolutePoint location="227,-1" />
+      <AbsolutePoint location="227,165" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/emailoptionsaction.do,display,/WEB-INF/jsp/emailoptionsinput.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="675,478" />
+      <AbsolutePoint location="675,525" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/addressDetails.do,confirm,/WEB-INF/jsp/confirmation.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="677,-5" />
+      <AbsolutePoint location="765,-5" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/addressDetails.do,cancel,/displayBioDetails.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="345,29" />
+      <AbsolutePoint location="270,29" />
+      <AbsolutePoint location="270,165" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/addressDetails.do,advisor,/WEB-INF/jsp/advisor.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="345,-31" />
+      <AbsolutePoint location="227,-31" />
+      <AbsolutePoint location="227,-56" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/addressDetails.do,step1,/WEB-INF/jsp/addressstep1.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="511,-45" />
+      <AbsolutePoint location="511,-110" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayBioDetails.do,invaliduser,/WEB-INF/jsp/studentsOnly.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="75,253" />
+      <AbsolutePoint location="75,300" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/emailoptionsaction.do,cancel,/displayBioDetails.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="495,434" />
+      <AbsolutePoint location="195,434" />
+      <AbsolutePoint location="195,253" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayBioDetails.do,display,/WEB-INF/jsp/displayBioDetails.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="165,253" />
+      <AbsolutePoint location="165,324" />
+      <AbsolutePoint location="480,324" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/WEB-INF/jsp/updateContactDetails.jsp,null,/contactDetailsAction.do,2" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="875,229" />
+      <AbsolutePoint location="875,244" />
+      <AbsolutePoint location="676,244" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactDetailsAction.do,display,/WEB-INF/jsp/updateContactDetails.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="676,209" />
+      <AbsolutePoint location="765,209" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/verifyemail.do,verified,/WEB-INF/jsp/verified.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1080,487" />
+      <AbsolutePoint location="1080,550" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/examcentreaction.do,display,/WEB-INF/jsp/examcentreinput.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="230,495" />
+      <AbsolutePoint location="398,495" />
+      <AbsolutePoint location="398,510" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactDetailsAction.do,home,/displayBioDetails.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="345,209" />
+      <AbsolutePoint location="277,209" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/displayBioDetails.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="91,133" />
+      <AbsolutePoint location="91,165" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/addressDetails.do,step2,/WEB-INF/jsp/addressstep2.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="615,-45" />
+      <AbsolutePoint location="615,-95" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/examcentreaction.do,cancel,/displayBioDetails.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="135,480" />
+      <AbsolutePoint location="135,253" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

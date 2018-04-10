@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans >
+    <form-bean name="studentlistform" type="za.ac.unisa.lms.tools.studentlist.forms.StudentListForm" />
+    
+
+  </form-beans>
+
+  <global-exceptions />
+  <global-forwards >  
+    
+<!-- session timeout or invalid session, displays login page -->
+<forward name="default" path="/studentlistaction.do?action=step1" />
+  </global-forwards>
+
+  <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.studentlist.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/studentlistaction.do?action=step1"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="studentlistform"
+      name="studentlistform"
+      parameter="action"
+      path="/studentlistaction"
+      type="za.ac.unisa.lms.tools.studentlist.actions.StudentListAction">
+      <forward
+        name="step1"
+        path="/WEB-INF/jsp/step1.jsp"
+        contextRelative="true" />
+        <forward
+        name="displayOptions"
+        path="/WEB-INF/jsp/displayOptions.jsp"
+        contextRelative="true" />
+        <forward
+         name="step2"
+         path="/WEB-INF/jsp/step2.jsp"
+         contextRelative="true"/>
+         <forward
+          name="step3"
+          path="/WEB-INF/jsp/step3.jsp"
+          contextRelative="true"/>
+          <forward
+          name="step4"
+          path="/WEB-INF/jsp/step4.jsp"
+          contextRelative="true"/>
+          <forward
+          name="generatelist"
+          path="/WEB-INF/jsp/generatelist.jsp"
+          contextRelative="true"/>
+    </action>
+    
+
+  </action-mappings>
+
+  <message-resources parameter="za.ac.unisa.lms.tools.studentlist.ApplicationResources" />
+</struts-config>
+

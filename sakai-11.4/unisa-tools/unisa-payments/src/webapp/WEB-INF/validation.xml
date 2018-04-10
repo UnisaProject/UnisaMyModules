@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE form-validation PUBLIC
+          "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1.3//EN"
+          "http://jakarta.apache.org/commons/dtds/validator_1_1_3.dtd">
+
+<form-validation>
+   <formset>   
+		<form name="creditCardPaymentForm">
+		
+			<field property="emailAddress" depends="required,email">
+			    <arg0 key="function.email"/>
+			</field>
+
+			<field property="cell" depends="mask">
+    			<msg name="mask" key="message.cell.maskmsg"/>
+    			<arg0 key="function.cell"/>
+    			<var>
+        			<var-name>mask</var-name>
+        			<var-value>^\+[0-9]{10,}$</var-value>
+    			</var>
+			</field>
+
+			<field property="matricExempFees" depends="double">
+			    <arg0 key="function.matric"/>
+			</field>
+
+			<field property="studyFees" depends="double">
+			    <arg0 key="function.studyfees"/>
+			</field>
+
+			<field property="creditCardNumber" depends="required,creditCard, minlength, maxlength">
+			    <arg0 key="function.creditcardnr"/>
+			    <arg1 name="minlength" key="${var:minlength}" resource="false"/>
+			    <arg1 name="maxlength" key="${var:maxlength}" resource="false"/>			    
+			    <var>
+			    	<var-name>minlength</var-name>
+			    	<var-value>15</var-value>
+			    </var>
+			    <var>
+			    	<var-name>maxlength</var-name>
+			    	<var-value>16</var-value>
+			    </var>			    
+			</field>
+			
+			<field property="cvNo" depends="required,minlength,maxlength,integer">
+			    <arg0 key="function.cvnnr"/>
+			    <arg1 name="minlength" key="${var:minlength}" resource="false"/>
+			    <arg2 name="maxlength" key="${var:maxlength}" resource="false"/>
+			    <var>
+			    	<var-name>minlength</var-name>
+			    	<var-value>3</var-value>
+			    </var>
+			    <var>
+			    	<var-name>maxlength</var-name>
+			    	<var-value>3</var-value>
+			    </var>			    
+			</field>	
+			
+			<field property="confCreditCard" depends="required">
+			    <arg0 key="function.confirmcreditcard"/>
+			</field>
+
+			<field property="confCVno" depends="required">
+			    <arg0 key="function.confirmcvnr"/>		    
+			</field>	
+			
+			<field property="expiryMonth" depends="required,integer,intRange">
+			    <arg0 key="function.expire"/>
+			    <arg1 name="intRange" key="${var:min}" resource="false"/>
+			    <arg2 name="intRange" key="${var:max}" resource="false"/>
+			    <var>
+			        <var-name>min</var-name>
+			        <var-value>1</var-value>
+			    </var>
+			    <var>
+			        <var-name>max</var-name>
+			        <var-value>12</var-value>
+			    </var>
+			</field>							
+
+			<field property="expiryYear" depends="required,integer">
+			    <arg0 key="function.expire"/>
+			</field>
+
+			<field property="budgetOption" depends="required">
+			    <arg0 key="function.budgetoption"/>
+			</field>
+						
+			<field property="cardholderSurname" depends="required">
+			    <arg0 key="function.cardholdername"/>
+			</field>		
+			
+			<field property="cardHolderId" depends="required,long,minlength,maxlength">
+			    <arg0 key="function.cardholderid"/>
+			    <arg1 name="minlength" key="${var:minlength}" resource="false"/>
+			    <arg2 name="maxlength" key="${var:maxlength}" resource="false"/>			    			    
+			    <var>
+			    	<var-name>minlength</var-name>
+			    	<var-value>13</var-value>
+			    </var>			    
+			    <var>
+			    	<var-name>maxlength</var-name>
+			    	<var-value>13</var-value>
+			    </var>			    
+			</field>				
+		</form>				
+		<form name="displayFinancialDetailsForm">
+			<field property="student.number" depends="required,integer,minlength,maxlength">
+			    <arg0 key="errors.studentNumber"/>
+				<arg1 key="${var:minlength}" name="minlength" resource="false" />
+				<arg1 key="${var:maxlength}" name="maxlength" resource="false" />				
+				<var>
+					<var-name>minlength</var-name>
+					<var-value>7</var-value>
+				</var>
+				<var>
+					<var-name>maxlength</var-name>
+					<var-value>8</var-value>
+				</var>
+			</field>
+			<field property="inputYear" depends="required, minlength, maxlength">
+				<arg0 key="errors.inputYear"/>
+				<arg1 key="${var:minlength}" name="minlength" resource="false" />
+				<arg1 key="${var:maxlength}" name="maxlength" resource="false" />				
+				<var>
+					<var-name>minlength</var-name>
+					<var-value>4</var-value>
+				</var>
+				<var>
+					<var-name>maxlength</var-name>
+					<var-value>4</var-value>
+				</var>
+			</field>
+		</form>
+	</formset>
+</form-validation>
+

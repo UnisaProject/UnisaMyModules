@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+	<pomVersion>3</pomVersion>
+	<name>Unisa JavaProxy Library</name>
+	<groupId>sakaiproject</groupId>
+	<id>unisa-javaproxies</id>
+	<currentVersion>2.3.0</currentVersion>
+	<organization>
+		<name>University of South Africa</name>
+		<url>http://www.unisa.ac.za</url>
+	</organization>
+	<inceptionYear>2003</inceptionYear>
+
+	<properties>
+		<!-- deploy as a components -->
+		<deploy.type>jar</deploy.type>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>allfusion</groupId>
+			<artifactId>gen</artifactId>
+			<version>7.5</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<!-- java source -->
+		<sourceDirectory>src/java</sourceDirectory>
+
+	</build>
+
+</project>

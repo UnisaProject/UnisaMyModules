@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		<form-bean name="assessmentCriteriaAuthForm" 
+			type="za.ac.unisa.lms.tools.assessmentcriteriaauth.forms.AssessmentCriteriaAuthForm"/>
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.assessmentcriteriaauth.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/assessmentCriteriaAuth.do?action=initial"
+				contextRelative="true" />
+		</action>
+		<action
+			name="assessmentCriteriaAuthForm"
+			attribute="assessmentCriteriaAuthForm"
+			parameter="action"
+			path="/assessmentCriteriaAuth"
+			type="za.ac.unisa.lms.tools.assessmentcriteriaauth.actions.AssessmentCriteriaAuthAction"
+			validate="false">
+			<forward
+				name="displayAuthRequestList"
+				path="/WEB-INF/jsp/requestList.jsp"
+				contextRelative="true" />
+				<forward
+				name="displayErrorPage"
+				path="/WEB-INF/jsp/errorPage.jsp"
+				contextRelative="true" />
+				<forward
+				name="displayInputStatusList"
+				path="/WEB-INF/jsp/inputStatusList.jsp"
+				contextRelative="true" />
+				<forward
+				name="displayStatusList"
+				path="/WEB-INF/jsp/statusList.jsp"
+				contextRelative="true" />
+				<forward
+				name="authorise"
+				path="/WEB-INF/jsp/authorise.jsp"
+				contextRelative="true" />
+				<forward
+				name="displayAssignment"
+				path="/WEB-INF/jsp/displayAssignment.jsp"
+				contextRelative="true" />
+		</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.assessmentcriteriaauth.ApplicationResources" />
+	
+</struts-config>

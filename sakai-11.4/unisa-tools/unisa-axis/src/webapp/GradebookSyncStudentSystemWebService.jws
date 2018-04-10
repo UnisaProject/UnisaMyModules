@@ -1,0 +1,821 @@
+import java.sql.Types;
+import org.apache.commons.collections.map.ListOrderedMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+
+
+import org.w3c.dom.*;
+
+import org.apache.axis.AxisFault;
+import org.apache.axis.utils.JavaUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.email.api.EmailService;
+import org.sakaiproject.email.api.Attachment;
+import org.sakaiproject.email.api.RecipientType;
+import org.sakaiproject.event.cover.UsageSessionService;
+import org.sakaiproject.event.api.UsageSession;
+
+import za.ac.unisa.lms.db.StudentSystemDAO;
+import za.ac.unisa.lms.db.SakaiDAO;
+
+
+/**
+This webservice is used to sync the assignment marks from the myUnisa Gradebook to the Student assignment system
+*/
+public class GradebookSyncStudentSystemWebService {
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	private EmailService emailService;
+	
+	// assessment online types
+	private static final String ONLINE_TYPES = "'BL','DF','SA'";
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// query to see if gradebook item exist for specific module,semester period and assignment
+	private static final String RETRIEVE_GRADEBOOKITEM = "select GBGOT.id as ID, GBGT.gradebook_uid as GUID, GBGOT.gradebook_id,"+ 
+                   " GBGOT.name "+ 
+                   " FROM GB_GRADABLE_OBJECT_T GBGOT, GB_GRADEBOOK_T GBGT "+
+                   " WHERE GBGOT.GRADEBOOK_ID = GBGT.ID"+ 
+                   " AND   substr(GBGT.GRADEBOOK_UID,0,13) = upper(?)"+ // coursesite example EUP1501-12-Y1
+                   " AND   upper(substr(gbgot.name,1,?)) = ?"+ // unqass.assignment_nr
+                   " AND   GBGOT.removed != 1";
+
+	/* ----------------------------------------------------------------------------------------------------------------- */                     
+	// query to see if STUASS record exist for the student
+	private static final String ASSIGNMENT_RECORD_DETAIL = "SELECT to_char(date_received,'YYYYMMDD') as DateIn,"+
+					   " nvl(to_char(date_returned,'YYYYMMDD'),'00000000') as DateOut,"+
+					   " sequence_nr as seqno,"+
+					   " substr('000' || nvl(percentage_obtaine,999),-3) as PPERC"+
+					" FROM  STUASS"+
+					" where	fk_academic_year=?"+ 	// academic year 
+					" and	fk_academic_period=1"+ 
+					" and	fk_student_nr=?"+ 		// Student number 
+					" and	fk_study_unit_code=?"+ 	// module code 
+					" and	fk_semester_period=?"+ 	// semester period
+					" and	mk_assignment_nr=?"+ 	// assignment number 
+					" and	cancellation_code='NC'";
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// log insert table STUAST for lecturer view
+	private static final String INSERT_LOG_STUAST = "insert into STUAST"+
+	          " (RECORD_NUMBER, YEAR, PERIOD, MK_STUDENT_NR, MK_STUDY_UNIT_CODE, NR,"+
+	          " CREATED_ON, PROCESS_GC139, PROGRAM, STATUS_GC140, SUB_STATUS_GC141,"+
+	          " PERCENTAGE, USER_ID, COMMENTS )"+
+          " values(stuasa_seq.nextval,?, ?, ?, ?, ?,sysdate, 'GDB', 'MYUNISA', 'RETURN', 'ERR',?,?,?)";
+          
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// Query to see if STUSUN record exist for the student
+	private static final String STUDENT_MODULE_RECORD_EXIST = "select fk_student_nr from STUSUN"+
+			        " where fk_academic_year=?"+
+			        " and fk_academic_period=1 "+
+			        " and fk_student_nr=?"+
+			        " and mk_study_unit_code=?"+
+			        " and semester_period=?"+
+			        " and status_code in ('RG','FC')"+
+			        " and exam_admission_cod <> 1";
+			        
+	/* ----------------------------------------------------------------------------------------------------------------- */			        
+	// Query to get the assignment sequence number
+	private static final String SELECT_ASSIGNMENT_SEQUENCE_NR = "select (sequence_nr+1) as ASS_SEQUENCE"+
+			" from stuass "+
+            " where fk_academic_year =?"+
+            " and fk_academic_period = 1"+
+            " and fk_student_nr = ?"+
+            " and fk_study_unit_code = ?"+
+            " and fk_semester_period = ?"+
+            " and mk_assignment_nr = ?";
+            
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// insert assignment record
+	private static final String INSERT_ASSIGNMENT_RECORD = "INSERT INTO STUASS"+
+            " (FK_ACADEMIC_YEAR,FK_ACADEMIC_PERIOD,FK_STUDENT_NR,FK_STUDY_UNIT_CODE,"+
+            "   FK_SEMESTER_PERIOD,MK_ASSIGNMENT_NR,"+
+            "  SEQUENCE_NR,"+
+            "  CANCELLATION_CODE,"+
+            "  DATE_RECEIVED,"+
+            "  CREATED_ON)"+
+        " VALUES(?,1,?,?,?,?,?,'NC',sysdate,sysdate)";
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// update assignment record
+	private static final String UPDATE_ASSIGNMENT_RECORD = "UPDATE STUASS "+
+		" SET DATE_RETURNED = sysdate,"+
+		"     PERCENTAGE_OBTAINE = ?,"+
+		"     SOL_FLAG = ?"+
+		" WHERE FK_ACADEMIC_YEAR = ?"+
+		" AND   FK_ACADEMIC_PERIOD = 1"+
+		" AND   FK_STUDENT_NR = ?"+
+		" AND   FK_STUDY_UNIT_CODE = ?"+
+		" AND   FK_SEMESTER_PERIOD = ?"+
+		" AND   MK_ASSIGNMENT_NR = ?"+
+		" AND   CANCELLATION_CODE = 'NC'";
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// Add log SXPLOG
+	private static final String INSERT_SXPLOG = "INSERT INTO SXPLOG(YEAR, PERIOD, MK_STUDY_UNIT_CODE, MK_PAPER_NR, MK_STUDENT_NR,"+
+	    " TYPE_GC78, ACTION_GC79, COMMENT0, REQUEST_ACTION_FROM, UPDATED_BY, UPDATED_ON) "+
+	    " VALUES (?,?,?,?,?,'ASS',' ',?,'',?,systimestamp)";
+	
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// Select the dateReceived
+	private static final String RETRIEVE_DATE_RECEIVED = "select to_char(sysdate,'YYYYMMDDHH24MISS') as DateReceived from dual";
+	
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// delete STUASA record
+	private static final String DELETE_STUASA = "delete stuasa "+
+			" where YEAR = ?"+ 
+			" and   PERIOD = ?"+ 
+			" and   MK_STUDENT_NR = ?"+ 
+			" and   MK_STUDY_UNIT_CODE = ?"+ 
+			" and   NR = ?"; // assignment number
+			
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// insert STUASA record
+	private static final String INSERT_STUASA = "insert into STUASA "+
+			" (RECORD_NUMBER, YEAR, PERIOD, MK_STUDENT_NR, MK_STUDY_UNIT_CODE, NR, CREATED_ON, PROCESS_GC139, PROGRAM,"+
+			" STATUS_GC140, SUB_STATUS_GC141, DATA_CHANGES_MADE, PERCENTAGE, USER_ID)"+
+			" values(stuass_seq.nextval, ?,?,?,?,?,to_date(?,'YYYYMMDDHH24MISS'),?,?,?,?,?,?,?)";
+			
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// insert STUAST record
+	private static final String INSERT_STUAST = "insert into STUAST "+
+			" (RECORD_NUMBER, YEAR, PERIOD, MK_STUDENT_NR, MK_STUDY_UNIT_CODE, NR, CREATED_ON, PROCESS_GC139, PROGRAM,"+
+			" STATUS_GC140, SUB_STATUS_GC141, DATA_CHANGES_MADE, PERCENTAGE, USER_ID)"+
+			" values(stuasa_seq.nextval,?,?,?,?,?,to_date(?,'YYYYMMDDHH24MISS'),?,?,?,?,?,?,?)";
+			
+			
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	
+	
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	/** Retrieve all marks from Sakai Gradebook that must be updated to the Student System
+        Input:
+                        module = Module - either enter module code OR if for all modules enter ALL
+                        acadYear = Academic year
+                        semPeriod = Semester period
+        */
+	public String getGradebookMarks(String module, String moduleSite, String acadYear, String semPeriod, String assignmentNr, String onlineType,
+                                        String primaryLecturer, String primaryLecturerEmail )throws AxisFault {
+                                                                               
+		//System.out.println("***** SY GRADEBOOK GradebookSyncStudentSystemWebService: in getGradebookMarks <br>");
+
+		/* =========== variables =========== */
+
+		boolean gradebookItemFound = false;
+		StringBuffer result = new StringBuffer();
+		StringBuffer serverUrl = new StringBuffer();
+		serverUrl.append(ServerConfigurationService.getString("serverUrl"));
+		int syncSuccess = 0;
+		int syncFail = 0;
+		
+		StringBuffer dbEnvironment = new StringBuffer();
+        
+        if (serverUrl.toString().equals("https://my.unisa.ac.za")) {
+                dbEnvironment.append("SAKAIPRD");
+        } else if (serverUrl.toString().equals("https://myqa.int.unisa.ac.za")) {
+                dbEnvironment.append("SAKAIQA");
+        } else {
+                dbEnvironment.append("SAKAIDEV");
+        }
+        
+		/* =========== end variables =========== */
+    
+		Log log = LogFactory.getLog(this.getClass());
+          
+		try {
+                                                    
+			/* ************ For each online assignment retrieved, retrieve the matching Gradebook item ****************/
+			JdbcTemplate jdt2 = new JdbcTemplate(new SakaiDAO().getDataSource());
+			try {
+                Integer tmpLength = assignmentNr.length()+11;
+                StringBuffer assignmentNrLength = new StringBuffer();
+                assignmentNrLength.append(tmpLength.toString());
+                
+                StringBuffer tmpAssignmentNr = new StringBuffer();
+                tmpAssignmentNr.append(assignmentNr+" ASSIGNMENT");
+                
+                List recordsGI = jdt2.queryForList(RETRIEVE_GRADEBOOKITEM,
+                        new Object[] {moduleSite, assignmentNrLength,tmpAssignmentNr});
+        
+                if (recordsGI.size() == 0) {
+                    gradebookItemFound = false;
+                    
+                    StringBuffer subject = new StringBuffer();
+                    StringBuffer body = new StringBuffer();
+                    
+                    /* 20 may 2017 - Sonette change e-mail message for gradebook item not found */
+                    subject.append("Gradebook Sync problem experienced for "+module+" assignment number: "+assignmentNr);
+                    body.append("Good day, <br> <br> There is no valid Gradebook item for your online assessment: <br>");
+		            body.append("<br>\n Module: "+module);
+            		body.append("<br>\n Academic year: "+acadYear);
+            		body.append("<br>\n Semester period: "+semPeriod);
+            		body.append("<br>\n Assignment number: "+assignmentNr);
+					body.append("<br><br>\n\n Please ensure that a Gradebook item with student marks is available on the Gradebook tool.");
+					body.append("<br>Format of gradebook title to be in format "+assignmentNr+" Assignment "+assignmentNr);
+					body.append("<br><br> Regards <br> myUnisa team ");   
+  
+                    if (!primaryLecturerEmail.equals("")) {
+                            sendEmail(subject.toString(), body.toString(), primaryLecturerEmail);
+                    } else {
+                            sendEmail(subject.toString(), body.toString(), "syzelle@unisa.ac.za");
+                            sendEmail(subject.toString(), body.toString(), "fmyburgh@unisa.ac.za");
+                            sendEmail(subject.toString(), body.toString(), "magagjs@unisa.ac.za");	//Sifiso Changes:Added:2017/05/10:Gradebook Push
+                    }
+                        
+                } else {
+                        gradebookItemFound = true;
+                }
+
+				if (gradebookItemFound == true) {                
+	                Iterator recordsGI_it = recordsGI.iterator();
+	
+					/* ************ if GradebookItem was found Retrieve marks for gradebook assessment ****************/
+					JdbcTemplate jdt3 = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+					                                                                
+					try {
+	
+						/* ************ Query to retrieve students from gradebook where marks has not been synced *********/
+						/* 22 Nov Sonette Yzelle: add RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" and unqass.ASSESS_GROUP_GC230 = 'F' "); 
+						 *              to exclude online exams.
+						*/
+						StringBuffer RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2 = new StringBuffer();
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("SELECT  ");
+		                RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" (select sakai_user_id_map.eid from sakai_user_id_map@"+dbEnvironment.toString()+" where sakai_user_id_map.user_id = GBR.STUDENT_ID) AS STNUMBER,"); 
+		                RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" GBR.POINTS_EARNED, GBT.POINTS_POSSIBLE, ");
+		                RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" (GBR.POINTS_EARNED/GBT.POINTS_POSSIBLE*100) AS PERCENTAGE, ");
+		                RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" (select sakai_user_id_map.eid from sakai_user_id_map@"+dbEnvironment.toString()+" where sakai_user_id_map.user_id = GBR.GRADER_ID) AS GRADER, ");
+		                RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" decode (unqass.Online_Type_gc176,'SA','A','DF','D','BL','B') as OType");
+		                RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" from GB_GRADEBOOK_T@"+dbEnvironment.toString()+" GB, "); /* gradebook_uid, id */
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" GB_GRADABLE_OBJECT_T@"+dbEnvironment.toString()+" GBT,"); /* POINTS_POSSIBLE */
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" GB_GRADE_RECORD_T@"+dbEnvironment.toString()+" GBR, "); /* student_id, points_earned, GRADER_ID */	
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" sakai_user_id_map@"+dbEnvironment.toString()+" ST, "); /* mapping student number to sakai userid */
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" unqass ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" where unqass.year= "+acadYear);
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" and unqass.period= "+semPeriod);
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" and unqass.mk_study_unit_code='"+module+"'");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" and unqass.assignment_nr= "+assignmentNr);
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" and unqass.type='H' ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" and unqass.ASSESS_GROUP_GC230 = 'F' ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" and substr(GB.gradebook_uid,1,13) = '"+moduleSite+"'");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" AND GBT.GRADEBOOK_ID = GB.ID ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" AND GBT.removed <> 1 ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" AND substr(GBT.name,1,length("+assignmentNr+")+1) = "+assignmentNr+"||' '");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" AND GBR.GRADABLE_OBJECT_ID = GBT.ID ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" AND GBR.POINTS_EARNED is not null ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" AND (GBR.POINTS_EARNED / GBT.POINTS_POSSIBLE * 100) BETWEEN -1 AND 101 ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" and ST.user_id = GBR.STUDENT_ID ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" and REGEXP_LIKE(ST.eid, '^[[:digit:]]+$') ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" and ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" not exists( select fk_student_nr from stuass ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("             where stuass.fk_academic_year = "+acadYear);
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("             and stuass.fk_academic_period = 1 ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("             and stuass.fk_student_nr = ST.eid ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("             and stuass.fk_study_unit_code = '"+module+"'");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("             and stuass.fk_semester_period = "+semPeriod);
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("             and stuass.mk_assignment_nr = "+assignmentNr);
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("             and stuass.cancellation_code = 'NC' ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("             and nvl(to_char(stuass.date_returned,'YYYYMMDD'),'0') > '20010101')");
+						       
+						       
+						List recordsGrades = jdt3.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.toString());
+						                        
+						Iterator recordsGrades_it = recordsGrades.iterator();
+						
+						/* ************ For each mark retrieved update the student system                         *********/
+						while (recordsGrades_it.hasNext()) {
+							ListOrderedMap record_StudentResult = (ListOrderedMap) recordsGrades_it.next();
+							
+							StringBuffer studentNr = new StringBuffer();
+							StringBuffer percentage = new StringBuffer();
+							StringBuffer lecturer = new StringBuffer();
+							StringBuffer studentTmp = new StringBuffer();
+							                                                                                
+							studentNr.append(record_StudentResult.get("STNUMBER").toString());
+							percentage.append(record_StudentResult.get("PERCENTAGE").toString());
+							lecturer.append(record_StudentResult.get("GRADER").toString()); // grader
+							studentTmp.append(studentNr+"#"+percentage+"#"+lecturer);
+							
+							
+	
+							boolean studentNrIsNumber = true;
+						                                                                        
+							try {
+								int x = Integer.parseInt(studentNr.toString());
+							}catch(NumberFormatException nFE) {
+								studentNrIsNumber = false;
+							}
+							
+							if (studentNrIsNumber == true) {
+								boolean syncWasSuccess = updateStudentSystem(module,acadYear,semPeriod,assignmentNr,studentNr.toString(), percentage.toString(), 
+										lecturer.toString(), onlineType.toString());
+								if (syncWasSuccess == false) {
+									syncFail++;
+								} else {
+									syncSuccess++;
+								}
+							} // end of if (studentNrIsNumber == true)
+	                                                                        
+						} // end of while (recordsGrades_it.hasNext()) {                                                                        
+						
+						
+						
+					} catch (Exception e) { // jdt3.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK,
+						e.printStackTrace();
+						log.error(e);
+	
+						System.out.println("***** SY GRADEBOOK: error "+e);
+	
+						String errorMessage = "GRADEBOOK INTEGRATION ERROR: "+ e.getMessage();
+						sendEmail("GRADEBOOK INTEGRATION ERROR", errorMessage, "syzelle@unisa.ac.za");	
+						sendEmail("GRADEBOOK INTEGRATION ERROR", errorMessage, "magagjs@unisa.ac.za");		  //Sifiso Changes:Added:2017/05/10:Gradebook Push
+					} // jdt3.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK,
+
+				} // END of if GradebookItemNotFound == true
+
+            } catch (Exception e) {
+                            e.printStackTrace();
+                            log.error(e);
+                            System.out.println("***** SY GRADEBOOK: error "+e);
+                            String errorMessage = "GRADEBOOK INTEGRATION ERROR: "+ e.getMessage();
+                            System.out.println("GRADEBOOK INTEGRATION ERROR: "+ e.getMessage());
+                            sendEmail("GRADEBOOK INTEGRATION ERROR", errorMessage, "syzelle@unisa.ac.za"); 
+                            sendEmail("GRADEBOOK INTEGRATION ERROR", errorMessage, "magagjs@unisa.ac.za"); //Sifiso Changes:Added:2017/05/10:Gradebook Push
+                            throw new AxisFault(e.getMessage());
+            } // end try -catch Exception jdt2.queryForList(RETRIEVE_GRADEBOOKITEM
+            
+            
+            if (gradebookItemFound == true) {
+	            StringBuffer subjectFeedback = new StringBuffer();
+	            StringBuffer bodyFeedback = new StringBuffer();
+	                    
+	            subjectFeedback.append("Gradebook Sync completed for "+module+" assignment number: "+assignmentNr);
+	            bodyFeedback.append("Gradebook sync for:");
+	            bodyFeedback.append("<br>\n Module: "+module);
+	            bodyFeedback.append("<br>\n Academic year: "+acadYear);
+	            bodyFeedback.append("<br>\n Semester period: "+semPeriod);
+	            bodyFeedback.append("<br>\n Assignment number: "+assignmentNr);
+	            bodyFeedback.append("<br><br>\n \n number of records synced successfully: "+syncSuccess);
+	            bodyFeedback.append("<br>\n number of records synced that failed (not registered): "+syncFail);
+	            sendEmail(subjectFeedback.toString(), bodyFeedback.toString(), "syzelle@unisa.ac.za");	
+	            sendEmail(subjectFeedback.toString(), bodyFeedback.toString(), primaryLecturerEmail);	 	//Sifiso Changes:Added:2017/05/10:Gradebook Push
+			} //     if (gradebookItemFound == true) {
+			                                                                
+        } catch (Exception e) {
+                e.printStackTrace();
+                log.error(e);
+                throw new AxisFault(e.getMessage());
+        } // end String moduleSite = module+"-"+acadYear+"-";
+        
+        return result.toString();
+
+	} // end getGradebookMarks
+
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	public boolean updateStudentSystem(String module,String acadYear,String semPeriod,String assignmentNr, String studentNr, 
+			String gradebookPercentage, String lecturer, String onlineType) {
+		/* =========== variables =========== */
+		boolean syncWasSuccess = false;
+		boolean assignmentRecordExist = false;
+		boolean markExist = false;
+		StringBuffer assignmentRecordMark = new StringBuffer(); // the mark that exist for the student on the assignment student system
+		StringBuffer assignmentSequence = new StringBuffer();
+		
+
+
+		/* =========== end variables =========== */
+		
+		
+		/* ============================================================= */
+		/* Does a STUASS record exist */
+	
+		JdbcTemplate jdt_a = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+		try {
+            List recordsAssignments = jdt_a.queryForList(ASSIGNMENT_RECORD_DETAIL,
+                    new Object[] {acadYear,studentNr,module,semPeriod,assignmentNr});
+    
+            if (recordsAssignments.size() == 0) {
+                assignmentRecordExist = false;
+                    
+            } else {
+                assignmentRecordExist = true;
+                
+                Iterator recordsAssignments_it = recordsAssignments.iterator();
+                
+                ListOrderedMap record_StudentResult = (ListOrderedMap) recordsAssignments_it.next();
+						                                                                                
+				assignmentRecordMark.append(record_StudentResult.get("PPERC").toString());
+            }	
+
+			if (assignmentRecordExist == true) {
+				
+				/* ============================================================= */
+				/* ************ if the mark on the student system is different from gradebook write to log file */
+				if (!assignmentRecordMark.toString().equals(gradebookPercentage)) {
+				
+					String comment = "GDB Assign returned error -  already different mark: "+assignmentRecordMark.toString();
+					markExist = true;
+					
+					insertLogStuast(module,acadYear,semPeriod,assignmentNr, studentNr,gradebookPercentage,comment, lecturer);
+					
+					syncWasSuccess = false;
+					return syncWasSuccess;
+
+				} // end of  if (assignmentRecordMark <> gradebookPercentage)
+			} // end of if (assignmentRecordExist == true)
+			
+			if (assignmentRecordExist == false) {
+				/* ============================================================= */
+				/* ************ check if STUSUN (student linked to module) record exist for the student */
+				
+				// STUDENT_MODULE_RECORD_EXIST String module, String acadYear, String semPeriod, String studentNr
+				boolean studentModuleRecordFound = studentModuleRecordExist(module, acadYear, semPeriod, studentNr);
+				
+			
+				if (studentModuleRecordFound == true) {
+					
+					/* ============================================================= */
+					/* ************ get assignment sequence number */
+					JdbcTemplate jdt_seq = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+					try {
+			            List recordAssignmentSequence = jdt_seq.queryForList(SELECT_ASSIGNMENT_SEQUENCE_NR,
+			                    new Object[] {acadYear,studentNr,module,semPeriod,assignmentNr});
+			                    
+			                    
+			            Iterator recordAssignmentSequence_it = recordAssignmentSequence.iterator();
+			            if (recordAssignmentSequence.size() == 0) {
+			            	assignmentSequence.append("1");
+			            } else {
+			                ListOrderedMap record_AssignmentSequence = (ListOrderedMap) recordAssignmentSequence_it.next();                         
+							assignmentSequence.append(record_AssignmentSequence.get("ASS_SEQUENCE").toString());
+						}
+						
+						
+						
+					} catch (Exception e) { //List recordAssignmentSequence
+			            //e.printStackTrace();
+			            System.out.println("***** SY GRADEBOOK: Does a STUASS record exist error "+e);
+			            //String errorMessage = "GRADEBOOK INTEGRATION ERROR: "+ e.getMessage();
+			            //sendEmail("GRADEBOOK INTEGRATION ERROR Does a STUASS record exist", errorMessage, "magagjs@unisa.ac.za"); 	//UNISA REMOVE
+			           // throw new AxisFault(e.getMessage());
+			        } //List recordAssignmentSequence	
+					
+					
+					/* ============================================================= */
+					/* ************ insert assignment record */
+					insertAssignment(module,acadYear,semPeriod,assignmentNr,studentNr, gradebookPercentage, assignmentSequence.toString());
+			        
+			        assignmentRecordExist = true;
+			        
+					
+				} else { // end of if (studentModuleRecordFound == true)
+					String comment = "GDB Assign returned error -  "+studentNr+" not registered";
+					
+					insertLogStuast(module,acadYear,semPeriod,assignmentNr, studentNr,gradebookPercentage,comment, lecturer);
+					
+					syncWasSuccess = false;
+					return syncWasSuccess;
+				}
+				
+			}  // end of if (assignmentRecordExist == false)
+			
+			if ((assignmentRecordExist == true)&&(markExist == false)) {
+				// assigment record does exist but there is no mark
+				/* ============================================================= */
+				/* ************ update assignment record */
+				updateAssignment(module,acadYear,semPeriod,assignmentNr,studentNr, gradebookPercentage, onlineType);
+
+				/* ============================================================= */
+				/* Retrieve assignment detail for logs */
+				StringBuffer tmpDateIn = new StringBuffer();
+				StringBuffer tmpDateOut = new StringBuffer();
+				StringBuffer tmpPperc = new StringBuffer();
+				StringBuffer tmpAssignmentSequence = new StringBuffer();
+				StringBuffer log1Comment = new StringBuffer();
+							
+				JdbcTemplate jdt_retrieve = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+				try {
+		            List recordsAssignments1 = jdt_retrieve.queryForList(ASSIGNMENT_RECORD_DETAIL,
+		                    new Object[] {acadYear,studentNr,module,semPeriod,assignmentNr});
+					
+					Iterator recordsAssignments1_it = recordsAssignments1.iterator();
+					
+					/* ************ For each mark retrieved update the student system                         *********/
+					while (recordsAssignments1_it.hasNext()) {
+						ListOrderedMap record_AssignmentResult = (ListOrderedMap) recordsAssignments1_it.next();
+						                                                                                
+						tmpDateIn.append(record_AssignmentResult.get("DateIn").toString());
+						tmpDateOut.append(record_AssignmentResult.get("DateOut").toString());
+						tmpAssignmentSequence.append(record_AssignmentResult.get("seqno").toString());
+						tmpPperc.append(record_AssignmentResult.get("PPERC").toString());
+						
+					} // end of while (recordsAssignments1_it.hasNext())
+				} catch (Exception e) { //List recordsAssignments
+		            //e.printStackTrace();
+		            System.out.println("***** SY GRADEBOOK: Does a STUASS record exist error "+e);
+		            //String errorMessage = "GRADEBOOK INTEGRATION ERROR: "+ e.getMessage();
+		            //sendEmail("GRADEBOOK INTEGRATION ERROR Does a STUASS record exist", errorMessage, "magagjs@unisa.ac.za"); 	//UNISA REMOVE
+		           // throw new AxisFault(e.getMessage());
+		        } //List recordsAssignments1	
+
+				/* ============================================================= */
+				/* ************ Insert SXPLOG (LOG 1) */
+
+				log1Comment.append("FGBK myUnisa MarkL 000->");
+				log1Comment.append(tmpPperc.toString());
+				log1Comment.append(" Ccode: -> MC RecD: 00000000->");
+				log1Comment.append(tmpDateIn.toString());
+				log1Comment.append("RetD: 00000000-> ");
+				log1Comment.append(tmpDateOut.toString());
+				log1Comment.append(" SolF:->");
+				log1Comment.append(onlineType.substring(0,1));
+				log1Comment.append(" SqNr:>");
+				log1Comment.append(tmpAssignmentSequence.toString());
+				
+				insertSXPLOG(acadYear,semPeriod, module, assignmentNr, studentNr, log1Comment.toString(), lecturer);
+				
+				/* ============================================================= */
+				/* ************ Create assignment Log files */
+				StringBuffer processGC139 = new StringBuffer();
+				StringBuffer fromProgram = new StringBuffer();
+				StringBuffer statusGC140 = new StringBuffer();
+				StringBuffer subStatusGC140 = new StringBuffer();
+				StringBuffer logMessage = new StringBuffer();
+				
+				processGC139.append("GDB"); // gradebook
+				fromProgram.append("MYUNISA");
+				statusGC140.append("RETURN");
+				subStatusGC140.append("4");
+				logMessage.append("GDB Assign returned to student");
+				createAssignmentLogFiles(acadYear, semPeriod, studentNr, module, assignmentNr, gradebookPercentage, lecturer, 
+					processGC139.toString(), fromProgram.toString(), statusGC140.toString(), subStatusGC140.toString(), logMessage.toString());
+					syncWasSuccess = true;
+
+			} else {
+				System.out.println("SY GRADEBOOK student: "+studentNr+" - "+gradebookPercentage+" DONT updateAssignment");
+			}
+			
+			
+			
+		} catch (Exception e) { //List recordsAssignments
+            //e.printStackTrace();
+            System.out.println("***** SY GRADEBOOK: Does a STUASS record exist error "+e);
+            //String errorMessage = "GRADEBOOK INTEGRATION ERROR: "+ e.getMessage();
+            //sendEmail("GRADEBOOK INTEGRATION ERROR Does a STUASS record exist", errorMessage, "magagjs@unisa.ac.za"); 	//UNISA REMOVE
+           // throw new AxisFault(e.getMessage());
+        } //List recordsAssignments				
+	
+		return syncWasSuccess;
+	} // end of updateStudentSystem
+
+
+
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	public boolean studentModuleRecordExist(String module, String acadYear, String semPeriod, String studentNr) {
+	
+		boolean recordExist = false;
+		
+		JdbcTemplate jdt_a = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+		try {
+            List studentRecords = jdt_a.queryForList(STUDENT_MODULE_RECORD_EXIST,
+                    new Object[] {acadYear,studentNr,module,semPeriod});
+    
+            if (studentRecords.size() == 0) {
+                recordExist = false;
+            } else {
+            	recordExist = true;
+            	
+            }
+		} catch (Exception e) { //List studentRecords
+            System.out.println("***** SY GRADEBOOK: studentModuleRecordExist error "+e);
+        } 
+                
+		return recordExist;
+	
+	} // end of studentModuleRecordExist
+	
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	public void insertLogStuast(String module,String acadYear,String semPeriod,String assignmentNr, String studentNr, 
+					String gradebookPercentage, String comment, String lecturer) {
+		
+		JdbcTemplate jdt_log = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+		try {
+        	jdt_log.update(INSERT_LOG_STUAST,
+                    new Object[] {acadYear,semPeriod,studentNr,module,assignmentNr,gradebookPercentage,lecturer,comment});
+        } catch (Exception e) { //List recordsAssignments
+            System.out.println("***** SY GRADEBOOK: insertLogStuast error "+e);
+        } //List recordsAssignments
+
+    } // end of insertLogStuast 
+    
+    /* ----------------------------------------------------------------------------------------------------------------- */
+	public void insertAssignment(String module,String acadYear,String semPeriod,String assignmentNr, String studentNr, 
+					String gradebookPercentage, String assignmentSequence) {
+		
+		JdbcTemplate jdt_insert = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+		try {
+        	jdt_insert.update(INSERT_ASSIGNMENT_RECORD,
+                    new Object[] {acadYear,studentNr,module,semPeriod,assignmentNr,assignmentSequence});
+        } catch (Exception e) { 
+            System.out.println("***** SY GRADEBOOK: insertAssignment error "+e);
+        } 
+
+    } // end of insertAssignment 
+    
+    /* ----------------------------------------------------------------------------------------------------------------- */
+	public void updateAssignment(String module,String acadYear,String semPeriod,String assignmentNr, String studentNr, 
+					String gradebookPercentage, String onlineType) {
+		
+		String tmpOnlineType = "";
+		if (onlineType.equals("BL")) {
+			tmpOnlineType = "B";
+		} else if (onlineType.equals("DF")) {
+			tmpOnlineType = "D";
+		} else if (onlineType.equals("SA")) {
+			tmpOnlineType = "E";
+		}
+		
+		JdbcTemplate jdt_update = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+		try {
+        	jdt_update.update(UPDATE_ASSIGNMENT_RECORD,
+                    new Object[] {gradebookPercentage,tmpOnlineType,acadYear,studentNr,module,semPeriod,assignmentNr});
+        } catch (Exception e) { 
+            System.out.println("***** SY GRADEBOOK: updateAssignment error "+e);
+        } 
+
+    } // end of updateAssignment 
+
+    /* ----------------------------------------------------------------------------------------------------------------- */
+	public void insertSXPLOG(String acadYear, String semPeriod, String module, String assignmentNr, String studentNr, String log1Comment, String lecturer) {
+		
+		JdbcTemplate jdt_update = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+		try {
+        	jdt_update.update(INSERT_SXPLOG,
+                    new Object[] {acadYear, semPeriod, module, assignmentNr, studentNr, log1Comment, lecturer});
+        } catch (Exception e) { 
+            System.out.println("***** SY GRADEBOOK: insertSXPLOG error "+e);
+        } 
+
+    } // end of insertSXPLOG 
+
+
+    /* ----------------------------------------------------------------------------------------------------------------- */
+    // SQL system (Harry) SqlId = 876888
+    // ---------------------------------
+	public void createAssignmentLogFiles(String acadYear, String semPeriod, String studentNr, String module, 
+					String assignmentNr, String gradebookPercentage, String lecturer, 
+					String processGC139, String fromProgram, String statusGC140, String subStatusGC140, String logMessage) {
+		
+		// 1.  select date received
+		StringBuffer dateReceived = new StringBuffer();
+		dateReceived.append(selectDateReceived());
+		
+		
+		// 2. delete STUASA
+		deleteSTUASA(acadYear, semPeriod, studentNr, module, assignmentNr);
+
+		System.out.println("***** SY GRADEBOOK: deleteSTUASA ");
+		
+		// 3. Insert STUASA
+		insertSTUASA(acadYear, semPeriod, studentNr, module, assignmentNr, dateReceived.toString(), processGC139, fromProgram,
+                    statusGC140, subStatusGC140, gradebookPercentage, lecturer, logMessage);
+        System.out.println("***** SY GRADEBOOK: insertSTUASA ");
+		
+		// 4. Insert STUAST
+		insertSTUAST(acadYear, semPeriod, studentNr, module, assignmentNr, dateReceived.toString(), processGC139, fromProgram,
+                    statusGC140, subStatusGC140, gradebookPercentage, lecturer, logMessage);
+        System.out.println("***** SY GRADEBOOK: insertSTUAST ");
+		
+
+
+    } // end of createAssignmentLogFiles 
+
+
+    /* ----------------------------------------------------------------------------------------------------------------- */
+	public String selectDateReceived() {
+		StringBuffer dateReceived = new StringBuffer();
+		
+		//RETRIEVE_DATE_RECEIVED = "select to_char(sysdate,'YYYYMMDDHH24MISS') as DateReceived from dual 
+		JdbcTemplate jdt_retrieve = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+		try {
+            List recordsDateReceived = jdt_retrieve.queryForList(RETRIEVE_DATE_RECEIVED,
+                    new Object[] {});
+			Iterator recordsDateReceived_it = recordsDateReceived.iterator();
+			
+			/* ************ For each mark retrieved update the student system                         *********/
+			while (recordsDateReceived_it.hasNext()) {
+				ListOrderedMap record_dateReceived = (ListOrderedMap) recordsDateReceived_it.next();
+				                                                                                
+				dateReceived.append(record_dateReceived.get("DateReceived").toString());
+				
+			} // end of while (recordsAssignments1_it.hasNext())
+		} catch (Exception e) { //List recordsAssignments
+            System.out.println("***** SY GRADEBOOK: selectDateReceived "+e);
+        } //List recordsAssignments1
+        
+        return dateReceived.toString();			                    
+    } // end of selectDateReceived
+
+    /* ----------------------------------------------------------------------------------------------------------------- */
+	public void deleteSTUASA(String acadYear, String semPeriod, String studentNr, String module, String assignmentNr) {
+		
+		JdbcTemplate jdt_delete = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+		try {
+        	jdt_delete.update(DELETE_STUASA,
+                    new Object[] {acadYear, semPeriod, studentNr, module, assignmentNr});
+        } catch (Exception e) { 
+            System.out.println("***** SY GRADEBOOK: deleteSTUASA error "+e);
+        } 
+
+    } // end of deleteSTUASA 
+
+
+    /* ----------------------------------------------------------------------------------------------------------------- */
+	public void insertSTUASA(String acadYear, String semPeriod, String studentNr, String module, String assignmentNr,
+					String dateReceived, String processGC139, String fromProgram,
+                    String statusGC140, String subStatusGC140, String percentage, String lecturer, String logMessage) {
+		
+		JdbcTemplate jdt_insert = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+		try {
+        	jdt_insert.update(INSERT_STUASA.toString(),                    
+                    new Object[] {acadYear, semPeriod, studentNr, module, assignmentNr, dateReceived, processGC139, fromProgram,
+                    statusGC140, subStatusGC140, logMessage, percentage, lecturer});
+        } catch (Exception e) { 
+            System.out.println("***** SY GRADEBOOK: insertSTUASA error "+e);
+        } 
+
+    } // end of insertSTUASA
+    
+
+    /* ----------------------------------------------------------------------------------------------------------------- */
+	public void insertSTUAST(String acadYear, String semPeriod, String studentNr, String module, String assignmentNr,
+					String dateReceived, String processGC139, String fromProgram,
+                    String statusGC140, String subStatusGC140, String percentage, String lecturer, String logMessage) {
+		
+		JdbcTemplate jdt_insert = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+		try {
+        	jdt_insert.update(INSERT_STUAST.toString(),                    
+                    new Object[] {acadYear, semPeriod, studentNr, module, assignmentNr, dateReceived, processGC139, fromProgram,
+                    statusGC140, subStatusGC140, logMessage, percentage, lecturer});
+        } catch (Exception e) { 
+            System.out.println("***** SY GRADEBOOK: insertSTUAST error "+e);
+        } 
+
+    } // end of insertSXPLOG
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	public void sendEmail(String subject, String body, String emailAddress) throws AddressException {
+
+		emailService = (EmailService) ComponentManager.get(EmailService.class);
+		
+		String tmpEmailFrom = ServerConfigurationService.getString("noReplyEmailFrom");
+		
+		//System.out.println("GRADEBOOK email send: "+body);
+		
+		InternetAddress toEmail = new InternetAddress(emailAddress);
+		InternetAddress iaTo[] = new InternetAddress[1];
+		iaTo[0] = toEmail;
+		InternetAddress iaHeaderTo[] = new InternetAddress[1];
+		iaHeaderTo[0] = toEmail;
+		InternetAddress iaReplyTo[] = new InternetAddress[1];
+		iaReplyTo[0] = new InternetAddress(tmpEmailFrom);
+		List<String> contentList = new ArrayList<String>();
+		contentList.add("Content-Type: text/html");
+		
+		emailService.sendMail(iaReplyTo[0],iaTo,subject,body,iaHeaderTo,iaReplyTo,contentList);
+	} // end of sendEmail
+
+} // end of GradebookSyncStudentSystemWebService

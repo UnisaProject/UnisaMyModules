@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>unisa-overlays-osp</artifactId>
+    <groupId>unisa.overlays.osp</groupId>
+    <version>10.5</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <name>Unisa overlay OSP glossary tool</name>
+  <groupId>unisa-overlays-osp</groupId>
+  <artifactId>osp-glossary-tool</artifactId>
+  <packaging>war</packaging>
+  <version>10.5</version>
+    <build>
+        <plugins>
+            <plugin>
+                 <artifactId>maven-war-plugin</artifactId>
+                             <configuration>
+                                 <warName>osp-glossary-tool</warName>
+                             </configuration>
+                        </plugin>
+        </plugins>
+    </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.sakaiproject.osp</groupId>
+      <artifactId>osp-glossary-tool</artifactId>
+      <version>10.5</version>
+      <type>war</type>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
+</project>

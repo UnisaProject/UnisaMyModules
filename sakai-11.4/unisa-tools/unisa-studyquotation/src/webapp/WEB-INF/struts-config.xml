@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<form-beans >
+    	<form-bean
+    		name="studyquotationform"
+    		type="za.ac.unisa.lms.tools.studyquotation.forms.StudyQuotationForm"/>
+	</form-beans>
+
+	<action-mappings>
+		<action
+      		parameter="action"
+      		path="/default"
+      		type="za.ac.unisa.lms.tools.studyquotation.actions.DefaultAction"
+      		validate="false">
+		    <forward
+		    	name="default"
+		        path="/studyquotation.do?action=studyQuotationInput"
+		        contextRelative="true"/>
+    	</action>
+		<action
+			attribute="studyquotationform"
+			input="/WEB-INF/jsp/studyquotationinput.jsp"
+			name="studyquotationform"
+			parameter="action"
+			path="/studyquotation"
+			type="za.ac.unisa.lms.tools.studyquotation.actions.StudyQuotationAction"
+			validate="false">
+			<forward
+				name="study-quotation-input"
+				path="/WEB-INF/jsp/studyquotationinput.jsp"
+				contextRelative="true" />
+			<forward
+				name="study-quotation-display"
+				path="/WEB-INF/jsp/studyquotationdisplay.jsp"
+				contextRelative="true" />
+			<forward
+				name="closed"
+				path="/WEB-INF/jsp/closedquotation.jsp"
+				contextRelative="true" />
+		</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.studyquotation.ApplicationResources"/>
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property property="pathnames" value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property property="stopOnFirstError" value="true"/>
+	</plug-in>
+</struts-config>

@@ -1,0 +1,127 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="350,104" />
+  <StrutsActivity path="/contactusaction.do" location="73,201" dimension="150,100" />
+  <StrutsActivity path="http://registration.unisa.ac.za/info/index.html" location="375,435" dimension="251,49" />
+  <StrutsActivity path="/WEB-INF/jsp/studentviewc2a.jsp" location="950,50" dimension="229,52" />
+  <StrutsActivity path="/WEB-INF/jsp/studentviewc4.jsp" location="650,550" dimension="186,49" />
+  <StrutsActivity path="/WEB-INF/jsp/thankyou.jsp" location="645,435" dimension="161,49" />
+  <StrutsActivity path="/WEB-INF/jsp/studentviewe.jsp" location="650,250" dimension="181,49" />
+  <StrutsActivity path="/WEB-INF/jsp/studentviewc2c.jsp" location="950,450" dimension="191,49" />
+  <StrutsActivity path="/WEB-INF/jsp/studentviewc1.jsp" location="950,250" dimension="186,49" />
+  <StrutsActivity path="/WEB-INF/jsp/studentviewc3.jsp" location="350,550" dimension="186,49" />
+  <StrutsActivity path="/WEB-INF/jsp/studentviewa.jsp" location="-30,495" dimension="181,49" />
+  <StrutsActivity path="/WEB-INF/jsp/studentviewd.jsp" location="405,180" dimension="181,49" />
+  <StrutsActivity path="/WEB-INF/jsp/studentviewb.jsp" location="350,250" dimension="181,49" />
+  <StrutsActivity path="/WEB-INF/jsp/studentciewc2a.jsp" location="950,350" dimension="191,49" />
+  <StrutsActivity path="/WEB-INF/jsp/studentviewc2b.jsp" location="950,550" dimension="192,49" />
+  <StrutsActivity path="/WEB-INF/jsp/studentviewc.jsp" location="165,435" dimension="180,49" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="650,50" dimension="178,53" />
+  <StrutsActivity path="/WEB-INF/jsp/studentviewb2.jsp" location="50,650" dimension="185,49" />
+  <StrutsTransition id="/contactusaction.do,studentviewa,/WEB-INF/jsp/studentviewa.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="76,301" />
+      <AbsolutePoint location="76,495" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/contactusaction.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="118,154" />
+      <AbsolutePoint location="118,201" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactusaction.do,studentviewe,/WEB-INF/jsp/studentviewe.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="106,301" />
+      <AbsolutePoint location="106,406" />
+      <AbsolutePoint location="755,406" />
+      <AbsolutePoint location="755,299" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactusaction.do,thankyou,/WEB-INF/jsp/thankyou.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="210,301" />
+      <AbsolutePoint location="210,316" />
+      <AbsolutePoint location="725,316" />
+      <AbsolutePoint location="725,435" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactusaction.do,studentviewc2a,/WEB-INF/jsp/studentviewc2a.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="148,251" />
+      <AbsolutePoint location="0,0" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactusaction.do,studentviewc3,/WEB-INF/jsp/studentviewc3.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="73,281" />
+      <AbsolutePoint location="-75,281" />
+      <AbsolutePoint location="-75,574" />
+      <AbsolutePoint location="350,574" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactusaction.do,studentviewd,/WEB-INF/jsp/studentviewd.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="223,214" />
+      <AbsolutePoint location="405,214" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactusaction.do,studentviewb2,/WEB-INF/jsp/studentviewb2.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="223,243" />
+      <AbsolutePoint location="1256,243" />
+      <AbsolutePoint location="1256,674" />
+      <AbsolutePoint location="235,674" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactusaction.do,studentviewb,/WEB-INF/jsp/studentviewb.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="223,265" />
+      <AbsolutePoint location="350,265" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactusaction.do,studentviewc1,/WEB-INF/jsp/studentviewc1.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="180,301" />
+      <AbsolutePoint location="180,346" />
+      <AbsolutePoint location="1043,346" />
+      <AbsolutePoint location="1043,299" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactusaction.do,studentviewc4,/WEB-INF/jsp/studentviewc4.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="148,201" />
+      <AbsolutePoint location="148,195" />
+      <AbsolutePoint location="-255,195" />
+      <AbsolutePoint location="-255,799" />
+      <AbsolutePoint location="743,799" />
+      <AbsolutePoint location="743,599" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactusaction.do,registrationlink,http://registration.unisa.ac.za/info/index.html,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="136,301" />
+      <AbsolutePoint location="136,376" />
+      <AbsolutePoint location="500,376" />
+      <AbsolutePoint location="500,435" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactusaction.do,registration.unisa,http://registration.unisa.ac.za/info/index.html,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="73,251" />
+      <AbsolutePoint location="-330,251" />
+      <AbsolutePoint location="-330,-45" />
+      <AbsolutePoint location="601,-45" />
+      <AbsolutePoint location="601,435" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/contactusaction.do,studentviewc2c,/WEB-INF/jsp/studentviewc2c.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="73,221" />
+      <AbsolutePoint location="-195,221" />
+      <AbsolutePoint location="-195,709" />
+      <AbsolutePoint location="906,709" />
+      <AbsolutePoint location="906,469" />
+      <AbsolutePoint location="950,469" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

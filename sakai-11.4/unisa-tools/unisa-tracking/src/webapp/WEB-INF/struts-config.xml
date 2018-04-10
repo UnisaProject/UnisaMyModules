@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans >
+	<form-bean name="trackingForm" type="za.ac.unisa.lms.tools.tracking.forms.TrackingForm"></form-bean>
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="act"
+			path="/default"
+			type="za.ac.unisa.lms.tools.tracking.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/tracking.do?act=getUserInfo"
+				contextRelative="true" />
+		</action>
+	    <action 
+	      attribute="trackingForm"
+	      name="trackingForm"
+	      parameter="act"
+	      path="/tracking"
+	      scope="session"
+	      type="za.ac.unisa.lms.tools.tracking.actions.TrackingAction"
+	      validate="false" >
+			<forward 
+	      		name="userselection" 
+	      		path="/WEB-INF/jsp/index.jsp"
+	      		contextRelative="true" />
+	       	<forward 
+	       		name="checkin" 
+	       		path="/WEB-INF/jsp/checkin.jsp"
+	      		contextRelative="true" />
+	      	<forward 
+	       		name="processbookin" 
+	       		path="/WEB-INF/jsp/checkin.jsp"
+	      		contextRelative="true" />
+	       	<forward 
+	       		name="checkout" 
+	       		path="/WEB-INF/jsp/checkout.jsp"
+	      		contextRelative="true" />
+	      	<forward 
+	       		name="processbookout" 
+	       		path="/WEB-INF/jsp/checkout.jsp"
+	      		contextRelative="true" />
+	      	<forward 
+	       		name="result" 
+	       		path="/WEB-INF/jsp/result.jsp"
+	      		contextRelative="true" />
+	      	<forward 
+	       		name="search" 
+	       		path="/WEB-INF/jsp/search.jsp"
+	      		contextRelative="true" />
+	      	<forward 
+	       		name="report" 
+	       		path="/WEB-INF/jsp/report.jsp"
+	      		contextRelative="true" />
+	       	<forward 
+	       		name="error"
+	       		path="/WEB-INF/jsp/error.jsp"
+	      		contextRelative="true" />
+	      
+	    </action>
+	      
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.tracking.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	
+</struts-config>

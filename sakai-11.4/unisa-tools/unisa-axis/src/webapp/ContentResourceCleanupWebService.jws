@@ -1,0 +1,320 @@
+import java.sql.Types;
+import org.apache.commons.collections.map.ListOrderedMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+
+
+import org.w3c.dom.*;
+
+import org.apache.axis.AxisFault;
+import org.apache.axis.utils.JavaUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.email.api.EmailService;
+import org.sakaiproject.email.api.Attachment;
+import org.sakaiproject.email.api.RecipientType;
+import org.sakaiproject.event.cover.UsageSessionService;
+import org.sakaiproject.event.api.UsageSession;
+
+import za.ac.unisa.lms.db.StudentSystemDAO;
+import za.ac.unisa.lms.db.SakaiDAO;
+
+
+
+
+/**
+This webservice is used to cleanup old content from old sites
+content: additional resources
+
+start with webservice 3 March 2017
+*/
+public class ContentResourceCleanupWebService {
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	private EmailService emailService;
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// query to retrieve sites for specific academic year and semester
+	// site_id like "YY-S1"
+	private static final String RETRIEVE_SITES = " SELECT sakai_site.site_id AS SITEID, SAKAI_SITE_TOOL.REGISTRATION AS REG "+ 
+												 " FROM   sakai_site, sakai_site_tool "+
+												 //" WHERE  sakai_site.site_id like ('%16-S1%') "+
+												 " WHERE    sakai_site.site_id = sakai_site_tool.site_id "+
+												 " AND    SAKAI_SITE_TOOL.REGISTRATION = 'sakai.resources'"+
+												 " and    sakai_site.site_id = 'FAC1501-16-S1'";
+	
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// query to retrieve content for a specific site
+	// context = module/site Id.
+	private static final String RETRIEVE_CONTENT_FOR_SITE = " SELECT RESOURCE_ID, RESOURCE_UUID, IN_COLLECTION, "+
+															" FILE_PATH, FILE_SIZE, CONTEXT, RESOURCE_TYPE_ID "+ 
+															" FROM  content_resource"+ 
+															" WHERE in_collection like '%?%'"; 
+		
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// statement to delete content record from table content_resource
+	private static final String DELETE_CONTENT_RECORD = " DELETE "+ 
+														" FROM  content_resource"+ 
+														" WHERE resource_id = ?"; 
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// statement to delete content record from table content_resource_bb_delete
+	private static final String DELETE_CONTENT_RESOURCE_BB_DELETE = " DELETE "+ 
+														" FROM  content_resource_bb_delete"+ 
+														" WHERE resource_id = ?"; 
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// statement to delete content record from table content_resource_body_binary
+	private static final String DELETE_CONTENT_RESOURCE_BODY = " DELETE "+ 
+														" FROM  content_resource_body_binary"+ 
+														" WHERE resource_id = ?"; 
+
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// statement to insert content delete log record 
+	private static final String INSERT_CONTENT_CLEANUP_LOG = " INSERT "+ 
+														" INTO  CONTENT_CLEANUP_LOG(RESOURCE_ID, RESOURCE_UUID, IN_COLLECTION, "+
+														"                   FILE_PATH, FILE_SIZE, CONTEXT, RESOURCE_TYPE_ID, "+
+														"                   REMOVE_DATE, REMOVED_BY) "+ 
+														" VALUES(?,?,?,?,?,?,?,sysdate,?)"; 														
+														
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	/** Actual method to do the cleanup
+		Input:
+		1) year
+		2) semester period
+    */
+	public String contentCleanup(String academicYear, String semesterPeriod )throws AxisFault {
+    
+    	StringBuffer removedBy = new StringBuffer();
+    	removedBy.append("cleanupWebService");
+    	// year and semester module site format
+    	StringBuffer yearSemester = new StringBuffer();
+    	StringBuffer result = new StringBuffer();
+
+    	// server url myDev/myQa/myUnisa
+    	String serverUrl = ServerConfigurationService.getString("serverUrl");
+    	//full path to file that needs to be removed
+    	String fullPathOfFile = "";
+    	
+    	yearSemester.append(academicYear.substring(2,4));
+    	yearSemester.append('-');
+    	yearSemester.append(semesterPeriod);
+		
+		if (serverUrl.equals("http://localhost:8080")) {
+			serverUrl = "https://mydev.unisa.ac.za";
+		} 
+		serverUrl = "http://163.200.82.234:8020/portal";
+		// dev path = /data/sakai/content
+		//sakai.properties: bodyPath@org.sakaiproject.content.api.ContentHostingService=/data/sakai/content
+		String bodyPath = "/data/sakai/content";
+		System.out.println(">>>>>>>>>>>>>>>>>>>>> contentCleanup <<<<<<<<<<<<<<<<<<<");
+			
+		result.append("Content cleanup");
+		result.append("<br> serverUrl = ");
+		result.append(serverUrl);
+		result.append("<br> bodyPath = ");
+		result.append(bodyPath);
+		result.append("<br>");
+		result.append("For this period: ");
+		result.append(academicYear);
+		result.append(" - ");
+		result.append(semesterPeriod);
+		result.append("<br><br>");
+					
+		/* ************ retrieve content that must be deleted */
+		JdbcTemplate jdt2 = new JdbcTemplate(new SakaiDAO().getDataSource());
+    				
+		String RETRIEVE_CONTENT_FOR_PERIOD = " SELECT RESOURCE_ID, NVL(RESOURCE_UUID,' ') as RESOURCE_UUID, "+
+    														" NVL(IN_COLLECTION,' ') as IN_COLLECTION, "+
+															" NVL(FILE_PATH,' ') as FILE_PATH, "+
+															" NVL(FILE_SIZE,0) as FILE_SIZE, "+
+															" NVL(CONTEXT,' ') as CONTEXT1, "+
+															" NVL(RESOURCE_TYPE_ID,' ') as RESOURCE_TYPE_ID "+ 
+															" FROM  content_resource"+ 
+															" WHERE in_collection like '%"+yearSemester.toString()+"%'";
+		System.out.println(">>>>>>>>>>RETRIEVE_CONTENT_FOR_PERIOD = "+RETRIEVE_CONTENT_FOR_PERIOD);
+		try {
+    		List recordsContent = jdt2.queryForList(RETRIEVE_CONTENT_FOR_SITE2,
+            new Object[] {});
+                        
+			Iterator recordsContent_it = recordsContent.iterator();
+			
+			int counterDelete = 0;						
+					
+			/* ************ For each content retrieved                          *********/
+			while (recordsContent_it.hasNext()) {
+    						  						
+				StringBuffer resourceUuid = new StringBuffer();
+				StringBuffer inCollection = new StringBuffer();
+				StringBuffer contentPath = new StringBuffer();    						  						
+    			StringBuffer contentSize = new StringBuffer();
+    			StringBuffer resourceId = new StringBuffer();
+    			StringBuffer contentContext = new StringBuffer();
+    			StringBuffer contentType = new StringBuffer();
+    						
+    			ListOrderedMap record_Content = (ListOrderedMap) recordsContent_it.next();
+
+				//System.out.println("FILE_PATH: "+record_Content.get("FILE_PATH").toString());
+				//System.out.println(">>RESOURCE_ID: "+record_Content.get("RESOURCE_ID").toString());
+							
+				resourceId.append(record_Content.get("RESOURCE_ID").toString());
+				resourceUuid.append(record_Content.get("RESOURCE_UUID").toString());
+				inCollection.append(record_Content.get("IN_COLLECTION").toString());
+				contentPath.append(record_Content.get("FILE_PATH").toString());
+				contentSize.append(record_Content.get("FILE_SIZE").toString());
+				contentContext.append(record_Content.get("CONTEXT1").toString());
+				contentType.append(record_Content.get("RESOURCE_TYPE_ID").toString());
+							
+				try {
+					String tempFile = bodyPath+contentPath.toString(); 
+
+					File fileTemp = new File(tempFile);
+	          		if (fileTemp.exists()){
+	          						
+	          			// delete file
+	             		//System.out.println(" ----- FILE EXIST ----- ");
+	             		fileTemp.delete();
+	             					
+	             		//System.out.println(" ----- FILE DELETED ----- ");
+	             		counterDelete=counterDelete+1;
+	             				
+	             	}  else {
+	          			//System.out.println(" ----- FILE DOES NOT EXIST ----- ");
+	          		}
+	          						
+	          		// delete record from database table content_resource_bb_delete
+	             	JdbcTemplate jdt_Delete1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+					try {
+						jdt_Delete1.update(DELETE_CONTENT_RESOURCE_BB_DELETE,
+					    new Object[] {resourceId.toString()});
+							                    						        	
+					} catch (Exception e) { //jdt_Delete1
+					    //System.out.println("***** CONTENTCLEANUP: delete record from database table content_resource error "+e);
+					    result.append("<br> ----- DELETE_CONTENT_RESOURCE_BB_DELETE ERROR ----- ");
+					    result.append(resourceId.toString());
+					    result.append(e);
+					} //jdt_Delete1	         
+							         						
+	          		// delete record from database table content_resource_body_binary
+					JdbcTemplate jdt_Delete2 = new JdbcTemplate(new SakaiDAO().getDataSource());
+					try {
+						jdt_Delete2.update(DELETE_CONTENT_RESOURCE_BODY,
+					    new Object[] {resourceId.toString()});
+							                    						        	
+					} catch (Exception e) { //jdt_Delete2
+					    //System.out.println("***** CONTENTCLEANUP: delete record from database table content_resource error "+e);
+					    result.append("<br> ----- DELETE_CONTENT_RESOURCE_BODY ERROR ----- ");
+					    result.append(resourceId.toString());
+					    result.append(e);
+					} //jdt_Delete2	         
+	          						
+	          						
+	             	// delete record from database table content_resource
+	             	JdbcTemplate jdt_Delete = new JdbcTemplate(new SakaiDAO().getDataSource());
+					try {
+						jdt_Delete.update(DELETE_CONTENT_RECORD,
+					    new Object[] {resourceId.toString()});
+							                    
+					   // insert log record
+					   JdbcTemplate jdt_Log = new JdbcTemplate(new SakaiDAO().getDataSource());
+					   try {
+						jdt_Log.update(INSERT_CONTENT_CLEANUP_LOG,
+					    	new Object[] {resourceId.toString(),resourceUuid.toString(),inCollection.toString(),
+							contentPath.toString(), contentSize.toString(),contentContext.toString(),
+							                	contentType.toString(), removedBy.toString()});
+					   } catch (Exception e) { //jdt_Log
+						   //System.out.println(" ----- CONTENT RESOURCE RECORD LOG ERROR ----- ");
+							result.append("<br> ----- CONTENT RESOURCE RECORD LOG ERROR ----- ");
+							result.append(resourceId.toString());
+							result.append(e);
+						} //try jdt_Log      
+							        	
+					} catch (Exception e) { //jdt_Delete
+					    //System.out.println("***** CONTENTCLEANUP: delete record from database table content_resource error "+e);
+					    result.append("<br> ----- CONTENT RESOURCE RECORD DELETE ERROR ----- ");
+						result.append(resourceId.toString());
+						result.append(e);
+					} //List recordsAssignments
+					//result.append("<br> ----- CONTENT RESOURCE RECORD DELETED ----- ");
+					//result.append(resourceId.toString());
+							        
+	          					
+				}catch(Exception e) {
+					// if any error occurs
+					e.printStackTrace();
+				}
+						    					
+							
+			} // end of While (List of resources per site)
+				
+			result.append(counterDelete);
+						
+		} catch (Exception e) { // jdt2.queryForList(RETRIEVE_CONTENT_FOR_SITES,
+			e.printStackTrace();
+			//uncomment log.error
+			e.printStackTrace();
+			//log.error(e);
+	
+			String errorMessage = "CONTENT CLEANUP ERROR: "+ e.getMessage();
+			//sendEmail("CONTENT CLEANUP ERROR", errorMessage, "syzelle@unisa.ac.za");
+		} 
+		return result.toString();    	
+    }
+    
+    /* ----------------------------------------------------------------------------------------------------------------- */
+	public void sendEmail(String subject, String body, String emailAddress) throws AddressException{
+
+		emailService = (EmailService) ComponentManager.get(EmailService.class);
+		
+		String tmpEmailFrom = ServerConfigurationService.getString("noReplyEmailFrom");
+		
+		//System.out.println("GRADEBOOK email send: "+body);
+		
+		InternetAddress toEmail = new InternetAddress(emailAddress);
+		InternetAddress iaTo[] = new InternetAddress[1];
+		iaTo[0] = toEmail;
+		InternetAddress iaHeaderTo[] = new InternetAddress[1];
+		iaHeaderTo[0] = toEmail;
+		InternetAddress iaReplyTo[] = new InternetAddress[1];
+		iaReplyTo[0] = new InternetAddress(tmpEmailFrom);
+		List<String> contentList = new ArrayList<String>();
+		contentList.add("Content-Type: text/html");
+		
+		emailService.sendMail(iaReplyTo[0],iaTo,subject,body,iaHeaderTo,iaReplyTo,contentList);
+	} // end of sendEmail
+    
+
+} // end of ContentResourceCleanupWebService

@@ -1,0 +1,157 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.sql.DataSource;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
+import oracle.jdbc.OracleTypes;
+
+import org.apache.axis.AxisFault;
+import org.apache.commons.collections.map.ListOrderedMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.email.api.EmailService;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
+
+import za.ac.unisa.lms.db.SakaiDAO;
+
+
+/**
+This webservice is used to delete old data from old sites
+tool: Sakai Content (additional resources, dropbox)
+
+Sonette start with webservice 2 July
+*/
+public class DataCleanup_AdditionalTablesWebService{
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	private static final String[] EMAIL_LIST = {"syzelle@unisa.ac.za", "magagjs@unisa.ac.za", "mphahsm@unisa.ac.za"};
+	//private static final String[] EMAIL_LIST = {"syzelle@unisa.ac.za"};
+	private static String emailAddressList = "";
+    private static final String LOCAL_URL_PORT80 = "http://localhost:8080";
+    private static final String LOCAL_URL_PORT82 = "http://localhost:8082";
+    private static final String PORTAL_URL = "/portal";
+
+	private EmailService emailService;
+	private Log log = LogFactory.getLog( this.getClass() );		
+	private boolean webServiceSuccess = false;				
+			
+	/** Actual method to do Additional tables data cleanup
+		Input:
+		1) year
+		2) semester period
+    */
+	public String sakaiAdditionalTablesDataCleanup( String academicYear, String semesterPeriod )throws AxisFault {
+	
+		// ----- variables
+		StringBuffer yearSemester = new StringBuffer();
+    	StringBuffer result = new StringBuffer();
+    	StringBuffer calenderIdStr = new StringBuffer();
+    	String serverUrl = ServerConfigurationService.getString( "serverUrl" );
+		
+    	//get email address list
+    	for ( int i=0; i<EMAIL_LIST.length; i++ ){
+    		emailAddressList += EMAIL_LIST[i].toString()+",";
+    	}	
+	
+		// ----- Set yearSemester YY-S1
+	    yearSemester.append( academicYear.substring(2,4) );
+    	yearSemester.append( '-' );
+    	yearSemester.append( semesterPeriod );
+    	
+		// ----- get serverUrl (myDev, myQa, myUnisa or localhost)
+		String localPortal80 = LOCAL_URL_PORT80 + PORTAL_URL;
+		String localPortal82 = LOCAL_URL_PORT82 + PORTAL_URL;
+		if ( serverUrl.equals(LOCAL_URL_PORT80) || serverUrl.equals(LOCAL_URL_PORT82)
+			|| serverUrl.equals(localPortal80) || serverUrl.equals(localPortal82) ) {
+			serverUrl = "https://mydev.int.unisa.ac.za";
+		} 
+		else
+			serverUrl = "http://163.200.82.234:8020/portal";
+		
+		System.out.println( ">>>>>>>>>> SAKAI Additional Tables DATA CLEANUP For this period: "+yearSemester );
+
+		result.append("Data cleanup of additional tables for ");
+		result.append(academicYear);
+		result.append("<br>");
+		
+		// ----- -----------------------------------------------
+		// ----- delete from table UNISA_MIS
+		String DELETE_Unisa_Mis = "DELETE FROM UNISA_MIS WHERE to_char(DATE_COUNTED,'YYYY') = ?";
+		JdbcTemplate jdt_Delete1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+		try {
+			int nrOfRecordsDeleted1 = jdt_Delete1.update(DELETE_Unisa_Mis,
+				new Object[] {academicYear});
+			System.out.println(">>>>>>>>>>>>>>>>>>>>> dataCleanup_AdditionalTablesWebService <<>> UNISA_MIS records deleted "+nrOfRecordsDeleted1);
+			result.append("<b> UNISA_MIS </b> records deleted = ");
+			result.append(nrOfRecordsDeleted1);
+		} catch (Exception e) { //jdt_Delete1
+			System.out.println("***** dataCleanup_AdditionalTablesWebService: delete from table SAKAI_SITE_PROPERTY error "+e);
+		} //jdt_Delete1.update
+		
+		// ----- -----------------------------------------------
+		// ----- delete from table SEARCHBUILDERITEM
+		String Delete_SEARCHBUILDERITEM = "DELETE FROM SEARCHBUILDERITEM WHERE CONTEXT LIKE ('%"+yearSemester+"%')";
+		System.out.println(">>>>>>>>>>>>>>>>>>>>> dataCleanup_AdditionalTablesWebService <<>> SEARCHBUILDERITEM "+Delete_SEARCHBUILDERITEM);
+		JdbcTemplate jdt_Delete2 = new JdbcTemplate(new SakaiDAO().getDataSource());
+		try {
+			int nrOfRecordsDeleted2 = jdt_Delete2.update(Delete_SEARCHBUILDERITEM,
+				new Object[] {});
+			System.out.println(">>>>>>>>>>>>>>>>>>>>> dataCleanup_AdditionalTablesWebService <<>> SEARCHBUILDERITEM records deleted "+nrOfRecordsDeleted2);
+			result.append("<b> SEARCHBUILDERITEM </b> records deleted = ");
+			result.append(nrOfRecordsDeleted2);
+		} catch (Exception e) { //jdt_Delete2
+			System.out.println("***** dataCleanup_AdditionalTablesWebService: delete from table SEARCHBUILDERITEM error "+e);
+		} //jdt_Delete2.update
+
+		// ----- -----------------------------------------------
+		// ----- delete from table EMAIL_LOGS
+		// -----
+		String Delete_Email_Logs = "DELETE FROM EMAIL_LOGS WHERE TO_CHAR(DATE_CREATED,'YYYY') = ?";
+		JdbcTemplate jdt_Delete3 = new JdbcTemplate(new SakaiDAO().getDataSource());
+		try {
+			int nrOfRecordsDeleted3 = jdt_Delete3.update(Delete_Email_Logs,
+				new Object[] {academicYear});
+			System.out.println(">>>>>>>>>>>>>>>>>>>>> dataCleanup_AdditionalTablesWebService<<>> EMAIL_LOGS records deleted "+nrOfRecordsDeleted3);
+			result.append("<b> EMAIL_LOGS </b> records deleted = ");
+			result.append(nrOfRecordsDeleted3);
+		} catch (Exception e) { //jdt_Delete3
+			System.out.println("***** dataCleanup_AdditionalTablesWebService: delete from table EMAIL_LOGS error "+e);
+		} //jdt_Delete3.update
+		
+
+		return result.toString();
+	} // end of sakaiContentDataCleanup 
+	
+    /* ----------------------------------------------------------------------------------------------------------------- */
+	public void sendEmail( String subject, String body, String emailAddress ) throws AddressException{
+
+		emailService = (EmailService) ComponentManager.get( EmailService.class );
+		String tmpEmailFrom = ServerConfigurationService.getString( "noReplyEmailFrom" );
+		
+		InternetAddress toEmail = new InternetAddress( emailAddress );
+		InternetAddress iaTo[] = new InternetAddress[1];
+		iaTo[0] = toEmail;
+		InternetAddress iaHeaderTo[] = new InternetAddress[1];
+		iaHeaderTo[0] = toEmail;
+		InternetAddress iaReplyTo[] = new InternetAddress[1];
+		iaReplyTo[0] = new InternetAddress( tmpEmailFrom );
+		List<String> contentList = new ArrayList<String>();
+		contentList.add("Content-Type: text/html");
+		
+		emailService.sendMail( iaReplyTo[0],iaTo,subject,body,iaHeaderTo,iaReplyTo,contentList );
+		log.info( this+": sendEmail(): email sent to: "+emailAddress+"\r\nemail send body: "+body );
+	} // end of sendEmail
+
+} // end of DataCleanup_AdditionalTablesWebService

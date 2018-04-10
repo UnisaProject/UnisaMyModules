@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		<form-bean name="smsEnquiryForm" 
+			type="za.ac.unisa.lms.tools.smsenquiry.forms.SmsEnquiryForm"/>
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.smsenquiry.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/smsEnquiry.do?action=initial"
+				contextRelative="true" />
+		</action>
+		<action
+			name="smsEnquiryForm"
+			attribute="smsEnquiryForm"
+			parameter="action"
+			path="/smsEnquiry"
+			type="za.ac.unisa.lms.tools.smsenquiry.actions.SmsEnquiryAction"
+			validate="false">
+			<forward
+				name="inputSmsEnquiry"
+				path="/WEB-INF/jsp/inputSmsEnquiry.jsp"
+				contextRelative="true" />	
+			<forward
+				name="displaySmsLogBatchList"
+				path="/WEB-INF/jsp/smsLogBatchList.jsp"
+				contextRelative="true" />	
+			<forward
+				name="displaySmsLogCellRefList"
+				path="/WEB-INF/jsp/smsLogCellRefList.jsp"
+				contextRelative="true" />	
+			<forward
+				name="displaySmsReqBatchList"
+				path="/WEB-INF/jsp/smsReqBatchList.jsp"
+				contextRelative="true" />	
+			<forward
+				name="displayinputSmsBatchSearch"
+				path="/WEB-INF/jsp/inputSmsBatchSearch.jsp"
+				contextRelative="true" />
+			<forward
+				name="displayLogEntryDetail"
+				path="/WEB-INF/jsp/logEntryDetail.jsp"
+				contextRelative="true" />	
+			</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.smsenquiry.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

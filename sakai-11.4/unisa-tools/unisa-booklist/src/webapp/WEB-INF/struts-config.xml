@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+    <form-bean name="booklistForm" type="za.ac.unisa.lms.tools.booklist.forms.BooklistForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+		<action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.booklist.actions.DefaultAction">
+      <forward
+      name="default"
+      path="/booklist.do?action=view"
+      contextRelative="true" />
+    </action>
+    <action
+      attribute="booklistForm"
+      name="booklistForm"
+      parameter="action"
+      path="/booklist"
+      scope="session"
+      type="za.ac.unisa.lms.tools.booklist.actions.BooklistAction">
+      <forward
+        name="viewforward"
+        path="/WEB-INF/jsp/viewlist.jsp"
+        contextRelative="true" />
+      <forward
+        name="viewbooklist"
+        path="/WEB-INF/jsp/school_department.jsp"
+        contextRelative="true" />
+      <forward
+        name="viewmodules"
+        path="/WEB-INF/jsp/moduleview.jsp"
+        contextRelative="true" /> 
+      
+      <forward
+        name="viewselectedmodules"
+        path="/WEB-INF/jsp/departmentsmodules.jsp"
+        contextRelative="true" />                
+      </action>
+
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.booklist.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

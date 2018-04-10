@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.bulkemail"
+		title="Bulk Email"
+		description="Send bulk email to a list of students">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

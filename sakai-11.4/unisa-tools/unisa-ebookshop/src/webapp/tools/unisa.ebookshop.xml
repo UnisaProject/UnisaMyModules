@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.ebookshop"
+		title="e-Bookshop"
+		description="This is a tool used by the students for selling books online">
+		<category name="unisa.tools" ></category>
+	</tool>
+</registration>

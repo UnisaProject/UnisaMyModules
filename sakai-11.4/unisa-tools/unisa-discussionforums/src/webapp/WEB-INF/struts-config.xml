@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+    <form-bean name="forumDetailsForm" type="za.ac.unisa.lms.tools.discussionforums.forms.ForumDetailsForm" />
+    <form-bean name="forumTopicsForm" type="za.ac.unisa.lms.tools.discussionforums.forms.ForumTopicsForm" />
+    <form-bean name="forumMessageForm" type="za.ac.unisa.lms.tools.discussionforums.forms.ForumMessageForm" />
+    <form-bean name="strutsUploadForm" type="za.ac.unisa.lms.tools.discussionforums.forms.StrutsUploadAndSaveForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+		<action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.discussionforums.actions.DefaultAction"
+      scope="session"
+      validate="false">
+      <forward
+      name="default"
+      path="/forums.do?action=showForums"
+      contextRelative="true" />
+    </action>
+    
+    <action
+      attribute="forumDetailsForm"
+      name="forumDetailsForm"
+      parameter="action"
+      path="/forums"
+      type="za.ac.unisa.lms.tools.discussionforums.actions.ForumAction"
+      scope="session"
+      validate="false">
+      <forward
+        name="createforumforward"
+        path="/WEB-INF/jsp/createforum.jsp"
+        contextRelative="true" />
+      <forward
+        name="forumlistforward"
+        path="/WEB-INF/jsp/viewforums.jsp"
+        contextRelative="true" />
+      <forward
+        name="deleteforumconfirmforward"
+        path="/WEB-INF/jsp/deleteforum.jsp"
+        contextRelative="true" />
+    </action>
+    
+    <action
+      attribute="forumTopicsForm"
+      name="forumTopicsForm"
+      parameter="act"
+      path="/forumtopic"
+      type="za.ac.unisa.lms.tools.discussionforums.actions.ForumTopicAction"
+      scope="session"
+      validate="false">
+      <forward
+        name="topicdeleteforward"
+        path="/WEB-INF/jsp/deletetopic.jsp"
+        contextRelative="true" />
+    <forward
+        name="edittopic"
+        path="/WEB-INF/jsp/edit.jsp"
+        contextRelative="true" />     
+      <forward
+        name="showtopicforward"
+        path="/WEB-INF/jsp/viewtopics.jsp"
+        contextRelative="true" />  
+      <forward
+        name="returntoforumforward"
+        path="/forums.do?act=showForums"
+        contextRelative="true" />
+      <forward
+        name="createtopicforward"
+        path="/WEB-INF/jsp/createtopic.jsp"
+        contextRelative="true" />
+    </action>
+    
+    <action
+      attribute="forumMessageForm"
+      name="forumMessageForm"
+      parameter="action"
+      path="/topicmessage"
+      type="za.ac.unisa.lms.tools.discussionforums.actions.ForumMessageAction"
+      scope="session"
+       validate="false">
+      <forward
+        name="showmessagesforward"
+        path="/WEB-INF/jsp/viewmessages.jsp"
+        contextRelative="true" />     
+      <forward
+        name="showtopicforward2"
+        path="/WEB-INF/jsp/viewtopics.jsp"
+        contextRelative="true" />
+      <forward
+        name="messagedeleteforward"
+        path="/WEB-INF/jsp/deletemessage.jsp"
+        contextRelative="true" />
+	 <forward
+        name="addattachmentforward"
+        path="/WEB-INF/jsp/addattachment.jsp"
+        contextRelative="true"/>
+     <!--Added by mphahsm on 2016/10 to check external URLs if has the permission to perform action and redirect -->
+     <forward
+        name="forumforward"
+        path="/WEB-INF/jsp/viewforums.jsp"
+        contextRelative="true" />
+     <!-- End of mphahsm Add -->
+    </action>
+    
+	<action
+      attribute="strutsUploadForm"
+      name="strutsUploadForm"
+      parameter="action"
+      path="/fileUploadAndSave"
+      scope="request"
+      type="za.ac.unisa.lms.tools.discussionforums.actions.StrutsUploadAndSaveAction"
+      validate="false">
+      <forward
+        name="success"
+        path="/WEB-INF/jsp/viewmessages.jsp"
+        contextRelative="true"/>
+     </action>
+	
+
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.discussionforums.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<!-- plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in-->
+</struts-config>

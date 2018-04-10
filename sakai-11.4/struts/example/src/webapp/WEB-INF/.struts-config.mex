@@ -1,0 +1,165 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/index.do" location="650,50" dimension="69,62" />
+  <StrutsActivity path="/taglibs/index.do" location="950,50" dimension="104,62" />
+  <StrutsActivity path="/taglibs/htmltag.do" location="1250,50" dimension="114,62" />
+  <StrutsActivity path="/taglibs/headingtag.do" location="950,250" dimension="132,62" />
+  <StrutsActivity path="/taglibs/groupheadingtag.do" location="1250,250" dimension="160,62" />
+  <StrutsActivity path="/taglibs/grouptabletag.do" location="50,450" dimension="146,62" />
+  <StrutsActivity path="/taglibs/instructiontag.do" location="350,450" dimension="144,62" />
+  <StrutsActivity path="/taglibs/requiredtag.do" location="650,450" dimension="134,62" />
+  <StrutsActivity path="/taglibs/toolbartag.do" location="950,450" dimension="128,62" />
+  <StrutsActivity path="/taglibs/htmlareatag.do" location="1550,150" dimension="157,70" />
+  <StrutsActivity path="/taglibs/flatlisttag.do" location="1250,450" dimension="328,88" />
+  <StrutsActivity path="/taglibs/messagestag.do" location="50,650" dimension="328,88" />
+  <StrutsActivity path="/taglibs/actionstag.do" location="650,650" dimension="368,104" />
+  <StrutsActivity path="/components/componentmanager.do" location="1250,650" dimension="200,62" />
+  <StrutsActivity path="/components/sessionmanager.do" location="50,850" dimension="182,62" />
+  <StrutsActivity path="/components/userdirectoryservice.do" location="350,850" dimension="203,62" />
+  <StrutsActivity path="/WEB-INF/jsp/index.jsp" location="650,850" dimension="142,49" />
+  <StrutsActivity path="/WEB-INF/jsp/taglibs/index.jsp" location="950,850" dimension="177,49" />
+  <StrutsActivity path="/WEB-INF/jsp/taglibs/htmltag.jsp" location="1250,850" dimension="187,49" />
+  <StrutsActivity path="/WEB-INF/jsp/taglibs/headingtag.jsp" location="650,950" dimension="205,49" />
+  <StrutsActivity path="/WEB-INF/jsp/taglibs/groupheadingtag.jsp" location="950,950" dimension="233,49" />
+  <StrutsActivity path="/WEB-INF/jsp/taglibs/grouptabletag.jsp" location="1250,950" dimension="219,49" />
+  <StrutsActivity path="/WEB-INF/jsp/taglibs/instructiontag.jsp" location="50,1050" dimension="217,49" />
+  <StrutsActivity path="/WEB-INF/jsp/taglibs/requiredtag.jsp" location="350,1050" dimension="207,49" />
+  <StrutsActivity path="/WEB-INF/jsp/taglibs/toolbartag.jsp" location="650,1050" dimension="201,49" />
+  <StrutsActivity path="/WEB-INF/jsp/taglibs/htmlareatag.jsp" location="950,1250" dimension="249,53" />
+  <StrutsActivity path="/WEB-INF/jsp/taglibs/flatlisttag.jsp" location="950,1050" dimension="196,49" />
+  <StrutsActivity path="/WEB-INF/jsp/taglibs/messagestag.jsp" location="1250,1050" dimension="214,49" />
+  <StrutsActivity path="/WEB-INF/jsp/taglibs/actionstag.jsp" location="650,1250" dimension="241,53" />
+  <StrutsActivity path="/WEB-INF/jsp/components/componentmanager.jsp" location="350,1150" dimension="273,49" />
+  <StrutsActivity path="/WEB-INF/jsp/components/sessionmanager.jsp" location="950,1150" dimension="255,49" />
+  <StrutsActivity path="/WEB-INF/jsp/components/userdirectoryservice.jsp" location="50,1250" dimension="276,49" />
+  <StrutsActivity path="/WEB-INF/jsp/taglibs/submittag.jsp" location="50,1150" dimension="198,49" />
+  <StrutsActivity path="/WEB-INF/jsp/menu.jsp" location="225,45" dimension="176,53" />
+  <StrutsActivity path="/WEB-INF/jsp/login.jsp" location="465,225" dimension="169,53" />
+  <StrutsActivity path="/WEB-INF/jsp/success.jsp" location="465,300" dimension="190,53" />
+  <StrutsTransition id="/taglibs/groupheadingtag.do,null,/WEB-INF/jsp/taglibs/groupheadingtag.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1250,281" />
+      <AbsolutePoint location="1172,281" />
+      <AbsolutePoint location="1172,950" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/taglibs/htmltag.do,null,/WEB-INF/jsp/taglibs/htmltag.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1250,81" />
+      <AbsolutePoint location="1220,81" />
+      <AbsolutePoint location="1220,874" />
+      <AbsolutePoint location="1250,874" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/taglibs/headingtag.do,null,/WEB-INF/jsp/taglibs/headingtag.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1082,281" />
+      <AbsolutePoint location="1142,281" />
+      <AbsolutePoint location="1142,927" />
+      <AbsolutePoint location="752,927" />
+      <AbsolutePoint location="752,950" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/taglibs/flatlisttag.do,display,/WEB-INF/jsp/taglibs/flatlisttag.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1484,538" />
+      <AbsolutePoint location="1484,1114" />
+      <AbsolutePoint location="1048,1114" />
+      <AbsolutePoint location="1048,1099" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/taglibs/instructiontag.do,null,/WEB-INF/jsp/taglibs/instructiontag.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="422,512" />
+      <AbsolutePoint location="422,783" />
+      <AbsolutePoint location="247,783" />
+      <AbsolutePoint location="247,1050" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/index.do,null,/WEB-INF/jsp/index.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="684,112" />
+      <AbsolutePoint location="684,398" />
+      <AbsolutePoint location="602,398" />
+      <AbsolutePoint location="602,874" />
+      <AbsolutePoint location="650,874" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/taglibs/grouptabletag.do,null,/WEB-INF/jsp/taglibs/grouptabletag.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="123,512" />
+      <AbsolutePoint location="123,583" />
+      <AbsolutePoint location="1653,583" />
+      <AbsolutePoint location="1653,974" />
+      <AbsolutePoint location="1469,974" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/components/componentmanager.do,null,/WEB-INF/jsp/components/componentmanager.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1350,712" />
+      <AbsolutePoint location="1350,813" />
+      <AbsolutePoint location="312,813" />
+      <AbsolutePoint location="312,1174" />
+      <AbsolutePoint location="350,1174" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/taglibs/requiredtag.do,null,/WEB-INF/jsp/taglibs/requiredtag.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="650,481" />
+      <AbsolutePoint location="572,481" />
+      <AbsolutePoint location="572,1074" />
+      <AbsolutePoint location="557,1074" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/taglibs/htmlareatag.do,null,/WEB-INF/jsp/taglibs/htmlareatag.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="0,0" />
+      <AbsolutePoint location="1074,1276" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/components/userdirectoryservice.do,null,/WEB-INF/jsp/components/userdirectoryservice.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="350,881" />
+      <AbsolutePoint location="282,881" />
+      <AbsolutePoint location="282,1250" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/taglibs/index.do,null,/WEB-INF/jsp/taglibs/index.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1054,81" />
+      <AbsolutePoint location="1097,81" />
+      <AbsolutePoint location="1097,850" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/taglibs/actionstag.do,display,/WEB-INF/jsp/taglibs/actionstag.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="0,0" />
+      <AbsolutePoint location="0,0" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/taglibs/toolbartag.do,null,/WEB-INF/jsp/taglibs/toolbartag.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1014,512" />
+      <AbsolutePoint location="1014,783" />
+      <AbsolutePoint location="900,783" />
+      <AbsolutePoint location="900,1074" />
+      <AbsolutePoint location="851,1074" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/taglibs/messagestag.do,display,/WEB-INF/jsp/taglibs/messagestag.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="214,738" />
+      <AbsolutePoint location="214,753" />
+      <AbsolutePoint location="1544,753" />
+      <AbsolutePoint location="1544,1074" />
+      <AbsolutePoint location="1464,1074" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/components/sessionmanager.do,null,/WEB-INF/jsp/components/sessionmanager.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="141,912" />
+      <AbsolutePoint location="141,1014" />
+      <AbsolutePoint location="1161,1014" />
+      <AbsolutePoint location="1161,1150" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

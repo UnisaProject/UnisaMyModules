@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans>
+	<form-bean name="exceptiontestform" type="za.ac.unisa.lms.tools.monitor.forms.UserForm" />
+	<form-bean name="userrolesdisplayform" type="za.ac.unisa.lms.tools.monitor.forms.UserForm" />
+  	<form-bean name="studentsystemqueryform" type="za.ac.unisa.lms.tools.monitor.forms.QueryForm" />
+  	<form-bean name="sakaiqueryform" type="za.ac.unisa.lms.tools.monitor.forms.QueryForm" />
+    <form-bean name="activeDirectorySSLForm" type="za.ac.unisa.lms.tools.monitor.forms.ActiveDirectorySSLForm" />
+  </form-beans>
+  <global-exceptions />
+  <global-forwards />
+  <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.monitor.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/WEB-INF/jsp/default.jsp"
+        contextRelative="true" />
+    </action>
+    
+    <action path="/displayspringcomponents"
+    	type="za.ac.unisa.lms.tools.monitor.actions.DisplaySpringComponentsAction">
+    	<forward
+    		name="display"
+    		path="/WEB-INF/jsp/displayspringcomponents.jsp"
+    		contextRelative="true" />
+    </action>
+    
+    <action path="/userrolesdisplay"
+    	name="userrolesdisplayform"
+    	type="za.ac.unisa.lms.tools.monitor.actions.UserRolesDisplayAction">
+    	<forward
+    		name="input"
+    		path="/WEB-INF/jsp/userrolesdisplayinput.jsp"
+    		contextRelative="true" />
+    </action>
+    
+    <action path="/studentsystemquery"
+    	name="studentsystemqueryform"
+    	type="za.ac.unisa.lms.tools.monitor.actions.StudentSystemQueryAction">
+    	<forward
+    		name="input"
+    		path="/WEB-INF/jsp/studentsystemqueryinput.jsp"
+    		contextRelative="true" />
+    </action>
+    
+    <action path="/sakaiquery"
+    	name="sakaiqueryform"
+    	type="za.ac.unisa.lms.tools.monitor.actions.SakaiQueryAction">
+    	<forward
+    		name="input"
+    		path="/WEB-INF/jsp/sakaiqueryinput.jsp"
+    		contextRelative="true" />
+    </action>
+    
+    <action path="/exceptiontest" 
+    	name="exceptiontestform"
+    	type="za.ac.unisa.lms.tools.monitor.actions.ExceptionTestAction">
+    </action>
+    <action
+      attribute="activeDirectorySSLForm"
+      name="activeDirectorySSLForm"
+      parameter="action"
+      path="/activedirectoryssl"
+      scope="request"
+      type="za.ac.unisa.lms.tools.monitor.actions.ActiveDirectorySSLAction"
+      validate="false">
+      
+      <forward
+      name="activedirectorysslforward"
+      path="/nagios/activedirectoryssl.jsp"
+      contextRelative="true" />
+    </action>
+    <action
+      parameter="action"
+      path="/sitestats"
+      scope="request"
+      type="za.ac.unisa.lms.tools.monitor.actions.SiteStatsAction"
+      validate="false">
+      
+      <forward
+      name="dbfailureforward"
+      path="/nagios/test_sitestatsdb_failure.jsp"
+      contextRelative="true" />
+      
+      <forward
+      name="dbsuccessforward"
+      path="/nagios/test_sitestatsdb_success.jsp"
+      contextRelative="true" />
+    </action>
+    <action
+      parameter="action"
+      path="/proxytest"
+      scope="request"
+      type="za.ac.unisa.lms.tools.monitor.actions.ProxyTestAction"
+      validate="false">
+      
+      <forward
+      name="proxyfailureforward"
+      path="/nagios/test_sitestatsdb_failure.jsp"
+      contextRelative="true" />
+      
+      <forward
+      name="proxysuccessforward"
+      path="/nagios/test_sitestatsdb_success.jsp"
+      contextRelative="true" />
+    </action>
+  </action-mappings>
+
+  <message-resources parameter="za.ac.unisa.lms.tools.monitor.ApplicationResources" />
+</struts-config>
+

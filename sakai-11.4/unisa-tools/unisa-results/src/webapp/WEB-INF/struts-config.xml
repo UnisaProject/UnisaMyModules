@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans>
+        <form-bean name="resultsform" type="za.ac.unisa.lms.tools.results.forms.ResultsForm" />
+  </form-beans>
+  <global-exceptions />
+  <global-forwards />
+  <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.results.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/displayresults.do?action=input"
+        contextRelative="true" />
+    </action>
+
+    <action
+         attribute="resultsform"
+         name="resultsform"
+         parameter="action"
+         path="/displayresults"
+         type="za.ac.unisa.lms.tools.results.actions.DisplayResultsAction"
+         validate="false">
+         <forward
+            name="display"
+            path="/WEB-INF/jsp/resultsdisplay.jsp"
+            contextRelative="true" />
+         <forward
+            name="input"
+            path="/WEB-INF/jsp/resultsinput.jsp"
+            contextRelative="true" />
+         <forward
+        	name="home"
+        	path="/displayresults.do?action=input"
+        	contextRelative="true" />
+        <forward 
+        	name="displayDetails" 
+         	path="/WEB-INF/jsp/resultdetails.jsp"
+          	contextRelative="true" />
+      </action>
+
+  </action-mappings>
+
+  <message-resources parameter="za.ac.unisa.lms.tools.results.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property property="pathnames" value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property property="stopOnFirstError" value="true"/>
+	</plug-in>
+
+</struts-config>
+

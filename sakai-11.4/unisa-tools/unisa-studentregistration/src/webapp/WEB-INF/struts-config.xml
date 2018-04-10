@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans >
+    	<form-bean name="studentRegistrationForm" type="za.ac.unisa.lms.tools.studentregistration.forms.StudentRegistrationForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+	
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.studentregistration.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/applyForStudentNumber.do?act=walkthrough"
+       	 		contextRelative="true" />
+       	 	<forward
+				name="applyForStudentNumber"
+				path="/applyForStudentNumber.do?act=walkthrough"
+       	 		contextRelative="true" />
+		</action>
+		
+    	<action
+     		attribute="studentRegistrationForm"
+     		name="studentRegistrationForm"
+     		parameter="act"
+     		scope="session"
+     		path="/applyForStudentNumber"
+    		type="za.ac.unisa.lms.tools.studentregistration.actions.ApplyForStudentNumberAction"
+     		validate="false">
+     		<forward
+				name="input"
+				path="/applyForStudentNumber.do?act=walkthrough"
+       	 		contextRelative="true" />
+       	 	<forward
+				name="default"
+				path="/applyForStudentNumber.do?act=walkthrough"
+       	 		contextRelative="true" />
+       	 	<forward
+				name="loginStu"
+				path="/applyForStudentNumber.do?act=walkthrough"
+       	 		contextRelative="true"/>
+       	 	<forward
+				name="loginStaff"
+				path="/applyForStudentNumber.do?act=loginAdmin"
+       	 		contextRelative="true"/>
+     		<forward
+      	  		name="loginSelect"
+       	 		path="/WEB-INF/jsp/applynr/applyLoginSelect.jsp"
+        		contextRelative="true" />
+        	<forward
+      	  		name="applyLoginSelect"
+       	 		path="/WEB-INF/jsp/applynr/applyLoginSelect.jsp"
+        		contextRelative="true" />
+        	<forward
+      	  		name="applyLoginNumber"
+       	 		path="/WEB-INF/jsp/applynr/applyLoginNumber.jsp"
+        		contextRelative="true" />
+        	<forward
+      	  		name="applyLogin"
+       	 		path="/WEB-INF/jsp/applynr/applyLogin.jsp"
+        		contextRelative="true" />
+        	<forward
+      	  		name="applyLoginSLP"
+       	 		path="/WEB-INF/jsp/applynr/applyLoginSLP.jsp"
+        		contextRelative="true" />
+        	<forward
+      	  		name="applyLoginAdmin"
+       	 		path="/WEB-INF/jsp/applynr/applyLoginAdmin.jsp"
+        		contextRelative="true" />
+        	<forward
+       	 		name="applyIDNumber"
+        		path="/WEB-INF/jsp/applynr/applyIDNumber.jsp"
+       	 		contextRelative="true" />
+        	<forward
+      	  		name="applyComplete"
+       	 		path="/WEB-INF/jsp/applynr/applysnrcomplete.jsp"
+        		contextRelative="true" />
+        	<forward
+       	 		name="applyNewPersonal"
+        		path="/WEB-INF/jsp/applynr/applyNewPersonal.jsp"
+       	 		contextRelative="true" />
+        	<forward
+       	 		name="applyNewContact"
+        		path="/WEB-INF/jsp/applynr/applyNewContact.jsp"
+       	 		contextRelative="true" />
+        	<forward
+       	 		name="applyNewAddress1"
+        		path="/WEB-INF/jsp/applynr/applyNewAddress1.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyNewAddress2"
+        		path="/WEB-INF/jsp/applynr/applyNewAddress2.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyNewAddress3"
+        		path="/WEB-INF/jsp/applynr/applyNewAddress3.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyNewInfo1"
+        		path="/WEB-INF/jsp/applynr/applyNewInfo1.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyNewInfo2"
+        		path="/WEB-INF/jsp/applynr/applyNewInfo2.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyNewInfo3"
+        		path="/WEB-INF/jsp/applynr/applyNewInfo3.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyNewSchool"
+        		path="/WEB-INF/jsp/applynr/applyNewSchool.jsp"
+       	 		contextRelative="true" />
+        	<forward
+       	 		name="applyNewDeclare"
+        		path="/WEB-INF/jsp/applynr/applyNewDeclare.jsp"
+       	 		contextRelative="true" />
+        	<forward
+       	 		name="confirmationforward"
+        		path="/WEB-INF/jsp/applynr/confirmapplication.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="dynamicUpload"
+        		path="upload.do?method=uploadInput"
+       	 		contextRelative="true" 
+       	 		redirect="true"/>	
+			<forward 
+				name="applyQualification" 
+				path="/WEB-INF/jsp/applynr/applyQualification.jsp"
+				contextRelative="true" />
+			<forward
+       	 		name="applyQualificationConfirm"
+        		path="/WEB-INF/jsp/applynr/applyQualificationConfirm.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyRetContact"
+        		path="/WEB-INF/jsp/applynr/applyRetContact.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyNewContact"
+        		path="/WEB-INF/jsp/applynr/applyNewContact.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyRetRadio"
+        		path="/WEB-INF/jsp/applynr/applyRetRadio.jsp"
+       	 		contextRelative="true" />	
+       	 	<forward
+       	 		name="applyRetDeclare"
+        		path="/WEB-INF/jsp/applynr/applyRetDeclare.jsp"
+       	 		contextRelative="true" />	
+       	 	<forward
+       	 		name="applyNDP"
+        		path="/WEB-INF/jsp/applynr/applyNDP.jsp"
+       	 		contextRelative="true" />
+       	 	<forward 
+       	 		name="applyPrevQual" 
+       	 		path="/WEB-INF/jsp/applynr/applyPrevQual.jsp"
+       	 		contextRelative="true"/>
+       	 	<forward 
+       	 		name="m30step1" 
+       	 		path="/WEB-INF/jsp/applynr/m30page1.jsp"
+       	 		contextRelative="true"/>
+       	 	<forward 
+       	 		name="m30step2" 
+       	 		path="/WEB-INF/jsp/applynr/m30page2.jsp"
+       	 		contextRelative="true"/>
+       	 	<forward
+       		 	name="searchforward"
+       			path="/WEB-INF/jsp/applynr/search.jsp"
+       		 	contextRelative="true" />
+       	 	<forward
+       	 		name="submitNewMD"
+        		path="/WEB-INF/jsp/applynr/applysnrcompleteMD.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyStatus"
+        		path="/WEB-INF/jsp/applynr/applyStatus.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyAPSSelect"
+        		path="/WEB-INF/jsp/applynr/applyAPSSelect.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyMatric"
+        		path="/WEB-INF/jsp/applynr/applyMatric.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyMatricSubject"
+        		path="/WEB-INF/jsp/applynr/applyMatricSubject.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="appealSelect"
+        		path="/WEB-INF/jsp/applynr/appealSelect.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="appealDeclare"
+        		path="/WEB-INF/jsp/applynr/appealDeclare.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="appealConfirm"
+        		path="/WEB-INF/jsp/applynr/appealConfirm.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyOffer"
+        		path="/WEB-INF/jsp/applynr/applyOffer.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="applyOfferConfirm"
+        		path="/WEB-INF/jsp/applynr/applyOfferConfirm.jsp"
+       	 		contextRelative="true" />
+    	</action>
+	
+		<action 
+			path="/upload" 
+		    type="za.ac.unisa.lms.tools.studentregistration.actions.UploadAction"
+			name="studentRegistrationForm" 
+			parameter="method" 
+			scope="session"
+			input="/WEB-INF/jsp/applynr/documentUpload.jsp"
+			validate="false">
+			<forward
+				name="default"
+				path="/applyForStudentNumber.do?act=walkthrough"
+       	 		contextRelative="true" />
+       	 	<forward
+				name="loginStu"
+				path="/applyForStudentNumber.do?act=walkthrough"
+       	 		contextRelative="true" />
+       	 	<forward
+				name="loginStaff"
+				path="/applyForStudentNumber.do?act=loginAdmin"
+       	 		contextRelative="true" />
+			<forward
+				name="input"
+				path="/WEB-INF/jsp/applynr/documentUpload.jsp"
+				contextRelative="true" />
+			<forward 
+				name="success" 
+				path="/WEB-INF/jsp/applynr/documentUpload.jsp"
+				contextRelative="true" />
+			<forward
+       	 		name="submitNew"
+        		path="/WEB-INF/jsp/applynr/applysnrcomplete.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="submitNewMD"
+        		path="/WEB-INF/jsp/applynr/applysnrcompleteMD.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="submitRet"
+        		path="/WEB-INF/jsp/applynr/applysnrcompleteRet.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+      	  		name="loginSelect"
+       	 		path="/WEB-INF/jsp/applynr/applyLoginSelect.jsp"
+        		contextRelative="true" />
+        	<forward
+      	  		name="applyLoginSelect"
+       	 		path="/WEB-INF/jsp/applynr/applyLoginSelect.jsp"
+        		contextRelative="true" />
+        	<forward
+      	  		name="applyLoginAdmin"
+       	 		path="/WEB-INF/jsp/applynr/applyLoginAdmin.jsp"
+        		contextRelative="true" />
+		</action>
+
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.studentregistration.ApplicationResources" />
+
+</struts-config>

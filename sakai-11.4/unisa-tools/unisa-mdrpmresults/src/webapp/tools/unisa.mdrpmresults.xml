@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.mdrpmresults"
+		title="M&amp;D RPM Results"
+		description="M&amp;D RPM Results">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

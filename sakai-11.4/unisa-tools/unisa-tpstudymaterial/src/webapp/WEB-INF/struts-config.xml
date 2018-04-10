@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		<form-bean name="tpStudyMaterialForm"
+			type="za.ac.unisa.lms.tools.tpstudymaterial.forms.TpStudyMaterialForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+		<action parameter="action" path="/default"
+			type="za.ac.unisa.lms.tools.tpstudymaterial.actions.DefaultAction">
+			<forward name="default" path="/tpStudyMaterial.do?action=studentnrstep"
+				contextRelative="true" />
+		</action>
+		<action attribute="tpStudyMaterialForm" name="tpStudyMaterialForm"
+			parameter="action" path="/tpStudyMaterial"
+			type="za.ac.unisa.lms.tools.tpstudymaterial.actions.TpStudyMaterialAction"
+			scope="session" validate="false">
+			<forward name="studentNrStep"
+			 path="/WEB-INF/jsp/studentstep.jsp" 
+			 contextRelative="true" />
+			 <forward name="courselist"
+			 path="/WEB-INF/jsp/courselist.jsp"
+			 contextRelative="true" />
+			 <forward name="viewMaterial"
+			 path="/WEB-INF/jsp/viewMaterial.jsp"
+			 contextRelative="true" />
+		</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.tpstudymaterial.ApplicationResources" />
+
+	</struts-config>

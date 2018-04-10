@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form-validation PUBLIC
+        "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.3.0//EN"
+        "http://jakarta.apache.org/commons/dtds/validator_1_3_0.dtd">
+
+<form-validation>
+    <global>
+        <constant>
+            <constant-name>phone</constant-name>
+            <constant-value>^\(?(\d{3})\)?[-| ]?(\d{3})[-| ]?(\d{4})$</constant-value>
+        </constant>
+        <constant>
+            <constant-name>zip</constant-name>
+            <constant-value>^\d{5}\d*$</constant-value>
+        </constant>
+        <constant>
+            <constant-name>currency</constant-name>
+            <constant-value>^\d{1,3}(,?\d{1,3})*\.?(\d{1,2})?$</constant-value>
+        </constant>
+        <constant>
+           <constant-name>url</constant-name>
+           <constant-value>^(http:\/\/)?[a-z0-9_\-\.]+\.[a-z0-9_\-]{2,3}((\/.*$)|($))$</constant-value>
+        </constant>
+        
+    </global>
+    <formset>
+    	<form name="vendor">
+    	   <field property="vendorName" depends="required">
+    	      <arg key ="vendor.vendorName"/>
+    	   </field>
+    	   <field property="logoFile" depends="required">
+        		<arg key="vendor.logoFile"/>
+   			</field> 
+   			<field property="offCampusURL" depends="required,mask">
+   			<msg name="mask" key="errors.url"/>
+   			 <arg key="vendor.offCampusURL"/>
+   			      <var>
+   			          <var-name>mask</var-name>
+                      <var-value>${url}</var-value>
+   			       </var> 
+   			</field>
+   			 <field property="onCampusURL" depends="required,mask"> 
+   			 <msg name="mask" key="errors.url"/>                
+   			 <arg key="vendor.onCampusURL"/>  
+   			      <var>
+   			          <var-name>mask</var-name>
+                      <var-value>${url}</var-value>
+   			       </var>        
+   			</field> 
+   			<field property="logoURL" depends="required,mask">
+                   <msg name="mask" key="errors.url" />
+                   <arg key="vendor.logoURL" />
+                        <var>
+                             <var-name>mask</var-name>
+                             <var-value>${url}</var-value>
+                         </var> 
+  			</field> 
+		</form>
+		<form name="eresource">
+		     <field property="resourceName" depends="required">
+		     <arg key ="eresource.resourceName"/>
+		     </field>
+		     
+		     <field property="description" depends="required">
+		     <arg key ="eresource.description"/>
+		     </field>
+		     
+		     <field property="onCampusUrl" depends="required,mask"> 
+   			 <msg name="mask" key="errors.url"/>                
+   			 <arg key="eresource.onCampusUrl"/>  
+   			      <var>
+   			          <var-name>mask</var-name>
+                      <var-value>${url}</var-value>
+   			       </var>  
+   			  </field>
+   
+   			 <field property="offCampusUrl" depends="required,mask">
+   			<msg name="mask" key="errors.url"/>
+   			 <arg key="eresource.offCampusUrl"/>
+   			      <var>
+   			          <var-name>mask</var-name>
+                      <var-value>${url}</var-value>
+   			       </var> 
+   			</field>
+		</form>
+		<form name="newsletter">
+				<field property="newsTitle" depends="required">
+					<arg key="newsletter.newsTitle" />
+				</field>
+		</form>
+		
+		<form name="contentType">
+				<field property="fullTxtDescr" depends="required">
+					<arg key="contentType.fullTxtDescr" />
+				</field>
+		</form>
+		
+		<form name="placement">	
+		       <field property="placement" depends="required">
+		           <arg key="placement.placement"/>
+		       </field>
+		       <field property="displayOrder" depends="required,integer">
+		          <arg key="placement.displayOrder"/>
+		       </field>
+		</form>
+		<form name="subject">	
+		       <field property="subjectName" depends="required">
+		           <arg key="subject.subjectName"/>
+		       </field>
+		</form>
+		<form name="highlightnote">
+		  <field property="highlightNote" depends="required">
+		  <arg key="highlightnote.highlightNote"/>
+		  </field> 
+		</form>
+        <form name="fileUpload">
+            <field property="name" depends="required">
+                <arg key="uploadForm.name"/>
+            </field>
+            <!--  Client-side Javascript won't catch this in IE, but server-side will -->
+            <field property="file" depends="required">
+                <arg key="uploadForm.file"/>
+            </field>
+        </form>
+        <form name="user">
+            <field property="username" depends="required">
+                <arg key="user.username"/>
+            </field>
+            <field property="password" depends="required,twofields">
+                <msg name="twofields" key="errors.twofields"/>
+                <arg key="user.password"/>
+                <arg key="user.confirmPassword" position="1"/>
+                <var>
+                    <var-name>secondProperty</var-name>
+                    <var-value>confirmPassword</var-value>
+                </var>
+            </field>
+            <field property="confirmPassword" depends="required">
+                <arg key="user.confirmPassword"/>
+            </field>
+            <field property="firstName" depends="required">
+                <arg key="user.firstName"/>
+            </field>
+            <field property="lastName" depends="required">
+                <arg key="user.lastName"/>
+            </field>
+            <field property="email" depends="required,email">
+                <arg key="user.email"/>
+            </field>
+            <field property="passwordHint" depends="required">
+                <arg key="user.passwordHint"/>
+            </field>
+        </form>
+    </formset>
+</form-validation>

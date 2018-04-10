@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.monitor"
+		title="Unisa Monitor Tool"
+		description="Tool to monitor various back-end processes within sakai such as database access">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

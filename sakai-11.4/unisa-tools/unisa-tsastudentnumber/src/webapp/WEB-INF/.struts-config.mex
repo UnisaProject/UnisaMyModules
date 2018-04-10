@@ -1,0 +1,18 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="242,88" />
+  <StrutsActivity path="/displaystudentnumber.do" location="75,225" dimension="538,112" />
+  <StrutsActivity path="/WEB-INF/jsp/displaynumber.jsp" location="135,405" dimension="242,55" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="350,50" dimension="150,49" />
+  <StrutsTransition id="/default.do,default,/displaystudentnumber.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="171,138" />
+      <AbsolutePoint location="171,225" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displaystudentnumber.do,display,/WEB-INF/jsp/displaynumber.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="344,337" />
+      <AbsolutePoint location="344,405" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

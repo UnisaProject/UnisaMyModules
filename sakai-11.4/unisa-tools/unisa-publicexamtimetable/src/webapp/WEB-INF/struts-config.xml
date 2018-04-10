@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+    <form-bean name="examtimetableform" type="za.ac.unisa.lms.tools.publicexamtimetable.forms.ExamTimeTableForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.publicexamtimetable.actions.DefaultAction">
+      <forward
+      name="default"
+      path="/examtimetable.do?action=inputSubject"
+      contextRelative="true" />
+
+
+		</action>
+    <action
+      attribute="examtimetableform"
+      name="examtimetableform"
+      parameter="action"
+      path="/examtimetable"
+      type="za.ac.unisa.lms.tools.publicexamtimetable.actions.ExamTimeTableAction"
+      validate="false">
+      <forward
+        name="timetableforward"
+        path="/WEB-INF/jsp/examtimetable.jsp"
+        contextRelative="true" />
+      <forward
+        name="timetableviewforward"
+        path="/WEB-INF/jsp/viewtimetable.jsp"
+        contextRelative="true" />
+      <forward
+        name="subjectinputforward"
+        path="/WEB-INF/jsp/subjectinput.jsp"
+        contextRelative="true" />
+	  <forward
+      	name="home"
+      	path="/examtimetable.do?action=inputSubject"
+      	contextRelative="true" />
+
+    </action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.publicexamtimetable.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

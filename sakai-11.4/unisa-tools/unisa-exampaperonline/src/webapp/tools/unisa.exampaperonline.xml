@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.exampaperonline"
+		title="Exam paper online"
+		description="">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

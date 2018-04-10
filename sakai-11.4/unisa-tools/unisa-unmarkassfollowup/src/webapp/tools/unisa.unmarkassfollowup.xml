@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.unmarkassfollowup"
+		title="Follow-up of outstanding unmarked assignments"
+		description="Follow-up of outstanding unmarked assignments">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

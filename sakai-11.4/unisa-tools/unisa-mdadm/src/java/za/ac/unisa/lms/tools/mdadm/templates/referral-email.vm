@@ -1,0 +1,20 @@
+<HTML>
+  <BODY>
+	<BR />
+	Dear Colleague
+	
+	<BR />
+	<p> 
+	The admission application from $studentNumber $studentName for the $qualCode $qualDesc
+	has been referred to you for consideration.</p>
+	 
+	<p>Please log on to myUnisa and follow the steps to the sign-off.</p>
+	 
+	<p>I thank you kindly.</p>
+	 
+	Regards<BR />
+	$staffName
+	
+	<br>
+ </BODY>
+</HTML>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="unisa-cronjobs"
+  id="myeclipse.1123511290096"
+  context-root="/unisa-cronjobs"
+  j2ee-spec="1.3"
+  archive="unisa-cronjobs.war">
+  <attributes>
+    <attribute name="webrootdir" value="/web" />
+  </attributes>
+</project-module>
+

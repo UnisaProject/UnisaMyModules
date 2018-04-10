@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.liberesource"
+		title="Library E-resources Display"
+		description="Display to students">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

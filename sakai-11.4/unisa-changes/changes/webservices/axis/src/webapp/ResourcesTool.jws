@@ -1,0 +1,284 @@
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+import org.apache.axis.AxisFault;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.content.api.ContentCollection;
+import org.sakaiproject.content.api.ContentEntity;
+import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.content.api.ContentHostingService;
+import org.sakaiproject.content.api.ContentResource;
+import org.sakaiproject.content.api.GroupAwareEntity;
+import org.sakaiproject.entity.api.ResourceProperties;
+import org.sakaiproject.time.api.Time;
+import org.sakaiproject.tool.api.Session;
+import org.sakaiproject.user.api.User;
+import org.sakaiproject.user.api.UserDirectoryService;
+import org.sakaiproject.util.Xml;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+/**
+ * This tool will be responsible for retrieving all resources for a module specific resources for a tool
+ *
+ * @author OpenCollab
+ * @since 1.0.0
+ */
+public class ResourcesTool {
+
+    private static final Log LOG = LogFactory.getLog(ResourcesTool.class);
+    private SessionManager sessionManager;
+    private ContentHostingService contentHostingService;
+    private UserDirectoryService userDirectoryService;
+    private Map<String, String> users = new WeakHashMap<String, String>();
+
+    /**
+     * Setup dependencies
+     */
+    public ResourcesTool() {
+        sessionManager = (SessionManager) ComponentManager.get(SessionManager.class.getName());
+        contentHostingService = (ContentHostingService) ComponentManager.get(ContentHostingService.class.getName());
+        userDirectoryService = (UserDirectoryService) ComponentManager.get(UserDirectoryService.class.getName());
+    }
+
+    /**
+     * Get the content /resources for a site
+     *
+     * @param sessionId
+     * @param siteId
+     * @param fromDate
+     * @return
+     */
+    public String getResourcesForSite(String sessionId, String siteId, String fromDate) throws AxisFault {
+        this.establishSession(sessionId);
+        Date filterDate = null;
+        if (!StringUtils.isEmpty(fromDate)) {
+            filterDate = new Date(Long.parseLong(fromDate));
+        }
+        Document dom = Xml.createDocument();
+        Node list = dom.createElement("list");
+        dom.appendChild(list);
+        String collectionId = contentHostingService.getSiteCollection(siteId);
+        try {
+            ContentCollection contentCollection = contentHostingService.getCollection(collectionId);
+            parseContentCollection(dom, list, contentCollection, siteId, filterDate);
+        } catch (Exception e) {
+            LOG.error("Could not retrieve the resources.", e);
+            throw new AxisFault("Could not retrieve the resources.\n" + Arrays.toString(e.getStackTrace()), e);
+        }
+        return Xml.writeDocumentToString(dom);
+    }
+
+    /**
+     * Get the Session related to the given sessionid
+     *
+     * @param sessionid	the id of the session to retrieve
+     * @return	the session, if it is active
+     * @throws AxisFault	if session is inactive
+     */
+    private Session establishSession(String sessionid) throws AxisFault {
+        Session s = null;
+        try {
+            s = sessionManager.getSession(sessionid);
+
+            if (s == null) {
+                throw new AxisFault("Session \"" + sessionid + "\" is not active");
+            }
+            s.setActive();
+            sessionManager.setCurrentSession(s);
+        } catch (Exception e) {
+            LOG.error(this.getClass().getName(), e);
+        }
+        return s;
+    }
+    
+    private int parseContentCollection(Document dom, Node list, ContentCollection contentCollection, String parentId, Date fromDate) {
+        int count = 0;
+        Element resource = dom.createElement("resource");
+        resource.setAttribute("id", contentCollection.getId());
+        resource.setAttribute("parent-id", parentId);
+        resource.setAttribute("reference", contentCollection.getReference());
+        String[] ref = contentCollection.getReference().split("/");
+        resource.setAttribute("name", ref[ref.length - 1]);
+        resource.setAttribute("access", getAccess(contentCollection));
+        resource.setAttribute("resource-type", contentCollection.getResourceType());
+        resource.setAttribute("url", contentCollection.getUrl());
+        resource.setAttribute("release-date", getDateString(contentCollection.getReleaseDate()));
+        resource.setAttribute("retract-date", getDateString(contentCollection.getRetractDate()));
+        ResourceProperties properties = contentCollection.getProperties();
+        resource.setAttribute("description", properties.getProperty(properties.getNamePropDescription()));
+        String userId = properties.getProperty(properties.getNamePropCreator());
+        resource.setAttribute("created-by", userId);
+        resource.setAttribute("created-by-display-name", getUserDisplayName(userId));
+        resource.setAttribute("created", convertSakaiTimeToDate(properties.getProperty(properties.getNamePropCreationDate())));
+        resource.setAttribute("last-changed", convertSakaiTimeToDate(properties.getProperty(properties.getNamePropModifiedDate())));
+        userId = properties.getProperty(properties.getNamePropModifiedBy());
+        resource.setAttribute("last-changed-by", userId);
+        resource.setAttribute("last-changed-by-display-name", getUserDisplayName(userId));
+        resource.setAttribute("is-collection", "true");
+        resource.setAttribute("type", "resource/collection");
+        resource.setAttribute("size", String.valueOf(contentCollection.getMemberCount()));
+        List<ContentEntity> memberResource = contentCollection.getMemberResources();
+        for(ContentEntity contentEntity: memberResource){
+            if(contentEntity.isCollection()){
+                count = count + parseContentCollection(dom, list, (ContentCollection)contentEntity, contentCollection.getId(), fromDate);
+            }else{
+                count = count + parseContentResource(dom, list, (ContentResource)contentEntity, contentCollection.getId(), fromDate);
+            }
+        }
+        if (count > 0) {
+            list.appendChild(resource);
+        }
+        return count;
+    }
+    
+    private int parseContentResource(Document dom, Node list, ContentResource contentResource, String parentId, Date fromDate) {
+        Element resource = dom.createElement("resource");
+        resource.setAttribute("id", contentResource.getId());
+        resource.setAttribute("parent-id", parentId);
+        resource.setAttribute("reference", contentResource.getReference());
+        String[] ref = contentResource.getReference().split("/");
+        resource.setAttribute("name", ref[ref.length - 1]);
+        resource.setAttribute("access", getAccess(contentResource));
+        resource.setAttribute("resource-type", contentResource.getResourceType());
+        resource.setAttribute("url", contentResource.getUrl());
+        resource.setAttribute("release-date", getDateString(contentResource.getReleaseDate()));
+        resource.setAttribute("retract-date", getDateString(contentResource.getRetractDate()));
+        ResourceProperties properties = contentResource.getProperties();
+        resource.setAttribute("description", properties.getProperty(properties.getNamePropDescription()));
+        String userId = properties.getProperty(properties.getNamePropCreator());
+        resource.setAttribute("created-by", userId);
+        resource.setAttribute("created-by-display-name", getUserDisplayName(userId));
+        resource.setAttribute("created", convertSakaiTimeToDate(properties.getProperty(properties.getNamePropCreationDate())));
+        resource.setAttribute("last-changed", convertSakaiTimeToDate(properties.getProperty(properties.getNamePropModifiedDate())));
+        resource.setAttribute("title", properties.getProperty(properties.getNamePropDisplayName()));
+        userId = properties.getProperty(properties.getNamePropModifiedBy());
+        resource.setAttribute("last-changed-by", userId);
+        resource.setAttribute("last-changed-by-display-name", getUserDisplayName(userId));
+        resource.setAttribute("is-collection", "false");
+        resource.setAttribute("type", contentResource.getContentType());
+        resource.setAttribute("size", String.valueOf(contentResource.getContentLength()));
+        Date comparisonDate = null;
+        if (!StringUtils.isEmpty(resource.getAttribute("created"))) {
+            comparisonDate = new Date(Long.parseLong(resource.getAttribute("created")));
+        }
+        if (!StringUtils.isEmpty(resource.getAttribute("last-changed"))) {
+            comparisonDate = new Date(Long.parseLong(resource.getAttribute("last-changed")));
+        }
+        //check if we want this message
+        if (fromDate == null || comparisonDate == null || comparisonDate.after(fromDate)) {
+            list.appendChild(resource);
+            return 1;
+        }else{
+            return 0;
+        }
+    }
+
+    /**
+     * the beginning , end and mod dates are of an abstract Sakai specific format, they can be empty or contain a long
+     * value which must be reformatted to return a standard date in long format ""
+     *
+     * @param sakaiTime
+     * @return
+     * @throws ParseException
+     */
+    private String convertSakaiTimeToDate(String sakaiTime) {
+        try {
+            if (sakaiTime == null || sakaiTime.trim().length() == 0) {
+                return null;
+            }
+            DateFormat inputDate = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+            Date date = inputDate.parse(sakaiTime);
+            return String.valueOf(date.getTime());
+        } catch (ParseException ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Retrieve the actual resource data when given the following
+     *
+     * @param sessionId
+     * @param siteId
+     * @param resourceId
+     * @return XML string with data base 64 encoded
+     */
+    public String getResourceData(String sessionId, String resourceId) throws AxisFault {
+        this.establishSession(sessionId);
+        Document dom = Xml.createDocument();
+        Node resource = dom.createElement("resource");
+        dom.appendChild(resource);
+        try {
+            ContentResource contentResource = contentHostingService.getResource(resourceId);
+            Element eleContent = dom.createElement("content");
+            eleContent.setAttribute("id", resourceId);
+            resource.appendChild(eleContent);
+            eleContent.setTextContent(new String(Base64.encodeBase64(contentResource.getContent())));
+        } catch (Exception e) {
+            LOG.error("Resource is invalid or missing.", e);
+            throw new AxisFault("Resource is invalid or missing.", e);
+        }
+        return Xml.writeDocumentToString(dom);
+    }
+
+    private String getDateString(Time time) {
+        if (time == null) {
+            return null;
+        }
+        return String.valueOf(time.getTime());
+    }
+
+    private String getDateString(Date time) {
+        if (time == null) {
+            return null;
+        }
+        return String.valueOf(time.getTime());
+    }
+
+    /**
+     * Gets the display name for a given user
+     *
+     * Differs from original above as that one uses the session to get the displayname hence you must know this in
+     * advance or be logged in to the web services with that user. This uses a userid as well so we could be logged in
+     * as admin and retrieve the display name for any user.
+     *
+     * @param	userid	the login username (ie jsmith26) of the user you want the display name for
+     * @return	the display name for the user
+     * @throws	AxisFault
+     *
+     */
+    private String getUserDisplayName(String userid) {
+        String name = users.get(userid);
+        if (name != null) {
+            return name;
+        }
+        try {
+            User user = userDirectoryService.getUser(userid);
+            name = user.getDisplayName();
+        } catch (Exception e) {
+            LOG.warn("Could not get the display name: " + userid, e);
+            name = "";
+        }
+        users.put(userid, name);
+        return name;
+    }    
+
+    private String getAccess(ContentEntity contentEntity) {
+        GroupAwareEntity.AccessMode accessMode = contentEntity.getAccess();
+        if(GroupAwareEntity.AccessMode.INHERITED.toString().equals(accessMode.toString())){
+            accessMode = contentEntity.getInheritedAccess();
+        }
+        return accessMode.toString();
+    }
+}

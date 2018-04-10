@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+    <form-bean name="satbookMonthlyForm" type="za.ac.unisa.lms.tools.satbook.forms.SatbookMonthlyForm" />
+    <form-bean name="satbookDailyForm" type="za.ac.unisa.lms.tools.satbook.forms.SatbookDailyForm" />
+    <form-bean name="bookingForm" type="za.ac.unisa.lms.tools.satbook.forms.BookingForm" />
+    <form-bean name="lecturerForm" type="za.ac.unisa.lms.tools.satbook.forms.LecturerForm" />
+    <form-bean name="adminForm" type="za.ac.unisa.lms.tools.satbook.forms.AdminForm" />
+    <form-bean name="institutionRecord" type="za.ac.unisa.lms.tools.satbook.forms.InstitutionRecord" />
+    <form-bean name="instDaysForm" type="za.ac.unisa.lms.tools.satbook.forms.InstDaysForm" />
+    <form-bean name="instDaysRecord" type="za.ac.unisa.lms.tools.satbook.forms.InstDaysRecord" />
+    <form-bean name="classroomForm" type="za.ac.unisa.lms.tools.satbook.forms.ClassroomForm" />
+    <form-bean name="adminLinkForm" type="za.ac.unisa.lms.tools.satbook.forms.AdminLinkForm" />
+    <form-bean name="vBookingTypeForm" type="za.ac.unisa.lms.tools.satbook.forms.VBookingTypeForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+		<action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.satbook.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/satbookMonthly.do?action=monthlyview"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="satbookMonthlyForm"
+      name="satbookMonthlyForm"
+      parameter="action"
+      path="/satbookMonthly"
+      scope="session"
+      type="za.ac.unisa.lms.tools.satbook.actions.SatbookMonthlyAction">
+      <forward
+        name="monthlyview"
+        path="/WEB-INF/jsp/monthlyview.jsp"
+        contextRelative="true" />
+      <forward
+        name="adminsystemlink"
+        path="/satbookAdmin.do?action=adminLink"
+        contextRelative="true" />
+      <forward
+        name="dailyview"
+        path="/satbookDaily.do?action=dailyview"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="satbookDailyForm"
+      name="satbookDailyForm"
+      parameter="action"
+      path="/satbookDaily"
+      scope="session"
+      type="za.ac.unisa.lms.tools.satbook.actions.SatbookDailyAction">
+      <forward
+        name="dailyview"
+        path="/WEB-INF/jsp/dailyview.jsp"
+        contextRelative="true" />
+      <forward
+        name="confirmbkngdelete"
+        path="/WEB-INF/jsp/confirmbkngdelete.jsp"
+        contextRelative="true" />
+      <forward
+        name="bookingsreport"
+        path="/WEB-INF/jsp/bookingsreport.jsp"
+        contextRelative="true" />
+      <forward
+        name="bookingstep1"
+        path="/satbookBooking.do?action=bookingstep1"
+        contextRelative="true" />
+      <forward
+        name="viewbooking"
+        path="/satbookBooking.do?action=viewbooking"
+        contextRelative="true" />
+      <forward
+        name="editbooking"
+        path="/satbookBooking.do?action=editbooking"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="bookingForm"
+      name="bookingForm"
+      parameter="action"
+      path="/satbookBooking"
+      scope="session"
+      type="za.ac.unisa.lms.tools.satbook.actions.SatbookBookingAction">
+      	<forward
+        name="bookingstep1"
+        path="/WEB-INF/jsp/bookingstep1.jsp"
+        contextRelative="true" />
+		<forward
+        name="bookingstep2"
+        path="/WEB-INF/jsp/bookingstep2.jsp"
+        contextRelative="true" />
+        <forward
+        name="bookingstep3"
+        path="/WEB-INF/jsp/bookingstep3.jsp"
+        contextRelative="true" />
+        <forward
+        name="bookingstep4"
+        path="/WEB-INF/jsp/bookingstep4.jsp"
+        contextRelative="true" />
+        <forward
+        name="bookingstep5"
+        path="/WEB-INF/jsp/bookingstep5.jsp"
+        contextRelative="true" />
+        <forward
+        name="bookingstep6"
+        path="/WEB-INF/jsp/bookingstep6.jsp"
+        contextRelative="true" />
+        <forward
+        name="viewbooking"
+        path="/WEB-INF/jsp/viewbooking.jsp"
+        contextRelative="true" />
+        <forward
+        name="bookingadmin"
+        path="/WEB-INF/jsp/bookingadmin.jsp"
+        contextRelative="true" />
+      <forward
+        name="dailyview"
+        path="/satbookDaily.do?action=dailyview"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="adminForm"
+      name="adminForm"
+      parameter="action"
+      path="/satbookAdmin"
+      type="za.ac.unisa.lms.tools.satbook.actions.SatbookAdminAction"
+      validate="false">
+      <forward
+        name="admininstitutions"
+        path="/WEB-INF/jsp/admininstitutions.jsp"
+        contextRelative="true" />
+      <forward name="sendgroupemail" path="/WEB-INF/jsp/sendgroupemail.jsp" />
+      <forward
+        name="admininstitutionsedit"
+        path="/WEB-INF/jsp/admininstitutionsedit.jsp"
+        contextRelative="true" />
+      <forward
+        name="emailschedule"
+        path="/WEB-INF/jsp/emailschedule.jsp"
+        contextRelative="true" />
+      <forward
+        name="adminassistants"
+        path="/WEB-INF/jsp/adminassistants.jsp"
+        contextRelative="true" />
+      <forward
+        name="adminclassrooms"
+        path="/WEB-INF/jsp/adminclassrooms.jsp"
+        contextRelative="true" />
+      <forward
+        name="adminVenues"
+        path="/WEB-INF/jsp/adminclassrooms.jsp"
+        contextRelative="true" />
+        <forward
+        name="confirmvenuedelete"
+        path="/WEB-INF/jsp/confirmvenuedelete.jsp"
+        contextRelative="true" />
+      <forward
+        name="adminlecturers"
+        path="/WEB-INF/jsp/adminlecturers.jsp"
+        contextRelative="true" />
+      <forward
+        name="adminmenu"
+        path="/WEB-INF/jsp/adminmenu.jsp"
+        contextRelative="true" />
+      <forward
+        name="admininstitutiondays"
+        path="/WEB-INF/jsp/admininstitutiondays.jsp"
+        contextRelative="true" />
+      <forward
+        name="admininstitutiondaysedit"
+        path="/WEB-INF/jsp/admininstitutiondaysedit.jsp"
+        contextRelative="true" />
+      <forward
+        name="adminmaterial"
+        path="/WEB-INF/jsp/adminmaterial.jsp"
+        contextRelative="true" />
+      <forward
+        name="adminmaterialadd"
+        path="/WEB-INF/jsp/adminmaterialadd.jsp"
+        contextRelative="true" />
+      <forward
+        name="adminlecturersedit"
+        path="/WEB-INF/jsp/adminlecturersedit.jsp"
+        contextRelative="true" />
+      <forward
+        name="satbookmonthlyfw"
+        path="/satbookMonthly.do?action=monthlyview"
+        contextRelative="true" />
+      <forward
+        name="adminassistanttype"
+        path="/WEB-INF/jsp/adminassistanttype.jsp"
+        contextRelative="true" />
+      <forward
+        name="adminclassroomsedit"
+        path="/WEB-INF/jsp/adminclassroomsedit.jsp"
+        contextRelative="true" />
+      <forward
+        name="adminclassroomsadd"
+        path="/WEB-INF/jsp/adminclassroomsadd.jsp"
+        contextRelative="true" />
+      <forward
+        name="adminasstypeadd"
+        path="/WEB-INF/jsp/adminasstypeadd.jsp"
+        contextRelative="true" />
+      <forward
+        name="adminassistantadd"
+        path="/WEB-INF/jsp/adminassistantadd.jsp"
+        contextRelative="true" />
+        <forward
+        name="bookingtype"
+        path="/WEB-INF/jsp/bookingtype.jsp"
+        contextRelative="true" />
+        <forward
+        name="confirmbooktypedelete"
+        path="/WEB-INF/jsp/confirmbooktypedelete.jsp"
+        contextRelative="true" />
+      <forward
+        name="emailconfirm"
+        path="/WEB-INF/jsp/emailconfirm.jsp"
+        contextRelative="true" />
+      <forward
+        name="adminsystemlink"
+        path="/WEB-INF/jsp/adminsystemlink.jsp"
+        contextRelative="true" />
+        
+    </action>
+
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.satbook.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

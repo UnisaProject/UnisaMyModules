@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.mylife"
+		title="Claim UNISA Login"
+		description="Claim UNISA Login">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

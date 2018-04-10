@@ -1,0 +1,26 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="242,88" />
+  <StrutsActivity path="/cancelUserAction.do" location="50,250" dimension="251,88" />
+  <StrutsActivity path="/WEB-INF/jsp/cancelUser.jsp" location="375,375" dimension="168,49" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="350,50" dimension="150,49" />
+  <StrutsTransition id="/default.do,default,/cancelUserAction.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="171,138" />
+      <AbsolutePoint location="171,250" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/cancelUserAction.do,save,/WEB-INF/jsp/savecanceluser.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="201,250" />
+      <AbsolutePoint location="201,174" />
+      <AbsolutePoint location="350,174" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/cancelUserAction.do,input,/WEB-INF/jsp/cancelUser.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="175,338" />
+      <AbsolutePoint location="175,399" />
+      <AbsolutePoint location="375,399" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

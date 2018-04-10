@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans >
+    	<form-bean name="studentOfferForm" type="za.ac.unisa.lms.tools.studentoffer.forms.StudentOfferForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+	
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.studentoffer.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/studentOffer.do?act=walkthrough"
+       	 		contextRelative="true" />
+       	 	<forward
+				name="studentOffer"
+				path="/studentOffer.do?act=walkthrough"
+       	 		contextRelative="true" />
+		</action>
+		
+    	<action
+     		attribute="studentOfferForm"
+     		name="studentOfferForm"
+     		parameter="act"
+     		scope="session"
+     		path="/studentOffer"
+    		type="za.ac.unisa.lms.tools.studentoffer.actions.StudentOfferAction"
+     		validate="false">
+     		<forward
+				name="input"
+				path="/studentOffer.do?act=walkthrough"
+       	 		contextRelative="true" />
+       	 	<forward
+				name="default"
+				path="/studentOffer.do?act=walkthrough"
+       	 		contextRelative="true" />
+        	<forward
+      	  		name="applyLogin"
+       	 		path="/WEB-INF/jsp/applyLogin.jsp"
+        		contextRelative="true" />
+       	 	<forward
+       	 		name="applyOffer"
+        		path="/WEB-INF/jsp/applyOffer.jsp"
+       	 		contextRelative="true" />
+			<forward
+       	 		name="applyOfferConfirm"
+        		path="/WEB-INF/jsp/applyOfferConfirm.jsp"
+       	 		contextRelative="true" />
+    	</action>
+
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.studentoffer.ApplicationResources" />
+
+</struts-config>

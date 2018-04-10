@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.examtimetable"
+		title="Student Examination Timetable"
+		description="This provides a student with his/her examination timetable for a given exam.">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

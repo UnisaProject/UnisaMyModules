@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.results"
+		title="Student Examination Results"
+		description="Student Examination Results">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

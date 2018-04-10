@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <name>Unisa Study Material Tool</name>
+   <groupId>org.sakaiproject.studymaterial</groupId>
+   <artifactId>unisa-studymaterial-tool</artifactId>
+   <organization>
+      <name>Sakai Project</name>
+      <url>http://sakaiproject.org/</url>
+   </organization>
+   <inceptionYear>2007</inceptionYear>
+   <description>Unisa Study Material (tool)</description>
+   <version>0.1</version>
+   <packaging>war</packaging>
+
+   <!-- the base is the parent pom -->
+   <parent>
+      <groupId>org.sakaiproject</groupId>
+      <artifactId>unisa-studymaterial</artifactId>
+      <version>0.1</version>
+   </parent>
+
+   <properties>
+      <rsfutil.version>0.7.2</rsfutil.version>
+      <sakairsf.sakai.version>2.2.x</sakairsf.sakai.version>
+      <deploy.webappname>unisa-studymaterial</deploy.webappname>
+      <appserver.id>${sakai.appserver.id}</appserver.id>
+   </properties>
+
+   <dependencies>
+
+      <!-- Sakai dependencies -->
+
+      <!-- Sakai RSF dependency -->
+      <dependency>
+         <groupId>uk.org.ponder.sakairsf</groupId>
+         <artifactId>sakairsf</artifactId>
+         <version>10.0</version>
+         <type>jar</type>
+      </dependency>
+      
+      <dependency>
+         <groupId>uk.org.ponder.sakairsf</groupId>
+         <artifactId>SakaiRSFComponents-evolvers</artifactId>
+         <version>${rsfutil.version}-sakai_${sakairsf.sakai.version}</version>
+         <type>jar</type>
+      </dependency>
+      <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+      <scope>provided</scope>
+    </dependency>
+      <dependency>
+         <groupId>uk.org.ponder.sakairsf</groupId>
+         <artifactId>SakaiRSFComponents-templates</artifactId>
+         <version>${rsfutil.version}-sakai_${sakairsf.sakai.version}</version>
+         <type>war</type>
+      </dependency>
+
+      <!-- apache commons logging -->
+      <dependency>
+         <groupId>commons-logging</groupId>
+         <artifactId>commons-logging</artifactId>
+         <version>1.1.1</version>
+         <scope>provided</scope>
+      </dependency>
+      <dependency>
+         <groupId>commons-collections</groupId>
+         <artifactId>commons-collections</artifactId>
+         <version>3.2.1</version>
+         <scope>provided</scope>
+      </dependency>
+      
+      <!-- unisa -->
+      <dependency>
+      	<groupId>org.sakaiproject</groupId>
+      	<artifactId>unisa-sharedclasses</artifactId>
+      	<version>${sakai.version}</version>
+      </dependency>
+       <dependency>
+      	<groupId>org.springframework</groupId>
+      	<artifactId>spring</artifactId>
+      	<version>2.0.6</version>
+      	<scope>provided</scope>
+      </dependency> 
+      
+      <dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>4.11</version>
+    <scope>test</scope>
+  </dependency>
+   <!-- core library -->
+   <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+       <artifactId>resteasy-jaxrs</artifactId>
+      <version>3.0.2.Final</version>
+   </dependency>
+  <!-- JAXB support -->
+  <dependency>
+    <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-jaxb-provider</artifactId>
+    <version>3.0.2.Final</version>
+  </dependency>
+  <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>jaxrs-api</artifactId>
+      <version>3.0.2.Final</version>
+  </dependency>
+  <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-client</artifactId>
+      <version>3.0.2.Final</version>
+  </dependency>
+<!--   <dependency>
+      <groupId>net.sf.scannotation</groupId>
+      <artifactId>scannotation</artifactId>
+      <version>1.0.3</version>
+  </dependency> -->
+  
+  		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+      
+   </dependencies>
+
+   <!-- RSF (CARET) maven 2 repositories -->
+   <repositories>
+<!--       <repository>
+         <id>Sakaiproject-Maven2</id>
+         <name>Sakaiproject Maven 2 Repository</name>
+         <url>https://source.sakaiproject.org/maven2</url>
+      </repository>
+      <repository>
+         <id>CARET-Maven2</id>
+         <name>CARET Maven 2 Repository</name>
+         <url>http://www2.caret.cam.ac.uk/maven2</url>
+      </repository>
+      <repository>
+         <id>CARET-Maven2-dev</id>
+         <name>CARET Maven 2 Development Repository</name>
+         <url>http://www2.caret.cam.ac.uk/maven2dev</url>
+         <snapshots>
+            <enabled>true</enabled>
+         </snapshots>
+      </repository>
+      
+
+  <repository>
+    <id>jboss</id>
+    <url>http://repository.jboss.org/maven2</url>
+  </repository> -->
+
+      
+   </repositories>
+
+   <pluginRepositories>
+      <pluginRepository>
+         <id>CARET-Maven2</id>
+         <name>CARET Maven 2 Repository</name>
+         <url>http://www2.caret.cam.ac.uk/maven2</url>
+      </pluginRepository>
+   </pluginRepositories>
+
+</project>
+

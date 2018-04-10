@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.registrationstatus"
+		title="Student Registration Status"
+		description="Student Registration Status">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

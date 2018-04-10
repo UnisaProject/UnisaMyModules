@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="ModuleInfo" type="moduleInfoRequest"/>
+
+  <xs:element name="Modules" type="moduleResponse"/>
+
+  <xs:element name="SCMCourseInfoDTO" type="scmCourseInfoDTO"/>
+
+  <xs:element name="StudyMaterial" type="studyMaterialResponse"/>
+
+  <xs:complexType name="resourceDTO">
+    <xs:sequence/>
+    <xs:attribute name="barcode" type="xs:string"/>
+    <xs:attribute name="shortDescription" type="xs:string"/>
+    <xs:attribute name="fullDescription" type="xs:string"/>
+    <xs:attribute name="unitNumber" type="xs:string"/>
+    <xs:attribute name="documentType" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="period" type="xs:string"/>
+    <xs:attribute name="year" type="xs:string"/>
+    <xs:attribute name="dateAvailable" type="xs:dateTime"/>
+    <xs:attribute name="fileSize" type="xs:string"/>
+    <xs:attribute name="dept" type="xs:string"/>
+    <xs:attribute name="lecturer" type="xs:string"/>
+    <xs:attribute name="category" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="studyMaterialResponse">
+    <xs:complexContent>
+      <xs:extension base="studyMaterialDTO">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="studyMaterialDTO">
+    <xs:sequence>
+      <xs:element name="Resource" type="resourceDTO" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="scmCourseInfoDTO">
+    <xs:complexContent>
+      <xs:extension base="moduleInfoDTO">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="moduleInfoDTO">
+    <xs:sequence>
+      <xs:element name="academicYear" type="xs:int" minOccurs="0"/>
+      <xs:element name="moduleCode" type="xs:string" minOccurs="0"/>
+      <xs:element name="semesterPeriod" type="xs:int" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="moduleResponse">
+    <xs:sequence>
+      <xs:element name="ModuleInfo" type="moduleInfoDTO" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="moduleInfoRequest">
+    <xs:complexContent>
+      <xs:extension base="moduleInfoDTO">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>
+

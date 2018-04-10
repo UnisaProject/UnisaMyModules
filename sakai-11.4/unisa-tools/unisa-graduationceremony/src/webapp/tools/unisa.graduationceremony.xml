@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.graduationceremony"
+		title="Unisa Graduation Ceremony application"
+		description="Unisa Graduation Ceremony application">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

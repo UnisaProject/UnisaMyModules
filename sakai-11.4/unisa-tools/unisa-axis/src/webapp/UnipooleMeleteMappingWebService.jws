@@ -1,0 +1,399 @@
+import java.sql.Types;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.lang.StringBuffer;
+
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
+import org.apache.axis.AxisFault;
+import org.apache.axis.utils.JavaUtils;
+import org.apache.commons.collections.map.ListOrderedMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.email.api.EmailService;
+import org.sakaiproject.email.api.Attachment;
+import org.sakaiproject.email.api.RecipientType;
+
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+
+import za.ac.unisa.lms.db.SakaiDAO;
+
+/**
+Webservice for the mapping of melete ids
+mapping between two sites
+*/
+public class UnipooleMeleteMappingWebService {
+
+
+	// -------------------------------------------------------------------------
+	
+	private StringBuffer selectMeleteModuleIdForMapping;
+	private String errorEmailAddress = new String("syzelle@unisa.ac.za");
+	private String monitorEmailAddress = new String("syzelle@unisa.ac.za");
+	//"MyUnisaBugs@unisa.ac.za"
+	private StringBuffer emailHeading = new StringBuffer();
+	private StringBuffer emailBody = new StringBuffer();
+	private StringBuffer emailSuccessHeading = new StringBuffer();
+	private StringBuffer emailSuccessBody = new StringBuffer();
+	// -------------------------------------------------------------------------
+
+
+	/************************************************************************* */ 
+	/* Method to do mapping for Melete 
+	 *  1) map module IDs
+	 *  2) map section IDs
+	 */
+	public void meleteDataToBeMapped(String toolId, String fromContext,
+		String toContext) throws AxisFault {
+		Log log = LogFactory.getLog(this.getClass());
+		boolean duplicateModulesExist = false;
+		boolean duplicateSectionExist = false;
+		
+		emailSuccessBody.append("UnipooleMeleteMappingWebService.wsdl <br>");
+		emailSuccessBody.append("Melete Mapping from ");
+		emailSuccessBody.append(fromContext);
+		emailSuccessBody.append(" to ");
+		emailSuccessBody.append(toContext);
+		emailSuccessBody.append("\n\n <br>");
+		System.out.println("*************** IN meleteDataToBeMapped getModuleIdList");
+		try {
+			// -------------------------------------------------------------------------
+			// QUERIES 
+			// query to retrieve the melete module ids that must be mapped
+	 		selectMeleteModuleIdForMapping= new StringBuffer();
+			
+			selectMeleteModuleIdForMapping.append("SELECT MCM.module_id as toModuleId, ");
+			selectMeleteModuleIdForMapping.append(" MM.title as toTitle,");
+			selectMeleteModuleIdForMapping.append(" nvl((select MCM2.module_id ");
+			selectMeleteModuleIdForMapping.append(" from   melete_course_module MCM2, melete_module MM2 ");
+			selectMeleteModuleIdForMapping.append(" where  MCM2.course_id = ? "); // the site id where you were copying from
+			selectMeleteModuleIdForMapping.append(" and    MCM2.module_id = MM2.module_id ");
+			selectMeleteModuleIdForMapping.append(" and    MM2.title = MM.title),0) as fromModuleId ");
+			selectMeleteModuleIdForMapping.append(" FROM  melete_course_module MCM, melete_module MM ");
+			selectMeleteModuleIdForMapping.append(" WHERE MCM.course_id = ? "); // the site id where you were copying to
+			selectMeleteModuleIdForMapping.append(" AND   MCM.module_id = MM.module_id");	
+	
+			/* ************ query to insert melete mapping ************************* */
+			StringBuffer InsertMeleteMapping= new StringBuffer();
+			InsertMeleteMapping.append("insert into uni_content_mapping(id, site_from_id, site_to_id, tool_name, tool_from_id, tool_to_id) ");
+			InsertMeleteMapping.append("values((select nvl(max(id),0) +1 from uni_content_mapping), ?, ?, ?, ?, ?)");
+	
+			/* ********* query to retrieve the melete section ids that must be mapped */
+	 		StringBuffer selectMeleteSectionIdForMapping= new StringBuffer();
+	 		
+	 		selectMeleteSectionIdForMapping.append(" select MCM.module_id as toModuleId, MS.section_Id as toSectionId, MS.Title as toSectionTitle,");
+			selectMeleteSectionIdForMapping.append(" (select MS2.section_id ");
+			selectMeleteSectionIdForMapping.append(" from   melete_course_module MCM2, melete_module MM2, melete_section MS2");
+			selectMeleteSectionIdForMapping.append(" where  MCM2.course_id = ?"); 
+			selectMeleteSectionIdForMapping.append(" and    MCM2.module_id = MM2.module_id");
+			selectMeleteSectionIdForMapping.append(" and    MM2.title = MM.title");
+			selectMeleteSectionIdForMapping.append(" and    MM2.module_id = MS2.module_id");
+			selectMeleteSectionIdForMapping.append(" and    MS2.title = MS.title) as fromSectionId");
+			selectMeleteSectionIdForMapping.append(" from  melete_course_module MCM, melete_module MM, melete_section MS");
+			selectMeleteSectionIdForMapping.append(" where MCM.course_id = ?");
+			selectMeleteSectionIdForMapping.append(" and   MCM.module_id = MM.module_id");
+			selectMeleteSectionIdForMapping.append(" and   MM.module_id = MS.module_id");
+			selectMeleteSectionIdForMapping.append(" order by MM.module_id");	 		
+			
+			/* ********* query to check for duplicate module ids ******************** */
+	 		StringBuffer selectModuleDuplicates= new StringBuffer();
+
+			selectModuleDuplicates.append(" select distinct(MM.title) as Title");
+			selectModuleDuplicates.append(" from  melete_course_module MCM, melete_module MM");
+			selectModuleDuplicates.append(" where MCM.course_id = ?");
+			selectModuleDuplicates.append(" and   MCM.module_id = MM.module_id");
+			selectModuleDuplicates.append(" and   2 <= (select count(MM2.title)");
+			selectModuleDuplicates.append(" from  melete_course_module MCM2, melete_module MM2");
+			selectModuleDuplicates.append(" where MCM2.course_id = MCM.course_id");
+			selectModuleDuplicates.append(" and   MM2.module_id = MCM2.module_id");
+			selectModuleDuplicates.append(" and   MM2.title = MM.title)");
+			
+			/* ********* query to check for duplicate section ids ******************* */
+	 		StringBuffer selectSectionDuplicates= new StringBuffer();
+
+			selectSectionDuplicates.append(" select distinct(MS.Title) as Title");
+			selectSectionDuplicates.append(" from  melete_course_module MCM, melete_module MM, melete_section MS");
+			selectSectionDuplicates.append(" where MCM.course_id = ?");
+			selectSectionDuplicates.append(" and   MCM.module_id = MM.module_id");
+			selectSectionDuplicates.append(" and   MM.module_id = MS.module_id");
+			selectSectionDuplicates.append(" and   2 <= (select count(MS2.title)");
+			selectSectionDuplicates.append(" from   melete_course_module MCM2, melete_module MM2, melete_section MS2");
+			selectSectionDuplicates.append(" where  MCM2.course_id = MCM.course_id"); 
+			selectSectionDuplicates.append(" and    MCM2.module_id = MM2.module_id");
+			selectSectionDuplicates.append(" and    MM2.module_id = MS2.module_id");
+			selectSectionDuplicates.append(" and    MS2.title = MS.title)");
+	
+
+			JdbcTemplate jdt1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+			// -------------------------------------------------------------------------
+			/* *********** check for duplicate moduleIds, can then not be mapped *** */
+			List listDuplicateModuleIds = jdt1.queryForList(selectModuleDuplicates.toString(),
+                                 new Object[] {fromContext});
+			
+			System.out.println("listDuplicateModuleIds.size = "+listDuplicateModuleIds.size());
+			if (listDuplicateModuleIds.size() >= 1) {
+				// if duplicates exist do not do the mapping but send e-mail that duplicates exist
+				duplicateModulesExist = true;
+				
+				// send e-mail no mapping exists
+				emailHeading.append("UNIPOOLE MAPPING duplicates exist no mapping done for ");
+				emailBody.append("duplicates exist no mapping done for ");
+				emailBody.append(fromContext);
+				emailBody.append(" to ");
+				emailBody.append(toContext);
+				emailBody.append("<br> Duplicate Module Titles: <br> ");
+				Iterator moduleIt = listDuplicateModuleIds.iterator();
+			                    
+				while (moduleIt.hasNext()) {
+					ListOrderedMap moduleRecord = (ListOrderedMap) moduleIt.next();
+					emailBody.append("* ");
+					emailBody.append(moduleRecord.get("Title").toString());
+					emailBody.append("<br>");
+				} // end of while (moduleIt.hasNext())
+				try {
+					sendEmail(emailHeading.toString(), emailBody.toString(), errorEmailAddress);
+				} catch (AddressException ex) {
+					log.error(ex);
+				}
+			} // end of if (listDuplicateModuleIds.size() >= 1)
+			
+			// -------------------------------------------------------------------------
+			/* ********** check for duplicate sectionIds, can then not be mapped *** */
+			List listDuplicateSections = jdt1.queryForList(selectSectionDuplicates.toString(),
+                                 new Object[] {fromContext});
+			
+			System.out.println("listDuplicateSections.size = "+listDuplicateSections.size());
+			if (listDuplicateSections.size() >= 1) {
+				// if duplicates exist do not do the mapping but send e-mail that duplicates exist
+				duplicateSectionExist = true;
+				
+				// send e-mail no mapping exists
+				emailHeading = new StringBuffer();
+				emailBody = new StringBuffer();
+				emailHeading.append("UNIPOOLE MAPPING duplicates exist no mapping done for ");
+				emailBody.append("duplicates exist no mapping done for ");
+				emailBody.append(fromContext);
+				emailBody.append(" to ");
+				emailBody.append(toContext);
+				emailBody.append("<br> Duplicate Section Titles: <br> ");
+				Iterator sectionIt = listDuplicateSections.iterator();
+			                    
+				while (sectionIt.hasNext()) {
+					ListOrderedMap sectionRecord = (ListOrderedMap) sectionIt.next();
+					emailBody.append("* ");
+					emailBody.append(sectionRecord.get("Title").toString());
+					emailBody.append("<br>");
+				} // end of while (sectionIt.hasNext())
+				try {
+					sendEmail(emailHeading.toString(), emailBody.toString(), errorEmailAddress);
+				} catch (AddressException ex) {
+					log.error(ex);
+				}
+			} // end of if (listDuplicateSections.size() >= 1)
+			
+
+
+			if ((duplicateModulesExist == false)&&(duplicateSectionExist == false)) {
+				// -------------------------------------------------------------------------
+				/* ************ retrieve all module id to be mapped ******************** */
+				//jdt1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+		
+				List listModuleIds = jdt1.queryForList(selectMeleteModuleIdForMapping.toString(),
+	                                 new Object[] {fromContext,toContext});
+				
+				Iterator moduleIds_it = listModuleIds.iterator();
+			                    
+				while (moduleIds_it.hasNext()) {
+					
+					StringBuffer toModuleId = new StringBuffer();
+	        		StringBuffer toTitle = new StringBuffer();
+	        		StringBuffer fromModuleId = new StringBuffer();
+					
+					ListOrderedMap moduleIdRecord = (ListOrderedMap) moduleIds_it.next();
+	               
+	                boolean mappingExist = false;
+	                
+	                if (!moduleIdRecord.get("fromModuleId").toString().equals("0")) {
+	                	mappingExist = true;
+		                
+						System.out.println("*************** MAP: NO MAPPING FOUND");
+					} // if fromModule != 0
+					
+					if (mappingExist == true) {
+						/* ************ ModuleId information ********************************** */
+						toModuleId.append(moduleIdRecord.get("toModuleId").toString());
+		                toTitle.append(moduleIdRecord.get("toTitle").toString());
+						fromModuleId.append(moduleIdRecord.get("fromModuleId").toString());
+						
+						System.out.println("*************** ModuleId MAP: "+ toTitle.toString()+" from="+fromModuleId.toString()+" to="+toModuleId.toString());
+						
+						// -------------------------------------------------------------------------
+						/* ************ for each module id to be mapped do an insert ************* */
+						System.out.println("*************** before insert ");
+						JdbcTemplate jdt2 = new JdbcTemplate(new SakaiDAO().getDataSource());
+						jdt2.update(InsertMeleteMapping.toString(),
+							new Object[] {fromContext,toContext,toolId,fromModuleId,toModuleId});
+						System.out.println("*************** after insert ");
+						// -------------------------------------------------------------------------
+						
+						// ---------------------------------------
+						emailSuccessBody.append("ModuleId MAP: title=");
+						emailSuccessBody.append(toTitle.toString());
+						emailSuccessBody.append(" fromModuleId= ");
+						emailSuccessBody.append(fromModuleId.toString());
+						emailSuccessBody.append(" toModuleId= ");
+						emailSuccessBody.append(toModuleId.toString());
+						emailSuccessBody.append("\n\n <br>");
+						// ---------------------------------------
+						
+						
+	
+					} else { // end of if (mappingExist == true)
+						// send e-mail no mapping exists
+						emailHeading.append("UNIPOOLE MAPPING no mapping exist");
+						emailBody.append("No mapping exist for ");
+						emailBody.append(fromContext);
+						emailBody.append(" to ");
+						emailBody.append(toContext);
+						emailBody.append("<br> on Module Id Title ");
+						emailBody.append(moduleIdRecord.get("toTitle").toString());
+						try {
+							sendEmail(emailHeading.toString(), emailBody.toString(), errorEmailAddress);
+						} catch (AddressException ex) {
+							log.error(ex);
+						}
+					} 
+					
+				} // end while (moduleIds_it.hasNext())
+				
+				// -------------------------------------------------------------------------
+				/* ************ for sections to be mapped                    ************* */
+	
+				System.out.println("*************** before jdt3");
+				JdbcTemplate jdt3 = new JdbcTemplate(new SakaiDAO().getDataSource());
+		
+				System.out.println("*************** after jdt3");
+				List listSectionIds = jdt3.queryForList(selectMeleteSectionIdForMapping.toString(),
+	                                 new Object[] {fromContext,toContext});
+				
+				System.out.println("*************** after listSectionIds >> "+selectMeleteSectionIdForMapping.toString());		
+				Iterator sectionIdIterator = listSectionIds.iterator();
+				System.out.println("*************** after sectionIdIterator iterator"+listSectionIds.size());
+							
+				while (sectionIdIterator.hasNext()) {
+				
+					StringBuffer toSectionId = new StringBuffer();
+				    StringBuffer toSectionTitle = new StringBuffer();
+				    StringBuffer fromSectionId = new StringBuffer();
+	
+					ListOrderedMap sectionIdRecord = (ListOrderedMap) sectionIdIterator.next();
+					toSectionId.append(sectionIdRecord.get("toSectionId").toString());
+					toSectionTitle.append(sectionIdRecord.get("toSectionTitle").toString());
+					fromSectionId.append(sectionIdRecord.get("fromSectionId").toString());
+	                
+	                System.out.println("*************** SectionId MAP: "+ toSectionTitle.toString()+" from="+fromSectionId.toString()+" to="+toSectionId.toString());
+	                
+	                // -------------------------------------------------------------------------
+					/* ************ for each section id to be mapped do an insert ************* */
+					System.out.println("*************** before section insert ");
+					JdbcTemplate jdt4 = new JdbcTemplate(new SakaiDAO().getDataSource());
+					jdt4.update(InsertMeleteMapping.toString(),
+						new Object[] {fromContext,toContext,toolId,fromSectionId,toSectionId});
+					System.out.println("*************** after section insert ");
+					// -------------------------------------------------------------------------
+	
+					// ---------------------------------------
+					emailSuccessBody.append("SectionId MAP: toSectionTitle=");
+					emailSuccessBody.append(toSectionTitle.toString());
+					emailSuccessBody.append(" fromSectionId= ");
+					emailSuccessBody.append(fromSectionId.toString());
+					emailSuccessBody.append(" toSectionId= ");
+					emailSuccessBody.append(toSectionId.toString());
+					emailSuccessBody.append("\n\n <br>");
+					// ---------------------------------------		                
+	               
+	            } // end of while (sectionIdIterator.hasNext())
+	            // -------------------------------------------------------------------------	
+	            if ((duplicateModulesExist == false)||(duplicateModulesExist==false)) {
+					/* ************ Mapping complete send e-mail                 ************* */
+					emailSuccessHeading.append("MELETE MAPPING COMPLETED FOR ");
+					emailSuccessHeading.append(toContext);
+					try {
+						sendEmail(emailSuccessHeading.toString(), emailSuccessBody.toString(), monitorEmailAddress);
+					} catch (AddressException ex) {
+						log.error(ex);
+					}
+				} //if ((duplicateModulesExist == false)||(duplicateModulesExist==false)) {
+				// -------------------------------------------------------------------------
+		
+			} else {// end if no duplicates
+				// send e-mail duplicates exist
+			} // end if if no duplicate else
+			
+		} catch (Exception  e) { //|AddressException
+			e.printStackTrace();
+			emailHeading = new StringBuffer();
+			emailBody = new StringBuffer();
+			emailHeading.append("UNIPOOLE MAPPING exception on UnipooleMeleteMappingWebService.wsdl");
+			emailBody.append("While doing melete mapping from ");
+			emailBody.append(fromContext);
+			emailBody.append(" to ");
+			emailBody.append(toContext);
+			emailBody.append(" exception: ");
+			emailBody.append(e);
+			try {
+				sendEmail(emailHeading.toString(), emailBody.toString(), errorEmailAddress);
+			} catch (AddressException ex) {
+				log.error(ex);
+			}
+			log.error(e);
+			throw new AxisFault(e.getMessage());
+		} // end try catch	
+
+
+
+		
+
+
+	} // end of meleteDataToBeMapped
+
+
+    public void sendEmail(String subject, String body, String emailAddress) throws AddressException {
+            
+        EmailService emailService;
+        emailService = (EmailService) ComponentManager.get(EmailService.class);
+
+        String tmpEmailFrom = ServerConfigurationService.getString("noReplyEmailFrom");
+
+        //System.out.println("GRADEBOOK email send: "+body);
+
+		InternetAddress toEmail = null;
+		try {
+        	toEmail = new InternetAddress(emailAddress);
+        } catch (AddressException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+       }
+        InternetAddress iaTo[] = new InternetAddress[1];
+        iaTo[0] = toEmail;
+        InternetAddress iaHeaderTo[] = new InternetAddress[1];
+        iaHeaderTo[0] = toEmail;
+        InternetAddress iaReplyTo[] = new InternetAddress[1];
+        iaReplyTo[0] = new InternetAddress(tmpEmailFrom);
+        List<String> contentList = new ArrayList<String>();
+        contentList.add("Content-Type: text/html");
+
+        emailService.sendMail(iaReplyTo[0],iaTo,subject,body,iaHeaderTo,iaReplyTo,contentList);
+    } // end of sendEmail
+
+			
+} // end of MeleteMappingMasterCourse

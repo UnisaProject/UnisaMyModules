@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <name>BlogWow IMPL</name>
+  <groupId>org.sakaiproject</groupId>
+  <artifactId>sakai-blogwow-impl</artifactId>
+  <packaging>jar</packaging>
+  <parent>
+    <groupId>org.sakaiproject</groupId>
+    <artifactId>sakai-blogwow-base</artifactId>
+    <version>0.9.9</version>
+<!--blogwow.version-->
+  </parent>
+  <dependencies>
+    <dependency>
+      <groupId>org.sakaiproject.kernel</groupId>
+      <artifactId>sakai-kernel-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.sakaiproject.kernel</groupId>
+      <artifactId>sakai-component-manager</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.sakaiproject.kernel</groupId>
+      <artifactId>sakai-kernel-util</artifactId>
+    </dependency>
+<!-- internal -->
+    <dependency>
+      <groupId>org.sakaiproject</groupId>
+      <artifactId>sakai-blogwow-api</artifactId>
+    </dependency>
+<!-- generic-dao -->
+    <dependency>
+      <groupId>org.sakaiproject</groupId>
+      <artifactId>generic-dao</artifactId>
+      <version>${sakai.generic-dao.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.azeckoski</groupId>
+      <artifactId>reflectutils</artifactId>
+      <version>0.9.14</version>
+    </dependency>
+<!-- sakai -->
+<!--org.sakaiprojectsakai-site-api-->
+<!--org.sakaiprojectsakai-util-api-->
+    <dependency>
+      <groupId>org.sakaiproject.entitybroker</groupId>
+      <artifactId>entitybroker-api</artifactId>
+    </dependency>
+<!--org.sakaiprojectsakai-entity-api-->
+<!--org.sakaiprojectsakai-tool-api-->
+<!--org.sakaiprojectsakai-authz-api-->
+<!--org.sakaiprojectsakai-user-api-->
+<!--org.sakaiprojectsakai-component-api-->
+<!--org.sakaiprojectsakai-util${sakai.version}jar-->
+<!-- non Sakai -->
+      <!-- spring and hibernate -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+         <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+        <!-- needed by hibernate unit tests -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-ehcache</artifactId>
+        </dependency>
+<!-- Required for hibernate 3 HQL queries -->
+    <dependency>
+      <groupId>antlr</groupId>
+      <artifactId>antlr</artifactId>
+      <version>2.7.6</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-mock</artifactId>
+      <version>2.0.6</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>1.8.0.7</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.ehcache</groupId>
+      <artifactId>ehcache</artifactId>
+      <version>1.6.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <resources>
+      <resource>
+        <directory>${basedir}/src/java</directory>
+        <includes>
+          <include>**/*.xml</include>
+          <include>**/*.properties</include>
+        </includes>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>${basedir}/../pack/src/webapp/WEB-INF</directory>
+        <includes>
+          <include>spring-hibernate.xml</include>
+        </includes>
+        <filtering>false</filtering>
+      </testResource>
+      <testResource>
+        <directory>${basedir}/src/test</directory>
+        <includes>
+          <include>hibernate-test.xml</include>
+          <include>hibernate.properties</include>
+        </includes>
+        <filtering>false</filtering>
+      </testResource>
+    </testResources>
+  </build>
+</project>
