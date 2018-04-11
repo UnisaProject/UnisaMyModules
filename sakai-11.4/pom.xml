@@ -118,6 +118,20 @@
                 <module>webservices</module>
 				<!-- UNISA CHANGES -->
 				<module>yaft</module> <!-- contrib tool -->
+				 <!--<module>blogwow</module>
+				<module>sms</module> 
+				<module>qna</module>
+				<module>clog</module> 
+    			<module>etudes-util</module> 
+				<module>melete</module>
+				<module>bbb-tool</module> 
+				<module>struts</module>
+				<module>permission</module>
+				<module>unisa-db</module>
+				<module>unisa-util</module>
+				<module>unisa-calendar</module>
+				<module>unisa-changes</module>
+				<module>unisa-tools</module>	-->				
 				<!-- END OF UNISA CHANGES -->
             </modules>
         </profile>
