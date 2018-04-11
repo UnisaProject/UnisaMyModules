@@ -85,10 +85,22 @@
 			<artifactId>entitybroker-utils</artifactId>
    		</dependency>
 
+		<!-- Unisa Changes: 2018/03/15: Get dependency from master pom -->
+<!--         <dependency> -->
+<!--             <groupId>org.springframework</groupId> -->
+<!--             <artifactId>spring</artifactId> -->
+<!--         </dependency> -->
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring</artifactId>
+            <artifactId>spring-core</artifactId>
+            <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <scope>provided</scope>
+        </dependency>  
+        <!-- End Unisa Changes -->
         
 		<dependency>
 			<groupId>org.sakaiproject.search</groupId>

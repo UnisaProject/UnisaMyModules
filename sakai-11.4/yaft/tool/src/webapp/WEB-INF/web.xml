@@ -84,10 +84,14 @@
     <listener>
         <listener-class>org.sakaiproject.util.ToolListener</listener-class>
     </listener>  
-    
-  	<listener>
-    	<listener-class>org.sakaiproject.util.ContextLoaderListener</listener-class>
+	<!-- Unisa Changes:2018/03/13 - New ContextLoaderListener for Sakai 11.4: 'org.sakaiproject.util.SakaiContextLoaderListener' -->    
+<!--   	<listener> -->
+<!--     	<listener-class>org.sakaiproject.util.ContextLoaderListener</listener-class> -->
+<!--   	</listener> -->
+	<listener>
+    	<listener-class>org.sakaiproject.util.SakaiContextLoaderListener</listener-class>
   	</listener>
+  	<!-- End Unisa Changes -->
 
 	<welcome-file-list>
 	  <welcome-file>yaft.html</welcome-file>
