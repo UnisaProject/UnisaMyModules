@@ -118,6 +118,7 @@
                 <module>webservices</module>
 				<!-- UNISA CHANGES -->
 				<module>yaft</module> <!-- contrib tool -->
+				<module>struts</module>
 				 <!--<module>blogwow</module>
 				<module>sms</module> 
 				<module>qna</module>
