@@ -7,7 +7,7 @@
   <parent>
     <artifactId>unisadb-base</artifactId>
     <groupId>org.sakaiproject</groupId>
-    <version>10.5</version>
+    <version>11.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>unisa-db-pack</name>
