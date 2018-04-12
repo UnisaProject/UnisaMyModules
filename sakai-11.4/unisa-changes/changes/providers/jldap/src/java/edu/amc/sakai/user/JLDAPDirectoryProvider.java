@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/svn/providers/tags/sakai-10.5/jldap/src/java/edu/amc/sakai/user/JLDAPDirectoryProvider.java $
- * $Id: JLDAPDirectoryProvider.java 318645 2015-05-05 13:37:23Z ottenhoff@longsight.com $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008, 2009 The Sakai Foundation
@@ -30,15 +30,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.sakaiproject.user.api.ExternalUserSearchUDP;
-import org.sakaiproject.user.api.DisplayAdvisorUDP;
-import org.sakaiproject.user.api.User;
-import org.sakaiproject.user.api.UserDirectoryProvider;
-import org.sakaiproject.user.api.UserEdit;
-import org.sakaiproject.user.api.UserFactory;
-import org.sakaiproject.user.api.UsersShareEmailUDP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.user.api.*;
 import org.apache.commons.lang.StringUtils;
 
 import com.novell.ldap.LDAPConnection;
@@ -61,7 +55,7 @@ import edu.amc.sakai.user.LdapUserData;
  * @author David Ross, Albany Medical College
  * @author Rishi Pande, Virginia Tech
  */
-public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnectionManagerConfig, ExternalUserSearchUDP, UsersShareEmailUDP
+public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnectionManagerConfig, ExternalUserSearchUDP, UsersShareEmailUDP, DisplayAdvisorUDP, AuthenticationIdUDP
 {
 	/** Default LDAP connection port */
 	public static final int DEFAULT_LDAP_PORT = 389;
@@ -94,20 +88,18 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	/** Default LDAP maximum number of objects to query for */
 	public static final int DEFAULT_BATCH_SIZE = 200;
 	
-	//unisa change: patch for display name https://jira.sakaiproject.org/browse/SAK-26150 
 	/** Property of the user object to store the display ID under */
-    public static final String DISPLAY_ID_PROPERTY = JLDAPDirectoryProvider.class+"-displayId";
- 
-    /** Property of the user object to store the display Name under */
-    public static final String DISPLAY_NAME_PROPERTY = JLDAPDirectoryProvider.class+"-displayName";
-    //end unisa change
+	public static final String DISPLAY_ID_PROPERTY = JLDAPDirectoryProvider.class+"-displayId";
+
+	/** Property of the user object to store the display Name under */
+	public static final String DISPLAY_NAME_PROPERTY = JLDAPDirectoryProvider.class+"-displayName";
 
 	public static final boolean DEFAULT_ALLOW_AUTHENTICATION = true;
 	
 	public static final boolean DEFAULT_AUTHENTICATE_WITH_PROVIDER_FIRST = false;
 
 	/** Class-specific logger */
-	private static Log M_log = LogFactory.getLog(JLDAPDirectoryProvider.class);
+	private static Logger M_log = LoggerFactory.getLogger(JLDAPDirectoryProvider.class);
 
 	/** LDAP host address */
 	private String ldapHost;
@@ -188,6 +180,15 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	private LDAPSocketFactory secureSocketFactory = 
 		new LDAPJSSESecureSocketFactory();
 
+	/**
+	 * Sockect factory for unsecure connections. Only relevant if
+	 * {@link #secureConnection} is <code>false</code>. Defaults to a new instance
+	 * of {@link LDAPSimpleSocketFactory}
+	 */
+	private LDAPSocketFactory socketFactory =
+		new LDAPSimpleSocketFactory();
+
+
 	/** LDAP referral following behavior. Defaults to {@link #DEFAULT_IS_FOLLOW_REFERRALS} */
 	private boolean followReferrals = DEFAULT_IS_FOLLOW_REFERRALS;
 
@@ -202,6 +203,9 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	private int operationTimeout = DEFAULT_OPERATION_TIMEOUT_MILLIS;
 	
 	private int searchScope = DEFAULT_SEARCH_SCOPE;
+
+	/** Should the provider support searching by Authentication ID */
+	private boolean enableAid = false;
 
 	/** 
 	 * User entry attribute mappings. Keys are logical attr names,
@@ -220,7 +224,7 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	/** Currently limited to allowing/disallowing searches for particular user EIDs.
 	 * Implements things like user EID blacklists. */
 	private EidValidator eidValidator;
-	
+
 	/**
 	 * Defaults to an anon-inner class which handles {@link LDAPEntry}(ies)
 	 * by passing them to {@link #mapLdapEntryOntoUserData(LDAPEntry)}, the
@@ -708,6 +712,34 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 
 	}
 
+	public boolean getUserbyAid(String aid, UserEdit user)
+	{
+		// Only do search if we're enabled.
+		if (!(enableAid)) {
+			return false;
+		}
+		LdapUserData foundUserData = getUserByAid(aid, null);
+		if ( foundUserData == null ) {
+			return false;
+		}
+		if ( user != null ) {
+			mapUserDataOntoUserEdit(foundUserData, user);
+		}
+		return true;
+	}
+
+	public LdapUserData getUserByAid(String aid, LDAPConnection conn) {
+		String filter = ldapAttributeMapper.getFindUserByAidFilter(aid);
+		LdapUserData mappedEntry = null;
+		try {
+			mappedEntry = (LdapUserData) searchDirectoryForSingleEntry(filter,
+					conn, null, null, null);
+		} catch (LDAPException e) {
+			M_log.error("Failed to find user for AID: " + aid, e);
+		}
+		return mappedEntry;
+	}
+
 	/**
 	 * Similar to iterating over <code>users</code> passing
 	 * each element to {@link #getUser(UserEdit)}, removing the
@@ -929,7 +961,11 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 		}
 
 		if ( !(isSearchableEid(eid)) ) {
-			if ( M_log.isInfoEnabled() ) {
+			if (eid == null)
+			{
+				M_log.debug("User EID not searchable (eid is null)");
+			}
+			else if ( M_log.isInfoEnabled() ) {
 				M_log.info("User EID not searchable (possibly blacklisted or otherwise syntactically invalid) [" + eid + "]");
 			}
 			return null;
@@ -981,7 +1017,13 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 					"][reusing conn = " + (conn != null) + "]");
 		}
 
-		LdapUserData foundUserData = getUserByEid(eid, conn);
+		LdapUserData foundUserData;
+		if (enableAid) {
+			foundUserData = getUserByAid(eid, conn);
+		} else {
+			foundUserData = getUserByEid(eid, conn);
+		}
+
 		if ( foundUserData == null ) {
 			if ( M_log.isDebugEnabled() ) {
 				M_log.debug("lookupUserEntryDN(): no directory entried found [eid = " + 
@@ -1384,6 +1426,23 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 		this.secureSocketFactory = secureSocketFactory;
 	}
 
+	/**
+	 * {@inheritDoc}
+     */
+	public LDAPSocketFactory getSocketFactory()
+	{
+		return socketFactory;
+	}
+
+
+	/**
+	 * {@inheritDoc}
+     */
+	public void setSocketFactory(LDAPSocketFactory socketFactory)
+	{
+		this.socketFactory = socketFactory;
+	}
+
 	public String getBasePath()
 	{
 		return basePath;
@@ -1511,6 +1570,13 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	 */
 	public void setBatchSize(int batchSize) {
 		this.batchSize = batchSize;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setEnableAid(boolean enableAid) {
+		this.enableAid = enableAid;
 	}
 
 	/**
@@ -1794,15 +1860,6 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	}
 
 	/**
-	 * Used to set the cache key case-sensitivity behavior. 
-	 * @param caseSensitive
-	 * @deprecated
-	 */
-	public void setCaseSensitiveCacheKeys(boolean caseSensitive) {
-		M_log.warn("DEPRECATION WARNING: caseSensitiveCacheKeys is deprecated. Please remove it from your jldap-beans.xml configuration.");
-	}
-
-	/**
 	 * Access the service used to verify EIDs prior to executing
 	 * searches on those values.
 	 * 
@@ -1894,6 +1951,23 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 			boolean authenticateWithProviderFirst) {
 		this.authenticateWithProviderFirst = authenticateWithProviderFirst;
 	}
+
+	public String getDisplayId(User user) {
+		String displayId = user.getProperties().getProperty(DISPLAY_ID_PROPERTY);
+		if (displayId != null && displayId.length() > 0) {
+				return displayId;
+		}
+		return null;
+	}
+
+	public String getDisplayName(User user) {
+		String displayName = user.getProperties().getProperty(DISPLAY_NAME_PROPERTY);
+		if (displayName != null && displayName.length() > 0) {
+			return displayName;
+		}
+		return null;
+	}
+
 	
 	/**
 	 * Access the configured search scope for all filters executed by

@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/svn/providers/tags/sakai-10.5/cm-authz-provider/src/java/org/sakaiproject/coursemanagement/impl/provider/CourseManagementGroupProvider.java $
- * $Id: CourseManagementGroupProvider.java 311414 2014-07-31 01:52:43Z enietzel@anisakai.com $
+ * $URL:$
+ * $Id:$
  ***********************************************************************************
  *
  * Copyright (c) 2006, 2007, 2008 The Sakai Foundation
@@ -29,15 +29,14 @@ import java.util.StringTokenizer;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.GroupProvider;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.coursemanagement.api.CourseManagementService;
 import org.sakaiproject.coursemanagement.api.Section;
 import org.sakaiproject.coursemanagement.api.exception.IdNotFoundException;
-import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.user.api.UserDirectoryProvider;
 
 /**
@@ -47,7 +46,7 @@ import org.sakaiproject.user.api.UserDirectoryProvider;
  * based on memberships in parent objects such as CourseSets.
  */
 public class CourseManagementGroupProvider implements GroupProvider {
-	private static final Log log = LogFactory.getLog(CourseManagementGroupProvider.class);
+	private static final Logger log = LoggerFactory.getLogger(CourseManagementGroupProvider.class);
 
 	// Configuration keys.
 	public static final String SITE_ROLE_RESOLUTION_ORDER = "siteRoleResolutionOrder";

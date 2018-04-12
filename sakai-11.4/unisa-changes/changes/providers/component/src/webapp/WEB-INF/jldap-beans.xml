@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
-
-<beans>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean id="org.sakaiproject.user.api.UserDirectoryProvider"
 		class="edu.amc.sakai.user.JLDAPDirectoryProvider" init-method="init"
-		destroy-method="destroy" singleton="true">
+		destroy-method="destroy">
 		
 		<!-- Setting a MemoryService in JLDAP is deprecated! 
 			Caching is done centrally in the UserDirectoryService.callCache -->
@@ -14,39 +14,38 @@
 					
 		<!-- Required. Host name or address of your LDAP server -->
 		<property name="ldapHost">
-			 <value>10.1.6.132</value> 
+			<value>ldap.university.edu</value>
 		</property>
 
 		<!-- Optional. LDAP connection port. Typically defaults to 
 			JLDAPDirectoryProvider.DEFAULT_LDAP_PORT (389). Secured
 			connections are usually on 636 -->
 		<property name="ldapPort">
-			<value>3268</value>
+			<value>389</value>
 		</property>
 		
 		<!--  If secureConnection is true, a keystore location must be provided
 			unless javax.net.ssl.trustStore system property has already been 
 			set -->
 		<!-- <property name="keystoreLocation">
-			<value>C:\sakai10.5\apache-tomcat-7.0.56\sakai\cecerts</value>
+			<value>/usually/set/at/startup</value>
 		</property> -->
 
 		<!--  If secureConnection is true, a keystore password must be provided
 			unless javax.net.ssl.trustStorePassword system property has already
 			been set -->
-<!-- 		<property name="keystorePassword">
-			<value>zzzzzz</value>
-		</property> -->
-		
+		<!--property name="keystorePassword">
+			<value>usually-set-at-startup</value>
+		</property-->
+
 		<!-- Optional. DN to which to bind for directory searches. 
 			Typically only necessary if autoBind is true -->
 		<property name="ldapUser">
-		<value>CN=srv-web,CN=Users,DC=int,DC=unisa,DC=ac,DC=za</value>
-		<!-- <value>CN=srv-web,CN=Users,DC=int,DC=unisa,DC=ac,DC=za</value> -->
+			<value>attr=value,attr=value,attr=value</value>
 		</property>
 		<!-- Optional. Password for ldapUser defined above -->
 		<property name="ldapPassword">
-			<value>password#</value>
+			<value>usually-set-this-value-in-security-dot-properties</value>
 		</property>
 
 		<!-- Optional. Enables/disables secure LDAP connections.
@@ -72,7 +71,7 @@
 
 		<!-- Optional, but usually specified. Base DN for directory searches. -->
 		<property name="basePath">
-			<value>DC=int,DC=unisa,DC=ac,DC=za</value>
+			<value>attr=value,attr=value,attr=value</value>
 			
 		</property>
 
@@ -89,33 +88,10 @@
 			<value>5000</value>
 		</property>
 
-<!--  <property name="ldapConnectionManager">
-    <bean class="edu.amc.sakai.user.PoolingLdapConnectionManager">
-      <property name="factory">
-        <bean class="edu.amc.sakai.user.PooledLDAPConnectionFactory">
-          <property name="connectionLivenessValidator">
-            <bean   class="edu.amc.sakai.user.SearchExecutingLdapConnectionLivenessValidator"  init-method="init">
-              <property name="baseDn">
-                <value>CN=srv-web,CN=Users,DC=int,DC=unisa,DC=ac,DC=za</value>
-                <value>CN=srv-web,CN=Users,DC=int,DC=unisa,DC=ac,DC=za</value>
-              </property>
-              <property name="searchAttributeName">
-                <value>cn</value>
-              </property>
-              <property name="serverConfigService">
-              	<ref bean="org.sakaiproject.component.api.ServerConfigurationService" />
-              </property>
-            </bean>
-          </property>
-        </bean>
-      </property>
-    </bean>
-  </property> -->
-		
 	<!-- 	unisa change: settingd for staff AD  -->
 	
   <property name="staffLdapHost">
-		<value>10.1.6.132</value>
+		<value>10</value>
 	</property>
 
 	<property name="staffLdapPort">
@@ -123,7 +99,7 @@
 	</property>
 
 	<property name="staffLdapUser">
-		<value>CN=srv-web,CN=Users,DC=int,DC=unisa,DC=ac,DC=za</value>
+		<value>CN=dev</value>
 	</property>
 
 	<property name="staffLdapPassword">
@@ -139,7 +115,7 @@
 	</property>
 
 	<property name="staffBasePath">
-		<value>DC=int,DC=unisa,DC=ac,DC=za</value>
+		<value>DC=test</value>
 	</property>
 
 	<property name="staffOperationTimeout">
@@ -147,13 +123,13 @@
 	</property>
 
 	<property name="staffBaseDn">
-		<value>CN=srv-web,CN=Users,DC=int,DC=unisa,DC=ac,DC=za</value>
+		<value>CN=test</value>
 	</property>
 
 <!-- 	unisa change: settings for Student AD  -->
 
 	<property name="studentLdapHost">
-		<value>students.int.unisa.ac.za</value>
+		<value>test</value>
 	</property>
 
 	<property name="studentLdapPort">
@@ -161,7 +137,7 @@
 	</property>
 
 	<property name="studentLdapUser">
-		<value>CN=srv-web,CN=Users,DC=int,DC=unisa,DC=ac,DC=za</value>
+		<value>test</value>
 	</property>
 
 	<property name="studentLdapPassword">
@@ -177,7 +153,7 @@
 	</property>
 
 	<property name="studentBasePath">
-		<value>DC=students,DC=int,DC=unisa,DC=ac,DC=za</value>
+		<value>DC=test</value>
 	</property>
 
 	<property name="studentOperationTimeout">
@@ -185,7 +161,7 @@
 	</property>
 
 	<property name="studentBaseDn">
-		<value>CN=srv-web,CN=Users,DC=int,DC=unisa,DC=ac,DC=za</value>
+		<value>CN=test</value>
 	</property>
 
 
@@ -193,7 +169,7 @@
 <!-- 	unisa change: settings for guest AD  -->
 
 	<property name="guestLdapHost">
-		<value>students.int.unisa.ac.za</value>
+		<value>test</value>
 	</property>
 
 	<property name="guestLdapPort">
@@ -201,7 +177,7 @@
 	</property>
 
 	<property name="guestLdapUser">
-		<value>CN=srv-web,CN=Users,DC=int,DC=unisa,DC=ac,DC=za</value>
+		<value>CN=guest</value>
 	</property>
 
 	<property name="guestLdapPassword">
@@ -217,7 +193,7 @@
 	</property>
 
 	<property name="guestBasePath">
-		<value>DC=students,DC=int,DC=unisa,DC=ac,DC=za</value>
+		<value>DC=guest</value>
 	</property>
 
 	<property name="guestOperationTimeout">
@@ -225,7 +201,7 @@
 	</property>
 
 	<property name="guestBaseDn">
-		<value>CN=srv-web,CN=Users,DC=int,DC=unisa,DC=ac,DC=za</value>
+		<value>CN=guest</value>
 	</property>
 		
 		<!-- Optional. Control depth of all searches. Possible values:
@@ -297,6 +273,13 @@
 		<!-- property name="maxResultSize">
 		  <value>1000</value>
 		</property -->
+
+		<!-- Optional. Require a different ID for login. This allows you to have one ID for logins
+		     and another EID which is used when looking up course/group information.
+		     Defaults to false -->
+		<!-- property name="enableAid">
+		  <value>true</value>
+		</property -->
 		
 		<!-- Optional. Defaults to an instance of 
 		edu.amc.sakai.user.SimpleLdapAttributeMapper -->
@@ -345,8 +328,7 @@
     (the default LdapAttributeMapper implementation). -->
 	<bean id="edu.amc.sakai.user.LdapAttributeMapper"
 			class="edu.amc.sakai.user.SimpleLdapAttributeMapper"
-			init-method="init"
-			singleton="true">
+			init-method="init">
 			
 		<!-- A typical set of attribute mappings. Keys are logical
 		names expected by the application. Values are physical LDAP
@@ -380,8 +362,6 @@
 			<!-- ref bean="edu.amc.sakai.user.EntryContainerRdnToUserTypeMapper" /-->
 			<!-- ref bean="edu.amc.sakai.user.StringUserTypeMapper" /-->
 		</property>
-
-		
 		
 	</bean>
 	
@@ -396,14 +376,12 @@
 	<!-- EmptyStringUserTypeMapper assigns gives all users an
 	empty string as their Sakai "type" -->
 	<bean id="edu.amc.sakai.user.EmptyStringUserTypeMapper"
-		class="edu.amc.sakai.user.EmptyStringUserTypeMapper"
-		singleton="true" />
+		class="edu.amc.sakai.user.EmptyStringUserTypeMapper"/>
 	
 	<!-- StringUserTypeMapper assigns a configurable String to all
 	users as their Sakai "type". -->
 	<bean id="edu.amc.sakai.user.StringUserTypeMapper"
-		class="edu.amc.sakai.user.StringUserTypeMapper"
-		singleton="true">
+		class="edu.amc.sakai.user.StringUserTypeMapper">
 		
 		<!--  property name="userType">
 			<value>Registered</value>
@@ -415,8 +393,7 @@
 		types by simply passing attribute values through a map with
 		configurable "miss" behavior. -->
 	<bean id="edu.amc.sakai.user.EntryAttributeToUserTypeMapper"
-		class="edu.amc.sakai.user.EntryAttributeToUserTypeMapper"
-		singleton="true">
+		class="edu.amc.sakai.user.EntryAttributeToUserTypeMapper">
 		
 		<!-- Optional. If not present or empty, behavior is
 		determined by the value of returnLiteralAttributeValueIfNoMapping
@@ -453,8 +430,7 @@
 		types by filtering a user entry's most-local RDN through the
 		assigned map. -->
 	<bean id="edu.amc.sakai.user.EntryContainerRdnToUserTypeMapper"
-		class="edu.amc.sakai.user.EntryContainerRdnToUserTypeMapper"
-		singleton="true">
+		class="edu.amc.sakai.user.EntryContainerRdnToUserTypeMapper">
 		
 		<!-- Optional. Maps between container RDN values and Sakai user types -->
 		<!-- property name="rdnToSakaiUserTypeMap">

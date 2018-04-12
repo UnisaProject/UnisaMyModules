@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/svn/providers/tags/sakai-10.5/jldap/src/java/edu/amc/sakai/user/SimpleLdapAttributeMapper.java $
- * $Id: SimpleLdapAttributeMapper.java 134298 2014-02-10 13:37:14Z ottenhoff@longsight.com $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 The Sakai Foundation
@@ -35,8 +35,8 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.user.api.UserEdit;
 
@@ -57,7 +57,7 @@ import com.novell.ldap.LDAPEntry;
 public class SimpleLdapAttributeMapper implements LdapAttributeMapper {
 	
 	/** Class-specific logger */
-	private static Log M_log = LogFactory.getLog(SimpleLdapAttributeMapper.class);
+	private static Logger M_log = LoggerFactory.getLogger(SimpleLdapAttributeMapper.class);
 	
 	/**
 	 * User entry attribute mappings. Keys are logical attr names,
@@ -170,6 +170,12 @@ public class SimpleLdapAttributeMapper implements LdapAttributeMapper {
 			valueFormat = (MessageFormat) valueFormat.clone();
 			return eidAttr + "=" + escapeSearchFilterTerm(valueFormat.format(new Object[]{eid}));
 		}
+	}
+
+	public String getFindUserByAidFilter(String aid) {
+		String eidAttr = 
+			attributeMappings.get(AttributeMappingConstants.AUTHENTICATION_ATTR_MAPPING_KEY);
+		return eidAttr + "=" + escapeSearchFilterTerm(aid);
 	}
 
 	/**
@@ -337,6 +343,22 @@ public class SimpleLdapAttributeMapper implements LdapAttributeMapper {
         				"][value = " + attrValue + "]");
         	}
             userData.setEmail(attrValue);
+        } else if ( logicalAttrName.equals(AttributeMappingConstants.DISPLAY_ID_ATTR_MAPPING_KEY) ) {
+        	if ( M_log.isDebugEnabled() ) {
+        		M_log.debug("mapLdapAttributeOntoUserData() mapping attribute to User display Id: " +
+        				"[logical attr name = " + logicalAttrName + 
+        				"][physical attr name = " + attribute.getName() + 
+        				"][value = " + attrValue + "]");
+        	}
+            userData.setProperty(JLDAPDirectoryProvider.DISPLAY_ID_PROPERTY, attrValue);
+        } else if ( logicalAttrName.equals(AttributeMappingConstants.DISPLAY_NAME_ATTR_MAPPING_KEY) ) {
+        	if ( M_log.isDebugEnabled() ) {
+        		M_log.debug("mapLdapAttributeOntoUserData() mapping attribute to User display name: " +
+        				"[logical attr name = " + logicalAttrName + 
+        				"][physical attr name = " + attribute.getName() + 
+        				"][value = " + attrValue + "]");
+        	}
+        	userData.setProperty(JLDAPDirectoryProvider.DISPLAY_NAME_PROPERTY, attrValue);
         } else {
         	if ( M_log.isDebugEnabled() ) {
         		M_log.debug("mapLdapAttributeOntoUserData() mapping attribute to a User property: " +
