@@ -1649,18 +1649,6 @@
           <artifactId>mariadb-java-client</artifactId>
           <version>1.5.7</version>
       </dependency>
-      <!-- Unisa Changes: 2018/03/15: Add yaft tool here so jars can go to tomcat\lib -->
-      <dependency>
-      	  <groupId>org.sakaiproject.yaft</groupId>
-      	  <artifactId>yaft-api</artifactId>
-      	  <version>1.3.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-      	  <groupId>org.sakaiproject.yaft</groupId>
-      	  <artifactId>yaft-help</artifactId>
-      	  <version>1.3.0-SNAPSHOT</version>
-      </dependency>
-	  <!-- End Unisa Changes -->
     </dependencies>
   </dependencyManagement>
 
