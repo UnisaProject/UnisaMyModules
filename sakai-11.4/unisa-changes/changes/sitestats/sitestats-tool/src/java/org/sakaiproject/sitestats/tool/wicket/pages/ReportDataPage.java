@@ -26,15 +26,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
-import org.apache.wicket.PageParameters;
-import org.apache.wicket.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.PropertyColumn;
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
@@ -47,12 +48,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.model.StringResourceModel;
-import org.apache.wicket.protocol.http.WebResponse;
-import org.apache.wicket.request.target.basic.EmptyRequestTarget;
+import org.apache.wicket.request.http.WebResponse;
+import org.apache.wicket.request.handler.EmptyRequestHandler;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.sitestats.api.EventStat;
 import org.sakaiproject.sitestats.api.PrefsData;
+import org.sakaiproject.sitestats.api.LessonBuilderStat;
 import org.sakaiproject.sitestats.api.ResourceStat;
 import org.sakaiproject.sitestats.api.SitePresence;
 import org.sakaiproject.sitestats.api.Stat;
@@ -78,7 +80,7 @@ import org.sakaiproject.user.api.UserNotDefinedException;
  */
 public class ReportDataPage extends BasePage {
 	private static final long			serialVersionUID	= 1L;
-	private static Log					LOG					= LogFactory.getLog(ReportDataPage.class);
+	private static Logger					LOG					= LoggerFactory.getLogger(ReportDataPage.class);
 
 	private String						realSiteId;
 	private String						siteId;
@@ -106,8 +108,8 @@ public class ReportDataPage extends BasePage {
 		this.reportDefModel = reportDef;
 		realSiteId = Locator.getFacade().getToolManager().getCurrentPlacement().getContext();
 		if(pageParameters != null) {
-			siteId = pageParameters.getString("siteId");
-			inPrintVersion = pageParameters.getBoolean("printVersion");
+			siteId = pageParameters.get("siteId").toString();
+			inPrintVersion = pageParameters.get("printVersion").toBoolean(false);
 		}
 		if(siteId == null){
 			siteId = realSiteId;
@@ -132,7 +134,7 @@ public class ReportDataPage extends BasePage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.renderJavascriptReference(JQUERYSCRIPT);
+		response.render(JavaScriptHeaderItem.forUrl(JQUERYSCRIPT));
 	}
 	
 	@SuppressWarnings("serial")
@@ -170,7 +172,10 @@ public class ReportDataPage extends BasePage {
 		toPrintVersion.add(new Link("printLink") {
 			@Override
 			public void onClick() {
-				setResponsePage(new ReportDataPage(reportDefModel, new PageParameters("printVersion=true,siteId="+siteId)));
+				PageParameters params = new PageParameters();
+				params.set("printVersion", "true");
+				params.set("siteId", siteId);
+				setResponsePage(new ReportDataPage(reportDefModel, params));
 			}			
 		});
 		add(toPrintVersion);
@@ -209,7 +214,7 @@ public class ReportDataPage extends BasePage {
 				dataProvider, 
 				!inPrintVersion);
 		if(inPrintVersion) {
-			reportTable.setRowsPerPage(Integer.MAX_VALUE);
+			reportTable.setItemsPerPage(Integer.MAX_VALUE);
 		}
 		reportTable.setVisible(
 				ReportManager.HOW_PRESENTATION_TABLE.equals(report.getReportDefinition().getReportParams().getHowPresentationMode())
@@ -390,9 +395,9 @@ public class ReportDataPage extends BasePage {
 					Label toolLabel = new Label(componentId, toolName);
 					String toolIconClass = "toolIcon";
 					String toolIconPath = "url(" + Locator.getFacade().getEventRegistryService().getToolIcon(toolId) + ")";
-					toolLabel.add(new AttributeModifier("class", true, new Model(toolIconClass)));
-					toolLabel.add(new AttributeModifier("style", true, new Model("background-image: "+toolIconPath)));
-					toolLabel.add(new AttributeModifier("title", true, new Model(toolName)));
+					toolLabel.add(new AttributeModifier("class", new Model(toolIconClass)));
+					toolLabel.add(new AttributeModifier("style", new Model("background-image: "+toolIconPath)));
+					toolLabel.add(new AttributeModifier("title", new Model(toolName)));
 					item.add(toolLabel);
 				}
 			});
@@ -414,9 +419,9 @@ public class ReportDataPage extends BasePage {
 						String toolName = Locator.getFacade().getEventRegistryService().getToolName(toolId);
 						String toolIconClass = "toolIcon";
 						String toolIconPath = "url(" + Locator.getFacade().getEventRegistryService().getToolIcon(toolId) + ")";
-						eventLabel.add(new AttributeModifier("class", true, new Model(toolIconClass)));
-						eventLabel.add(new AttributeModifier("style", true, new Model("background-image: "+toolIconPath)));
-						eventLabel.add(new AttributeModifier("title", true, new Model(toolName)));
+						eventLabel.add(new AttributeModifier("class", new Model(toolIconClass)));
+						eventLabel.add(new AttributeModifier("style", new Model("background-image: "+toolIconPath)));
+						eventLabel.add(new AttributeModifier("title", new Model(toolName)));
 					}
 					item.add(eventLabel);
 				}
@@ -455,6 +460,40 @@ public class ReportDataPage extends BasePage {
 					}else{
 						if(!"".equals(refAction.trim()))
 							action = (String) new ResourceModel("action_"+refAction).getObject();
+					}
+					item.add(new Label(componentId, action));
+				}
+			});
+		}
+        // lessonbuilder page
+		if(Locator.getFacade().getReportManager().isReportColumnAvailable(reportParams, StatsManager.T_PAGE)) {
+			columns.add(new PropertyColumn(new ResourceModel("th_page"), columnsSortable ? ReportsDataProvider.COL_PAGE : null, ReportsDataProvider.COL_PAGE) {
+				@Override
+				public void populateItem(Item item, String componentId, IModel model) {
+					LessonBuilderStat stat = (LessonBuilderStat) model.getObject();
+					final String ref = stat.getPageRef();
+					String lnkLabel = stat.getPageTitle();
+					String imgUrl = "", lnkUrl = "";
+				    if (lnkLabel == null) {
+					    lnkLabel = (String) new ResourceModel("resource_unknown").getObject();
+					}
+					Component resourceComp = new ImageWithLink(componentId, imgUrl, lnkUrl, lnkLabel, "_new");
+					item.add(resourceComp);
+				}
+			});
+		}
+        // lessonbuilder page action
+		if(Locator.getFacade().getReportManager().isReportColumnAvailable(reportParams, StatsManager.T_PAGE_ACTION)) {
+			columns.add(new PropertyColumn(new ResourceModel("th_action"), columnsSortable ? ReportsDataProvider.COL_ACTION : null, ReportsDataProvider.COL_ACTION) {
+				@Override
+				public void populateItem(Item item, String componentId, IModel model) {
+					final String pageAction = ((LessonBuilderStat) model.getObject()).getPageAction();
+					String action = "";
+					if (pageAction == null){
+						action = "";
+					} else {
+						if (!"".equals(pageAction.trim()))
+							action = (String) new ResourceModel("action_" + pageAction).getObject();
 					}
 					item.add(new Label(componentId, action));
 				}
@@ -566,7 +605,7 @@ public class ReportDataPage extends BasePage {
 		String fileName = getExportFileName();
 		byte[] hssfWorkbookBytes = Locator.getFacade().getReportManager().getReportAsExcel(report, fileName);
 		
-		RequestCycle.get().setRequestTarget(EmptyRequestTarget.getInstance());
+		RequestCycle.get().scheduleRequestHandlerAfterCurrent(new EmptyRequestHandler());
 		WebResponse response = (WebResponse) getResponse();
 		response.setContentType("application/vnd.ms-excel");
 		response.setAttachmentHeader(fileName + ".xls");
@@ -578,14 +617,12 @@ public class ReportDataPage extends BasePage {
 			out.write(hssfWorkbookBytes);
 			out.flush();
 		}catch(IOException e){
-			LOG.error(e);
-			e.printStackTrace();
+			LOG.error(e.getMessage());
 		}finally{
 			try{
 				if(out != null) out.close();
 			}catch(IOException e){
-				LOG.error(e);
-				e.printStackTrace();
+				LOG.error(e.getMessage());
 			}
 		}
 	}
@@ -594,7 +631,7 @@ public class ReportDataPage extends BasePage {
 		String fileName = getExportFileName();
 		String csvString = Locator.getFacade().getReportManager().getReportAsCsv(report);
 		
-		RequestCycle.get().setRequestTarget(EmptyRequestTarget.getInstance());
+		RequestCycle.get().scheduleRequestHandlerAfterCurrent(new EmptyRequestHandler());
 		WebResponse response = (WebResponse) getResponse();
 		response.setContentType("text/comma-separated-values");
 		response.setAttachmentHeader(fileName + ".csv");
@@ -606,14 +643,12 @@ public class ReportDataPage extends BasePage {
 			out.write(csvString.getBytes());
 			out.flush();
 		}catch(IOException e){
-			LOG.error(e);
-			e.printStackTrace();
+			LOG.error(e.getMessage());
 		}finally{
 			try{
 				if(out != null) out.close();
 			}catch(IOException e){
-				LOG.error(e);
-				e.printStackTrace();
+				LOG.error(e.getMessage());
 			}
 		}
 	}
@@ -622,7 +657,7 @@ public class ReportDataPage extends BasePage {
 		String fileName = getExportFileName();
 		byte[] pdf = Locator.getFacade().getReportManager().getReportAsPDF(report);
 
-		RequestCycle.get().setRequestTarget(EmptyRequestTarget.getInstance());
+		RequestCycle.get().scheduleRequestHandlerAfterCurrent(new EmptyRequestHandler());
 		WebResponse response = (WebResponse) getResponse();
 		response.setContentType("application/pdf");
 		response.setAttachmentHeader(fileName + ".pdf");
@@ -634,14 +669,12 @@ public class ReportDataPage extends BasePage {
 			out.write(pdf);
 			out.flush();
 		}catch(IOException e){
-			LOG.error(e);
-			e.printStackTrace();
+			LOG.error(e.getMessage());
 		}finally{
 			try{
 				if(out != null) out.close();
 			}catch(IOException e){
-				LOG.error(e);
-				e.printStackTrace();
+				LOG.error(e.getMessage());
 			}
 		}
 	}
