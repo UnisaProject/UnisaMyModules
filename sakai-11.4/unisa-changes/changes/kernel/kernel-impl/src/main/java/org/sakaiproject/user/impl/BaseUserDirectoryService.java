@@ -1,6 +1,7 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/svn/kernel/tags/sakai-10.5/kernel-impl/src/main/java/org/sakaiproject/user/impl/BaseUserDirectoryService.java $
- * $Id: BaseUserDirectoryService.java 318808 2015-05-12 22:21:37Z enietzel@anisakai.com $
+/**********************************************************************************
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Sakai Foundation
@@ -22,8 +23,8 @@
 package org.sakaiproject.user.impl;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.*;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.component.cover.ComponentManager;
@@ -33,7 +34,6 @@ import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.id.api.IdManager;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.memory.api.MemoryService;
-import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.SessionBindingEvent;
@@ -66,7 +66,7 @@ import java.util.*;
 public abstract class BaseUserDirectoryService implements UserDirectoryService, UserFactory
 {
 	/** Our log (commons). */
-	private static Log M_log = LogFactory.getLog(BaseUserDirectoryService.class);
+	private static Logger M_log = LoggerFactory.getLogger(BaseUserDirectoryService.class);
 
 	/** Storage manager for this service. */
 	protected Storage m_storage = null;
@@ -434,20 +434,6 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 		m_cacheCleanerSeconds = Integer.parseInt(time) * 60;
 	}
 
-	/** Configuration: case sensitive user eid. */
-	protected boolean m_caseSensitiveEid = false;
-
-	/**
-	 * Configuration: case sensitive user eid
-	 *
-	 * @param value
-	 *        The case sensitive user eid.
-	 */
-	public void setCaseSensitiveId(String value)
-	{
-		m_caseSensitiveEid = Boolean.valueOf(value).booleanValue();
-	}
-
 	/** Configuration: use a different id and eid for each record (otherwise make them the same value). */
 	protected boolean m_separateIdEid = false;
 
@@ -509,11 +495,6 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 	 * @return the EventTrackingService collaborator.
 	 */
 	protected abstract EventTrackingService eventTrackingService();
-
-	/**
-	 * @return the ThreadLocalManager collaborator.
-	 */
-	protected abstract ThreadLocalManager threadLocalManager();
 
 	/**
 	 * @return the AuthzGroupService collaborator.
@@ -619,7 +600,7 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 		}
 		catch (Exception t)
 		{
-			M_log.warn("init(): ", t);
+			M_log.error("init(): ", t);
 		}
 	}
 
@@ -806,8 +787,8 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 		if (user == null)
 		{
 			// find our user record, and use it if we have it
-			user = m_storage.getById(id); //Vijay check with Francette: 
-	
+			user = m_storage.getById(id);
+
 			// let the provider provide if needed
 			if ((user == null) && (m_provider != null))
 			{
@@ -1028,9 +1009,7 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 	{
 		String id = sessionManager().getCurrentSessionUserId();
 
-		// check current service caching - discard if the session user is different
-		User rv = (User) threadLocalManager().get(M_curUserKey);
-		if ((rv != null) && (rv.getId().equals(id))) return rv;
+		User rv = null;
 
 		try
 		{
@@ -1040,9 +1019,6 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 		{
 			rv = getAnonymousUser();
 		}
-
-		// cache in the current service
-		threadLocalManager().set(M_curUserKey, rv);
 
 		return rv;
 	}
@@ -1290,7 +1266,7 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 		// check for closed edit
 		if (!user.isActiveEdit())
 		{
-			M_log.warn("commitEdit(): closed UserEdit", new Exception());
+			M_log.error("commitEdit(): closed UserEdit", new Exception());
 			return;
 		}
 
@@ -1315,11 +1291,6 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 
 		// Update the caches to match any changed data.
 		putCachedUser(ref, user);
-		
-		// update in the threadLocal cache if this is the current user
-		if (user.getId().equals(sessionManager().getCurrentSessionUserId())) {
-			threadLocalManager().set(M_curUserKey, user);
-		}
 
 	}
 
@@ -1337,7 +1308,7 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 			}
 			catch (Exception e)
 			{
-				M_log.warn("cancelEdit(): closed UserEdit", e);
+				M_log.error("cancelEdit(): closed UserEdit", e);
 			}
 			return;
 		}
@@ -1348,6 +1319,26 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 		// close the edit object
 		((BaseUserEdit) user).closeEdit();
 	}
+
+	/**
+	 * @inheritDoc
+	 */
+ 	public User getUserByAid(String aid) throws UserNotDefinedException
+ 	{
+		if (m_provider instanceof AuthenticationIdUDP)
+		{
+			UserEdit user = new BaseUserEdit();
+			if (((AuthenticationIdUDP)m_provider).getUserbyAid(aid, user))
+			{
+				String id = m_storage.checkMapForId(user.getEid());
+				user.setId(id);
+				ensureMappedIdForProvidedUser(user);
+				putCachedUser(user.getReference(), user);
+				return user;
+			}
+		}
+		return getUserByEid(aid);
+ 	}
 
 	/**
 	 * @inheritDoc
@@ -1438,10 +1429,12 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 	 * @inheritDoc
 	 */
 	@SuppressWarnings("unchecked")
-	public Collection findUsersByEmail(String email)
+	public Collection<User> findUsersByEmail(String email)
 	{
+		Set<User> users = new HashSet<User>();
+
 		// check internal users
-		Collection users = m_storage.findUsersByEmail(email);
+		users.addAll(m_storage.findUsersByEmail(email));
 
 		// add in provider users
 		if (m_provider != null)
@@ -1517,7 +1510,6 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 			throw new UserIdInvalidException("Eid is too long");
 		}
 		
-	
 		// check security (throws if not permitted)
 		unlock(SECURE_ADD_USER, userReference(id));
 
@@ -1635,7 +1627,7 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 		// check for closed edit
 		if (!user.isActiveEdit())
 		{
-			M_log.warn("removeUser(): closed UserEdit", new Exception());
+			M_log.error("removeUser(): closed UserEdit", new Exception());
 			return;
 		}
 
@@ -1675,11 +1667,11 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 	 */
 	public User authenticate(String loginId, String password)
 	{
-		loginId = StringUtils.trimToNull(loginId);
+		loginId = cleanEid(loginId);
 		if (loginId == null) return null;
 
 		UserEdit user = null;
-		boolean authenticateWithProviderFirst = (m_provider != null) && m_provider.authenticateWithProviderFirst(loginId); 
+		boolean authenticateWithProviderFirst = (m_provider != null) && m_provider.authenticateWithProviderFirst(loginId);
 
 		if (authenticateWithProviderFirst)
 		{
@@ -1744,7 +1736,7 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 			// locally stored users.
 			try
 			{
-				user = (UserEdit)getUserByEid(loginId);
+				user = (UserEdit)getUserByAid(loginId);
 			} catch (UserNotDefinedException e)
 			{
 				return null;
@@ -1823,9 +1815,7 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 	 */
 	protected String cleanEid(String eid)
 	{
-        if (!m_caseSensitiveEid) {
-            eid = StringUtils.lowerCase(eid);
-        }
+        eid = StringUtils.lowerCase(eid);
         eid = StringUtils.trimToNull(eid);
 
         if (eid != null) {
@@ -1838,24 +1828,34 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 
 	protected UserEdit getCachedUser(String ref)
 	{
-		UserEdit user = (UserEdit)threadLocalManager().get(ref);
-		if ((user == null) && (m_callCache != null))
+		// KNL-1241 removed caching in threadlocal
+		UserEdit userEdit = null;
+		if (m_callCache != null)
 		{
-			user = (UserEdit)m_callCache.get(ref);
+			Object cachedRef = m_callCache.get(ref);
+			if (cachedRef != null)
+			{
+				userEdit = (UserEdit) cachedRef;
+			}
 		}
-		return user;
+		return userEdit;
 	}
 
 	protected void putCachedUser(String ref, UserEdit user)
 	{
-		threadLocalManager().set(ref, user);
-		if (m_callCache != null) m_callCache.put(ref, user);
+		// KNL-1241 removed caching in threadlocal
+		if (m_callCache != null)
+		{
+			m_callCache.put(ref, user);
+		}
 	}
 
 	protected void removeCachedUser(String ref)
 	{
-		threadLocalManager().set(ref, null);
-		if (m_callCache != null) m_callCache.remove(ref);
+		if (m_callCache != null)
+		{
+			m_callCache.remove(ref);
+		}
 	}
 
 	/**********************************************************************************************************************************************************************************************************************************************************
@@ -2025,6 +2025,42 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 		checkAndEnsureMappedIdForProvidedUser(u);
 		return u;
 	}
+
+	public boolean updateUserId(String id,String newEmail)
+	{
+		try {
+			List<String> locksSucceeded = new ArrayList<String>();
+			// own or any
+			List<String> locks = new ArrayList<String>();
+			locks.add(SECURE_UPDATE_USER_ANY);
+			locks.add(SECURE_UPDATE_USER_OWN);
+			locks.add(SECURE_UPDATE_USER_OWN_EMAIL);
+			locksSucceeded = unlock(locks, userReference(id));
+
+			if(!locksSucceeded.isEmpty()) {
+				UserEdit user = m_storage.edit(id);
+				if (user == null) {
+					M_log.warn("Can't find user " + id + " when trying to update email address");
+					return false;
+				}
+				user.setEid(newEmail);
+				user.setEmail(newEmail);
+				commitEdit(user);
+				return true;
+			}
+			else {
+				M_log.warn("User with id: "+id+" failed permission checks" );
+				return false;
+			}
+		} catch (UserPermissionException e) {
+			M_log.warn("You do not have sufficient permission to edit the user with Id: "+id, e);
+			return false;
+		} catch (UserAlreadyDefinedException e) {
+			M_log.error("A users already exists with EID of: "+id +"having email :"+ newEmail, e);
+			return false;
+		}
+	}
+
 
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * UserEdit implementation
@@ -2633,14 +2669,17 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 		/**
 		 * @inheritDoc
 		 */
-		public boolean equals(Object obj)
-		{
-			if (!(obj instanceof User)) return false;
-			//its possible that the user object has no id set
-			if (((User) obj).getId() == null) {
-				return false;
-			}
-			return ((User) obj).getId().equals(getId());
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			BaseUserEdit that = (BaseUserEdit) o;
+
+			if (m_id != null ? !m_id.equals(that.m_id) : that.m_id != null) return false;
+			if (m_eid != null ? !m_eid.equals(that.m_eid) : that.m_eid != null) return false;
+
+			return true;
 		}
 
 		/**
@@ -2910,6 +2949,15 @@ public abstract class BaseUserDirectoryService implements UserDirectoryService, 
 			}
 
 			return false;
+		}
+
+		@Override
+		public String toString()
+		{
+			return "BaseUserEdit{" +
+					"m_id='" + m_id + '\'' +
+					", m_eid='" + m_eid + '\'' +
+					'}';
 		}
 
 		/******************************************************************************************************************************************************************************************************************************************************

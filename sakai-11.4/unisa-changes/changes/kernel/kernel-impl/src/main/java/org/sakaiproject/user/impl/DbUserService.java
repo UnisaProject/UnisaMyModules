@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/svn/kernel/tags/sakai-10.5/kernel-impl/src/main/java/org/sakaiproject/user/impl/DbUserService.java $
- * $Id: DbUserService.java 309199 2014-05-06 15:36:14Z enietzel@anisakai.com $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Sakai Foundation
@@ -22,8 +22,8 @@
 package org.sakaiproject.user.impl;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlReaderFinishedException;
 import org.sakaiproject.db.api.SqlService;
@@ -47,7 +47,7 @@ import java.util.*;
 public abstract class DbUserService extends BaseUserDirectoryService
 {
 	/** Our log (commons). */
-	private static Log M_log = LogFactory.getLog(DbUserService.class);
+	private static Logger M_log = LoggerFactory.getLogger(DbUserService.class);
 
 	/** Table name for users. */
 	protected String m_tableName = "SAKAI_USER";
@@ -156,15 +156,6 @@ public abstract class DbUserService extends BaseUserDirectoryService
 			if (m_autoDdl)
 			{
 				sqlService().ddl(this.getClass().getClassLoader(), "sakai_user");
-
-				// load the 2.1.0.004 email_lc conversion
-				sqlService().ddl(this.getClass().getClassLoader(), "sakai_user_2_1_0_004");
-
-				// load the 2.1.0 postmaster password conversion
-				sqlService().ddl(this.getClass().getClassLoader(), "sakai_user_2_1_0");
-
-				// load the 2.2 id-eid map table conversion
-				sqlService().ddl(this.getClass().getClassLoader(), "sakai_user_2_2_map");
 			}
 
 			super.init();
@@ -270,16 +261,13 @@ public abstract class DbUserService extends BaseUserDirectoryService
 
 		public UserEdit put(String id, String eid)
 		{
-			String userId = checkMapForId(eid);//unisa change: check userId already existing in sakai_user_id_map for EID
-			if(userId==null){	//insert into sakai_user_id_map only if the record is not exists		
 			// check for already exists
 			if (check(id)) return null;
 
 			// assure mapping
-			if (!putMap(id, eid)) return null;//unisa change:insert into SAKAI_USER_ID_MAP (USER_ID, EID) values (?,?)
-			}
+			if (!putMap(id, eid)) return null;
 
-			BaseUserEdit rv = (BaseUserEdit) super.putResource(id, fields(id, null, false)); //inserts record into sakai_user
+			BaseUserEdit rv = (BaseUserEdit) super.putResource(id, fields(id, null, false));
 			if (rv != null) rv.activate();
 			return rv;
 		}
@@ -493,7 +481,7 @@ public abstract class DbUserService extends BaseUserDirectoryService
 			// if we are not doing separate id/eid, do nothing
 			if (!m_separateIdEid) return true;
 
-			String statement = userServiceSql.getInsertUserIdSql();//vijay: insert into SAKAI_USER_ID_MAP (USER_ID, EID) values (?,?)
+			String statement = userServiceSql.getInsertUserIdSql();
 
 			Object fields[] = new Object[2];
 			fields[0] = id;

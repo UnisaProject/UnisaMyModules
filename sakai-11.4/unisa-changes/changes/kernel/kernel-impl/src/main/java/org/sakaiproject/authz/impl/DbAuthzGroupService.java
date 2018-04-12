@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/svn/kernel/tags/sakai-10.5/kernel-impl/src/main/java/org/sakaiproject/authz/impl/DbAuthzGroupService.java $
- * $Id: DbAuthzGroupService.java 315392 2014-11-13 15:36:46Z enietzel@anisakai.com $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2003, 2004, 2005, 2006, 2006 2007, 2007, 2008 Sakai Foundation
@@ -21,10 +21,10 @@
 
 package org.sakaiproject.authz.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.*;
-// unisa-change KNL-1325 import org.sakaiproject.authz.api.SimpleRole;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.entity.api.Entity;
@@ -47,11 +47,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-/*  unisa-change KNL-1325 */
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-/* end unisa-change KNL-1325 */
 
 /**
  * <p>
@@ -60,10 +58,10 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class DbAuthzGroupService extends BaseAuthzGroupService implements Observer
 {
-	/** To avoide the dreaded ORA-01795 and the like, we need to limit to <100 the items in each in(?, ?, ...) clause, connecting them with ORs. */
-	protected final static int MAX_IN_CLAUSE = 99;
+	/** To avoide the dreaded ORA-01795 and the like, we need to limit to <1000 the items in each in(?, ?, ...) clause, connecting them with ORs. */
+	protected final static int MAX_IN_CLAUSE = 999;
 	/** Our log (commons). */
-	private static Log M_log = LogFactory.getLog(DbAuthzGroupService.class);
+	private static Logger M_log = LoggerFactory.getLogger(DbAuthzGroupService.class);
 	/** All the event functions we know exist on the db. */
 	protected Collection m_functionCache = new HashSet();
 	/** All the event role names we know exist on the db. */
@@ -111,8 +109,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 	private Cache authzUserGroupIdsCache;
 
     private Cache maintainRolesCache;
-    
-    /** unisa-change KNL-1325 */
+
 	/** KNL-1325 provide a more efficent refreshAuthzGroup */
     public static final String REFRESH_MAX_TIME_PROPKEY = "authzgroup.refresh.max.time";
     public static final String REFRESH_INTERVAL_PROPKEY = "authzgroup.refresh.interval";
@@ -134,7 +131,6 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 
 	/** Queue of authzgroups to refresh used by refreshAuthzGroupTask */
 	private Map<String, AuthzGroup> refreshQueue;
-    /** END unisa-change KNL-1325 */
 
 	public void setDatabaseBeans(Map databaseBeans)
 	{
@@ -208,18 +204,16 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		m_promoteUsersToProvided = promoteUsersToProvided;
 	}
 	
-	/** unisa-change KNL-1325 */
 	public void setRefreshTaskInterval(long refreshTaskInterval) {
 		M_log.info(REFRESH_INTERVAL_PROPKEY + " changed from " + this.refreshTaskInterval + " to " + refreshTaskInterval);
 		this.refreshTaskInterval = refreshTaskInterval;
 	}
-		
+
 	public void setRefreshMaxTime(long refreshMaxTime) {
 		M_log.info(REFRESH_MAX_TIME_PROPKEY + " changed from " + this.refreshMaxTime + " to " + refreshMaxTime);
-				this.refreshMaxTime = refreshMaxTime;
+		this.refreshMaxTime = refreshMaxTime;
 	}
-	/** END unisa-change KNL-1325 */
-	
+
 	/**
 	 * Final initialization, once all dependencies are set.
 	 */
@@ -234,7 +228,6 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			if (m_autoDdl)
 			{
 				sqlService().ddl(this.getClass().getClassLoader(), "sakai_realm");
-				sqlService().ddl(this.getClass().getClassLoader(), "sakai_realm_2_4_0_001");
 			}
 
 			super.init();
@@ -251,8 +244,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
             maintainRolesCache = m_memoryService.newCache("org.sakaiproject.authz.impl.DbAuthzGroupService.maintainRolesCache");
             //get the set of maintain roles and cache them on startup
             getMaintainRoles();
-            
-            /** unisa-change KNL-1325 */
+
             refreshTaskInterval = initConfig(REFRESH_INTERVAL_PROPKEY, serverConfigurationService().getString(REFRESH_INTERVAL_PROPKEY), refreshTaskInterval);
             refreshMaxTime = initConfig(REFRESH_MAX_TIME_PROPKEY, serverConfigurationService().getString(REFRESH_MAX_TIME_PROPKEY), refreshMaxTime);
 
@@ -265,8 +257,6 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
                 refreshTaskInterval, // delay before running again
                 TimeUnit.SECONDS
             );
-            /** end unisa-change KNL-1325 */
-
 		}
 		catch (Exception t)
 		{
@@ -274,7 +264,6 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		}
 	}
 
-	/** unisa-change KNL-1325 */
 	private long initConfig(String propkey, String scsValue, long currentValue) {
 		if (!"".equals(scsValue)) {
 			try {
@@ -287,8 +276,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		}
 		return currentValue;
 	}
-	/** END unisa-change KNL-1325 */
-	
+
 	/*************************************************************************************************************************************************
 	 * BaseAuthzGroupService extensions
 	 ************************************************************************************************************************************************/
@@ -298,16 +286,14 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 	*/
 	public void destroy()
 	{
-		/** unisa-change KNL-1325 */
 		refreshScheduler.shutdown();
-		/** END unisa-change KNL-1325 */
-		
-		authzUserGroupIdsCache.destroy();
+
+		authzUserGroupIdsCache.close();
 
 		// done with event watching
 		eventTrackingService().deleteObserver(this);
 
-        maintainRolesCache.destroy();
+        maintainRolesCache.close();
 
 		M_log.info(this +".destroy()");
 	}
@@ -382,7 +368,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				public Object readSqlResultRecord(ResultSet result) {
 					try {
 						String name = result.getString(1);
-						String key = result.getString(2);
+						Integer key = result.getInt(2);
 						RealmRole realmRole = new RealmRole(name, key);
 						m_roleNameCache.add(realmRole);
 					}
@@ -409,7 +395,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 					try
 					{
 						String name = result.getString(1);
-						String key = result.getString(2);
+						Integer key = result.getInt(2);
 						RealmRole realmRole = new RealmRole(name, key);
 						m_roleNameCache.add(realmRole);
 					}
@@ -521,7 +507,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 	 */
 	protected String orInClause(int size, String field)
 	{
-		// Note: to avoide the dreaded ORA-01795 and the like, we need to limit to <100 the items in each in(?, ?, ...) clause, connecting them with
+		// Note: to avoide the dreaded ORA-01795 and the like, we need to limit to <1000 the items in each in(?, ?, ...) clause, connecting them with
 		// ORs -ggolden
 		int ors = size / MAX_IN_CLAUSE;
 		int leftover = size - (ors * MAX_IN_CLAUSE);
@@ -591,7 +577,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		return bindParameter;
 	}
 
-	private String getRealmRoleKey(String roleName) {
+	private Integer getRealmRoleKey(String roleName) {
 		Iterator<RealmRole> itr = m_roleNameCache.iterator();
 		while (itr.hasNext()) {
 			RealmRole realmRole = (RealmRole) itr.next();
@@ -620,29 +606,18 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 
 			if (realmId != null) {
 				for (String user : getAuthzUsersInGroups(new HashSet<String>(Arrays.asList(realmId)))) {
-					//authzUserGroupIdsCache.remove(user);
+					authzUserGroupIdsCache.remove(user);
 				}
-				/** unisa-change KNL-1325 */
-				//if (serverConfigurationService().getBoolean("authz.cacheGrants", true)) {
-				//	if (M_log.isDebugEnabled()) {
-				//		M_log.debug("DbAuthzGroupService update(): clear realm role cache for " + realmId);
-				//	}
-
-				//	m_realmRoleGRCache.remove(realmId);
 				if (M_log.isDebugEnabled()) {
 					M_log.debug("DbAuthzGroupService update(): clear realm role cache for " + realmId);
- 				}
+				}
 				m_realmRoleGRCache.remove(realmId);
-
-				/** unisa-change KNL-1325 */	
 			} else {
 				// This should never happen as the events we generate should always have
 				// a /realm/ prefix on the resource.
 				M_log.warn("DBAuthzGroupService update(): failed to extract realm ID from "+ event.getResource());
 			}
 		}
-
-
 	}
 	
 	/**
@@ -684,7 +659,6 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 	    return rv;
 	}
 
-	/** unisa-change KNL-1325 */
 	/**
 	 * Step through queue and call refreshAuthzGroup on all groups queued up for
 	 * a refresh
@@ -704,7 +678,8 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				Iterator<AuthzGroup> it = queueList.iterator();
 				while (it.hasNext()) {
 					AuthzGroup azGroup = it.next();
-					if (M_log.isDebugEnabled()) M_log.debug("RefreshAuthzGroupTask.run() start refresh of azgroup: " + azGroup.getId());
+					String azGroupId = azGroup.getId();
+					if (M_log.isDebugEnabled()) M_log.debug("RefreshAuthzGroupTask.run() start refresh of azgroup: " + azGroupId);
 
 					numberRefreshed++;
 					long time = 0;
@@ -723,11 +698,11 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 					timeRefreshed += time;
 					if (time > longestRefreshed) {
 						longestRefreshed = time;
-						longestName = azGroup.getId();
+						longestName = azGroupId;
 					}
 					
 					if (it.hasNext() && (time > (refreshMaxTime * 1000L))) {
-						M_log.warn("RefreshAuthzGroupTask.run() " + azGroup.getId() + " took " + time/1e3 + 
+						M_log.warn("RefreshAuthzGroupTask.run() " + azGroupId + " took " + time/1e3 + 
 								" seconds which is longer than the maximum allowed of " + refreshMaxTime + 
 								" seconds, delay processing the rest of the queue");
 						break;
@@ -774,7 +749,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		 * Configure whether or not users with same status and role will be "promoted" to
 		 * being provided.
 		 *
-		 * @param autoPromoteNonProvidedUsers Whether or not to promote non-provided users
+		 * @param promoteUsersToProvided Whether or not to promote non-provided users
 		 */
 		public void setPromoteUsersToProvided(boolean promoteUsersToProvided) {
 			this.promoteUsersToProvided = promoteUsersToProvided;
@@ -984,29 +959,16 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			        }
 			    });
 
-			    /** unisa-change KNL-1325 */
-				//if (serverConfigurationService().getBoolean("authz.cacheGrants", true)) {
-				//	Map<String, Map> payLoad = new HashMap<String, Map>();
-				//	// rehydrate from SimpleRole, which can be stored in a Terracotta cache
-				//	Map<String, SimpleRole> roleProperties = new HashMap<String, SimpleRole>();
-				//	for (java.util.Map.Entry<String, BaseRole> entry : ((Map<String, BaseRole>) realm.m_roles).entrySet()) {
-				//		roleProperties.put(entry.getKey(), entry.getValue().exportToSimpleRole());
-				//	}
-				//	Map<String, MemberWithRoleId> membersWithRoleIds = getMemberWithRoleIdMap(realm.m_userGrants);
-				//	payLoad.put(REALM_ROLES_CACHE, roleProperties);
-				//	payLoad.put(REALM_USER_GRANTS_CACHE, membersWithRoleIds);
-				//	m_realmRoleGRCache.put(realm.getId(), payLoad);
 				Map<String, Map> payLoad = new HashMap<String, Map>();
 				// rehydrate from SimpleRole, which can be stored in a Terracotta cache
 				Map<String, SimpleRole> roleProperties = new HashMap<String, SimpleRole>();
 				for (java.util.Map.Entry<String, BaseRole> entry : ((Map<String, BaseRole>) realm.m_roles).entrySet()) {
 					roleProperties.put(entry.getKey(), entry.getValue().exportToSimpleRole());
-			    }
+				}
 				Map<String, MemberWithRoleId> membersWithRoleIds = getMemberWithRoleIdMap(realm.m_userGrants);
 				payLoad.put(REALM_ROLES_CACHE, roleProperties);
 				payLoad.put(REALM_USER_GRANTS_CACHE, membersWithRoleIds);
 				m_realmRoleGRCache.put(realm.getId(), payLoad);
-				/** end unisa-change KNL-1325 */
 			}
 		}
 
@@ -1070,7 +1032,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			UserAndGroups uag = (UserAndGroups) authzUserGroupIdsCache.get(userid);
 			if (uag != null) {
 				List<String> result = uag.getRealmQuery(new HashSet<String>(authzGroupIds));
-				if (M_log.isDebugEnabled()) M_log.debug(uag);
+				M_log.debug(uag.toString());
 				if (result != null) {
 					// hit
 					return result;
@@ -1148,15 +1110,15 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		/**
 		 * {@inheritDoc}
 		 */
-		public Set getProviderIds(String authzGroupId)
+		public Set<String> getProviderIds(String authzGroupId)
 		{
 			String statement = dbAuthzGroupSql.getSelectRealmProviderId1Sql();
 			List results = sqlService().dbRead(statement, new Object[] {authzGroupId}, null);
 			if (results == null)
 			{
-				return new HashSet();
+				return new HashSet<>();
 			}
-			return new HashSet(results);
+			return new HashSet<>(results);
 		}
 
 		/**
@@ -1941,52 +1903,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		{
 			if ((lock == null) || (realmId == null)) return false;
 
-			// does the user have any roles granted that include this lock, based on grants or anon/auth?
-			boolean auth = (userId != null) && (!userDirectoryService().getAnonymousUser().getId().equals(userId));
-
-			if (M_log.isDebugEnabled())
-				M_log.debug("isAllowed: auth=" + auth + " userId=" + userId + " lock=" + lock + " realm=" + realmId);
-
-			String statement = dbAuthzGroupSql.getCountRealmRoleFunctionSql(getRealmRoleKey(ANON_ROLE), getRealmRoleKey(AUTH_ROLE), auth);
-			Object[] fields = new Object[3];
-			fields[0] = userId;
-			fields[1] = lock;
-			fields[2] = realmId;
-
-			// checks to see if the user is the current user and has the roleswap variable set in the session
-			String roleswap = securityService().getUserEffectiveRole(realmId);
-
-            if (roleswap != null && auth && userId.equals(sessionManager().getCurrentSessionUserId()))
-            {
-            	fields[0] = roleswap; // set the field to the student role for the alternate sql
-            	statement = dbAuthzGroupSql.getCountRoleFunctionSql(); // set the function for our alternate sql
-            }
-
-			List resultsNew = m_sql.dbRead(statement, fields, new SqlReader()
-			{
-				public Object readSqlResultRecord(ResultSet result)
-				{
-					try
-					{
-						int count = result.getInt(1);
-						return Integer.valueOf(count);
-					}
-					catch (SQLException ignore)
-					{
-						return null;
-					}
-				}
-			});
-
-			boolean rvNew = false;
-			int countNew = -1;
-			if (!resultsNew.isEmpty())
-			{
-				countNew = ((Integer) resultsNew.get(0)).intValue();
-				rvNew = countNew > 0;
-			}
-
-			return rvNew;
+			return isAllowed(userId,lock,Arrays.asList(new String[]{realmId}));
 		}
 
 		/**
@@ -1996,7 +1913,6 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		{
 			if (lock == null) return false;
 
-			boolean auth = (userId != null) && (!userDirectoryService().getAnonymousUser().getId().equals(userId));
 
 			if (realms == null || realms.size() < 1)
 			{
@@ -2005,15 +1921,19 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 					M_log.debug("isAllowed():", new Exception());
 				return false;
 			}
-
+			
+			Set<String> roles = getEmptyRoles(userId);
+			
 			if (M_log.isDebugEnabled())
-				M_log.debug("isAllowed: auth=" + auth + " userId=" + userId + " lock=" + lock + " realms=" + realms);
+				M_log.debug("isAllowed: userId=" + userId + " lock=" + lock + " realms=" + realms
+						+ " roles="+ StringUtils.join(roles, ','));
 
 			String inClause = orInClause(realms.size(), "SAKAI_REALM.REALM_ID");
+			Set<Integer> roleIds = getRealmRoleKeys(roles);
 
 			// any of the grant or role realms
-			String statement = dbAuthzGroupSql.getCountRealmRoleFunctionSql(getRealmRoleKey(ANON_ROLE), getRealmRoleKey(AUTH_ROLE), auth, inClause);
-			Object[] fields = new Object[2 + (2 * realms.size())];
+			String statement = dbAuthzGroupSql.getCountRealmRoleFunctionSql(roleIds, inClause);
+			Object[] fields = new Object[2 + (2 * realms.size()) + roleIds.size()];
 			int pos = 0;
 
 			// for roleswap
@@ -2052,6 +1972,12 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				fields[pos++] = realmId;
 			}
 
+			for (Integer roleId : roleIds)
+			{
+				fields[pos++] = roleId;
+			}
+
+			
 			/* Delegated access essentially behaves like roleswap except instead of just specifying which role, you can also specify
 			 * the realm as well.  The access map is populated by an Event Listener that listens for dac.checkaccess and is stored in the session
 			 * attribute: delegatedaccess.accessmap.  This is a map of: SiteRef -> String[]{realmId, roleId}.  Delegated access
@@ -2068,9 +1994,6 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			if (SiteService.GROUP_SUBTYPE.equals(ref.getSubType())) {
 				String containerSiteRef = siteService.siteReference(ref.getContainer());
 			    roleswap = securityService().getUserEffectiveRole(containerSiteRef);
-			    if (roleswap != null) {
-			        siteRef = containerSiteRef;
-			    }
 			} else {
 			    roleswap = securityService().getUserEffectiveRole(siteRef);
 			}
@@ -2091,7 +2014,9 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 
 				// Then check the site where there's a roleswap effective
 				if (M_log.isDebugEnabled()) M_log.debug("userId="+userId+", siteRef="+siteRef+", roleswap="+roleswap+", delegatedAccess="+delegatedAccess);
-				Object[] fields2 = new Object[3];
+				// In roleswap check all realms, not for delegated access
+				int fieldCount = 3 + (roleswap!=null?realms.size():1); 
+				Object[] fields2 = new Object[fieldCount-(delegatedAccess?1:0)];
 				if (roleswap != null) {
 				    fields2[0] = roleswap;
 				} else if (delegatedAccess
@@ -2100,18 +2025,27 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				    fields2[0] = delegatedAccessGroupAndRole[1];
 				}
 				fields2[1] = lock;
+				pos = 2;
 				if (roleswap == null
 				        && delegatedAccess
 				        && delegatedAccessGroupAndRole != null
 				        ) {
 				    // set the realm for delegated access
 				    fields2[2] = delegatedAccessGroupAndRole[0];
+				    pos++;
 				} else {
-				    fields2[2] = siteRef;
+					// Check all realms in roleswap
+					for (String realmId : realms) {
+						fields2[pos++] = realmId;
+					}
 				}
+				if (!delegatedAccess) fields2[pos] = userId;
 				if (M_log.isDebugEnabled()) M_log.debug("roleswap/dac fields: "+Arrays.toString(fields2));
-
-				statement = dbAuthzGroupSql.getCountRoleFunctionSql();
+				// In delegated access use a single in clause
+				if (roleswap==null) {
+					inClause = orInClause(1, "SAKAI_REALM.REALM_ID");
+				}
+				statement = dbAuthzGroupSql.getCountRoleFunctionSql(inClause,delegatedAccess);
 
 				results = m_sql.dbRead(statement, fields2, new SqlReader()
 				{
@@ -2136,46 +2070,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 					count = ((Integer) results.get(0)).intValue();
 					rv = count > 0;
 				}
-				if (rv) // if true, go ahead and return
-					return true;
-
-				// Then check the rest of the realms. For example these could be subfolders under /content/group/...
-				if(roleswap != null){
-				for (String realmId : realms)
-				{
-					if (realmId == siteRef || realmId == userSiteRef) // we've already checked these so no need to do it again
-						continue;
-
-					fields2[2] = realmId;
-
-					results = m_sql.dbRead(statement, fields2, new SqlReader()
-					{
-						public Object readSqlResultRecord(ResultSet result)
-						{
-							try
-							{
-								int count = result.getInt(1);
-								return Integer.valueOf(count);
-							}
-							catch (SQLException ignore)
-							{
-								return null;
-							}
-						}
-					});
-
-					count = -1;
-					if (!results.isEmpty())
-					{
-						count = ((Integer) results.get(0)).intValue();
-						rv = count > 0;
-					}
-					if (rv) // if true, go ahead and return
-						return true;
-				}
-				}
-				// No successful results for roleswap
-				return false;
+				return rv;
             }
 
 			// Regular lookup (not roleswap)
@@ -2432,7 +2327,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		/**
 		 * {@inheritDoc}
 		 */
-		public void refreshUser(String userId, Map providerGrants)
+		public void refreshUser(String userId, Map<String, String> providerGrants)
 		{
 			if (userId == null) return;
 
@@ -2517,9 +2412,8 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				sql = dbAuthzGroupSql.getSelectRealmProviderSql(orInClause(providerGrants.size(), "SRP.PROVIDER_ID"));
 				Object[] fieldsx = new Object[providerGrants.size()];
 				int pos = 0;
-				for (Iterator f = providerGrants.keySet().iterator(); f.hasNext();)
+				for (String providerId : providerGrants.keySet())
 				{
-					String providerId = (String) f.next();
 					fieldsx[pos++] = providerId;
 				}
 				List<RealmAndProvider> realms = m_sql.dbRead(sql, fieldsx, new SqlReader()
@@ -2543,7 +2437,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				{
 					for (RealmAndProvider rp : realms)
 					{
-						String role = (String) providerGrants.get(rp.providerId);
+						String role = providerGrants.get(rp.providerId);
 						if (role != null)
 						{
 							if (target.containsKey(rp.realmId))
@@ -2627,25 +2521,39 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		/**
 		 * {@inheritDoc}
 		 */
-		/** unisa-change KNL-1325 */
-		//public void refreshAuthzGroup(BaseAuthzGroup realm)
-		//{
 		public void refreshAuthzGroup(BaseAuthzGroup azGroup) {
 			if (azGroup == null) return;
 
-			// Add the AuthzGroup to the queue, keyed on id to eliminate duplicate refreshes
-			if (M_log.isDebugEnabled()) M_log.debug("refreshAuthzGroup() queue add " + azGroup.getId());
-			refreshQueue.put(azGroup.getId(), azGroup);
+			if (azGroup.m_isNew) {
+				// refresh new authz groups immediately
+				M_log.debug("Refresh new authz group: {}", azGroup.getId());
+				refreshAuthzGroupInternal(azGroup);
+
+				// refresh parent
+				Reference reference = entityManager.newReference(azGroup.getId());
+				if (SiteService.APPLICATION_ID.equals(reference.getType()) && SiteService.GROUP_SUBTYPE.equals(reference.getSubType())) {
+					try {
+						refreshAuthzGroupInternal((BaseAuthzGroup) getAuthzGroup(siteService.siteReference(reference.getContainer())));
+					} catch (Exception e) {
+						M_log.warn("Cannot refresh parent authz group for authz group: {}", azGroup.getId(), e);
+					}
+				}
+			} else {
+				// Add the AuthzGroup to the queue, keyed on id to eliminate duplicate refreshes
+				M_log.debug("Queue authz group for refresh " + azGroup.getId());
+				refreshQueue.put(azGroup.getId(), azGroup);
+			}
 		}
 
+		/**
+		 * Update the realm with info from the provider
+		 * 
+		 * @param realm the realm to be refreshed
+		 */
 		protected void refreshAuthzGroupInternal(BaseAuthzGroup realm)
-		/** end unisa-change KNL-1325 */
- 		{
-			//	M_log.debug("refreshAuthzGroup()");
+		{
 			if ((realm == null) || (m_provider == null)) return;
-			/** unisa-change KNL-1325 */
-			if (M_log.isDebugEnabled()) M_log.debug("refreshAuthzGroupInternal() refreshing " + realm.getId());
-			/** end unisa-change KNL-1325 */
+			M_log.debug("Refreshing authz group: {}", realm);
 
 			boolean synchWithContainingRealm = serverConfigurationService().getBoolean("authz.synchWithContainingRealm", true);
 
@@ -2668,10 +2576,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				}
 				catch (GroupNotDefinedException e)
 				{
-					/** unisa-change KNL-1325 */
-					//M_log.warn("refreshAuthzGroup: cannot find containing realm for id: " + containingRealmRef);
 					M_log.warn("refreshAuthzGroupInternal() cannot find containing realm for id: " + containingRealmRef);
-					/** end unisa-change KNL-1325 */
 				}
 			}
 
@@ -2683,10 +2588,6 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			Map<String,String> target = m_provider.getUserRolesForGroup(realm.getProviderGroupId());
 
 			// read the realm's grants
-			sql = dbAuthzGroupSql.getSelectRealmRoleGroup4Sql();
-			Object[] fields = new Object[1];
-			fields[0] = caseId(realm.getId());
-
 			List<UserAndRole> grants = getGrants(realm);
 
 			// make a map, user id -> role granted, each for provider and non-provider (or inactive)
@@ -2700,10 +2601,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				{
 					if (existing.containsKey(uar.userId))
 					{
-						/** unisa-change KNL-1325 */
-						//M_log.warn("refreshRealm: duplicate user id found in provider grants: " + uar.userId);
 						M_log.warn("refreshAuthzGroupInternal() duplicate user id found in provider grants: " + uar.userId);
-						/** END unisa-change KNL-1325 */
 					}
 					else
 					{
@@ -2721,10 +2619,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				{
 					if (nonProvider.containsKey(uar.userId))
 					{
-						/** unisa-change KNL-1325 */
-						//M_log.warn("refreshRealm: duplicate user id found in nonProvider grants: " + uar.userId);
 						M_log.warn("refreshAuthzGroupInternal() duplicate user id found in nonProvider grants: " + uar.userId);
-						/** END unisa-change KNL-1325 */
 					}
 					else
 					{
@@ -2768,10 +2663,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				}
 				catch (UserNotDefinedException e)
 				{
-					/** unisa-change KNL-1325 */
-					//M_log.warn("refreshAuthzGroup: cannot find eid for user: " + userId);
 					M_log.warn("refreshAuthzGroupInternal() cannot find eid for user: " + userId);
-					/** END unisa-change KNL-1325 */
 				}
 			}
 
@@ -2830,10 +2722,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 							if ((existingRole != null && !existingRole.equals(cMemberRoleId)) // overriding existing authz group role
 									||!role.equals(cMemberRoleId))	// overriding provided role
 							{
-								/** unisa-change KNL-1325 */
-								//M_log.info("refreshAuthzGroup: realm id=" + realm.getId() + ", overrides group role of user eid=" + userEid + ": provided role=" + role + ", with site-level role=" + cMemberRoleId + " and site-level active status=" + cMemberActive);
 								M_log.info("refreshAuthzGroupInternal() realm id=" + realm.getId() + ", overrides group role of user eid=" + userEid + ": provided role=" + role + ", with site-level role=" + cMemberRoleId + " and site-level active status=" + cMemberActive);
-								/** END unisa-change KNL-1325 */
 							}
 						}
 					}
@@ -2854,10 +2743,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 				}
 				catch (UserNotDefinedException e)
 				{
-					/** unisa-change KNL-1325 */
-					//M_log.warn("refreshAuthzGroup: cannot find id for user eid: " + userEid);
 					M_log.warn("refreshAuthzGroupInternal() cannot find id for user eid: " + userEid);
-					/** END unisa-change KNL-1325 */
 				}
 			}
 
@@ -2890,10 +2776,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 					}
 					catch (UserNotDefinedException e)
 					{
-						/** unisa-change KNL-1325 */
-						//M_log.warn("refreshAuthzGroup: cannot find eid for user: " + userId);
 						M_log.warn("refreshAuthzGroupInternal() cannot find eid for user: " + userId);
-						/** end unisa-change KNL-1325 */
 					}
 
 				}
@@ -2907,7 +2790,7 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 
 				// delete
 				sql = dbAuthzGroupSql.getDeleteRealmRoleGroup4Sql();
-				fields = new Object[2];
+				Object[] fields = new Object[2];
 				fields[0] = caseId(realm.getId());
 				for (String userId : toDelete)
 				{
@@ -2929,18 +2812,16 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 
 					m_sql.dbWrite(sql, fields);
 				}
+				eventTrackingService().post(eventTrackingService().newEvent(SECURE_UPDATE_AUTHZ_GROUP, realm.getReference(), true));
 			}
 			if (M_log.isDebugEnabled()) {
-				/** unisa-change KNL-1325 */
-				//M_log.debug("refreshAuthzGroup(): deleted: "+ toDelete.size()+ " inserted: "+ toInsert.size()+ " provided: "+ existing.size()+ " nonProvider: "+ nonProvider.size());
 				M_log.debug("refreshAuthzGroupInternal() deleted: "+ toDelete.size()+ " inserted: "+ toInsert.size()+ " provided: "+ existing.size()+ " nonProvider: "+ nonProvider.size());
-				/** end unisa-change KNL-1325 */
 			}
 		}
 
 		private List<UserAndRole> getGrants(AuthzGroup realm) {
 			// read the realm's grants
-			String sql = dbAuthzGroupSql.getSelectRealmRoleGroup4Sql();
+			String sql = dbAuthzGroupSql.getSelectRealmRoleGroup2Sql();
 			Object[] fields = new Object[1];
 			fields[0] = caseId(realm.getId());
 
@@ -3114,7 +2995,8 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 
             if (maintainRolesCache != null && maintainRolesCache.containsKey("maintainRoles")) {
                 maintainRoles = (Set<String>) maintainRolesCache.get("maintainRoles");
-            } else {
+            }
+            if(maintainRoles == null) {
                 String sql = dbAuthzGroupSql.getMaintainRolesSql();
                 maintainRoles = new HashSet<String>(m_sql.dbRead(sql));
                 maintainRolesCache.put("maintainRoles", maintainRoles);
@@ -3350,16 +3232,28 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 		}
 
 	} // DbStorage
+	
+	private Set<Integer> getRealmRoleKeys(Set<String> roles) {
+		Set<Integer> roleIds = new HashSet<Integer>();
+		for(String role: roles) {
+			Integer realmRoleKey = getRealmRoleKey(role);
+			// If the role hasn't yet been used then it won't exist and so we can't lookup it's ID.
+			if (realmRoleKey != null) {
+				roleIds.add(realmRoleKey);
+			}
+		}
+		return roleIds;
+	}
 
 	class RealmRole implements Comparable<RealmRole>{
 		private String name;
-		private String key;
+		private Integer key;
 
 		RealmRole(String name) {
 			this.name = name;
 		}
 
-		RealmRole(String name, String key) {
+		RealmRole(String name, Integer key) {
 			this.name = name;
 			this.key = key;
 		}
@@ -3372,11 +3266,11 @@ public abstract class DbAuthzGroupService extends BaseAuthzGroupService implemen
 			this.name = name;
 		}
 
-		public String getKey() {
+		public Integer getKey() {
 			return key;
 		}
 
-		public void setKey(String key) {
+		public void setKey(Integer key) {
 			this.key = key;
 		}
 

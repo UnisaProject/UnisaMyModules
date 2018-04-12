@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/svn/kernel/tags/sakai-10.5/api/src/main/java/org/sakaiproject/user/api/UserDirectoryService.java $
- * $Id: UserDirectoryService.java 318808 2015-05-12 22:21:37Z enietzel@anisakai.com $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Sakai Foundation
@@ -178,6 +178,14 @@ public interface UserDirectoryService extends EntityProducer
 	 * @return true if the user is allowed to update their own first and last names, false if not.
 	 */
 	public boolean allowUpdateUserName(String id);
+	/**
+	 * Gets the UserEdit object from storage inorder to update the user Eid()
+	 *
+	 * @param eId  The user id.
+	 * @param newEmail the Id with which userId will be updated
+	 * @return UserEdit object
+	 */
+	public boolean updateUserId(String eId,String newEmail);
 
 	/**
 	 * check permissions for editUser()
@@ -337,6 +345,18 @@ public interface UserDirectoryService extends EntityProducer
 	//unisa-change: add this method to check the user only in DB not in providers
 	
 	User getUserByEidFromDb(String eid) throws UserNotDefinedException;
+
+	/**
+	 * Access a user object, given an authentication ID. This is used when integrating with a authenitcation system that doesn't
+	 * use the EID to authenticate the user.
+	 *
+	 * @param aid
+	 *        The user authentication ID.
+	 * @return A user object containing the user information
+	 * @exception UserNotDefinedException
+	 *            if not found
+	 */
+	User getUserByAid(String aid) throws UserNotDefinedException;
 
 	/**
 	 * Find the user eid from a user id.
