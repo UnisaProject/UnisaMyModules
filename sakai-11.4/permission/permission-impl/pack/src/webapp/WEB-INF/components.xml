@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="za.ac.unisa.permission.api.UnisaWelcomeService"
+			class="za.ac.unisa.permission.impl.UnisaWelcomeSecurityServiceImpl"
+			init-method="init">
+	</bean>
+
+	<bean id="za.ac.unisa.permission.api.UnisaDiscussionForumsService"
+			class="za.ac.unisa.permission.impl.UnisaDiscussionForumsSecurityServiceImpl"
+			init-method="init">
+	</bean>
+
+	<bean id="za.ac.unisa.permission.api.UnisaFAQsService"
+			class="za.ac.unisa.permission.impl.UnisaFAQsSecurityServiceImpl"
+			init-method="init">
+	</bean>
+
+	<bean id="za.ac.unisa.permission.api.UnisaBulkemailService"
+			class="za.ac.unisa.permission.impl.UnisaBulkemailSecurityServiceImpl"
+			init-method="init">
+	</bean>
+
+		<bean id="za.ac.unisa.permission.api.UnisaClasslistService"
+			class="za.ac.unisa.permission.impl.UnisaClasslistSecurityServiceImpl"
+			init-method="init">
+	</bean>
+
+		<bean id="za.ac.unisa.permission.api.UnisaStudentlistService"
+			class="za.ac.unisa.permission.impl.UnisaStudentlistSecurityServiceImpl"
+			init-method="init">
+	</bean>
+	
+	<bean id="za.ac.unisa.permission.api.UnisaExampapersService"
+			class="za.ac.unisa.permission.impl.UnisaExampapersSecurityServiceImpl"
+			init-method="init">
+	</bean>
+	
+	<bean id="za.ac.unisa.permission.api.UnisaPbooksService"
+			class="za.ac.unisa.permission.impl.UnisaPbooksSecurityServiceImpl"
+			init-method="init">
+	</bean>
+
+</beans>
+
+
