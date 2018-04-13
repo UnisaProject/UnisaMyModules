@@ -1,0 +1,68 @@
+<!--
+
+    Copyright (c) 2007-2009 The Sakai Foundation
+
+    Licensed under the Educational Community License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+                http://www.osedu.org/licenses/ECL-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:rsf="http://ponder.org.uk/rsf" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title rsf:id="page-title"></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<link href="/library/skin/tool_base.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+	<link href="/library/skin/default/tool.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+	<script type="text/javascript" rsf:id="scr=portal-matter" language="JavaScript" src="/library/js/headscripts.js"></script>
+	<!-- standard on all pages -->
+	<script type="text/javascript" language="JavaScript" src="../js/qna.js"></script>
+	<link href="../css/qna.css" type="text/css" rel="stylesheet" media="all" />
+	<!-- end -->
+</head>
+
+
+<body>
+<div class="portletBody">
+	<div rsf:id="navIntraTool:" class="navIntraTool"/>
+	<div rsf:id="searchTool:" class="navIntraTool"/>
+
+	<h3 rsf:id="page-title">Categories</h3><br/>
+  <div rsf:id="message-for:*">
+	<span>Message for user here</span>
+  </div>
+	<div rsf:id="category-note"/>
+
+	<form rsf:id="category-form" id="category-form" method="post">
+		<input type="hidden" value="0" id="catIndex" />
+		<div id="catContainer">
+			<div id="categoryInput" class="actionitem highlightPanel">
+					<label rsf:id="category-label" for="category-name"/>
+					<input rsf:id="category-name" size="60" id="category-name" type="text"/>
+					<a class="small" href="#" id="remove-cat" onclick="javascript:removeCategoryInput('catContainer', 'catIndex', this);" style="display:none">
+						<img src="/library/image/silk/cross.png"/>
+					</a>
+			</div>
+		</div>
+		<p class="act">
+			<a class="small" href="#" onclick="javascript:addCategoryInput('catContainer','catIndex','categoryInput');"><span rsf:id="msg=qna.category.add-another">add another category</span></a>
+		</p>
+		<div class="act">
+		<p>
+			<input rsf:id="save-button" type="submit" value="Save" class="active"/>
+			<input rsf:id="cancel-button" type="submit" value="Cancel"/>
+		</p>
+		</div>
+	</form>
+	</div>
+</body>
+</html>

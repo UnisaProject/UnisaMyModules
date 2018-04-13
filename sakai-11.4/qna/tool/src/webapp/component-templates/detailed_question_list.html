@@ -1,0 +1,62 @@
+<!--
+
+    Copyright (c) 2007-2009 The Sakai Foundation
+
+    Licensed under the Educational Community License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+                http://www.osedu.org/licenses/ECL-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:rsf="http://ponder.org.uk/rsf" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+   <title rsf:id="page-title"></title>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   <link href="tool_base.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+   <link href="tool.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+   <script type="text/javascript" rsf:id="scr=portal-matter" language="JavaScript" src="/library/js/headscripts.js"></script>
+   <link href="../css/qna.css" type="text/css" rel="stylesheet" media="all" />
+</head>
+
+<body>
+<!-- everything outside this div is thrown away -->
+<div rsf:id="question-list-table:" class="layoutViewContainer">
+	<br/>
+	<div rsf:id="sort-message">Sort questions by clicking on the appropriate column headings.</div>
+	<div rsf:id="pagerDiv:" class="listNav"></div>
+	<table class="listHier lines" style="table-layout:fixed;">
+		<thead>
+			<th width="55%"><a href="" rsf:id="tableheader.question:">Question</a></th>
+			<th width="6%" class="tableviews"><a rsf:id="tableheader.views:" >Views</a></th>
+			<th width="6%" class="tableanswers"><a rsf:id="tableheader.answers:" >Answers</a></th>
+			<th width="10%" class="tablecreated"><a rsf:id="tableheader.created:" >Created</a></th>
+			<th width="10%" class="tablemodified"><a rsf:id="tableheader.modified:">Modified</a></th>
+			<th width="20%" class="tablecategory"><a rsf:id="tableheader.category:" >Category</a></th>
+			<th width="5%" class="tableremove" rsf:id="tableheader.remove:">Remove?</th>
+		</thead>
+		<tbody>
+			<tr rsf:id="question-entry:">
+			<td style="overflow:hidden;"><a rsf:id="question-link" href="view_question.html"><span rsf:id="question-link-text"/></a></td>
+			<td rsf:id="question_row_views">83</td>
+			<td rsf:id="question_row_answers">2</td>
+			<td rsf:id="question_row_created">2008-02-08</td>
+			<td rsf:id="question_row_modified">2008-02-08</td>
+			<td rsf:id="question_row_category" style="overflow:hidden;">Misc</td>
+			<td><input rsf:id="remove-question-checkbox" name="remove-question-checkbox" value="false" type="checkbox"/></td>
+			</tr>
+		</tbody>
+
+	</table>
+
+</div>
+</body>
+</html>

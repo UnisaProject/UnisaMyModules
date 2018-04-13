@@ -1,0 +1,333 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+<!-- 	<bean id="sakaiFCKTextEvolver"
+		class="uk.ac.cam.caret.sakai.rsf.tmp.evolverimpl.SakaiFCKTextEvolver">
+		<property name="contentHostingService"
+			ref="org.sakaiproject.content.api.ContentHostingService" />
+		<property name="context" ref="sakai-Context" />
+	</bean>
+ -->
+	<!-- rich text evolver bean def -->
+	<bean id="richTextEvolver" parent="sakaiFCKTextEvolver" />
+
+	<!-- Renderers -->
+	<bean id="PagerRenderer" class="org.sakaiproject.qna.tool.producers.renderers.PagerRenderer">
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+		<property name="messageLocator" ref="messageLocator" />
+ 	</bean>
+
+	<bean id="SortHeaderRenderer" class="org.sakaiproject.qna.tool.producers.renderers.SortHeaderRenderer" />
+
+	<bean id="NavbarRenderer" class="org.sakaiproject.qna.tool.producers.renderers.NavBarRenderer">
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+	</bean>
+
+	<bean
+		id="SearchBarRenderer"
+		class="org.sakaiproject.qna.tool.producers.renderers.SearchBarRenderer"/>
+
+	<bean id="QuestionIteratorRenderer"
+		class="org.sakaiproject.qna.tool.producers.renderers.QuestionIteratorRenderer">
+		<property name="questionIteratorHelper" ref="QuestionIteratorHelper"/>
+		<property name="messageLocator" ref="messageLocator" />
+	</bean>
+
+	<!-- Question Iterator Helper -->
+	<bean id="QuestionIteratorHelper" class="org.sakaiproject.qna.tool.otp.QuestionIteratorHelper">
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+		<property name="questionsSorter" ref="QuestionsSorter"/>
+		<property name="viewHelper" ref ="ViewHelper" />
+	</bean>
+
+	<bean id="CategoryQuestionListRenderer"
+		class="org.sakaiproject.qna.tool.producers.renderers.CategoryQuestionListRenderer">
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+		<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic"/>
+	</bean>
+
+	<bean id="DetailedQuestionListRenderer"
+		class="org.sakaiproject.qna.tool.producers.renderers.DetailedQuestionListRenderer">
+		<property name="pagerRenderer" ref="PagerRenderer" />
+		<property name="sortHeaderRenderer" ref="SortHeaderRenderer" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+		<property name="questionsSorter" ref="QuestionsSorter" />
+	</bean>
+
+	<bean id="StandardQuestionListRenderer"
+		class="org.sakaiproject.qna.tool.producers.renderers.StandardQuestionListRenderer" >
+		<property name="questionsSorter" ref="QuestionsSorter" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+		<property name="pagerRenderer" ref="PagerRenderer"/>
+	</bean>
+
+	<bean id="AttachmentsViewRenderer" class="org.sakaiproject.qna.tool.producers.renderers.AttachmentsViewRenderer">
+		<property name="chs" ref="org.sakaiproject.content.api.ContentHostingService" />
+		<property name="ctis" ref="org.sakaiproject.content.api.ContentTypeImageService" />
+		<property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager" />
+    	<property name="entityManager" ref="org.sakaiproject.entity.api.EntityManager"/>
+	</bean>
+	
+	<bean class="org.sakaiproject.qna.tool.producers.AttachmentsHelperProducer" />
+
+	<!-- list the producer beans here -->
+	<bean
+		class="org.sakaiproject.qna.tool.producers.AskQuestionProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="searchBarRenderer" ref="SearchBarRenderer"/>
+		<property name="richTextEvolver" ref="richTextEvolver" />
+		<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic"/>
+		<property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic" />
+		<property name="attachmentsViewRenderer" ref="AttachmentsViewRenderer" />
+		<property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager" />
+		<property name="ELEvaluator" ref="ELEvaluator" />
+	</bean>
+
+	<bean class="org.sakaiproject.qna.tool.producers.OptionsProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+        <property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+        <property name="ELEvaluator" ref="ELEvaluator" />
+        <property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic" />
+	</bean>
+
+	<bean class="org.sakaiproject.qna.tool.producers.CategoryProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="searchBarRenderer" ref="SearchBarRenderer"/>
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic"/>
+		<property name="messages" ref="targettedMessageList"/>
+	</bean>
+
+	<bean class="org.sakaiproject.qna.tool.producers.PermissionsProducer">
+      <property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager" />
+      <property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+      <property name="messageLocator" ref="messageLocator" />
+   </bean>
+
+    <bean
+		class="org.sakaiproject.qna.tool.producers.QueuedQuestionProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="searchBarRenderer" ref="SearchBarRenderer"/>
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+		<property name="attachmentsViewRenderer" ref="AttachmentsViewRenderer" />
+		<property name="questionIteratorRenderer" ref="QuestionIteratorRenderer" />
+		<property name="targettedMessageList" ref="targettedMessageList"/>
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.PublishQueuedQuestionProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="richTextEvolver" ref="richTextEvolver" />
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+		<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic"/>
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.DeleteQuestionProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.DeleteQuestionsProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.DeleteCategoriesProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.MultipleDeletesProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+		<property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.DeleteCategoryProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.DeleteAnswerProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="ELEvaluator" ref="ELEvaluator" />
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.EditPublishedQuestionProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="richTextEvolver" ref="richTextEvolver" />
+		<property name="ELEvaluator" ref="ELEvaluator" />
+		<property name="attachmentsViewRenderer" ref="AttachmentsViewRenderer" />
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.EditPublishedAnswerProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="richTextEvolver" ref="richTextEvolver" />
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.ReplyPrivatelyProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="richTextEvolver" ref="richTextEvolver" />
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.ViewPrivateReplyProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="questionIteratorRenderer" ref="QuestionIteratorRenderer" />
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.ViewQuestionProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="searchBarRenderer" ref="SearchBarRenderer"/>
+		<property name="richTextEvolver" ref="richTextEvolver" />
+		<property name="questionIteratorRenderer" ref="QuestionIteratorRenderer" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+		<property name="attachmentsViewRenderer" ref="AttachmentsViewRenderer" />
+		<property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic" />
+		<property name="targettedMessageList" ref="targettedMessageList"/>
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.SearchResultsProducer">
+		<property name="searchBarRenderer" ref="SearchBarRenderer"/>
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+		<property name="searchLogic" ref="org.sakaiproject.qna.logic.SearchLogic"/>
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.MoveQuestionProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer"/>
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+		<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+		<property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic"/>
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+	</bean>
+
+	<bean class="org.sakaiproject.qna.tool.producers.OrganiseListProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+		<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+		<property name="messages" ref="targettedMessageList"/>
+		<property name="messageLocator" ref="messageLocator" />
+	</bean>
+
+	<bean
+		class="org.sakaiproject.qna.tool.producers.QuestionsListProducer">
+		<property name="navBarRenderer" ref="NavbarRenderer" />
+		<property name="searchBarRenderer" ref="SearchBarRenderer"/>
+		<property name="categoryQuestionListRenderer" ref="CategoryQuestionListRenderer" />
+		<property name="detailedQuestionListRenderer" ref="DetailedQuestionListRenderer" />
+		<property name="standardQuestionListRenderer" ref="StandardQuestionListRenderer" />
+		<property name="messageLocator" ref="messageLocator" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+		<property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic"/>
+		<property name="ELEvaluator" ref="ELEvaluator"/>
+		<property name="viewHelper" ref="ViewHelper"/> 
+		<property name="targettedMessageList" ref="targettedMessageList"/>
+	</bean>
+
+	<bean id="OrganiserHelper" class="org.sakaiproject.qna.tool.otp.OrganiserHelper">
+		<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic"/>
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+		<property name="messages" ref="targettedMessageList"/>
+	</bean>
+
+	<!-- Question Sorter -->
+	<bean id="QuestionsSorter" class="org.sakaiproject.qna.tool.utils.QuestionsSorter">
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+		<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+	</bean>
+	
+	<bean id="ViewHelper" class="org.sakaiproject.qna.tool.utils.ViewHelper"> 
+		<property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic" />
+		<property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager" />
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+	</bean>
+	
+	<!-- OTP -->
+	<bean id="DeleteMultiplesHelper" class="org.sakaiproject.qna.tool.otp.DeleteMultiplesHelper">
+	</bean>
+
+	<bean id="CategoryLocator" class="org.sakaiproject.qna.tool.otp.CategoryLocator">
+      <property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+      <property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+   	  <property name="messages" ref="targettedMessageList"/>
+   	</bean>
+
+	<bean id="QuestionLocator" class="org.sakaiproject.qna.tool.otp.QuestionLocator">
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic"/>
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+		<property name="messages" ref="targettedMessageList"/>
+		<property name="attachmentLogic" ref="org.sakaiproject.qna.logic.AttachmentLogic" />
+		<property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager" />
+	</bean>
+
+	<bean id="OptionsLocator" class="org.sakaiproject.qna.tool.otp.OptionsLocator">
+	  <property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic" />
+	  <property name="messages" ref="targettedMessageList"/>
+   	</bean>
+
+   	<bean id="AnswerLocator" class="org.sakaiproject.qna.tool.otp.AnswerLocator">
+      <property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+      <property name="answerLogic" ref="org.sakaiproject.qna.logic.AnswerLogic" />
+      <property name="messages" ref="targettedMessageList"/>
+   	</bean>
+
+   	<bean id="MultipleBeanMediator" class="org.sakaiproject.qna.tool.otp.MultipleBeanMediator">
+		<property name="questionLocator" ref="QuestionLocator" />
+   		<property name="categoryLocator" ref="CategoryLocator"/>
+   		<property name="answerLocator" ref="AnswerLocator" />
+   		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic"/>
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+		<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+		<property name="messages" ref="targettedMessageList"/>
+		<property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager" />
+		<property name="messageLocator" ref="messageLocator" />
+   	</bean>
+   	
+   		<!-- error prograting bean -->
+	<bean id="allErrorsAllowable"
+		class="org.sakaiproject.qna.tool.utils.ErrorHandler">
+		<property name="errorStateManager" ref="errorStateManager" />
+	</bean>
+   	
+</beans>

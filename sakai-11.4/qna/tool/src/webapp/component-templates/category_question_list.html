@@ -1,0 +1,80 @@
+<!--
+
+    Copyright (c) 2007-2009 The Sakai Foundation
+
+    Licensed under the Educational Community License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+                http://www.osedu.org/licenses/ECL-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:rsf="http://ponder.org.uk/rsf" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+   <title rsf:id="page-title"></title>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   <link href="/library/skin/tool_base.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+   <link href="/library/skin/default/tool.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+   <script type="text/javascript" rsf:id="scr=portal-matter" language="JavaScript" src="/library/js/headscripts.js"></script>
+   <link href="../css/qna.css" type="text/css" rel="stylesheet" media="all" />
+</head>
+
+<body>
+<!-- everything outside this div is thrown away -->
+<div rsf:id="question-list-table:" class="layoutViewContainer">
+   <table class="tableFlat listHier lines nolines" cellpadding="0" cellspacing="0" summary="Questions table">
+      <thead>
+         <tr id="table-head">
+         	<th></th>
+            <th rsf:id="categories-title" id="categories-title">Categories</th>
+            <th rsf:id="answers-title" id="answers-title">Answers</th>
+            <th rsf:id="views-title" id="views-title">Views</th>
+            <th rsf:id="modified-title" id="modified-title">Modified</th>
+            <th rsf:id="modified-title-longer" id="modified-title-longer">Modified</th>
+            <th rsf:id="remove-title" id="remove">Remove?</th>
+         </tr>
+      </thead>
+      <tbody>
+		<span rsf:id="table-entry:" id="table-entry:">
+	         <tr id="category-entry" rsf:id="category-entry:">
+	         	<td>
+	         		<img src="/library/image/sakai/expand.gif" id="expand-icon" rsf:id="expand-icon" />
+	         		<img src="/library/image/sakai/collapse.gif" id="collapse-icon" rsf:id="collapse-icon" style="display:none;"/>
+	         	</td>
+	            <td style="font-weight:bold;">
+	            	<img rsf:id="new-question-icon" src="/library/image/silk/flag_yellow.png"/>
+	            	<span rsf:id="category-name" style="white-space: pre;overflow:hidden;" id="category-name">Assignments</span>
+	            	<a rsf:id="category-edit" id="category-edit" class="small">edit</a>
+					<script rsf:id="onclick-init" type="text/javascript" style="display:none;">
+   						init_questions_toggle("icon","entry","expandIconSrc","ExpandIconSrc");
+	         		</script>
+            	</td>
+	            <td></td>
+	            <td></td>
+	            <td rsf:id="modified-date">2007-08-22</td>
+	            <td rsf:id="remove-category-checkbox-td:"><input rsf:id="remove-category-checkbox" name="remove-category-checkbox" value="false" type="checkbox"/></td>
+	         </tr>
+			 			 
+		     <tr id="question-entry" rsf:id="question-entry:" style="display:none;">
+				<td></td>
+				<td><a href="#" rsf:id="question-link"><span rsf:id="question-link-text"/></a></td>
+				<td rsf:id="answers-nr">3</td>
+				<td rsf:id="views-nr">88</td>
+				<td rsf:id="question-modified-date" style="white-space: nowrap;">2008-02-01</td>
+				<td rsf:id="remove-question-checkbox-td:"><input rsf:id="remove-question-checkbox" name="remove-question-checkbox" value="false" type="checkbox"/></td>
+			 </tr>
+         </span>
+      </tbody>
+   </table>
+</div>
+
+</body>
+</html>

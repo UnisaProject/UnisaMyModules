@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<!-- Bring in the hibernate related beans -->
+	<import resource="spring-hibernate.xml" />
+	<import resource="sakai-hibernate.xml" />
+
+	<!-- add sakai application scope bean definitions here -->
+
+	<bean id="org.sakaiproject.sms.logic.hibernate.SmsConfigLogic"
+		class="org.sakaiproject.sms.logic.impl.hibernate.SmsConfigLogicImpl">
+		<property name="smsDao" ref="org.sakaiproject.sms.dao.SmsDao" />
+	</bean>
+
+	<bean id="org.sakaiproject.sms.logic.hibernate.SmsAccountLogic"
+		class="org.sakaiproject.sms.logic.impl.hibernate.SmsAccountLogicImpl">
+		<property name="hibernateLogicLocator"
+			ref="org.sakaiproject.sms.logic.hibernate.HibernateLogicLocator" />
+        <property name="externalLogic"
+            ref="org.sakaiproject.sms.logic.external.ExternalLogic" />
+		<property name="smsDao" ref="org.sakaiproject.sms.dao.SmsDao" />
+		<property name="smsBilling" ref="org.sakaiproject.sms.api.SmsBilling" />
+	</bean>
+	
+	<bean id="org.sakaiproject.sms.logic.hibernate.SmsTaskLogic"
+		class="org.sakaiproject.sms.logic.impl.hibernate.SmsTaskLogicImpl">
+		<property name="externalLogic"
+			ref="org.sakaiproject.sms.logic.external.ExternalLogic" />
+		<property name="hibernateLogicLocator"
+			ref="org.sakaiproject.sms.logic.hibernate.HibernateLogicLocator" />
+		<property name="smsDao" ref="org.sakaiproject.sms.dao.SmsDao" />
+	</bean>
+
+	<bean id="org.sakaiproject.sms.logic.hibernate.SmsTransactionLogic"
+		class="org.sakaiproject.sms.logic.impl.hibernate.SmsTransactionLogicImpl">
+		<property name="hibernateLogicLocator"
+			ref="org.sakaiproject.sms.logic.hibernate.HibernateLogicLocator" />
+		<property name="smsBilling" ref="org.sakaiproject.sms.api.SmsBilling" />
+		<property name="smsDao" ref="org.sakaiproject.sms.dao.SmsDao" />
+
+	</bean>
+
+	<bean id="org.sakaiproject.sms.logic.hibernate.SmsMessageLogic"
+		class="org.sakaiproject.sms.logic.impl.hibernate.SmsMessageLogicImpl">
+		<property name="externalLogic"
+			ref="org.sakaiproject.sms.logic.external.ExternalLogic" />
+		<property name="hibernateLogicLocator"
+			ref="org.sakaiproject.sms.logic.hibernate.HibernateLogicLocator" />
+		<property name="smsDao" ref="org.sakaiproject.sms.dao.SmsDao" />
+	</bean>
+
+	<bean id="org.sakaiproject.sms.logic.hibernate.HibernateLogicLocator" class="org.sakaiproject.sms.logic.HibernateLogicLocator">
+		<property name="smsMessageLogic"
+			ref="org.sakaiproject.sms.logic.hibernate.SmsMessageLogic" />
+		<property name="smsTaskLogic"
+			ref="org.sakaiproject.sms.logic.hibernate.SmsTaskLogic" />
+		<property name="smsAccountLogic"
+			ref="org.sakaiproject.sms.logic.hibernate.SmsAccountLogic" />
+		<property name="smsTransactionLogic"
+			ref="org.sakaiproject.sms.logic.hibernate.SmsTransactionLogic" />
+		<property name="smsConfigLogic"
+			ref="org.sakaiproject.sms.logic.hibernate.SmsConfigLogic" />
+		<property name="externalLogic"
+			ref="org.sakaiproject.sms.logic.external.ExternalLogic" />
+	</bean>
+
+	<bean id="org.sakaiproject.sms.api.SmsBilling" class="org.sakaiproject.sms.logic.smpp.impl.SmsBillingImpl"
+		init-method="init">
+		<property name="hibernateLogicLocator"
+			ref="org.sakaiproject.sms.logic.hibernate.HibernateLogicLocator" />
+        <property name="externalLogic"
+            ref="org.sakaiproject.sms.logic.external.ExternalLogic" />			
+	</bean>
+
+	<bean id="org.sakaiproject.sms.api.SmsSmpp" class="org.sakaiproject.sms.logic.smpp.impl.SmsSmppImpl"
+		init-method="init" destroy-method="destroy">
+		<property name="hibernateLogicLocator"
+			ref="org.sakaiproject.sms.logic.hibernate.HibernateLogicLocator" />
+		<property name="smsCore" ref="org.sakaiproject.sms.api.SmsCore" />
+        <property name="numberRoutingHelper" ref="org.sakaiproject.sms.logic.external.NumberRoutingHelper" />
+	</bean>
+
+	<bean id="org.sakaiproject.sms.api.SmsCore" class="org.sakaiproject.sms.logic.smpp.impl.SmsCoreImpl"
+		init-method="init">
+		<property name="smsBilling" ref="org.sakaiproject.sms.api.SmsBilling" />
+		<property name="smsSmpp" ref="org.sakaiproject.sms.api.SmsSmpp" />
+		<property name="hibernateLogicLocator"
+			ref="org.sakaiproject.sms.logic.hibernate.HibernateLogicLocator" />
+		<property name="smsTaskValidator"
+			ref="org.sakaiproject.sms.logic.smpp.validate.SmsTaskValidator" />
+		<property name="smsMessageParser"
+			ref="org.sakaiproject.sms.logic.incoming.SmsMessageParser" />
+		<property name="smsIncomingLogicManager"
+			ref="org.sakaiproject.sms.logic.incoming.SmsIncomingLogicManager" />
+		<property name="externalLogic" ref="org.sakaiproject.sms.logic.external.ExternalLogic"/>
+		<property name="externalEmailLogic" ref="org.sakaiproject.sms.logic.external.ExternalEmailLogic"/>
+       <property name="numberRoutingHelper" ref="org.sakaiproject.sms.logic.external.NumberRoutingHelper" />
+       
+       <!-- external message sending for non-SMPP -->
+       <!-- <property name="externalMessageSending" ref="org.sakaiproject.sms.logic.external.ExternalMessageSending"/> -->
+       	  
+	</bean>
+
+	<bean id="org.sakaiproject.sms.api.SmsScheduler" class="org.sakaiproject.sms.logic.smpp.impl.SmsSchedulerImpl"
+		init-method="init" destroy-method="destroy">
+		<property name="smsCore" ref="org.sakaiproject.sms.api.SmsCore" />
+		<property name="hibernateLogicLocator"
+			ref="org.sakaiproject.sms.logic.hibernate.HibernateLogicLocator" />
+        <property name="externalLogic"
+            ref="org.sakaiproject.sms.logic.external.ExternalLogic" />
+            <!-- external message sending for non-SMPP -->
+       <!-- <property name="externalMessageSending" ref="org.sakaiproject.sms.logic.external.ExternalMessageSending"/>-->
+	</bean>
+
+
+	<!-- Sending via clickatell -->
+	<bean id="org.sakaiproject.sms.logic.external.ExternalMessageSending" 
+	class="org.sakaiproject.sms.logic.external.ClickatellService">
+		<property name="hibernateLogicLocator"
+			ref="org.sakaiproject.sms.logic.hibernate.HibernateLogicLocator" />
+		<property name="serverConfigurationService" ref="org.sakaiproject.component.api.ServerConfigurationService"/>
+	</bean>
+
+
+	
+	<bean id="org.sakaiproject.sms.logic.incoming.SmsMessageParser"
+		class="org.sakaiproject.sms.logic.incoming.impl.SmsMessageParserImpl">
+	</bean>
+
+
+	<bean id="org.sakaiproject.sms.logic.smpp.validate.SmsTaskValidator"
+		class="org.sakaiproject.sms.logic.smpp.validate.SmsTaskValidatorImpl">
+		<property name="smsBilling" ref="org.sakaiproject.sms.api.SmsBilling" />
+	</bean>
+
+	<bean id="org.sakaiproject.sms.logic.smpp.validate.MessageValidator"
+		class="org.sakaiproject.sms.logic.smpp.validate.MessageValidatorImpl" />
+
+
+	<bean id="org.sakaiproject.sms.api.SmsService" class="org.sakaiproject.sms.logic.smpp.impl.SmsServiceImpl">
+		<property name="smsCore" ref="org.sakaiproject.sms.api.SmsCore" />
+		<property name="smsTaskValidator"
+			ref="org.sakaiproject.sms.logic.smpp.validate.SmsTaskValidator" />
+		<property name="smsBilling" ref="org.sakaiproject.sms.api.SmsBilling" />
+	</bean>
+
+	<bean id="org.sakaiproject.sms.logic.incoming.SmsIncomingLogicManager"
+		class="org.sakaiproject.sms.logic.incoming.impl.SmsIncomingLogicManagerImpl">
+		<property name="externalLogic"
+			ref="org.sakaiproject.sms.logic.external.ExternalLogic" />
+		<property name="smsMessageParser"
+			ref="org.sakaiproject.sms.logic.incoming.SmsMessageParser" />
+			<property name="hibernateLogicLocator"
+			ref="org.sakaiproject.sms.logic.hibernate.HibernateLogicLocator" />
+	</bean>
+	
+	<bean id="org.sakaiproject.sms.logic.incoming.helper.SmsCommandRegisterHelper"
+		class="org.sakaiproject.sms.logic.incoming.helper.SmsCommandRegisterHelper" init-method="init" >
+		<property name="incomingLogicManager" ref="org.sakaiproject.sms.logic.incoming.SmsIncomingLogicManager" />
+		<property name="toolKey" value="sms" />
+		<property name="commands">
+			<list>
+				<bean class="org.sakaiproject.sms.logic.command.SmsAdminCommand">
+				<property name="hibernateLogicLocator"
+			ref="org.sakaiproject.sms.logic.hibernate.HibernateLogicLocator" />					
+				</bean>
+
+		<!-- The PING command just sends back the same message that it received -->
+                <bean class="org.sakaiproject.sms.logic.command.SmsPingCommand" />
+                
+                <!-- Example REST command handlers to invoke an external script -->
+                <!--
+
+                <bean id="ext1" class="org.sakaiproject.sms.logic.command.SmsRestCommand">
+                    <property name="commandKey" value="EXT1"/>
+                    <property name="enabled" value="true"/>
+                    <property name="helpMessage" value="Usage: EXT1 some thing"/>
+                    <property name="requiresSiteId" value="true"/>
+                    <property name="restUrl" value="https://vula.uct.ac.za/linktool/smsping.php"/>
+                    <property name="visible" value="false"/>
+                </bean>
+
+                <bean id="ext2" class="org.sakaiproject.sms.logic.command.SmsRestCommand">
+                    <property name="commandKey" value="EXT2"/>
+                    <property name="enabled" value="true"/>
+                    <property name="helpMessage" value="Usage: EXT2 some thing"/>
+                    <property name="requiresSiteId" value="true"/>
+                    <property name="restUrl" value="http://localhost/some/url2"/>
+                    <property name="visible" value="false"/>
+                </bean>
+
+                -->
+			</list>
+		</property>
+	</bean>	
+	<import resource="external.xml" />
+	<import resource="quartz.xml" />
+</beans>

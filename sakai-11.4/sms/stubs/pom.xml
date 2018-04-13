@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<name>SMS Test Stubs</name>
+	<groupId>org.sakaiproject.sms</groupId>
+	<artifactId>sms-stubs</artifactId>
+	<organization>
+		<name>Sakai Project</name>
+		<url>http://sakaiproject.org/</url>
+	</organization>
+	<inceptionYear>2008</inceptionYear>
+	<description>Sms test stubs</description>
+	<packaging>jar</packaging>
+
+	<!-- the base is the parent pom -->
+    <parent>
+        <groupId>org.sakaiproject.sms</groupId>
+        <artifactId>sms</artifactId>
+        <version>11.4</version><!--Sms.version-->
+    </parent>
+   <!--   --> 
+   <dependencyManagement>
+        <dependencies>
+            <dependency>
+               <groupId>org.sakaiproject.sms</groupId>
+				<artifactId>sms-stubs</artifactId>
+				<version>11.4</version>
+				<scope>compile</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+   
+	<dependencies>
+	
+		<!-- email dependencies -->
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+		</dependency>
+
+		<!--  For sending email -->
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+		</dependency>
+		
+		<!-- Internal dependencies -->
+		
+		<dependency>
+			<groupId>org.sakaiproject.kernel</groupId>
+			<artifactId>sakai-kernel-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.sakaiproject.kernel</groupId>
+			<artifactId>sakai-component-manager</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.sakaiproject.sms</groupId>
+			<artifactId>sms-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.sakaiproject.common</groupId>
+			<artifactId>sakai-common-edu-person-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.sakaiproject.common</groupId>
+			<artifactId>sakai-common-manager-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.sakaiproject.common</groupId>
+			<artifactId>sakai-common-type-api</artifactId>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<finalName>sms_stubs</finalName>
+		<sourceDirectory>${basedir}/src/java</sourceDirectory>
+
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
