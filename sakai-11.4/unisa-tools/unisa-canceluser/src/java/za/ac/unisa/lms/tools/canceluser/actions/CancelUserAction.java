@@ -485,13 +485,13 @@ public class CancelUserAction extends LookupDispatchAction {
 	    }
 			
 			}
-		   /* try {
+		  /*  try {
 			db.insertAuditLog(cancelUserForm.getStudentNr());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-*/
+
 	
 			UserCleanupSakaiDAO db2=new UserCleanupSakaiDAO();
 			String userId = "";
@@ -545,7 +545,7 @@ public class CancelUserAction extends LookupDispatchAction {
 					}
 					
 				}
-		}
+		}*/
 		    UsageSession usageSession = usageSessionService.startSession(cancelUserForm.getStudentNr(), request.getRemoteAddr(), request.getHeader("user-agent"));
 		    request.getSession().setAttribute("UsageSession", usageSession);
 
