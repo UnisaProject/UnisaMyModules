@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>base</artifactId>
+    <groupId>org.sakaiproject</groupId>
+    <version>11.4</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <name>Unisa Permission Project</name>
+  <groupId>org.sakaiproject</groupId>
+  <artifactId>permission-base</artifactId>
+  <packaging>pom</packaging>
+  <modules>
+    <module>permission-impl/impl</module>
+    <module>permission-impl/pack</module>
+  </modules>
+</project>

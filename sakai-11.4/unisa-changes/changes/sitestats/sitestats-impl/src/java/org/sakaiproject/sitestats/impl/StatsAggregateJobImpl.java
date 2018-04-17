@@ -1,6 +1,6 @@
 /**
- * $URL: https://source.sakaiproject.org/svn/sitestats/tags/sakai-10.4/sitestats-impl/src/java/org/sakaiproject/sitestats/impl/StatsAggregateJobImpl.java $
- * $Id: StatsAggregateJobImpl.java 105078 2012-02-24 23:00:38Z ottenhoff@longsight.com $
+ * $URL$
+ * $Id$
  *
  * Copyright (c) 2006-2009 The Sakai Foundation
  *
@@ -28,8 +28,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.SchedulerException;
@@ -42,7 +42,7 @@ import org.sakaiproject.sitestats.api.StatsUpdateManager;
 
 
 public class StatsAggregateJobImpl implements StatefulJob {
-	private Log					LOG					= LogFactory.getLog(StatsAggregateJobImpl.class);
+	private Logger					LOG					= LoggerFactory.getLogger(StatsAggregateJobImpl.class);
 
 	// Spring fields
 	private int					maxEventsPerRun		= 0;
@@ -73,16 +73,18 @@ public class StatsAggregateJobImpl implements StatefulJob {
 	private final static String ORACLE_CONTEXT_COLUMN  = ",CONTEXT";
 	private String MYSQL_GET_EVENT					= "select " + MYSQL_DEFAULT_COLUMNS + MYSQL_CONTEXT_COLUMN + " " +
 														"from SAKAI_EVENT e join SAKAI_SESSION s on e.SESSION_ID=s.SESSION_ID " +
-														"where EVENT_ID >= ? and EVENT_ID < ? " +
-														"order by EVENT_ID asc ";
+														"where EVENT_ID >= ? " +
+														"order by EVENT_ID asc LIMIT ?";
+	
+	// SAK-28967 - this query is very slow, replace it with the one below
 	private String ORACLE_GET_EVENT					= "SELECT * FROM ( " +
 														"SELECT " +
-															" ROW_NUMBER() OVER (ORDER BY EVENT_ID ASC) AS rn, " +
 															ORACLE_DEFAULT_COLUMNS + ORACLE_CONTEXT_COLUMN + " " +
 														"from SAKAI_EVENT e join SAKAI_SESSION s on e.SESSION_ID=s.SESSION_ID " +
 														"where EVENT_ID >= ? " +
-														") " +
-														"WHERE rn BETWEEN ? AND  ?";
+														"order by EVENT_ID asc) " +
+														"WHERE ROWNUM <= ?";
+	
 	private String MYSQL_PAST_SITE_EVENTS			= "select " + MYSQL_DEFAULT_COLUMNS + MYSQL_CONTEXT_COLUMN + " " +
 														"from SAKAI_EVENT e join SAKAI_SESSION s on e.SESSION_ID=s.SESSION_ID " +
 														"where (CONTEXT = ? or (EVENT in ('pres.begin','pres.end') and REF = ?)) " +
@@ -129,7 +131,7 @@ public class StatsAggregateJobImpl implements StatefulJob {
 	// ################################################################
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		String result = null;
-		String jobName = context.getJobDetail().getFullName();
+		String jobName = context.getJobDetail().getKey().getName();
 		
 		// ABORT if job is currently running in this cluster node.
 		//  -> Required as StatefullJob is only correctly supported in trunk!
@@ -240,7 +242,7 @@ public class StatsAggregateJobImpl implements StatefulJob {
 
 	private String startJob() throws SQLException {
 		List<Event> eventsQueue = new ArrayList<Event>();
-		long counter = 0;
+		long processedCounter = 0;
 		long offset = 0;
 		long lastProcessedEventId = 0;
 		long lastProcessedEventIdWithSuccess = 0;
@@ -248,7 +250,6 @@ public class StatsAggregateJobImpl implements StatefulJob {
 		long firstEventIdProcessedInBlock = -1;
 		Date lastEventDate = null;
 		Date lastEventDateWithSuccess = null;
-		boolean abortIteration = false;
 		long start = System.currentTimeMillis();
 		boolean sqlError = false;
 		String returnMessage = null;
@@ -261,23 +262,20 @@ public class StatsAggregateJobImpl implements StatefulJob {
 			st = connection.prepareStatement(sqlGetEvent);
 			rs = null;
 			
-			while(!abortIteration) {
-				abortIteration = true;
-				st.clearParameters();		
-				if(!isOracle){
-					if(firstEventIdProcessed == -1)
-						offset = eventIdLowerLimit;
-					st.setLong(1, offset);					// MySQL >= startId	
-					st.setLong(2, sqlBlockSize + offset);	// MySQL < endId
-				}else{
-					st.setLong(1, eventIdLowerLimit);		// Oracle lower limit	
-					st.setLong(2, offset);					// Oracle offset
-					st.setLong(3, sqlBlockSize + offset);	// Oracle limit	
+			// Let's make sure we don't end up in a never-ending loop
+			for (int loops = 0; loops < 100; loops++) {
+				long counter = 0;
+
+				// SAK-28967
+				if( offset == 0 ) {
+					offset = eventIdLowerLimit;
 				}
+				st.setLong( 1, offset );
+				st.setLong( 2, sqlBlockSize );
+				
 				rs = st.executeQuery();
 				
 				while(rs.next()){
-					abortIteration = false;
 					Date date = null;
 					String event = null;
 					String ref = null;
@@ -295,21 +293,27 @@ public class StatsAggregateJobImpl implements StatefulJob {
 							context = rs.getString("CONTEXT");
 						eventsQueue.add( statsUpdateManager.buildEvent(date, event, ref, context, sessionUser, sessionId) );
 						
-						counter++;					
 						lastProcessedEventId = rs.getInt("EVENT_ID");
 						lastEventDate = date;
 						if(firstEventIdProcessed == -1)
 							firstEventIdProcessed = jobRun.getStartEventId(); //was: lastProcessedEventId;
 						if(firstEventIdProcessedInBlock == -1)
 							firstEventIdProcessedInBlock = lastProcessedEventId;
+						processedCounter++;
 					}catch(Exception e){
 						if(LOG.isDebugEnabled())
 							LOG.debug("Ignoring "+event+", "+ref+", "+date+", "+sessionUser+", "+sessionId+" due to: "+e.toString());
 					}
+					counter++;
 				}
 				rs.close();
 				
-				if(!abortIteration){
+				// If we didn't see a single event, time to break out and wrap up this job
+				if (counter < 1) {
+					break;
+				}
+
+				if (firstEventIdProcessedInBlock > 0) {
 					// process events
 					boolean processedOk = statsUpdateManager.collectEvents(eventsQueue);
 					eventsQueue.clear();
@@ -321,19 +325,18 @@ public class StatsAggregateJobImpl implements StatefulJob {
 						jobRun.setLastEventDate(lastEventDateWithSuccess);
 						jobRun.setJobEndDate(new Date(System.currentTimeMillis()));
 						saveJobRun(jobRun);
-						firstEventIdProcessedInBlock = -1;
-						if(counter >= getMaxEventsPerRun()){
-							abortIteration = true;
-						}else if(counter + sqlBlockSize < getMaxEventsPerRun()){
-							offset += sqlBlockSize;	
-						}else{
-							offset += getMaxEventsPerRun() - counter;
-						}
 					}else{
 						returnMessage = "An error occurred while processing/persisting events to db. Please check your logs, fix possible problems and re-run this job (will start after last successful processed event).";
 						LOG.error(returnMessage);
 						throw new Exception(returnMessage);
 					}
+				}
+
+				firstEventIdProcessedInBlock = -1;
+				if(processedCounter >= getMaxEventsPerRun()) {
+					break;
+				} else {
+					offset += sqlBlockSize;
 				}
 			}
 
@@ -383,7 +386,7 @@ public class StatsAggregateJobImpl implements StatefulJob {
 			saveJobRun(jobRun);
 		}
 		
-		return counter + " events processed (ids: "+firstEventIdProcessed+" - "+lastProcessedEventIdWithSuccess+") in "+processingTime+"s (only events associated with a session are processed)";
+		return processedCounter + " events processed (ids: "+firstEventIdProcessed+" - "+lastProcessedEventIdWithSuccess+") in "+processingTime+"s (only events associated with a session are processed)";
 	}
 
 	private long getEventIdLowerLimit() {

@@ -1,0 +1,109 @@
+<!DOCTYPE html      PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:rsf="http://ponder.org.uk/rsf">
+<head>
+	<title rsf:id="page-title">SMS Account</title>
+
+	<script rsf:id="scr=portal-matter" type="text/javascript" language="JavaScript" src="/library/js/headscripts.js"></script>
+	
+	<script type="text/javascript">includeLatestJQuery('user-sms');</script>
+	<link href="/library/webjars/jquery-ui/1.11.3/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="/library/js/lang-datepicker/lang-datepicker.js"></script>
+		
+	<link href="../css/tool_base.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+    <link href="../css/default/tool.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+    <link rel="stylesheet" href="/sms-tool/content/css/sms.css" type="text/css"/>
+
+	<script type="text/javascript">
+		function initClearDateInput(dateInputId) {
+			var dateInput = document.getElementById(dateInputId);
+			dateInput.value = '';
+		}
+	</script>
+	
+	<script type="text/javascript">
+
+		$( document ).ready(function() {
+			localDatePicker({
+				input:'#accountEndDate',
+				useTime:1,
+				parseFormat: 'YYYY-MM-DD HH:mm:ss',
+				getval: '#enddate-iso8601',
+				ashidden: { iso8601: 'enddate-iso8601' }
+			});
+		});
+		
+	</script>  
+</head>
+
+<body style="margin-left : 5px;">
+	<div rsf:id="navIntraTool:" class="navIntraTool"/>
+	<h3 rsf:id="sms-account-heading" >SMS Account</h3>
+	<div rsf:id="message-for:*">
+		<span>Message for user here</span>
+	</div>
+
+	<form name="account" rsf:id="account-form">
+		<p class="shorttext required">
+			<label rsf:id="account-enabled-label" for="accountName" >
+				Account Name
+			</label>
+			<select rsf:id="account-enabled" >
+				<option>value</option>
+			</select>
+		</p>
+		<p class="shorttext required">
+			<label rsf:id="account-name-label" for="accountName" >
+				Account Name
+			</label>
+			<input rsf:id="account-name" type="text" maxlength="99" style="width:200px"/>
+		</p>
+		<p class="shorttext required">
+			<label rsf:id="sakai-site-id-label" for="sakaiSiteId" >
+				Sakai Site Id
+			</label>
+			<input rsf:id="sakai-site-id" type="text" maxlength="99" style="width:200px"/>
+		</p>
+		<p class="shorttext required" rsf:id="sakai-user-id-row:">
+			<label rsf:id="sakai-user-id-label" for="sakaiUserId" style="width:200px">
+				Sakai User Id
+			</label>
+			<input rsf:id="sakai-user-id" type="text" maxlength="99"  style="width:200px"/>
+		</p>
+		<p class="shorttext required">
+			<label rsf:id="sakai-owner-id-label" for="ownerId">Owner Id</label><input rsf:id="sakai-owner-id" type="text" maxlength="99"  style="width:200px" id="ownerId"/>
+		</p>
+		<p class="shorttext required">
+			<label rsf:id="overdraft-limit-label" for="overdraft-limit">
+				Overdraft Limit
+			</label>
+			<input rsf:id="overdraft-limit" type="text" maxlength="10" style="width:80px" />
+		</p>
+		<p class="shorttext required">
+			<label rsf:id="notiEmail-label" for="notiEmail">
+
+			</label>
+			<input rsf:id="notiEmail" type="text" maxlength="100" style="width:200px" />
+		</p>
+
+		<p class="shorttext required">
+			<label rsf:id="end-date-label">
+				End Date
+			</label>
+			<input rsf:id="enddate-iso8601" type="hidden"
+				id="enddate" name="enddate" value="YYYY/MM/DD"
+				size="25" maxlength="25" /> 
+			<input type="text" id="accountEndDate" name="accountEndDate"/>	
+		</p>
+
+		<div class="act">
+			<input rsf:id="save-btn" class="active" value="Save" accesskey="s" type="submit" />
+			<input rsf:id="cancel-btn" value="Cancel" accesskey="x" type="submit" />
+		</div>
+	</form>
+
+	<script rsf:id="init-clear-date-input" type="text/javascript">
+		initClearDateInput("dateInputId");
+	</script>
+</body>
+</html>

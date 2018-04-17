@@ -1,0 +1,60 @@
+<!--
+
+    Copyright (c) 2007-2009 The Sakai Foundation
+
+    Licensed under the Educational Community License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+                http://www.osedu.org/licenses/ECL-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:rsf="http://ponder.org.uk/rsf" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+   <title rsf:id="page-title"></title>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   <link href="/library/skin/tool_base.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+   <link href="/library/skin/default/tool.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+   <script type="text/javascript" rsf:id="scr=portal-matter" language="JavaScript" src="/library/js/headscripts.js"></script>
+   <link href="../css/qna.css" type="text/css" rel="stylesheet" media="all" />
+</head>
+
+<body>
+<div class="portletBody">
+  <div rsf:id="navIntraTool:" class="navIntraTool"/>
+    <h3 rsf:id="page-title">Reply to Question Privately</h3>
+  <div rsf:id="message-for:*">
+	<span>Message for user here</span>
+  </div>
+  <h4 rsf:id="sub-title">Question</h4>
+  <br/>
+  <form rsf:id="reply-privately-form" method="post">
+  	<div rsf:id="unpublished-question">
+  		How is the year mark composed?
+  	</div>
+  	<br/>
+  	<div rsf:id="unpublished-question-submitter" class="grey">Joe Bloggs, 2007-06-21 16:40</div>
+  	<br/>
+  	<h4 rsf:id="answer-title">Answer:</h4>
+  	<div class="textBox">
+    <div rsf:id="reply-input:">
+		<textarea rows="10" cols="80" name="reply">This should be the FCK editor. </textarea>
+	</div>
+    </div>
+  	
+	<div class="act">
+		<input rsf:id="send-button" type="submit" value="Send" class="active" />
+		<input rsf:id="cancel-button" type="submit" value="Cancel"/>
+	</div>
+  </form>
+  </div>
+</body>
+</html>

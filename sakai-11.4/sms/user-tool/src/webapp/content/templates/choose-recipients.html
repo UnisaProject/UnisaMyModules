@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:rsf="http://ponder.org.uk/rsf">
+<head>
+<title rsf:id="page-title">Sms Items</title>
+</head>
+<body>
+<div class="portletBody">
+<h3 rsf:id="msg=ui.recipients.choose.title" id="chooseTitle" class="insColor clear insBak insBorder" style="display:none">Choose Recipients</h3>
+  <div class="alertMessage" style="display:none">
+    <ul style="margin:0px;">
+      <li>Message for user here</li>
+    </ul>
+  </div>
+<div rsf:id="error" class="">
+                You have no messages to moderate
+            </div>
+<input rsf:id="error-back" type="button" value="cancel" class="close"/>
+  <form rsf:id="chooseForm" action="/direct/sms-task/new" method="POST">
+    <div id="people">
+      <div id="peopleList" style="width: 100%;">
+        <ul>
+          <li rsf:id="roles:" id="peopleTabsRoles"> <a rsf:id="roles-title" href="#peopleListRoles">Select by role</a> <span rsf:id="roles-selected" rel="recipientsSum" class="tabsNumber" title="Number you have selected" style="display:none">0</span> </li>
+          <li rsf:id="groups:" id="peopleTabsGroups"> <a rsf:id="groups-title" href="#peopleListGroups">Select by group</a> <span rsf:id="groups-selected" rel="recipientsSum" class="tabsNumber" title="Number you have selected" style="display:none">0</span> </li>
+          <li rsf:id="names:" id="peopleTabsNames">
+              <a rsf:id="names-title" href="#peopleListNames" style="display: none;">Individuals</a>
+              <a rsf:id="names-title-loading" href="#peopleListNames" name="loading">Loading individuals</a>
+              <span rsf:id="names-selected" rel="recipientsSum" class="tabsNumber" title="Number you have selected" style="display:none">0</span>
+          </li>
+          <li rsf:id="numbers:" id="peopleTabsNumbers"> <a rsf:id="numbers-title" href="#peopleListNumbers">Numbers</a> <span rsf:id="numbers-selected" rel="recipientsSum" class="tabsNumber" title="Number you have selected" style="display:none">0</span> </li>
+        </ul>
+          <div id="peopleListRoles">
+              <div rsf:id="error-no-roles" class="smsAlert">None</div>
+          		<span rsf:id="role-holder" />
+                  <div rsf:id="role-row:" rel="Roles">
+                      <input rsf:id="role-box" type="checkbox" name="students" value="1233" id="peopleList-students-12" data-listtype="roles"/>
+                      <label rsf:id="role-label" for="peopleList-students-12">students </label>
+                  </div>
+          </div>
+        <div id="peopleListGroups">
+            <div rsf:id="error-no-groups" class="smsAlert">None</div>
+        	<span rsf:id="group-holder" />
+           <div rsf:id="group-row:" rel="Groups" class="columnBoxes">
+               <input rsf:id="group-box" type="checkbox" name="Group 1" value="433443" id="group-students-12" data-listtype="groups"/>
+               <label rsf:id="group-label" for="peopleList-students-12">students </label>
+           </div>
+        </div>
+        <div id="peopleListNames">
+        	<div id="errorNoNames" rsf:id="msg=ui.error.no.names" class="smsAlert" style="display:none">This site has are no groups to choose from.</div>
+            <div  id="withNumbersOnlyNames"  rsf:id="msg=ui.recipients.choose.names.withnumbers" class="highlight">Enter the names of any site members: </div>
+            <div id="instructionsNames" rsf:id="msg=ui.recipients.choose.names.instructions" style="display:none">Enter the names of any site members: </div>
+            <div class="autocompleteParent">
+            <ul id="peopleListNamesSuggest" class="first acfb-holder">
+			    <input type="text" class="city acfb-input"/>
+            </ul>
+          </div>
+        </div>
+        <div id="peopleListNumbers"> <span rsf:id="msg=ui.recipients.choose.numbers.instructions">Mauris eleifend est et turpis. Duis id erat. </span>
+          <table width="100%" border="0" cellspacing="2" cellpadding="2">
+            <tr>
+              <td><div id="numbersInvalid"> <div rsf:id="msg=ui.recipients.choose.numbers.incorrect" class="msg highlight" style="display:none"> Correct these numbers:</div>
+                  <textarea rsf:id="peopleListNumbersBox" id="peopleListNumbersBox" name="deliveryMobileNumbersSet" cols="22" rows="5">+2275456357826</textarea>
+                </div></td>
+              <td valign="top"><div rsf:id="msg=ui.recipients.choose.numbers.correct" id="numbersValid" style="display:none">These numbers are fine:</div>
+                <ul id="peopleListNumbersBox2">
+                </ul></td>
+            </tr>
+          </table>
+            <span rsf:id="msg=ui.recipients.choose.numbers.total" id="peopleListNumbersLogText" style="display:none"> </span>
+            <span id="peopleListNumbersLog" style="display:none"> </span>
+            <span rsf:id="msg=ui.recipients.choose.numbers.duplicates" id="peopleListNumbersDuplicates" class="highlight" style="display:none">Some duplicate numbers were found and removed.</span>
+            <div><a rsf:id="checkNumbers" href="#" id="checkNumbers">Check numbers</a></div>
+        </div>
+      </div>
+      <div class="clear">
+        <input rsf:id="copy-me" type="checkbox" name="copyMe" id="copyMe" />
+        <label rsf:id="copy-me-label">Send me a copy</label>
+      </div>
+        
+        <div id="errorFacebox" style="display:none;" class="smsAlert">
+                    <div rsf:id="msg=ui.console.alert">
+                        ERROR:
+                    </div>
+                    <span> </span>
+          </div>
+
+        <div class="act">
+      <input rsf:id="calculate" type="button" class="active"  id="calculateCmd" value="Calculate" />
+            <img class="loadingImage" style="display:none;" src="/library/image/sakai/spinner.gif" alt="Loading" />
+        </div>
+
+
+      <div id="cReportConsole" class="" style="display:none">
+
+          <div>
+                    <span rsf:id="msg=ui.console.selected">
+                        Credits remaining:
+                    </span>
+                    <span rsf:id="console-selected" class="console-selected">
+                        100
+                    </span>
+          </div>
+
+          <div>
+                    <span rsf:id="msg=ui.console.estimated.credits">
+                        Credits remaining:
+                    </span>
+                    <span rsf:id="console-credits" class="console-credits">
+                        100
+                    </span>
+          </div>
+          <div>
+                    <span rsf:id="msg=ui.console.estimated.cost">
+                        Credits remaining:
+                    </span>
+                    <span rsf:id="console-cost" class="console-cost">
+                        100
+                    </span>
+          </div>
+          <div>
+                    <span rsf:id="msg=ui.console.credits.total">
+                        Credits remaining:
+                    </span>
+                    <span rsf:id="console-total" class="console-total">
+                        100
+                    </span>
+          </div>
+          <div class="smsAlert mayChange" style="display:none;">
+                    <div rsf:id="msg=ui.console.alert">
+                        Alert:
+                    </div>
+                    <span rsf:id="msg=ui.console.alert.maychange">
+                        100
+                    </span>
+          </div>
+
+      </div>
+
+      <div class="act">
+          <!-- DOM elements for re-opening a task -->
+          <input rsf:id="savedUserIds" id="savedUserIds" name="savedUserIds" type="hidden" value=""/>
+          <input rsf:id="savedEntityList" id="savedEntityList" name="savedEntityList" type="hidden" value=""/>
+          <input rsf:id="savedDeliveryMobileNumbersSet"  id="savedDeliveryMobileNumbersSet" name="savedDeliveryMobileNumbersSet" type="hidden" value=""/>
+          <input rsf:id="id" type="hidden" value="" name="id"/>
+        <input id="sakaiUserIds" name="sakaiUserIds" type="hidden"/>
+        <input id="deliveryEntityList" name="deliveryEntityList" type="hidden"/>
+        <input id="deliveryMobileNumbersSet" name="deliveryMobileNumbersSet" type="hidden"/>
+        <input rsf:id="sakaiSiteId" type="hidden" value="" name="sakaiSiteId"/>
+        <input rsf:id="senderUserName" type="hidden" value="" name="senderUserName"/>
+        <input rsf:id="senderUserId" type="hidden" value="" name="senderUserId"/>
+        <input rsf:id="currency" id="currency" type="hidden" value="" name="currency"/>
+        <input rsf:id="continue" type="button" class="active" id="recipientsCmd" value="Continue" disabled="disabled" />
+        <input rsf:id="cancel" type="button" value="cancel" rel="closeFB"/>
+      </div>
+    </div>
+  </form>
+ 
+</div>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!--
+
+    Copyright (c) 2007-2009 The Sakai Foundation
+
+    Licensed under the Educational Community License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+                http://www.osedu.org/licenses/ECL-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:rsf="http://ponder.org.uk/rsf" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+   <title rsf:id="page-title"></title>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   <link href="/library/skin/tool_base.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+   <link href="/library/skin/default/tool.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+   <script type="text/javascript" rsf:id="scr=portal-matter" language="JavaScript" src="/library/js/headscripts.js"></script>
+   <link href="../css/qna.css" type="text/css" rel="stylesheet" media="all" />
+   <script type="text/javascript" language="JavaScript" src="../js/qna.js"></script>
+</head>
+
+<body>
+<div class="portletBody">
+  <div rsf:id="navIntraTool:" class="navIntraTool"/>
+  <h3 rsf:id="page-title">Options</h3>
+  <div rsf:id="message-for:*">
+	<span>Message for user here</span>
+  </div>
+    
+  <form rsf:id="options-form" method="post">
+	  <br/>
+	  <div id="moderation-option">
+	 	<span class="tier0"><input rsf:id="moderation" type="checkbox" name="moderation" id="moderation" value="moderation" /></span>
+		<span class="tier1">
+	  		<label rsf:id="moderation-label" for="moderation">Moderate questions</label>
+	  	</span>
+	  </div>
+	  <div class="tier3"><label rsf:id="moderation-msg">Message comes here</label></div>
+	  <br/>
+
+	  <div id="anonymous-option">
+	  	<span class="tier0"><input rsf:id="anonymous" name="anonymous" type="checkbox" id="anonymous" value="anonymous" /></span>
+	  	<span class="tier1"><label rsf:id="anonymous-label" for="anonymous">Participants may ask questions anonymously</label></span>
+	  </div>
+	  <br/>
+
+<!--
+	  <div id="unknown-mobile-option">
+	  	 <span class="tier0"><input rsf:id="unknown-mobile" type="checkbox" name="unknown-mobile" id="unknown-mobile" value="unknown-mobile" checked="checked" /></span>
+	  	 <span class="tier1"><label rsf:id="unknown-mobile-label" for="unknown-mobile">Allow new questions and answers from unknown mobile numbers</label></span>
+	  </div>
+	  <br/>
+	  
+	  <div id="sms-notification-option">
+	  	 <span class="tier0"><input rsf:id="sms-notification" type="checkbox" name="sms-notification" id="sms-notification" value="sms-notification" checked="checked" /></span>
+	  	 <span class="tier1"><label rsf:id="sms-notification-label" for="sms-notification">Enable SMS notification for new answers</label></span>
+	  </div>
+	  <br/>
+-->
+
+	  <div id="notification-option">
+	  	 <span class="tier0"><input rsf:id="notification" type="checkbox" name="notification" id="notification" value="notification" checked="checked" /></span>
+	  	 <span class="tier1"><label rsf:id="notification-label" for="notification">When new questions are added, send email notifcation to:</label></span>
+	  </div>
+	  
+
+
+	  <div id="notification-type" class="tier4">
+		  <span rsf:id="notification-radio"/>
+		  <fieldset class="inputRadioGroup">
+		      <p class="inputRadio checkbox">
+		         <input rsf:id="site-contact" type="radio" name="notification-radio" id="site-contact" value="site-contact" />
+		         <label rsf:id="site-contact-label" for="site-contact">lecturer@university.ac.za</label>
+				 <input rsf:id="site-contact-stay-disabled" id="site-contact-stay-disabled" type="hidden" value="true"/> 
+		      </p>
+		      <p class="inputRadio checkbox">
+		         <input rsf:id="custom-mail" type="radio" name="notification-radio" id="custom-mail" value="custom-mail" />
+		         <label rsf:id="custom-mail-label" for="custom-mail">Specified e-mail address(es):</label>
+		      </p>
+		      <div id="custom-mail-option" class="tier2">
+		      	<input rsf:id="custom-mail-input" type="text" name="custom-mail-input" id="custom-mail-input" size="60" value="example@example.com,more@less.com" />
+		      </div>
+		      <div id="custom-mail-msg" class="tier2">
+		      	<label rsf:id="custom-mail-msg" for="custom-mail">(Please separate e-mail addresses with a comma)</label>
+		      </div>
+		      <p class="inputRadio checkbox">
+		         <input rsf:id="update-rights" type="radio" name="notification-radio" id="update-rights" value="update-rights" />
+		         <label rsf:id="update-rights-label" for="update-rights">Everyone with update rights</label>
+		      </p>
+		      <div class="tier2">
+		      	 <label rsf:id="update-rights-msg" for="update-rights">(Please check the tool Permissions to confirm who has these rights)</label>
+		      </div>
+		  </fieldset>
+	  </div>
+	  <script rsf:id="email-notification-init" type="text/javascript">
+  		init_mail_notifications("notification","site-contact","custom_option_id","update_option_id","custom_mail_input_id");
+  	  </script>
+	  
+	  <br/>
+	  <div id="default-view-option">
+	  <label rsf:id="default-view-label">Default view of questions for students:</label><br/>
+	  	<div id="view-type" class="tier4">
+		  	<span rsf:id="default-view-radio" />
+			<fieldset class="inputRadioGroup">
+				<p class="inputRadio checkbox">
+					<input rsf:id="category-view" type="radio" name="default-view-radio" id="category-view" value="category" />
+					<label rsf:id="category-view-label" for="category-view">Category</label>
+				</p>
+				<p class="inputRadio checkbox">
+					<input rsf:id="popular-view" type="radio" name="default-view-radio" id="popular-view" value="most_popular" />
+					<label rsf:id="popular-view-label" for="popular-view">Most Popular</label>
+				</p>
+			</fieldset>
+	  	</div>
+	  </div>
+	  
+<!--	  <br/>
+	  <div id="nr-answers-option">
+	   <span class="tier0"><label rsf:id="nr-answers-label">Number of answers returned by SMS Answer command:</label></span>
+	   <span class="tier1"><input type="text" rsf:id="nr-answers-input" size="1" value="1" /></span>
+	  </div>
+ --> 
+	  <div class="act">
+	  <p>
+	  	<input rsf:id="save-options-button" type="submit" value="Save" class="active"/>
+	  	<input rsf:id="cancel-button" type="submit" value="Cancel"/>
+	  </p>
+	  </div>
+ </form>
+</div>
+</body>
+</html>

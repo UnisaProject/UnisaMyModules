@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+          "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+   <!-- put your value object in the class name,
+      the table name is optional but you should specify it to avoid collisions -->
+   <class name="org.sakaiproject.qna.model.QnaQuestion" table="qna_QUESTIONS">
+
+      <!-- create the primary key id, using native is typically the best way -->
+      <id name="id" type="long">
+         <generator class="native"/>
+      </id>
+      <!-- linkage to the category -->
+      <many-to-one name="category" lazy="false" class="org.sakaiproject.qna.model.QnaCategory">
+         <column name="category_id" />
+      </many-to-one>
+
+      <!--  linkage to answers -->
+      <bag name="answers" lazy="false" inverse="true" cascade="delete" batch-size="100">
+      		<key column="question_id"/>
+      		<one-to-many class="org.sakaiproject.qna.model.QnaAnswer" />
+      </bag>
+      
+      <!-- linkage to attachments -->
+      <bag name="attachments" lazy="false" cascade="all" batch-size="50">
+      		<key column="question_id"/>
+      		<one-to-many class="org.sakaiproject.qna.model.QnaAttachment" />
+      </bag>
+
+	  <property name="ownerId" type="string" length="255" not-null="false" >
+	  	<column name="ownerId" not-null="false" />
+	  </property>
+	  <property name="ownerMobileNr" type="string" />
+      <property name="lastModifierId" type="string" length="255">
+      	<column name="lastModifierId" not-null="false" />
+      </property>
+      <property name="location" type="string" length="255" not-null="true" />
+      <property name="questionText" type="text" not-null="true" />
+      <property name="views" type="integer" not-null="true" />
+      <property name="dateLastModified" type="java.util.Date" not-null="true"/>
+      <property name="dateCreated" type="java.util.Date" not-null="true" />
+      <property name="sortOrder" type="integer" not-null="true" />
+      <property name="anonymous" type="boolean" not-null="true" />
+      <property name="published" type="boolean" not-null="true" />
+      <property name="notify" type="boolean" not-null="true" />
+      <property name="hidden" type="boolean" not-null="true"/>
+   </class>
+</hibernate-mapping>

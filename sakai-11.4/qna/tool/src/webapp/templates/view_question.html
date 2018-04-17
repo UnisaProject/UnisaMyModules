@@ -1,0 +1,91 @@
+<!--
+
+    Copyright (c) 2007-2009 The Sakai Foundation
+
+    Licensed under the Educational Community License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+                http://www.osedu.org/licenses/ECL-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:rsf="http://ponder.org.uk/rsf" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+   <title rsf:id="page-title"></title>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   <link href="tool_base.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+   <link href="tool.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+   <script type="text/javascript" rsf:id="scr=portal-matter" language="JavaScript" src="/library/js/headscripts.js"></script>
+   <link href="../css/qna.css" type="text/css" rel="stylesheet" media="all" />
+   <script type="text/javascript" language="JavaScript" src="../js/qna.js"></script>
+</head>
+<body>
+<div class="portletBody">
+  <div rsf:id="navIntraTool:" class="navIntraTool"/>
+  <div rsf:id="searchTool:" class="searchTool"/>
+
+  <div rsf:id="iterator1:" style="text-align: right;"></div>
+
+  <div rsf:id="message-for:*">
+	<span>Message for user here</span>
+  </div>
+  <div class="question" rsf:id="question">
+  		How is the year mark composed?
+  </div>
+  <div rsf:id="attachmentsViewTool:"></div>
+  <div class="details grey"><span rsf:id="question-submit-details">Joe Bloggs, 2007-06-21 16:40</span>, <span rsf:id="answers-title">4 Answers</span>, <span rsf:id="question-id">001</span> <span class="itemAction"><a rsf:id="edit-question-link" href="edit_question.html">Edit question</a>
+  <a rsf:id="move-category-link" href="move_question.html">Move to another category</a>
+  <a rsf:id="delete-question-link" href="delete_question.html">Delete</a></span></div>
+  <div rsf:id="no-answers" class="answer">There are no answers yet for this question</div>
+  <div rsf:id="answer:" class="answer">
+  <div rsf:id="answer-text" class="answerText">Answer Text</div>
+  	<div><img rsf:id="answer-icon" src="/library/image/silk/user_suit.png" alt="this will be replaced"/> <span class="grey" rsf:id="answer-timestamp">2007-06-21</span> <span class="itemAction"><a rsf:id="edit-answer-link" href="edit_answer.html">Edit</a>
+	
+	<a rsf:id="withdraw-approval-link" id="withdraw-approval-link" href="withdraw_approval.html">Withdraw approval</a>
+	<form style="display:none;" rsf:id="withdraw-approval-form" method="post">
+		<input id="" type="submit" style="display:none;" value="" rsf:id="withdraw-approval-command" />
+	</form>
+	
+	<a rsf:id="mark-correct-link" id="mark-correct-link" href="mark_correct.html">Mark as correct</a>
+	<form style="display:none;" rsf:id="mark-correct-form" method="post">
+		<input id="" type="submit" style="display:none;" value="" rsf:id="mark-correct-command" />
+	</form>
+	
+	<a rsf:id="delete-answer-link" href="delete_answer.html">Delete</a></span>
+	<script rsf:id="make-link-submit" type="text/javascript">
+   		make_link_call_command("link-id","command-id");
+  	</script></div>
+  </div>
+  <div rsf:id="iterator2:" style="text-align: right;" />
+  <img rsf:id="add-answer-icon" id="add-answer-icon" src="/libary/image/silk/add.png" />
+  <a rsf:id="add-answer-link" id="add-answer-link" href="#">Add an answer</a>
+  <div rsf:id="add-answer" id="add-answer" style="display:none;">
+  	<form rsf:id="add-answer-form">
+  	  <h4 rsf:id="add-answer-title">Add your answer:</h4>
+          <div class="textBox">
+  	  <div rsf:id="answer-input:">
+	          <textarea rows="10" cols="80" name="answer">This should be the FCK editor. </textarea>
+	  </div>
+          </div>
+	  <div class="act">
+		<input rsf:id="add-answer-button" type="submit" value="Add Answer" class="active"/>
+		<input rsf:id="cancel-button" type="submit" value="Cancel"/>
+	  </div>
+  	</form>
+  </div>
+
+<br />
+  <script rsf:id="onclick-init" type="text/javascript">
+   	init_add_answer_toggle("add-answer-link","add-answer-icon","add-answer");
+  </script>
+  </div>
+</body>
+</html>

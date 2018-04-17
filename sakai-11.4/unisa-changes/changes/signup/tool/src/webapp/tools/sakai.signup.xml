@@ -8,8 +8,9 @@
 		<configuration name="signup.other.sites.availability" value="default" />
 		<category name="course" />
 		<category name="project" />
+		<!--unisa change: added categories-->
 		<category name="PostGraduate" />
-			<category name="onlcourse" />
+		<category name="onlcourse" />
 		
 		<!-- <category name="myworkspace" /> -->
 		<!-- <category name="sakai.admin" /> -->

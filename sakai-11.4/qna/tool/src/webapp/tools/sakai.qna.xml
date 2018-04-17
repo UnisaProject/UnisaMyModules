@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registration>
+	<tool id="sakai.qna"
+		title="Q&amp;A"
+		description="For asking, answering and organising questions">
+		<category name="course" />
+		<category name="project" />
+		<!-- <category name="myworkspace" /> -->
+		<!-- <category name="sakai.admin" /> -->
+	</tool>	
+</registration>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <parent>
+    <artifactId>permission-base</artifactId>
+    <groupId>org.sakaiproject</groupId>
+    <version>11.4</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.sakaiproject</groupId>
+  <artifactId>unisa-permission-pack</artifactId>
+  <packaging>sakai-component</packaging>
+  <name>unisa-permission-pack</name>
+  <description>Deployment of components</description>
+  <build>
+    <resources>
+      <resource>
+        <directory>${basedir}/src/java</directory>
+        <includes>
+          <include>**/*.properties</include>
+        </includes>
+      </resource>
+    </resources>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.sakaiproject</groupId>
+      <artifactId>unisa-permission-impl</artifactId>
+      <version>${sakai.version}</version>
+    </dependency>
+  </dependencies>
+  <properties>
+    <deploy.target>components</deploy.target>
+  </properties>
+</project>

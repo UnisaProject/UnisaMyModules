@@ -1,0 +1,94 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<name>Sakai Qna Tool</name>
+	<groupId>org.sakaiproject.qna</groupId>
+	<artifactId>qna-tool</artifactId>
+	<organization>
+		<name>Sakai Project</name>
+		<url>http://sakaiproject.org/</url>
+	</organization>
+	<inceptionYear>2007</inceptionYear>
+	<description>Qna webapp (tool)</description>
+	<packaging>war</packaging>
+
+	<!-- the base is the parent pom -->
+	<parent>
+		<groupId>org.sakaiproject</groupId>
+		<artifactId>qna</artifactId>
+		<version>11.4</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	<properties>
+		<deploy.webappname>Qna</deploy.webappname>
+		<appserver.id>${sakai.appserver.id}</appserver.id>
+	</properties>
+	<dependencies>
+		<!-- internal dependencies -->
+		<dependency>
+			<groupId>org.sakaiproject.qna</groupId>
+			<artifactId>qna-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Spring dependency -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+		<!-- no longer in shared -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.sakaiproject.entitybroker</groupId>
+			<artifactId>entitybroker-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.sakaiproject.entitybroker</groupId>
+			<artifactId>entitybroker-utils</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.sakaiproject.kernel</groupId>
+			<artifactId>sakai-kernel-util</artifactId>
+		</dependency>
+		<!-- RSF dependencies -->
+		<dependency>
+			<groupId>org.sakaiproject.rsf</groupId>
+			<artifactId>sakai-rsf-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.sakaiproject.rsf</groupId>
+			<artifactId>sakai-rsf-web-evolvers</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.sakaiproject.rsf</groupId>
+			<artifactId>sakai-rsf-web-templates</artifactId>
+			<version>${project.version}</version>
+			<type>war</type>
+		</dependency>
+
+		<!-- apache commons logging -->
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.sakaiproject.kernel</groupId>
+			<artifactId>sakai-kernel-api</artifactId>
+		</dependency>
+	</dependencies>
+	<!-- RSF (CARET) maven 2 repositories -->
+	<repositories>
+		<repository>
+			<id>Sakaiproject-Maven2</id>
+			<name>Sakaiproject Maven 2 Repository</name>
+			<url>https://source.sakaiproject.org/maven2</url>
+		</repository>
+	</repositories>
+
+
+</project>
