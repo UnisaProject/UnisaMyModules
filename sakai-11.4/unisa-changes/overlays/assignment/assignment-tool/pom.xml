@@ -7,7 +7,7 @@
   <parent>
     <artifactId>unisa-overlays-assignment</artifactId>
     <groupId>unisa.overlays.assignment</groupId>
-    <version>10.5</version>
+    <version>11.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Unisa overlay assignment App</name>
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.sakaiproject.assignment</groupId>
       <artifactId>sakai-assignment-tool</artifactId>
-      <version>10.5</version>
+      <version>11.4</version>
       <type>war</type>
       <scope>runtime</scope>
     </dependency>
