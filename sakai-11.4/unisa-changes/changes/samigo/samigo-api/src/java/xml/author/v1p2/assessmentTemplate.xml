@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!--****************unisa-change: To reference the DTD file locally******************* -->
 <!DOCTYPE Parts SYSTEM "/data/sakai/content/samigo/ims_qtiasiv1p2p1.dtd">
-<!--****************End of unisa-changes******************* -->
 <questestinterop>
   <assessment ident="" title="">
     <qticomment/>
@@ -159,12 +157,6 @@
       <!--Possible Values -->
       <!--True, False -->
 
-      <qtimetadatafield>
-        <fieldlabel>USERID</fieldlabel>
-        <fieldentry/>
-      </qtimetadatafield>
-      <!--Possible Values -->
-      <!--#PCDATA -->
       <qtimetadatafield>
         <fieldlabel>PASSWORD</fieldlabel>
         <fieldentry/>
@@ -681,6 +673,12 @@
       <!--Possible Values -->
       <!--True, False -->
       <qtimetadatafield>
+        <fieldlabel>displayScores_isInstructorEditable</fieldlabel>
+        <fieldentry>True</fieldentry>
+      </qtimetadatafield>      
+      <!--Possible Values -->
+      <!--True, False -->
+      <qtimetadatafield>
         <fieldlabel>submissionModel_isInstructorEditable</fieldlabel>
         <fieldentry>True</fieldentry>
       </qtimetadatafield>
@@ -688,6 +686,12 @@
       <!--True, False -->
       <qtimetadatafield>
         <fieldlabel>lateHandling_isInstructorEditable</fieldlabel>
+        <fieldentry>True</fieldentry>
+      </qtimetadatafield>
+      <!--Possible Values -->
+      <!--True, False -->
+      <qtimetadatafield>
+        <fieldlabel>instructorNotification_isInstructorEditable</fieldlabel>
         <fieldentry>True</fieldentry>
       </qtimetadatafield>
       <qtimetadatafield>
@@ -770,6 +774,12 @@
       <!--True, False -->
       <qtimetadatafield>
         <fieldlabel>metadataQuestions_isInstructorEditable</fieldlabel>
+        <fieldentry>True</fieldentry>
+      </qtimetadatafield>
+      <!--Possible Values -->
+      <!--True, False -->
+      <qtimetadatafield>
+        <fieldlabel>honorpledge_isInstructorEditable</fieldlabel>
         <fieldentry>True</fieldentry>
       </qtimetadatafield>
       <!--Possible Values -->
