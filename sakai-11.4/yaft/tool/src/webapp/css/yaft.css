@@ -228,3 +228,85 @@ th.yaftSortableTableHeaderSortDown {
 #yaft_author_nav_buttons {
     padding-bottom: 5px;
 }
+
+/* Unisa Changes:2018/03/08: Responsive tables on yaft */
+@media only screen and (max-width: 800px) { 
+	/* display table inline since it is inside a main <div> */
+    table.listHier {
+        display: inline-table !important; 	/* overide other css */
+		table-layout: fixed;
+		width: 100%;
+    }
+    
+    /* apply style to <div> elements inside <th> elements - some <th> */
+    /* elements have <div> elements which contain the content */
+    table.listHier th> div {						
+		word-wrap: break-word;	  	   /* text must wrap inside header column */
+		white-space: -o-pre-wrap; 	   /* white space must wrap inside header column */
+	    white-space: -moz-pre-wrap; 
+	    white-space: -webkit-pre-wrap; 
+	    white-space: -ms-pre-wrap;
+	    white-space: pre-wrap; 
+	}
+	
+    table.listHier th {						
+		word-wrap: break-word;	  	   
+		white-space: -o-pre-wrap; 	   
+	    white-space: -moz-pre-wrap; 
+	    white-space: -webkit-pre-wrap; 
+	    white-space: -ms-pre-wrap;
+	    white-space: pre-wrap; 
+	}
+	
+	table.listHier td {						
+		word-wrap: break-word;	  	   /* text must wrap inside row column */
+		white-space: -o-pre-wrap; 	   /* white space must wrap inside row column */
+	    white-space: -moz-pre-wrap; 
+	    white-space: -webkit-pre-wrap; 
+	    white-space: -ms-pre-wrap;
+	    white-space: pre-wrap; 	
+	}    
+    
+    /* do not apply style on tables with id 'yaft_permissions_table' - too much text to wrap*/
+    table:not(#yaft_permissions_table) {
+        display: inline-table !important; 	
+		table-layout: fixed;
+		width: 100%;
+    }
+     	
+    table:not(#yaft_permissions_table) th>div {						
+		word-wrap: break-word;	  	  
+		white-space: -o-pre-wrap; 	   
+	    white-space: -moz-pre-wrap; 
+	    white-space: -webkit-pre-wrap; 
+	    white-space: -ms-pre-wrap;
+	    white-space: pre-wrap; 	
+    }
+	
+    table:not(#yaft_permissions_table) th {						
+		word-wrap: break-word;	  	  
+		white-space: -o-pre-wrap; 	   
+	    white-space: -moz-pre-wrap; 
+	    white-space: -webkit-pre-wrap; 
+	    white-space: -ms-pre-wrap;
+	    white-space: pre-wrap; 	
+	}	
+	
+	table:not(#yaft_permissions_table) td {						
+		word-wrap: break-word;	  	   
+		white-space: -o-pre-wrap; 	   
+	    white-space: -moz-pre-wrap; 
+	    white-space: -webkit-pre-wrap; 
+	    white-space: -ms-pre-wrap;
+	    white-space: pre-wrap; 	
+	}
+	
+	/* do not make permission table responsive but allow horizontal scroll bar - */
+	/* the table has too much text to wrap around a small screen */
+    table#yaft_permissions_table {
+        display: block; 
+		overflow: auto;
+		width: 100%;
+    }
+}
+/* End Unisa Changes */

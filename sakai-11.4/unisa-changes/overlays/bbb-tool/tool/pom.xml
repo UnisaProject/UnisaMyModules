@@ -7,14 +7,14 @@
   <parent>
     <artifactId>unisa-overlays-bbb</artifactId>
     <groupId>unisa.overlays.bbb</groupId>
-    <version>10.5</version>
+    <version>11.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Unisa overlay bbb</name>
   <groupId>unisa-overlays-bbb</groupId>
   <artifactId>bbb-tool</artifactId>
   <packaging>war</packaging>
-  <version>10.5</version>
+  <version>11.4</version>
     <build>
         <plugins>
             <plugin>
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.sakaiproject.bbb</groupId>
       <artifactId>bbb-tool</artifactId>
-      <version>1.0.7-rc5</version>
+      <version>11.4</version>
       <type>war</type>
       <scope>runtime</scope>
     </dependency>
