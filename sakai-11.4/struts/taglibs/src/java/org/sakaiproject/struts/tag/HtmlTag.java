@@ -47,6 +47,57 @@ public class HtmlTag extends org.apache.struts.taglib.html.HtmlTag {
             if (headInclude != null) {
                 out.write(headInclude);
             }
+            
+            // Unisa Changes:2018/04/20: Make Struts tools responsive on small devices for Sakai 11.x
+            // styling applies to tables only - to fix text boxes not being responsive on struts tools
+            out.write("<style> "+
+            			 "@media only screen and (max-width: 800px) { "+
+            			 	 "table { display: inline-table !important; "+
+            		  		          "table-layout: fixed; width: 100%; } "+ 
+             		  		 "table th> div { " +					
+					  		  				  "word-wrap: break-word; "+	  	   
+					  		  				  "white-space: -o-pre-wrap; "+ 	   
+					  		  				  "white-space: -moz-pre-wrap; "+ 
+					  		  				  "white-space: -webkit-pre-wrap; "+
+					  		  				  "white-space: -ms-pre-wrap; "+
+					  		  				  "white-space: pre-wrap; } "+
+					  		 "table th { "+						
+					  		  			 "word-wrap: break-word; "+  	   
+					  		  			 "white-space: -o-pre-wrap; "+   
+					  		  			 "white-space: -moz-pre-wrap; "+ 
+					  		  			 "white-space: -webkit-pre-wrap; "+ 
+					  		  			 "white-space: -ms-pre-wrap; "+
+					  		  			 "white-space: pre-wrap; } "+
+					  		 "table td { "+					
+										 "word-wrap: break-word; "+ 	   
+										 "white-space: -o-pre-wrap; "+	   
+										 "white-space: -moz-pre-wrap; "+
+										 "white-space: -webkit-pre-wrap; "+ 
+										 "white-space: -ms-pre-wrap; "+
+										 "white-space: pre-wrap; } "+            			 	 
+            		  		 "table.listHier th> div { " +					
+            		  		  						   "word-wrap: break-word; "+	  	   
+            		  		  						   "white-space: -o-pre-wrap; "+ 	   
+            		  		  						   "white-space: -moz-pre-wrap; "+ 
+            		  		  						   "white-space: -webkit-pre-wrap; "+
+            		  		  						   "white-space: -ms-pre-wrap; "+
+            		  		  						   "white-space: pre-wrap; } "+
+            		  		 "table.listHier th { "+						
+            		  		  					  "word-wrap: break-word; "+  	   
+            		  		  					  "white-space: -o-pre-wrap; "+   
+            		  		  					  "white-space: -moz-pre-wrap; "+ 
+            		  		  					  "white-space: -webkit-pre-wrap; "+ 
+            		  		  					  "white-space: -ms-pre-wrap; "+
+            		  		  					  "white-space: pre-wrap; } "+
+            		  		 "table.listHier td { "+					
+            		  		  					  "word-wrap: break-word; "+ 	   
+            		  		  					  "white-space: -o-pre-wrap; "+	   
+            		  		  					  "white-space: -moz-pre-wrap; "+
+            		  		  					  "white-space: -webkit-pre-wrap; "+ 
+            		  		  					  "white-space: -ms-pre-wrap; "+
+            		  		  					  "white-space: pre-wrap; } "+
+            		  		"}</style>");
+            // End Unisa Changes
 
             out.write("</head>\n");
 
