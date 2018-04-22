@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-<beans>
-
-
+	<!--  uNISA CHANGE>bean id="org.sakaiproject.calendar.api.CalendarService"
+			class="org.sakaiproject.calendar.impl.DbCalendarService"
+			init-method="init"
+			destroy-method="destroy" -->
 	<bean id="org.sakaiproject.calendar.api.CalendarService"
 			class="za.ac.unisa.lms.services.calendar.InstitutionalCalendarService"
 			init-method="init"
-			destroy-method="destroy"
-			singleton="true">
+			destroy-method="destroy">
+				
 		<property name="memoryService"><ref bean="org.sakaiproject.memory.api.MemoryService"/></property>
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
 		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
@@ -21,7 +24,6 @@
 		<property name="securityService"><ref bean="org.sakaiproject.authz.api.SecurityService"/></property>
 		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
 		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
-		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
 		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
 		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
 		<property name="userDirectoryService"><ref bean="org.sakaiproject.user.api.UserDirectoryService"/></property>
@@ -33,20 +35,18 @@
  		<property name="locksInDb"><value>false</value></property>
  		<property name="autoDdl"><value>${auto.ddl}</value></property>
 	</bean>
-<!-- defined in calendar-impl/pack -->
+	
 	<bean id="org.sakaiproject.calendar.api.CalendarImporterService"
 		class="org.sakaiproject.calendar.impl.GenericCalendarImporter"
 		init-method="init"
-		destroy-method="destroy"
-		singleton="true">
+		destroy-method="destroy">
 		<property name="calendarService"><ref bean="org.sakaiproject.calendar.api.CalendarService"/></property>
 		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
 	</bean>
 	
 	<bean id="org.sakaiproject.calendar.api.ExternalCalendarSubscriptionService"
 		class="org.sakaiproject.calendar.impl.BaseExternalCalendarSubscriptionService"
-		init-method="init" destroy-method="destroy"
-		singleton="true">
+		init-method="init" destroy-method="destroy">
 		<property name="calendarService"><ref bean="org.sakaiproject.calendar.api.CalendarService"/></property>
  		<property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService"/></property>
 		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
@@ -61,8 +61,7 @@
 	</bean>
 
 	<bean id="org.sakaiproject.calendar.api.OpaqueUrlDao" 
-		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
-		singleton="true">
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager">
 			<ref bean="org.sakaiproject.springframework.orm.hibernate.GlobalTransactionManager" />
 		</property>
@@ -78,6 +77,6 @@
 			</props>
 		</property>
 	</bean>
+	<import resource="hibernate-hbms.xml"/>
+
 </beans>
-
-
