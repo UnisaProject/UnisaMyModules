@@ -7,7 +7,7 @@
   <parent>
     <artifactId>unisa-overlays-chat</artifactId>
     <groupId>unisa.overlays.chat</groupId>
-    <version>10.5</version>
+    <version>11.4</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <name>Unisa overlay chat tool</name>
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.sakaiproject</groupId>
       <artifactId>sakai-chat-tool</artifactId>
-      <version>10.5</version>
+      <version>11.4</version>
       <type>war</type>
       <scope>runtime</scope>
     </dependency>
