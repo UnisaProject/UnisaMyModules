@@ -7,7 +7,7 @@
   <parent>
     <artifactId>unisa-overlays-podcasts</artifactId>
     <groupId>unisa.overlays.podcasts</groupId>
-    <version>10.5</version>
+    <version>11.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Unisa overlay Podcasts App</name>
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.sakaiproject</groupId>
       <artifactId>sakai-podcasts</artifactId>
-      <version>10.5</version>
+      <version>11.4</version>
       <type>war</type>
       <scope>runtime</scope>
     </dependency>
