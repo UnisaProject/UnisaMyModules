@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/svn/web/tags/sakai-10.5/web-portlet/src/java/org/sakaiproject/portlets/PortletIFrame.java $
- * $Id: PortletIFrame.java 307879 2014-04-07 15:53:26Z enietzel@anisakai.com $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2005-2013 The Sakai Foundation.
@@ -21,104 +21,62 @@
 
 package org.sakaiproject.portlets;
 
-import java.lang.Integer;
-
-import java.io.PrintWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.File;
-
-import java.net.URL;
-import java.net.URI;
-import java.net.URLEncoder;
-import java.net.HttpURLConnection;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.Properties;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.ResourceBundle;
-import java.util.Locale;
-import java.util.Date;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.httpclient.util.URIUtil;
-
-import javax.portlet.GenericPortlet;
-import javax.portlet.RenderRequest;
-import javax.portlet.ActionRequest;
-import javax.portlet.ActionResponse;
-import javax.portlet.RenderResponse;
-import javax.portlet.PortletRequest;
-import javax.portlet.PortletException;
-import javax.portlet.PortletURL;
-import javax.portlet.PortletPreferences;
-import javax.portlet.PortletContext;
-import javax.portlet.PortletConfig;
-import javax.portlet.WindowState;
-import javax.portlet.PortletMode;
-import javax.portlet.PortletSession;
-import javax.portlet.ReadOnlyException;
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.sakaiproject.portlet.util.VelocityHelper;
-import org.sakaiproject.portlet.util.JSPHelper;
-import org.sakaiproject.util.FormattedText;
-import org.sakaiproject.util.ResourceLoader;
-
-import org.sakaiproject.tool.api.Session;
-import org.sakaiproject.tool.cover.SessionManager;
-import org.sakaiproject.event.api.UsageSession;
-import org.sakaiproject.event.cover.UsageSessionService;
-import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.context.Context;
+import org.sakaiproject.authz.api.AuthzGroup;
+import org.sakaiproject.authz.api.GroupNotDefinedException;
+import org.sakaiproject.authz.api.Role;
+import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.entity.cover.EntityManager;
 import org.sakaiproject.event.api.EventTrackingService;
-
-import javax.servlet.ServletRequest;
-import org.sakaiproject.thread_local.cover.ThreadLocalManager;
-
+import org.sakaiproject.event.cover.UsageSessionService;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.portal.util.PortalUtils;
+import org.sakaiproject.portlet.util.JSPHelper;
+import org.sakaiproject.portlet.util.VelocityHelper;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SitePage;
 import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.site.cover.SiteService;
+import org.sakaiproject.thread_local.cover.ThreadLocalManager;
 import org.sakaiproject.tool.api.Placement;
+import org.sakaiproject.tool.api.Session;
+import org.sakaiproject.tool.cover.SessionManager;
 import org.sakaiproject.tool.cover.ToolManager;
-import org.sakaiproject.tool.api.ToolSession;
-import org.sakaiproject.user.cover.UserDirectoryService;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserNotDefinedException;
-import org.sakaiproject.exception.IdUnusedException;
-import org.sakaiproject.authz.api.AuthzGroup;
-import org.sakaiproject.authz.api.GroupNotDefinedException;
-import org.sakaiproject.entity.api.Reference;
-import org.sakaiproject.entity.cover.EntityManager;
-import org.sakaiproject.authz.api.AuthzGroup;
-import org.sakaiproject.authz.api.GroupNotDefinedException;
-import org.sakaiproject.authz.api.Role;
-import org.sakaiproject.authz.cover.AuthzGroupService;
+import org.sakaiproject.user.cover.UserDirectoryService;
+import org.sakaiproject.util.FormattedText;
+import org.sakaiproject.util.ResourceLoader;
 
-import org.apache.commons.validator.routines.UrlValidator;
+import javax.portlet.*;
+import javax.servlet.ServletRequest;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 // Velocity
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.context.Context;
-import org.apache.velocity.app.VelocityEngine;
 
 /**
  * a simple PortletIFrame Portlet
  */
 public class PortletIFrame extends GenericPortlet {
 
-	private static final Log M_log = LogFactory.getLog(PortletIFrame.class);
+	private static final Logger M_log = LoggerFactory.getLogger(PortletIFrame.class);
 
 	/** Event for accessing the web-content tool */
 	protected final static String EVENT_ACCESS_WEB_CONTENT = "webcontent.read";
@@ -139,6 +97,8 @@ public class PortletIFrame extends GenericPortlet {
 	VelocityEngine vengine = null;
 
 	private PortletContext pContext;
+
+    private AuthzGroupService authzGroupService;
 
 	// TODO: Perhaps these constancts should come from portlet.xml
 
@@ -216,8 +176,6 @@ public class PortletIFrame extends GenericPortlet {
     protected static final String MACRO_USER_LAST_NAME      = "${USER_LAST_NAME}";
     /** Macro name: Role */
     protected static final String MACRO_USER_ROLE           = "${USER_ROLE}";
-    /** Macro name: Session */
-    protected static final String MACRO_SESSION_ID          = "${SESSION_ID}";
 
     private static final String MACRO_CLASS_SITE_PROP = "SITE_PROP:";
    
@@ -297,6 +255,7 @@ public class PortletIFrame extends GenericPortlet {
 
 	public void init(PortletConfig config) throws PortletException {
 		super.init(config);
+		authzGroupService = ComponentManager.get(AuthzGroupService.class);
 
 		pContext = config.getPortletContext();
 		try {
@@ -406,6 +365,7 @@ public class PortletIFrame extends GenericPortlet {
                 String csrfToken = (String) session.getAttribute(UsageSessionService.SAKAI_CSRF_SESSION_ATTRIBUTE);
                 if ( csrfToken != null ) context.put("sakai_csrf_token", csrfToken);
 				context.put("tlang", rb);
+				context.put("includeLatestJQuery", PortalUtils.includeLatestJQuery("PortletIFrame"));
 				context.put("validator", validator);
 				context.put("source",url);
 				context.put("height",height);
@@ -554,6 +514,7 @@ public class PortletIFrame extends GenericPortlet {
             String csrfToken = (String) session.getAttribute(UsageSessionService.SAKAI_CSRF_SESSION_ATTRIBUTE);
             if ( csrfToken != null ) context.put("sakai_csrf_token", csrfToken);
 			context.put("tlang", rb);
+			context.put("includeLatestJQuery", PortalUtils.includeLatestJQuery("PortletIFrame"));
 			context.put("validator", validator);
 			sendAlert(request,context);
 
@@ -566,6 +527,8 @@ public class PortletIFrame extends GenericPortlet {
             Properties config = getAllProperties(placement);
             String special = getSpecial(config);
 			context.put("title", validator.escapeHtml(placement.getTitle(), false));
+			String fa_icon = placement.getPlacementConfig().getProperty("imsti.fa_icon");
+			if ( fa_icon != null ) context.put("fa_icon", fa_icon );
 			String source = placement.getPlacementConfig().getProperty(SOURCE);
 			if ( source == null ) source = "";
 			if ( special == null ) context.put("source",source);
@@ -631,6 +594,10 @@ public class PortletIFrame extends GenericPortlet {
 					    String infoUrl = StringUtils.trimToNull(s.getInfoUrl());
 					    if (infoUrl != null)
 					    {
+                                            //Check if infoUrl is relative? and prepend the server url
+                                            if(infoUrl.startsWith("/") && !infoUrl.contains("://")){
+                                                infoUrl = ServerConfigurationService.getServerUrl() + infoUrl;
+                                            }
 						    context.put("info_url", FormattedText.escapeHtmlFormattedTextarea(infoUrl));
 					    }
 
@@ -846,11 +813,18 @@ public class PortletIFrame extends GenericPortlet {
 			}
 			placement.setTitle(title);
 
+			// icon
+			String fa_icon = request.getParameter("fa_icon");
+			if ( fa_icon != null && fa_icon.length() > 0 ) {
+				placement.getPlacementConfig().setProperty("imsti.fa_icon",fa_icon);
+			}
+
 			try
 			{
 				Site site = SiteService.getSite(toolConfig.getSiteId());
 				SitePage page = site.getPage(toolConfig.getPageId());
-				page.setTitleCustom(true);
+				if (page.isHomePage()) page.setHomeToolsTitleCustom(placement.getId());
+				else page.setTitleCustom(true);
 
 				// for web content tool, if it is a site page tool, and the only tool on the page, update the page title / popup.
 				if (toolConfig != null && ! SPECIAL_WORKSITE.equals(special) && ! SPECIAL_WORKSPACE.equals(special) )
@@ -897,11 +871,17 @@ public class PortletIFrame extends GenericPortlet {
             // Handle the infoUrl
             if (SPECIAL_WORKSITE.equals(special))
             {
-                if ((infoUrl != null) && (infoUrl.length() > 0) && (!infoUrl.startsWith("/")) && (infoUrl.indexOf("://") == -1))
-                {
-                    infoUrl = "http://" + infoUrl;
+                //Check info-url for null and empty
+                if(StringUtils.isNotBlank(infoUrl)){
+                    // If the site info url has server url then make it a relative link.
+                    String serverName = new URL(ServerConfigurationService.getServerUrl()).getHost();
+                    // if the supplied url starts with protocol//serverName:port/
+                    Pattern serverUrlPattern = Pattern.compile(String.format("^(https?:)?//%s:?\\d*/", serverName));
+                    infoUrl = serverUrlPattern.matcher(infoUrl).replaceFirst("/");
                 }
                 String description = StringUtils.trimToNull(request.getParameter("description"));
+                //Need to save this processed
+                description = FormattedText.processFormattedText(description,new StringBuilder());
     
                 // update the site info
                 try
@@ -1063,16 +1043,19 @@ public class PortletIFrame extends GenericPortlet {
 
         Locale locale = new ResourceLoader().getLocale();
 
+        // You can only access inside the current context in Tomcat 8.
+        // Tomcat 8 advises against unpacking the WARs so this isn't a good long term solution.
+        String rootPath = getPortletConfig().getPortletContext().getRealPath("/");
         if (locale != null){
             // check if localized file exists for current language/locale/variant
             String localizedFile = doc + "_" + locale.toString() + ext;
-            String filePath = getPortletConfig().getPortletContext().getRealPath(".."+localizedFile);
+            String filePath = rootPath+ ".."+localizedFile;
             if ( (new File(filePath)).exists() )
                 return localizedFile;
 
             // otherwise, check if localized file exists for current language
             localizedFile = doc + "_" + locale.getLanguage() + ext;
-            filePath = getPortletConfig().getPortletContext().getRealPath(".."+localizedFile);
+            filePath = rootPath+ ".."+localizedFile;
             if ( (new File(filePath)).exists() )
                 return localizedFile;
         }
@@ -1190,7 +1173,7 @@ public class PortletIFrame extends GenericPortlet {
 		AuthzGroup 	group;
 		Role 				role;
 
-		group = AuthzGroupService.getAuthzGroup("/site/" + getSiteId());
+		group = authzGroupService.getAuthzGroup("/site/" + getSiteId());
 		if (group == null)
 		{
 			throw new SessionDataException("No current group");
@@ -1250,10 +1233,6 @@ public class PortletIFrame extends GenericPortlet {
 			if (macroName.equals(MACRO_USER_ROLE))
 			{
 				return this.getUserRole();
-			}
-			if (macroName.equals(MACRO_SESSION_ID))
-			{
-				return this.getSessionId();
 			}
 
 			if (macroName.startsWith("${"+MACRO_CLASS_SITE_PROP)) 
