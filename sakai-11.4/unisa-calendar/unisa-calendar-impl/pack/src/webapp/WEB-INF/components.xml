@@ -77,6 +77,6 @@
 			</props>
 		</property>
 	</bean>
-	<import resource="hibernate-hbms.xml"/>
+	<!-- >import resource="hibernate-hbms.xml"/-->
 
 </beans>

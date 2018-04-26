@@ -2,7 +2,7 @@
   <parent>
     <artifactId>unisa-calendar-base</artifactId>
     <groupId>org.sakaiproject</groupId>
-    <version>10.5</version>
+    <version>11.4</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
