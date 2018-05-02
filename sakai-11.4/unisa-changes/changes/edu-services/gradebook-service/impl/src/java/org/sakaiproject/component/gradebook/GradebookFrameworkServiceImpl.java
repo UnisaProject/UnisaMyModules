@@ -1,6 +1,6 @@
 /**********************************************************************************
 *
-* $Id: GradebookFrameworkServiceImpl.java 314627 2014-10-20 17:40:17Z matthew@longsight.com $
+* $Id$
 *
 ***********************************************************************************
 *
@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -53,7 +53,7 @@ import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 
 public class GradebookFrameworkServiceImpl extends BaseHibernateManager implements GradebookFrameworkService {
-	private static final Log log = LogFactory.getLog(GradebookFrameworkServiceImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(GradebookFrameworkServiceImpl.class);
 
 	public static final String UID_OF_DEFAULT_GRADING_SCALE_PROPERTY = "uidOfDefaultGradingScale";
 	
@@ -104,9 +104,7 @@ public class GradebookFrameworkServiceImpl extends BaseHibernateManager implemen
 			  	gradebook.setCourseGradeDisplayed(propCourseGradeDisplayed);
 
 			   	Boolean propCoursePointsDisplayed = serverConfigurationService.getBoolean(PROP_COURSE_POINTS_DISPLAYED,false);
-
-		   		//Feature is only in Sakai 11
-		   		//gradebook.setCoursePointsDisplayed(propCoursePointsDisplayed);
+		   		gradebook.setCoursePointsDisplayed(propCoursePointsDisplayed);
 
 				String defaultScaleUid = GradebookFrameworkServiceImpl.this.getPropertyValue(UID_OF_DEFAULT_GRADING_SCALE_PROPERTY);
 
@@ -138,11 +136,16 @@ public class GradebookFrameworkServiceImpl extends BaseHibernateManager implemen
 				// uncommitted.
 				gradebook.setGradeMappings(gradeMappings);
 				
-				//Unisa Changes:2017/05/05:Modify Gradebook tool so the default grade type is Percentage and not points
-				//gradebook.setGrade_type(GradebookService.GRADE_TYPE_POINTS);			//Unisa Changes:Removed
-				gradebook.setGrade_type(GradebookService.GRADE_TYPE_PERCENTAGE);		//Unisa Changes:Added
+				//Unisa Changes:2018/04/26:Modify Gradebook tool so the default grade type is Percentage and not points
+				//gradebook.setGrade_type(GradebookService.GRADE_TYPE_POINTS);			//Unisa Changes:2018/04/26:Removed
+				gradebook.setGrade_type(GradebookService.GRADE_TYPE_PERCENTAGE);		//Unisa Changes:2018/04/26:Added
 				gradebook.setCategory_type(GradebookService.CATEGORY_TYPE_NO_CATEGORY);
 
+				//SAK-29740 make backwards compatible
+				gradebook.setCourseLetterGradeDisplayed(true);
+
+				gradebook.setCourseAverageDisplayed(true);
+				
 				// Update the gradebook with the new selected grade mapping
 				session.update(gradebook);
 
@@ -192,6 +195,63 @@ public class GradebookFrameworkServiceImpl extends BaseHibernateManager implemen
 		});
 	}
 
+	
+
+	@Override
+	public void saveGradeMappingToGradebook(final String scaleUuid, final String gradebookUid) {
+		getHibernateTemplate().execute(new HibernateCallback() {
+			public Object doInHibernate(Session session) throws HibernateException {
+
+				List gradingScales = session.createQuery("from GradingScale as gradingScale where gradingScale.unavailable=false").list();
+
+
+				for (Iterator iter = gradingScales.iterator(); iter.hasNext(); ) {
+					GradingScale gradingScale = (GradingScale) iter.next();
+					if (gradingScale.getUid().equals(scaleUuid)){
+						GradeMapping gradeMapping = new GradeMapping(gradingScale);
+						Gradebook gradebookToSet = getGradebook(gradebookUid);
+						gradeMapping.setGradebook(gradebookToSet);
+						session.save(gradeMapping);
+					}
+				}
+				session.flush();
+				return null;
+			}
+		});
+	}
+
+	@Override
+	public List getAvailableGradingScales() {
+
+		return (List)getHibernateTemplate().execute(new HibernateCallback() {
+
+			public List doInHibernate(Session session) throws HibernateException {
+				// Get available grade mapping templates.
+				List gradingScales = session.createQuery("from GradingScale as gradingScale where gradingScale.unavailable=false").list();
+
+				// The application won't be able to run without grade mapping
+				// templates, so if for some reason none have been defined yet,
+				// do that now.
+				if (gradingScales.isEmpty()) {
+					if (log.isInfoEnabled()) log.info("No Grading Scale defined yet. This is probably because you have upgraded or you are working with a new database. Default grading scales will be created. Any customized system-wide grade mappings you may have defined in previous versions will have to be reconfigured.");
+					gradingScales = GradebookFrameworkServiceImpl.this.addDefaultGradingScales(session);
+				}
+				return gradingScales;
+			}
+		});
+	}
+	
+	@Override
+	public List<GradingScaleDefinition> getAvailableGradingScaleDefinitions() {
+		List<GradingScale> gradingScales = this.getAvailableGradingScales();
+		
+		List<GradingScaleDefinition> rval = new ArrayList<>();
+		for(GradingScale gradingScale: gradingScales) {
+			rval.add(gradingScale.toGradingScaleDefinition());
+		}
+		return rval;
+	}
+
 	public void setDefaultGradingScale(String uid) {
 		setPropertyValue(UID_OF_DEFAULT_GRADING_SCALE_PROPERTY, uid);
 	}
@@ -202,7 +262,7 @@ public class GradebookFrameworkServiceImpl extends BaseHibernateManager implemen
 		gradingScale.setGrades(bean.getGrades());
 		Map defaultBottomPercents = new HashMap();
 		Iterator gradesIter = bean.getGrades().iterator();
-		Iterator defaultBottomPercentsIter = bean.getDefaultBottomPercents().iterator();
+		Iterator defaultBottomPercentsIter = bean.getDefaultBottomPercentsAsList().iterator();
 		while (gradesIter.hasNext() && defaultBottomPercentsIter.hasNext()) {
 			String grade = (String)gradesIter.next();
 			Double value = (Double)defaultBottomPercentsIter.next();
