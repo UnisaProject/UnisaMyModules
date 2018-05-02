@@ -12,6 +12,11 @@
 			<value>#{org_sakaiproject_tool_gradebook_business_GradebookManager}</value>
 		</managed-property>
 		<managed-property>
+			<description>Gradebook FrameworkService</description>
+			<property-name>gradebookFrameworkService</property-name>
+			<value>#{org_sakaiproject_service_gradebook_GradebookFrameworkService}</value>
+		</managed-property>
+		<managed-property>
 			<description>Section Awareness Service</description>
 			<property-name>sectionAwareness</property-name>
 			<value>#{org_sakaiproject_section_api_SectionAwareness}</value>
@@ -51,6 +56,11 @@
 			<property-name>gradebookExternalAssessmentService</property-name>
 			<value>#{org_sakaiproject_service_gradebook_GradebookExternalAssessmentService}</value>
 		</managed-property>
+		<managed-property>
+            <description>Gradebook Scoring Agent Manager</description>
+            <property-name>scoringAgentManager</property-name>
+            <value>#{org_sakaiproject_tool_gradebook_business_GradebookScoringAgentManager}</value>
+        </managed-property>
         <managed-property>
 			<property-name>configurationBean</property-name>
 			<value>#{configurationBean}</value>
@@ -277,7 +287,7 @@
 		</managed-property>
 	</managed-bean>
 	
-	<!-- Unisa Changes:2017/04/06:Added gradebookSync managed Bean -->
+	<!-- Unisa Changes:2018/04/26:Added gradebookSync managed Bean -->
 	<managed-bean>
 		<managed-bean-name>gradebookSyncBean</managed-bean-name>
 		<managed-bean-class>org.sakaiproject.tool.gradebook.ui.GradebookSyncBean</managed-bean-class>
@@ -291,6 +301,7 @@
 			<value>gradebookSync</value>
 		</managed-property>
 	</managed-bean>
+	<!-- End Unisa Changes -->
 
 </faces-config>
 

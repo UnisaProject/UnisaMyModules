@@ -23,8 +23,9 @@
 
 	<h:outputText value="#{msgs.breadcrumb_edit}" rendered="#{bean.editing}" />
 	
-	<%-- Unisa Changes:2017/04/06:Added bottom level breadcrumb for gradebookSync page --%>
+	<%-- Unisa Changes:2018/04/26:Added bottom level breadcrumb for gradebookSync page --%>
 	<h:outputText value="#{msgs.breadcrumb_sync}" rendered="#{bean.syncing}" />	
+	<%-- End Unisa Changes --%>
 	
 	<%-- if adding, will render as blank, if editing, will display assignment name
 		 since this is the behavior we want, no rendering tag needed --%>

@@ -1,11 +1,12 @@
 <link href="dhtmlpopup/dhtmlPopup.css" rel="stylesheet" type="text/css" />
 <script src="dhtmlpopup/dhtmlPopup.js" type="text/javascript"></script>
 <script src="js/dynamicSizeCheck.js" type="text/javascript"></script>
-
+<script src="js/scoringAgent/integration.js" type="text/javascript"></script>
+<script src="/library/js/spinner.js" type="text/javascript"></script>
 
 <f:view>
   <div class="portletBody">
-	<h:form id="gbForm">
+	<h:form id="gbForm" onsubmit="return blockDoubleSubmit();">
 	
 
 		<sakai:flowState bean="#{assignmentDetailsBean}" />
@@ -26,7 +27,7 @@
 				value="#{msgs.assignment_details_previous_assignment}"
 				title="#{assignmentDetailsBean.previousAssignment.name}"
 				accesskey="p"
-				tabindex="4">
+				onclick="SPNR.disableControlsAndSpin( this, null );">
 					<f:param name="assignmentId" value="#{assignmentDetailsBean.previousAssignment.id}"/>
 			</h:commandButton>
 			<h:commandButton
@@ -34,14 +35,14 @@
 				immediate="true"
 				value="#{assignmentDetailsBean.returnString}"
 				accesskey="l"
-				tabindex="6"/>
+				onclick="SPNR.disableControlsAndSpin( this, null );"/>
 			<h:commandButton
 				disabled="#{assignmentDetailsBean.last}"
 				actionListener="#{assignmentDetailsBean.processAssignmentIdChange}"
 				value="#{msgs.assignment_details_next_assignment}"
 				title="#{assignmentDetailsBean.nextAssignment.name}"
 				accesskey="n"
-				tabindex="5">
+				onclick="SPNR.disableControlsAndSpin( this, null );">
 					<f:param name="assignmentId" value="#{assignmentDetailsBean.nextAssignment.id}"/>
 			</h:commandButton>
 		</p>
@@ -91,7 +92,6 @@
 					<h:commandLink
 						action="#{assignmentDetailsBean.navigateToEdit}"
 						accesskey="e"
-						tabindex="7"
 						title="#{msgs.assignment_details_edit}">
 						<h:outputFormat id="editAssignment" value="#{msgs.assignment_details_edit}" />
 						<f:param name="assignmentId" value="#{assignmentDetailsBean.assignment.id}"/>
@@ -100,13 +100,12 @@
 						action="removeAssignment"
 						rendered="#{!assignmentDetailsBean.assignment.externallyMaintained}"
 						accesskey="r"
-						tabindex="8"
 						title="#{msgs.assignment_details_remove}">
 							<h:outputText id="removeAssignment" value="#{msgs.assignment_details_remove}"/>
 						<f:param name="assignmentId" value="#{assignmentDetailsBean.assignment.id}"/>
 					</h:commandLink>
 					
-					<%/*  Unisa Changes: Added:2017/04/06: Link for Request Gradebook item sync:BEGIN */%>
+					<%/*  Unisa Changes: Added:2018/04/26: Link for Request Gradebook item sync:BEGIN */%>
 					<h:commandLink
 						action="#{assignmentDetailsBean.navigateToGradebookSync}"
 						rendered="#{overviewBean.userAbleToGradeAll && assignmentDetailsBean.userAbleToEditAssessments}"
@@ -117,13 +116,12 @@
 						</h:outputFormat>
 						<f:param name="assignmentId" value="#{assignmentDetailsBean.assignment.id}"/>
 					</h:commandLink>
-					<%/*  Unisa Changes: Added:2017/04/06: Link for Request Gradebook item sync:END */%>
+					<%/*  End Unisa Changes */%>					
 
 					<h:outputLink
 						value="#{assignmentDetailsBean.assignment.externalInstructorLink}"
 						rendered="#{assignmentDetailsBean.assignment.externallyMaintained && not empty assignmentDetailsBean.assignment.externalInstructorLink}"
 						accesskey="x"
-						tabindex="9"
 						title="#{msgs.assignment_details_edit}">
 							<h:outputFormat value="#{msgs.assignment_details_external_edit}">
 								<f:param value="#{assignmentDetailsBean.assignment.externalAppName}"/>
@@ -156,9 +154,8 @@
 				disabled="#{assignmentDetailsBean.assignment.externallyMaintained || assignmentDetailsBean.allStudentsViewOnly}"
 				rendered="#{!assignmentDetailsBean.emptyEnrollments}"
 				accesskey="s"
-				tabindex="9998"
 				title="#{msgs.assignment_details_submit}"
-				onclick="disableButton('buttonDiv1', this)"/>
+				onclick="SPNR.disableControlsAndSpin( this, null );"/>
 			<h:commandButton
 				id="cancelButton1"
 				value="#{msgs.assignment_details_cancel}"
@@ -167,8 +164,7 @@
 				rendered="#{!assignmentDetailsBean.emptyEnrollments}"
 				accesskey="c"
 				immediate="true"
-				tabindex="9999"
-				title="#{msgs.assignment_details_cancel}" onclick="disableButton('buttonDiv1', this)">
+				title="#{msgs.assignment_details_cancel}" onclick="SPNR.disableControlsAndSpin( this, null );">
 					<f:param name="breadcrumbPage" value="#{assignmentDetailsBean.breadcrumbPage}"/>
 			</h:commandButton>
 		</div>
@@ -182,7 +178,7 @@
 			sortAscending="#{assignmentDetailsBean.sortAscending}"
 			columnClasses="gbMessageAbove,gbMessageAbove,gbMessageAbove,gbMessageAbove,gbMessageAbove"
 			headerClass="gbHeader"
-			styleClass="listHier lines nolines">
+			styleClass="listHier lines nolines gradingTable">
 			<h:column>
 				<f:facet name="header">
 		            <t:commandSortHeader columnName="studentSortName" arrow="true" immediate="false" actionListener="#{assignmentDetailsBean.sort}">
@@ -219,6 +215,8 @@
 					<h:graphicImage value="images/log.png" alt="#{msgs.inst_view_log_alt}"/>
 				</h:outputLink>
 			</h:column>
+
+			<%@include file="/inc/scoringAgent/assignmentDetails.jspf"%>
 
 			<h:column>
 				<f:facet name="header">
@@ -317,9 +315,8 @@
 				actionListener="#{assignmentDetailsBean.processUpdateScores}"
 				disabled="#{assignmentDetailsBean.assignment.externallyMaintained || assignmentDetailsBean.allStudentsViewOnly}"
 				rendered="#{!assignmentDetailsBean.emptyEnrollments}"
-				tabindex="9998"
 				title="#{msgs.assignment_details_submit}"
-				onclick="disableButton('buttonDiv2', this)"/>
+				onclick="SPNR.disableControlsAndSpin( this, null );"/>
 			<h:commandButton
 				id="cancelButton2"
 				value="#{msgs.assignment_details_cancel}"
@@ -327,9 +324,8 @@
 				immediate="true"
 				disabled="#{assignmentDetailsBean.assignment.externallyMaintained || assignmentDetailsBean.allStudentsViewOnly}"
 				rendered="#{!assignmentDetailsBean.emptyEnrollments}"
-				tabindex="9999"
 				title="#{msgs.assignment_details_cancel}"
-				onclick="disableButton('buttonDiv2', this)">
+				onclick="SPNR.disableControlsAndSpin( this, null );">
 					<f:param name="breadcrumbPage" value="#{assignmentDetailsBean.breadcrumbPage}"/>
 			</h:commandButton>
 		</div>
@@ -337,7 +333,7 @@
 		</div> <!-- END OF INDNT1 -->
 
 
-<script src="/library/js/jquery/jquery-1.9.1.min.js" type="text/javascript"></script>
+<script>includeLatestJQuery('assignmentDetails.jsp');</script>
 <script type="text/javascript">
 $(document).ready(function(){
 	org_vals = new Array($("table#gbForm\\:gradingTable :text").length);
@@ -349,11 +345,11 @@ $(document).ready(function(){
 check_change = function(){
 	changed = false;
 	$("table#gbForm\\:gradingTable :text").each(function(i){
-		if(org_vals[i] != this.value){changed=true;}
+		if(org_vals[i] !== this.value){changed=true;}
 	});
 	if(changed){return confirm("<h:outputText value="#{msgs.assignment_details_page_confirm_unsaved}"/>");}
 	return true;
-}
+};
 </script>
 		
 	</h:form>

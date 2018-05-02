@@ -1,6 +1,6 @@
 /**********************************************************************************
 *
-* $Id: OverviewBean.java 133464 2014-01-21 14:48:50Z azeckoski@unicon.net $
+* $Id$
 *
 ***********************************************************************************
 *
@@ -36,8 +36,8 @@ import java.util.Map.Entry;
 
 import javax.faces.context.FacesContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.tool.api.ToolSession;
@@ -53,7 +53,7 @@ import org.sakaiproject.tool.gradebook.jsf.FacesUtil;
  * Backing bean for the visible list of assignments in the gradebook.
  */
 public class OverviewBean extends GradebookDependentBean implements Serializable  {
-	private static final Log logger = LogFactory.getLog(OverviewBean.class);
+	private static final Logger logger = LoggerFactory.getLogger(OverviewBean.class);
 
     private static final Map columnSortMap;
 
@@ -139,7 +139,7 @@ public class OverviewBean extends GradebookDependentBean implements Serializable
 				for (Category category : (List<Category>) categoryList) {
 					catIds.add(category.getId());
 				}
-				List<Long> viewableCats = getGradebookPermissionService().getCategoriesForUser(getGradebookId(), getUserUid(), catIds, getGradebook().getCategory_type());
+				List<Long> viewableCats = getGradebookPermissionService().getCategoriesForUser(getGradebookId(), getUserUid(), catIds);
 				List<Category> tmpCatList = new ArrayList<Category>();
 				for (Category category : (List<Category>) categoryList) {
 					if(viewableCats.contains(category.getId())){
@@ -237,7 +237,7 @@ public class OverviewBean extends GradebookDependentBean implements Serializable
 		session.removeAttribute("editing");
 		session.removeAttribute("middle");
 		
-		// Unisa Changes:2017/04/18:Added-Remove attribute for navigation to 'syncing' page
+		// Unisa Changes:2018/04/26:Added-Remove attribute for navigation to 'syncing' page
 		session.removeAttribute("syncing");
 	}
 

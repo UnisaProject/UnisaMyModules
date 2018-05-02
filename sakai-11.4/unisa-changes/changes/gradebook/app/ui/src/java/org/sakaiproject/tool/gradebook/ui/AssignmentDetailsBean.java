@@ -1,6 +1,6 @@
 /**********************************************************************************
 *
-* $Id: AssignmentDetailsBean.java 105079 2012-02-24 23:08:11Z ottenhoff@longsight.com $
+* $Id$
 *
 ***********************************************************************************
 *
@@ -34,8 +34,8 @@ import java.util.Set;
 import javax.faces.event.ActionEvent;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.section.api.coursemanagement.EnrollmentRecord;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.service.gradebook.shared.StaleObjectModificationException;
@@ -49,12 +49,13 @@ import org.sakaiproject.tool.gradebook.Comment;
 import org.sakaiproject.tool.gradebook.GradingEvent;
 import org.sakaiproject.tool.gradebook.GradingEvents;
 import org.sakaiproject.tool.gradebook.jsf.FacesUtil;
-//Unisa Changes:2017/04/25:Added database dependency for UNISA Student system
+// Unisa Changes:2018/04/26:Added database dependency for UNISA Student system and GardeBookSync Bean
 import org.sakaiproject.tool.gradebook.business.impl.UnisaGradeBookDAO;
 import org.sakaiproject.tool.gradebook.ui.GradebookSyncBean;
+// End Unisa Changes
 
 public class AssignmentDetailsBean extends EnrollmentTableBean {
-	private static final Log logger = LogFactory.getLog(AssignmentDetailsBean.class);
+	private static final Logger logger = LoggerFactory.getLogger(AssignmentDetailsBean.class);
 
 	/**
 	 * The following variable keeps bean initialization from overwriting
@@ -78,6 +79,7 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
 	private boolean isAllStudentsViewOnly = true;  // with grader perms, user may be able to grade/comment a selection
 													// of the students and view the rest. If all view only, disable
 													// the buttons
+	private ScoringAgentData scoringAgentData;
 
     public class ScoreRow implements Serializable {
         private AssignmentGradeRecord gradeRecord;
@@ -85,6 +87,12 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
         private Comment comment;
         private List eventRows;
         private boolean userCanGrade;
+        // if a ScoringComponent is associated with this assignment, this
+        // is the URL for scoring this student
+        private String scoringComponentUrl;
+        // this url can be called to retrieve grade info for this student
+        // from the external scoring service
+        private String retrieveScoreUrl;
  
 		public ScoreRow() {
 		}
@@ -99,6 +107,19 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
             for (Iterator iter = gradingEvents.iterator(); iter.hasNext();) {
             	GradingEvent gradingEvent = (GradingEvent)iter.next();
             	eventRows.add(new GradingEventRow(gradingEvent));
+            }
+
+            if (isScoringAgentEnabled()) {
+            	// show the gradable vs. the view-only version of the scoring component
+            	if (userCanGrade && !assignment.isExternallyMaintained()) {
+            		this.scoringComponentUrl = getScoringAgentManager().
+            				getScoreStudentUrl(getGradebookUid(), assignmentId, enrollment.getUser().getUserUid());
+            		this.retrieveScoreUrl = getScoringAgentManager().
+                			getScoreUrl(getGradebookUid(), assignmentId, enrollment.getUser().getUserUid());
+            	} else {
+            		this.scoringComponentUrl = getScoringAgentManager().
+            				getViewStudentScoreUrl(getGradebookUid(), assignmentId, enrollment.getUser().getUserUid());
+            	}  	
             }
 		}
 
@@ -187,6 +208,24 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
         }
         public void setUserCanGrade(boolean userCanGrade) {
         	this.userCanGrade = userCanGrade;
+        }
+        
+        /**
+         * 
+         * @return the URL to launch the ScoringComponent for grading this student
+         * via a ScoringAgent, if it exists
+         */
+        public String getScoringComponentUrl() {
+        	return this.scoringComponentUrl;
+        }
+        
+        /**
+         * 
+         * @return the URL for retrieving this student's grade from the
+         * external scoring agent
+         */
+        public String getRetrieveScoreUrl() {
+        	return this.retrieveScoreUrl;
         }
 	}
 
@@ -291,7 +330,7 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
         				for (Category category : (List<Category>) categoryList) {
         					catIds.add(category.getId());
         				}
-        				List<Long> viewableCats = getGradebookPermissionService().getCategoriesForUser(getGradebookId(), getUserUid(), catIds, getGradebook().getCategory_type());
+        				List<Long> viewableCats = getGradebookPermissionService().getCategoriesForUser(getGradebookId(), getUserUid(), catIds);
         				List<Category> tmpCatList = new ArrayList<Category>();
         				for (Category category : (List<Category>) categoryList) {
         					if(viewableCats.contains(category.getId())){
@@ -469,6 +508,10 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
 				if (logger.isWarnEnabled()) logger.warn("No assignmentId=" + assignmentId + " in gradebookUid " + getGradebookUid());
                 FacesUtil.addErrorMessage(getLocalizedString("assignment_details_assignment_removed"));
 			}
+		}
+		
+		if (isScoringAgentEnabled()) {
+			scoringAgentData = initializeScoringAgentData(getGradebookUid(), assignmentId, null);
 		}
 	}
 	
@@ -718,6 +761,10 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
 	public boolean isAllStudentsViewOnly() {
 		return isAllStudentsViewOnly;
 	}
+	
+	public ScoringAgentData getScoringAgentData() {
+		return this.scoringAgentData;
+	}
 
 	/**
 	 * Go to instructor view. State saved in tool
@@ -730,7 +777,7 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
 	}
 	
 	/**
-	 * Unisa Changes:2017/04/10:Added navigateToGradebookSync() method.
+	 * Unisa Changes:2018/04/26:Added navigateToGradebookSync() method.
 	 * Go to gradebookSync page. State is kept in tool session, hence 
 	 * attribute setting. Method implemented here instead of GradebookDependantBean
 	 * since methods used require assignment object which is declared here
@@ -813,5 +860,5 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
 		
 		return redirectPage;
 	}
-	
+	// End Unisa Changes
 }

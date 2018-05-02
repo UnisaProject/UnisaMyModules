@@ -1,6 +1,6 @@
 /**********************************************************************************
 *
-* $Id: GradebookManager.java 317967 2015-03-12 19:41:11Z ottenhoff@longsight.com $
+* $Id$
 *
 ***********************************************************************************
 *
@@ -895,8 +895,8 @@ public interface GradebookManager {
     public void applyDropScores(Collection<AssignmentGradeRecord> gradeRecords);
     
     /**
-     * Unisa Changes:2017/04/21:Added-Check if gradebook settings for module site is set to record
+     * Unisa Changes:2018/04/26:Added-Check if gradebook settings for module site is set to record
      * percentages and not points: grade_type = 2
      */
-    public boolean checkGradeType(Assignment assignment);
+    public boolean checkGradeType(Assignment assignment); //End Unisa Changes
 }
