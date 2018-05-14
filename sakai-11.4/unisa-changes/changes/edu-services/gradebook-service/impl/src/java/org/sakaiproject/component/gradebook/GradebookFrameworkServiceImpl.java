@@ -135,7 +135,7 @@ public class GradebookFrameworkServiceImpl extends BaseHibernateManager implemen
 				// the mappings to be seen while the transaction remains
 				// uncommitted.
 				gradebook.setGradeMappings(gradeMappings);
-				
+
 				//Unisa Changes:2018/04/26:Modify Gradebook tool so the default grade type is Percentage and not points
 				//gradebook.setGrade_type(GradebookService.GRADE_TYPE_POINTS);			//Unisa Changes:2018/04/26:Removed
 				gradebook.setGrade_type(GradebookService.GRADE_TYPE_PERCENTAGE);		//Unisa Changes:2018/04/26:Added
