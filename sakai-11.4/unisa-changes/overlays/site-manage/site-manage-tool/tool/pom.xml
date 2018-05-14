@@ -7,7 +7,7 @@
   <parent>
     <artifactId>unisa-overlays-sitemanage</artifactId>
     <groupId>unisa.overlays.sitemanage</groupId>
-    <version>10.5</version>
+    <version>11.4</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <name>Unisa overlay Site Manage tool</name>
@@ -15,16 +15,6 @@
   <artifactId>sakai-site-manage-tool</artifactId>
   <packaging>war</packaging>
   <version>1.0-SNAPSHOT</version>
-    <build>
-        <plugins>
-            <plugin>
-                 <artifactId>maven-war-plugin</artifactId>
-                             <configuration>
-                                 <warName>sakai-site-manage-tool</warName>
-                             </configuration>
-                        </plugin>
-        </plugins>
-    </build>
   <dependencies>
     <dependency>
       <groupId>org.sakaiproject.sitemanage</groupId>
@@ -53,37 +43,35 @@
         <dependency>
             <groupId>org.sakaiproject.sitemanage</groupId>
             <artifactId>sakai-site-manage-api</artifactId>
-			<version>10.5</version>
+			<version>11.4</version>
 			<scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.sakaiproject.sitemanage</groupId>
             <artifactId>sakai-site-manage-util</artifactId>
-			<version>10.5</version>
+			<version>11.4</version>
 			<scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.sakaiproject.announcement</groupId>
             <artifactId>sakai-announcement-api</artifactId>
-            <!-->version>${sakai.announcement.version}</version -->
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.sakaiproject.common</groupId>
             <artifactId>archive-api</artifactId>
-            <!-- >version>${sakai.common.version}</version-->
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.sakaiproject.edu-services.course-management</groupId>
             <artifactId>coursemanagement-api</artifactId>
-			<scope>provided</scope>
         </dependency>
-        <dependency>
+        <!-- >dependency>
             <groupId>org.sakaiproject.mock</groupId>
             <artifactId>sakai-mock</artifactId>
+             <version>11.4</version>
             <scope>test</scope>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.sakaiproject.velocity</groupId>
             <artifactId>sakai-velocity-tool-api</artifactId>
@@ -97,22 +85,16 @@
             <artifactId>userauditservice-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.sakaiproject.userauditservice</groupId>
-            <artifactId>userauditservice-util</artifactId>
+            <groupId>org.sakaiproject.shortenedurl</groupId>
+            <artifactId>shortenedurl-api</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
-            <version>1.7.0</version>
         </dependency>
         <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
-            <version>1.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
@@ -122,6 +104,10 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jmock</groupId>
@@ -157,6 +143,32 @@
             <artifactId>sakai-privacy-api</artifactId>
         </dependency>
 
-        
-  </dependencies>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                 <artifactId>maven-war-plugin</artifactId>
+                             <configuration>
+                                 <warName>sakai-site-manage-tool</warName>
+                             </configuration>
+                        </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/bundle</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/config</directory>
+                <includes>
+                    <include>**/*.xsl</include>
+                    <include>**/*.xml</include>
+                    <include>**/*.ttf</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
 </project>

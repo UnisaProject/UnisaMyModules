@@ -7,8 +7,6 @@ import java.util.List;
 import za.ac.unisa.lms.db.SakaiDAO;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import org.apache.commons.logging.*;
-
 public class UnisaEmailLogDAO extends SakaiDAO {
 
 	private Log log = LogFactory.getLog(this.getClass());

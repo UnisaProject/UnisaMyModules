@@ -10,12 +10,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.cheftool.Context;
+import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.entity.api.ResourcePropertiesEdit;
@@ -48,12 +48,13 @@ import org.sakaiproject.util.ResourceLoader;
 public class JoinableSiteSettings
 {
 	// Logger
-	private static Log log = LogFactory.getLog( JoinableSiteSettings.class );
+	private static final Logger log = LoggerFactory.getLogger( JoinableSiteSettings.class );
 	
 	// API's
-	private static UserDirectoryService 	userDirectoryService 	= (UserDirectoryService) 	ComponentManager.get( UserDirectoryService.class );
-	private static SiteService 				siteService 			= (SiteService) 		 	ComponentManager.get( SiteService.class );
-	private static DeveloperHelperService 	developerHelperService	= (DeveloperHelperService) 	ComponentManager.get( DeveloperHelperService.class );
+	private static final UserDirectoryService 		userDirectoryService 	= (UserDirectoryService) 		ComponentManager.get( UserDirectoryService.class );
+	private static final SiteService 				siteService 			= (SiteService) 				ComponentManager.get( SiteService.class );
+	private static final DeveloperHelperService 	developerHelperService	= (DeveloperHelperService) 		ComponentManager.get( DeveloperHelperService.class );
+	private static final ServerConfigurationService serverConfigService		= (ServerConfigurationService) 	ComponentManager.get( ServerConfigurationService.class );
 	
 	// State variable names
 	private static final String STATE_JOIN_SITE_GROUP_ID				= "state_join_site_group";
@@ -65,7 +66,7 @@ public class JoinableSiteSettings
 	
 	// Site property names
 	private static final String SITE_PROP_JOIN_SITE_GROUP_ID 				= "joinerGroup";
-	private static final String SITE_PROP_JOIN_SITE_GROUP_NO_SEL			= "noSelection";
+	private static final String SITE_PROP_JOIN_SITE_GROUP_NO_SEL				= "noSelection";
 	private static final String SITE_PROP_JOIN_SITE_EXCLUDE_PUBLIC_LIST		= "joinExcludeFromPublicList";
 	private static final String SITE_PROP_JOIN_SITE_LIMIT_BY_ACCOUNT_TYPE 	= "joinLimitByAccountType";
 	private static final String SITE_PROP_JOIN_SITE_ACCOUNT_TYPES 			= "joinLimitedAccountTypes";
@@ -94,13 +95,14 @@ public class JoinableSiteSettings
 	private static final String CONTEXT_JOIN_SITE_LINK											= "link";
 	private static final String CONTEXT_JOIN_SITE_SITE_BROWSER_JOIN_ENABLED						= "siteBrowserJoinEnabled";
 	private static final String CONTEXT_JOIN_SITE_GROUP_ENABLED_LOCAL_DISABLED_GLOBAL 			= "joinGroupEnabledLocalDisabledGlobal";
-	private static final String CONTEXT_JOIN_SITE_EXCLUDE_ENABLED_LOCAL_DISABLED_GLOBAL 		= "joinExcludeEnabledLocalDisabledGlobal";
+	private static final String CONTEXT_JOIN_SITE_EXCLUDE_ENABLED_LOCAL_DISABLED_GLOBAL 			= "joinExcludeEnabledLocalDisabledGlobal";
 	private static final String CONTEXT_JOIN_SITE_LIMIT_ENABLED_LOCAL_DISABLED_GLOBAL 			= "joinLimitEnabledLocalDisabledGlobal";
+	private static final String CONTEXT_UI_SERVICE = "uiService";
 	
 	// Message keys
 	private static final String MSG_KEY_UNJOINABLE 			= "join.unjoinable";
 	private static final String MSG_KEY_LOGIN				= "join.login";
-	private static final String MSG_KEY_ALREADY_MEMBER_1	= "join.alreadyMember1";
+	private static final String MSG_KEY_ALREADY_MEMBER_1		= "join.alreadyMember1";
 	private static final String MSG_KEY_ALREADY_MEMBER_2	= "join.alreadyMember2";
 	private static final String MSG_KEY_NOT_ALLOWED_TO_JOIN	= "join.notAllowed";
 	private static final String MSG_KEY_JOIN_SUCCESS		= "join.success";
@@ -111,12 +113,16 @@ public class JoinableSiteSettings
 	// Random other things
 	private static final String CSV_DELIMITER 			= ",";
 	private static final String TRUE_STRING				= "true";
-	private static final String FALSE_STRING			= "false";
+	private static final String FALSE_STRING				= "false";
 	private static final String ON_STRING				= "on";
 	private static final String FORM_PREFIX				= "form_";
 	private static final String SITE_REF_PREFIX			= "/site/";
 	private static final String SITE_BROWSER_MODE		= "sitebrowser.mode";
+	private static final String DEFAULT_UI_SERVICE 		= "Sakai";
 	public  static final String SITE_BROWSER_JOIN_MODE 	= "join";
+	
+	// sakai.properties
+	private static final String SAK_PROP_UI_SERVICE = "ui.service";
 	
 	/**********************************************************************************************
 	 ********************* SiteBrowserAction Methods (Site Browser tool) **************************
@@ -426,10 +432,9 @@ public class JoinableSiteSettings
 	 * Perform the steps needed to join a site. This includes determining if the global switch for
 	 * join limited by account type is enabled, as well as if it's enabled for the current site along
 	 * with the allowed account types set for the current site. The joiner group is also checked, and
-	 * joined if necessary. It will also send email notifications on join only if it is enabled both
-	 * globally and for the site.
-     * 
-     * Update: (Dec 2013 - sfoster9@uwo.ca) these checks are now in kernel's join method, so just call join
+	 * joined if necessary.
+	 * 
+	 * Update: (Dec 2013 - sfoster9@uwo.ca) these checks are now in kernel's join method, so just call join
 	 * 
 	 * @param siteID
 	 * 				the ID of the site in question
@@ -653,9 +658,13 @@ public class JoinableSiteSettings
 	 * @param state
 	 * 				the object to get the settings from
 	 * @return status (true/false)
+	 * @throws InvalidJoinableSiteSettingsException when the settings in the state are invalid
 	 */
 	public static boolean updateSitePropertiesFromStateOnSiteInfoSaveGlobalAccess( ResourcePropertiesEdit props, SessionState state )
 	{
+		// validate the state, throw an InvalidJoinableSiteSettingsException if the state's settings are invalid
+		validateJoinableSiteSettings(state);
+
 		if( props == null || state == null )
 		{
 			return false;
@@ -688,9 +697,13 @@ public class JoinableSiteSettings
 	 * @param state
 	 * 				the object to get the settings from
 	 * @return status (true/false)
+	 * @throws InvalidJoinableSiteSettingsException when the settings in the state are invalid
 	 */
 	public static boolean updateSitePropertiesFromStateOnSiteUpdate( ResourcePropertiesEdit props, SessionState state )
 	{
+		// validate the state, throw an InvalidJoinableSiteSettingsException if the state's settings are invalid
+		validateJoinableSiteSettings(state);
+
 		if( props == null || state == null )
 		{
 			return false;
@@ -925,6 +938,8 @@ public class JoinableSiteSettings
 			return false;
 		}
 		
+		context.put( CONTEXT_UI_SERVICE, serverConfigService.getString( SAK_PROP_UI_SERVICE, DEFAULT_UI_SERVICE ) );
+		
 		if( isSiteJoinable )
 		{
 			putGlobalEnabledSettingsIntoContext( context );
@@ -955,6 +970,8 @@ public class JoinableSiteSettings
 		{
 			return false;
 		}
+		
+		context.put( CONTEXT_UI_SERVICE, serverConfigService.getString( SAK_PROP_UI_SERVICE, DEFAULT_UI_SERVICE ) );
 		
 		if( isSiteJoinable )
 		{
@@ -1063,6 +1080,8 @@ public class JoinableSiteSettings
 		{
 			return false;
 		}
+		
+		context.put( CONTEXT_UI_SERVICE, serverConfigService.getString( SAK_PROP_UI_SERVICE, DEFAULT_UI_SERVICE ) );
 		
 		putGlobalEnabledSettingsIntoContext( context );
 		updateContextFromSiteInfo( context, siteInfo );
@@ -1273,6 +1292,38 @@ public class JoinableSiteSettings
 		// Add the csv list to the site properties
 		propertyList = sb.toString();
 		props.addProperty( SITE_PROP_JOIN_SITE_ACCOUNT_TYPES, propertyList );
+	}
+
+	/**
+	 * Validates the joinable site settings in the state
+	 * @param state object containing the joinable site settings to validate
+	 * @throws InvalidJoinableSiteSettingsException when the settings in the state are invalid
+	 */
+	public static void validateJoinableSiteSettings(SessionState state)
+	{
+		String attribute = "";
+		if (siteService.isGlobalJoinLimitByAccountTypeEnabled())
+		{
+			attribute = state.getAttribute(STATE_JOIN_SITE_LIMIT_BY_ACCOUNT_TYPE).toString();
+			if (TRUE_STRING.equalsIgnoreCase(attribute))
+			{
+				boolean accountTypeSelected = false;
+				for (String account : siteService.getAllowedJoinableAccountTypes())
+				{
+					attribute = state.getAttribute(STATE_JOIN_SITE_ACCOUNT_TYPE_PREFIX + account).toString();
+					if (TRUE_STRING.equalsIgnoreCase(attribute))
+					{
+						accountTypeSelected = true;
+						break;
+					}
+				}
+				
+				if (!accountTypeSelected)
+				{
+					throw new InvalidJoinableSiteSettingsException("Limit join to specific accounts selected, but no accounts specified", "ediacc.noAccountTypesSelected");
+				}
+			}
+		}
 	}
 	
 	/**
