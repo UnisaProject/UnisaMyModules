@@ -17,7 +17,6 @@
 		<category name="onlgroup" />
 		<category name="group" />
 		<category name="myworkspace" />
-		
 
 		<configuration name="functions.require" value="calendar.read" /> 
 		
