@@ -18,6 +18,7 @@
 		<html:link href="forumtopic.do?act=returnToForum">
 			<fmt:message key="forum.link.returnToForums"/>
 		</html:link>
+		&nbsp;	<!-- Sifiso Changes:2018/05/17: Add Space between buttons for Sakai 11.4 Links -->
 		<c:if test="${forumTopicsForm.topicAddable == true}">
 			<html:link href="forumtopic.do?act=createTopic">
 				<fmt:message key="forum.link.createTopic"/>

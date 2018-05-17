@@ -20,6 +20,7 @@ function setAction() {
 		<html:link href="forumtopic.do?act=returnToForum">
 			<fmt:message key="forum.link.returnToForums"/>
 		</html:link>
+		&nbsp;	<!-- Sifiso Changes:2018/05/17: Add Space between buttons for Sakai 11.4 Links -->
 		<html:link href="forumtopic.do?act=showTopics">
 			<fmt:message key="forum.link.returnToTopics"/>
 		</html:link>
