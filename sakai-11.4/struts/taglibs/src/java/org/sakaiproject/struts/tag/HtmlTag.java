@@ -50,7 +50,19 @@ public class HtmlTag extends org.apache.struts.taglib.html.HtmlTag {
             
             // Unisa Changes:2018/04/20: Make Struts tools responsive on small devices for Sakai 11.x
             // styling applies to tables only - to fix text boxes not being responsive on struts tools
+            // 2018/05/17: Morphues has added borders for 'table.listHier' in Sakai 11-remove these borders here
             out.write("<style> "+
+	            		 "/*table and cells for displaying a flat or hierarchical list of tabular data*/ "+
+	            		 "/*see an annoucement, assignment list*/ "+
+	            		 "table.listHier { "+						// 2018/05/17: All this because of unisa-discussionforums
+	            		 " border:none !important; /*keep ff from giving it a border*/ "+
+	            		 "} "+
+	            		 "table.listHier tr td { "+ 				// 2018/05/17: All this because of unisa-discussionforums
+	            		 "	border-right: none !important; "+
+        				 "} "+
+	            		 "table.listHier tr:nth-child(2n+1) td { "+ // 2018/05/17: All this because of unisa-discussionforums
+	            		 "	border-right: none !important; "+
+	            		 "} "+
             			 "@media only screen and (max-width: 800px) { "+
             			 	 "table { display: inline-table !important; "+
             		  		          "table-layout: fixed; width: 100%; } "+ 
