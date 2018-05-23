@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/svn/mailarchive/tags/sakai-10.4/mailarchive-james/james/src/java/org/sakaiproject/james/SakaiMailet.java $
- * $Id: SakaiMailet.java 105079 2012-02-24 23:08:11Z ottenhoff@longsight.com $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 The Sakai Foundation
@@ -50,8 +50,8 @@ import javax.mail.internet.MimeUtility;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.mailet.GenericMailet;
 import org.apache.mailet.Mail;
 import org.apache.mailet.MailAddress;
@@ -91,7 +91,7 @@ public class SakaiMailet extends GenericMailet
 	private static ResourceLoader rb = new ResourceLoader("sakaimailet");
 
 	/** Our logger. */
-	private static Log M_log = LogFactory.getLog(SakaiMailet.class);
+	private static Logger M_log = LoggerFactory.getLogger(SakaiMailet.class);
 
 	/** The user name of the postmaster user - the one who posts incoming mail. */
 	public static final String POSTMASTER = "postmaster";
@@ -508,8 +508,10 @@ public class SakaiMailet extends GenericMailet
 					    //e.printStackTrace();
 						M_log.warn("IOException: service(): msg.getContent() threw: " + e, e);
 					}
-					
-					mailHeaders.add("List-Id: <"+ channel.getId()+ ".localhost>");
+
+					mailHeaders.add("List-Id: <"+ channel.getId()+ "."+ channel.getContext()
+							+ "."+ serverConfigurationService.getServerName()+ ">");
+
 					// post the message to the group's channel
 					String body[] = new String[2];
 					body[0] = bodyBuf[0].toString(); // plain/text
