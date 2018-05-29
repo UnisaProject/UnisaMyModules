@@ -32,14 +32,14 @@
 				$tlang.getString("sitinfimp.import.info")
 			</p>
 			<p></p>
-			<div class="indnt2">
+			<!-- UNISA CHANGE div class="indnt2">
 				<a href="#toolLink("SiteAction" "doMenu_siteInfo_import_user")" title ="$tlang.getString('sitinfimp.import.user')">
 					$tlang.getString("sitinfimp.import.user")
 				</a>
 			</div>
 			<p class="indnt2">
 				$tlang.getString("sitinfimp.import.user.info")
-			</p>
+			</p> -->
 		#else
 			## show "no site available warning"
 			<p class="instruction">

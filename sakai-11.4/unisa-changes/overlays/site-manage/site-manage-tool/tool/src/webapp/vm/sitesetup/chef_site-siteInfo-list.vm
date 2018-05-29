@@ -180,6 +180,7 @@
 					$!term
 				</td>
 			</tr>
+			#if ($!allowUpdate)
 			<tr> 
 				<th>
 					$tlang.getString("sitegen.siteinfolist.courses")
@@ -229,10 +230,8 @@
 		#end
 		#end
 		
-
-		#* UNISA CHANGES  Only display contact details for poject sites*#
+		## UNISA CHANGES  Only display contact details for poject sites**
 		#if ($allowUpdate)
-		#* END UNISA-CHANGES *#
 			<tr>
 				<th>
 					$tlang.getString("sitegen.siteinfolist.sitecont")
@@ -241,9 +240,7 @@
 					$validator.escapeHtml($!contactName)#if($!contactEmail && !$contactEmail.equals("")), <a href="mailto:$!contactEmail">$!contactEmail</a>#end
 				</td>
 			</tr>
-		#* UNISA CHANGES *#
 		#end
-		#* END UNISA CHANGES *#
 		
 		#if ($!allowUpdate)
 			<tr> 
@@ -538,10 +535,8 @@
 		<div style="clear:both"> </div>
 		#end
 
-#* UNISA CHANGES Only view Roster if not coursesite*#
+## UNISA CHANGES Only view Roster if not coursesite **
 #if (!$!siteTypeIsCourse)
-#*END UNISA CHANGES *#	
-
 	#if ($!viewRoster)
 		#if ($participantList.size() > 0)
 			#set($pagesizeFormName="pagesizeFormTop")
@@ -785,8 +780,7 @@
 				#end
 			</dl>	
 	#end
-		#* UNISA CHANGES *#
+
 #end
-#* END UNISA CHANGES *#
-	
+
 </div>

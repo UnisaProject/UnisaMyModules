@@ -2064,16 +2064,9 @@ public class SiteAction extends PagedResourceActionII {
 					}
 					
 					// top menu bar
-					/* UNISA CHANGES DO NOT ALLOW EDIT SITE INFO FOR Course postgraduate onlcourse group onlgroup site types*/
-					if (("Course".equalsIgnoreCase(siteType))||("postgraduate".equalsIgnoreCase(siteType))||("onlcourse".equalsIgnoreCase(siteType)) || ("group".equalsIgnoreCase(siteType)) ||("onlgroup".equalsIgnoreCase(siteType))) {
-							/* UNISA CHANGES NOT ALLOWING TO UPDATE MEMBERSHIP AND GOURP MEMBERSHIP 
-					    FOR Course postgraduate onlcourse group onlgroup site types*/
-						System.out.println("we[UNISA] Do not allow edit of site info for Course postgraduate onlcourse group onlgroup site types");
-					} else {
-						if (!isMyWorkspace) {
-							b.add(new MenuEntry(rb.getString("java.editsite"),
-									"doMenu_edit_site_info"));
-						}
+					if (!isMyWorkspace) {
+						b.add(new MenuEntry(rb.getString("java.editsite"),
+								"doMenu_edit_site_info"));
 					}
 					b.add(new MenuEntry(rb.getString("java.edittools"),
 							"doMenu_edit_site_tools"));
@@ -2091,25 +2084,17 @@ public class SiteAction extends PagedResourceActionII {
 					}
 					
 				}
-				/* UNISA CHANGES  ADDED IF STATEMENT BELOW */
-				if (("Course".equalsIgnoreCase(siteType))||("postgraduate".equalsIgnoreCase(siteType))||("onlcourse".equalsIgnoreCase(siteType)) || ("group".equalsIgnoreCase(siteType)) ||("onlgroup".equalsIgnoreCase(siteType))) {
-							/* UNISA CHANGES NOT ALLOWING TO UPDATE MEMBERSHIP AND GOURP MEMBERSHIP 
-					    FOR Course postgraduate onlcourse group onlgroup site types*/
-						System.out.println("we[UNISA] Do not allow update of site membership and Group memeship for Course postgraduate onlcourse group onlgroup site types");
-				} else {
-					/* UNISA CHANGES */
-					System.out.println("allowUpdateSiteMembership: "+allowUpdateSiteMembership);
-					/* END UNISA CHANGES */
-					if (allowUpdateSiteMembership) 
-					{
-						// show add participant menu
-						if (!isMyWorkspace) {
-							// if the add participant helper is available, not
-							// stealthed and not hidden, show the link
-							if (notStealthOrHiddenTool("sakai-site-manage-participant-helper")) {
-								b.add(new MenuEntry(rb.getString("java.addp"),
-										"doParticipantHelper"));
-							}
+
+				if (allowUpdateSiteMembership) 
+				{
+					// show add participant menu
+					if (!isMyWorkspace) {
+						// if the add participant helper is available, not
+						// stealthed and not hidden, show the link
+						if (notStealthOrHiddenTool("sakai-site-manage-participant-helper")) {
+							b.add(new MenuEntry(rb.getString("java.addp"),
+									"doParticipantHelper"));
+						}
 						
 						// show the Edit Class Roster menu
 						if (ServerConfigurationService.getBoolean("site.setup.allow.editRoster", true) && siteType != null && SiteTypeUtil.isCourseSite(siteType)) {
@@ -2140,9 +2125,6 @@ public class SiteAction extends PagedResourceActionII {
 						}
 					}
 				}
-				/* UNISA CHANGE CLOSE ADDED IF */
-				}
-				/* END UNISA CHANGE ADDED IF */
 
 				if (allowUpdateSite) 
 				{
@@ -2174,22 +2156,15 @@ public class SiteAction extends PagedResourceActionII {
 						if (!isProvidedType) {
 							// hide site access for provided site types
 							// type of sites
-							/* UNISA CHANGES  WE DO NOT ALLOW TO MANAGE ACCESS FOR Course postgraduate onlcourse group onlgroup site types*/
-							if (("Course".equalsIgnoreCase(siteType))||("postgraduate".equalsIgnoreCase(siteType))||("onlcourse".equalsIgnoreCase(siteType)) || ("group".equalsIgnoreCase(siteType)) ||("onlgroup".equalsIgnoreCase(siteType))) {
-								/* UNISA CHANGES NOT ALLOWING TO UPDATE MEMBERSHIP AND GOURP MEMBERSHIP 
-								FOR Course postgraduate onlcourse group onlgroup site types*/
-								System.out.println("we[UNISA] Do not show external tools link for Course postgraduate onlcourse group onlgroup site types");
-							} else {
-								b.add(new MenuEntry(
-										rb.getString("java.siteaccess"),
-										"doMenu_edit_site_access"));
-
-								// hide site duplicate and import
-								if (SiteService.allowAddSite(null) && ServerConfigurationService.getBoolean("site.setup.allowDuplicateSite", true))
-								{
-									b.add(new MenuEntry(rb.getString("java.duplicate"),
-											"doMenu_siteInfo_duplicate"));
-								}
+							b.add(new MenuEntry(
+									rb.getString("java.siteaccess"),
+									"doMenu_edit_site_access"));
+							
+							// hide site duplicate and import
+							if (SiteService.allowAddSite(null) && ServerConfigurationService.getBoolean("site.setup.allowDuplicateSite", true))
+							{
+								b.add(new MenuEntry(rb.getString("java.duplicate"),
+										"doMenu_siteInfo_duplicate"));
 							}
 
 							List updatableSites = SiteService
@@ -2284,36 +2259,28 @@ public class SiteAction extends PagedResourceActionII {
 				// set participant list
 				if (allowUpdateSite || allowViewRoster
 						|| allowUpdateSiteMembership) {
-					/* UNISA CHANGES DO NOT DISPLAY PARTICIPANT LIST FOR Course postgraduate onlcourse group onlgroup site TYPE */
-					if (("Course".equalsIgnoreCase(siteType))||("postgraduate".equalsIgnoreCase(siteType))||("onlcourse".equalsIgnoreCase(siteType)) || ("group".equalsIgnoreCase(siteType)) || ("onlgroup".equalsIgnoreCase(siteType))) {
-					  System.out.println("we[UNISA] don't want to get any participant List for Course and onlCourse");
+					Collection participantsCollection = getParticipantList(state);
+					sortedBy = (String) state.getAttribute(SORTED_BY);
+					sortedAsc = (String) state.getAttribute(SORTED_ASC);
+					if (sortedBy == null) {
+						state.setAttribute(SORTED_BY, SiteConstants.SORTED_BY_PARTICIPANT_NAME);
+						sortedBy = SiteConstants.SORTED_BY_PARTICIPANT_NAME;
 					}
-					else 
-					{	
-						Collection participantsCollection = getParticipantList(state);
-						sortedBy = (String) state.getAttribute(SORTED_BY);
-						sortedAsc = (String) state.getAttribute(SORTED_ASC);
-						if (sortedBy == null) {
-							state.setAttribute(SORTED_BY, SiteConstants.SORTED_BY_PARTICIPANT_NAME);
-							sortedBy = SiteConstants.SORTED_BY_PARTICIPANT_NAME;
-						}
-						if (sortedAsc == null) {
-							sortedAsc = Boolean.TRUE.toString();
-							state.setAttribute(SORTED_ASC, sortedAsc);
-						}
-						if (sortedBy != null)
-							context.put("currentSortedBy", sortedBy);
-						if (sortedAsc != null)
-							context.put("currentSortAsc", sortedAsc);
-						context.put("participantListSize", Integer.valueOf(participantsCollection.size()));
-						context.put("participantList", prepPage(state));
-						pagingInfoToContext(state, context);
+					if (sortedAsc == null) {
+						sortedAsc = Boolean.TRUE.toString();
+						state.setAttribute(SORTED_ASC, sortedAsc);
 					}
+					if (sortedBy != null)
+						context.put("currentSortedBy", sortedBy);
+					if (sortedAsc != null)
+						context.put("currentSortAsc", sortedAsc);
+					context.put("participantListSize", Integer.valueOf(participantsCollection.size()));
+					context.put("participantList", prepPage(state));
+					pagingInfoToContext(state, context);
 				}
-	
+
 				context.put("include", Boolean.valueOf(site.isPubView()));
-				/* UNISA-CHANGES */
-				/* REMOVED site Contact Info 
+
 				// site contact information
 				String contactName = siteProperties.getProperty(Site.PROP_SITE_CONTACT_NAME);
 				String contactEmail = siteProperties.getProperty(Site.PROP_SITE_CONTACT_EMAIL);
@@ -2331,11 +2298,8 @@ public class SiteAction extends PagedResourceActionII {
 				if (contactEmail != null) {
 					context.put("contactEmail", contactEmail);
 				}
-				*/
 				
-				/* Unisa-change */
-				if (SiteTypeUtil.isCourseSite(siteType)||("onlcourse".equalsIgnoreCase(siteType)) || ("group".equalsIgnoreCase(siteType)) ||("onlgroup".equalsIgnoreCase(siteType))) {
-					/* end of unisa-change */
+				if (SiteTypeUtil.isCourseSite(siteType)) {
 					context.put("isCourseSite", Boolean.TRUE);
 					
 					coursesIntoContext(state, context, site);
@@ -3163,10 +3127,9 @@ public class SiteAction extends PagedResourceActionII {
 			        return Integer.compare(sortedToolIds.indexOf(s1), sortedToolIds.indexOf(s2));
 			    }
 			});
-			
 			Collections.sort(importableToolsIdsInDestinationSite, new Comparator<String>() {
 			    public int compare(String s1, String s2) {
-			        return Integer.compare(sortedToolIds.indexOf(s1), sortedToolIds.indexOf(s2));
+			        return Integer.compare(allImportableToolIdsInOriginalSites.indexOf(s1), allImportableToolIdsInOriginalSites.indexOf(s2));
 			    }
 			});
 			
@@ -3195,6 +3158,17 @@ public class SiteAction extends PagedResourceActionII {
 
 				//just just the ones in the destination site
 				context.put("selectedTools", selectedTools); 
+
+				/*UNISA CHANGES */
+			    // Force addition of "Welcome tool" as an import option even if it is displayed on
+			    // a multi-col layout and there are more than one tool on the page
+				for (int i = 0; i < allImportableToolIdsInOriginalSites.size(); i++) {
+					if (allImportableToolIdsInOriginalSites.get(i).equals("unisa.welcome")) {
+						selectedTools.add(allImportableToolIdsInOriginalSites.get(i));
+					}
+				}
+				// end of unisa-change
+				
 			}
 			
 			//get all known tool names from the sites selected to import from (importSites) and the selectedTools list
@@ -13859,6 +13833,7 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 
 		}
 		
+
 		if (displayWebContent && !toolIdList.contains(WEB_CONTENT_TOOL_ID))
 			toolIdList.add(WEB_CONTENT_TOOL_ID);
 		if (displayNews && !toolIdList.contains(NEWS_TOOL_ID))
