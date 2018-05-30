@@ -7,7 +7,7 @@
   <parent>
     <artifactId>unisa-overlays-content</artifactId>
     <groupId>unisa.overlays.content</groupId>
-    <version>10.5</version>
+    <version>11.4</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <name>Unisa overlay Content tool</name>
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.sakaiproject.content</groupId>
       <artifactId>sakai-content-tool</artifactId>
-      <version>10.5</version>
+      <version>11.4</version>
       <type>war</type>
       <scope>runtime</scope>
     </dependency>
