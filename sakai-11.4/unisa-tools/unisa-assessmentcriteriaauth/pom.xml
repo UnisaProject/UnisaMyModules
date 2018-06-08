@@ -2,7 +2,7 @@
   <parent>
     <artifactId>unisa-base</artifactId>
     <groupId>org.sakaiproject</groupId>
-    <version>10.5</version>
+    <version>11.4</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.sakaiproject</groupId>
@@ -50,12 +50,7 @@
       <groupId>org.sakaiproject</groupId>
       <artifactId>sakai-struts-tool</artifactId>
       <version>${sakai.version}</version>
-    </dependency>
-    <!-- <dependency>
-      <groupId>org.sakaiproject</groupId>
-      <artifactId>unisa-providers-api</artifactId>
-      <version>${sakai.version}</version>
-    </dependency>-->
+    </dependency>    
     <dependency>
       <groupId>org.sakaiproject</groupId>
       <artifactId>sakai-struts-taglibs</artifactId>
@@ -96,11 +91,11 @@
       <artifactId>standard</artifactId>
       <version>1.1.2</version>
     </dependency>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
-    </dependency>
+<!--     <dependency> -->
+<!--       <groupId>commons-logging</groupId> -->
+<!--       <artifactId>commons-logging</artifactId> -->
+<!--       <version>1.1.1</version> -->
+<!--     </dependency> -->
     <dependency>
       <groupId>commons-beanutils</groupId>
       <artifactId>commons-beanutils</artifactId>
