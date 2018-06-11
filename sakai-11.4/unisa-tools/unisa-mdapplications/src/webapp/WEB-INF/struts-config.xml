@@ -38,6 +38,10 @@
         		path="/WEB-INF/jsp/mdapplyp0.jsp"
         		contextRelative="true" />
         	<forward
+        		name="loginAdmin"
+        		path="/WEB-INF/jsp/mdadmin.jsp"
+        		contextRelative="true" />
+        	<forward
 				name="step1forward"
 				path="/WEB-INF/jsp/mdapplyp1.jsp"
 				contextRelative="true" />

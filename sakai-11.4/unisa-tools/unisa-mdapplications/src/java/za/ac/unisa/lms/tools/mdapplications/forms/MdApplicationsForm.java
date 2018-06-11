@@ -5,21 +5,22 @@ package za.ac.unisa.lms.tools.mdapplications.forms;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.struts.upload.FormFile;
 import org.apache.struts.validator.ValidatorActionForm;
-
 
 public class MdApplicationsForm extends ValidatorActionForm {
 
 	// --------------------------------------------------------- Instance Variables
 
 	private static final long serialVersionUID = 1L;
-	private static final String version = "2018001d";
+	private static final String version = "2018003";
 
 	private String applyType = "";
 	private String loginType = "";
 	private String registrationType ="";// U = undergrad, P = postgrad, S = Short learning programme
 	private Student student = new Student();
+	private Staff adminStaff = new Staff();
 	private Qualification qual = new Qualification();
 ///putback	private Application studentApplication = new Application();
 	//private History prevHistory = new History();
@@ -73,6 +74,13 @@ public class MdApplicationsForm extends ValidatorActionForm {
 	private ArrayList<StudentFile> studentFiles = new ArrayList<StudentFile>();
 	private ArrayList<StudentFile> requiredFiles = new ArrayList<StudentFile>();
 	
+	//Admin Login
+	private String webLoginMsg = "";
+	private boolean dateWEBMDAPP = false;
+	private boolean dateWEBMDDOC = false;
+	private boolean dateWEBMDADM = false;
+	
+	
 	public String getVersion() {
 		return version;
 	}
@@ -83,6 +91,14 @@ public class MdApplicationsForm extends ValidatorActionForm {
 
 	public void setStudent(Student student) {
 		this.student = student;
+	}
+	
+	public Staff getAdminStaff() {
+		return adminStaff;
+	}
+
+	public void setAdminStaff(Staff adminStaff) {
+		this.adminStaff = adminStaff;
 	}
 
 	public String getApplyType() {
@@ -409,5 +425,37 @@ public class MdApplicationsForm extends ValidatorActionForm {
 
 	public void setSpescount(int spescount) {
 		this.spescount = spescount;
+	}
+
+	public String getWebLoginMsg() {
+		return webLoginMsg;
+	}
+
+	public void setWebLoginMsg(String webLoginMsg) {
+		this.webLoginMsg = webLoginMsg;
+	}
+
+	public boolean isDateWEBMDAPP() {
+		return dateWEBMDAPP;
+	}
+
+	public void setDateWEBMDAPP(boolean dateWEBMDAPP) {
+		this.dateWEBMDAPP = dateWEBMDAPP;
+	}
+
+	public boolean isDateWEBMDDOC() {
+		return dateWEBMDDOC;
+	}
+
+	public void setDateWEBMDDOC(boolean dateWEBMDDOC) {
+		this.dateWEBMDDOC = dateWEBMDDOC;
+	}
+
+	public boolean isDateWEBMDADM() {
+		return dateWEBMDADM;
+	}
+
+	public void setDateWEBMDADM(boolean dateWEBMDADM) {
+		this.dateWEBMDADM = dateWEBMDADM;
 	}
 }
