@@ -33,9 +33,10 @@ public class StudentUploadDAO extends StudentSystemDAO {
 	public static Log log = LogFactory.getLog(StudentUploadDAO.class);
 
 	public String getQualDesc(String sQual) throws Exception {
-		String query = "select eng_description from grd where code= ? ";
 		
 		String desc = "";
+		
+		String query = "select eng_description from grd where code= ? ";
 
 		try {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -91,7 +92,7 @@ public class StudentUploadDAO extends StudentSystemDAO {
 					//+ " and (nr <= 70000000 or nr >=80000000)";
 		
 		try {
-			//log.debug("validateStudentLogin: query=" +  query+", surname=" +  surname.toUpperCase()+", firstNames=" +  firstNames.toUpperCase()+". bDay=" +  bDay);
+			//log.debug("StudentUploadDAO - validateStudentLogin: query=" +  query+", surname=" +  surname.toUpperCase()+", firstNames=" +  firstNames.toUpperCase()+". bDay=" +  bDay);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{surname.toUpperCase(), firstNames.toUpperCase(), bDay});
 			Iterator i = queryList.iterator();
@@ -103,24 +104,27 @@ public class StudentUploadDAO extends StudentSystemDAO {
 			throw new Exception(
 					"StudentUploadDAO : Error validating STU student number / " + ex);
 		}
-		//log.debug("validateStudentLogin: stuCheck" +  stuCheck);
+		//log.debug("StudentUploadDAO - validateStudentLogin: stuCheck" +  stuCheck);
 		return stuCheck;
 	}
 	
 	/**
 	 * Validate student Academic Record
 	 */
-	public boolean validateStudentRec(String studentNr) throws Exception {
+	public boolean validateStudentRec(String studentNr, String acaYear) throws Exception {
 		
-		String query = "select mk_student_nr "
-				+ " from stuaca "
-				+ " where mk_student_nr = ? ";
+		String query = "select mk_student_nr from stuaca "
+				+ " where mk_student_nr = ? "
+				+ " union "
+				+ " select mk_student_nr from stuann "
+				+ " where mk_student_nr= ? "
+				+ " and mk_academic_year < ? ";
 
 		try {
-			//log.debug("StudentUploadDAO - validateStudentRec - Query="+query+", StudentNr="+studentNr);
+			//log.debug("StudentUploadDAO - validateStudentRec - Query="+query+", StudentNr="+studentNr+", AcademicYear="+acaYear);
 			
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-			List queryList = jdt.queryForList(query, new Object []{studentNr});
+			List queryList = jdt.queryForList(query, new Object []{studentNr, studentNr, acaYear});
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				return true;
@@ -137,7 +141,7 @@ public class StudentUploadDAO extends StudentSystemDAO {
 	/**
 	 * Check if student has a student/reference number
 	 */
-	public boolean validateSTUAPQ(String surname, String firstNames, String  bDay, String acaYear, String acaPeriod) throws Exception {
+	public boolean validateSTUAPQ(String surname, String firstNames, String  bDay, String acaYear) throws Exception {
 		
 		boolean stuapqCheck = false;
 		String dbParam = "";
@@ -151,26 +155,23 @@ public class StudentUploadDAO extends StudentSystemDAO {
 				+ " and stu.surname = ? "
 				+ " and stu.first_names = ? "
 				+ " and to_char(stu.birth_date, 'DD/MM/YYYY') = ? "
-				+ " and stuapq.academic_year= ? "
-				+ " and stuapq.application_period = ? ";		
+				+ " and stuapq.academic_year= ? ";	
 		try {
-			dbParam = surname.toUpperCase()+","+firstNames.toUpperCase()+","+bDay+","+acaYear+","+acaPeriod;
-			//log.debug("validateSTUAPQ - query: " +  query);
-			//log.debug("validateSTUAPQ - dbParam: " +  dbParam);
+			//log.debug("StudentUploadDAO - validateSTUAPQ - query="+query+", surname="+surname.toUpperCase()+", firstNames="+firstNames.toUpperCase()+", bDay="+bDay+", acaYear="+acaYear);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-			List queryList = jdt.queryForList(query, new Object []{surname.toUpperCase(), firstNames.toUpperCase(), bDay, acaYear, acaPeriod});
+			List queryList = jdt.queryForList(query, new Object []{surname.toUpperCase(), firstNames.toUpperCase(), bDay, acaYear});
 			
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
-				//log.debug("validateSTUAPQ - isNumber= " +  data.get("mk_student_nr").toString());
+				//log.debug("StudentUploadDAO - validateSTUAPQ - isNumber= " +  data.get("mk_student_nr").toString());
 				stuapqCheck=true;
 			}
 		} catch (Exception ex) {
 			throw new Exception(
 					"StudentUploadDAO : Error validating STUAPQ student number / " + ex);
 		}
-		//log.debug("validateSTUAPQ - stuapqCheck: " +  stuapqCheck);
+		//log.debug("StudentUploadDAO - validateSTUAPQ - stuapqCheck: " +  stuapqCheck);
 		return stuapqCheck;
 	}
 
@@ -266,7 +267,7 @@ public class StudentUploadDAO extends StudentSystemDAO {
 			List queryList = jdt.queryForList(query, new Object []{acaYear});
 			Iterator i = queryList.iterator();
 			while (i.hasNext()) {
-				//log.debug("validateClosingDate - has Next");
+				//log.debug("StudentUploadDAO - validateClosingDate - has Next");
 				ListOrderedMap data = (ListOrderedMap) i.next();
 				String dateType = data.get("dateType").toString().trim().toUpperCase();
 				//log.debug("StudentUploadDAO - validateClosingDate - TYPE = " + dateType+", from_date = " + data.get("from_date").toString().trim()+", to_date = " + data.get("to_date").toString().trim());
@@ -287,7 +288,7 @@ public class StudentUploadDAO extends StudentSystemDAO {
 		return sDates;
 	}
 		
-	public StudySelected queryStudySelected(String studentNr, String acaYear, String acaPeriod) throws Exception {
+	public StudySelected queryStudySelected(String studentNr, String acaYear) throws Exception {
 
 		StudySelected selectedNew = new StudySelected();
 
@@ -300,13 +301,12 @@ public class StudentUploadDAO extends StudentSystemDAO {
 						+ " from STUAPQ "
 						+ " where mk_student_nr = ? "
 						+ " and academic_year = ? "
-						+ " and application_period = ? "
 						+ " order by choice_nr " ;
 
 			try {
 				//log.debug("StudentUploadDAO - queryStudySelectedNew - queryNew (else): " + query);
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-				List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod});
+				List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear});
 				Iterator i = queryList.iterator();
 				while (i.hasNext()) {
 					ListOrderedMap data = (ListOrderedMap) i.next();
@@ -381,7 +381,6 @@ public class StudentUploadDAO extends StudentSystemDAO {
 				+ " ), 0) as REFERENCE_SEQUENCE from dual ";
 
 		try {
-			//log.debug("StudentUploadDAO - getSTUXMLRef - "+studentNr+" - Query: " + query);
 			//log.debug("StudentUploadDAO - getSTUXMLRef - "+studentNr+" - Query: " +studentNr+", "+acaYear+", "+acaPeriod+", "+referenceType+", "+referenceValue);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List<?> queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, referenceType, referenceValue});
@@ -566,7 +565,7 @@ public class StudentUploadDAO extends StudentSystemDAO {
 	
 	  
 
-	public String vrfyPrevQual(String qualSpec, String studentNr, String acaYear, String acaPeriod) throws Exception {
+	public String vrfyPrevQual(String qualSpec, String studentNr, String acaYear) throws Exception {
 
 		String query = "";
 		String result = "";
@@ -627,14 +626,8 @@ public class StudentUploadDAO extends StudentSystemDAO {
 	 * This method retrieves the student's saved qualifications from STUAPQ as a final validation check
 	 * and returns the values to applysnrcomplete.jsp and applysnrcompleteRet.jsp for new and returning
 	 * students respectively
-	 * 
-	 * @param studentNr
-	 * @param acaYear
-	 * @param acaPeriod
-	 * @return
-	 * @throws Exception
 	 */
-	public String vrfyNewQual(String qualSpec, String choice, String studentNr, String acaYear, String acaPeriod) throws Exception {
+	public String vrfyNewQual(String qualSpec, String choice, String studentNr, String acaYear) throws Exception {
 
 		String query = "";
 		String stuChoice = "";
@@ -648,7 +641,6 @@ public class StudentUploadDAO extends StudentSystemDAO {
 					+ " where stuapq.new_qual = grd.code "
 					+ " and stuapq.mk_student_nr = ? "
 					+ " and stuapq.academic_year = ? "
-					+ " and application_period = ? "
 					+ " and stuapq.choice_nr = ? ";
 		}else{
 			query = "select stuapq.new_spes, stuapq.choice_nr, "
@@ -659,14 +651,13 @@ public class StudentUploadDAO extends StudentSystemDAO {
 					+ " and stuapq.new_spes = quaspc.speciality_code "
 					+ " and stuapq.mk_student_nr = ? "
 					+ " and stuapq.academic_year = ? "
-					+ " and application_period = ? "
 					+ " and stuapq.choice_nr = ? ";
 		}
 		
 		try {
-			//log.debug("StudentUploadDAO - vrfyNewQual - qualSpec: " + qualSpec + ", query:" + query + ", StudentNr:" + studentNr + ", acaYear: " + acaYear + ", acaPeriod:" + acaPeriod + ", choice:" + choice);
+			//log.debug("StudentUploadDAO - vrfyNewQual - qualSpec: " + qualSpec + ", query:" + query + ", StudentNr:" + studentNr + ", acaYear: " + acaYear + ", choice:" + choice);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choice});
+			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, choice});
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				while (i.hasNext()) {
@@ -695,7 +686,7 @@ public class StudentUploadDAO extends StudentSystemDAO {
 		return result;
 	}
 	
-	public String vrfyNewQualShort(String qualSpec, String choice, String studentNr, String acaYear, String acaPeriod) throws Exception {
+	public String vrfyNewQualShort(String qualSpec, String choice, String studentNr, String acaYear) throws Exception {
 
 		String query = "";
 		String stuChoice = "";
@@ -706,12 +697,11 @@ public class StudentUploadDAO extends StudentSystemDAO {
 					+ " where stuapq.new_qual = grd.code "
 					+ " and stuapq.mk_student_nr = ? "
 					+ " and stuapq.academic_year = ? "
-					+ " and application_period = ? "
 					+ " and stuapq.choice_nr = ? ";
 		try {
 			//log.debug("StudentUploadDAO - vrfyNewQualShort - qualSpec: " + qualSpec + ", query:" + query);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choice});
+			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, choice});
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
@@ -729,14 +719,8 @@ public class StudentUploadDAO extends StudentSystemDAO {
 	 * This method retrieves the student's saved qualifications from STUAPQ as a final validation check
 	 * and returns the values to applysnrcomplete.jsp and applysnrcompleteRet.jsp for new and returning
 	 * students respectively
-	 * 
-	 * @param studentNr
-	 * @param acaYear
-	 * @param acaPeriod
-	 * @return
-	 * @throws Exception
 	 */
-	public String vrfyNewMDQual(String qualSpec, String studentNr, String acaYear, String acaPeriod) throws Exception {
+	public String vrfyNewMDQual(String qualSpec, String studentNr, String acaYear) throws Exception {
 
 		String query = "";
 		String stuChoice = "";
@@ -790,7 +774,7 @@ public class StudentUploadDAO extends StudentSystemDAO {
 		return result;
 	}
 	
-	public String getSTUAPQUpload(String studentNr,String acaYear,String acaPeriod, String choice, String callingMethod) throws Exception{
+	public String getSTUAPQUpload(String studentNr,String acaYear, String choice, String callingMethod) throws Exception{
 		
 		String upload = "AP";
 		try{		
@@ -798,14 +782,13 @@ public class StudentUploadDAO extends StudentSystemDAO {
 						+ " from stuapq "
 						+ " where mk_student_nr = ? "
 						+ " and academic_year = ? "
-						+ " and application_period = ? "
 						+ " and choice_nr = ? "
 						+ " and status_code in ('ND', 'NP') ";
 
-			//log.debug("getSTUAPQUpload - query="+query+", studentNr="+studentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", choice="+choice+", CallingMethod="+callingMethod);
+			//log.debug("StudentUploadDAO - getSTUAPQUpload - query="+query+", studentNr="+studentNr+", acaYear="+acaYear+", choice="+choice+", CallingMethod="+callingMethod);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choice});
+			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, choice});
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
@@ -822,11 +805,11 @@ public class StudentUploadDAO extends StudentSystemDAO {
 			}
 
 		}
-		//log.debug("getSTUAPQUpload - Upload: " + upload );
+		//log.debug("StudentUploadDAO - getSTUAPQUpload - Upload: " + upload );
 		return upload;
 	}
 	
-	public String getFinalMD(String studentNr,String acaYear,String acaPeriod) throws Exception{
+	public String getFinalMD(String studentNr,String acaYear) throws Exception{
 		
 		String checkMD = "";
 		try{		
@@ -834,12 +817,11 @@ public class StudentUploadDAO extends StudentSystemDAO {
 						+ " from stuann, grd "
 						+ " where stuann.mk_highest_qualifi = grd.code "
 						+ " and stuann.mk_student_nr = ? "
-						+ " and stuann.mk_academic_year = ? "
-						+ " and stuann.mk_academic_period = ? ";
+						+ " and stuann.mk_academic_year = ? ";
 
-			//log.debug("getFinalMD - query: " + query );
+			//log.debug("StudentUploadDAO - getFinalMD - query: " + query );
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod});
+			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear});
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
@@ -857,7 +839,7 @@ public class StudentUploadDAO extends StudentSystemDAO {
 			}
 
 		}
-		//log.debug("getFinalMD - checkMD: " + checkMD );
+		//log.debug("StudentUploadDAO - getFinalMD - checkMD: " + checkMD );
 		return checkMD;
 	}
 	
@@ -876,7 +858,7 @@ public class StudentUploadDAO extends StudentSystemDAO {
 					+ " FROM DUAL";
 		
 		try {
-			//log.debug("checkLeapYear: query" +  query);
+			//log.debug("StudentUploadDAO - checkLeapYear: query" +  query);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List<?> queryList = jdt.queryForList(query, new Object []{"15/02/"+bYear});
 			Iterator i = queryList.iterator();

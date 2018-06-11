@@ -150,23 +150,17 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 			  
 		/**Click Pay Later button**/
 		$("#payLater").click(function(){
-			var isAdmin = $('#webADM').val();
-			if (isAdmin === false || isAdmin === "false"){
-				var butVal = $(this).val();
-				var checkStuNr = $('#tmpStuNr').val();
-				var retVal = confirm("Did you make a note of your student number?\n Your number is: " + checkStuNr);
-				if( retVal === true ){
-					$.blockUI({ message: "<strong><img src='<c:url value='/resources/images/ajax-loader.gif' />' alt=' * ' /> <br>Redirecting...</strong>" });
-					var url = "http://applications.unisa.ac.za/index.html";
-		  	      	window.top.location.href =url;
-		  	      	return false;
-			 	}else{
-					return false;
-			   	}
-			}else{
-				//redirect to Admin home page
-				window.top.location.href = "/unisa-studentregistration/applyForStudentNumber.do?act=loginAdmin";
-		  	}
+			var butVal = $(this).val();
+			var checkStuNr = $('#tmpStuNr').val();
+			var retVal = confirm("Did you make a note of your student number?\n Your number is: " + checkStuNr);
+			if( retVal === true ){
+				$.blockUI({ message: "<strong><img src='<c:url value='/resources/images/ajax-loader.gif' />' alt=' * ' /> <br>Redirecting...</strong>" });
+				var url = "http://applications.unisa.ac.za/index.html";
+	  	      	window.top.location.href =url;
+	  	      	return false;
+		 	}else{
+				return false;
+		   	}
 		});		
 	});
 </script>
@@ -200,7 +194,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		<div class="col-md-12 col-sm-12 col-xs-12">
 			<div class="panel panel-default">
 				<div class="panel-heading">
-					<h3 class="panel-title text-center"><fmt:message key="page.studentnr.upload.heading"/></h3>
+					<h3 class="panel-title text-center"><fmt:message key="page.studentnr.apply.heading"/></h3>
 				</div>
 				<div class="panel-body">
 					<sakai:group_heading><fmt:message key="page.studentnr.complete.info1"/></sakai:group_heading>

@@ -1,6 +1,3 @@
-//Created by MyEclipse Struts
-// XSL source (default): platform:/plugin/com.genuitec.eclipse.cross.easystruts.eclipse_3.9.210/xslt/JavaClass.xsl
-
 package za.ac.unisa.lms.tools.studentupload.forms;
 
 import java.util.ArrayList;
@@ -30,7 +27,7 @@ public class StudentUploadForm extends ValidatorActionForm {
 	// --------------------------------------------------------- Instance Variables
 
 	private static final long serialVersionUID = 1L;
-	private static final String version = "2018001b";
+	private static final String version = "2018002a";
 	public static Log log = LogFactory.getLog(StudentUploadAction.class);
 	
 	private String applyType = "";
@@ -709,7 +706,7 @@ public class StudentUploadForm extends ValidatorActionForm {
 		try {
 			//log.debug("studentuploadForm - loadData - getAllRequiredDocs - Try: " + getStudent().getNumber() + " : " + getStudent().getAcademicYear() + " : " + getStudent().getAcademicPeriod() + " : Y : " + getStudent().getMatrix());
 			DocDao docDao = new DocDao();
-			requiredDocs = docDao.getAllRequiredDocs(getStudent().getNumber(),getStudent().getAcademicYear(),getStudent().getAcademicPeriod(),"Y",getStudent().getMatrix(), getStudent().isStuExist(), getLoginSelectMain());
+			requiredDocs = docDao.getAllRequiredDocs(getStudent().getNumber(),getStudent().getAcademicYear(),"Y",getStudent().getMatrix(), getStudent().isStuExist(), getLoginSelectMain());
 		} catch (Exception e1) {
 			//log.debug("studentuploadForm - loadData - getAllRequiredDocs - Catch: " + getStudent().getNumber() + " : " + getStudent().getAcademicYear() + " : " + getStudent().getAcademicPeriod() + " : Y : " + getStudent().getMatrix());
 			e1.printStackTrace();
@@ -717,7 +714,7 @@ public class StudentUploadForm extends ValidatorActionForm {
 		try {
 			//log.debug("studentuploadForm - loadData - getAllOptionalDocs - Try: " + getStudent().getNumber() + " : " + getStudent().getAcademicYear() + " : " + getStudent().getAcademicPeriod() + " : Y : " + getStudent().getMatrix());
 			DocDao docDao = new DocDao();
-			optionalDocs = docDao.getAllOptionalDocs(getStudent().getNumber(),getStudent().getAcademicYear(),getStudent().getAcademicPeriod(),getStudent().getMatrix(), getStudent().isStuExist());
+			optionalDocs = docDao.getAllOptionalDocs(getStudent().getNumber(),getStudent().getAcademicYear(),getStudent().getMatrix(), getStudent().isStuExist());
 		} catch (Exception e1) {
 			//log.debug("studentuploadForm - loadData - getAllOptionalDocs - Catch: " + getStudent().getNumber() + " : " + getStudent().getAcademicYear() + " : " + getStudent().getAcademicPeriod() + " : " + getStudent());
 			e1.printStackTrace();
@@ -737,7 +734,7 @@ public class StudentUploadForm extends ValidatorActionForm {
 				requiredFileBeans[index++] = fb;
 				try {
 					SavedDocDao savedDocDao = new SavedDocDao();
-					fb.setUploaded(savedDocDao.getSavedDocByDoc(doc.getDocCode(),getStudent().getNumber(),getStudent().getAcademicYear(),getStudent().getAcademicPeriod()));
+					fb.setUploaded(savedDocDao.getSavedDocByDoc(doc.getDocCode(),getStudent().getNumber(),getStudent().getAcademicYear()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -771,7 +768,7 @@ public class StudentUploadForm extends ValidatorActionForm {
 		   try {
 			   SavedDocDao savedDocDao = new SavedDocDao();
 			   //log.debug("studentuploadForm - loadData - Getting SavedDocDAOInfo");
-			   savedDocDao.getAllNonRequiredDocInfo(desc, map, getStudent().getNumber(),getStudent().getAcademicYear(),getStudent().getAcademicPeriod(), getStudent().isStuExist());
+			   savedDocDao.getAllNonRequiredDocInfo(desc, map, getStudent().getNumber(),getStudent().getAcademicYear(), getStudent().isStuExist());
 		   } catch (Exception e) {
 			   e.printStackTrace();
 		   }
@@ -783,10 +780,10 @@ public class StudentUploadForm extends ValidatorActionForm {
 		map.clear();
 		SavedDocDao savedDocDao = new SavedDocDao();
 		//log.debug("studentuploadForm - reLoad - Reloading uploaded docs..");
-		savedDocDao.getAllNonRequiredDocInfo(desc, map, getStudent().getNumber(),getStudent().getAcademicYear(),getStudent().getAcademicPeriod(), getStudent().isStuExist());
+		savedDocDao.getAllNonRequiredDocInfo(desc, map, getStudent().getNumber(),getStudent().getAcademicYear(), getStudent().isStuExist());
 		for(FileBean fb : requiredFileBeans){
 			//log.debug("studentuploadForm - reLoad - Setting FileBean Uploaded..");
-			fb.setUploaded(savedDocDao.getSavedDocByDoc(fb.getDoc().getDocCode(),getStudent().getNumber(),getStudent().getAcademicYear(),getStudent().getAcademicPeriod()));
+			fb.setUploaded(savedDocDao.getSavedDocByDoc(fb.getDoc().getDocCode(),getStudent().getNumber(),getStudent().getAcademicYear()));
 		}
 		//log.debug("studentuploadForm - reLoad - Done");
 	}
