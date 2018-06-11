@@ -207,7 +207,6 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 	   		  	title: errorTitle,
 	   		  	modal: true,
 	   		 	width: "auto",
-	   		 	position:['middle',20],
 	   		  	buttons: {
 	   		    	"Ok": function() {
 	   		   	  		doSubmit("Continue");

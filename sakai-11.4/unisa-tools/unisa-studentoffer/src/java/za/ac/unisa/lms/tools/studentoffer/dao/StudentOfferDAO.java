@@ -206,7 +206,7 @@ public class StudentOfferDAO extends StudentSystemDAO {
 	/**
 	 * Check if student has a student/reference number
 	 */
-	public boolean validateSTUAPQ(String surname, String firstNames, String  bDay, String acaYear, String acaPeriod) throws Exception {
+	public boolean validateSTUAPQ(String surname, String firstNames, String  bDay, String acaYear) throws Exception {
 		
 		boolean stuapqCheck = false;
 		String dbParam = "";
@@ -221,16 +221,12 @@ public class StudentOfferDAO extends StudentSystemDAO {
 				+ " and stu.first_names = ? "
 				+ " and to_char(stu.birth_date, 'DD/MM/YYYY') = ? "
 				+ " and stuapq.academic_year= ? "
-				+ " and stuapq.application_period = ? "
 				+ " and (stu.nr <= 70000000 or stu.nr >=80000000)";
-				//+ " and stu.application_status in ('AP','TN','RG') " //We now only allow one entry, no matter what the status is - Confirmed with Claudette and Wynand
 		
 		try {
-			dbParam = surname.toUpperCase()+","+firstNames.toUpperCase()+","+bDay+","+acaYear+","+acaPeriod;
-			//log.debug("validateSTUAPQ - query: " +  query);
-			//log.debug("validateSTUAPQ - dbParam: " +  dbParam);
+			//log.debug("validateSTUAPQ - query: " +  query+" - dbParam: " +  surname.toUpperCase()+","+firstNames.toUpperCase()+","+bDay+","+acaYear);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-			List queryList = jdt.queryForList(query, new Object []{surname.toUpperCase(), firstNames.toUpperCase(), bDay, acaYear, acaPeriod});
+			List queryList = jdt.queryForList(query, new Object []{surname.toUpperCase(), firstNames.toUpperCase(), bDay, acaYear});
 			
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
@@ -361,7 +357,7 @@ public class StudentOfferDAO extends StudentSystemDAO {
 		return result;
 	}
 	
-	public boolean getOfferStatus(String studentNr,String acaYear,String acaPeriod, String choice, String callingMethod) throws Exception{
+	public boolean getOfferStatus(String studentNr,String acaYear, String choice, String callingMethod) throws Exception{
 		
 		boolean status = false;;
 		try{		
@@ -369,16 +365,15 @@ public class StudentOfferDAO extends StudentSystemDAO {
 						+ " from stuapq "
 						+ " where mk_student_nr = ? "
 						+ " and academic_year = ? "
-						+ " and application_period = ? "
 						+ " and choice_nr = ? "
 						+ " and status_code in ('TO', 'EO', 'TX', 'EX') "
 						+ " and space_offered = 'Y' "
 						+ " and (offer_accepted <> 'Y' or offer_accepted is null) ";
 
-			//log.debug("getOfferStatus - query="+query+", studentNr="+studentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", choice="+choice+", CallingMethod="+callingMethod);
+			//log.debug("getOfferStatus - query="+query+", studentNr="+studentNr+", acaYear="+acaYear+", choice="+choice+", CallingMethod="+callingMethod);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choice});
+			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, choice});
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				status = true; //data.get("status_code").toString();
@@ -407,7 +402,7 @@ public class StudentOfferDAO extends StudentSystemDAO {
 	 * @return
 	 * @throws Exception
 	 */
-	public String getStatusQual(String qualSpec, String choice, String studentNr, String acaYear, String acaPeriod) throws Exception {
+	public String getStatusQual(String qualSpec, String choice, String studentNr, String acaYear) throws Exception {
 
 		String query = "";
 		String result = "";
@@ -420,7 +415,6 @@ public class StudentOfferDAO extends StudentSystemDAO {
 					+ " where stuapq.new_qual = grd.code "
 					+ " and stuapq.mk_student_nr = ? "
 					+ " and stuapq.academic_year = ? "
-					+ " and application_period = ? "
 					+ " and stuapq.choice_nr = ? ";
 		}else{
 			query = "select stuapq.new_spes, stuapq.choice_nr, "
@@ -431,15 +425,14 @@ public class StudentOfferDAO extends StudentSystemDAO {
 					+ " and stuapq.new_spes = quaspc.speciality_code "
 					+ " and stuapq.mk_student_nr = ? "
 					+ " and stuapq.academic_year = ? "
-					+ " and application_period = ? "
 					+ " and stuapq.choice_nr = ? ";
 		}
 
 		try {
-			//log.debug("StudentOfferDAO - getStatusQual - Query:" + query+", studentNr: " + studentNr+", acaYear: " + acaYear+", acaPeriod: " + acaPeriod+", choice: " + choice+", qualSpec: " + qualSpec);
+			//log.debug("StudentOfferDAO - getStatusQual - Query:" + query+", studentNr: " + studentNr+", acaYear: " + acaYear+", choice: " + choice+", qualSpec: " + qualSpec);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choice});
+			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, choice});
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				while (i.hasNext()) {
@@ -469,9 +462,9 @@ public class StudentOfferDAO extends StudentSystemDAO {
 	}
 
 	/************ Get Offer Reason *************/
-	public String getApplyStatus(String studentNr, String acaYear, String acaPeriod, String choice) throws Exception{
+	public String getApplyStatus(String studentNr, String acaYear, String choice) throws Exception{
 	
-		  //log.debug("StudentOfferDAO - getApplyStatus studentNr: " + studentNr+", acaYear: " + acaYear+", acaPeriod: " + acaPeriod+", choice: " + choice);
+		  //log.debug("StudentOfferDAO - getApplyStatus studentNr: " + studentNr+", acaYear: " + acaYear+", choice: " + choice);
 	
 		  String result = "";
 		  boolean overSubscribed = false;
@@ -482,14 +475,13 @@ public class StudentOfferDAO extends StudentSystemDAO {
 	  			  	+ " where stuapq.new_qual = gencod.code "
 	  			  	+ " and stuapq.choice_nr = ?"
 	  			  	+ " and stuapq.academic_year = ? "
-	  			  	+ " and stuapq.application_period = ? "
 	  			  	+ " and gencod.fk_gencatcode='249' "
 	  			  	+ " and gencod.in_use_flag='Y' "
 	  			  	+ " and mk_student_nr = ? ";
 	  	  
-	  	  //log.debug("StudentOfferDAO getQualSubscription - getApplyStatus - Checked OverSubscribed - query1: " + query1+", choice="+choice+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", studentNr="+studentNr);
+	  	  //log.debug("StudentOfferDAO getQualSubscription - getApplyStatus - Checked OverSubscribed - query1: " + query1+", choice="+choice+", acaYear="+acaYear+", studentNr="+studentNr);
 	  	  JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-	  	  List queryList = jdt.queryForList(query1, new Object []{choice, acaYear, acaPeriod, studentNr});
+	  	  List queryList = jdt.queryForList(query1, new Object []{choice, acaYear, studentNr});
 	  	  Iterator i = queryList.iterator();
 	  	  if (i.hasNext()) {
 		    	  //log.debug("StudentOfferDAO getQualSubscription - getApplyStatus - studentNr="+studentNr+", - choice="+choice+" - IS Oversubscribed");
@@ -504,12 +496,11 @@ public class StudentOfferDAO extends StudentSystemDAO {
 			  			+ " from stuapq "
 	  			  	+ " where choice_nr = ? "
 	  			  	+ " and academic_year = ? "
-	  			  	+ " and application_period = ? "
 	  			  	+ " and mk_student_nr = ? ";
 	  			  		    	  
-			  //log.debug("StudentOfferDAO getApplyStatus - Check Status - query2: " + query2+", choice="+choice+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", studentNr="+studentNr);
+			  //log.debug("StudentOfferDAO getApplyStatus - Check Status - query2: " + query2+", choice="+choice+", acaYear="+acaYear+", studentNr="+studentNr);
 	  	  JdbcTemplate jdtQual = new JdbcTemplate(getDataSource());
-	  	  List queryListQual = jdtQual.queryForList(query2, new Object []{choice, acaYear, acaPeriod, studentNr});
+	  	  List queryListQual = jdtQual.queryForList(query2, new Object []{choice, acaYear, studentNr});
 	  	  Iterator quals = queryListQual.iterator();
 	  	  if (quals.hasNext()) {
 	  		  ListOrderedMap data = (ListOrderedMap) quals.next();
@@ -567,6 +558,33 @@ public class StudentOfferDAO extends StudentSystemDAO {
 	    	}
 	}
 	
+	public String getApplyPeriod(String StudentNr, String acaYear, String qualCode, String choice) throws Exception{
+			
+		String result = "";
+	
+		try{ 
+			String query = "select application_period "
+						+ " from stuapq "
+						+ " where mk_student_nr = ? "
+						+ " and academic_year = ? "
+						+ " and new_qual = ? "
+						+ " and choice_nr = ? ";
+	
+	    		//log.debug("StudentOfferDAO - getApplyPeriod - Query: " + query +", StudentNr="+StudentNr+", acaYear="+acaYear+", qualCode="+qualCode+", Choice="+choice);
+				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
+				List queryList = jdt.queryForList(query, new Object []{StudentNr, acaYear, qualCode, choice});
+				Iterator i = queryList.iterator();
+				if (i.hasNext()) {
+					ListOrderedMap data = (ListOrderedMap) i.next();
+					result = data.get("application_period").toString().trim();
+				}
+		    } catch (Exception ex) {
+		    	throw new Exception("StudentOfferDAO - getApplyPeriod : Error reading application period / " + ex);
+	    }
+		//log.debug("StudentOfferDAO - getApplyPeriod - QualCode="+qualCode+", Period=" + result); 
+		    return result;
+	}
+	
 	public String getStatusDesc(String status) throws Exception{
 	  	
 	  	//log.debug("StudentOfferDAO - getStatusDesc - Status: "+status);
@@ -600,7 +618,7 @@ public class StudentOfferDAO extends StudentSystemDAO {
 		    return result;
 	 }
 	  
-	public String getDeclineReason(String StudentNr, String qualCode, String acaYear, String acaPeriod) throws Exception{
+	public String getDeclineReason(String StudentNr, String qualCode, String acaYear) throws Exception{
 		
 		//log.debug("StudentOfferDAO - getDeclineReason - StudentNr: "+StudentNr+", qualCode: "+qualCode);
 	
@@ -613,13 +631,12 @@ public class StudentOfferDAO extends StudentSystemDAO {
 						+ " and gencod.fk_gencatcode = 263 "
 						+ " and gencod.in_use_flag = 'Y' "
 						+ " and stuapq.academic_year = ? "
-						+ " and stuapq.application_period = ? "
 						+ " and stuapq.mk_student_nr = ? "
-						+ " and stuapq.qualification_code = ? ";
+						+ " and stuapq.new_qual = ? ";
 	
-	    		//log.debug("StudentOfferDAO - getDeclineReason - Query: " + query);
+	    		//log.debug("StudentOfferDAO - getDeclineReason - Query: " + query +", acaYear="+acaYear+", StudentNr="+StudentNr+", qualCode="+qualCode);
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-				List queryList = jdt.queryForList(query, new Object []{acaYear, acaPeriod, StudentNr, qualCode});
+				List queryList = jdt.queryForList(query, new Object []{acaYear, StudentNr, qualCode});
 				Iterator i = queryList.iterator();
 				if (i.hasNext()) {
 					ListOrderedMap data = (ListOrderedMap) i.next();
@@ -634,7 +651,7 @@ public class StudentOfferDAO extends StudentSystemDAO {
 		    return result;
 	}
 
-	public String vrfyNewQualShort(String qualSpec, String choice, String studentNr, String acaYear, String acaPeriod) throws Exception {
+	public String vrfyNewQualShort(String qualSpec, String choice, String studentNr, String acaYear) throws Exception {
 	
 		String query = "";
 		String stuChoice = "";
@@ -645,12 +662,11 @@ public class StudentOfferDAO extends StudentSystemDAO {
 					+ " where stuapq.new_qual = grd.code "
 					+ " and stuapq.mk_student_nr = ? "
 					+ " and stuapq.academic_year = ? "
-					+ " and application_period = ? "
 					+ " and stuapq.choice_nr = ? ";
 		try {
-			//log.debug("StudentOfferDAO - vrfyNewQualShort - qualSpec: " + qualSpec + ", query:" + query);
+			//log.debug("StudentOfferDAO - vrfyNewQualShort - qualSpec: " + qualSpec + ", query:" + query +", studentNr="+studentNr+", acaYear="+acaYear+", choice="+choice);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choice});
+			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, choice});
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();

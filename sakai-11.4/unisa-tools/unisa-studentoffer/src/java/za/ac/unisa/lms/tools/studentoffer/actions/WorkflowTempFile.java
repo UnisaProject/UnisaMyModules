@@ -1,4 +1,4 @@
-package za.ac.unisa.lms.tools.studentappeal.actions;
+package za.ac.unisa.lms.tools.studentoffer.actions;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -33,7 +33,7 @@ public class WorkflowTempFile {
 	private String fileName;
 	private String filePath;
 
-	public static Log log = LogFactory.getLog(StudentAppealAction.class);
+	public static Log log = LogFactory.getLog(StudentOfferAction.class);
 
 	/**
 	* Class constructor.

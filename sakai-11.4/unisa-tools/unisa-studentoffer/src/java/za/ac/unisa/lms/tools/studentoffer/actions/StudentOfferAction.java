@@ -541,11 +541,11 @@ public class StudentOfferAction extends LookupDispatchAction {
 			//log.debug("StudentOfferAction - applyLogin - (1) - Check STUAPQ (F851)");
 			String bDay = stuStatForm.getStudent().getBirthDay() + "/" + stuStatForm.getStudent().getBirthMonth() + "/" + stuStatForm.getStudent().getBirthYear();
 
-			boolean vSTUAPQCheck = dao.validateSTUAPQ(stuStatForm.getStudent().getSurname(), stuStatForm.getStudent().getFirstnames(), bDay, stuStatForm.getStudent().getAcademicYear(), stuStatForm.getStudent().getAcademicPeriod());
+			boolean vSTUAPQCheck = dao.validateSTUAPQ(stuStatForm.getStudent().getSurname(), stuStatForm.getStudent().getFirstnames(), bDay, stuStatForm.getStudent().getAcademicYear());
 			stuStatForm.getStudent().setStuapqExist(vSTUAPQCheck);
 				
 			//log.debug("StudentOfferAction - applyLogin - (IF) vAcaCheck=True - vRETSTUAPQCheck: " + vSTUAPQCheck + " - setStuExist:curStu - goto - MenuReturnStu");
-			if (vSTUAPQCheck){ //Student already applied during this application period (Only allowed one application per application period)
+			if (vSTUAPQCheck){ //Student already applied (Only allowed one application per year)
 				/** Flow Check: (2) **/
 				//log.debug("StudentOfferAction - applyLogin - (2) - Student has applied during this application period");
 				/** Flow Check: (3) **/
@@ -555,7 +555,7 @@ public class StudentOfferAction extends LookupDispatchAction {
 				//log.debug("StudentOfferAction - applyLogin - (4) - Redirect to Offer page");
 				applyOfferStatus(request, stuStatForm);
 				return mapping.findForward("applyOffer");
-			} else{ //Student thus doesn't have a STUAPQ record for this Academic Year & Period
+			} else{ //Student thus doesn't have a STUAPQ record for this Academic Year
 				/** Flow Check: (5) **/
 				//log.debug("StudentOfferAction - applyLogin - (5) - Student thus doesn't have a STUAPQ record for this Academic Year & Period yet");
 				stuStatForm.getStudent().setStuExist(false);
@@ -1186,19 +1186,19 @@ public class StudentOfferAction extends LookupDispatchAction {
 		try{
 			boolean isQualOffer1 = false;
 			boolean isQualOffer2 = false;
-			isQualOffer1 = dao.getOfferStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "1", "applyOfferStatus");
-			isQualOffer2 = dao.getOfferStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "2", "applyOfferStatus");
+			isQualOffer1 = dao.getOfferStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(), "1", "applyOfferStatus");
+			isQualOffer2 = dao.getOfferStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(), "2", "applyOfferStatus");
 
 			//log.debug("StudentOfferAction - applyOfferStatus - isQualOffer1="+isQualOffer1);
 			//log.debug("StudentOfferAction - applyOfferStatus - isQualOffer2="+isQualOffer2);
 			
 			if (isQualOffer1){
-				stuRegForm.setOfferQual1(dao.getStatusQual("Qual", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
-				stuRegForm.setOfferSpec1(dao.getStatusQual("Spec", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
+				stuRegForm.setOfferQual1(dao.getStatusQual("Qual", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear()));
+				stuRegForm.setOfferSpec1(dao.getStatusQual("Spec", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear()));
 			}
 			if (isQualOffer2){
-				stuRegForm.setOfferQual2(dao.getStatusQual("Qual", "2", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
-				stuRegForm.setOfferSpec2(dao.getStatusQual("Spec", "2", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
+				stuRegForm.setOfferQual2(dao.getStatusQual("Qual", "2", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear()));
+				stuRegForm.setOfferSpec2(dao.getStatusQual("Spec", "2", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear()));
 			}
 			//log.debug("StudentOfferAction - applyOfferStatus - After - " + stuRegForm.getStudent().getNumber() +" - Qual1     = " + stuRegForm.getOfferQual1());
 			//log.debug("StudentOfferAction - applyOfferStatus - After - " + stuRegForm.getStudent().getNumber() +" - Spec1     = " + stuRegForm.getOfferSpec1());
@@ -1207,6 +1207,8 @@ public class StudentOfferAction extends LookupDispatchAction {
 			//log.debug("StudentOfferAction - applyOfferStatus - After - " + stuRegForm.getStudent().getNumber() +" - Spec2     = " + stuRegForm.getOfferSpec2());
 
 			//Appeal & Offer Status
+			stuRegForm.setQualPeriodCode1("");
+			stuRegForm.setQualPeriodCode2("");
 			stuRegForm.setQualStatusCode1("");
 			stuRegForm.setQualStatusCode2("");
 			stuRegForm.setQualStatus1("");
@@ -1214,7 +1216,11 @@ public class StudentOfferAction extends LookupDispatchAction {
 			stuRegForm.setQualStatus1Reason("");
 			stuRegForm.setQualStatus2Reason("");
 			if (isQualOffer1 && (stuRegForm.getOfferQual1() != null && !"Not Found".equalsIgnoreCase(stuRegForm.getOfferQual1()))){
-				String status1 = dao.getApplyStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "1");
+				String qual1 = (stuRegForm.getOfferQual1().substring(0,5));
+				//log.debug("StudentOfferAction - applyOffer - Qual1 Offer Input="+qual1);
+				String period1 = dao.getApplyPeriod(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(),qual1, "1");
+				//log.debug("StudentOfferAction - applyOfferStatus - Period1="+period1);
+				String status1 = dao.getApplyStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), "1");
 				//log.debug("StudentOfferAction - applyOfferStatus - Status1="+status1);
 				stuRegForm.setQualStatusCode1(status1);
 				if (status1 != null && !"".equals(status1)){
@@ -1223,7 +1229,7 @@ public class StudentOfferAction extends LookupDispatchAction {
 				}
 				//Offer Reason
 				if ("AX".equalsIgnoreCase(stuRegForm.getQualStatusCode1()) || "EX".equalsIgnoreCase(stuRegForm.getQualStatusCode1()) || "TX".equalsIgnoreCase(stuRegForm.getQualStatusCode1())){
-					String reason1 = dao.getDeclineReason(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), stuRegForm.getOfferQual1());
+					String reason1 = dao.getDeclineReason(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getNumber(), stuRegForm.getOfferQual1());
 					stuRegForm.setQualStatus1Reason(reason1);
 					//log.debug("StudentOfferAction - applyOfferStatus - Reason1="+reason1);
 				}	
@@ -1232,7 +1238,11 @@ public class StudentOfferAction extends LookupDispatchAction {
 			}
 			
 			if (isQualOffer2 && (stuRegForm.getOfferQual2() != null && !"Not Found".equalsIgnoreCase(stuRegForm.getOfferQual2()))){
-				String status2 = dao.getApplyStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "2");
+				String qual2 = (stuRegForm.getOfferQual2().substring(0,5));
+				//log.debug("StudentOfferAction - applyOffer - Qual2 Offer Input="+qual2);
+				String period2 = dao.getApplyPeriod(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(),qual2, "2");
+				//log.debug("StudentOfferAction - applyOfferStatus - Period2="+period2);
+				String status2 = dao.getApplyStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), "2");
 				stuRegForm.setQualStatusCode2(status2);
 				//log.debug("StudentOfferAction - applyOfferStatus - Status2="+status2);
 				if (status2 != null && !"".equals(status2)){
@@ -1241,7 +1251,7 @@ public class StudentOfferAction extends LookupDispatchAction {
 				}
 				//Offer Reason
 				if ("AX".equalsIgnoreCase(stuRegForm.getQualStatusCode2()) || "EX".equalsIgnoreCase(stuRegForm.getQualStatusCode2()) || "TX".equalsIgnoreCase(stuRegForm.getQualStatusCode2())){
-						String reason2 = dao.getDeclineReason(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), stuRegForm.getOfferQual2());
+						String reason2 = dao.getDeclineReason(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getNumber(), stuRegForm.getOfferQual2());
 						stuRegForm.setQualStatus2Reason(reason2);
 						//log.debug("StudentOfferAction - applyOfferStatus - Reason2="+reason2);
 				}
@@ -1251,7 +1261,7 @@ public class StudentOfferAction extends LookupDispatchAction {
 		}catch(Exception e){
 			log.warn("StudentOfferAction - applyOfferStatus - crashed / " + e);
 		}
-		//log.debug("StudentOfferAction - applyOfferStatus - Done");
+		//log.debug("StudentOfferAction - applyOfferStatus - Done - Return to calling method");
 	}
 	
 	/*public String applyOffer(ActionMapping mapping, ActionForm form,
@@ -1268,8 +1278,11 @@ public class StudentOfferAction extends LookupDispatchAction {
 
 		//log.debug("StudentOfferAction - applyOffer - Start");
 		
-		stuRegForm.getStudent().setQual1(dao.vrfyNewQualShort("Qual","1",stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
-		stuRegForm.getStudent().setQual2(dao.vrfyNewQualShort("Qual","2",stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
+		String qual1 = "";
+		String qual2 = "";
+		
+		stuRegForm.getStudent().setQual1(dao.vrfyNewQualShort("Qual","1",stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear()));
+		stuRegForm.getStudent().setQual2(dao.vrfyNewQualShort("Qual","2",stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear()));
 		
 		//log.debug("StudentOfferAction - applyOffer check - Qual1="+stuRegForm.getStudent().getQual1());
 		//log.debug("StudentOfferAction - applyOffer check - Qual2="+stuRegForm.getStudent().getQual2());
@@ -1286,9 +1299,19 @@ public class StudentOfferAction extends LookupDispatchAction {
 			
 			if ("Y".equalsIgnoreCase(stuRegForm.getStudentApplication().getRadioOfferQual1()) || "N".equalsIgnoreCase(stuRegForm.getStudentApplication().getRadioOfferQual1())){
 				isRadio1 = true;
+				qual1 = (stuRegForm.getOfferQual1().substring(0,5));
+				//log.debug("StudentOfferAction - applyOffer - Qual1 Offer Input="+qual1);
+				String period1 = dao.getApplyPeriod(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(),qual1, "1");
+				stuRegForm.setQualPeriodCode1(period1);
+				//log.debug("StudentOfferAction - applyOffer - Period1="+stuRegForm.getQualPeriodCode1());
 			}
 			if ("Y".equalsIgnoreCase(stuRegForm.getStudentApplication().getRadioOfferQual2()) || "N".equalsIgnoreCase(stuRegForm.getStudentApplication().getRadioOfferQual2())){
 				isRadio2 = true;
+				qual2 = (stuRegForm.getOfferQual2().substring(0,5));
+				//log.debug("StudentOfferAction - applyOffer - Qual2 Offer Input="+qual2);
+				String period2 = dao.getApplyPeriod(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(),qual2, "2");
+				stuRegForm.setQualPeriodCode2(period2);
+				//log.debug("StudentOfferAction - applyOffer - Period2="+stuRegForm.getQualPeriodCode2());
 			}
 			
 			if (!isRadio1 && !isRadio2){
@@ -1317,6 +1340,13 @@ public class StudentOfferAction extends LookupDispatchAction {
 				if (isRadio1){
 					//log.debug("StudentOfferAction - applyOffer - Qual1="+stuRegForm.getOfferQual1()+", Qual1 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual1());
 					//Student Input fields
+					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Student Number         ="+stuRegForm.getStudent().getNumber());
+					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Academic Year          ="+stuRegForm.getStudent().getAcademicYear());
+					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Academic Period        ="+stuRegForm.getStudent().getAcademicPeriod());
+					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Qualification Accepted ="+stuRegForm.getOfferQual1());
+					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Qualification Period   ="+stuRegForm.getQualPeriodCode1());
+					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Qualification Radio    ="+stuRegForm.getStudentApplication().getRadioOfferQual1());
+
 					op.setInCsfClientServerCommunicationsClientVersionNumber((short) 3);
 					op.setInCsfClientServerCommunicationsClientRevisionNumber((short) 1);
 					op.setInCsfClientServerCommunicationsAction("OU"); //Offer Update
@@ -1324,20 +1354,11 @@ public class StudentOfferAction extends LookupDispatchAction {
 					op.setInWsUserNumber(99998);
 					op.setInWebStuApplicationQualMkStudentNr(Integer.parseInt(stuRegForm.getStudent().getNumber()));
 					op.setInWebStuApplicationQualAcademicYear((short) Integer.parseInt(stuRegForm.getStudent().getAcademicYear()));
-					op.setInWebStuApplicationQualApplicationPeriod((short) Integer.parseInt(stuRegForm.getStudent().getAcademicPeriod()));
-					//op.setInWsQualificationCode(stuRegForm.getStudent().getQual1());
-					String qual1 = (stuRegForm.getOfferQual1().substring(0,5));
-					//log.debug("StudentOfferAction - applyOffer - Qual1 Offer Input="+qual1);
+					op.setInWebStuApplicationQualApplicationPeriod((short) Integer.parseInt(stuRegForm.getQualPeriodCode1()));
 					op.setInWebStuApplicationQualNewQual(qual1);
 					op.setInWebStuApplicationQualChoiceNr((short) 1);
 					op.setInWebStuApplicationQualOfferAccepted(stuRegForm.getStudentApplication().getRadioOfferQual1());
 				
-					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Student Number         ="+stuRegForm.getStudent().getNumber());
-					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Academic Year          ="+stuRegForm.getStudent().getAcademicYear());
-					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Academic Period        ="+stuRegForm.getStudent().getAcademicPeriod());
-					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Qualification Accepted ="+stuRegForm.getOfferQual1());
-					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Qualification Radio    ="+stuRegForm.getStudentApplication().getRadioOfferQual1());
-					
 					op.execute();
 		
 					if (opl.getException() != null) throw opl.getException();
@@ -1347,17 +1368,23 @@ public class StudentOfferAction extends LookupDispatchAction {
 					String opResult1 = op.getOutCsfStringsString500();
 					//log.debug("StudentOfferAction - applyOffer - 1 - opResult: " + opResult1);
 					op.clear();
-					if (!opResult1.contains("generated")){
+					
+					if (!opResult1.contains("generated") && !opResult1.contains("successful")){
+						if ("".equals(opResult1)){
+							opResult1 = "Process Failed, please try again or contact Unisa via email at <a href='mailto:applications@unisa.ac.za'>applications@unisa.ac.za</a>";
+						}
 						messages.add(ActionMessages.GLOBAL_MESSAGE,
 								new ActionMessage("message.generalmessage", stuRegForm.getOfferQual1()+" - "+ opResult1));
 						addErrors(request, messages);
 						applyOfferStatus(request, stuRegForm);
+						
 						if ((stuRegForm.getOfferQual1() == null || "".equalsIgnoreCase(stuRegForm.getOfferQual1())) && (stuRegForm.getOfferQual2() == null || "".equalsIgnoreCase(stuRegForm.getOfferQual2()))){
 							//log.debug("StudentOfferAction - applyOffer - Qual1 Done - Goto applyOfferConfirm");
 							//return "applyOfferConfirm";
 							return mapping.findForward("applyOfferConfirm");
 						}else{
 							//return "applyOffer";
+							//log.debug("StudentOfferAction - applyOffer - Qual1 Still has offer - Goto applyOffer");
 							return mapping.findForward("applyOffer");
 						}
 					}
@@ -1367,6 +1394,13 @@ public class StudentOfferAction extends LookupDispatchAction {
 				if (isRadio2){
 					//log.debug("StudentOfferAction - applyOffer - Qual2="+stuRegForm.getOfferQual2()+", Qual2 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual2());
 					//Student Input fields
+					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Student Number         ="+stuRegForm.getStudent().getNumber());
+					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Academic Year          ="+stuRegForm.getStudent().getAcademicYear());
+					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Academic Period        ="+stuRegForm.getStudent().getAcademicPeriod());
+					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Qualification Accepted ="+stuRegForm.getOfferQual2());
+					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Qualification Period   ="+stuRegForm.getQualPeriodCode2());
+					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Qualification Radio    ="+stuRegForm.getStudentApplication().getRadioOfferQual2());
+
 					op.setInCsfClientServerCommunicationsClientVersionNumber((short) 3);
 					op.setInCsfClientServerCommunicationsClientRevisionNumber((short) 1);
 					op.setInCsfClientServerCommunicationsAction("OU"); //Offer Update
@@ -1374,20 +1408,11 @@ public class StudentOfferAction extends LookupDispatchAction {
 					op.setInWsUserNumber(99998);
 					op.setInWebStuApplicationQualMkStudentNr(Integer.parseInt(stuRegForm.getStudent().getNumber()));
 					op.setInWebStuApplicationQualAcademicYear((short) Integer.parseInt(stuRegForm.getStudent().getAcademicYear()));
-					op.setInWebStuApplicationQualApplicationPeriod((short) Integer.parseInt(stuRegForm.getStudent().getAcademicPeriod()));
-					//op.setInWsQualificationCode(stuRegForm.getStudent().getQual2());
-					String qual2 = (stuRegForm.getOfferQual2().substring(0,5));
-					//log.debug("StudentOfferAction - applyOffer - Qual2 Offer Input="+qual2);
+					op.setInWebStuApplicationQualApplicationPeriod((short) Integer.parseInt(stuRegForm.getQualPeriodCode2()));
 					op.setInWebStuApplicationQualNewQual(qual2);
 					op.setInWebStuApplicationQualChoiceNr((short) 2);
 					op.setInWebStuApplicationQualOfferAccepted(stuRegForm.getStudentApplication().getRadioOfferQual2());
-				
-					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Student Number         ="+stuRegForm.getStudent().getNumber());
-					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Academic Year          ="+stuRegForm.getStudent().getAcademicYear());
-					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Academic Period        ="+stuRegForm.getStudent().getAcademicPeriod());
-					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Qualification Accepted ="+stuRegForm.getOfferQual2());
-					//log.debug("StudentOfferAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Qualification Radio    ="+stuRegForm.getStudentApplication().getRadioOfferQual2());
-										
+														
 					op.execute();
 		
 					if (opl.getException() != null) throw opl.getException();
@@ -1397,7 +1422,10 @@ public class StudentOfferAction extends LookupDispatchAction {
 					String opResult2 = op.getOutCsfStringsString500();
 					//log.debug("StudentOfferAction - applyOffer - 2 - opResult: " + opResult2);
 					op.clear();
-					if (!opResult2.contains("generated")){
+					if (!opResult2.contains("generated") && !opResult2.contains("successful")){
+						if ("".equals(opResult2)){
+							opResult2 = "Process Failed, please try again or contact Unisa via email at <a href='mailto:applications@unisa.ac.za'>applications@unisa.ac.za</a>";
+						}
 						messages.add(ActionMessages.GLOBAL_MESSAGE,
 								new ActionMessage("message.generalmessage", stuRegForm.getOfferQual2()+" - "+ opResult2));
 						addErrors(request, messages);
@@ -1408,6 +1436,7 @@ public class StudentOfferAction extends LookupDispatchAction {
 							return mapping.findForward("applyOfferConfirm");
 						}else{
 							//return "applyOffer";
+							//log.debug("StudentOfferAction - applyOffer - Qual2 Still has offer - Goto applyOffer");
 							return mapping.findForward("applyOffer");
 						}
 					}
