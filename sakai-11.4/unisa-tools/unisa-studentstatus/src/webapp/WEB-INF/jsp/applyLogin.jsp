@@ -86,6 +86,8 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		input[type="text"] {
 			width: 100%;
 			padding: 0 5px;
+			height: 2em;
+			line-height: 2; 
 		}
 	</style>
 		
@@ -111,9 +113,10 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		var number = $('input[name="student.number"]').val();
 		var surname = $('input[name="student.surname"]').val();
 		var firstname = $('input[name="student.firstnames"]').val();
-		var bYear = $("select[name='student.birthYear']").val(); 
-		var bMonth = $("select[name='student.birthMonth']").val();
-		var bDay = $("select[name='student.birthDay']").val();
+
+		var bYear = $("select[name='student.birthYear']").find("option:selected").val();
+		var bMonth = $("select[name='student.birthMonth']").find("option:selected").val();
+		var bDay = $("select[name='student.birthDay']").find("option:selected").val();
 
 		if(number == null || number.trim() == "" || number == "undefinded"){
 			showError("Error", "Please enter your Student number");
@@ -155,7 +158,6 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 			window.top.location.href = "http://applications.unisa.ac.za/index.html";
   		  	return false;
 		}
-		$.blockUI({ message: "<strong><img src='<c:url value='/resources/images/ajax-loader.gif' />' alt=' * ' /> <br>Submitting...</strong>" });
 		document.studentStatusForm.submit();
 	}
 
