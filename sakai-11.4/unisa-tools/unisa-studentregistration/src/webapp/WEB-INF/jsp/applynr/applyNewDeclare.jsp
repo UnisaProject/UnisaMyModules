@@ -118,14 +118,14 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 	
 	
 		function doAction() {
-			if ($("#doneSubmit").val() == "true"){
-				showError("Warning", "Please note that you have already submitted your application and it may not be re-submitted. Please email applications@unisa.ac.za with your personal details and an issue description should you encounter any problems during your submissionm.");
-				$("input[name='Submit Application']").attr("disabled", "disabled");
-				return false;
-			}else{
+			//if ($("#doneSubmit").val() == "true"){
+			//	showError("Warning", "Please note that you have already submitted your application and it may not be re-submitted. Please email applications@unisa.ac.za with your personal details and an issue description should you encounter any problems during your submissionm.");
+			//	$("input[name='Submit Application']").attr("disabled", "disabled");
+			//	return false;
+			//}else{
 				document.studentRegistrationForm.action = 'applyForStudentNumber.do?act=applyNewDeclare';  
 				document.studentRegistrationForm.submit();
-			}
+			//}
 		}
 		
 		//Click button
@@ -161,7 +161,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 <!-- Form -->
 <html:form action="/applyForStudentNumber">
 	<html:hidden property="page" value="applyNewDeclare"/>
-	<input type="hidden" name="doneSubmit" id="doneSubmit" value="<bean:write name='studentRegistrationForm' property='doneSubmit'/>"/>
+	<!-- <input type="hidden" name="doneSubmit" id="doneSubmit" value="<bean:write name='studentRegistrationForm' property='doneSubmit'/>"/> -->
 			
 	<sakai:messages/>
 	<sakai:messages message="true"/>
