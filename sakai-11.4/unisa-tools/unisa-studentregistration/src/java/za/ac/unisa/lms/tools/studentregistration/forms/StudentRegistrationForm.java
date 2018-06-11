@@ -33,7 +33,7 @@ public class StudentRegistrationForm extends ValidatorActionForm {
 	// --------------------------------------------------------- Instance Variables
 
 	private static final long serialVersionUID = 1L;
-	private static final String version = "2018005d";
+	private static final String version = "2018006c";
 	public static Log log = LogFactory.getLog(ApplyForStudentNumberAction.class);
 	
 	private String applyType = "";
@@ -2793,15 +2793,19 @@ public class StudentRegistrationForm extends ValidatorActionForm {
 	}
 
 	public void resetFormFields(){
+
 		applyType = "";
+		applySEQUENCE = 0;
 		registrationType = "";
 		allowLogin = true;
 		student = new Student();
 		qual = new Qualification();
 		qualtwo = new Qualification();
+		qualAPS = new Qualification();
 		studentApplication = new Application();
 		adminStaff = new Staff();
 		qualOther = new HistoryOther();
+		status = new Status();
 
 		// History (MasterDoctor)
 
@@ -2878,6 +2882,10 @@ public class StudentRegistrationForm extends ValidatorActionForm {
 		searchTown = "";
 		searchResult = "";
 
+		addressSubResultPos = "";
+		addressSubResultPhys = "";
+		addressSubResultCour = "";
+	
 		hiddenButton = false;
 		hiddenQualButton = false;
 
@@ -2888,6 +2896,7 @@ public class StudentRegistrationForm extends ValidatorActionForm {
 		loginSelectDocPay = "";
 		loginSelectYesNo = "";
 		webLoginMsg = "";
+		webLoginMsg2 = "";
 		webUploadMsg = "";
 		selectReset = "";
 		
@@ -2899,12 +2908,23 @@ public class StudentRegistrationForm extends ValidatorActionForm {
 		selQualCode1 = null;
 		selQualCode2 = null;
 		
+		selQualCodeDesc = "";
+		selQualCode1Desc = "";
+		selQualCode2Desc = "";
+		
 		selSpecCode = null;
 		selSpecCode1 = null;
 		selSpecCode2 = null;
 		
+		selSpecCodeDesc = "";
+		selSpecCode1Desc = "";
+		selSpecCode2Desc = "";
+		
 		existQual = "";
 		existSpec = "";
+
+		existQualDesc = "";
+		existSpecDesc = "";
 		
 		selQualPrevCode  = null;
 
@@ -3033,6 +3053,10 @@ public class StudentRegistrationForm extends ValidatorActionForm {
 		appealSourceFiles = new ArrayList<String>();
 		appealTypeFiles = new ArrayList<String>();
 		appealWorkflowFiles = new ArrayList<String>();
+		
+		//M&D Admission Process
+		mdprevList = null;
+		readmd = "";
 
 		student.setNumber("");
 		student.setNumberTmp("");

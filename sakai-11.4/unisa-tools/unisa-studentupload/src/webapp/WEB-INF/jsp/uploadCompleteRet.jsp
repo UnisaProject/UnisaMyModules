@@ -154,6 +154,13 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 	<input type="hidden" name="stuHON" id="stuHON" value="<bean:write name='studentUploadForm' property='student.stuHON' />"/>
 	<input type="hidden" name="stuPG" id="stuPG" value="<bean:write name='studentUploadForm' property='student.stuPG' />"/>
 	<input type="hidden" name="stuMD" id="stuMD" value="<bean:write name='studentUploadForm' property='student.stuMD' />"/>
+	
+	<input type="hidden" name="QualPrevFinal" id="QualPrevFinal" value="<bean:write name='studentUploadForm' property='student.retQualPrevFinal'/>"/>
+	<input type="hidden" name="SpecPrevFinal" id="SpecPrevFinal" value="<bean:write name='studentUploadForm' property='student.retSpecPrevFinal'/>"/>
+	<input type="hidden" name="QualOneFinal" id="QualOneFinal" value="<bean:write name='studentUploadForm' property='student.retQualOneFinal'/>"/>
+	<input type="hidden" name="SpecOneFinal" id="SpecOneFinal" value="<bean:write name='studentUploadForm' property='student.retSpecOneFinal'/>"/>
+	<input type="hidden" name="QualTwoFinal" id="QualTwoFinal" value="<bean:write name='studentUploadForm' property='student.retQualTwoFinal'/>"/>
+	<input type="hidden" name="QualTwoFinal" id="QualTwoFinal" value="<bean:write name='studentUploadForm' property='student.retSpecTwoFinal'/>"/>
 
 	<sakai:messages/>
 	<sakai:messages message="true"/>
@@ -165,7 +172,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		<div class="col-md-12 col-sm-12 col-xs-12">
 			<div class="panel panel-default">
 				<div class="panel-heading">
-					<h3 class="panel-title text-center"><fmt:message key="page.studentnr.upload.heading"/></h3>
+					<h3 class="panel-title text-center"><fmt:message key="page.studentnr.apply.heading"/></h3>
 				</div>
 				<div class="panel-body">
 					<sakai:group_heading><fmt:message key="page.studentnr.completeRet.info1"/></sakai:group_heading>

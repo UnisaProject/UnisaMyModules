@@ -119,6 +119,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		var bMonth = $("select[name='student.birthMonth']").find("option:selected").val();
 		var bDay = $("select[name='student.birthDay']").find("option:selected").val();
 		
+		//alert("validate - number="+number+", surname="+surname+", firstname="+firstname+", bYear="+bYear+", bMonth="+bMonth+", bDay="+bDay );
 		if(number == null || number.trim() == "" || number == "undefinded"){
 			showError("Error", "Please enter your Student number");
 			return false;
@@ -147,6 +148,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 	}
 		
 	function doSubmit(button){
+		//alert("doSubmit - Button="+button);
 		if (button === "Continue"){
 			document.studentUploadForm.action='studentUpload.do?act=applyLogin';
 			document.studentUploadForm.submit();

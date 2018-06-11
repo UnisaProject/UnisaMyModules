@@ -133,19 +133,12 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 	$(document).ready(function() {
 		// This will hold our timer
 		var myTimer = {};
-		  // delay 45 seconds
-		  myTimer = $.timer(60000, function() {
-			var isAdmin = $('#webADM').val();
-			if (isAdmin === false || isAdmin === "false"){
-				//redirect to home page
-			  	var url = "/unisa-findtool/default.do?sharedTool=unisa.mdapplications";
-	  	      	window.location.href =url;
-	  	      	return false;
-			}else{
-				//redirect to Admin home page
-				window.top.location.href = "/unisa-studentregistration/applyForStudentNumber.do?act=loginAdmin";
-			}
-		  });
+		// delay 45 seconds
+		myTimer = $.timer(60000, function() {
+			//redirect to home page
+			var url = "/unisa-findtool/default.do?sharedTool=unisa.mdapplications";
+	  		window.location.href =url;
+		});
 		  
 		  /**Click Pay Now button**/
 			$("#payNow").click(function(){
@@ -159,7 +152,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		  	      	window.location.href =url;
 		  	      	return false;
 		  	   	}else{
-		  	   	$.blockUI({ message: "<strong><img src='<c:url value='/resources/images/ajax-loader.gif' />' alt=' * ' /> <br>Redirecting...</strong>" });
+		  	   		$.blockUI({ message: "<strong><img src='<c:url value='/resources/images/ajax-loader.gif' />' alt=' * ' /> <br>Redirecting...</strong>" });
 		  	   		var url = "/unisa-findtool/default.do?sharedTool=unisa.mdapplications";
 	  	      		/**alert("User wants to go to M&D! " + url);**/
 	  	      		window.location.href =url;
@@ -170,25 +163,19 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		  
 			/**Click Pay Later button**/
 			$("#payLater").click(function(){
-				var isAdmin = $('#webADM').val();
-				if (isAdmin === false || isAdmin === "false"){
-					var butVal = $(this).val();
-					var checkStuNr = $('#tmpStuNr').val();
-					var retVal = confirm("Did you make a note of your reference number?\n Your number is: " + checkStuNr+"\nYou must complete your application by clicking OK to go to Master's and Doctoral Applications or click Cancel to take down your student number.");
-					if( retVal == true ){
-						$.blockUI({ message: "<strong><img src='<c:url value='/resources/images/ajax-loader.gif' />' alt=' * ' /> <br>Redirecting...</strong>" });
-						var url = "/unisa-findtool/default.do?sharedTool=unisa.mdapplications";
-				 	      	/**alert("User wants to go to M&D! " + url);**/
-				 	      	window.location.href =url;
-				 	      	return false;
-				 	   	}else{
-				  	      	/**alert("User does not wants to stay!");**/
-				  		  	return false;
-				   	}
-			  	}else{
-			  	//redirect to Admin home page
-					window.top.location.href = "/unisa-studentregistration/applyForStudentNumber.do?act=loginAdmin";
-			  	}
+				var butVal = $(this).val();
+				var checkStuNr = $('#tmpStuNr').val();
+				var retVal = confirm("Did you make a note of your reference number?\n Your number is: " + checkStuNr+"\nYou must complete your application by clicking OK to go to Master's and Doctoral Applications or click Cancel to take down your student number.");
+				if( retVal == true ){
+					$.blockUI({ message: "<strong><img src='<c:url value='/resources/images/ajax-loader.gif' />' alt=' * ' /> <br>Redirecting...</strong>" });
+					var url = "/unisa-findtool/default.do?sharedTool=unisa.mdapplications";
+			 	      	/**alert("User wants to go to M&D! " + url);**/
+			 	      	window.location.href =url;
+			 	      	return false;
+		 	   	}else{
+		  	      	/**alert("User does not wants to stay!");**/
+		  		  	return false;
+			   	}
 			});	
 	});
 			
@@ -218,7 +205,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		<div class="col-md-12 col-sm-12 col-xs-12">
 			<div class="panel panel-default">
 				<div class="panel-heading">
-					<h3 class="panel-title text-center"><fmt:message key="page.studentnr.upload.heading"/></h3>
+					<h3 class="panel-title text-center"><fmt:message key="page.studentnr.apply.heading"/></h3>
 				</div>
 				<div class="panel-body">
 					<sakai:group_heading><fmt:message key="page.studentnr.complete.info1"/></sakai:group_heading>

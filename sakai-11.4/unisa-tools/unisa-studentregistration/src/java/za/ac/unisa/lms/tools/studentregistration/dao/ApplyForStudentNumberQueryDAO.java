@@ -42,7 +42,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		String desc = "";
 
 		try {
-    	  	log.debug("ApplyForStudentNumberQueryDAO - getQualDesc - query: " + query);
+    	  	//log.debug("ApplyForStudentNumberQueryDAO - getQualDesc - query: " + query);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{sQual});
@@ -69,7 +69,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ " and speciality_code = ? ";
 
 		try {
-    	  	log.debug("ApplyForStudentNumberQueryDAO - getSpecDesc - query=" + query+", Qual=" + qualCode+", Spec=" + specCode);
+    	  	//log.debug("ApplyForStudentNumberQueryDAO - getSpecDesc - query=" + query+", Qual=" + qualCode+", Spec=" + specCode);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{qualCode, specCode});
@@ -93,7 +93,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		String query = "select title from title where used_by='A' order by title";
 
 		try {
-    	  	log.debug("ApplyForStudentNumberQueryDAO - getTitles - query: " + query);
+    	  	//log.debug("ApplyForStudentNumberQueryDAO - getTitles - query: " + query);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query);
@@ -135,7 +135,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 						+ " SELECT CODE, ENG_DESCRIPTION FROM FullMTR "
 						+ " UNION ALL SELECT CODE, NAME AS ENG_DESCRIPTION FROM MTRSCH WHERE CODE=9999999 ";
 
-		log.debug("ApplyForStudentNumberDAO - getSchools - Query="+query+", province="+province);
+		//log.debug("ApplyForStudentNumberDAO - getSchools - Query="+query+", province="+province);
 		
 		try {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -183,8 +183,8 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ " and TYPE in ("+paramDB+") "
 					+ " order by mk_province_code desc, PROVINCE, eng_description ";
 
-		log.debug("ApplyForStudentNumberDAO - getExamCentres - Query="+query);
-		log.debug("ApplyForStudentNumberDAO - getExamCentres - examCentreType="+examCentreType);
+		//log.debug("ApplyForStudentNumberDAO - getExamCentres - Query="+query);
+		//log.debug("ApplyForStudentNumberDAO - getExamCentres - examCentreType="+examCentreType);
 		
 		try {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -222,7 +222,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 
 		String query = "select code, eng_description from lns where in_use_flag = 'Y' order by eng_description";
 
-		log.debug("ApplyForStudentNumberDAO - getCountries - Query="+query);
+		//log.debug("ApplyForStudentNumberDAO - getCountries - Query="+query);
 		
 		try {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -263,8 +263,8 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				+ " and aps_score is not null "
 				+ " and rownum = 1 ";
 
-		log.debug("ApplyForStudentNumberDAO - getQualAPS - Query="+query);
-		log.debug("ApplyForStudentNumberDAO - getQualAPS - selQualCode="+selQualCode);
+		//log.debug("ApplyForStudentNumberDAO - getQualAPS - Query="+query);
+		//log.debug("ApplyForStudentNumberDAO - getQualAPS - selQualCode="+selQualCode);
 		
 		try {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -319,7 +319,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		//Check if student record exists by using Surname, First Names, Date of Birth and ID (Or ForeignID or Passport)
 		
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - validateStudentLogin: query=" +  query+", surname=" +  surname.toUpperCase()+", firstNames=" +  firstNames.toUpperCase()+". bDay=" +  bDay);
+			//log.debug("ApplyForStudentNumberQueryDAO - validateStudentLogin: query=" +  query+", surname=" +  surname.toUpperCase()+", firstNames=" +  firstNames.toUpperCase()+". bDay=" +  bDay);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{surname.toUpperCase(), firstNames.toUpperCase(), bDay});
 			Iterator i = queryList.iterator();
@@ -331,7 +331,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			throw new Exception(
 					"ApplyForStudentNumberQueryDAO : Error validating STU student number / " + ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - validateStudentLogin: stuCheck" +  stuCheck);
+		//log.debug("ApplyForStudentNumberQueryDAO - validateStudentLogin: stuCheck" +  stuCheck);
 		return stuCheck;
 	}
 	
@@ -353,7 +353,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 						+ "and rownum = 1 "
 						+ "order by date_initial desc ";
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - checkStuTempNr: query="+query+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", surname="+surname.toUpperCase()+", firstNames="+firstNames.toUpperCase()+", bDay="+bDay);
+			//log.debug("ApplyForStudentNumberQueryDAO - checkStuTempNr: query="+query+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", surname="+surname.toUpperCase()+", firstNames="+firstNames.toUpperCase()+", bDay="+bDay);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{acaYear, acaPeriod, surname.toUpperCase()+"%", "%"+firstNames.toUpperCase()+"%", "%"+bDay});
 			Iterator i = queryList.iterator();
@@ -365,20 +365,20 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			throw new Exception(
 					"ApplyForStudentNumberQueryDAO : Error validating STU Temp student number / " + ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - checkStuTempNr" +  stuCheck);
+		//log.debug("ApplyForStudentNumberQueryDAO - checkStuTempNr" +  stuCheck);
 		return stuCheck;
 	}
 	
 	/**
 	 * Check if student has a student/reference number
 	 */
-	public boolean validateSTUAPQ(String surname, String firstNames, String  bDay, String acaYear, String acaPeriod) throws Exception {
+	public boolean validateSTUAPQ(String surname, String firstNames, String  bDay, String acaYear) throws Exception {
 		
 		boolean stuapqCheck = false;
 		String dbParam = "";
 		String result = "";
 		//Check if student record exists by using Surname, First Names, Date of Birth
-		
+		//Note we do not check the Period as student is only allowed one application per year (except SLP)
 		String query  = "select DISTINCT stuapq.mk_student_nr "
 				+ " from stu, stuann, stuapq "
 				+ " where stu.nr = stuann.mk_student_nr "
@@ -386,27 +386,26 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				+ " and stu.surname = ? "
 				+ " and stu.first_names = ? "
 				+ " and to_char(stu.birth_date, 'DD/MM/YYYY') = ? "
-				+ " and stuapq.academic_year= ? "
-				+ " and stuapq.application_period = ? ";
+				+ " and stuapq.academic_year= ? ";
 		
 		try {
-			dbParam = surname.toUpperCase()+","+firstNames.toUpperCase()+","+bDay+","+acaYear+","+acaPeriod;
-			log.debug("ApplyForStudentNumberQueryDAO - validateSTUAPQ - query: " +  query);
-			log.debug("ApplyForStudentNumberQueryDAO - validateSTUAPQ - dbParam: " +  dbParam);
+			dbParam = surname.toUpperCase()+","+firstNames.toUpperCase()+","+bDay+","+acaYear;
+			//log.debug("ApplyForStudentNumberQueryDAO - validateSTUAPQ - query: " +  query);
+			//log.debug("ApplyForStudentNumberQueryDAO - validateSTUAPQ - dbParam: " +  dbParam);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-			List queryList = jdt.queryForList(query, new Object []{surname.toUpperCase(), firstNames.toUpperCase(), bDay, acaYear, acaPeriod});
+			List queryList = jdt.queryForList(query, new Object []{surname.toUpperCase(), firstNames.toUpperCase(), bDay, acaYear});
 			
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
-				log.debug("ApplyForStudentNumberQueryDAO - validateSTUAPQ - isNumber= " +  data.get("mk_student_nr").toString());
+				//log.debug("ApplyForStudentNumberQueryDAO - validateSTUAPQ - isNumber= " +  data.get("mk_student_nr").toString());
 				stuapqCheck=true;
 			}
 		} catch (Exception ex) {
 			throw new Exception(
 					"ApplyForStudentNumberQueryDAO : Error validating STUAPQ student number / " + ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - validateSTUAPQ - stuapqCheck: " +  stuapqCheck);
+		//log.debug("ApplyForStudentNumberQueryDAO - validateSTUAPQ - stuapqCheck: " +  stuapqCheck);
 		return stuapqCheck;
 	}
 	
@@ -433,21 +432,21 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 
 		try {
 			dbParam = surname.toUpperCase()+","+firstNames.toUpperCase()+","+bDay+","+acaYear+","+acaYear+","+acaPeriod;
-			log.debug("ApplyForStudentNumberQueryDAO - validateSLPSTUAPQ - query: " +  query + ", dbParam: " +  dbParam);
+			//log.debug("ApplyForStudentNumberQueryDAO - validateSLPSTUAPQ - query: " +  query + ", dbParam: " +  dbParam);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{surname.toUpperCase(), firstNames.toUpperCase(), bDay, acaYear, acaYear, acaPeriod});
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
-				log.debug("ApplyForStudentNumberQueryDAO - validateSLPSTUAPQ - SLP Count="+data.get("Count"));
+				//log.debug("ApplyForStudentNumberQueryDAO - validateSLPSTUAPQ - SLP Count="+data.get("Count"));
 				stuapqCheck = Integer.parseInt(data.get("Count").toString().trim());
 			}
 		} catch (Exception ex) {
 			throw new Exception(
 					"ApplyForStudentNumberQueryDAO : Error validating STUAPQ SLP Record / " + ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - validateSLPSTUAPQ - stuapqCheck: " +  stuapqCheck);
+		//log.debug("ApplyForStudentNumberQueryDAO - validateSLPSTUAPQ - stuapqCheck: " +  stuapqCheck);
 		return stuapqCheck;
 	}
 	
@@ -466,7 +465,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		        		+ " AND APPLICATION_PERIOD = ? "
 		        		+ " AND STUAPQ.CHOICE_NR = ? ";
 
-	    	  log.debug("ApplyForStudentNumberQueryDAO - getSLPQual - query=" + query+", studentNr=" + studentNr+", acaYear=" + acaYear+", acaPeriod=" + acaPeriod+", choiceNr=" + choiceNr+", choice=" + choice+", callingMethod="+callingMethod);
+	    	  //log.debug("ApplyForStudentNumberQueryDAO - getSLPQual - query=" + query+", studentNr=" + studentNr+", acaYear=" + acaYear+", acaPeriod=" + acaPeriod+", choiceNr=" + choiceNr+", choice=" + choice+", callingMethod="+callingMethod);
 
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choiceNr});
@@ -485,7 +484,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					}else if ("SPEC".equalsIgnoreCase(choice)){
 						result = data.get("NEW_SPES").toString();
 					}
-					log.debug("ApplyForStudentNumberQueryDAO - getSLPQual - Choice=" + choice+",  result=" + result);
+					//log.debug("ApplyForStudentNumberQueryDAO - getSLPQual - Choice=" + choice+",  result=" + result);
 				}
 	      	} catch (Exception ex) {
 	      			throw new Exception(
@@ -500,7 +499,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	 */
 	public ArrayList getQualsUnisa(String studentNr) throws Exception {
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getQualsUnisa - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - getQualsUnisa - Start");
 
 		ArrayList list = new ArrayList();
 				
@@ -513,7 +512,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ "	and stuaca.mk_qualification_c = grd.code "
 					+ "	order by actual_completion ";
 
-		log.debug("ApplyForStudentNumberQueryDAO - getQualsUnisa - query="+query);
+		//log.debug("ApplyForStudentNumberQueryDAO - getQualsUnisa - query="+query);
 		try{
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr});
@@ -531,19 +530,19 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				list.add(qual);
 				count++;
 			}
-			log.debug("ApplyForStudentNumberQueryDAO - getQualsUnisa - Records Found="+count);
+			//log.debug("ApplyForStudentNumberQueryDAO - getQualsUnisa - Records Found="+count);
 		} catch (Exception ex) {
 			throw new Exception(
 				"ApplyForStudentNumberQueryDAO : Error validating student completed history record / " + ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - getQualsUnisa - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - getQualsUnisa - Start");
 	return list;
 	}
 
 	/** Retrieve Previous Academic Record count**/
 	public int getSTUPREVMax(String studentNr) throws Exception {
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getSTUPREVMax - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - getSTUPREVMax - Start");
 
 		int prevMax = 0;
 		
@@ -552,14 +551,14 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 						+ " from STUPREV "
 						+ " where mk_student_nr = ? ";
 			
-			log.debug("ApplyForStudentNumberQueryDAO - getSTUPREVMax - Query="+query+ ", StudentNr="+studentNr);
+			//log.debug("ApplyForStudentNumberQueryDAO - getSTUPREVMax - Query="+query+ ", StudentNr="+studentNr);
 			
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr});
 			
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
-				log.debug("ApplyForStudentNumberQueryDAO - getSTUPREVMax - has Next");
+				//log.debug("ApplyForStudentNumberQueryDAO - getSTUPREVMax - has Next");
 				ListOrderedMap data = (ListOrderedMap) i.next();
 				prevMax = (Integer.parseInt(data.get("MaxSEQUENCE").toString()));
 			}
@@ -572,7 +571,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	/** Retrieve Previous Academic Record **/
 	public HistoryOther getPREVADM(String studentNr) throws Exception {
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getPREVADM - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - getPREVADM - Start");
 
 		HistoryOther history = new HistoryOther();
 		
@@ -587,17 +586,17 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr});
 
-			log.debug("ApplyForStudentNumberQueryDAO - getPREVADM - Query="+query);
+			//log.debug("ApplyForStudentNumberQueryDAO - getPREVADM - Query="+query);
 			
 			Iterator i = queryList.iterator();
 			int count = 0;
 			while (i.hasNext()) {
-				log.debug("ApplyForStudentNumberQueryDAO - getPREVADM ---------------------------------------------------------");
-				log.debug("ApplyForStudentNumberQueryDAO - getPREVADM - has Next");
+				//log.debug("ApplyForStudentNumberQueryDAO - getPREVADM ---------------------------------------------------------");
+				//log.debug("ApplyForStudentNumberQueryDAO - getPREVADM - has Next");
 				ListOrderedMap data = (ListOrderedMap) i.next();
 				
 				if (data.get("SEQ_NR") != null && !"".equals(data.get("SEQ_NR").toString().trim())){
-					log.debug("ApplyForStudentNumberQueryDAO - getPREVADM - SEQ_NR="+data.get("SEQ_NR").toString().trim());
+					//log.debug("ApplyForStudentNumberQueryDAO - getPREVADM - SEQ_NR="+data.get("SEQ_NR").toString().trim());
 					
 					if (Integer.parseInt(data.get("SEQ_NR").toString().trim()) == 1){
 						history.setHistoryOTHERSEQ2(Integer.parseInt(data.get("SEQ_NR").toString().trim()));
@@ -1344,21 +1343,21 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					}
 				}
 				count++;
-				log.debug("ApplyForStudentNumberQueryDAO - getPREVADM ---------------------------------------------------------");
+				//log.debug("ApplyForStudentNumberQueryDAO - getPREVADM ---------------------------------------------------------");
 			}
-			log.debug("ApplyForStudentNumberQueryDAO - getPREVADM - Records Found="+count+", List size="+count);
+			//log.debug("ApplyForStudentNumberQueryDAO - getPREVADM - Records Found="+count+", List size="+count);
 			
 		} catch (Exception ex) {
 				log.warn("ApplyForStudentNumberQueryDAO: Error - Retrieving Previous Academic Record for student nr / "+ studentNr + " / " +ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - getPREVADM - Done - Return List to page");
+		//log.debug("ApplyForStudentNumberQueryDAO - getPREVADM - Done - Return List to page");
 		return history;
 	}
 	
 	/** Retrieve Previous Academic Record **/
 	public ArrayList<KeyValue> getPREVADMNew(String studentNr, String acaYear, String acaPeriod) throws Exception {
 			
-		log.debug("ApplyForStudentNumberQueryDAO - getPREVADMNew - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - getPREVADMNew - Start");
 
 		ArrayList<KeyValue> keyvalues = new ArrayList<KeyValue>();
 		
@@ -1370,7 +1369,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ " where MK_STUDENT_NR = ? "
 					+ " order by SEQ_NR ";
 							
-			log.debug("ApplyForStudentNumberQueryDAO - getPREVADMNew - Query="+query+", StudentNr="+studentNr+", StudentNr="+studentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod);
+			//log.debug("ApplyForStudentNumberQueryDAO - getPREVADMNew - Query="+query+", StudentNr="+studentNr+", StudentNr="+studentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr});
@@ -1378,10 +1377,10 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			
 			int count = 0;
 			while (i.hasNext()) {
-				log.debug("ApplyForStudentNumberQueryDAO - getPREVADMNew - has Next");
+				//log.debug("ApplyForStudentNumberQueryDAO - getPREVADMNew - has Next");
 				ListOrderedMap data = (ListOrderedMap) i.next();
 				KeyValue qual = new KeyValue();
-				log.debug("ApplyForStudentNumberQueryDAO - getPREVADMNew - SEQ_NR="+data.get("SEQ_NR").toString().trim());
+				//log.debug("ApplyForStudentNumberQueryDAO - getPREVADMNew - SEQ_NR="+data.get("SEQ_NR").toString().trim());
 				qual.setKey(data.get("SEQ_NR").toString().trim());
 
 				StringBuilder values = new StringBuilder();
@@ -1403,15 +1402,15 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				qual.setValue(values.toString());
 				keyvalues.add(qual);
 				count++;
-				log.debug("ApplyForStudentNumberQueryDAO - getPREVADMNew - Records Found="+count+", Values="+values.toString());
+				//log.debug("ApplyForStudentNumberQueryDAO - getPREVADMNew - Records Found="+count+", Values="+values.toString());
 			}
-			log.debug("ApplyForStudentNumberQueryDAO - getPREVADMNew - Records Found="+count);
+			//log.debug("ApplyForStudentNumberQueryDAO - getPREVADMNew - Records Found="+count);
 			
 		} catch (Exception ex) {
-				log.debug("ApplyForStudentNumberQueryDAO: Error - Retrieving Previous Academic Record for student nr / "+ studentNr + " / " +ex);
+				//log.debug("ApplyForStudentNumberQueryDAO: Error - Retrieving Previous Academic Record for student nr / "+ studentNr + " / " +ex);
 				log.warn("ApplyForStudentNumberQueryDAO: Error - Retrieving Previous Academic Record for student nr / "+ studentNr + " / " +ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - getPREVADMNew - Done - Return List to page");
+		//log.debug("ApplyForStudentNumberQueryDAO - getPREVADMNew - Done - Return List to page");
 		return keyvalues;
 	}
 	
@@ -1419,7 +1418,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	 * @throws Exception **/
 	public boolean checkPREV(String studentNr, int seqNr) throws Exception{
 		
-		log.debug("ApplyForStudentNumberQueryDAO - checkPREV - checkPREV");
+		//log.debug("ApplyForStudentNumberQueryDAO - checkPREV - checkPREV");
 
 		boolean isExist = false;
 		
@@ -1432,20 +1431,20 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr, seqNr});
 
-			log.debug("ApplyForStudentNumberQueryDAO - checkPREV - Query="+query+", StudentNr="+studentNr+", SEQ_Nr="+seqNr);
+			//log.debug("ApplyForStudentNumberQueryDAO - checkPREV - Query="+query+", StudentNr="+studentNr+", SEQ_Nr="+seqNr);
 			
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				isExist = true;
-				log.debug("ApplyForStudentNumberQueryDAO - checkPREV - Records Found");
+				//log.debug("ApplyForStudentNumberQueryDAO - checkPREV - Records Found");
 			}
 		} catch (Exception ex) {
-				log.debug("ApplyForStudentNumberQueryDAO: Error - Checking Previous Academic Record for student nr / "+ studentNr + " / " +ex);
+				//log.debug("ApplyForStudentNumberQueryDAO: Error - Checking Previous Academic Record for student nr / "+ studentNr + " / " +ex);
 				log.warn("ApplyForStudentNumberQueryDAO: Error - Checking Previous Academic Record for student nr / "+ studentNr + " / " +ex);
 				throw new Exception(
 						"ApplyForStudentNumberQueryDAO : Error - Checking Previous Academic Qualification for student nr / StudentNr="+studentNr+", SEQ_Nr="+seqNr+ " / " +ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - checkPREV - Done - Return List to page");
+		//log.debug("ApplyForStudentNumberQueryDAO - checkPREV - Done - Return List to page");
 		return isExist;
 
 		
@@ -1456,7 +1455,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	 * @throws Exception **/
 	public int updatePREVADM(String UnisaStuNr, int SEQ_NR, String finalYear, String complete) throws Exception {
 
-			log.debug("ApplyForStudentNumberQueryDAO - updatePREVADM - Start");
+			//log.debug("ApplyForStudentNumberQueryDAO - updatePREVADM - Start");
 		
 			String dbParam = "";
 			int resultInt = 0;
@@ -1472,16 +1471,16 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				resultInt = jdt.update(query, new Object []{year, complete, UnisaStuNr, SEQ_NR});
 				dbParam = year+", "+complete+", "+UnisaStuNr+", "+SEQ_NR;
 			
-				log.debug("ApplyForStudentNumberQueryDAO - updatePREVADM - Update - Query="+query+", resultInt="+resultInt);
-				log.debug("ApplyForStudentNumberQueryDAO - updatePREVADM - Update - resultInt: "+resultInt);
-				log.debug("ApplyForStudentNumberQueryDAO - updatePREVADM - Update - dbParam: "+dbParam);
+				//log.debug("ApplyForStudentNumberQueryDAO - updatePREVADM - Update - Query="+query+", resultInt="+resultInt);
+				//log.debug("ApplyForStudentNumberQueryDAO - updatePREVADM - Update - resultInt: "+resultInt);
+				//log.debug("ApplyForStudentNumberQueryDAO - updatePREVADM - Update - dbParam: "+dbParam);
 
 			} catch (Exception ex) {
 				log.warn("ApplyForStudentNumberQueryDAO: Error - Updating Previous Academic Qualification for student nr / "+UnisaStuNr + " / " + dbParam + " / " +ex);
 				throw new Exception(
 						"ApplyForStudentNumberQueryDAO : Error - Updating Previous Academic Qualification for student nr / "+UnisaStuNr + " / " + dbParam + " / " +ex);
 			}
-		log.debug("ApplyForStudentNumberQueryDAO - updatePREVADM - End");
+		//log.debug("ApplyForStudentNumberQueryDAO - updatePREVADM - End");
 		return resultInt;
 	}
 
@@ -1490,7 +1489,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	public int savePREVADM(String UnisaStuNr, int maxPrev, String firstYear, String finalYear, String institution, 
 				 String otherStuNr, String qualCode, String foreign, String complete, String instCode, String country) throws Exception {
 
-			log.debug("ApplyForStudentNumberQueryDAO - savePREVADM - Start");
+			//log.debug("ApplyForStudentNumberQueryDAO - savePREVADM - Start");
 		
 			String dbParam = "";
 			int resultInt = 0;
@@ -1519,24 +1518,23 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				resultInt = jdt.update(query, new Object []{UnisaStuNr,maxPrev,firstYear,finalYear,institution,otherStuNr,qualCode," "," ",foreign," "," ","N",complete,instCode,country});
 				dbParam = UnisaStuNr+", "+maxPrev+", "+firstYear+", "+finalYear+", "+institution+", "+otherStuNr+", "+qualCode+", , ,"+foreign+", , ,N ,"+complete+", "+instCode+", "+country;
 			
-				log.debug("ApplyForStudentNumberQueryDAO - savePREVADM - Insert - Query="+query+", resultInt="+resultInt);
-				log.debug("ApplyForStudentNumberQueryDAO - savePREVADM - Insert - resultInt: "+resultInt);
-				log.debug("ApplyForStudentNumberQueryDAO - savePREVADM - Insert - dbParam: "+dbParam);
+				//log.debug("ApplyForStudentNumberQueryDAO - savePREVADM - Insert - Query="+query+", resultInt="+resultInt);
+				//log.debug("ApplyForStudentNumberQueryDAO - savePREVADM - Insert - resultInt: "+resultInt);
+				//log.debug("ApplyForStudentNumberQueryDAO - savePREVADM - Insert - dbParam: "+dbParam);
 
 			} catch (Exception ex) {
 				log.warn("ApplyForStudentNumberQueryDAO: Error - Saving Previous Academic Qualification for student nr / "+UnisaStuNr + " / " + dbParam + " / " +ex);
 				throw new Exception(
 						"ApplyForStudentNumberQueryDAO : Error - Saving Previous Academic Qualification for student nr / "+UnisaStuNr + " / " + dbParam + " / " +ex);
 			}
-		log.debug("ApplyForStudentNumberQueryDAO - savePREVADM - End");
+		//log.debug("ApplyForStudentNumberQueryDAO - savePREVADM - End");
 		return resultInt;
 	}
 
 	
 	public boolean getNDPMod(String acaYear, String acaPeriod, String studentNr, String qualCode, String studyUnit) {
 
-
-		log.debug("ApplyForStudentNumberQueryDAO - getNDPMod - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - getNDPMod - Start");
 	
 		String dbParam = "";
 		boolean result = false;
@@ -1544,8 +1542,8 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		try {
 			String query  = "select Mk_study_unit_code from STUAPSUN "
 					+ " where Academic_year = ? "
-					+ " and Application_period ? "
-					+ " and MK_STUDENT_NR ? "
+					+ " and Application_period = ? "
+					+ " and MK_STUDENT_NR = ? "
 					+ " and Qaulification_code = ? "
 					+ " and Mk_study_unit_code = ? ";
 				
@@ -1554,8 +1552,8 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{acaYear, acaPeriod, studentNr, qualCode, studyUnit});
 
-			log.debug("ApplyForStudentNumberQueryDAO - getNDPMod - Query="+query);
-			log.debug("ApplyForStudentNumberQueryDAO - getNDPMod - dbParam: "+dbParam);
+			//log.debug("ApplyForStudentNumberQueryDAO - getNDPMod - Query="+query);
+			//log.debug("ApplyForStudentNumberQueryDAO - getNDPMod - dbParam: "+dbParam);
 
 			Iterator i = queryList.iterator();
 			if(i.hasNext()) {
@@ -1564,14 +1562,13 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		} catch (Exception ex) {
 			log.warn("ApplyForStudentNumberQueryDAO: Error - Retrieving NDP Study Units for student nr / "+studentNr + " / " + dbParam + " / " +ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - getNDPMod - End");
+		//log.debug("ApplyForStudentNumberQueryDAO - getNDPMod - End");
 		return result;
 	}
 	
 	public ArrayList<String> getNDPList(String acaYear, String acaPeriod, String studentNr) {
 
-
-		log.debug("ApplyForStudentNumberQueryDAO - getNDPList - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - getNDPList - Start");
 	
 		String dbParam = "";
 		ArrayList<String> list = new ArrayList<String>();
@@ -1579,16 +1576,16 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		try {
 			String query  = "select Mk_study_unit_code from STUAPSUN "
 					+ " where Academic_year = ? "
-					+ " and Application_period ? "
-					+ " and MK_STUDENT_NR ? ";
+					+ " and Application_period = ? "
+					+ " and MK_STUDENT_NR = ? ";
 				
 			dbParam = acaYear+", "+acaPeriod+", "+studentNr;
 			
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{acaYear, acaPeriod, studentNr});
 
-			log.debug("ApplyForStudentNumberQueryDAO - getNDPList - Query="+query);
-			log.debug("ApplyForStudentNumberQueryDAO - getNDPList - dbParam: "+dbParam);
+			//log.debug("ApplyForStudentNumberQueryDAO - getNDPList - Query="+query);
+			//log.debug("ApplyForStudentNumberQueryDAO - getNDPList - dbParam: "+dbParam);
 
 			Iterator i = queryList.iterator();
 			while(i.hasNext()) {
@@ -1598,14 +1595,14 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		} catch (Exception ex) {
 			log.warn("ApplyForStudentNumberQueryDAO: Error - Retrieving NDP Study Unit List for student nr / "+studentNr + " / " + dbParam + " / " +ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - getNDPList - End");
+		//log.debug("ApplyForStudentNumberQueryDAO - getNDPList - End");
 		return list;
 	}
 	
 	
 	public int saveNDPMod(String acaYear, String acaPeriod, String studentNr, String qualCode, String studyUnit) {
 
-		log.debug("ApplyForStudentNumberQueryDAO - saveNDPMod - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - saveNDPMod - Start");
 	
 		String dbParam = "";
 		int resultInt = 0;
@@ -1619,14 +1616,13 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			resultInt = jdt.update(query, new Object []{acaYear, acaPeriod, studentNr, qualCode, studyUnit});
 			dbParam = acaYear+", "+acaPeriod+", "+studentNr+", "+qualCode+", "+studyUnit;
 		
-			log.debug("ApplyForStudentNumberQueryDAO - saveNDPMod - Insert - Query="+query+", resultInt="+resultInt);
-			log.debug("ApplyForStudentNumberQueryDAO - saveNDPMod - Insert - resultInt: "+resultInt);
-			log.debug("ApplyForStudentNumberQueryDAO - saveNDPMod - Insert - dbParam: "+dbParam);
+			//log.debug("ApplyForStudentNumberQueryDAO - saveNDPMod - Insert - dbParam: "+dbParam);
+			//log.debug("ApplyForStudentNumberQueryDAO - saveNDPMod - Insert - Query="+query+", resultInt="+resultInt);
 			
 		} catch (Exception ex) {
 			log.warn("ApplyForStudentNumberQueryDAO: Error - Saving NDP Study Units for student nr / "+studentNr + " / " + dbParam + " / " +ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - saveNDPMod - End");
+		//log.debug("ApplyForStudentNumberQueryDAO - saveNDPMod - End");
 		return resultInt;
 	}
 
@@ -1643,7 +1639,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				+ " and mk_academic_year < ? ";
 
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - validateStudentRec - Query="+query+", StudentNr="+studentNr+", AcademicYear="+acaYear);
+			//log.debug("ApplyForStudentNumberQueryDAO - validateStudentRec - Query="+query+", StudentNr="+studentNr+", AcademicYear="+acaYear);
 			
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr, studentNr, acaYear});
@@ -1671,7 +1667,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				+ " and mk_academic_year < ? ";
 
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - validateStudentAnnual - Query="+query+", StudentNr="+studentNr+", AcademicYear="+acaYear);
+			//log.debug("ApplyForStudentNumberQueryDAO - validateStudentAnnual - Query="+query+", StudentNr="+studentNr+", AcademicYear="+acaYear);
 			
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear});
@@ -1711,7 +1707,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		}else{
 			query = "SELECT " + selectInfo + " as dbInfo from stu where nr= ? ";
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - personalDetail="+ query);
+		//log.debug("ApplyForStudentNumberQueryDAO - personalDetail="+ query);
 
 		try {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -1729,7 +1725,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			throw new Exception(
 					"ApplyForStudentNumberQueryDAO : Error retrieving student details / " + ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - personalDetail="+ result);
+		//log.debug("ApplyForStudentNumberQueryDAO - personalDetail="+ result);
 		return result;
 		
 	}
@@ -1742,16 +1738,16 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				+ " and academic_year = ? "
 				+ " and trunc(sysdate) between from_date and to_date";
 				
-				log.debug("ApplyForStudentNumberQueryDAO - validateClosingDateAll - Query: " + query);
+				//log.debug("ApplyForStudentNumberQueryDAO - validateClosingDateAll - Query: " + query);
 				try {
 					JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 					List queryList = jdt.queryForList(query, new Object []{acaYear});
 					Iterator i = queryList.iterator();
 					if (i.hasNext()) {
-						log.debug("ApplyForStudentNumberQueryDAO - validateClosingDateAll - Result: TRUE");
+						//log.debug("ApplyForStudentNumberQueryDAO - validateClosingDateAll - Result: TRUE");
 						return true;
 					}else{
-						log.debug("ApplyForStudentNumberQueryDAO - validateClosingDateAll - Result: FALSE");
+						//log.debug("ApplyForStudentNumberQueryDAO - validateClosingDateAll - Result: FALSE");
 						return false;
 					}
 				} catch (Exception ex) {
@@ -1773,16 +1769,16 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ " and trunc(sysdate) between from_date and to_date "; 
 			
 			try{
-				log.debug("ApplyForStudentNumberQueryDAO - validateClosingDate - Year = " + acaYear + ", Query: " + query);
+				//log.debug("ApplyForStudentNumberQueryDAO - validateClosingDate - Year = " + acaYear + ", Query: " + query);
 					
 					JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 					List queryList = jdt.queryForList(query, new Object []{acaYear});
 					Iterator i = queryList.iterator();
 					while (i.hasNext()) {
-						log.debug("ApplyForStudentNumberQueryDAO - validateClosingDate - has Next");
+						//log.debug("ApplyForStudentNumberQueryDAO - validateClosingDate - has Next");
 						ListOrderedMap data = (ListOrderedMap) i.next();
 						String dateType = data.get("dateType").toString().trim().toUpperCase();
-						log.debug("ApplyForStudentNumberQueryDAO - validateClosingDate - TYPE = " + dateType+", from_date = " + data.get("from_date").toString().trim()+", to_date = " + data.get("to_date").toString().trim());
+						//log.debug("ApplyForStudentNumberQueryDAO - validateClosingDate - TYPE = " + dateType+", from_date = " + data.get("from_date").toString().trim()+", to_date = " + data.get("to_date").toString().trim());
 						sDates.add(dateType);
 					}
 				} catch (Exception ex) {
@@ -1790,10 +1786,10 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 						"ApplyForStudentNumberQueryDAO : Error reading closing date: " + acaYear + "  / " + ex);
 				}
 			//Testing sDates
-			log.debug("ApplyForStudentNumberQueryDAO - validateClosingDate - sDates Size="+sDates.size());
+			//log.debug("ApplyForStudentNumberQueryDAO - validateClosingDate - sDates Size="+sDates.size());
 			//if (!sDates.isEmpty()){ //Check Dates Array before building Query String
 			//	for (int i=0; i < sDates.size(); i++){
-			//		log.debug("ApplyForStudentNumberQueryDAO - validateClosingDate - sDates="+sDates.get(i).toString());
+			//		//log.debug("ApplyForStudentNumberQueryDAO - validateClosingDate - sDates="+sDates.get(i).toString());
 			//	}
 			//}
 			
@@ -1808,7 +1804,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		String code2 = "G";
 		String code3 = "00";
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - validateQualification - "+studentNr+" - Query: " + query);
+			//log.debug("ApplyForStudentNumberQueryDAO - validateQualification - "+studentNr+" - Query: " + query);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{sQual});
 			Iterator i = queryList.iterator();
@@ -1826,7 +1822,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					"ApplyForStudentNumberQueryDAO : Error validating Qualification / " + ex);
 		}
 		code = code + code2 + code3;
-		log.debug("ApplyForStudentNumberQueryDAO - validateQualification - "+studentNr+" - Code="+code);
+		//log.debug("ApplyForStudentNumberQueryDAO - validateQualification - "+studentNr+" - Code="+code);
 		return code;
 	}
   
@@ -1835,15 +1831,15 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	 */
 	public Categories getCategories(String acaYear, String UHMDSelect, boolean isAdmin, boolean isWAPU, boolean isWAPRU, boolean isWAPADMU, boolean isWAPH, boolean isWAPRH, boolean isWAPADMH, boolean isWAPD, boolean isWAPADMD, boolean isWAPM, boolean isWAPADMM, boolean isWAPS, boolean isWAPADMS) throws Exception{
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getCategories - acaYear: " + acaYear);
+		//log.debug("ApplyForStudentNumberQueryDAO - getCategories - acaYear: " + acaYear);
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getCategories - UHMDSelect: " + UHMDSelect + ", isAdmin: " + isAdmin);
-		log.debug("ApplyForStudentNumberQueryDAO - getCategories - isWAPU: " + isWAPU + ", isWAPRU: " + isWAPRU);
-		log.debug("ApplyForStudentNumberQueryDAO - getCategories - isWAPADMU: " + isWAPADMU + ", isWAPH: " + isWAPH);
-		log.debug("ApplyForStudentNumberQueryDAO - getCategories - isWAPRH: " + isWAPRH + ", isWAPADMH: " + isWAPADMH);
-		log.debug("ApplyForStudentNumberQueryDAO - getCategories - isWAPS: " + isWAPS + ", isWAPADMS: " + isWAPADMS);
-		log.debug("ApplyForStudentNumberQueryDAO - getCategories - isWAPD: " + isWAPD + ", isWAPADMD: " + isWAPADMD);
-		log.debug("ApplyForStudentNumberQueryDAO - getCategories - isWAPM: " + isWAPM + ", isWAPADMM: " + isWAPADMM);
+		//log.debug("ApplyForStudentNumberQueryDAO - getCategories - UHMDSelect: " + UHMDSelect + ", isAdmin: " + isAdmin);
+		//log.debug("ApplyForStudentNumberQueryDAO - getCategories - isWAPU: " + isWAPU + ", isWAPRU: " + isWAPRU);
+		//log.debug("ApplyForStudentNumberQueryDAO - getCategories - isWAPADMU: " + isWAPADMU + ", isWAPH: " + isWAPH);
+		//log.debug("ApplyForStudentNumberQueryDAO - getCategories - isWAPRH: " + isWAPRH + ", isWAPADMH: " + isWAPADMH);
+		//log.debug("ApplyForStudentNumberQueryDAO - getCategories - isWAPS: " + isWAPS + ", isWAPADMS: " + isWAPADMS);
+		//log.debug("ApplyForStudentNumberQueryDAO - getCategories - isWAPD: " + isWAPD + ", isWAPADMD: " + isWAPADMD);
+		//log.debug("ApplyForStudentNumberQueryDAO - getCategories - isWAPM: " + isWAPM + ", isWAPADMM: " + isWAPADMM);
 		
 		boolean isDateWAPU = false;
 		boolean isDateWAPH = false;
@@ -1933,7 +1929,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		ArrayList catCodes = new ArrayList();
 		ArrayList catDescs = new ArrayList();
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - getCategories: " + queryString.toString());
+			//log.debug("ApplyForStudentNumberQueryDAO - getCategories: " + queryString.toString());
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(queryString.toString());
 			Iterator i = queryList.iterator();
@@ -1963,15 +1959,15 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 
 		String query = "";
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getQualifications - acaYear: " + acaYear + ", catCode: " + catCode);
+		//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - acaYear: " + acaYear + ", catCode: " + catCode);
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getQualifications - UHMDSelect: " + UHMDSelect + ", isAdmin: " + isAdmin);
-		log.debug("ApplyForStudentNumberQueryDAO - getQualifications - isWAPU: " + isWAPU + ", isWAPRU: " + isWAPRU);
-		log.debug("ApplyForStudentNumberQueryDAO - getQualifications - isWAPADMU: " + isWAPADMU + ", isWAPH: " + isWAPH);
-		log.debug("ApplyForStudentNumberQueryDAO - getQualifications - isWAPRH: " + isWAPRH + ", isWAPADMH: " + isWAPADMH);
-		log.debug("ApplyForStudentNumberQueryDAO - getQualifications - isWAPS: " + isWAPS + ", isWAPADMS: " + isWAPADMS);
-		log.debug("ApplyForStudentNumberQueryDAO - getQualifications - isWAPD: " + isWAPD + ", isWAPADMD: " + isWAPADMD);
-		log.debug("ApplyForStudentNumberQueryDAO - getQualifications - isWAPM: " + isWAPM + ", isWAPADMM: " + isWAPADMM);
+		//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - UHMDSelect: " + UHMDSelect + ", isAdmin: " + isAdmin);
+		//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - isWAPU: " + isWAPU + ", isWAPRU: " + isWAPRU);
+		//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - isWAPADMU: " + isWAPADMU + ", isWAPH: " + isWAPH);
+		//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - isWAPRH: " + isWAPRH + ", isWAPADMH: " + isWAPADMH);
+		//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - isWAPS: " + isWAPS + ", isWAPADMS: " + isWAPADMS);
+		//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - isWAPD: " + isWAPD + ", isWAPADMD: " + isWAPADMD);
+		//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - isWAPM: " + isWAPM + ", isWAPADMM: " + isWAPADMM);
 		
 		ArrayList qualCodes = new ArrayList();
 		ArrayList qualDescs = new ArrayList();
@@ -1990,7 +1986,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		boolean isUD2 = false;
 		boolean isAnyOpen = false;
 
-		log.debug("ApplyForStudentNumberQueryDAO - getQualifications - UHMDSelect: " + UHMDSelect);
+		//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - UHMDSelect: " + UHMDSelect);
 		
 		if (isWAPU || isWAPRU || (isAdmin && isWAPADMU)){
 			isDateWAPU = true;
@@ -2013,12 +2009,12 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			isAnyOpen = true;
 		}
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getQualifications - catCode: " + catCode);
+		//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - catCode: " + catCode);
 
 		//Check which dates are open
 		if (!isAnyOpen){
 			//Final catch-all if No dates open. Use 'Dummy' to not return anything
-			log.debug("ApplyForStudentNumberQueryDAO - getQualifications: No dates open, so use Dummy to not return anything");
+			//log.debug("ApplyForStudentNumberQueryDAO - getQualifications: No dates open, so use Dummy to not return anything");
 			underPostString.append(
 					" 'DOESNOTEXIST'");
 		}else if ("SLP".equalsIgnoreCase(UHMDSelect) || "15".equalsIgnoreCase(catCode)){ //SLP
@@ -2062,7 +2058,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			catString = "            and grd.fk_katcode <> 9 " ;
 		}
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getQualifications - UnderPost: " + underPostString.toString());
+		//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - UnderPost: " + underPostString.toString());
 		
 		try {
 			if ("SLP".equalsIgnoreCase(UHMDSelect) || "15".equalsIgnoreCase(catCode)){ //Short Learning Programmes
@@ -2118,8 +2114,8 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 						+ "		and gencod.afr_description = 'UCL') "
 						+ "		order by ENG_DESCRIPTION asc ";
 
-				log.debug("ApplyForStudentNumberQueryDAO - getQualifications - SLP - query=" + query);
-				log.debug("ApplyForStudentNumberQueryDAO - getQualifications - SLP - dbParam="+acaYear+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaPeriod+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaPeriod);
+				//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - SLP - query=" + query);
+				//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - SLP - dbParam="+acaYear+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaPeriod+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaPeriod);
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				List queryList = jdt.queryForList(query, new Object []{acaYear, acaYear, acaYear, acaYear, acaPeriod, acaYear, acaYear, acaYear, acaYear, acaPeriod});
 				Iterator i = queryList.iterator();
@@ -2188,8 +2184,8 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 						+ " ) T "
 						+ " order by T.ENG_DESCRIPTION ASC ";
 				
-				log.debug("ApplyForStudentNumberQueryDAO - getQualifications - UHMD - query=" + query);
-				log.debug("ApplyForStudentNumberQueryDAO - getQualifications - UHMD - dbParam="+catCode+", "+catCode+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaPeriod+", "+catCode+", "+catCode+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaPeriod);
+				//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - UHMD - query=" + query);
+				//log.debug("ApplyForStudentNumberQueryDAO - getQualifications - UHMD - dbParam="+catCode+", "+catCode+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaPeriod+", "+catCode+", "+catCode+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaYear+", "+acaPeriod);
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				List queryList = jdt.queryForList(query, new Object []{catCode, catCode, acaYear, acaYear, acaYear, acaYear, acaYear, acaPeriod, catCode, catCode, acaYear, acaYear, acaYear, acaYear, acaYear, acaPeriod});
 				Iterator i = queryList.iterator();
@@ -2218,7 +2214,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	 */
 	public Specializations getSpecializations(String qualCode, String acaYear, String acaPeriod) throws Exception{
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getSpecializations - acaYear: " + acaYear);
+		//log.debug("ApplyForStudentNumberQueryDAO - getSpecializations - acaYear: " + acaYear);
 		
 		Specializations specializations = new Specializations();
 
@@ -2274,7 +2270,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ " ) T "
 					+ "	order by T.ENG_DESCRIPTION ASC ";
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - getSpecializations - query=" + query+", qualCode=" + qualCode+", acaYear=" + acaYear+", acaPeriod=" + acaPeriod);
+			//log.debug("ApplyForStudentNumberQueryDAO - getSpecializations - query=" + query+", qualCode=" + qualCode+", acaYear=" + acaYear+", acaPeriod=" + acaPeriod);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{qualCode, acaYear, acaYear, acaYear, acaYear, acaYear, acaPeriod, qualCode, acaYear, acaYear, acaYear, acaYear, acaYear, acaPeriod});
 			Iterator i = queryList.iterator();
@@ -2284,7 +2280,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				specDescs.add(data.get("ENG_DESCRIPTION").toString());
 			}
 		} catch (Exception ex) {
-			log.debug("ApplyForStudentNumberQueryDAO - getSpecializations - Error reading specializations list / " + ex);
+			//log.debug("ApplyForStudentNumberQueryDAO - getSpecializations - Error reading specializations list / " + ex);
 			throw new Exception(
 					"ApplyForStudentNumberQueryDAO: Error reading specializations list / " + ex);
 
@@ -2314,7 +2310,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 						+ " where IN_USE_FLAG='Y' "
 						+ " and CODE = ? ";
 
-				log.debug("ApplyForStudentNumberQueryDAO - getQualType - query="+query+", qualCode="+qualCode);
+				//log.debug("ApplyForStudentNumberQueryDAO - getQualType - query="+query+", qualCode="+qualCode);
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				List queryList = jdt.queryForList(query, new Object []{qualCode});
 				Iterator i = queryList.iterator();
@@ -2325,7 +2321,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					dbDepartment = data.get("MK_DEPARTMENT_CODE").toString().trim();
 					dbUnderPost = data.get("UNDER_POST_CATEGOR").toString().trim();
 					dbType    = data.get("TYPE").toString().trim();
-					log.debug("ApplyForStudentNumberQueryDAO - getQualType - dbCatCode="+dbCatCode);
+					//log.debug("ApplyForStudentNumberQueryDAO - getQualType - dbCatCode="+dbCatCode);
 
 					if ("05".equalsIgnoreCase(dbDepartment) && !"S".equalsIgnoreCase(dbType)){
 						/**SBL Qualification**/
@@ -2358,7 +2354,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	      					"ApplyForStudentNumberQueryDAO: Error occured on reading Qualification Type / " + ex);
 	      	} finally {
 	      	}
-	      log.debug("ApplyForStudentNumberQueryDAO - getQualType - qualType="+qualType);
+	      //log.debug("ApplyForStudentNumberQueryDAO - getQualType - qualType="+qualType);
 	      return qualType;
 	  }
 	
@@ -2367,7 +2363,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	 */
 	public Qualifications getCompletedQualifications(String studentNr, String acaYear) throws Exception{
 
-		log.debug("ApplyForStudentNumberQueryDAO - getCompletedQualifications studentNr: " + studentNr + ", acaYear: " + acaYear);
+		//log.debug("ApplyForStudentNumberQueryDAO - getCompletedQualifications studentNr: " + studentNr + ", acaYear: " + acaYear);
 		
 		Qualifications qualifications = new Qualifications();
 		
@@ -2381,7 +2377,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		ArrayList qualPrevDescs = new ArrayList();
 
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - getCompletedQualifications: " + query);
+			//log.debug("ApplyForStudentNumberQueryDAO - getCompletedQualifications: " + query);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr});
@@ -2410,7 +2406,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	 */
 	public ArrayList<String> getPrevQualifications(String studentNr) throws Exception{
 
-		log.debug("ApplyForStudentNumberQueryDAO - getPrevQualifications studentNr: " + studentNr);
+		//log.debug("ApplyForStudentNumberQueryDAO - getPrevQualifications studentNr: " + studentNr);
 		
 		String query = " select distinct mk_qualification_c as CODE, substr(trim(fk_speciality_code)||'NVT',1,3) as SPEC "
 					+ " from stuaca "
@@ -2420,7 +2416,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		ArrayList qualPrevCodes = new ArrayList();
 
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - getPrevQualifications: " + query);
+			//log.debug("ApplyForStudentNumberQueryDAO - getPrevQualifications: " + query);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr});
@@ -2445,7 +2441,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	 */
 	public Qualifications getPrevSTUACA(String studentNr) throws Exception{
 
-		log.debug("ApplyForStudentNumberQueryDAO - getPrevSTUACA studentNr: " + studentNr);
+		//log.debug("ApplyForStudentNumberQueryDAO - getPrevSTUACA studentNr: " + studentNr);
 		ArrayList qualCodes = new ArrayList();
 		ArrayList qualDescs = new ArrayList();
 		ArrayList specCodes = new ArrayList();
@@ -2473,7 +2469,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ " and status_code  in ('RG','CA') "
 					+ " ) order by QUALCODE ";
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - getPrevSTUACA: " + query+", StudentNr="+studentNr);
+			//log.debug("ApplyForStudentNumberQueryDAO - getPrevSTUACA: " + query+", StudentNr="+studentNr);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr, studentNr});
@@ -2505,7 +2501,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 
 		StudySelected selectedNew = new StudySelected();
 
-		log.debug("ApplyForStudentNumberQueryDAO - queryStudySelectedNew - studentNr: " + studentNr);
+		//log.debug("ApplyForStudentNumberQueryDAO - queryStudySelectedNew - studentNr: " + studentNr);
 		if ("Temp".equalsIgnoreCase(studentNr) || "".equalsIgnoreCase(studentNr) ||studentNr == null){
 			return null;
 		}else{
@@ -2518,7 +2514,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 						+ " order by choice_nr " ;
 
 			try {
-				log.debug("ApplyForStudentNumberQueryDAO - queryStudySelectedNew - queryNew (else): " + query);
+				//log.debug("ApplyForStudentNumberQueryDAO - queryStudySelectedNew - queryNew (else): " + query);
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod});
 				Iterator i = queryList.iterator();
@@ -2579,7 +2575,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 						+ " where IN_USE_FLAG='Y' "
 						+ " and CODE = ? ";
 
-	    	  	log.debug("ApplyForStudentNumberQueryDAO - selectPrevCategory - query: " + query);
+	    	  	//log.debug("ApplyForStudentNumberQueryDAO - selectPrevCategory - query: " + query);
 
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				List queryList = jdt.queryForList(query, new Object []{qualCode});
@@ -2590,7 +2586,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					dbCatCode = data.get("FK_KATCODE").toString();
 					dbUnderPost = data.get("UNDER_POST_CATEGOR").toString();
 					dbType    = data.get("TYPE").toString();
-					log.debug("ApplyForStudentNumberQueryDAO - selectPrevCategory - CatCode=" + dbCatCode+",  UnderPost=" + dbUnderPost+",  Type=" + dbType);
+					//log.debug("ApplyForStudentNumberQueryDAO - selectPrevCategory - CatCode=" + dbCatCode+",  UnderPost=" + dbUnderPost+",  Type=" + dbType);
 
 					 /**Undergraduate**/
 					if ("U".equalsIgnoreCase(dbUnderPost)){
@@ -2639,7 +2635,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	  /************ Get previous category to show current qualification *************/
 	  public String getExistQualDesc(String studentNr) throws Exception{
 
-		  log.debug("ApplyForStudentNumberQueryDAO - getExistQualDesc studentNr: " + studentNr);
+		  //log.debug("ApplyForStudentNumberQueryDAO - getExistQualDesc studentNr: " + studentNr);
 
 		  String existQual = "";
 
@@ -2653,7 +2649,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 						+ " and rownum = 1 "
 						+ " order by stuann.mk_academic_year desc";
 
-	    	  	log.debug("ApplyForStudentNumberQueryDAO - getExistQualDesc - query: " + query);
+	    	  	//log.debug("ApplyForStudentNumberQueryDAO - getExistQualDesc - query: " + query);
 
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				List queryList = jdt.queryForList(query, new Object []{studentNr});
@@ -2677,9 +2673,9 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	  /************ Get previous specialization show current qualification *************/
 	  public String getExistSpec(String studentNr, String acaYear, String acaPeriod ) throws Exception{
 
-		  log.debug("ApplyForStudentNumberQueryDAO - getExistSpec studentNr: " + studentNr);
-		  log.debug("ApplyForStudentNumberQueryDAO - getExistSpec acaYear: " + acaYear);
-		  log.debug("ApplyForStudentNumberQueryDAO - getExistSpec acaPeriod: " + acaPeriod);
+		  //log.debug("ApplyForStudentNumberQueryDAO - getExistSpec studentNr: " + studentNr);
+		  //log.debug("ApplyForStudentNumberQueryDAO - getExistSpec acaYear: " + acaYear);
+		  //log.debug("ApplyForStudentNumberQueryDAO - getExistSpec acaPeriod: " + acaPeriod);
 
 	      String existSpec = "";
 
@@ -2691,7 +2687,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 							+ " and mk_qualification_c in (select mk_highest_qualifi from (select mk_highest_qualifi from stuann where mk_student_nr = ? and status_code = 'RG' and rownum = 1 order by mk_academic_year desc)) "
 							+ " and speciality_code = (select speciality_code from (select speciality_code from stuann where mk_student_nr = ? and status_code = 'RG' and rownum = 1 order by mk_academic_year desc))";
 
-	    	  	log.debug("ApplyForStudentNumberQueryDAO getExistSpec - query: " + query);
+	    	  	//log.debug("ApplyForStudentNumberQueryDAO getExistSpec - query: " + query);
 
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				List queryList = jdt.queryForList(query, new Object []{studentNr, studentNr});
@@ -2715,7 +2711,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	  /************ Get category or under post of qualification to show MasterDoctor Screen *************/
 	  public ArrayList<String> getGENCODCategory(String genCod) throws Exception{
 
-		  log.debug("ApplyForStudentNumberQueryDAO - getGENCODCategory genCod=" + genCod);
+		  //log.debug("ApplyForStudentNumberQueryDAO - getGENCODCategory genCod=" + genCod);
 		  
 		  ArrayList<String> list = new ArrayList<String>();
 		  
@@ -2749,13 +2745,13 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	    		  query = query1;
 	    	  }
 	    			 
-	    	  log.debug("ApplyForStudentNumberQueryDAO - getGENCODCategory - Query="+query+", genCod=" + genCod);
+	    	  //log.debug("ApplyForStudentNumberQueryDAO - getGENCODCategory - Query="+query+", genCod=" + genCod);
 	    	  JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 	    	  List queryList = jdt.queryForList(query, new Object []{genCod});
 	    	  Iterator i = queryList.iterator();
 	    	  while(i.hasNext()) {
 	    		  ListOrderedMap data = (ListOrderedMap) i.next();
-	    		  log.debug("ApplyForStudentNumberQueryDAO - getGENCODCategory - FK_CATCODE=" + data.get("code").toString());
+	    		  //log.debug("ApplyForStudentNumberQueryDAO - getGENCODCategory - FK_CATCODE=" + data.get("code").toString());
 	    		  
 	    		  list.add(data.get("code").toString());	    		 
 	    	  }
@@ -2769,7 +2765,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	  /************ Get category or under post of qualification to show MasterDoctor Screen *************/
 	  public boolean getQualCategory(String qualCode) throws Exception{
 
-		  log.debug("ApplyForStudentNumberQueryDAO - getQualCategory qualCode: " + qualCode);
+		  //log.debug("ApplyForStudentNumberQueryDAO - getQualCategory qualCode: " + qualCode);
 
 		  boolean isPrevQual = false;
 
@@ -2782,14 +2778,14 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	    			  	+ " and gencod.fk_gencatcode = 172 "
 	    			  	+ " and grd.code = ? ";
 
-	    	  log.debug("ApplyForStudentNumberQueryDAO - getQualCategory - query: " + query);
+	    	  //log.debug("ApplyForStudentNumberQueryDAO - getQualCategory - query: " + query);
 
 	    	  JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 	    	  List queryList = jdt.queryForList(query, new Object []{qualCode});
 	    	  Iterator i = queryList.iterator();
 	    	  if (i.hasNext()) {
 	    		  ListOrderedMap data = (ListOrderedMap) i.next();
-	    		  log.debug("ApplyForStudentNumberQueryDAO - getQualCategory - UnderPost="+data.get("under_post_categor").toString() + ", FK_CATCODE" + data.get("fk_katcode").toString() + ", CATEGORY" + data.get("category").toString());
+	    		  //log.debug("ApplyForStudentNumberQueryDAO - getQualCategory - UnderPost="+data.get("under_post_categor").toString() + ", FK_CATCODE" + data.get("fk_katcode").toString() + ", CATEGORY" + data.get("category").toString());
 	    		  
 	    		  if ("H".equals(data.get("under_post_categor").toString())|| "M".equals(data.get("under_post_categor").toString()) || "D".equals(data.get("under_post_categor").toString())){
 	    			  isPrevQual = true;
@@ -2917,7 +2913,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		String query = "Select code, upper(eng_name) as eng_description from UNK where "+
 					   " (TYPE = 'UNIV' or TYPE='TECH') and IN_USE_FLAG = 'Y'" +
 					   " Order by eng_description";
-		log.debug("ApplyForStudentNumberQueryDAO - getUniversities - query="+query);
+		//log.debug("ApplyForStudentNumberQueryDAO - getUniversities - query="+query);
 
 		try {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -2946,7 +2942,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ " union all "
 					+ " Select 'OTHR' as code, 'OTHER' as eng_description from dual ";
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getUniversitiesShort - query="+query);
+		//log.debug("ApplyForStudentNumberQueryDAO - getUniversitiesShort - query="+query);
 
 		try {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -2975,7 +2971,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ " union all "
 					+ " Select '0000' as code, 'OTHER' as eng_description from dual ";
 		
-	  	log.debug("ApplyForStudentNumberQueryDAO - getUniversitiesOther - query: " + query);
+	  	//log.debug("ApplyForStudentNumberQueryDAO - getUniversitiesOther - query: " + query);
 
 		try {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -3005,7 +3001,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				+ " union all "
 				+ " Select 'OTHR' as code, 'OTHER' as eng_description from dual ";
 
-		log.debug("ApplyForStudentNumberDAO - getUniversities - Query="+query);
+		//log.debug("ApplyForStudentNumberDAO - getUniversities - Query="+query);
 		
 		try {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -3079,7 +3075,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
         			 + " order by eng_description";
 
 		try {
-    	  	log.debug("ApplyForStudentNumberQueryDAO - getExaminationCentreListold - query: " + query);
+    	  	//log.debug("ApplyForStudentNumberQueryDAO - getExaminationCentreListold - query: " + query);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query);
@@ -3108,7 +3104,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	 */
 	public ArrayList<LabelValueBean> getPostalCodes(String suburb, String town, String listIdentifier, String postalBoxStreet) throws Exception {
 		
-		log.debug("ApplyForStudentNumberQueryDAO: - getPostalCodes - suburb=" + suburb+", town=" + town+", listIdentifier=" + listIdentifier+", postalBoxStreet=" + postalBoxStreet);
+		//log.debug("ApplyForStudentNumberQueryDAO: - getPostalCodes - suburb=" + suburb+", town=" + town+", listIdentifier=" + listIdentifier+", postalBoxStreet=" + postalBoxStreet);
 		String query = "";
 		String bsParam1 = "B";
 		String bsParam2 = "S";
@@ -3149,7 +3145,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				physicalTest = "where query2.suburb not in (select suburb from query1) ";
 			}
 		
-			log.debug("ApplyForStudentNumberQueryDAO - getPostalCodes - bsParam1=" + bsParam1+", bsParam2=" + bsParam2);
+			//log.debug("ApplyForStudentNumberQueryDAO - getPostalCodes - bsParam1=" + bsParam1+", bsParam2=" + bsParam2);
 			if (listIdentifier.equalsIgnoreCase("Postal")){
 				
 				query = "Select code , type , suburb, town from pstcod "
@@ -3158,7 +3154,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 						+ " and type = ? "
 						+ " order by code";
 				
-				log.debug("ApplyForStudentNumberQueryDAO - getPostalCodes - query=" + query + " suburbParam=" + suburbParam + ", townParam=" + townParam + ", bsParam1=" + bsParam1);
+				//log.debug("ApplyForStudentNumberQueryDAO - getPostalCodes - query=" + query + " suburbParam=" + suburbParam + ", townParam=" + townParam + ", bsParam1=" + bsParam1);
 				queryList = jdt.queryForList(query, new Object []{suburbParam, townParam, bsParam1});
 				
 			}else{
@@ -3183,7 +3179,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				    	+ " FROM query2                                           "
 				    	+ physicalTest;
 				
-				log.debug("ApplyForStudentNumberQueryDAO - getPostalCodes - query=" + query + " suburbParam=" + suburbParam + ", townParam=" + townParam + ", bsParam1=" + bsParam1 + ", bsParam2=" + bsParam2);
+				//log.debug("ApplyForStudentNumberQueryDAO - getPostalCodes - query=" + query + " suburbParam=" + suburbParam + ", townParam=" + townParam + ", bsParam1=" + bsParam1 + ", bsParam2=" + bsParam2);
 				queryList = jdt.queryForList(query, new Object []{suburbParam, townParam, bsParam1, suburbParam, townParam, bsParam2});
 			}
 	
@@ -3206,7 +3202,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	private ArrayList readDatabase(String query, String callMethod){
 		ArrayList list = new ArrayList();
 
-	  	log.debug("ApplyForStudentNumberQueryDAO - "+callMethod+" - query: " + query);
+	  	//log.debug("ApplyForStudentNumberQueryDAO - "+callMethod+" - query: " + query);
 
 		JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 		List queryList = jdt.queryForList(query);
@@ -3228,7 +3224,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		String query = "Select dummyStudnr_seq.nextval dummyNr from dual";
 
 		try {
-    	  	log.debug("ApplyForStudentNumberQueryDAO - getNextDummyStudentNr - query: " + query);
+    	  	//log.debug("ApplyForStudentNumberQueryDAO - getNextDummyStudentNr - query: " + query);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query);
@@ -3258,7 +3254,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			query="update stuapp set doc_supplied_toefl='Y' where application_nr= ? ";
 		}
 
-	  	log.debug("ApplyForStudentNumberQueryDAO - updStudentApp - query: " + query);
+	  	//log.debug("ApplyForStudentNumberQueryDAO - updStudentApp - query: " + query);
 
 		
 		try {
@@ -3565,7 +3561,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			}
 		});
 
-		log.debug("ApplyForStudentNumberQueryDAO - Solsun record written for " + student.getNumber());
+		//log.debug("ApplyForStudentNumberQueryDAO - Solsun record written for " + student.getNumber());
 		// return timestamp
 		return cal;
 
@@ -3583,7 +3579,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		String query="update adrph set email_address = ?, cell_number = ? where reference_no = ? and fk_adrcatcode=1";
 	
 		try {
-    	  	log.debug("ApplyForStudentNumberQueryDAO - updStudentContact - query: " + query);
+    	  	//log.debug("ApplyForStudentNumberQueryDAO - updStudentContact - query: " + query);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			int result = jdt.update(query, new Object []{emailAddress, cellNumber, studentNr});
@@ -3610,7 +3606,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				+ " and mk_academic_year = ? ";
 
 		try {
-    	  	log.debug("ApplyForStudentNumberQueryDAO - updateStudent - query: " + query);
+    	  	//log.debug("ApplyForStudentNumberQueryDAO - updateStudent - query: " + query);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			int result = jdt.update(query, new Object []{staffCurrent, staffDependant, qualComplete, qualExplain, prisoner, studentNr, acaYear});
@@ -3631,7 +3627,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ " WHERE nr = ?";
 
 		try {
-    	  	log.debug("ApplyForStudentNumberQueryDAO - updateStudentCorrespondence - query: " + query);
+    	  	//log.debug("ApplyForStudentNumberQueryDAO - updateStudentCorrespondence - query: " + query);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			int result = jdt.update(query, new Object []{studentNr});
@@ -3644,11 +3640,11 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	
 	public String getSTUXMLRef(String studentNr, String acaYear, String acaPeriod, String referenceType, String referenceValue, String callingMethod) {
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef - "+studentNr+" - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef - "+studentNr+" - Start");
 		
 		String result = "False"; 
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef - "+studentNr+" - Calling Method: " + callingMethod);
+		//log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef - "+studentNr+" - Calling Method: " + callingMethod);
 
 		String query = "SELECT COALESCE( ( "
 				+ " select max(REFERENCE_SEQUENCE) "
@@ -3661,44 +3657,44 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				+ " ), 0) as REFERENCE_SEQUENCE from dual ";
 
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef - "+studentNr+" - Query: " + query);
-			log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef - "+studentNr+" - Query: " +studentNr+", "+acaYear+", "+acaPeriod+", "+referenceType+", "+referenceValue);
+			//log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef - "+studentNr+" - Query: " + query);
+			//log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef - "+studentNr+" - Query: " +studentNr+", "+acaYear+", "+acaPeriod+", "+referenceType+", "+referenceValue);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List<?> queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, referenceType, referenceValue});
 			Iterator<?> i = queryList.iterator();
 			if (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
-				log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef: Has Row");
+				//log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef: Has Row");
 				result = data.get("REFERENCE_SEQUENCE").toString().trim();
-				log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef - "+studentNr+" - Result: STUXML "+callingMethod+" Exists");
+				//log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef - "+studentNr+" - Result: STUXML "+callingMethod+" Exists");
 			}else{
 				result = "0";
-				log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef - "+studentNr+" - Result: No STUXML "+callingMethod);
+				//log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef - "+studentNr+" - Result: No STUXML "+callingMethod);
 			}
 			
 		} catch (Exception ex) {
-			log.debug("ApplyForStudentNumberQueryDAO: getSTUXMLRef - Error Retrieving STUXML StuInfo"+referenceType+" for Student / "+studentNr + "/ " +ex);
+			//log.debug("ApplyForStudentNumberQueryDAO: getSTUXMLRef - Error Retrieving STUXML StuInfo"+referenceType+" for Student / "+studentNr + "/ " +ex);
 			result = "Error Retrieving STUXML StuInfo for Returning Student / "+studentNr;
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef - "+studentNr+" - Retrieve StuInfo Sequence - Done");
+		//log.debug("ApplyForStudentNumberQueryDAO - getSTUXMLRef - "+studentNr+" - Retrieve StuInfo Sequence - Done");
 		return result;
 	}
 	
 	
 	public String isSTUXML(String studentNr, String acaYear, String acaPeriod, String referenceType, String referenceValue, String callingMethod) {
 		
-		log.debug("ApplyForStudentNumberQueryDAO - isSTUXML - "+studentNr+" - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - isSTUXML - "+studentNr+" - Start");
 		
 		String result = "False";  //Note: Not Boolean;
 		
-		log.debug("ApplyForStudentNumberQueryDAO - isSTUXML - "+studentNr+" - Calling Method: " + callingMethod);
+		//log.debug("ApplyForStudentNumberQueryDAO - isSTUXML - "+studentNr+" - Calling Method: " + callingMethod);
 
 		String query = "select detail from STUXML where mk_student_nr = ? and mk_academic_year = ? and mk_academic_period = ? and reference_type = ? and reference_value = ?";
 
 		try {
 			Thread.sleep(Long.parseLong("1000"));
-			log.debug("ApplyForStudentNumberQueryDAO - isSTUXML - "+studentNr+" - Query: " + query);
-			log.debug("ApplyForStudentNumberQueryDAO - isSTUXML - "+studentNr+" - Query: " +studentNr+", "+acaYear+", "+acaPeriod+", "+referenceType+", "+referenceValue);
+			//log.debug("ApplyForStudentNumberQueryDAO - isSTUXML - "+studentNr+" - Query: " + query);
+			//log.debug("ApplyForStudentNumberQueryDAO - isSTUXML - "+studentNr+" - Query: " +studentNr+", "+acaYear+", "+acaPeriod+", "+referenceType+", "+referenceValue);
 			
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List<?> queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, referenceType, referenceValue});
@@ -3706,51 +3702,51 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			if (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
 				result = "True";
-				log.debug("ApplyForStudentNumberQueryDAO - isSTUXML - "+studentNr+" - Result: STUXML Exists="+data.get("detail").toString().trim());
+				//log.debug("ApplyForStudentNumberQueryDAO - isSTUXML - "+studentNr+" - Result: STUXML Exists="+data.get("detail").toString().trim());
 			}else{
 				result = "False";
-				log.debug("ApplyForStudentNumberQueryDAO - isSTUXML - "+studentNr+" - Result: No STUXML");
+				//log.debug("ApplyForStudentNumberQueryDAO - isSTUXML - "+studentNr+" - Result: No STUXML");
 			}
 			
 		} catch (Exception ex) {
-			log.debug("ApplyForStudentNumberQueryDAO: Error Retrieving STUXML "+referenceType+" "+referenceValue+" for Student / "+studentNr + "/ " +ex);
+			//log.debug("ApplyForStudentNumberQueryDAO: Error Retrieving STUXML "+referenceType+" "+referenceValue+" for Student / "+studentNr + "/ " +ex);
 			result = "Error Retrieving STUXML Category for Returning Student / "+studentNr;
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - isSTUXML - "+studentNr+" - "+callingMethod+" - Done");
+		//log.debug("ApplyForStudentNumberQueryDAO - isSTUXML - "+studentNr+" - "+callingMethod+" - Done");
 		return result;
 	}
 	
 	public String saveSTUXML(String studentNr, String acaYear, String acaPeriod, String referenceType, String referenceValue, int referenceSequence, String referenceData, String callingMethod, String queryType) {
 
-		log.debug("ApplyForStudentNumberQueryDAO - saveSTUXML - "+studentNr+" - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - saveSTUXML - "+studentNr+" - Start");
 		
 		String query = "";
 		String dbParam = "";
 		int resultInt = 0;
 		String result = "False";  //Note: Not Boolean;
 
-		log.debug("ApplyForStudentNumberQueryDAO - saveSTUXML - "+studentNr+" - referenceSequence="+referenceSequence+" - referenceData="+referenceData+", Calling Method: " + callingMethod);
+		//log.debug("ApplyForStudentNumberQueryDAO - saveSTUXML - "+studentNr+" - referenceSequence="+referenceSequence+" - referenceData="+referenceData+", Calling Method: " + callingMethod);
 		
 		try{
 			query  = "insert into STUXML (mk_student_nr,mk_academic_year,mk_academic_period,reference_type,reference_value,reference_sequence,date_initial,date_modified,detail) "
 					+ " values (?, ?, ?, ?, ?, ?, systimestamp, systimestamp, ?)";
 
 			dbParam = studentNr+","+acaYear+","+acaPeriod+","+referenceType+","+referenceValue+", "+referenceSequence+", "+referenceData;
-			log.debug("ApplyForStudentNumberQueryDAO - saveSTUXML - INSERT - Query="+query+" - "+studentNr+" - dbParam: "+dbParam);
+			//log.debug("ApplyForStudentNumberQueryDAO - saveSTUXML - INSERT - Query="+query+" - "+studentNr+" - dbParam: "+dbParam);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			resultInt = jdt.update(query, new Object []{studentNr,acaYear,acaPeriod,referenceType,referenceValue,referenceSequence,referenceData});
 			
-			log.debug("ApplyForStudentNumberQueryDAO - saveSTUXML - "+studentNr+" - QueryType="+queryType+", resultInt="+resultInt);
+			//log.debug("ApplyForStudentNumberQueryDAO - saveSTUXML - "+studentNr+" - QueryType="+queryType+", resultInt="+resultInt);
 			
 			if (resultInt > 0){
 				result = "True";
 			}
 		} catch (Exception ex) {
-			log.debug("ApplyForStudentNumberQueryDAO: Error "+queryType+" "+referenceType+" "+referenceValue+" "+referenceSequence+" "+referenceData+" for Student= "+studentNr + " / " + dbParam + " / " + ex);
+			//log.debug("ApplyForStudentNumberQueryDAO: Error "+queryType+" "+referenceType+" "+referenceValue+" "+referenceSequence+" "+referenceData+" for Student= "+studentNr + " / " + dbParam + " / " + ex);
 			log.info("ApplyForStudentNumberQueryDAO: Error "+queryType+" "+referenceType+" "+referenceValue+" "+referenceSequence+" "+referenceData+" for Student= "+studentNr + " / " + dbParam + " / " + ex);
 			result = "Error "+queryType+" saveSTUXML "+referenceType+" "+referenceValue+" "+referenceSequence+" for Student= "+studentNr;
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - saveSTUXML - "+studentNr+" - End, Result="+result);
+		//log.debug("ApplyForStudentNumberQueryDAO - saveSTUXML - "+studentNr+" - End, Result="+result);
 		return result;
 	}
 
@@ -3758,7 +3754,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 
 		String result="";
 
-		log.debug("ApplyForStudentNumberQueryDAO - getXMLSelected - reference_type : " + reference_type + " reference_value: " + reference_value + " : " + studentNr + " : " + acaYear + " : " + acaPeriod + " : " + callingMethod);
+		//log.debug("ApplyForStudentNumberQueryDAO - getXMLSelected - reference_type : " + reference_type + " reference_value: " + reference_value + " : " + studentNr + " : " + acaYear + " : " + acaPeriod + " : " + callingMethod);
 	
 		String checkXML	= "select detail "
 						+ " from STUXML "
@@ -3770,18 +3766,18 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 						+ " and rownum = 1 "
 						+ " order by reference_sequence desc ";
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - getXMLSelected - Doing Select - checkXML: " +checkXML);
-			log.debug(checkXML);
+			//log.debug("ApplyForStudentNumberQueryDAO - getXMLSelected - Doing Select - checkXML: " +checkXML);
+			//log.debug(checkXML);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(checkXML);
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
-				log.debug("ApplyForStudentNumberQueryDAO - getXMLSelected - checkXML: Has Row");
+				//log.debug("ApplyForStudentNumberQueryDAO - getXMLSelected - checkXML: Has Row");
 				result = data.get("detail").toString().trim();
 			}
 		} catch (Exception ex) {
-			log.debug("ApplyForStudentNumberQueryDAO: Error retrieving Temp STUXML for Student / "+studentNr + " / " + ex);
+			//log.debug("ApplyForStudentNumberQueryDAO: Error retrieving Temp STUXML for Student / "+studentNr + " / " + ex);
 		}
 	return result;
 
@@ -3800,24 +3796,24 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ " ), 0) as SEQ_NR from dual ";
 
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - getSTULOGRef - Query="+query+", dbparam=" +acaYear+", "+acaPeriod+", "+studentNr);
+			//log.debug("ApplyForStudentNumberQueryDAO - getSTULOGRef - Query="+query+", dbparam=" +acaYear+", "+acaPeriod+", "+studentNr);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List<?> queryList = jdt.queryForList(query, new Object []{acaYear, acaPeriod, studentNr});
 			Iterator<?> i = queryList.iterator();
 			if (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
-				log.debug("ApplyForStudentNumberQueryDAO - getSTULOGRef: Has Row");
+				//log.debug("ApplyForStudentNumberQueryDAO - getSTULOGRef: Has Row");
 				result = Integer.parseInt(data.get("SEQ_NR").toString().trim());
-				log.debug("ApplyForStudentNumberQueryDAO - getSTULOGRef - "+studentNr+" - Result: STULOG Exists");
+				//log.debug("ApplyForStudentNumberQueryDAO - getSTULOGRef - "+studentNr+" - Result: STULOG Exists");
 			}else{
-				log.debug("ApplyForStudentNumberQueryDAO - getSTULOGRef - "+studentNr+" - Result: No STULOG Exists");
+				//log.debug("ApplyForStudentNumberQueryDAO - getSTULOGRef - "+studentNr+" - Result: No STULOG Exists");
 			}
 			
 		} catch (Exception ex) {
-			log.debug("ApplyForStudentNumberQueryDAO - getSTULOGRef - Error Retrieving STULOG Sequence for Student="+studentNr + "/ " +ex);
+			//log.debug("ApplyForStudentNumberQueryDAO - getSTULOGRef - Error Retrieving STULOG Sequence for Student="+studentNr + "/ " +ex);
 			log.warn("Error Retrieving STULOG Sequence / "+studentNr+" / " + ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - getSTULOGRef - "+studentNr+" - Retrieve STULOG Sequence - Done="+result);
+		//log.debug("ApplyForStudentNumberQueryDAO - getSTULOGRef - "+studentNr+" - Retrieve STULOG Sequence - Done="+result);
 		return result;
 	}
 	
@@ -3825,7 +3821,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		
 		boolean result = false; 
 
-    	log.debug("ApplyForStudentNumberAction - getSTULOG - INPUT_DESC="+valueDesc+", TYPE_GC303="+action+", STUDENT="+studentNr+", YEAR="+acaYear+", PERIOD="+acaPeriod+", SEQ="+seqNr);
+    	//log.debug("ApplyForStudentNumberAction - getSTULOG - INPUT_DESC="+valueDesc+", TYPE_GC303="+action+", STUDENT="+studentNr+", YEAR="+acaYear+", PERIOD="+acaPeriod+", SEQ="+seqNr);
 				
 		try{
 			String query  = "select STUDENT "
@@ -3838,30 +3834,30 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ " and TYPE_GC303 = ? " 
 					+ " and INPUT_DESC = ? ";
 
-			log.debug("ApplyForStudentNumberQueryDAO - getSTULOG - Query="+query+" - "+acaYear+","+acaPeriod+","+studentNr+","+seqNr+", APP, "+action+", "+valueDesc);
+			//log.debug("ApplyForStudentNumberQueryDAO - getSTULOG - Query="+query+" - "+acaYear+","+acaPeriod+","+studentNr+","+seqNr+", APP, "+action+", "+valueDesc);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List<?> queryList = jdt.queryForList(query, new Object []{acaYear,acaPeriod,studentNr,seqNr,action,valueDesc});
 			Iterator<?> i = queryList.iterator();
 			if (i.hasNext()) {
-				log.debug("ApplyForStudentNumberQueryDAO - getSTULOG: Has Row");
+				//log.debug("ApplyForStudentNumberQueryDAO - getSTULOG: Has Row");
 				result = true;
-				log.debug("ApplyForStudentNumberQueryDAO - getSTULOG - "+studentNr+" - Result: STULOG Exists");
+				//log.debug("ApplyForStudentNumberQueryDAO - getSTULOG - "+studentNr+" - Result: STULOG Exists");
 			}else{
 				result = false;;
-				log.debug("ApplyForStudentNumberQueryDAO - getSTULOG - "+studentNr+" - Result: No STULOG Exists");
+				//log.debug("ApplyForStudentNumberQueryDAO - getSTULOG - "+studentNr+" - Result: No STULOG Exists");
 			}
 			
 		} catch (Exception ex) {
-			log.debug("ApplyForStudentNumberQueryDAO: getSTULOG - Error Retrieving STULOG for Student="+studentNr + "/ " +ex);
+			//log.debug("ApplyForStudentNumberQueryDAO: getSTULOG - Error Retrieving STULOG for Student="+studentNr + "/ " +ex);
 			log.warn("Error Retrieving STULOG Sequence / "+studentNr+" / " + ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - getSTULOG - "+studentNr+" - Retrieve STULOG Sequence - Done="+result);
+		//log.debug("ApplyForStudentNumberQueryDAO - getSTULOG - "+studentNr+" - Retrieve STULOG Sequence - Done="+result);
 		return result;
 	}
 	
 	public String saveSTULOG(String acaYear, String acaPeriod, String studentNr, String value, String valueDesc, String action, int seqNr, String sqlAction) throws Exception {
 
-    	log.debug("ApplyForStudentNumberAction - saveSTULOG - INPUT_DETAIL="+value+", INPUT_DESC="+valueDesc+", TYPE_GC303="+action+", STUDENT="+studentNr+", YEAR="+acaYear+", PERIOD="+acaPeriod+", SEQ="+seqNr+", SQLAction="+sqlAction);
+    	//log.debug("ApplyForStudentNumberAction - saveSTULOG - INPUT_DETAIL="+value+", INPUT_DESC="+valueDesc+", TYPE_GC303="+action+", STUDENT="+studentNr+", YEAR="+acaYear+", PERIOD="+acaPeriod+", SEQ="+seqNr+", SQLAction="+sqlAction);
 		
 		String queryUpdate = "";
 		String queryInsert = "";
@@ -3880,7 +3876,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ " and TYPE_GC303 = ? " 
 					+ " and INPUT_DESC = ? ";
 
-				log.debug("ApplyForStudentNumberQueryDAO - saveSTULOG - INSERT - queryUpdate="+queryUpdate+" - "+acaYear+","+acaPeriod+","+studentNr+","+seqNr+", APP, "+action+", "+valueDesc+", "+value);
+				//log.debug("ApplyForStudentNumberQueryDAO - saveSTULOG - INSERT - queryUpdate="+queryUpdate+" - "+acaYear+","+acaPeriod+","+studentNr+","+seqNr+", APP, "+action+", "+valueDesc+", "+value);
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				resultInt = jdt.update(queryUpdate, new Object []{value, acaYear,acaPeriod,studentNr,seqNr,action,valueDesc});
 			
@@ -3888,7 +3884,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				queryInsert  = "insert into stulog (YEAR ,PERIOD, STUDENT, SEQ_NR, APP_TYPE, TYPE_GC303, INPUT_DESC, INPUT_DETAIL, TIMESTAMP, INFO) "
 					+ " values (?, ?, ?, ?, 'APP', ?, ?, ?, systimestamp, ' ') ";
 	
-				log.debug("ApplyForStudentNumberQueryDAO - saveSTULOG - INSERT - queryInsert="+queryInsert+" - "+acaYear+","+acaPeriod+","+studentNr+","+seqNr+", APP, "+action+", "+valueDesc+", "+value);
+				//log.debug("ApplyForStudentNumberQueryDAO - saveSTULOG - INSERT - queryInsert="+queryInsert+" - "+acaYear+","+acaPeriod+","+studentNr+","+seqNr+", APP, "+action+", "+valueDesc+", "+value);
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				resultInt = jdt.update(queryInsert, new Object []{acaYear,acaPeriod,studentNr,seqNr,action,valueDesc,value});
 			}
@@ -3897,16 +3893,16 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				result = "True";
 			}
 		} catch (Exception ex) {
-			log.debug("ApplyForStudentNumberQueryDAO - saveSTULOG - Error saving STULOG / " + ex);
+			//log.debug("ApplyForStudentNumberQueryDAO - saveSTULOG - Error saving STULOG / " + ex);
 			result = "Error saving STULOG";
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - saveSTULOG - "+studentNr+" - End, Result="+result);
+		//log.debug("ApplyForStudentNumberQueryDAO - saveSTULOG - "+studentNr+" - End, Result="+result);
 		return result;
 	}
 			
 	public String getQualAdminSection(String qualCode) throws Exception{
 
-		log.debug("ApplyForStudentNumberQueryDAO - GetQualUnderPostCategory - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - GetQualUnderPostCategory - Start");
 
 		String type = "";
 		String underPost = " ";
@@ -3915,7 +3911,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		String query = "select type, under_post_categor,admin_section, fk_katcode from grd where code = ? ";
 
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - GetQualUnderPostCategory - Query: " + query);
+			//log.debug("ApplyForStudentNumberQueryDAO - GetQualUnderPostCategory - Query: " + query);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List<?> queryList = jdt.queryForList(query, new Object []{qualCode});
 			Iterator i = queryList.iterator();
@@ -3936,9 +3932,9 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				}else{
 					admin = "064"; //Fallback just in case
 				}
-				log.debug("ApplyForStudentNumberQueryDAO - getQualAdminSection - Result: under_post_categor: " + data.get("under_post_categor").toString() + ", admin_section: " + data.get("admin_section").toString() + "UNDERPOST: " + underPost);
+				//log.debug("ApplyForStudentNumberQueryDAO - getQualAdminSection - Result: under_post_categor: " + data.get("under_post_categor").toString() + ", admin_section: " + data.get("admin_section").toString() + "UNDERPOST: " + underPost);
 			}else{
-				log.debug("ApplyForStudentNumberQueryDAO - getQualAdminSection - Result: No Rows");
+				//log.debug("ApplyForStudentNumberQueryDAO - getQualAdminSection - Result: No Rows");
 			}
 		} catch (Exception ex) {
 			throw new Exception(
@@ -3950,22 +3946,22 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	
 	public String getCollegeCategory(String qualCode2) throws Exception{
 
-		log.debug("ApplyForStudentNumberQueryDAO - GetQualCollegeCategory - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - GetQualCollegeCategory - Start");
 		
 		String college = " ";
 		String query = "select college_code from grd where code = ? ";
 
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - GetQualCollegeCategory - Query: " + query);
+			//log.debug("ApplyForStudentNumberQueryDAO - GetQualCollegeCategory - Query: " + query);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List<?> queryList = jdt.queryForList(query, new Object []{qualCode2});
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
 				college = data.get("college_code").toString();
-				log.debug("ApplyForStudentNumberQueryDAO - GetQualCollegeCategory - Result: college_code: " + data.get("college_code").toString());
+				//log.debug("ApplyForStudentNumberQueryDAO - GetQualCollegeCategory - Result: college_code: " + data.get("college_code").toString());
 			}else{
-				log.debug("ApplyForStudentNumberQueryDAO - GetQualCollegeCategory - Result: No Rows");
+				//log.debug("ApplyForStudentNumberQueryDAO - GetQualCollegeCategory - Result: No Rows");
 			}
 		} catch (Exception ex) {
 			throw new Exception(
@@ -3977,7 +3973,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	
 public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPeriod, String choiceNr, String callingMethod) throws Exception{
 
-		log.debug("ApplyForStudentNumberQueryDAO - getSTUAPQDetail - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - getSTUAPQDetail - Start");
 		
 		boolean result = false;
 		
@@ -3989,15 +3985,15 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 					+ " and choice_nr = ? ";
 
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - getSTUAPQDetail - Query: " +studentNr+", "+acaYear+", "+acaPeriod+", "+choiceNr);
+			//log.debug("ApplyForStudentNumberQueryDAO - getSTUAPQDetail - Query: " +studentNr+", "+acaYear+", "+acaPeriod+", "+choiceNr);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List<?> queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choiceNr});
 			Iterator<?> i = queryList.iterator();
 			if (i.hasNext()) {
-				log.debug("ApplyForStudentNumberQueryDAO - getSTUAPQDetail - Result: STUAPQ Exists");
+				//log.debug("ApplyForStudentNumberQueryDAO - getSTUAPQDetail - Result: STUAPQ Exists");
 				result =  true;
 			}else{
-				log.debug("ApplyForStudentNumberQueryDAO - getSTUAPQDetail - Result: No STUAPQ");
+				//log.debug("ApplyForStudentNumberQueryDAO - getSTUAPQDetail - Result: No STUAPQ");
 				result =  false;
 			}
 			
@@ -4018,24 +4014,24 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 				  + " and rownum = 1 "
 				  + " order by app_sequence_nr desc";
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - getMDAPPLRecord - Query: "+query+ " - " +studentNr);
+			//log.debug("ApplyForStudentNumberQueryDAO - getMDAPPLRecord - Query: "+query+ " - " +studentNr);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr});
 			Iterator i = queryList.iterator();
 			if (i.hasNext()){
-				log.debug("ApplyForStudentNumberQueryDAO - getMDAPPLRecord - Record: TRUE");
+				//log.debug("ApplyForStudentNumberQueryDAO - getMDAPPLRecord - Record: TRUE");
 				result = true;
 			}
 		} catch (Exception ex) {
 			throw new Exception("ApplyForStudentNumberQueryDAO : getMDAPPLRecord : Error occurred / "+ ex,ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - getMDAPPLRecord - Result: "+result);
+		//log.debug("ApplyForStudentNumberQueryDAO - getMDAPPLRecord - Result: "+result);
 		return result;
 	}
 
 	public int delSTUAPQ(String studentNr, String acaYear, String acaPeriod, String choiceNr, String callingMethod) {
 
-		log.debug("ApplyForStudentNumberQueryDAO - delSTUAPQ - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - delSTUAPQ - Start");
 	
 		String dbParam = "";
 		int resultInt = 0;
@@ -4051,14 +4047,14 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 			resultInt = jdt.update(query, new Object []{studentNr,acaYear,acaPeriod,choiceNr});
 			dbParam = studentNr+","+acaYear+","+acaPeriod+","+choiceNr;
 	
-			log.debug("ApplyForStudentNumberQueryDAO - delSTUAPQ - Delete - QueryType="+callingMethod+", Query="+query+", resultInt="+resultInt);
-			log.debug("ApplyForStudentNumberQueryDAO - delSTUAPQ - Delete - resultInt: "+resultInt);
-			log.debug("ApplyForStudentNumberQueryDAO - delSTUAPQ - Delete - dbParam: "+dbParam);
+			//log.debug("ApplyForStudentNumberQueryDAO - delSTUAPQ - Delete - QueryType="+callingMethod+", Query="+query+", resultInt="+resultInt);
+			//log.debug("ApplyForStudentNumberQueryDAO - delSTUAPQ - Delete - resultInt: "+resultInt);
+			//log.debug("ApplyForStudentNumberQueryDAO - delSTUAPQ - Delete - dbParam: "+dbParam);
 			
 		} catch (Exception ex) {
 			log.warn("ApplyForStudentNumberQueryDAO: Error "+callingMethod+" Deleting APQ Qualification for Returning student nr / "+studentNr + " / " + dbParam + " / " +ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - delSTUAPQ - End");
+		//log.debug("ApplyForStudentNumberQueryDAO - delSTUAPQ - End");
 		return resultInt;
 	}
 	
@@ -4077,7 +4073,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 					String radioNDP,
 					String callingMethod) {
 
-		log.debug("ApplyForStudentNumberQueryDAO - saveSTUAPQ - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - saveSTUAPQ - Start");
 	
 		String dbParam = "";
 		int resultInt = 0;
@@ -4099,22 +4095,22 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 			resultInt = jdt.update(query, new Object []{studentNr,acaYear,acaPeriod,qualCode,specCode,qualCode,specCode,statusCode,collegeCode,admin_section,choiceNr, radioNDP, radioPrev, radioRPL});
 			dbParam = studentNr+","+acaYear+","+acaPeriod+","+qualCode+","+specCode+","+qualCode+","+specCode+","+statusCode+","+collegeCode+","+admin_section+","+choiceNr+","+radioNDP+","+radioPrev+","+radioRPL;
 		
-			log.debug("ApplyForStudentNumberQueryDAO - saveSTUAPQ - Insert - QueryType="+callingMethod+", Query="+query+", resultInt="+resultInt);
-			log.debug("ApplyForStudentNumberQueryDAO - saveSTUAPQ - Insert - resultInt: "+resultInt);
-			log.debug("ApplyForStudentNumberQueryDAO - saveSTUAPQ - Insert - dbParam: "+dbParam);
+			//log.debug("ApplyForStudentNumberQueryDAO - saveSTUAPQ - Insert - QueryType="+callingMethod+", Query="+query+", resultInt="+resultInt);
+			//log.debug("ApplyForStudentNumberQueryDAO - saveSTUAPQ - Insert - resultInt: "+resultInt);
+			//log.debug("ApplyForStudentNumberQueryDAO - saveSTUAPQ - Insert - dbParam: "+dbParam);
 			
 		} catch (Exception ex) {
-			log.debug("ApplyForStudentNumberQueryDAO: Error "+callingMethod+" Saving APQ Qualification for Returning student nr / "+studentNr + " / " + dbParam + " / " +ex);
+			//log.debug("ApplyForStudentNumberQueryDAO: Error "+callingMethod+" Saving APQ Qualification for Returning student nr / "+studentNr + " / " + dbParam + " / " +ex);
 			log.warn("ApplyForStudentNumberQueryDAO: Error "+callingMethod+" Saving APQ Qualification for Returning student nr / "+studentNr + " / " + dbParam + " / " +ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - saveSTUAPQ - End");
+		//log.debug("ApplyForStudentNumberQueryDAO - saveSTUAPQ - End");
 		return resultInt;
 	}
 	
 	  /************ Get previous category to show current qualification *************/
 	  public String getExistQual(String studentNr) throws Exception{
 
-		  log.debug("ApplyForStudentNumberQueryDAO - getExistQual studentNr: " + studentNr);
+		  //log.debug("ApplyForStudentNumberQueryDAO - getExistQual studentNr: " + studentNr);
 
 		  String existQual = "";
 
@@ -4128,7 +4124,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 						+ " and rownum = 1 "
 						+ " order by stuann.mk_academic_year desc";
 
-	    	  	log.debug("ApplyForStudentNumberQueryDAO - getExistQual - query: " + query);
+	    	  	//log.debug("ApplyForStudentNumberQueryDAO - getExistQual - query: " + query);
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				List queryList = jdt.queryForList(query, new Object []{studentNr});
 				Iterator i = queryList.iterator();
@@ -4151,7 +4147,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 	  /************ Get previous specialization show current qualification *************/
 	  public String getExistSpec(String studentNr) throws Exception{
 
-		  log.debug("ApplyForStudentNumberQueryDAO - getExistSpec studentNr: " + studentNr);
+		  //log.debug("ApplyForStudentNumberQueryDAO - getExistSpec studentNr: " + studentNr);
 
 	      String existSpec = "";
 
@@ -4163,7 +4159,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 							+ " and mk_qualification_c in (select mk_highest_qualifi from (select mk_highest_qualifi from stuann where mk_student_nr = ? and status_code = 'RG' and rownum = 1 order by mk_academic_year desc)) "
 							+ " and speciality_code = (select speciality_code from (select speciality_code from stuann where mk_student_nr = ? and status_code = 'RG' and rownum = 1 order by mk_academic_year desc))";
 
-	    	  	log.debug("ApplyForStudentNumberQueryDAO - getExistSpec - query: " + query);
+	    	  	//log.debug("ApplyForStudentNumberQueryDAO - getExistSpec - query: " + query);
 
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				List queryList = jdt.queryForList(query, new Object []{studentNr, studentNr});
@@ -4189,7 +4185,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 	  /************ Get previous specialization show current qualification *************/
 	  public boolean getXMLRandom(Integer studentNr) throws Exception{
 
-		  log.debug("ApplyForStudentNumberQueryDAO - getXMLRandom studentNr: " + studentNr);
+		  //log.debug("ApplyForStudentNumberQueryDAO - getXMLRandom studentNr: " + studentNr);
 
 	      boolean existStuNr = false;
 
@@ -4201,16 +4197,16 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 	    			  		+ " select nr from stu where nr = ? "
 	    			  		+ " ) ";
 							
-	    	  	log.debug("ApplyForStudentNumberQueryDAO - getXMLRandom - query: " + query);
+	    	  	//log.debug("ApplyForStudentNumberQueryDAO - getXMLRandom - query: " + query);
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				List queryList = jdt.queryForList(query, new Object []{studentNr, studentNr});
 				Iterator i = queryList.iterator();
 				if (i.hasNext()) {
 					ListOrderedMap data = (ListOrderedMap) i.next();
 					existStuNr = true;
-					log.debug("ApplyForStudentNumberQueryDAO - getXMLRandom Exists: " + studentNr);
+					//log.debug("ApplyForStudentNumberQueryDAO - getXMLRandom Exists: " + studentNr);
 				}else{
-					log.debug("ApplyForStudentNumberQueryDAO - getXMLRandom Does Not Exist: " + studentNr);
+					//log.debug("ApplyForStudentNumberQueryDAO - getXMLRandom Does Not Exist: " + studentNr);
 				}
 	      	} catch (Exception ex) {
 	      			throw new Exception(
@@ -4254,23 +4250,23 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 		}
 
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - vrfyPrevQual - query:" + query);
+			//log.debug("ApplyForStudentNumberQueryDAO - vrfyPrevQual - query:" + query);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr});
 			Iterator i = queryList.iterator();
 			while (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
-					log.debug("ApplyForStudentNumberQueryDAO - vrfyPrevQual - stuChoice:" + stuChoice);
+					//log.debug("ApplyForStudentNumberQueryDAO - vrfyPrevQual - stuChoice:" + stuChoice);
 					if ("Qual".equalsIgnoreCase(qualSpec)){
 						result = data.get("qualification_code").toString().trim() + " - " + data.get("QualLongDesc").toString().trim();
-						log.debug("ApplyForStudentNumberQueryDAO - vrfyPrevQual - Qual:" + result);
+						//log.debug("ApplyForStudentNumberQueryDAO - vrfyPrevQual - Qual:" + result);
 					}else if ("Spec".equalsIgnoreCase(qualSpec)){
 						if (data.get("speciality_code").toString().trim() != null && !"".equalsIgnoreCase(data.get("speciality_code").toString().trim()) && !"0".equalsIgnoreCase(data.get("speciality_code").toString().trim())){
 							result = data.get("speciality_code").toString().trim() + " - " + data.get("SpecDesc").toString().trim();
 						}else{
 							result = "N/A - Not Applicable";
 						}
-						log.debug("ApplyForStudentNumberQueryDAO - vrfyPrevQual - Spec:" + result);
+						//log.debug("ApplyForStudentNumberQueryDAO - vrfyPrevQual - Spec:" + result);
 					}
 			}
 		} catch (Exception ex) {
@@ -4321,24 +4317,24 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 		}
 
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - vrfyNewQual - qualSpec: " + qualSpec + ", query:" + query);
+			//log.debug("ApplyForStudentNumberQueryDAO - vrfyNewQual - qualSpec: " + qualSpec + ", query:" + query);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choice});
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				while (i.hasNext()) {
 					ListOrderedMap data = (ListOrderedMap) i.next();
-						log.debug("ApplyForStudentNumberQueryDAO - vrfyNewQual - stuChoice:" + stuChoice);
+						//log.debug("ApplyForStudentNumberQueryDAO - vrfyNewQual - stuChoice:" + stuChoice);
 						if ("Qual".equalsIgnoreCase(qualSpec)){
 							result = data.get("new_qual").toString().trim() + " - " + data.get("QualDesc").toString().trim() + " (" + data.get("QualLongDesc").toString().trim() + ")";
-							log.debug("ApplyForStudentNumberQueryDAO - vrfyNewQual - Qual:" + result);
+							//log.debug("ApplyForStudentNumberQueryDAO - vrfyNewQual - Qual:" + result);
 						}else if ("Spec".equalsIgnoreCase(qualSpec)){
 							if (data.get("new_spes").toString().trim() != null && !"".equalsIgnoreCase(data.get("new_spes").toString().trim()) && !"0".equalsIgnoreCase(data.get("new_spes").toString().trim())){
 								result = data.get("new_spes").toString().trim() + " - " + data.get("SpecDesc").toString().trim();
 							}else{
 								result = "N/A - Not Applicable";
 							}
-							log.debug("ApplyForStudentNumberQueryDAO - vrfyNewQual - Spec:" + result);
+							//log.debug("ApplyForStudentNumberQueryDAO - vrfyNewQual - Spec:" + result);
 						}
 				}
 			}else{
@@ -4348,7 +4344,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 			throw new Exception(
 					"ApplyForStudentNumberQueryDAO : Error validating student saved quals / " + ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - vrfyNewQual - result:" + result);
+		//log.debug("ApplyForStudentNumberQueryDAO - vrfyNewQual - result:" + result);
 		return result;
 	}
 	
@@ -4366,14 +4362,14 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 					+ " and application_period = ? "
 					+ " and stuapq.choice_nr = ? ";
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - vrfyNewQualShort - qualSpec: " + qualSpec + ", query:" + query);
+			//log.debug("ApplyForStudentNumberQueryDAO - vrfyNewQualShort - qualSpec: " + qualSpec + ", query:" + query);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choice});
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
 				result = data.get("new_qual").toString().trim();
-				log.debug("ApplyForStudentNumberQueryDAO - vrfyNewQualShort - Qual:" + result);
+				//log.debug("ApplyForStudentNumberQueryDAO - vrfyNewQualShort - Qual:" + result);
 			}
 		} catch (Exception ex) {
 			throw new Exception(
@@ -4421,23 +4417,23 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 		}
 
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - vrfyNewMDQual - query:" + query);
+			//log.debug("ApplyForStudentNumberQueryDAO - vrfyNewMDQual - query:" + query);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear});
 			Iterator i = queryList.iterator();
 			while (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
-					log.debug("ApplyForStudentNumberQueryDAO - vrfyNewMDQual - stuChoice:" + stuChoice);
+					//log.debug("ApplyForStudentNumberQueryDAO - vrfyNewMDQual - stuChoice:" + stuChoice);
 					if ("Qual".equalsIgnoreCase(qualSpec)){
 						result = data.get("mk_highest_qualifi").toString().trim() + " - " + data.get("QualDesc").toString().trim() + " (" + data.get("QualLongDesc").toString().trim() + ")";
-						log.debug("ApplyForStudentNumberQueryDAO - vrfyNewMDQual - Qual:" + result);
+						//log.debug("ApplyForStudentNumberQueryDAO - vrfyNewMDQual - Qual:" + result);
 					}else if ("Spec".equalsIgnoreCase(qualSpec)){
 						if (data.get("speciality_code").toString().trim() != null && !"".equalsIgnoreCase(data.get("speciality_code").toString().trim()) && !"0".equalsIgnoreCase(data.get("speciality_code").toString().trim())){
 							result = data.get("speciality_code").toString().trim() + " - " + data.get("SpecDesc").toString().trim();
 						}else{
 							result = data.get("SpecDesc").toString().trim();
 						}
-						log.debug("ApplyForStudentNumberQueryDAO - vrfyNewMDQual - Spec:" + result);
+						//log.debug("ApplyForStudentNumberQueryDAO - vrfyNewMDQual - Spec:" + result);
 					}
 			}
 		} catch (Exception ex) {
@@ -4459,7 +4455,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 						+ " and choice_nr = ? "
 						+ " and status_code in ('ND', 'NP') ";
 
-			log.debug("ApplyForStudentNumberQueryDAO - getSTUAPQStatus - query="+query+", studentNr="+studentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", choice="+choice+", CallingMethod="+callingMethod);
+			//log.debug("ApplyForStudentNumberQueryDAO - getSTUAPQStatus - query="+query+", studentNr="+studentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", choice="+choice+", CallingMethod="+callingMethod);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choice});
@@ -4479,7 +4475,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 			}
 
 		}
-		log.debug("getSTUAPQStatus - Status: " + status );
+		//log.debug("getSTUAPQStatus - Status: " + status );
 		return status;
 	}
 	
@@ -4494,7 +4490,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 						+ " and application_period = ? "
 						+ " and choice_nr = ? ";
 
-			log.debug("ApplyForStudentNumberQueryDAO - getBasicStatus - query="+query+", studentNr="+studentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", choice="+choice);
+			//log.debug("ApplyForStudentNumberQueryDAO - getBasicStatus - query="+query+", studentNr="+studentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", choice="+choice);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choice});
@@ -4507,7 +4503,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 			throw new Exception(
 					"ApplyForStudentNumberQueryDAO : Error reading STUAPQ status / " + ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - getBasicStatus - Status: " + status );
+		//log.debug("ApplyForStudentNumberQueryDAO - getBasicStatus - Status: " + status );
 		return status;
 	}
 	
@@ -4522,7 +4518,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 						+ " and application_period = ? "
 						+ " and choice_nr = ? ";
 
-			log.debug("ApplyForStudentNumberQueryDAO - getBasicSTUAPQInfo - query="+query+", studentNr="+studentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", choice="+choice);
+			//log.debug("ApplyForStudentNumberQueryDAO - getBasicSTUAPQInfo - query="+query+", studentNr="+studentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", choice="+choice);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choice});
@@ -4541,7 +4537,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 			throw new Exception(
 					"ApplyForStudentNumberQueryDAO : Error reading STUAPQ NDP Info / " + ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - getBasicSTUAPQInfo - Result: " + result );
+		//log.debug("ApplyForStudentNumberQueryDAO - getBasicSTUAPQInfo - Result: " + result );
 		return result;
 	}
 	
@@ -4556,7 +4552,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 						+ " and stuann.mk_academic_year = ? "
 						+ " and stuann.mk_academic_period = ? ";
 
-			log.debug("ApplyForStudentNumberQueryDAO - getFinalMD - query: " + query );
+			//log.debug("ApplyForStudentNumberQueryDAO - getFinalMD - query: " + query );
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod});
 			Iterator i = queryList.iterator();
@@ -4576,7 +4572,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 			}
 
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - getFinalMD - checkMD: " + checkMD );
+		//log.debug("ApplyForStudentNumberQueryDAO - getFinalMD - checkMD: " + checkMD );
 		return checkMD;
 	}
 	
@@ -4595,7 +4591,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 					+ " FROM DUAL";
 		
 		try {
-			log.debug("ApplyForStudentNumberQueryDAO - checkLeapYear: query" +  query);
+			//log.debug("ApplyForStudentNumberQueryDAO - checkLeapYear: query" +  query);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List<?> queryList = jdt.queryForList(query, new Object []{"15/02/"+bYear});
 			Iterator i = queryList.iterator();
@@ -4612,14 +4608,14 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 	
     public boolean checkSuburbExact(String postalCode, String suburb) throws Exception{
     	
-    	log.debug("ApplyForStudentNumberQueryDAO - checkSuburbExact - Suburb/Town="+suburb+", PostalCode="+postalCode);
+    	//log.debug("ApplyForStudentNumberQueryDAO - checkSuburbExact - Suburb/Town="+suburb+", PostalCode="+postalCode);
  	    boolean result = false;
  	    String query = "SELECT code from pstcod where (upper(suburb) = ? or upper(town) = ?) and code = ? ";
 
  	    ResultSet rs;
 
  	    try{ 
- 	    	log.debug("ApplyForStudentNumberQueryDAO - checkSuburbExact query: " + query + ", postalCode: " + postalCode + ", suburb: " + suburb);
+ 	    	//log.debug("ApplyForStudentNumberQueryDAO - checkSuburbExact query: " + query + ", postalCode: " + postalCode + ", suburb: " + suburb);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{suburb.toUpperCase(), suburb.toUpperCase(), postalCode});
 			Iterator i = queryList.iterator();
@@ -4629,14 +4625,14 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
  	    } catch (Exception ex) {
  	    	throw new Exception("ApplyForStudentNumberQueryDAO - checkSuburbExact : Error reading suburb / " + ex);
         }
-		log.debug("ApplyForStudentNumberQueryDAO - Database Check=" + result); 
+		//log.debug("ApplyForStudentNumberQueryDAO - Database Check=" + result); 
  	    return result;
      }
 
 	  /************ Get Offer Reason *************/
 	  public String getApplyStatus(String studentNr, String acaYear, String acaPeriod, String choice) throws Exception{
 
-		  log.debug("ApplyForStudentNumberQueryDAO - getApplyStatus studentNr: " + studentNr+", acaYear: " + acaYear+", acaPeriod: " + acaPeriod+", choice: " + choice);
+		  //log.debug("ApplyForStudentNumberQueryDAO - getApplyStatus studentNr: " + studentNr+", acaYear: " + acaYear+", acaPeriod: " + acaPeriod+", choice: " + choice);
 
 		  String result = "";
 		  boolean overSubscribed = false;
@@ -4652,15 +4648,15 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 	    			  	+ " and gencod.in_use_flag='Y' "
 	    			  	+ " and mk_student_nr = ? ";
 	    	  
-	    	  log.debug("ApplyForStudentNumberQueryDAO - getQualSubscription - getApplyStatus - Checked OverSubscribed - query1: " + query1+", choice="+choice+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", studentNr="+studentNr);
+	    	  //log.debug("ApplyForStudentNumberQueryDAO - getQualSubscription - getApplyStatus - Checked OverSubscribed - query1: " + query1+", choice="+choice+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", studentNr="+studentNr);
 	    	  JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 	    	  List queryList = jdt.queryForList(query1, new Object []{choice, acaYear, acaPeriod, studentNr});
 	    	  Iterator i = queryList.iterator();
 	    	  if (i.hasNext()) {
-		    	  log.debug("ApplyForStudentNumberQueryDAO - getQualSubscription - getApplyStatus - studentNr="+studentNr+", - choice="+choice+" - IS Oversubscribed");
+		    	  //log.debug("ApplyForStudentNumberQueryDAO - getQualSubscription - getApplyStatus - studentNr="+studentNr+", - choice="+choice+" - IS Oversubscribed");
 	    		  overSubscribed = true;
 	    	  }else{
-	    		  log.debug("ApplyForStudentNumberQueryDAO - getQualSubscription - getApplyStatus - studentNr="+studentNr+", - choice="+choice+" - IS NOT Oversubscribed");
+	    		  //log.debug("ApplyForStudentNumberQueryDAO - getQualSubscription - getApplyStatus - studentNr="+studentNr+", - choice="+choice+" - IS NOT Oversubscribed");
 	    	  }
 
 			  String query2 = "select new_qual, status_code, admission_verified, docs_outstanding, "
@@ -4672,7 +4668,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 	    			  	+ " and application_period = ? "
 	    			  	+ " and mk_student_nr = ? ";
 	    			  		    	  
-			  log.debug("ApplyForStudentNumberQueryDAO - getApplyStatus - Check Status - query2: " + query2+", choice="+choice+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", studentNr="+studentNr);
+			  //log.debug("ApplyForStudentNumberQueryDAO - getApplyStatus - Check Status - query2: " + query2+", choice="+choice+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", studentNr="+studentNr);
 	    	  JdbcTemplate jdtQual = new JdbcTemplate(getDataSource());
 	    	  List queryListQual = jdtQual.queryForList(query2, new Object []{choice, acaYear, acaPeriod, studentNr});
 	    	  Iterator quals = queryListQual.iterator();
@@ -4685,7 +4681,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 	    		  String space = data.get("space_offered").toString().trim();
 	    		  String results = data.get("results_outstanding").toString().trim();
 	    		  
-	    		  log.debug("ApplyForStudentNumberQueryDAO - getApplyStatus - Qualification="+qual+", choice="+choice+", status="+status+", verified="+verified+", docs="+docs+", space="+space);
+	    		  //log.debug("ApplyForStudentNumberQueryDAO - getApplyStatus - Qualification="+qual+", choice="+choice+", status="+status+", verified="+verified+", docs="+docs+", space="+space);
 	    		  if ("AP".equalsIgnoreCase(status)){
 		    		  if ("Y".equalsIgnoreCase(docs)){
 	    				  return "APD";
@@ -4734,7 +4730,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 	  
 	  public String getStatusDesc(String status) throws Exception{
 	    	
-	    	log.debug("ApplyForStudentNumberQueryDAO - getStatusDesc - Status: "+status);
+	    	//log.debug("ApplyForStudentNumberQueryDAO - getStatusDesc - Status: "+status);
 
 	    	String result = "";
 
@@ -4747,7 +4743,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 		    					+ " and fk_gencatcode='264' "
 		    					+ " and in_use_flag='Y' ";
 	
-		    		log.debug("ApplyForStudentNumberQueryDAO - getStatusDesc - Query: " + query + ", Status: "+status);
+		    		//log.debug("ApplyForStudentNumberQueryDAO - getStatusDesc - Query: " + query + ", Status: "+status);
 					JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 					List queryList = jdt.queryForList(query, new Object []{status});
 					Iterator i = queryList.iterator();
@@ -4761,7 +4757,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 	 	    } catch (Exception ex) {
 	 	    	throw new Exception("ApplyForStudentNumberQueryDAO - getStatusDesc : Error reading status / " + ex);
 	        }
-	    	log.debug("ApplyForStudentNumberQueryDAO - getStatusDesc - Final Status=" + result); 
+	    	//log.debug("ApplyForStudentNumberQueryDAO - getStatusDesc - Final Status=" + result); 
 	 	    return result;
 	   }
 	  
@@ -4774,7 +4770,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 		  int academicYear = Integer.parseInt(acaYear);
 		  Status status = new Status();
 		  
-		  log.debug("ApplyForStudentNumberQueryDAO - getStatusFee - StudentNr="+StudentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod);
+		  //log.debug("ApplyForStudentNumberQueryDAO - getStatusFee - StudentNr="+StudentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod);
 		  //2018 Edmund - Probable future implementation as not sure till when a payment can be made/accepted.
 		  Calendar cal = Calendar.getInstance();
 		  int month = cal.get(Calendar.MONTH)+1; //zero-based
@@ -4817,7 +4813,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 					  	+ " and STSXTN.MK_GL_ACCOUNT = '10030' "
 					  	+ " group by STUAPP.FEE_PAID ";
 			  
-		 		log.debug("ApplyForStudentNumberQueryDAO - getStatusFee - Query=" + query+", Current Year=" + cYear+", acaYear=" + aYear+", FROM="+from_Month+"/"+from_year+", TO="+to_Month+"/"+to_year);
+		 		//log.debug("ApplyForStudentNumberQueryDAO - getStatusFee - Query=" + query+", Current Year=" + cYear+", acaYear=" + aYear+", FROM="+from_Month+"/"+from_year+", TO="+to_Month+"/"+to_year);
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				List queryList = jdt.queryForList(query, new Object []{acaYear, acaPeriod, StudentNr});
 				Iterator i = queryList.iterator();
@@ -4838,17 +4834,17 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
         }
 		
 		//Debug
-    	log.debug("ApplyForStudentNumberQueryDAO - getStatusFee - PayDate="+status.getPayDate());
-    	log.debug("ApplyForStudentNumberQueryDAO - getStatusFee - PayFee ="+status.getPayFee());
-    	log.debug("ApplyForStudentNumberQueryDAO - getStatusFee - PayFull="+status.isPayFull());
-    	log.debug("ApplyForStudentNumberQueryDAO - getStatusFee - PayCom ="+status.getPayComment());
+    	//log.debug("ApplyForStudentNumberQueryDAO - getStatusFee - PayDate="+status.getPayDate());
+    	//log.debug("ApplyForStudentNumberQueryDAO - getStatusFee - PayFee ="+status.getPayFee());
+    	//log.debug("ApplyForStudentNumberQueryDAO - getStatusFee - PayFull="+status.isPayFull());
+    	//log.debug("ApplyForStudentNumberQueryDAO - getStatusFee - PayCom ="+status.getPayComment());
     	
  	    return status;
    }
 	    				
 	  public String getDeclineReason(String StudentNr, String qualCode, String acaYear, String acaPeriod) throws Exception{
 	    	
-	    	log.debug("ApplyForStudentNumberQueryDAO - getDeclineReason - StudentNr: "+StudentNr+", qualCode: "+qualCode);
+	    	//log.debug("ApplyForStudentNumberQueryDAO - getDeclineReason - StudentNr: "+StudentNr+", qualCode: "+qualCode);
 
 	    	String result = "";
 
@@ -4863,7 +4859,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 							+ " and stuapq.mk_student_nr = ? "
 							+ " and stuapq.qualification_code = ? ";
 	
-		    		log.debug("ApplyForStudentNumberQueryDAO - getDeclineReason - Query: " + query);
+		    		//log.debug("ApplyForStudentNumberQueryDAO - getDeclineReason - Query: " + query);
 					JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 					List queryList = jdt.queryForList(query, new Object []{acaYear, acaPeriod, StudentNr, qualCode});
 					Iterator i = queryList.iterator();
@@ -4876,7 +4872,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 	 	    } catch (Exception ex) {
 	 	    	throw new Exception("ApplyForStudentNumberQueryDAO - getDeclineReason : Error reading decline reason / " + ex);
 	        }
-	    	log.debug("ApplyForStudentNumberQueryDAO - getDeclineReason - Decline Reseason=" + result); 
+	    	//log.debug("ApplyForStudentNumberQueryDAO - getDeclineReason - Decline Reseason=" + result); 
 	 	    return result;
 	   }
 	    
@@ -4918,25 +4914,25 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 			}
 
 			try {
-				log.debug("ApplyForStudentNumberQueryDAO - getStatusQual - qualSpec: " + qualSpec + ", query:" + query);
+				//log.debug("ApplyForStudentNumberQueryDAO - getStatusQual - qualSpec: " + qualSpec + ", query:" + query);
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choice});
 				Iterator i = queryList.iterator();
 				if (i.hasNext()) {
 					while (i.hasNext()) {
 						ListOrderedMap data = (ListOrderedMap) i.next();
-							log.debug("ApplyForStudentNumberQueryDAO - getStatusQual - Choice:" + choice);
+							//log.debug("ApplyForStudentNumberQueryDAO - getStatusQual - Choice:" + choice);
 							if ("Qual".equalsIgnoreCase(qualSpec)){
 								result = data.get("new_qual").toString().trim() + " - " + data.get("QualLongDesc").toString().trim();
 								//result = data.get("new_qual").toString().trim() + " - " + data.get("QualDesc").toString().trim() + " (" + data.get("QualLongDesc").toString().trim() + ")";
-								log.debug("ApplyForStudentNumberQueryDAO - getStatusQual - Qual:" + result);
+								//log.debug("ApplyForStudentNumberQueryDAO - getStatusQual - Qual:" + result);
 							}else if ("Spec".equalsIgnoreCase(qualSpec)){
 								if (data.get("new_spes").toString().trim() != null && !"".equalsIgnoreCase(data.get("new_spes").toString().trim()) && !"0".equalsIgnoreCase(data.get("new_spes").toString().trim())){
 									result = data.get("new_spes").toString().trim() + " - " + data.get("SpecDesc").toString().trim();
 								}else{
 									result = "N/A - Not Applicable";
 								}
-								log.debug("ApplyForStudentNumberQueryDAO - getStatusQual - Spec:" + result);
+								//log.debug("ApplyForStudentNumberQueryDAO - getStatusQual - Spec:" + result);
 							}
 					}
 				}else{
@@ -4963,7 +4959,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 							+ " and space_offered = 'Y' "
 							+ " and (offer_accepted <> 'Y' or offer_accepted is null) ";
 
-				log.debug("ApplyForStudentNumberQueryDAO - getOfferStatus - query="+query+", studentNr="+studentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", choice="+choice+", CallingMethod="+callingMethod);
+				//log.debug("ApplyForStudentNumberQueryDAO - getOfferStatus - query="+query+", studentNr="+studentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod+", choice="+choice+", CallingMethod="+callingMethod);
 
 				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 				List queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, acaPeriod, choice});
@@ -4982,14 +4978,14 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 				}
 
 			}
-			log.debug("ApplyForStudentNumberQueryDAO - getOfferStatus - Status: " + status );
+			//log.debug("ApplyForStudentNumberQueryDAO - getOfferStatus - Status: " + status );
 			return status;
 		}
 	//Update STUAPQ for Enrolment Offer
 
 	public ArrayList<KeyValue> getMatricSubjects(String matCert, String matric1, String matric2, String matric3, String matric4, String matric5, String matric6, String matric7, String matric8, String matric9, String matric10, String matric11, String matric12) throws Exception {
 	
-		log.debug("ApplyForStudentNumberQueryDAO - getMatricSubjects - matCert:" + matCert);
+		//log.debug("ApplyForStudentNumberQueryDAO - getMatricSubjects - matCert:" + matCert);
 		
 		String query = "";
 		StringBuilder matricExclude = new StringBuilder();
@@ -5008,7 +5004,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 		if (!"0".equals(matric11)){matricExclude.append(" and code <> '"+matric11+"' ");}
 		if (!"0".equals(matric12)){matricExclude.append(" and code <> '"+matric12+"' ");}
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getMatricSubjects - matricExclude= " + matricExclude.toString());
+		//log.debug("ApplyForStudentNumberQueryDAO - getMatricSubjects - matricExclude= " + matricExclude.toString());
 
 		//ToDo
 		String querySC = "  select code, eng_description from mvk "
@@ -5029,7 +5025,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 		}else{
 			query = queryNSC;
 		}
-	  	log.debug("ApplyForStudentNumberQueryDAO - getMatricSubjects - query: " + query);
+	  	//log.debug("ApplyForStudentNumberQueryDAO - getMatricSubjects - query: " + query);
 	
 		try {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -5040,7 +5036,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 				KeyValue subjects = new KeyValue();
 				subjects.setKey(data.get("CODE").toString());
 				subjects.setValue(data.get("ENG_DESCRIPTION").toString().toUpperCase().trim());
-				log.debug("ApplyForStudentNumberQueryDAO - getMatricSubjects - CODE:" + data.get("CODE").toString()+", DESC="+data.get("ENG_DESCRIPTION").toString());
+				//log.debug("ApplyForStudentNumberQueryDAO - getMatricSubjects - CODE:" + data.get("CODE").toString()+", DESC="+data.get("ENG_DESCRIPTION").toString());
 				keyvalues.add(subjects);
 			}
 		} catch (Exception ex) {
@@ -5052,7 +5048,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 
 	public ArrayList<LabelValueBean> getAppealDocTypes() throws Exception {
 		
-		log.debug("ApplyForStudentNumberQueryDAO - getAppealDocTypes");
+		//log.debug("ApplyForStudentNumberQueryDAO - getAppealDocTypes");
 
 		ArrayList list = new ArrayList();
 
@@ -5062,7 +5058,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 					+ " and in_use_flag = 'Y' "
 					+ " order by docDescription asc";
 		
-	  	log.debug("ApplyForStudentNumberQueryDAO - getAppealDocTypes - query: " + query);
+	  	//log.debug("ApplyForStudentNumberQueryDAO - getAppealDocTypes - query: " + query);
 
 		try {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -5081,7 +5077,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 	
 	public int updateSTUXML(String oldStuNr, String newStuNr, String acaYear, String acaPeriod) throws Exception {
 
-		log.debug("ApplyForStudentNumberQueryDAO - updateSTUXML - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - updateSTUXML - Start");
 	
 		String dbParam = "";
 		int result = 0;
@@ -5093,22 +5089,22 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 						+ " AND MK_ACADEMIC_YEAR = ? "
 						+ " AND MK_ACADEMIC_PERIOD = ? ";
 
-			log.debug("ApplyForStudentNumberQueryDAO - updateSTUXML - Query="+query+", oldStuNr="+oldStuNr+", newStuNr="+newStuNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod);
+			//log.debug("ApplyForStudentNumberQueryDAO - updateSTUXML - Query="+query+", oldStuNr="+oldStuNr+", newStuNr="+newStuNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod);
 			
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			result = jdt.update(query, new Object []{newStuNr, oldStuNr, acaYear, acaPeriod});
 		} catch (Exception ex) {
-			log.debug("ApplyForStudentNumberQueryDAO: Error - Updating Temp Record for student nr / "+newStuNr + " / oldStuNr="+oldStuNr+", newStuNr="+newStuNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod + " / " +ex);
+			//log.debug("ApplyForStudentNumberQueryDAO: Error - Updating Temp Record for student nr / "+newStuNr + " / oldStuNr="+oldStuNr+", newStuNr="+newStuNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod + " / " +ex);
 			throw new Exception(
 					"ApplyForStudentNumberQueryDAO : Error - Updating Temp Record for student="+newStuNr + " / oldStuNr="+oldStuNr+", newStuNr="+newStuNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod + " / " +ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - updateSTUXML - End");
+		//log.debug("ApplyForStudentNumberQueryDAO - updateSTUXML - End");
 		return result;
 	}
 	
 	public int updateSTULOG(String oldStuNr, String newStuNr, String acaYear, String acaPeriod) throws Exception {
 
-		log.debug("ApplyForStudentNumberQueryDAO - updateSTULOG - Start");
+		//log.debug("ApplyForStudentNumberQueryDAO - updateSTULOG - Start");
 	
 		String dbParam = "";
 		int result = 0;
@@ -5120,16 +5116,16 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 						+ " AND YEAR = ? "
 						+ " AND PERIOD = ? ";
 
-			log.debug("ApplyForStudentNumberQueryDAO - updateSTULOG - Query="+query+", oldStuNr="+oldStuNr+", newStuNr="+newStuNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod);
+			//log.debug("ApplyForStudentNumberQueryDAO - updateSTULOG - Query="+query+", oldStuNr="+oldStuNr+", newStuNr="+newStuNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod);
 			
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			result = jdt.update(query, new Object []{newStuNr, oldStuNr, acaYear, acaPeriod});
 		} catch (Exception ex) {
-			log.debug("ApplyForStudentNumberQueryDAO: Error - Updating Log Record for student nr / "+newStuNr + " / oldStuNr="+oldStuNr+", newStuNr="+newStuNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod + " / " +ex);
+			//log.debug("ApplyForStudentNumberQueryDAO: Error - Updating Log Record for student nr / "+newStuNr + " / oldStuNr="+oldStuNr+", newStuNr="+newStuNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod + " / " +ex);
 			throw new Exception(
 					"ApplyForStudentNumberQueryDAO : Error - Updating Log Record for student="+newStuNr + " / oldStuNr="+oldStuNr+", newStuNr="+newStuNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod + " / " +ex);
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - updateSTULOG - End");
+		//log.debug("ApplyForStudentNumberQueryDAO - updateSTULOG - End");
 		return result;
 	}
 	
@@ -5141,7 +5137,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 						+ " from stu "
 						+ " where nr = ? ";
 
-			log.debug("ApplyForStudentNumberQueryDAO - getCountry - query="+query+", studentNr="+studentNr);
+			//log.debug("ApplyForStudentNumberQueryDAO - getCountry - query="+query+", studentNr="+studentNr);
 
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List queryList = jdt.queryForList(query, new Object []{studentNr});
@@ -5161,7 +5157,7 @@ public boolean getSTUAPQDetail(String studentNr, String acaYear, String acaPerio
 			}
 
 		}
-		log.debug("ApplyForStudentNumberQueryDAO - getCountry - Result: " + result );
+		//log.debug("ApplyForStudentNumberQueryDAO - getCountry - Result: " + result );
 		return result;
 	}
 }

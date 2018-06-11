@@ -27,7 +27,6 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 import org.apache.struts.actions.DispatchAction;
-import org.apache.struts.actions.LookupDispatchAction;
 import org.apache.struts.upload.FormFile;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 
@@ -637,44 +636,52 @@ public class UploadAction extends DispatchAction {
 				
 				log.debug("UploadAction - Upload - Do Staae05sAppAdmissionEvaluator Letter");
 				/**2018 Edmund Start of Send Letter**/
-				Staae05sAppAdmissionEvaluator op = new Staae05sAppAdmissionEvaluator();
-				operListener opl = new operListener();
-				op.addExceptionListener(opl);
-				op.clear();
-
-				op.setInCsfClientServerCommunicationsClientVersionNumber((short) 3);
-				op.setInCsfClientServerCommunicationsClientRevisionNumber((short) 1);
-				op.setInCsfClientServerCommunicationsAction("PR");
-				op.setInCsfClientServerCommunicationsClientDevelopmentPhase("C");
-				op.setInWsUserNumber(99998);
-				log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Academic Year=" + stuRegForm.getStudent().getAcademicYear());
-				op.setInWsAcademicYearYear((short) Integer.parseInt(stuRegForm.getStudent().getAcademicYear()));
-				op.setInWebStuApplicationQualAcademicYear((short) Integer.parseInt(stuRegForm.getStudent().getAcademicYear()));
-				log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Academic Period=" + stuRegForm.getStudent().getAcademicPeriod());
-				op.setInWebStuApplicationQualApplicationPeriod((short) Integer.parseInt(stuRegForm.getStudent().getAcademicPeriod()));
-				log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Student Number=" + stuRegForm.getStudent().getNumber());
-				op.setInWebStuApplicationQualMkStudentNr(Integer.parseInt(stuRegForm.getStudent().getNumber()));
-				//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - RetQualOneFinal=" + stuRegForm.getStudent().getRetQualOneFinal());
-				//op.setInWebStuApplicationQualNewQual(stuRegForm.getStudent().getRetQualOneFinal());
-				//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Choice Nr= 1");
-				//op.setInWebStuApplicationQualChoiceNr((short) 1);
-				//Get Current Status
-				//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Get Basic Status");
-				//String status = applyDAO.getBasicStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod(), "1");
-				//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Basic Status="+status);
-				//op.setInWebStuApplicationQualStatusCode(status);
-				
-				log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Execute");
+				/*
+				try{
+					Staae05sAppAdmissionEvaluator op = new Staae05sAppAdmissionEvaluator();
+					operListener opl = new operListener();
+					op.addExceptionListener(opl);
+					op.clear();
 	
-				op.execute();
-	
-				if (opl.getException() != null) throw opl.getException();
-				if (op.getExitStateType() < 3) throw new Exception(op.getExitStateMsg());
-	
-				log.debug("UploadAction - Upload - Staae05sAppAdmissionEvaluator - After Execute");
-				String opResult = op.getOutCsfStringsString500();
-				log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) opResult: " + opResult);
-				/**End of Send Letter**/
+					op.setInCsfClientServerCommunicationsClientVersionNumber((short) 3);
+					op.setInCsfClientServerCommunicationsClientRevisionNumber((short) 1);
+					op.setInCsfClientServerCommunicationsAction("PR");
+					op.setInCsfClientServerCommunicationsClientDevelopmentPhase("C");
+					op.setInWsUserNumber(99998);
+					log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Academic Year=" + stuRegForm.getStudent().getAcademicYear());
+					op.setInWsAcademicYearYear((short) Integer.parseInt(stuRegForm.getStudent().getAcademicYear()));
+					op.setInWebStuApplicationQualAcademicYear((short) Integer.parseInt(stuRegForm.getStudent().getAcademicYear()));
+					log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Academic Period=" + stuRegForm.getStudent().getAcademicPeriod());
+					op.setInWebStuApplicationQualApplicationPeriod((short) Integer.parseInt(stuRegForm.getStudent().getAcademicPeriod()));
+					log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Student Number=" + stuRegForm.getStudent().getNumber());
+					op.setInWebStuApplicationQualMkStudentNr(Integer.parseInt(stuRegForm.getStudent().getNumber()));
+					//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - RetQualOneFinal=" + stuRegForm.getStudent().getRetQualOneFinal());
+					//op.setInWebStuApplicationQualNewQual(stuRegForm.getStudent().getRetQualOneFinal());
+					//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Choice Nr= 1");
+					//op.setInWebStuApplicationQualChoiceNr((short) 1);
+					//Get Current Status
+					//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Get Basic Status");
+					//String status = applyDAO.getBasicStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod(), "1");
+					//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Basic Status="+status);
+					//op.setInWebStuApplicationQualStatusCode(status);
+					
+					log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Execute");
+		
+					op.execute();
+		
+					if (opl.getException() != null) throw opl.getException();
+					if (op.getExitStateType() < 3) throw new Exception(op.getExitStateMsg());
+		
+					log.debug("UploadAction - Upload - Staae05sAppAdmissionEvaluator - After Execute");
+					String opResult = "No Result";
+					opResult = op.getOutCsfStringsString500();
+					log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) opResult: " + opResult);
+				}catch(Exception e){
+					log.debug("Unisa-StudentRegistration - UploadAction - Upload - Staae05sAppAdmissionEvaluator - After Execute / sessionID=" + request.getSession().getId() + " / Error=" + e );
+					log.warn("Unisa-StudentRegistration - UploadAction - Upload - Staae05sAppAdmissionEvaluator - After Execute / sessionID=" + request.getSession().getId() + " / Error=" + e );
+				}
+				/**End of Send Letter
+				*/
 				
 				log.debug("UploadAction moveDocuments if any: " + stuRegForm.getStudent().getNumber());
 				 

@@ -21,6 +21,7 @@ import za.ac.unisa.lms.tools.mdapplications.forms.Student;
 import za.ac.unisa.lms.tools.mdapplications.forms.MdPrev;
 import za.ac.unisa.lms.tools.mdapplications.forms.StudentFile;
 
+@SuppressWarnings({"rawtypes", 	"unchecked", "unused"})
 public class MdApplicationsQueryDAO extends StudentSystemDAO {
 
 	public static Log log = LogFactory.getLog(MdApplicationsQueryDAO.class);
@@ -31,6 +32,7 @@ public class MdApplicationsQueryDAO extends StudentSystemDAO {
 	 * @param applyType
 	 *            The application type : F = formal / S = Short courses
 	 */
+
 	public ArrayList getQualList(String applyType, String sYear)
 			throws Exception {
 		ArrayList list = new ArrayList();
@@ -209,41 +211,34 @@ public class MdApplicationsQueryDAO extends StudentSystemDAO {
 		}
 	}
 
-	public boolean validateClosingDate(String sYear) throws Exception {
-// validateClosingDate(String sQual, String sYear) throws Exception {
-//		Int currentYear = (Calendar.getInstance().get(Calendar.YEAR));
-//      + "and substr(regdat.type,7,1) = grd.under_post_categor "
-		String sQual="";
+	public boolean validateClosingDate(String sYear, String dateSelect) throws Exception {
 
+		boolean result = false;
+		
 		String query="Select regdat.type from regdat "
-			+ " where regdat.type = 'WEBMD' "
-			+ " and regdat.academic_year = " + sYear
+			+ " where regdat.type = ? "
+			+ " and regdat.academic_year = ? "
 		    + " and trunc(sysdate) between regdat.from_date and regdat.to_date ";
-		String queryother=" Select regdat.type from regdat,grd "
-			+ " where (grd.code='" +sQual +"' "
-			+ " and grd.code in (select mk_qualification_c from quaspc where app_open=regdat.type "
-			+ " and regdat.academic_year = " + sYear
-			+ " and trunc(sysdate) between regdat.from_date and regdat.to_date ))"
-			+ " or (grd.code='" +sQual +"' and grd.under_post_categor=substr(regdat.type,4,1) "
-			+ " and regdat.academic_year = " + sYear
-		    + " and trunc(sysdate) between regdat.from_date and regdat.to_date) ";
-		//log.debug(query);
+		
+		//log.debug("MdApplicationsQueryDAO - validateClosingDate - query="+query+", sYear="+sYear+", dateSelect="+dateSelect);
 
 		try {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-			List queryList = jdt.queryForList(query);
+			List queryList = jdt.queryForList(query, new Object []{dateSelect, sYear});
 			Iterator i = queryList.iterator();
 			if (i.hasNext()) {
-				return true;
+				result = true;
+				//log.debug("MdApplicationsQueryDAO - validateClosingDate - dateSelect="+dateSelect+" = TRUE");
 			}else{
-				return false;
+				result = false;
 			}
 		} catch (Exception ex) {
 			throw new Exception(
-					"MdApplicationsQueryDAO : Error closing date" + sQual, ex);
+					"MdApplicationsQueryDAO : Error reading closing dates" + dateSelect +", "+sYear+" / "+ ex);
 		}
+		return result;
 	}
-
+	
 	/**
 	 * This method returns a list of languages
 	 */
@@ -264,9 +259,14 @@ public class MdApplicationsQueryDAO extends StudentSystemDAO {
 	/**
 	 * This method returns a list of specialisations
 	 */
-	public ArrayList getSpesList(String sQual, String sYear) throws Exception {
+	public ArrayList getSpesList(String sQual, String sYear, boolean isAdmin) throws Exception {
 		ArrayList list = new ArrayList();
 
+		String wapString = "            and quaspc.app_open=regdat.type ";
+		if (isAdmin){
+			wapString = "            and quaspc.app_open like 'WAP%' " ;
+		}
+		
 		String query1 = "select substr(trim(speciality_code)||'NVT',1,3)||'-'||mk_qualification_c as speciality_code ," +
 						" substr(english_descriptio,1,60) as english_descriptio from quaspc" +
 						" where in_use_flag = 'Y'" +
@@ -282,7 +282,7 @@ public class MdApplicationsQueryDAO extends StudentSystemDAO {
 						" and (from_year=0 or from_year<=" +sYear + ")" +
 						" and (to_year=0 or to_year>=" +sYear + ")" +
 						" and regdat.academic_year =" +sYear +
-						" and quaspc.app_open = regdat.type " +
+						" " + wapString +
 						" and trunc(sysdate) between regdat.from_date and regdat.to_date " +
 						" order by mk_qualification_c, english_descriptio";
 
@@ -548,7 +548,6 @@ public class MdApplicationsQueryDAO extends StudentSystemDAO {
 		String sql;
 		String title;
 		Student stu = new Student();
-		MdApplicationsForm mdForm = new MdApplicationsForm();
 		title="";
 
 		sql = "select mk_student_nr, app_sequence_nr, mk_qualification_c, speciality_code, " +
@@ -568,10 +567,10 @@ public class MdApplicationsQueryDAO extends StudentSystemDAO {
 				stu.setApplYear(data.get("apppyr").toString());
 				if(data.get("interest_area") !=null){
 					stu.setInterestArea(data.get("interest_area").toString());
-					//log.debug("DAO getMDRecord NOT NULL: " + mdForm.getStudent().getInterestArea());
+					//log.debug("DAO getMDRecord NOT NULL: " + stu.getInterestArea());
 				}else{
 					stu.setInterestArea("");
-					//log.debug("DAO getMDRecord NULL: " + mdForm.getStudent().getInterestArea());
+					//log.debug("DAO getMDRecord NULL: " + stu.getInterestArea());
 				}
 				if(data.get("proposed_title") !=null){
 					stu.setResearchTopic(data.get("proposed_title").toString());
@@ -643,7 +642,6 @@ public class MdApplicationsQueryDAO extends StudentSystemDAO {
 		String sql2;
 		String title;
 		Student stu = new Student();
-		MdApplicationsForm mdForm = new MdApplicationsForm();
 		title="";
 
 		if("".equals(scode)){
@@ -670,10 +668,10 @@ public class MdApplicationsQueryDAO extends StudentSystemDAO {
 				stu.setAdmstatus(data.get("admission_status").toString());
 				if(data.get("interest_area") !=null){
 					stu.setInterestArea(data.get("interest_area").toString());
-					//log.debug("DAO getMDRecordOLD NOT NULL: " + mdForm.getStudent().getInterestArea());
+					//log.debug("DAO getMDRecordOLD NOT NULL: " + stu.getInterestArea());
 				}else{
 					stu.setInterestArea("");
-					//log.debug("DAO getMDRecordOLD NULL: " + mdForm.getStudent().getInterestArea());
+					//log.debug("DAO getMDRecordOLD NULL: " + stu.getInterestArea());
 				}
 				if(data.get("proposed_title") !=null){
 					stu.setResearchTopic(data.get("proposed_title").toString());
@@ -690,8 +688,7 @@ public class MdApplicationsQueryDAO extends StudentSystemDAO {
 			sql2 = "select mk_student_nr, app_sequence_nr, mk_qualification_c, speciality_code, " +
 			  " admission_status, interest_area, proposed_title " +
 			  " from mdappl where mk_student_nr = " + studentNr +
-			  " and mk_qualification_c = '" + qcode + "' " +
-			  " and speciality_code = '" + scode + "' " +
+			  " and (mk_qualification_c = '" + qcode + "' or applied_qual = '" + qcode + "' ) " +
 			  " order by app_sequence_nr";
 			try {
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -705,10 +702,10 @@ public class MdApplicationsQueryDAO extends StudentSystemDAO {
 				stu.setSeqnr(data.get("app_sequence_nr").toString());
 				if(data.get("interest_area") !=null){
 					stu.setInterestArea(data.get("interest_area").toString());
-					//log.debug("DAO getMDRecordOLD StuNr = NULL and Int NOT NULL: " + mdForm.getStudent().getInterestArea());
+					//log.debug("DAO getMDRecordOLD StuNr = NULL and Int NOT NULL: " + stu.getInterestArea());
 				}else{
 					stu.setInterestArea("");
-					//log.debug("DAO getMDRecordOLD StuNr = NULL and Int NULL: " + mdForm.getStudent().getInterestArea());
+					//log.debug("DAO getMDRecordOLD StuNr = NULL and Int NULL: " + stu.getInterestArea());
 				}
 				if(data.get("proposed_title") !=null){
 					stu.setResearchTopic(data.get("proposed_title").toString());
@@ -778,9 +775,7 @@ public class MdApplicationsQueryDAO extends StudentSystemDAO {
 
 
 	public void updMDrecordOld(Student stu, String qcode, String scode) throws Exception {
-		MdApplicationsForm mdForm = new MdApplicationsForm();
-		//log.debug("DAO updMDrecordOld - Form: " + mdForm.getStudent().getInterestArea());
-		//log.debug("DAO updMDrecordOld - Stu: " + stu.getInterestArea());
+		//log.debug("DAO updMDrecordOld - InterestArea: " + stu.getInterestArea());
 		
 		String query="";
 		query="update mdappl set interest_area = '" + stu.getInterestArea() + "' " +
