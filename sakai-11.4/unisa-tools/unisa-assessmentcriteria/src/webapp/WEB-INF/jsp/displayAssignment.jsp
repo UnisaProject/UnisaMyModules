@@ -104,14 +104,19 @@
 				document.getElementsByName("assignment.format")[i].checked=false;
 				if (group=="S"){
 					if (document.getElementsByName("assignment.format")[i].value=="A"){  
-						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Discussion Forum								
+						document.getElementsByName("assignment.format")[i].disabled=true; //Disable MCQ								
 					}		
 					if (document.getElementsByName("assignment.format")[i].value=="BL"){  
-						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Discussion Forum								
+						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Blog								
 					}		
 					if (document.getElementsByName("assignment.format")[i].value=="DF"){  
 						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Discussion Forum								
 					}		
+				}
+				if (group=="F"){
+					if (document.getElementsByName("assignment.format")[i].value=="OR"){  
+						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Oral							
+					}						
 				}
 			}	
 		//Reset Assignment Type, enable all buttons
@@ -194,13 +199,13 @@
 					document.getElementsByName("assignment.type")[i].disabled=true;								
 				}	
 				if (group=="F"){
-					if (document.getElementsByName("assignment.type")[i].value=="PF"){            //Disable Portfolio
+					if (document.getElementsByName("assignment.type")[i].value=="PF"){        //Disable Portfolio
 						document.getElementsByName("assignment.type")[i].disabled=true;							
 					}
-					if (document.getElementsByName("assignment.type")[i].value=="PC"){            //Disable Practical
+					if (document.getElementsByName("assignment.type")[i].value=="PC"){        //Disable Practical
 						document.getElementsByName("assignment.type")[i].disabled=true;							
 					}
-					if (document.getElementsByName("assignment.type")[i].value=="PJ"){            //Disable Project
+					if (document.getElementsByName("assignment.type")[i].value=="PJ"){        //Disable Project
 						document.getElementsByName("assignment.type")[i].disabled=true;							
 					}				
 				}
@@ -318,7 +323,7 @@
 				}	
 			}
 		}
-		if (format=="OR"){  //Discusson Forum 
+		if (format=="OR"){  //Oral
 			for (var i=0;i<document.getElementsByName("assignment.type").length;i++) 
 			{	
 				if (document.getElementsByName("assignment.type")[i].value=="G"){             //Disable Group Assessment
@@ -341,12 +346,44 @@
 				}
 				if (document.getElementsByName("assignment.type")[i].value=="S"){             //Disable Peer Assignment
 					document.getElementsByName("assignment.type")[i].disabled=true;								
-				}
-				if (document.getElementsByName("assignment.type")[i].value=="O"){             //Disable Online Examination
-					document.getElementsByName("assignment.type")[i].disabled=true;								
-				}							
+				}	
+				if (document.getElementsByName("assignment.type")[i].value=="I"){  
+					document.getElementsByName("assignment.type")[i].disabled=true;			  //Disable Individual						
+				}	
+				//BRS 2019 - 20180530
+				if (group=="F"){
+					if (document.getElementsByName("assignment.type")[i].value=="O"){  
+						document.getElementsByName("assignment.type")[i].disabled=true;		 //Disable Online Examination						
+					}
+				}					
 			}
 		}
+	}
+	
+	
+function setDefaultFormats(group){
+		
+		//Reset Assignment Format, enable all buttons
+		for (var i=0;i<document.getElementsByName("assignment.format").length;i++) 
+			{				
+				if (group=="S"){
+					if (document.getElementsByName("assignment.format")[i].value=="A"){  
+						document.getElementsByName("assignment.format")[i].disabled=true; //Disable MCQ								
+					}		
+					if (document.getElementsByName("assignment.format")[i].value=="BL"){  
+						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Blog								
+					}		
+					if (document.getElementsByName("assignment.format")[i].value=="DF"){  
+						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Discussion Forum								
+					}		
+				}
+				if (group=="F"){
+					if (document.getElementsByName("assignment.format")[i].value=="OR"){  
+						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Oral							
+					}						
+				}
+			}	
+		
 	}
 	
 	function onChangeNormalWeight(){
@@ -359,21 +396,20 @@
   });
   
   $(document).ready(function(){	  
-	  if (document.getElementsByName("assignmentAction").value!="view"){
-		  var group="";
-		  var format="";
-		  for (var i=0;i<document.getElementsByName("assignment.group").length;i++){		  
-			  	if (document.getElementsByName("assignment.group")[i].checked){			  
-				  group =document.getElementsByName("assignment.group")[i].value;
-				}					
-		  }
-		  for (var i=0;i<document.getElementsByName("assignment.format").length;i++){		  
-			  	if (document.getElementsByName("assignment.format")[i].checked){			  
-				  format =document.getElementsByName("assignment.format")[i].value;	
-				  setDefaultTypes(format,group);
-				}					
-		  }
+	  var group="";
+	  var format="";
+	  for (var i=0;i<document.getElementsByName("assignment.group").length;i++){		  
+		  	if (document.getElementsByName("assignment.group")[i].checked){			  
+			  group =document.getElementsByName("assignment.group")[i].value;
+			  setDefaultFormats(group);
+			}					
 	  }
+	  for (var i=0;i<document.getElementsByName("assignment.format").length;i++){		  
+		  	if (document.getElementsByName("assignment.format")[i].checked){			  
+			  format =document.getElementsByName("assignment.format")[i].value;	
+			  setDefaultTypes(format,group);
+			}					
+	  }	 
   });
  </script>
 
@@ -498,6 +534,7 @@
 								<logic:equal name="assessmentCriteriaForm" property="assignmentAction" value="view">
 									<td><html:radio property="assignment.type" idName="record" value="code" disabled="true"></html:radio></td>
 								</logic:equal>
+									<!-- <td><bean:write name="record" property="engDescription"/></td> -->
 									<td><bean:write name="record" property="engDescription"/></td>
 							</tr>
 						</logic:iterate>

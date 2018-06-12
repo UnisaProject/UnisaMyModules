@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.mail.internet.InternetAddress;
-import javax.management.openmbean.OpenDataException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,7 +32,6 @@ import org.sakaiproject.event.api.UsageSession;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.event.api.UsageSessionService;
 
-import sun.util.calendar.CalendarUtils;
 import za.ac.unisa.lms.constants.EventTrackingTypes;
 import za.ac.unisa.lms.dao.Gencod;
 import za.ac.unisa.lms.dao.StudentSystemGeneralDAO;
@@ -241,19 +239,19 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 						Integer.parseInt(assessmentCritForm.getFinalMarkComp().getPortfolioComponent()) > 100)  {
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
 							new ActionMessage("message.generalmessage",
-										"Non-venue Examination component must be a value from 0 to 100"));	
+										"Non-venue examination component must be a value from 0 to 100"));	
 				}
 				if (Integer.parseInt(assessmentCritForm.getFinalMarkComp().getExamComponent()) < 0 ||
 						Integer.parseInt(assessmentCritForm.getFinalMarkComp().getExamComponent()) > 100)  {
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
 							new ActionMessage("message.generalmessage",
-										"Venue Examination component must be a value from 0 to 100"));	
+										"Venue examination component must be a value from 0 to 100"));	
 				}
 				if (assessmentCritForm.getExamBase().equalsIgnoreCase("CONT")){
 					if (Integer.parseInt(assessmentCritForm.getFinalMarkComp().getYearMarkComponent())<100){
 						messages.add(ActionMessages.GLOBAL_MESSAGE,
 								new ActionMessage("message.generalmessage",
-										"Module is flagged for continuous assessment, year mark component of the final mark composition must be 100%"));
+										"Module is flagged for <b>Continuous assessment</b> on AIMS. Add a 100% Year mark component weight to the Final Mark Composition. No Venue or Non-Venue Examination weight allowed."));
 				}							
 				}else{
 					//Venue and Non Venue Base exam
@@ -281,7 +279,25 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 											"Year mark component of the final mark composition must be between 20 and 49%. Any value outside this range need Senate approval and must be affected by DSAA."));
 						}
 					}
-				}				
+				}	
+				//Change 2019 BR
+				if(assessmentCritForm.getExamBase().equalsIgnoreCase("NONVENUE")){
+					if (assessmentCritForm.getFinalMarkComp().getPortfolioComponent()!=null &&
+							Integer.parseInt(assessmentCritForm.getFinalMarkComp().getPortfolioComponent())==0){
+						messages.add(ActionMessages.GLOBAL_MESSAGE,
+								new ActionMessage("message.generalmessage",
+										"Module is flagged for a <b>Non-venue examination</b> on AIMS. Add a Non-venue examination component weight to the Final Mark Composition"));
+					}
+				}
+				//Change 2019 BR
+				if(assessmentCritForm.getExamBase().equalsIgnoreCase("VENUE")){
+					if (assessmentCritForm.getFinalMarkComp().getExamComponent()!=null &&
+							Integer.parseInt(assessmentCritForm.getFinalMarkComp().getExamComponent())==0){
+						messages.add(ActionMessages.GLOBAL_MESSAGE,
+								new ActionMessage("message.generalmessage",
+										"Module is flagged for a <b>Venue examination</b> on AIMS. Add a Venue examination component weight to the Final Mark Composition"));
+					}
+				}
 				if (Integer.parseInt(assessmentCritForm.getFinalMarkComp().getYearMarkComponent()) +
 						Integer.parseInt(assessmentCritForm.getFinalMarkComp().getPortfolioComponent()) +
 						Integer.parseInt(assessmentCritForm.getFinalMarkComp().getExamComponent())!=100) {
@@ -896,13 +912,13 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 				if (finalMarkComp.getExamYear()==null){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
 							new ActionMessage("message.generalmessage",
-										"The assessment plan must include Final mark composition and examination admission method information before authorisation can be requested."));
+										"The assessment plan must include <b>Final Mark Composition</b> and <b>Examination Admission Method</b> information before authorisation can be requested."));
 				}else {
 					if (assessmentCritForm.getExamBase().equalsIgnoreCase("CONT")){
 						if (Integer.parseInt(assessmentCritForm.getFinalMarkComp().getYearMarkComponent())!=100){
 							messages.add(ActionMessages.GLOBAL_MESSAGE,
 									new ActionMessage("message.generalmessage",
-											"Module is flagged for continuous assessment, year mark component of the final mark composition must be 100%"));
+											"Module is flagged for <b>Continuous assessment</b> on AIMS. Add a 100% Year mark component weight to the Final Mark Composition. No Venue or Non-Venue Examination weight allowed."));
 						}							
 					} 
 					if ((assessmentCritForm.getExamBase().equalsIgnoreCase("VENUE") || assessmentCritForm.getExamBase().equalsIgnoreCase("NONVENUE")) &&
@@ -928,6 +944,24 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 							messages.add(ActionMessages.GLOBAL_MESSAGE,
 									new ActionMessage("message.generalmessage",
 											"Year mark component of the final mark composition must be between 20 and 49%. Any value outside this range need Senate approval and must be affected by DSAA."));
+						}
+					}					
+					//Change 2019 BR
+					if(assessmentCritForm.getExamBase().equalsIgnoreCase("NONVENUE")){
+						if (assessmentCritForm.getFinalMarkComp().getPortfolioComponent()!=null &&
+								Integer.parseInt(assessmentCritForm.getFinalMarkComp().getPortfolioComponent())==0){
+							messages.add(ActionMessages.GLOBAL_MESSAGE,
+									new ActionMessage("message.generalmessage",
+											"Module is flagged for a <b>Non-venue examination</b> on AIMS. Add a Non-venue examination component weight to the Final Mark Composition"));
+						}
+					}
+					//Change 2019 BR
+					if(assessmentCritForm.getExamBase().equalsIgnoreCase("VENUE")){
+						if (assessmentCritForm.getFinalMarkComp().getExamComponent()!=null &&
+								Integer.parseInt(assessmentCritForm.getFinalMarkComp().getExamComponent())==0){
+							messages.add(ActionMessages.GLOBAL_MESSAGE,
+									new ActionMessage("message.generalmessage",
+											"Module is flagged for a <b>Venue examination</b> on AIMS. Add a Venue examination component weight to the Final Mark Composition"));
 						}
 					}
 					//Johanet - change 2015 BR
@@ -1009,17 +1043,11 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 						//surveys 
 					}else{
 						if (dueDate.before(firstControlDate) || dueDate.equals(firstControlDate)){
-							existAssignmentBeforeFirstDueDate=true;
-//							if ("PF".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType()) ||
-//									"PJ".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType()) ||
-//									"PC".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType())){
+							existAssignmentBeforeFirstDueDate=true;//						
 							if ("S".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getGroup())) {
 								portfolioBeforeFirstDueDate=true;
 							}
 						}
-//						if ("PF".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType()) ||
-//								"PJ".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType()) ||
-//								"PC".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType())){
 						if ("S".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getGroup())) {
 							nrOfPortfolios = nrOfPortfolios + 1;
 						}
@@ -1027,9 +1055,6 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 							nrOfAssignmentsBeforeSecondDueDate = nrOfAssignmentsBeforeSecondDueDate + 1;
 						}						
 						if ((Integer.parseInt(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getNormalWeight())>0)) {
-//							if ("PF".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType()) ||
-//									"PJ".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType()) ||
-//									"PC".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType())){
 							if ("S".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getGroup())) {
 								totalPortfolioNormalWeight = totalPortfolioNormalWeight + Integer.parseInt(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getNormalWeight());
 							}else{
@@ -1038,9 +1063,6 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 							existAssignmentwithNormalWeights=true;
 						}
 						if ((Integer.parseInt(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getAegrotatWeight())>0)){
-//							if ("PF".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType()) ||
-//									"PJ".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType()) ||
-//									"PC".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType())){
 							if ("S".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getGroup())) {
 								totalPortfolioAegrotatWeight = totalPortfolioAegrotatWeight + Integer.parseInt(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getAegrotatWeight());
 							}else{
@@ -1049,9 +1071,6 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 							existAssignmentwithAegrotatWeights=true;
 						}
 						if ((Integer.parseInt(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getRepeatWeight())>0)){
-//							if ("PF".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType())||
-//									"PJ".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType()) ||
-//									"PC".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getType())){
 							if ("S".equalsIgnoreCase(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getGroup())) {
 								totalPortfolioRepeatWeight = totalPortfolioRepeatWeight + Integer.parseInt(((Assignment)(assessmentCritForm.getListAssignment().get(i))).getRepeatWeight());
 							}else{
@@ -1137,14 +1156,13 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 				if (assessmentCritForm.getExamBase().equalsIgnoreCase("CONT") && nrOfPortfolios > 0){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
 							new ActionMessage("message.generalmessage",
-										"Module is flagged for continuous assessment, summative assessments are not allowed"));
+										"Module is flagged for <b>Continuous assessment</b> on AIMS, summative assessments are not allowed"));
 				}
-				if (assessmentCritForm.getExamBase().equalsIgnoreCase("CONT") && 
-						assessmentCritForm.getFinalMarkComp().getYearMarkComponent()!=null &&
-						Integer.parseInt(assessmentCritForm.getFinalMarkComp().getYearMarkComponent()) < 100){
+				//BRD 2019 - 20180530
+				if (assessmentCritForm.getExamBase().equalsIgnoreCase("NONVENUE") && nrOfPortfolios == 0){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
 							new ActionMessage("message.generalmessage",
-										"Module is flagged for continuous assessment, final mark component, year mark should be 100%."));
+										"Module is flagged for <b>Non-venue Based examination</b> on AIMS.  Add a Non-Venue Based Exam Type(summative asssessment) to the listed assessments."));
 				}
 				//if exam admission method - Admission granted if student submitted a specified number of of prescribed assignments
 				//Check on authorisation if the assessment plan number of assignments at least equals the number of assignments to be submitted for exam admission
@@ -1164,9 +1182,6 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 						}
 						if (nrFormativeAssAfterExamAdmDate > 0) {	
 							//20160605 - 2018 Changes
-//							messages.add(ActionMessages.GLOBAL_MESSAGE,
-//									new ActionMessage("message.generalmessage",
-//												"If examination admission is given on the submission of more than one assessment then all formative assessment due dates must be before the examination admission date(" + assessmentCritForm.getExamAdmissionDate() + "). Not all formative assessments satisfy this requirement." ));
 							messages.add(ActionMessages.GLOBAL_MESSAGE,
 									new ActionMessage("message.generalmessage",
 												"If examination admission is given on the 'Submission of more than one assessment' then all formative assessments due dates must be at least 3 days before the examination admission date(" + assessmentCritForm.getExamAdmissionDate() + "). Not all formative assessments satisfy this requirement." ));
@@ -3040,7 +3055,7 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 				if (assessmentCritForm.getExamBase().equalsIgnoreCase("CONT")){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
 							new ActionMessage("message.generalmessage",
-										"Module is flagged for continuous assessment, summative assessments are not allowed."));
+										"Module is flagged for continuous assessment on AIMS, summative assessments are not allowed."));
 				}
 			}
 						
@@ -3187,13 +3202,20 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 //							}
 						}
 						
+						//BRD 2019 - 20180530 Allow modules marked as Continiuous assessment on AIMS F69 to select due dates for formative assessments up until the cut-off date for 'Last Due Date Portfolio' on F586
+						String lastDueDate =assessmentCritForm.getLastAssDueControlDate();
 						Date lastControlDate = formatter.parse(assessmentCritForm.getLastAssDueControlDate());
+						if(assessmentCritForm.getExamBase().equalsIgnoreCase("CONT")){
+							lastControlDate = formatter.parse(assessmentCritForm.getLastPortfolioDueControlDate());
+							lastDueDate=assessmentCritForm.getLastPortfolioDueControlDate();
+						}
+						
 						if (assessmentCritForm.getFinalMarkComp().getExamAdmissionMethod().equalsIgnoreCase("A1") ||
 								examAdmissionDate.after(lastControlDate)){
 							if (dueDate.after(lastControlDate)){
 								messages.add(ActionMessages.GLOBAL_MESSAGE,
 										new ActionMessage("message.generalmessage",
-													"All formative assignments must be due on or before " + assessmentCritForm.getLastAssDueControlDate()));
+													"All formative assignments must be due on or before " + lastDueDate));
 							}
 						}
 						
@@ -3257,11 +3279,11 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 									"Assessment Type is required"));
 			}else{
 
-				//Validate Assessment Formats/Types for Summative assessment Group
+				//Validate Assessment Formats/Types for Summative assessment Group				
 				if (assessmentCritForm.getAssignment().getGroup().equalsIgnoreCase("F")){
 					if ((assessmentCritForm.getAssignment().getFormat().equalsIgnoreCase("A") && (assessmentCritForm.getAssignment().getType().equalsIgnoreCase("I") ||
 																								  assessmentCritForm.getAssignment().getType().equalsIgnoreCase("T") ||
-							                                                                      assessmentCritForm.getAssignment().getType().equalsIgnoreCase("G"))) ||
+							                                                                      assessmentCritForm.getAssignment().getType().equalsIgnoreCase("G"))) ||				
 				    (assessmentCritForm.getAssignment().getFormat().equalsIgnoreCase("DF") && assessmentCritForm.getAssignment().getType().equalsIgnoreCase("I")) ||
 					(assessmentCritForm.getAssignment().getFormat().equalsIgnoreCase("BL") && assessmentCritForm.getAssignment().getType().equalsIgnoreCase("I")) ||
 					(assessmentCritForm.getAssignment().getFormat().equalsIgnoreCase("SA") && assessmentCritForm.getAssignment().getType().equalsIgnoreCase("I")) ||
@@ -3288,14 +3310,16 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 											"<tr><td>Blog</td><td>-</td><td>Individual</td></tr>" +
 											"<tr><td>Samigo</td><td>-</td><td>Individual</td></tr>" +
 											"<tr><td>External Assessment</td><td>-</td><td>Individual</td></tr>" +
-											"<tr><td>myUnisa File Submission</td><td>-</td><td>Individual, Group, Peer Assessment Report, Peer Assessment</td></tr>" +
+											"<tr><td>myUnisa File Submission</td><td>-</td><td>Individual, Group, Peer Assessment Report, Peer Assessment</td></tr>" +										
 											"</table>"));
 					}
 				}
 				//Validate Assessment Formats/Types for Summative assessment Group
+				//BRS 2019 - 20180530 - Allow summative assessment (Oral - Online Examination)
 				if (assessmentCritForm.getAssignment().getGroup().equalsIgnoreCase("S")){
 					if ((assessmentCritForm.getAssignment().getFormat().equalsIgnoreCase("SA") && assessmentCritForm.getAssignment().getType().equalsIgnoreCase("O")) ||
-					(assessmentCritForm.getAssignment().getFormat().equalsIgnoreCase("XA") && assessmentCritForm.getAssignment().getType().equalsIgnoreCase("O")) ||					
+					(assessmentCritForm.getAssignment().getFormat().equalsIgnoreCase("XA") && assessmentCritForm.getAssignment().getType().equalsIgnoreCase("O")) ||		
+					(assessmentCritForm.getAssignment().getFormat().equalsIgnoreCase("OR") && assessmentCritForm.getAssignment().getType().equalsIgnoreCase("O")) ||	
 					(assessmentCritForm.getAssignment().getFormat().equalsIgnoreCase("H") && (assessmentCritForm.getAssignment().getType().equalsIgnoreCase("PF") ||
 							                                                                 assessmentCritForm.getAssignment().getType().equalsIgnoreCase("PJ") ||
 							                                                                 assessmentCritForm.getAssignment().getType().equalsIgnoreCase("PC"))) ||
@@ -3318,28 +3342,43 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 											"<tr><td>Samigo</td><td>-</td><td>Online Examination</td></tr>" +
 											"<tr><td>External Assessment</td><td>-</td><td>Online Examination</td></tr>" +
 											"<tr><td>myUnisa File Submission</td><td>-</td><td>Portfolio, Practical, Project, Peer Assessment Report, Peer Assessment, Online Examination</td></tr>" +
+											"<tr><td>Oral<td>-</td><td>Online Examination</td></tr>" +
 											"</table>"));
 					}
+					//BRD 2019 - 20180530 - only allow selection of Oral format as summative assessment if Non-venue Based Exam value in AIMS F69 is set for Oral
+					if (assessmentCritForm.getAssignment().getFormat().equalsIgnoreCase("OR")) {
+						 if (assessmentCritForm.getExamBase().equalsIgnoreCase("NONVENUE") && assessmentCritForm.getNonVenueExamType().equalsIgnoreCase("ORAL")){
+							 //Ok - do nothing
+						 }else{
+							 messages.add(ActionMessages.GLOBAL_MESSAGE,
+							 new ActionMessage("message.generalmessage",
+										"Assessment format Oral is only allowed for a summative assessment if the Non-venue based exam on AIMS is set for Oral."));
+						 }					
+					}
+					//Change BRD 2016	
+					//BRD 2019 - Add Oral as allowed summative assessment for MIXED ind
+					if	(assessmentCritForm.getSummativeAssessInd().equalsIgnoreCase("MIXED") && 
+									assessmentCritForm.getExamBase().equalsIgnoreCase("NONVENUE")) {
+						if ((assessmentCritForm.getAssignment().getFormat().equalsIgnoreCase("H") &&
+								(assessmentCritForm.getAssignment().getType().equalsIgnoreCase("PF") ||
+										assessmentCritForm.getAssignment().getType().equalsIgnoreCase("PC") ||	
+										assessmentCritForm.getAssignment().getType().equalsIgnoreCase("PJ"))) ||
+							(assessmentCritForm.getAssignment().getFormat().equalsIgnoreCase("OR") 
+								&& assessmentCritForm.getAssignment().getType().equalsIgnoreCase("O"))) {
+							//Ok do nothing
+						} else {
+							messages.add(ActionMessages.GLOBAL_MESSAGE,
+									new ActionMessage("message.generalmessage",
+												"The Assessment Format and Type combination that you selected is not allowed.  If the Summative Assessment flag on AIMS is set to MIXED and " +
+												"the examination is set to non-venue based, only the following Summative Assessment Format and Type combination is valid:<br/>" +
+												"<table>" +		
+												"<tr><td>Written</td><td>-</td><td>PortFolio, Practical, Project</td></tr>" +
+												"<tr><td>Oral<td>-</td><td>Online Examination</td></tr>" +
+												"</table>"));
+						}
+					}
 				}
-					
-			}
-			//Change BRD 2016
-			if (assessmentCritForm.getAssignment().getGroup().equalsIgnoreCase("S") && 
-					(assessmentCritForm.getSummativeAssessInd().equalsIgnoreCase("MIXED") && 
-							assessmentCritForm.getExamBase().equalsIgnoreCase("NONVENUE"))) {
-				if (assessmentCritForm.getAssignment().getFormat().equalsIgnoreCase("H") &&
-						(assessmentCritForm.getAssignment().getType().equalsIgnoreCase("PF") ||
-								assessmentCritForm.getAssignment().getType().equalsIgnoreCase("PC") ||
-								assessmentCritForm.getAssignment().getType().equalsIgnoreCase("PJ"))) {
-					//Ok do nothing
-				} else {
-					messages.add(ActionMessages.GLOBAL_MESSAGE,
-							new ActionMessage("message.generalmessage",
-										"The Assessment Format and Type combination that you selected is not allowed.  If the Summative Assessment flag on AIMS is set to MIXED and " +
-										"the examination is set to non-venue based, only the following Summative Assessment Format and Type combination is valid:<br/>" +
-										"Written - Portfolio, Practical, Project "));
-				}
-			}
+			}	
 			
 			if (assessmentCritForm.getStudyUnit().getDepartment().equalsIgnoreCase("5") &&
 					assessmentCritForm.getAssignment().getFormat().equalsIgnoreCase("MS")){
@@ -3945,6 +3984,7 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 					assessmentCritForm.setExamBase("CONT");
 				}else{
 					assessmentCritForm.setExamBase("NONVENUE");
+					assessmentCritForm.setNonVenueExamType(sunpdt.getNonVenueBaseExam());
 				}	
 			}
 
@@ -4133,9 +4173,6 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 					} else {
 						if (assignment.getGroup()==null || assignment.getGroup().equalsIgnoreCase("")){
 							//Do nothing type not known, do not no against which date to test
-//						} else if ("PF".equalsIgnoreCase(assignment.getType()) ||
-//								"PJ".equalsIgnoreCase(assignment.getType()) ||
-//								"PC".equalsIgnoreCase(assignment.getType())){
 						} else if ("S".equalsIgnoreCase(assignment.getGroup())) {	
 							//Test porfolio's, practical's and projects against last due date
 							Date lastControlDate = formatter.parse(assessmentCritForm.getLastPortfolioDueControlDate());
@@ -4144,11 +4181,55 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 								break;
 							}	
 						}else {
-							Date lastControlDate = formatter.parse(assessmentCritForm.getLastAssDueControlDate());
-							if (dueDate.after(lastControlDate)){
-								errorFlag="Y";
-								break;
+							//20160622 changes for 2017
+							//Verify that all due dates for formative assessments with admission system AM(Submission of more than one assignment) are set before exam admission date for that academic period
+							//Verify that all due dates for formative assessments with admission system YM(Year mark subminimum achieved) are set at least 7 days before exam admission date for that academic period
+							calendar = Calendar.getInstance();
+							Date examAdmissionDate = formatter.parse(assessmentCritForm.getExamAdmissionDate());						
+							if (assessmentCritForm.getFinalMarkComp().getExamAdmissionMethod().equalsIgnoreCase("AM") ||
+								assessmentCritForm.getFinalMarkComp().getExamAdmissionMethod().equalsIgnoreCase("YM")){
+								if (assessmentCritForm.getFinalMarkComp().getExamAdmissionMethod().equalsIgnoreCase("YM") &&
+										assessmentCritForm.getYearMarkContributionYesNoFlag().equalsIgnoreCase("Y")){
+									calendar.setTime(examAdmissionDate);
+									calendar.add(Calendar.DATE, -6);
+									examAdmissionDate = calendar.getTime();
+									if (dueDate.before(examAdmissionDate)) {
+										//ok
+									} else {
+										errorFlag="Y";
+										break;
+										
+									}
+								} 
+								//20170605 - change for 2018
+								//Verify that all due dates for formative assessments with admission system AM(Submission of more than one assignment) are set at least 3 days before exam admission date for that academic period
+								if (assessmentCritForm.getFinalMarkComp().getExamAdmissionMethod().equalsIgnoreCase("AM")){
+									calendar.setTime(examAdmissionDate);
+									calendar.add(Calendar.DATE, -2);
+									examAdmissionDate = calendar.getTime();
+									if (dueDate.before(examAdmissionDate)) {
+										//ok
+									} else {
+										errorFlag="Y";
+										break;
+										
+									}
+								}
 							}
+							
+							//BRD 2019 - 20180530 Allow modules marked as Continiuous assessment on AIMS F69 to select due dates for formative assessments up until the cut-off date for 'Last Due Date Portfolio' on F586
+							Date lastControlDate = formatter.parse(assessmentCritForm.getLastAssDueControlDate());
+							if(assessmentCritForm.getExamBase().equalsIgnoreCase("CONT")){
+								lastControlDate = formatter.parse(assessmentCritForm.getLastPortfolioDueControlDate());								
+							}
+							
+							if (assessmentCritForm.getFinalMarkComp().getExamAdmissionMethod().equalsIgnoreCase("A1") ||
+									examAdmissionDate.after(lastControlDate)){
+								if (dueDate.after(lastControlDate)){
+									errorFlag="Y";
+									break;
+								}
+							}							
 						}
 					}
 				
@@ -4164,6 +4245,13 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 								break;
 							}							
 						}
+						//Validate that due date do not fall on a public holiday				
+						CourseDAO courseDAO = new CourseDAO();
+						boolean dueDateOnPublicHoliday = courseDAO.isDueDateOnPublicHoliday(assignment.getDueDate(),Short.parseShort(assessmentCritForm.getAcademicYear()));
+						if (dueDateOnPublicHoliday==true){
+							errorFlag="Y";
+							break;
+						}
 					}
 					
 				}
@@ -4171,32 +4259,81 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 				if (assignment.getType()==null || assignment.getType().equalsIgnoreCase("")){
 					errorFlag="Y";
 					break;
-				}
-				//Assessment plan changes for 2016
-				//Johanet added 20130702 - can only perform test if sunpdt exists
-//				if ((assignment.getFormat().equalsIgnoreCase("DF") ||
-//						assignment.getFormat().equalsIgnoreCase("BL") ||
-//						assignment.getFormat().equalsIgnoreCase("SA") ||
-//						assignment.getFormat().equalsIgnoreCase("XA") ||
-//						assignment.getFormat().equalsIgnoreCase("MS"))){
-//					if (!assessmentCritForm.getFormativeAssessInd().equalsIgnoreCase("ONLINE"))
-//						errorFlag="Y";
-//						break;
-//				}
-				
-				if (assignment.getGroup().equalsIgnoreCase("S") && 
-						(assessmentCritForm.getSummativeAssessInd().equalsIgnoreCase("MIXED") && 
-						assessmentCritForm.getExamBase().equalsIgnoreCase("NONVENUE"))) {
-					if (assignment.getFormat().equalsIgnoreCase("H") &&
-							(assignment.getType().equalsIgnoreCase("PF") ||
-									assignment.getType().equalsIgnoreCase("PC") ||
-									assignment.getType().equalsIgnoreCase("PJ"))) {
-						//Ok do nothing
-					} else {
-						errorFlag="Y";
-						break;
+				}else{
+					//start//
+					//Validate Assessment Formats/Types for Summative assessment Group
+					//BRS 2019 - 20180530 - Allow formative assessment (Oral - Individual)
+					if (assignment.getGroup().equalsIgnoreCase("F")){
+							if ((assignment.getFormat().equalsIgnoreCase("A") && (assignment.getType().equalsIgnoreCase("I") ||
+									assignment.getType().equalsIgnoreCase("T") ||
+									assignment.getType().equalsIgnoreCase("G"))) ||					
+						    (assignment.getFormat().equalsIgnoreCase("DF") && assignment.getType().equalsIgnoreCase("I")) ||
+							(assignment.getFormat().equalsIgnoreCase("BL") && assignment.getType().equalsIgnoreCase("I")) ||
+							(assignment.getFormat().equalsIgnoreCase("SA") && assignment.getType().equalsIgnoreCase("I")) ||
+							(assignment.getFormat().equalsIgnoreCase("XA") && assignment.getType().equalsIgnoreCase("I")) ||					
+							(assignment.getFormat().equalsIgnoreCase("H") && (assignment.getType().equalsIgnoreCase("G") ||
+									assignment.getType().equalsIgnoreCase("I") ||
+									assignment.getType().equalsIgnoreCase("T"))) ||
+							(assignment.getFormat().equalsIgnoreCase("MS") && (assignment.getType().equalsIgnoreCase("G") ||
+									assignment.getType().equalsIgnoreCase("I") ||									                                                              
+									assignment.getType().equalsIgnoreCase("R") ||
+									assignment.getType().equalsIgnoreCase("S")))){
+							//Do nothing : Valid Assessment Format and Type combination  for Formative Assessment Group					
+						}else{                                                                 
+							errorFlag="Y";
+							break;
+						}
+					}
+					//Validate Assessment Formats/Types for Summative assessment Group
+					//BRS 2019 - 20180530 - Allow summative assessment (Oral - Online Examination)
+					if (assignment.getGroup().equalsIgnoreCase("S")){
+						if ((assignment.getFormat().equalsIgnoreCase("SA") && assignment.getType().equalsIgnoreCase("O")) ||
+						(assignment.getFormat().equalsIgnoreCase("XA") && assignment.getType().equalsIgnoreCase("O")) ||		
+						(assignment.getFormat().equalsIgnoreCase("OR") && assignment.getType().equalsIgnoreCase("O")) ||	
+						(assignment.getFormat().equalsIgnoreCase("H") && (assignment.getType().equalsIgnoreCase("PF") ||
+								assignment.getType().equalsIgnoreCase("PJ") ||
+								assignment.getType().equalsIgnoreCase("PC"))) ||
+						(assignment.getFormat().equalsIgnoreCase("MS") && (assessmentCritForm.getAssignment().getType().equalsIgnoreCase("PF") ||
+								assignment.getType().equalsIgnoreCase("PJ") ||
+								assignment.getType().equalsIgnoreCase("PC") ||
+								assignment.getType().equalsIgnoreCase("R") ||
+								assignment.getType().equalsIgnoreCase("S") ||
+								assignment.getType().equalsIgnoreCase("O")))){
+							//Do nothing : Valid Assessment Format and Type combination  for Summative Assessment Group					
+						}else{                                                                 
+							//Assessment Format and Type combination not valid for Summative Assessment Group	
+							errorFlag="Y";
+							break;
+						}
+						//BRD 2019 - 20180530 - only allow selection of Oral format as summative assessment if Non-venue Based Exam value in AIMS F69 is set for Oral
+						if (assignment.getFormat().equalsIgnoreCase("OR")) {
+							 if (assessmentCritForm.getExamBase().equalsIgnoreCase("NONVENUE") && assessmentCritForm.getNonVenueExamType().equalsIgnoreCase("ORAL")){
+								 //Ok - do nothing
+							 }else{
+									errorFlag="Y";
+									break;
+							 }					
+						}
+						//Change BRD 2016	
+						//BRD 2019 - Add Oral as allowed summative assessment for MIXED ind
+						if	(assessmentCritForm.getSummativeAssessInd().equalsIgnoreCase("MIXED") && 
+										assessmentCritForm.getExamBase().equalsIgnoreCase("NONVENUE")) {
+							if ((assignment.getFormat().equalsIgnoreCase("H") &&
+									(assignment.getType().equalsIgnoreCase("PF") ||
+											assignment.getType().equalsIgnoreCase("PC") ||	
+											assignment.getType().equalsIgnoreCase("PJ"))) ||
+								(assignment.getFormat().equalsIgnoreCase("OR") 
+									&& assignment.getType().equalsIgnoreCase("O"))) {
+								//Ok do nothing
+							} else {								
+									errorFlag="Y";
+									break;
+							}
+						}
 					}	
+					
 				}
+
 				String weightSet="N";
 				//Validate normal weight
 				if (assignment.getNormalWeight()==null || assignment.getNormalWeight().trim().equalsIgnoreCase("")){
