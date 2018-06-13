@@ -9,6 +9,7 @@
 <%@ page import="za.ac.unisa.lms.dao.Gencod"%>
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.assessmentcriteria.ApplicationResources"/>
+<sakai:html>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
 <script src="https://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
@@ -412,8 +413,7 @@ function setDefaultFormats(group){
 	  }	 
   });
  </script>
-
-<sakai:html>	
+	
 	<html:form action="/assessmentCriteria">
 		<!--<html:hidden property="currentPage" value="assignment"/>-->
 		<!--<html:hidden property="currentPage" value="assignment"/>-->

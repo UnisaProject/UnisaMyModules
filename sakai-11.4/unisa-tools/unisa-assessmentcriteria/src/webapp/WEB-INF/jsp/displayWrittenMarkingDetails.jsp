@@ -6,13 +6,14 @@
 <%@ taglib uri="http://sakaiproject.org/struts/sakai" prefix="sakai" %>
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.assessmentcriteria.ApplicationResources"/>
+<sakai:html>
 <script language="javascript">
 	function doAction() {
 		document.assessmentCriteriaForm.action = 'assessmentCriteria.do?act=saveData';  
 		document.assessmentCriteriaForm.submit();
 	}
 </script>
-<sakai:html>
+
 	<html:form action="/assessmentCriteria">
 		<!--<html:hidden property="currentPage" value="writtenMarking"/>-->
 		<sakai:messages/>
