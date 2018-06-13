@@ -1,0 +1,94 @@
+hr {
+	padding: 0px;
+   	margin: 0.5em auto;  
+}
+
+li div { 
+	text-align:right; 
+}
+
+li div span { 
+	float:left; 
+}
+
+/* This is the equivalent of cellspacing="0" */
+table {
+	border-collapse:collapse;
+}
+ 
+/* This is the equivalent of cellpadding="0" */
+td, th {
+  	padding:0;
+}
+ 
+/* This is the equivalent of border="1" */
+td, th {
+  	border:0;
+}
+
+label {
+    font-weight: normal !important;
+}
+
+.equal, .equal > div[class*='col-'] {  
+    display: -webkit-flex;
+    display: flex;
+    flex:1 1 auto;
+}
+
+.panel {
+	/*height : 300px;*/
+	margin-bottom:0;
+	position: relative;
+}
+
+.panel .panel-footer {
+	position : absolute;
+	bottom : 0;
+	margin-bottom:1px;
+	width : 100%;
+}
+
+.paddRight{
+  	padding-right: 60px; /*used to align list with checkboxes */
+}
+
+.paddRightMax{
+  	padding-right: 80px; /*used to align list with checkboxes */
+}
+
+.paddRightSmall{
+   	padding-right: 5px; /*used to align list with checkboxes */
+}
+
+.topAlign{
+  	vertical-align:top;
+   	/*background-color: #FBFBFB;*/
+   	/*text-align:center;*/
+}
+
+.parent {
+	background-color: #FBFBFB;
+	/*padding: 0;
+	margin: 0;*/
+}
+
+.dialog .ui-icon {
+    background-image: url("<c:url value='/resources/images/ui-icons_222222_256x240.png' />");
+}
+
+.ui-state-default .ui-icon {
+        	background-image: url("<c:url value='/resources/images/ui-icons_222222_256x240.png' />");
+}
+
+/* Override jQuery UI theme's padding on buttons: */
+.ui-button-text-only .ui-button-text {
+        padding: 0.2em 0.5em;
+}
+
+.container{
+   min-height: 600px; 
+   height:auto !important; 
+   height: 600px; 
+}
+
