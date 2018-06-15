@@ -155,10 +155,7 @@ public class TUser implements User {
         return null;
     }
 
-    public Element toXml(Document doc, Stack stack) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+
 
     public int compareTo(Object arg0) {
         // TODO Auto-generated method stub
@@ -178,11 +175,19 @@ public class TUser implements User {
         return this.getDisplayId();
     }
 
+	@Override
+	public Element toXml(Document arg0, Stack<Element> arg1) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public Date getCreatedDate() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public Date getModifiedDate() {
 		// TODO Auto-generated method stub
 		return null;

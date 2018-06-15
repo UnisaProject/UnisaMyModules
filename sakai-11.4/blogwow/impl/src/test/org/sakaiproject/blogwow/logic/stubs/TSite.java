@@ -219,7 +219,7 @@ public class TSite implements Site {
      * 
      * @see org.sakaiproject.site.api.Site#getOrderedPages()
      */
-    public List<SitePage>getOrderedPages() {
+    public List<SitePage> getOrderedPages() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -602,6 +602,13 @@ public class TSite implements Site {
     /*
      * (non-Javadoc)
      * 
+     * @see org.sakaiproject.entity.api.Entity#toXml(org.w3c.dom.Document, java.util.Stack)
+     */
+
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     public int compareTo(Object arg0) {
@@ -859,58 +866,46 @@ public class TSite implements Site {
 
     }
 
+	@Override
+	public Element toXml(Document arg0, Stack<Element> arg1) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public Date getCreatedDate() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public Date getModifiedDate() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public boolean isSoftlyDeleted() {
+	@Override
+	public Collection<String> getMembersInGroups(Set<String> arg0) {
 		// TODO Auto-generated method stub
-		return false;
+		return null;
 	}
 
+	@Override
 	public Date getSoftlyDeletedDate() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public void setSoftlyDeleted(boolean flag) {
+	@Override
+	public boolean isSoftlyDeleted() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setSoftlyDeleted(boolean arg0) {
 		// TODO Auto-generated method stub
 		
-	}
-
-	public Collection<String> getMembersInGroups(Set<String> groupIds) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Element toXml(Document doc, Stack<Element> stack) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	public String getHtmlShortDescription() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	public String getHtmlDescription() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Collection<Group> getGroupsWithMembers(String[] userIds) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }
