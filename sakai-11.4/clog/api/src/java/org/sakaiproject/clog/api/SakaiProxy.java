@@ -18,18 +18,23 @@ package org.sakaiproject.clog.api;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.sakaiproject.authz.api.Role;
 import org.sakaiproject.entity.api.EntityProducer;
+import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.search.api.InvalidSearchQueryException;
 import org.sakaiproject.search.api.SearchResult;
 import org.sakaiproject.site.api.Site;
+import org.sakaiproject.site.api.ToolConfiguration;
+import org.sakaiproject.user.api.User;
 
 public interface SakaiProxy {
 
-	public String getCurrentSiteId();
+    public String getCurrentSiteId();
 
     public Site getSiteOrNull(String siteId);
 
@@ -46,77 +51,87 @@ public interface SakaiProxy {
      */
     public Map<String, String> getSiteGroupsForCurrentUser(String siteId);
 
-	public String getCurrentToolId();
+    public List<User> getUsersInGroups(String siteId, Collection<String> group);
 
-	public String getCurrentToolTitle();
+    public String getCurrentToolId();
 
-	public String getCurrentUserId();
+    public String getCurrentToolTitle();
 
-	public Connection borrowConnection() throws SQLException;
+    public String getCurrentUserId();
 
-	public void returnConnection(Connection connection);
+    public Connection borrowConnection() throws SQLException;
 
-	public String getCurrentUserDisplayName();
+    public void returnConnection(Connection connection);
 
-	public String getVendor();
+    public String getCurrentUserDisplayName();
 
-	public String getDisplayNameForTheUser(String userId);
+    public String getVendor();
 
-	public boolean isCurrentUserMaintainer(String siteId);
+    public String getDisplayNameForTheUser(String userId);
 
-	public boolean isCurrentUserTutor(String siteId);
+    public boolean isCurrentUserMaintainer(String siteId);
 
-	public boolean isCurrentUserAdmin();
+    public boolean isCurrentUserTutor(String siteId);
 
-	public String getSakaiProperty(String string);
+    public boolean isCurrentUserAdmin();
 
-	public ClogMember getMember(String memberId);
+    public String getSakaiProperty(String string);
 
-	public boolean isAutoDDL();
+    public ClogMember getMember(String memberId);
 
-	public List<ClogMember> getSiteMembers(String siteId);
+    public boolean isAutoDDL();
 
-	public String getServerUrl();
+    public List<ClogMember> getSiteMembers(String siteId);
 
-	public String getServiceName();
+    public String getServerUrl();
 
-	public String getPortalUrl();
+    public String getServiceName();
 
-	public String getAccessUrl();
+    public String getPortalUrl();
 
-	public void registerEntityProducer(EntityProducer entityProducer);
+    public String getAccessUrl();
 
-	public void registerFunction(String function);
+    public void registerEntityProducer(EntityProducer entityProducer);
 
-	public boolean isAllowedFunction(String function, String siteId);
+    public void registerFunction(String function);
 
-	public void postEvent(String event, String entityId, String siteId);
+    public boolean isAllowedFunction(String function, String siteId);
 
-	public Set<String> getSiteUsers(String siteId);
+    public boolean isAllowedFunction(String function, Role role);
 
-	public String getSiteTitle(String siteId);
+    public void postEvent(String event, String entityId, String siteId);
 
-	public String getClogPageId(String siteId);
+    public Set<String> getSiteUsers(String siteId);
 
-	public String getClogToolId(String siteId);
+    public String getSiteTitle(String siteId);
 
-	public String storeResource(byte[] blob, String displayName, String siteId, String creatorId);
+    public String getClogPageId(String siteId);
 
-	public List<SearchResult> searchInCurrentSite(String searchTerms) throws InvalidSearchQueryException;
+    public String getClogToolId(String siteId);
 
-	public Set<String> getSitePermissionsForCurrentUser(String siteId);
+    public String storeResource(byte[] blob, String displayName, String siteId, String creatorId);
 
-	public Map<String, Set<String>> getSitePermissions(String siteId);
+    public List<SearchResult> searchInCurrentSite(String searchTerms) throws InvalidSearchQueryException;
 
-	public boolean setPermissionsForSite(String siteId, Map<String, Object> params);
+    public Set<String> getSitePermissionsForCurrentUser(String siteId);
 
-	public boolean isPublicAllowed();
+    public Map<String, Set<String>> getSitePermissions(String siteId);
 
-	public String getCurrentUserEid();
+    public boolean setPermissionsForSite(String siteId, Map<String, Object> params);
 
-	public boolean setResourcePublic(String contentId, boolean isPublic);
+    public boolean isPublicAllowed();
 
-	public boolean isCurrentUserMemberOfSite(String siteId) throws Exception;
+    public String getCurrentUserEid();
 
-	public String getWysiwygEditor();
+    public boolean setResourcePublic(String contentId, boolean isPublic);
+
+    public boolean isCurrentUserMemberOfSite(String siteId) throws Exception;
+
+    public String getWysiwygEditor();
+
+    public Cache getCache(String cache);
+
+    void addToolToToolConfig(ToolConfiguration tool);
+
+    boolean saveSite(Site site);
 }

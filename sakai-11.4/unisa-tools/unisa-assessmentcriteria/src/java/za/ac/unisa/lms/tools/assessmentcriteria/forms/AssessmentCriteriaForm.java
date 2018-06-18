@@ -68,6 +68,7 @@ public class AssessmentCriteriaForm extends ValidatorActionForm {
 	private boolean sunpdtExists;
 	private boolean survey;
 	private String examBase;	
+	private String nonVenueExamType;
 	private String onlineMethod;
 	private String formativeAssessInd;
 	private String summativeAssessInd;
@@ -75,7 +76,12 @@ public class AssessmentCriteriaForm extends ValidatorActionForm {
 	private boolean resetOnscreenMarkingArrays;	
 	private String submissionDateIndicator;
 	
-	
+	public String getNonVenueExamType() {
+		return nonVenueExamType;
+	}
+	public void setNonVenueExamType(String nonVenueExamType) {
+		this.nonVenueExamType = nonVenueExamType;
+	}
 	public String getExamBase() {
 		return examBase;
 	}

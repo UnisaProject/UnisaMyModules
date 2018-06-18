@@ -24,32 +24,19 @@ clog.sakai = {
 			}
 	   	});
 
-		return "";
+		return profile;
 	},
     setupFCKEditor: function (textarea_id, width, height) {
 
         sakai.editor.launch(textarea_id, {}, width, height);
-        
-        clog.fitFrame();
 	},
     setupCKEditor: function (textarea_id, width, height) {
-    	
-    	var instance = CKEDITOR.instances[textarea_id];
-    	
-      /*  if (CKEDITOR.instances[textarea_id]) {
-        	//alert("CKEDITOR.instances[textarea_id]"+CKEDITOR.instances[textarea_id]); unisa changes
-            CKEDITOR.remove(CKEDITOR.instances[textarea_id]);
-        }*/
 
-    	 if(typeof instance !== 'undefined') {
-         	delete CKEDITOR.instances[textarea_id];
-         }
+        if (CKEDITOR.instances[textarea_id]) {
+            CKEDITOR.remove(CKEDITOR.instances[textarea_id]);
+        }
 
         sakai.editor.launch(textarea_id,{},width,height);
-        
-        CKEDITOR.instances[textarea_id].on('instanceReady',function (e) {
-            clog.fitFrame();
-        });
 	},
     setupWysiwygEditor: function (editorId, textarea_id, width, height) {
 
