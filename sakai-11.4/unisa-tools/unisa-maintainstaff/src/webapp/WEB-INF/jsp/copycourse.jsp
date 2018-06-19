@@ -7,15 +7,13 @@
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.maintainstaff.ApplicationResources"/>
 
+<sakai:html>
 <script language="JavaScript">
 	function setAction() {
 		document.mainForm.action = 'main.do?act=goCopyCourse';
 		document.mainForm.submit();
 	}
 </script>
-
-
-<sakai:html>
 <html:form action="/main"> 
 	<sakai:group_heading>
 		<fmt:message key="copy.info.heading"/>

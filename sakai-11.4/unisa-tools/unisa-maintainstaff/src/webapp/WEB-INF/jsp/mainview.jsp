@@ -7,6 +7,8 @@
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.maintainstaff.ApplicationResources"/>
 
+
+<sakai:html>
 <script language="JavaScript">
 	function setActionCourse() {
 		document.mainForm.action = 'main.do?act=courseDisplay';
@@ -25,8 +27,6 @@
 		document.mainForm.submit();
 	}
 </script>
-<sakai:html>
-
 <html:form action="/main"> 
 <html:hidden property="display" value=""/>
 <html:hidden property="changeview" value=""/>
