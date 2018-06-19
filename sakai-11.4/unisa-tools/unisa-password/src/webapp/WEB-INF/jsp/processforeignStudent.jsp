@@ -5,13 +5,14 @@
 <%@ page import="java.util.*" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <fmt:setBundle basename="za.ac.unisa.lms.tools.password.ApplicationResources"/>
+
+<sakai:html>
 <script language="JavaScript">
 function setAction() {
 		document.getElementById("sbmt").style.visibility='hidden';
 		document.getElementById("process").style.display="block";  
 	}
 </script>
-<sakai:html>
 <html:form action="/forgotPassword.do"   >
 	<sakai:heading><fmt:message key="forget.headingsstep3"/></sakai:heading>
 	
