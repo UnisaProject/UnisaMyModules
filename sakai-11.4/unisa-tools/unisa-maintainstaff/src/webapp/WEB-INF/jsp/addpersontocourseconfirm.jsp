@@ -7,14 +7,13 @@
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.maintainstaff.ApplicationResources"/>
 
+<sakai:html>
 <script language="JavaScript">
 	function setAction() {
 		document.personForm.action = 'person.do?act=addPerson';
 		document.personForm.submit();
 	}
 </script>
-
-<sakai:html>
 <html:form action="/person"> 
 	<html:hidden property="atstep" value="save"/>
 
