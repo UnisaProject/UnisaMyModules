@@ -7,7 +7,7 @@
   <parent>
     <artifactId>unisa-overlays-syllabus</artifactId>
     <groupId>unisa.overlays.syllabus</groupId>
-    <version>10.5</version>
+    <version>11.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Unisa overlay Syllabus tool</name>

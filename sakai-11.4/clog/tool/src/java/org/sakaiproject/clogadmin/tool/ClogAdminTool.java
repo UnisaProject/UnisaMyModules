@@ -19,86 +19,87 @@ import org.sakaiproject.clog.api.datamodel.Visibilities;
 import org.sakaiproject.clog.api.sql.ISQLGenerator;
 import org.sakaiproject.component.api.ComponentManager;
 import org.sakaiproject.component.api.ServerConfigurationService;
+import org.sakaiproject.site.api.*;
 
 /**
  * @author Adrian Fish (a.fish@lancaster.ac.uk)
  */
 public class ClogAdminTool extends HttpServlet {
 
-	private Logger logger = Logger.getLogger(getClass());
+    private Logger logger = Logger.getLogger(getClass());
 
-	private SakaiProxy sakaiProxy;
-	private ClogManager clogManager;
-	private ServerConfigurationService serverConfigurationService;
+    private SakaiProxy sakaiProxy;
+    private ClogManager clogManager;
+    private ServerConfigurationService serverConfigurationService;
 
-	public void init(ServletConfig config) throws ServletException {
-		super.init(config);
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
 
-		ComponentManager componentManager = org.sakaiproject.component.cover.ComponentManager.getInstance();
-		sakaiProxy = (SakaiProxy) componentManager.get(SakaiProxy.class);
-		clogManager = (ClogManager) componentManager.get(ClogManager.class);
-		serverConfigurationService = (ServerConfigurationService) componentManager.get(ServerConfigurationService.class);
-	}
+        ComponentManager componentManager = org.sakaiproject.component.cover.ComponentManager.getInstance();
+        sakaiProxy = (SakaiProxy) componentManager.get(SakaiProxy.class);
+        clogManager = (ClogManager) componentManager.get(ClogManager.class);
+        serverConfigurationService = (ServerConfigurationService) componentManager.get(ServerConfigurationService.class);
+    }
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-		if (sakaiProxy == null)
-			throw new ServletException("sakaiProxy MUST be initialised.");
+        if (sakaiProxy == null)
+            throw new ServletException("sakaiProxy MUST be initialised.");
 
-		if (!sakaiProxy.isCurrentUserAdmin()) {
-			throw new ServletException("CLOG admin can only be used by Sakai super users.");
-		}
+        if (!sakaiProxy.isCurrentUserAdmin()) {
+            throw new ServletException("CLOG admin can only be used by Sakai super users.");
+        }
 
-		request.setAttribute("skin", serverConfigurationService.getString("skin.default","default"));
-		request.setAttribute("toolId", sakaiProxy.getCurrentToolId());
+        request.setAttribute("skin", serverConfigurationService.getString("skin.default","default"));
+        request.setAttribute("toolId", sakaiProxy.getCurrentToolId());
 
-		response.setContentType("text/html");
-		response.setStatus(HttpServletResponse.SC_OK);
-		RequestDispatcher dispatcher = request.getRequestDispatcher("/admin.jsp");
-		dispatcher.include(request, response);
-	}
+        response.setContentType("text/html");
+        response.setStatus(HttpServletResponse.SC_OK);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/admin.jsp");
+        dispatcher.include(request, response);
+    }
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String blogwow = request.getParameter("blogwow");
-		String blogger = request.getParameter("blogger");
-		String blog2 = request.getParameter("blog2");
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String blogwow = request.getParameter("blogwow");
+        String blogger = request.getParameter("blogger");
+        String blog2 = request.getParameter("blog2");
 
-		int numberImported = 0;
+        int numberImported = 0;
 
-		if (blogwow != null) {
-			numberImported += importBlogWowData();
-		}
+        if (blogwow != null) {
+            numberImported += importBlogWowData();
+        }
 
-		if (blogger != null) {
-			numberImported += importBlog1Data();
-		}
+        if (blogger != null) {
+            numberImported += importBlog1Data();
+        }
 
-		if (blog2 != null) {
-			numberImported += importBlog2Data();
-		}
+        if (blog2 != null) {
+            numberImported += importBlog2Data();
+        }
 
-		request.setAttribute("skin", serverConfigurationService.getString("skin.default","default"));
-		request.setAttribute("toolId", sakaiProxy.getCurrentToolId());
-		request.setAttribute("numberImported", numberImported);
+        request.setAttribute("skin", serverConfigurationService.getString("skin.default","default"));
+        request.setAttribute("toolId", sakaiProxy.getCurrentToolId());
+        request.setAttribute("numberImported", numberImported);
 
-		response.setContentType("text/html");
-		response.setStatus(HttpServletResponse.SC_OK);
-		RequestDispatcher dispatcher = request.getRequestDispatcher("/result.jsp");
-		dispatcher.include(request, response);
-	}
+        response.setContentType("text/html");
+        response.setStatus(HttpServletResponse.SC_OK);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/result.jsp");
+        dispatcher.include(request, response);
+    }
 
-	public int importBlog1Data() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Starting import of Blogger data ...");
-		}
+    public int importBlog1Data() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Starting import of Blogger data ...");
+        }
 
-		Connection connection = null;
-		Statement postST = null;
-		Statement imageST = null;
-		Statement fileST = null;
-		ResultSet postRS = null;
+        Connection connection = null;
+        Statement postST = null;
+        Statement imageST = null;
+        Statement fileST = null;
+        ResultSet postRS = null;
 
-		int numberImported = 0;
+        int numberImported = 0;
 
         try {
             connection = sakaiProxy.borrowConnection();
@@ -147,61 +148,61 @@ public class ClogAdminTool extends HttpServlet {
                 if (-1 == post.getCreatedDate())
                     post.setCreatedDate(createdDate);
 
-				post.setSiteId(siteId);
+                post.setSiteId(siteId);
 
-				if (clogManager.savePost(post)) {
-					List<Comment> comments = post.getComments();
+                if (clogManager.savePost(post)) {
+                    List<Comment> comments = post.getComments();
 
-					for (Comment comment : comments) {
-						comment.setPostId(post.getId());
-						clogManager.saveComment(comment);
-					}
+                    for (Comment comment : comments) {
+                        comment.setPostId(post.getId());
+                        clogManager.saveComment(comment);
+                    }
 
-					numberImported++;
-				}
-			}
+                    numberImported++;
+                }
+            }
 
-			if (logger.isDebugEnabled()) {
-				logger.debug("Finished import of previous Blogger data. " + numberImported + " posts imported.");
-			}
+            if (logger.isDebugEnabled()) {
+                logger.debug("Finished import of previous Blogger data. " + numberImported + " posts imported.");
+            }
 
-			return numberImported;
-		} catch (Exception e) {
-			logger.error("Exception thrown whilst importing Blogger data", e);
-			return 0;
-		} finally {
-			if (postRS != null) {
-				try {
-					postRS.close();
-				} catch (Exception e) {
-				}
-			}
+            return numberImported;
+        } catch (Exception e) {
+            logger.error("Exception thrown whilst importing Blogger data", e);
+            return 0;
+        } finally {
+            if (postRS != null) {
+                try {
+                    postRS.close();
+                } catch (Exception e) {
+                }
+            }
 
-			if (postST != null) {
-				try {
-					postST.close();
-				} catch (Exception e) {
-				}
-			}
-			if (imageST != null) {
-				try {
-					imageST.close();
-				} catch (Exception e) {
-				}
-			}
-			if (fileST != null) {
-				try {
-					fileST.close();
-				} catch (Exception e) {
-				}
-			}
-		}
-	}
+            if (postST != null) {
+                try {
+                    postST.close();
+                } catch (Exception e) {
+                }
+            }
+            if (imageST != null) {
+                try {
+                    imageST.close();
+                } catch (Exception e) {
+                }
+            }
+            if (fileST != null) {
+                try {
+                    fileST.close();
+                } catch (Exception e) {
+                }
+            }
+        }
+    }
 
-	public int importBlog2Data() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Starting import of blog 2 data ...");
-		}
+    public int importBlog2Data() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Starting import of blog 2 data ...");
+        }
 
         Connection connection = null;
         Statement postST = null;
@@ -280,34 +281,34 @@ public class ClogAdminTool extends HttpServlet {
 
                 post.setVisibility(visibility);
 
-				String shortText = postRS.getString("SHORT_TEXT");
+                String shortText = postRS.getString("SHORT_TEXT");
 
-				String collectedMarkup = "<i>" + shortText + "</i><br /><br />";
+                String collectedMarkup = "<i>" + shortText + "</i><br /><br />";
 
-				postElementRS = postElementST.executeQuery("SELECT * FROM BLOG_POST_ELEMENT WHERE POST_ID = '" + postId + "' ORDER BY POSITION");
-				while (postElementRS.next()) {
-					String elementId = postElementRS.getString("ELEMENT_ID");
-					String elementType = postElementRS.getString("ELEMENT_TYPE").trim();
-					String displayName = postElementRS.getString("DISPLAY_NAME");
+                postElementRS = postElementST.executeQuery("SELECT * FROM BLOG_POST_ELEMENT WHERE POST_ID = '" + postId + "' ORDER BY POSITION");
+                while (postElementRS.next()) {
+                    String elementId = postElementRS.getString("ELEMENT_ID");
+                    String elementType = postElementRS.getString("ELEMENT_TYPE").trim();
+                    String displayName = postElementRS.getString("DISPLAY_NAME");
 
-					if ("PARAGRAPH".equals(elementType)) {
-						elementRS = elementST.executeQuery("SELECT CONTENT FROM BLOG_PARAGRAPH WHERE PARAGRAPH_ID = '" + elementId + "'");
-						if (!elementRS.next()) {
-							logger.error("Inconsistent Database. Post ID: " + postId + ". Post Title: " + post.getTitle() + ". No paragraph element found for post element with id '" + elementId + "'. Skipping this post ...");
-							brokenPost = true;
-							continue;
-						}
+                    if ("PARAGRAPH".equals(elementType)) {
+                        elementRS = elementST.executeQuery("SELECT CONTENT FROM BLOG_PARAGRAPH WHERE PARAGRAPH_ID = '" + elementId + "'");
+                        if (!elementRS.next()) {
+                            logger.error("Inconsistent Database. Post ID: " + postId + ". Post Title: " + post.getTitle() + ". No paragraph element found for post element with id '" + elementId + "'. Skipping this post ...");
+                            brokenPost = true;
+                            continue;
+                        }
 
-						String content = elementRS.getString("CONTENT");
-						collectedMarkup += content + "<br /><br />";
-						elementRS.close();
-					} else if ("LINK".equals(elementType)) {
-						elementRS = elementST.executeQuery("SELECT URL FROM BLOG_LINK WHERE LINK_ID = '" + elementId + "'");
-						if (!elementRS.next()) {
-							logger.error("Inconsistent Database. Post ID: " + postId + ". Post Title: " + post.getTitle() + ". No link element found for post element with id '" + elementId + "'. Skipping this post ...");
-							brokenPost = true;
-							continue;
-						}
+                        String content = elementRS.getString("CONTENT");
+                        collectedMarkup += content + "<br /><br />";
+                        elementRS.close();
+                    } else if ("LINK".equals(elementType)) {
+                        elementRS = elementST.executeQuery("SELECT URL FROM BLOG_LINK WHERE LINK_ID = '" + elementId + "'");
+                        if (!elementRS.next()) {
+                            logger.error("Inconsistent Database. Post ID: " + postId + ". Post Title: " + post.getTitle() + ". No link element found for post element with id '" + elementId + "'. Skipping this post ...");
+                            brokenPost = true;
+                            continue;
+                        }
 
                         String href = elementRS.getString("URL");
                         String link = "<a href=\"" + href + "\">" + displayName + "</a><br /><br />";
@@ -490,9 +491,25 @@ public class ClogAdminTool extends HttpServlet {
 
                 Post post = new Post();
 
+                String siteId = null;
                 if (location.startsWith("/site/")) {
-                    String siteId = location.substring(location.lastIndexOf("/") + 1);
+                    siteId = location.substring(location.lastIndexOf("/") + 1);
                     post.setSiteId(siteId);
+                }
+
+                if (siteId != null && !siteId.isEmpty()) {
+                    String pageId = sakaiProxy.getClogPageId(siteId);
+                    // Site does not have Clogs installed, add it
+                    if (pageId.isEmpty()) {
+                        Site site = sakaiProxy.getSiteOrNull(siteId);
+                        if(site != null) {
+                            SitePage sitePage = site.addPage();
+
+                            ToolConfiguration tool = sitePage.addTool();
+                            sakaiProxy.addToolToToolConfig(tool);
+                            sakaiProxy.saveSite(site);
+                        }
+                    }
                 }
 
                 QueryBean query = new QueryBean();
@@ -535,6 +552,9 @@ public class ClogAdminTool extends HttpServlet {
                         comment.setModifiedDate(commentModified.getTime());
                         comment.setContent(commentText);
                         comment.setPostId(post.getId());
+                        if(siteId != null) {
+                            comment.setSiteId(siteId);
+                        }
 
                         clogManager.saveComment(comment);
                     }

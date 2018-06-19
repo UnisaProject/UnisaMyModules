@@ -29,7 +29,7 @@ public class MentorMaintenanceAction  extends LookupDispatchAction{
 		Map map = new HashMap();
 		map.put("extractFile", "extractFile");
 		map.put("initial", "initial");
-		map.put("button.display", "displayMentor");
+		map.put("button.display", "listMentors");
 		map.put("button.back", "prevPage");
 		map.put("button.searchSchool","searchSchool");
 		map.put("button.save", "saveMentor");
