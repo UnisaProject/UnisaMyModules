@@ -6,6 +6,7 @@
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.smsbatch.ApplicationResources"/>
 
+<sakai:html>
 <script type="text/JavaScript" language="JavaScript">
 
 	function isValidateSMSChar(evt){
@@ -42,7 +43,7 @@
 </script>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<sakai:html>
+
   <head>
     <!--    include cascading style sheet here    
 	<link rel="stylesheet" href="/cmsys/staff/stylesheets/staff.css">-->
