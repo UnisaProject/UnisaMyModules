@@ -14,8 +14,8 @@ import javax.naming.OperationNotSupportedException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -68,8 +68,9 @@ public class MyUnisaMylifeAction extends LookupDispatchAction {
 		if (request.getParameter("action") == null) return nextStep(mapping, form, request, response);
 		return super.execute(mapping, form, request, response);		
 	}
-	Log log = LogFactory.getLog(MyUnisaMylifeAction.class);
+	Logger log = LoggerFactory.getLogger(MyUnisaMylifeAction.class);
 	
+
 	/**
 	 * Method: getKeyMethodMap
 	 */
