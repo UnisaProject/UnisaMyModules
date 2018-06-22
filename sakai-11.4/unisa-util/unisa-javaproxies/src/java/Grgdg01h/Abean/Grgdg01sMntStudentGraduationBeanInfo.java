@@ -280,6 +280,7 @@ public class Grgdg01sMntStudentGraduationBeanInfo extends SimpleBeanInfo {
       null,   // 264
       null,   // 265
       null,   // 266
+      null,   // 267
 };
  
    public BeanDescriptor getBeanDescriptor() {
@@ -530,42 +531,43 @@ public class Grgdg01sMntStudentGraduationBeanInfo extends SimpleBeanInfo {
          myProperties[228] = new PropertyDescriptor("OutWsStudentMkLastAcademicYear", rootClass, "getOutWsStudentMkLastAcademicYear", null);
          myProperties[229] = new PropertyDescriptor("OutWsStudentMkLastAcademicPeriod", rootClass, "getOutWsStudentMkLastAcademicPeriod", null);
          myProperties[230] = new PropertyDescriptor("OutWsStudentMkCountryCode", rootClass, "getOutWsStudentMkCountryCode", null);
-         myProperties[231] = new PropertyDescriptor("OutStudentGraduationDetailMkStudentNr", rootClass, "getOutStudentGraduationDetailMkStudentNr", null);
-         myProperties[232] = new PropertyDescriptor("OutStudentGraduationDetailMkQualificationCode", rootClass, "getOutStudentGraduationDetailMkQualificationCode", null);
-         myProperties[233] = new PropertyDescriptor("OutStudentGraduationDetailDateAltered", rootClass, "getOutStudentGraduationDetailDateAltered", null);
-         myProperties[234] = new PropertyDescriptor("OutStudentGraduationDetailMkGraduationCeremonyCode", rootClass, "getOutStudentGraduationDetailMkGraduationCeremonyCode", null);
-         myProperties[235] = new PropertyDescriptor("OutStudentGraduationDetailLanguage", rootClass, "getOutStudentGraduationDetailLanguage", null);
-         myProperties[236] = new PropertyDescriptor("OutStudentGraduationDetailSeatNo", rootClass, "getOutStudentGraduationDetailSeatNo", null);
-         myProperties[237] = new PropertyDescriptor("OutStudentGraduationDetailNoOfGuests", rootClass, "getOutStudentGraduationDetailNoOfGuests", null);
-         myProperties[238] = new PropertyDescriptor("OutStudentGraduationDetailPresentFlag", rootClass, "getOutStudentGraduationDetailPresentFlag", null);
-         myProperties[239] = new PropertyDescriptor("OutStudentGraduationDetailCollectFlag", rootClass, "getOutStudentGraduationDetailCollectFlag", null);
-         myProperties[240] = new PropertyDescriptor("OutStudentGraduationDetailGownSize", rootClass, "getOutStudentGraduationDetailGownSize", null);
-         myProperties[241] = new PropertyDescriptor("OutStudentGraduationDetailCapSize", rootClass, "getOutStudentGraduationDetailCapSize", null);
-         myProperties[242] = new PropertyDescriptor("OutStudentGraduationDetailPreviousDegree", rootClass, "getOutStudentGraduationDetailPreviousDegree", null);
-         myProperties[243] = new PropertyDescriptor("OutStudentGraduationDetailPurchaseFlag", rootClass, "getOutStudentGraduationDetailPurchaseFlag", null);
-         myProperties[244] = new PropertyDescriptor("OutStudentGraduationDetailAmount", rootClass, "getOutStudentGraduationDetailAmount", null);
-         myProperties[245] = new PropertyDescriptor("OutStudentGraduationDetailBundleDate", rootClass, "getOutStudentGraduationDetailBundleDate", null);
-         myProperties[246] = new PropertyDescriptor("OutStudentGraduationDetailBundleNr", rootClass, "getOutStudentGraduationDetailBundleNr", null);
-         myProperties[247] = new PropertyDescriptor("OutStudentGraduationDetailBundleDoc", rootClass, "getOutStudentGraduationDetailBundleDoc", null);
-         myProperties[248] = new PropertyDescriptor("OutStudentGraduationDetailTransferBlockedFlag", rootClass, "getOutStudentGraduationDetailTransferBlockedFlag", null);
-         myProperties[249] = new PropertyDescriptor("OutSecurityWsPrinterCode", rootClass, "getOutSecurityWsPrinterCode", null);
-         myProperties[250] = new PropertyDescriptor("OutSecurityWsUserNumber", rootClass, "getOutSecurityWsUserNumber", null);
-         myProperties[251] = new PropertyDescriptor("OutSecurityWsUserNumberOfLogonAttempts", rootClass, "getOutSecurityWsUserNumberOfLogonAttempts", null);
-         myProperties[252] = new PropertyDescriptor("OutSecurityWsUserLoggedOnFlag", rootClass, "getOutSecurityWsUserLoggedOnFlag", null);
-         myProperties[253] = new PropertyDescriptor("OutSecurityWsUserInUsedFlag", rootClass, "getOutSecurityWsUserInUsedFlag", null);
-         myProperties[254] = new PropertyDescriptor("OutSecurityWsUserLastLogonDate", rootClass, "getOutSecurityWsUserLastLogonDate", null);
-         myProperties[255] = new PropertyDescriptor("OutSecurityWsUserName", rootClass, "getOutSecurityWsUserName", null);
-         myProperties[256] = new PropertyDescriptor("OutSecurityWsUserPersonnelNo", rootClass, "getOutSecurityWsUserPersonnelNo", null);
-         myProperties[257] = new PropertyDescriptor("OutSecurityWsUserPhoneNumber", rootClass, "getOutSecurityWsUserPhoneNumber", null);
-         myProperties[258] = new PropertyDescriptor("OutSecurityWsUserPassword", rootClass, "getOutSecurityWsUserPassword", null);
-         myProperties[259] = new PropertyDescriptor("OutWsGraduationCeremonyCentreV2EngDescription", rootClass, "getOutWsGraduationCeremonyCentreV2EngDescription", null);
-         myProperties[260] = new PropertyDescriptor("OutCellPhoneNumberWsAddressV2CellNumber", rootClass, "getOutCellPhoneNumberWsAddressV2CellNumber", null);
-         myProperties[261] = new PropertyDescriptor("OutEmailFromCsfStringsString132", rootClass, "getOutEmailFromCsfStringsString132", null);
-         myProperties[262] = new PropertyDescriptor("OutEmailToCsfStringsString132", rootClass, "getOutEmailToCsfStringsString132", null);
-         myProperties[263] = new PropertyDescriptor("OutFaxNameCsfStringsString132", rootClass, "getOutFaxNameCsfStringsString132", null);
-         myProperties[264] = new PropertyDescriptor("OutFaxNumberCsfStringsString132", rootClass, "getOutFaxNumberCsfStringsString132", null);
-         myProperties[265] = new PropertyDescriptor("OutFaxOrEmailCsfStringsString1", rootClass, "getOutFaxOrEmailCsfStringsString1", null);
-         myProperties[266] = new PropertyDescriptor("OutSmsMessageIefSuppliedFlag", rootClass, "getOutSmsMessageIefSuppliedFlag", null);
+         myProperties[231] = new PropertyDescriptor("OutWsStudentPassportNo", rootClass, "getOutWsStudentPassportNo", null);
+         myProperties[232] = new PropertyDescriptor("OutStudentGraduationDetailMkStudentNr", rootClass, "getOutStudentGraduationDetailMkStudentNr", null);
+         myProperties[233] = new PropertyDescriptor("OutStudentGraduationDetailMkQualificationCode", rootClass, "getOutStudentGraduationDetailMkQualificationCode", null);
+         myProperties[234] = new PropertyDescriptor("OutStudentGraduationDetailDateAltered", rootClass, "getOutStudentGraduationDetailDateAltered", null);
+         myProperties[235] = new PropertyDescriptor("OutStudentGraduationDetailMkGraduationCeremonyCode", rootClass, "getOutStudentGraduationDetailMkGraduationCeremonyCode", null);
+         myProperties[236] = new PropertyDescriptor("OutStudentGraduationDetailLanguage", rootClass, "getOutStudentGraduationDetailLanguage", null);
+         myProperties[237] = new PropertyDescriptor("OutStudentGraduationDetailSeatNo", rootClass, "getOutStudentGraduationDetailSeatNo", null);
+         myProperties[238] = new PropertyDescriptor("OutStudentGraduationDetailNoOfGuests", rootClass, "getOutStudentGraduationDetailNoOfGuests", null);
+         myProperties[239] = new PropertyDescriptor("OutStudentGraduationDetailPresentFlag", rootClass, "getOutStudentGraduationDetailPresentFlag", null);
+         myProperties[240] = new PropertyDescriptor("OutStudentGraduationDetailCollectFlag", rootClass, "getOutStudentGraduationDetailCollectFlag", null);
+         myProperties[241] = new PropertyDescriptor("OutStudentGraduationDetailGownSize", rootClass, "getOutStudentGraduationDetailGownSize", null);
+         myProperties[242] = new PropertyDescriptor("OutStudentGraduationDetailCapSize", rootClass, "getOutStudentGraduationDetailCapSize", null);
+         myProperties[243] = new PropertyDescriptor("OutStudentGraduationDetailPreviousDegree", rootClass, "getOutStudentGraduationDetailPreviousDegree", null);
+         myProperties[244] = new PropertyDescriptor("OutStudentGraduationDetailPurchaseFlag", rootClass, "getOutStudentGraduationDetailPurchaseFlag", null);
+         myProperties[245] = new PropertyDescriptor("OutStudentGraduationDetailAmount", rootClass, "getOutStudentGraduationDetailAmount", null);
+         myProperties[246] = new PropertyDescriptor("OutStudentGraduationDetailBundleDate", rootClass, "getOutStudentGraduationDetailBundleDate", null);
+         myProperties[247] = new PropertyDescriptor("OutStudentGraduationDetailBundleNr", rootClass, "getOutStudentGraduationDetailBundleNr", null);
+         myProperties[248] = new PropertyDescriptor("OutStudentGraduationDetailBundleDoc", rootClass, "getOutStudentGraduationDetailBundleDoc", null);
+         myProperties[249] = new PropertyDescriptor("OutStudentGraduationDetailTransferBlockedFlag", rootClass, "getOutStudentGraduationDetailTransferBlockedFlag", null);
+         myProperties[250] = new PropertyDescriptor("OutSecurityWsPrinterCode", rootClass, "getOutSecurityWsPrinterCode", null);
+         myProperties[251] = new PropertyDescriptor("OutSecurityWsUserNumber", rootClass, "getOutSecurityWsUserNumber", null);
+         myProperties[252] = new PropertyDescriptor("OutSecurityWsUserNumberOfLogonAttempts", rootClass, "getOutSecurityWsUserNumberOfLogonAttempts", null);
+         myProperties[253] = new PropertyDescriptor("OutSecurityWsUserLoggedOnFlag", rootClass, "getOutSecurityWsUserLoggedOnFlag", null);
+         myProperties[254] = new PropertyDescriptor("OutSecurityWsUserInUsedFlag", rootClass, "getOutSecurityWsUserInUsedFlag", null);
+         myProperties[255] = new PropertyDescriptor("OutSecurityWsUserLastLogonDate", rootClass, "getOutSecurityWsUserLastLogonDate", null);
+         myProperties[256] = new PropertyDescriptor("OutSecurityWsUserName", rootClass, "getOutSecurityWsUserName", null);
+         myProperties[257] = new PropertyDescriptor("OutSecurityWsUserPersonnelNo", rootClass, "getOutSecurityWsUserPersonnelNo", null);
+         myProperties[258] = new PropertyDescriptor("OutSecurityWsUserPhoneNumber", rootClass, "getOutSecurityWsUserPhoneNumber", null);
+         myProperties[259] = new PropertyDescriptor("OutSecurityWsUserPassword", rootClass, "getOutSecurityWsUserPassword", null);
+         myProperties[260] = new PropertyDescriptor("OutWsGraduationCeremonyCentreV2EngDescription", rootClass, "getOutWsGraduationCeremonyCentreV2EngDescription", null);
+         myProperties[261] = new PropertyDescriptor("OutCellPhoneNumberWsAddressV2CellNumber", rootClass, "getOutCellPhoneNumberWsAddressV2CellNumber", null);
+         myProperties[262] = new PropertyDescriptor("OutEmailFromCsfStringsString132", rootClass, "getOutEmailFromCsfStringsString132", null);
+         myProperties[263] = new PropertyDescriptor("OutEmailToCsfStringsString132", rootClass, "getOutEmailToCsfStringsString132", null);
+         myProperties[264] = new PropertyDescriptor("OutFaxNameCsfStringsString132", rootClass, "getOutFaxNameCsfStringsString132", null);
+         myProperties[265] = new PropertyDescriptor("OutFaxNumberCsfStringsString132", rootClass, "getOutFaxNumberCsfStringsString132", null);
+         myProperties[266] = new PropertyDescriptor("OutFaxOrEmailCsfStringsString1", rootClass, "getOutFaxOrEmailCsfStringsString1", null);
+         myProperties[267] = new PropertyDescriptor("OutSmsMessageIefSuppliedFlag", rootClass, "getOutSmsMessageIefSuppliedFlag", null);
          return myProperties;
       } catch (IntrospectionException e) {
          throw new Error(e.toString());

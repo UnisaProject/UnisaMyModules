@@ -2474,6 +2474,10 @@ public class Grgdg01sMntStudentGraduation  implements ActionListener, java.io.Se
       return FixedStringAttr.valueOf(exportView.OutWsStudentMkCountryCode, 4);
    }
  
+   public String getOutWsStudentPassportNo() {
+      return StringAttr.valueOf(exportView.OutWsStudentPassportNo);
+   }
+ 
    public int getOutStudentGraduationDetailMkStudentNr() {
       return exportView.OutStudentGraduationDetailMkStudentNr;
    }
