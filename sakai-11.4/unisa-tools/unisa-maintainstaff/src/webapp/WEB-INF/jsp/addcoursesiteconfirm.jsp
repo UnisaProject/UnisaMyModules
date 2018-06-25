@@ -7,7 +7,7 @@
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.maintainstaff.ApplicationResources"/>
 
-<!--  getElementById -->
+<sakai:html>
 <script language="JavaScript">
 	function saveCourseSite() {
 		document.courseForm.buttonFinish.disabled=true;
@@ -16,8 +16,6 @@
 		
 	}
 </script>
-
-<sakai:html>
 <html:form action="/course"> 
 	<html:hidden property="atstep" value="save"/>
 	<html:hidden property="display" value="displaycourse"/>

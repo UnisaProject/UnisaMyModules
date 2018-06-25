@@ -542,7 +542,7 @@ public class StudentUploadAction extends LookupDispatchAction {
 			/**
 			 * Validation Test: Check if student has a academic record
 			 **/
-			boolean isACAExist = dao.validateStudentRec(stuUpForm.getStudent().getNumber());
+			boolean isACAExist = dao.validateStudentRec(stuUpForm.getStudent().getNumber(), stuUpForm.getStudent().getAcademicYear());
 			if (isACAExist) {
 				stuUpForm.getStudent().setStuExist(true);
 			}else{
@@ -554,7 +554,7 @@ public class StudentUploadAction extends LookupDispatchAction {
 			//log.debug("StudentUploadAction - applyLogin - (1) - Check STUAPQ (F851)");
 			String bDay = stuUpForm.getStudent().getBirthDay() + "/" + stuUpForm.getStudent().getBirthMonth() + "/" + stuUpForm.getStudent().getBirthYear();
 
-			boolean vSTUAPQCheck = dao.validateSTUAPQ(stuUpForm.getStudent().getSurname(), stuUpForm.getStudent().getFirstnames(), bDay, stuUpForm.getStudent().getAcademicYear(), stuUpForm.getStudent().getAcademicPeriod());
+			boolean vSTUAPQCheck = dao.validateSTUAPQ(stuUpForm.getStudent().getSurname(), stuUpForm.getStudent().getFirstnames(), bDay, stuUpForm.getStudent().getAcademicYear());
 			stuUpForm.getStudent().setStuapqExist(vSTUAPQCheck);
 				
 			//log.debug("StudentUploadAction - applyLogin - (IF) vSTUAPQCheck=" + vSTUAPQCheck + " - StuExist="+stuUpForm.getStudent().isStuapqExist());
@@ -1192,7 +1192,7 @@ public class StudentUploadAction extends LookupDispatchAction {
 						requiredDoc.setDocCode(fb.getDoc().getDocCode());
 						requiredDoc.setDocName(file.getFileName());
 						//log.debug("StudentUploadAction - Upload - Required File - Calling Required File addSavedDoc 1 - Doc:" + requiredDoc + "............");
-						dao.addSavedDocSTUAPD(requiredDoc,"Y",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod(),"1");
+						dao.addSavedDocSTUAPD(requiredDoc,"Y",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),"1");
 						dao.addSavedDocSTUXML(requiredDoc,"Y",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod(),"1");
 					}else {
 						//Uploaded file not found on Filesystem
@@ -1290,7 +1290,7 @@ public class StudentUploadAction extends LookupDispatchAction {
 					optionDoc.setDocCode(stuUpForm.getOptionFileBean().getDoc().getDocCode());
 					optionDoc.setDocName(file.getFileName());
 					//log.debug("StudentUploadAction - Upload - Optional File - Calling addSavedDoc 2 - optionDoc:" + optionDoc + "............");
-					dao.addSavedDocSTUAPD(optionDoc,"N",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod(),"2");
+					dao.addSavedDocSTUAPD(optionDoc,"N",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),"2");
 					dao.addSavedDocSTUXML(optionDoc,"N",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod(),"2");
 				}else {
 					//Uploaded file not found on Filesystem
@@ -1366,13 +1366,14 @@ public class StudentUploadAction extends LookupDispatchAction {
 						
 				if(!stuUpForm.getStudent().isStuMD()){
 					//log.debug("StudentUploadAction - Not MD, so write STUAPQ record for Student");
-					dao.setSTUAPQ(stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod());
+					dao.setSTUAPQ(stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear());
 				}
 				
 				//log.debug("StudentUploadAction - Upload - STUAPQ Done");
 				
 				//log.debug("StudentUploadAction - Upload - Do Staae05sAppAdmissionEvaluator Letter");
 				/**2018 Edmund Start of Send Letter**/
+				/**
 				Staae05sAppAdmissionEvaluator op = new Staae05sAppAdmissionEvaluator();
 				operListener opl = new operListener();
 				op.addExceptionListener(opl);
@@ -1402,7 +1403,8 @@ public class StudentUploadAction extends LookupDispatchAction {
 				//log.debug("StudentUploadAction - Upload - Staae05sAppAdmissionEvaluator - After Execute");
 				String opResult = op.getOutCsfStringsString500();
 				//log.debug("StudentUploadAction - Upload - (Staae05sAppAdmissionEvaluator) opResult: " + opResult);
-				/**End of Send Letter**/
+				/**End of Send Letter
+				**/
 				
 				//log.debug("StudentUploadAction moveDocuments if any: " + stuUpForm.getStudent().getNumber());
 				 
@@ -1442,13 +1444,13 @@ public class StudentUploadAction extends LookupDispatchAction {
 					
 					//New Qualifications
 					//Get saved qualifications for student from STUAPQ (Getting them individually to simplify moving result between forms)
-					String retQualOneFinal =  dao.vrfyNewQual("Qual","1",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod());
+					String retQualOneFinal =  dao.vrfyNewQual("Qual","1",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear());
 					//log.debug("StudentUploadAction - Upload - stuExist - Get saved qualifications for student from STUAPQ - retQualOneFinal="+retQualOneFinal);
-					String retSpecOneFinal = dao.vrfyNewQual("Spec","1",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod());
+					String retSpecOneFinal = dao.vrfyNewQual("Spec","1",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear());
 					//log.debug("StudentUploadAction - Upload - stuExist - Get saved qualifications for student from STUAPQ - retSpecOneFinal="+retSpecOneFinal);
-					String retQualTwoFinal = dao.vrfyNewQual("Qual","2",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod());
+					String retQualTwoFinal = dao.vrfyNewQual("Qual","2",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear());
 					//log.debug("StudentUploadAction - Upload - stuExist - Get saved qualifications for student from STUAPQ - retQualTwoFinal="+retQualTwoFinal);
-					String retSpecTwoFinal = dao.vrfyNewQual("Spec","2",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod());
+					String retSpecTwoFinal = dao.vrfyNewQual("Spec","2",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear());
 					//log.debug("StudentUploadAction - Upload - stuExist - Get saved qualifications for student from STUAPQ - retSpecTwoFinal="+retSpecTwoFinal);
 					String emailAddress = stuUpForm.getStudent().getEmailAddress();
 					
@@ -1517,8 +1519,8 @@ public class StudentUploadAction extends LookupDispatchAction {
 						
 						//Get saved qualifications for student from STUAPQ (Getting them individually to simplify moving result between forms)
 						String studentNr = stuUpForm.getStudent().getNumber();
-						String newMDQualFinal = dao.vrfyNewMDQual("Qual",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod());
-						String newMDSpecFinal = dao.vrfyNewMDQual("Spec",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod());
+						String newMDQualFinal = dao.vrfyNewMDQual("Qual",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear());
+						String newMDSpecFinal = dao.vrfyNewMDQual("Spec",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear());
 						String emailAddress = stuUpForm.getStudent().getEmailAddress();
 						String cellNr = stuUpForm.getStudent().getCellNr();
 						//Reset All Form Variables
@@ -1553,10 +1555,10 @@ public class StudentUploadAction extends LookupDispatchAction {
 						
 						//Get saved qualifications for student from STUAPQ (Getting them individually to simplify moving result between forms)
 						String studentNr = stuUpForm.getStudent().getNumber();
-						String newQualOneFinal = dao.vrfyNewQual("Qual","1",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod());
-						String newSpecOneFinal = dao.vrfyNewQual("Spec","1",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod());
-						String newQualTwoFinal = dao.vrfyNewQual("Qual","2",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod());
-						String newSpecTwoFinal = dao.vrfyNewQual("Spec","2",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod());
+						String newQualOneFinal = dao.vrfyNewQual("Qual","1",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear());
+						String newSpecOneFinal = dao.vrfyNewQual("Spec","1",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear());
+						String newQualTwoFinal = dao.vrfyNewQual("Qual","2",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear());
+						String newSpecTwoFinal = dao.vrfyNewQual("Spec","2",stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear());
 						String emailAddress = stuUpForm.getStudent().getEmailAddress();
 						String cellNr = stuUpForm.getStudent().getCellNr();
 						//Reset All Form Variables
@@ -1651,8 +1653,8 @@ public class StudentUploadAction extends LookupDispatchAction {
 			StudentUploadDAO applyDAO = new StudentUploadDAO();
 			
 	        try {
-	        	String qual1 = applyDAO.vrfyNewQualShort("QUAL", "1", stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod());
-	        	String qual2 = applyDAO.vrfyNewQualShort("QUAL", "2", stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear(),stuUpForm.getStudent().getAcademicPeriod());
+	        	String qual1 = applyDAO.vrfyNewQualShort("QUAL", "1", stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear());
+	        	String qual2 = applyDAO.vrfyNewQualShort("QUAL", "2", stuUpForm.getStudent().getNumber(),stuUpForm.getStudent().getAcademicYear());
 	        	
 	        	//log.debug("StudentUploadAction - moveDocuments - Qual1="+qual1);
 	        	//log.debug("StudentUploadAction - moveDocuments - Qual2="+qual2);
@@ -1939,10 +1941,10 @@ public class StudentUploadAction extends LookupDispatchAction {
 		form.getMap().clear();
 		SavedDocDao savedDocDao = new SavedDocDao();
 		//log.debug("StudentUploadForm - reLoad - Reloading uploaded docs..");
-		savedDocDao.getAllNonRequiredDocInfo(form.getDesc(), form.getMap(), form.getStudent().getNumber(),form.getStudent().getAcademicYear(),form.getStudent().getAcademicPeriod(),form.getStudent().isStuExist());
+		savedDocDao.getAllNonRequiredDocInfo(form.getDesc(), form.getMap(), form.getStudent().getNumber(),form.getStudent().getAcademicYear(),form.getStudent().isStuExist());
 		for(FileBean fb : form.getRequiredFileBeans()){
 			//log.debug("StudentUploadForm - reLoad - Setting FileBean Uploaded..");
-			fb.setUploaded(savedDocDao.getSavedDocByDoc(fb.getDoc().getDocCode(),form.getStudent().getNumber(),form.getStudent().getAcademicYear(),form.getStudent().getAcademicPeriod()));
+			fb.setUploaded(savedDocDao.getSavedDocByDoc(fb.getDoc().getDocCode(),form.getStudent().getNumber(),form.getStudent().getAcademicYear()));
 		}
 		//log.debug("StudentUploadAction - reLoad - Done");
 	}

@@ -22,16 +22,15 @@ public class DocDao extends StudentSystemDAO {
 	 * This method builds the dropdown menu for Optional documents.
 	 * @param studentNr
 	 * @param year
-	 * @param period
 	 * @param matrix
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Doc> getAllOptionalDocs(String studentNr,String year,String period, String matrix, boolean stuExist) throws Exception{
+	public List<Doc> getAllOptionalDocs(String studentNr,String year, String matrix, boolean stuExist) throws Exception{
 
 		List<Doc> docs = new ArrayList<Doc>();
 
-		//log.debug("DocDao - getAllOptionalDocs - stuExist: " + stuExist + " studentNr: " + studentNr + " year: " + year + " period: " + period + " matrix: " + matrix);
+		//log.debug("DocDao - getAllOptionalDocs - stuExist: " + stuExist + " studentNr: " + studentNr + " year: " + year +  " matrix: " + matrix);
 		
 		String query = "select distinct code AS docCode, eng_description as docDescription "
 					+ " from gencod "
@@ -77,15 +76,14 @@ public class DocDao extends StudentSystemDAO {
 	 * Builds list of required documents for new students
 	 * @param studentNr
 	 * @param year
-	 * @param period
 	 * @param required
 	 * @param matrix
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Doc> getAllRequiredDocs(String studentNr,String year,String period, String required, String matrix, boolean isStuExist, String loginSelectMain) throws Exception{
+	public List<Doc> getAllRequiredDocs(String studentNr, String year, String required, String matrix, boolean isStuExist, String loginSelectMain) throws Exception{
 
-		//log.debug("DocDao - getAllRequiredDocs - isStuExist: " + isStuExist + " studentNr: " + studentNr + " year: " + year + " period: " + period + " required: " + required + " matrix: " + matrix);
+		//log.debug("DocDao - getAllRequiredDocs - isStuExist: " + isStuExist + " studentNr: " + studentNr + " year: " + year + " required: " + required + " matrix: " + matrix);
 		
 		JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 		List<?> queryList = null;
@@ -115,11 +113,11 @@ public class DocDao extends StudentSystemDAO {
 				//log.debug("DocDao - getDocs - NEWSTU - In New Student");
 				//Get choice 1 and 2 from STUAPQ for New Student
 
-				StudySelected selected = querySTUAPQSelected(studentNr, year, period);				
+				StudySelected selected = querySTUAPQSelected(studentNr, year);				
 				String spec = (selected==null||selected.getDocSpec()==null) ||"0".equals(selected.getDocSpec()) ? " " :selected.getDocSpec();
 				String qual = (selected==null||selected.getDocQual()==null) ||"0".equals(selected.getDocQual()) ? "" :selected.getDocQual();
 				
-				StudySelected selectedNew = querySTUAPQSelectedNew(studentNr, year, period);
+				StudySelected selectedNew = querySTUAPQSelectedNew(studentNr, year);
 				String qual1 = selectedNew.getDocQual1()==null ||"0".equals(selectedNew.getDocQual1()) ? "" :selectedNew.getDocQual1();
 				String qual2 = selectedNew.getDocQual2()==null ||"0".equals(selectedNew.getDocQual2()) ? "" :selectedNew.getDocQual2();
 				String spec1 = selectedNew.getDocSpec1()==null ||"0".equals(selectedNew.getDocSpec1()) ? " " :selectedNew.getDocSpec1();
@@ -184,7 +182,6 @@ public class DocDao extends StudentSystemDAO {
 	 * Builds list of required documents for new students
 	 * @param studentNr
 	 * @param year
-	 * @param period
 	 * @param required
 	 * @param matrix
 	 * @return
@@ -247,14 +244,13 @@ public class DocDao extends StudentSystemDAO {
 		return docs;
 	}
 	
-	public StudySelected querySTUAPQSelected(String studentNr, String acaYear, String acaPeriod) throws Exception{
+	public StudySelected querySTUAPQSelected(String studentNr, String acaYear) throws Exception{
 
 		try {
 			String query = "select new_qual as qualification_code, new_spes as speciality_code "
 						+ " from STUAPQ "
 						+ " where mk_student_nr = ? "
 						+ " and academic_year = ? ";
-			//+ " and application_period = '" + period + "'"; //2014 Removed as we check for any existing record for this academic year
 
 			//log.debug("DocDao - queryStudySelected - query: " + query+"studentNr="+studentNr+", acaYear="+acaYear);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -286,7 +282,7 @@ public class DocDao extends StudentSystemDAO {
 		return null;
 	}
 
-	public StudySelected querySTUAPQSelectedNew(String studentNr, String acaYear, String acaPeriod) throws Exception {
+	public StudySelected querySTUAPQSelectedNew(String studentNr, String acaYear) throws Exception {
 
 		StudySelected selectedNew = new StudySelected();
 
@@ -299,7 +295,7 @@ public class DocDao extends StudentSystemDAO {
 								+ " and academic_year = ? "
 								+ " order by choice_nr";
 
-			//log.debug("DocDao - queryStudySelectedNew - query: " + query+"studentNr="+studentNr+", acaYear="+acaYear+", acaPeriod="+acaPeriod);
+			//log.debug("DocDao - queryStudySelectedNew - query: " + query+"studentNr="+studentNr+", acaYear="+acaYear);
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 			List<?> queryList = jdt.queryForList(query, new Object []{studentNr, acaYear});
 			Iterator<?> i = queryList.iterator();
@@ -339,7 +335,7 @@ public class DocDao extends StudentSystemDAO {
 		return null;
 	}
 	
-	public String getSTUAPQStatus(String studentNr,String acaYear,String period) throws Exception{
+	public String getSTUAPQStatus(String studentNr,String acaYear) throws Exception{
 		
 		String checkAP = "";
 
@@ -349,7 +345,6 @@ public class DocDao extends StudentSystemDAO {
 						+ " where mk_student_nr = ? "
 						+ " and academic_year = ? "
 						+ " and status_code in ('AP','TN','RG') ";
-						//+ " and application_period = '" + period + "'"; //2014 Removed as we check for any existing record for this academic year
 			
 			//log.debug("DocDao - getSTUAPQStatus - query: " + query );
 			JdbcTemplate jdt = new JdbcTemplate(getDataSource());

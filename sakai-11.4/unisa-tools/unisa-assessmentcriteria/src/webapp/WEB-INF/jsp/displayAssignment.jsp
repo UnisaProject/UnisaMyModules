@@ -9,6 +9,7 @@
 <%@ page import="za.ac.unisa.lms.dao.Gencod"%>
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.assessmentcriteria.ApplicationResources"/>
+<sakai:html>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
 <script src="https://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
@@ -104,14 +105,19 @@
 				document.getElementsByName("assignment.format")[i].checked=false;
 				if (group=="S"){
 					if (document.getElementsByName("assignment.format")[i].value=="A"){  
-						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Discussion Forum								
+						document.getElementsByName("assignment.format")[i].disabled=true; //Disable MCQ								
 					}		
 					if (document.getElementsByName("assignment.format")[i].value=="BL"){  
-						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Discussion Forum								
+						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Blog								
 					}		
 					if (document.getElementsByName("assignment.format")[i].value=="DF"){  
 						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Discussion Forum								
 					}		
+				}
+				if (group=="F"){
+					if (document.getElementsByName("assignment.format")[i].value=="OR"){  
+						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Oral							
+					}						
 				}
 			}	
 		//Reset Assignment Type, enable all buttons
@@ -194,13 +200,13 @@
 					document.getElementsByName("assignment.type")[i].disabled=true;								
 				}	
 				if (group=="F"){
-					if (document.getElementsByName("assignment.type")[i].value=="PF"){            //Disable Portfolio
+					if (document.getElementsByName("assignment.type")[i].value=="PF"){        //Disable Portfolio
 						document.getElementsByName("assignment.type")[i].disabled=true;							
 					}
-					if (document.getElementsByName("assignment.type")[i].value=="PC"){            //Disable Practical
+					if (document.getElementsByName("assignment.type")[i].value=="PC"){        //Disable Practical
 						document.getElementsByName("assignment.type")[i].disabled=true;							
 					}
-					if (document.getElementsByName("assignment.type")[i].value=="PJ"){            //Disable Project
+					if (document.getElementsByName("assignment.type")[i].value=="PJ"){        //Disable Project
 						document.getElementsByName("assignment.type")[i].disabled=true;							
 					}				
 				}
@@ -318,7 +324,7 @@
 				}	
 			}
 		}
-		if (format=="OR"){  //Discusson Forum 
+		if (format=="OR"){  //Oral
 			for (var i=0;i<document.getElementsByName("assignment.type").length;i++) 
 			{	
 				if (document.getElementsByName("assignment.type")[i].value=="G"){             //Disable Group Assessment
@@ -341,12 +347,44 @@
 				}
 				if (document.getElementsByName("assignment.type")[i].value=="S"){             //Disable Peer Assignment
 					document.getElementsByName("assignment.type")[i].disabled=true;								
-				}
-				if (document.getElementsByName("assignment.type")[i].value=="O"){             //Disable Online Examination
-					document.getElementsByName("assignment.type")[i].disabled=true;								
-				}							
+				}	
+				if (document.getElementsByName("assignment.type")[i].value=="I"){  
+					document.getElementsByName("assignment.type")[i].disabled=true;			  //Disable Individual						
+				}	
+				//BRS 2019 - 20180530
+				if (group=="F"){
+					if (document.getElementsByName("assignment.type")[i].value=="O"){  
+						document.getElementsByName("assignment.type")[i].disabled=true;		 //Disable Online Examination						
+					}
+				}					
 			}
 		}
+	}
+	
+	
+function setDefaultFormats(group){
+		
+		//Reset Assignment Format, enable all buttons
+		for (var i=0;i<document.getElementsByName("assignment.format").length;i++) 
+			{				
+				if (group=="S"){
+					if (document.getElementsByName("assignment.format")[i].value=="A"){  
+						document.getElementsByName("assignment.format")[i].disabled=true; //Disable MCQ								
+					}		
+					if (document.getElementsByName("assignment.format")[i].value=="BL"){  
+						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Blog								
+					}		
+					if (document.getElementsByName("assignment.format")[i].value=="DF"){  
+						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Discussion Forum								
+					}		
+				}
+				if (group=="F"){
+					if (document.getElementsByName("assignment.format")[i].value=="OR"){  
+						document.getElementsByName("assignment.format")[i].disabled=true; //Disable Oral							
+					}						
+				}
+			}	
+		
 	}
 	
 	function onChangeNormalWeight(){
@@ -359,25 +397,23 @@
   });
   
   $(document).ready(function(){	  
-	  if (document.getElementsByName("assignmentAction").value!="view"){
-		  var group="";
-		  var format="";
-		  for (var i=0;i<document.getElementsByName("assignment.group").length;i++){		  
-			  	if (document.getElementsByName("assignment.group")[i].checked){			  
-				  group =document.getElementsByName("assignment.group")[i].value;
-				}					
-		  }
-		  for (var i=0;i<document.getElementsByName("assignment.format").length;i++){		  
-			  	if (document.getElementsByName("assignment.format")[i].checked){			  
-				  format =document.getElementsByName("assignment.format")[i].value;	
-				  setDefaultTypes(format,group);
-				}					
-		  }
+	  var group="";
+	  var format="";
+	  for (var i=0;i<document.getElementsByName("assignment.group").length;i++){		  
+		  	if (document.getElementsByName("assignment.group")[i].checked){			  
+			  group =document.getElementsByName("assignment.group")[i].value;
+			  setDefaultFormats(group);
+			}					
 	  }
+	  for (var i=0;i<document.getElementsByName("assignment.format").length;i++){		  
+		  	if (document.getElementsByName("assignment.format")[i].checked){			  
+			  format =document.getElementsByName("assignment.format")[i].value;	
+			  setDefaultTypes(format,group);
+			}					
+	  }	 
   });
  </script>
-
-<sakai:html>	
+	
 	<html:form action="/assessmentCriteria">
 		<!--<html:hidden property="currentPage" value="assignment"/>-->
 		<!--<html:hidden property="currentPage" value="assignment"/>-->
@@ -498,6 +534,7 @@
 								<logic:equal name="assessmentCriteriaForm" property="assignmentAction" value="view">
 									<td><html:radio property="assignment.type" idName="record" value="code" disabled="true"></html:radio></td>
 								</logic:equal>
+									<!-- <td><bean:write name="record" property="engDescription"/></td> -->
 									<td><bean:write name="record" property="engDescription"/></td>
 							</tr>
 						</logic:iterate>

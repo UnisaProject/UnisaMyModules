@@ -4,13 +4,13 @@
 <%@ taglib uri="http://sakaiproject.org/struts/sakai" prefix="sakai" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <fmt:setBundle basename="za.ac.unisa.lms.tools.mdadmission.ApplicationResources"/>
+<sakai:html>
 <script language="javascript">
 	function doAction() {
 		document.mdAdmissionForm.action = 'displaymdadmission.do?act=signOff';  
 		document.mdAdmissionForm.submit();
 	}
 </script>
-<sakai:html>
 
 	<html:form action="/displaymdadmission">
 

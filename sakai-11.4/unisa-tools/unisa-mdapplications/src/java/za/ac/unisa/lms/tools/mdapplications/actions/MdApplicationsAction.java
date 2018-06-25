@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 
+
+
+
+
+
 //import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,13 +37,12 @@ import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 import org.apache.struts.actions.LookupDispatchAction;
 import org.apache.struts.util.LabelValueBean;
-import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
-import org.sakaiproject.email.api.EmailService;
 
 import za.ac.unisa.lms.tools.mdapplications.dao.MdApplicationsQueryDAO;
 import za.ac.unisa.lms.tools.mdapplications.forms.MdApplicationsForm;
 import za.ac.unisa.lms.tools.mdapplications.forms.MdPrev;
+import za.ac.unisa.lms.tools.mdapplications.forms.Staff;
 import za.ac.unisa.lms.tools.mdapplications.forms.Student;
 import za.ac.unisa.lms.tools.mdapplications.forms.StudentFile;
 import za.ac.unisa.lms.tools.mdapplications.forms.GeneralItem;
@@ -45,10 +50,11 @@ import za.ac.unisa.lms.tools.mdapplications.forms.Qualification;
 import za.ac.unisa.lms.tools.mdapplications.actions.GeneralMethods;
 import za.ac.unisa.utils.WorkflowFile;
 import Srrsa01h.Abean.Srrsa01sRegStudentPersDetail;
+import Menu95h.Abean.Menu95S;
 
+@SuppressWarnings("unchecked")
 public class MdApplicationsAction extends LookupDispatchAction {
 	//private statements add June 2011
-	private EmailService emailService;
 	private Pattern regexPattern;
 	private Matcher regMatcher;
 
@@ -67,8 +73,8 @@ public class MdApplicationsAction extends LookupDispatchAction {
 			exception = new Exception(aEvent.getActionCommand());
 		}
 	}
-	protected Map getKeyMethodMap() {
-		Map map = new HashMap();
+	protected Map<String, String> getKeyMethodMap() {
+		Map<String, String> map = new HashMap<String, String>();
 		map.put("button.display", "login");
 		map.put("button.reset", "reset");
 		map.put("button.submit","submit");
@@ -79,6 +85,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		map.put("button.backto", "back");
 		map.put("button.withdraw", "cancel");
 		map.put("button.continue", "nextStep");
+		map.put("button.submitLoginAdmin", "loginStaff");
 		map.put("studinput", "studinput");
 		map.put("walkthrough", "walkthrough");
 	    map.put("step1", "login");
@@ -88,6 +95,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		map.put("button.add.attachment", "addAttachment");
 		map.put("button.add", "attachFile");
 		map.put("button.submitdoc","submitDocuments");
+		map.put("loginAdmin", "loginAdmin");
 	return map;
 	}
 
@@ -98,6 +106,8 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		HttpServletRequest request,
 		HttpServletResponse response)
 	 throws Exception {
+		
+		//log.debug("MDApplicationsAction - walkthrough - START");
 
 /*		Type cast the incoming form to mdForm and reset
  */
@@ -107,6 +117,187 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		return mapping.findForward("walkthroughforward");
 	}
 
+	public ActionForward loginAdmin(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
+		//log.debug("MDApplicationsAction - loginAdmin - Start");
+	    
+		MdApplicationsForm mdForm = (MdApplicationsForm) form;
+				
+		resetForm(mdForm);
+		
+		mdForm.setWebLoginMsg("");
+	
+		mdForm.setFromPage("step0");
+				
+		//log.debug("MDApplicationsAction - loginAdmin - AcademicYear="+mdForm.getStudent().getAcademicYear());
+
+		
+        if (mdForm.isDateWEBMDAPP() || mdForm.isDateWEBMDDOC() || mdForm.isDateWEBMDAPP()){ 
+        	mdForm.setWebLoginMsg("Applications for "+ mdForm.getStudent().getAcademicYear());
+	    }else{
+	    	mdForm.setWebLoginMsg("Applications are closed for Administrators");
+	    }
+
+        //log.debug("MDApplicationsAction - loginAdmin - WEBMDAPP="+mdForm.isDateWEBMDAPP()+", WEBMDDOC="+mdForm.isDateWEBMDDOC()+", WEBMDADM="+mdForm.isDateWEBMDADM());
+        
+		//log.debug("MDApplicationsAction - Return to loginAdmin - Login Screen");
+		return mapping.findForward("loginAdmin");
+	}
+	
+	public ActionForward loginStaff(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
+		//2018 Edmund - Debug
+		//getAllRequestParamaters(request, response);
+		
+		//log.debug("MDApplicationsAction - loginStaff - Start");
+	    
+		MdApplicationsForm mdForm = (MdApplicationsForm) form;
+		GeneralMethods gen = new GeneralMethods();
+		ActionMessages messages = new ActionMessages();
+		
+ 		mdForm.getAdminStaff().setNumber(stripXSS(mdForm.getAdminStaff().getNumber()));
+		if (mdForm.getAdminStaff().getNumber() == null || "".equalsIgnoreCase(mdForm.getAdminStaff().getNumber().trim()) || "userID".equalsIgnoreCase(mdForm.getAdminStaff().getNumber().trim())){
+			//log.debug("MDApplicationsAction - loginStaff - AdminStaff - Number is empty");
+			messages.add(ActionMessages.GLOBAL_MESSAGE,
+					new ActionMessage("message.generalmessage", "Please Enter User ID."));
+			addErrors(request, messages);
+			return mapping.findForward("loginAdmin");
+		}
+		//log.debug("MDApplicationsAction - loginStaff - AdminStaff - Number="+mdForm.getAdminStaff().getNumber());
+		if (mdForm.getAdminStaff().getNumber().trim().length() > 8 ){
+			//log.debug("MDApplicationsAction - loginStaff - AdminStaff - Number is larger than 8 characters");
+			messages.add(ActionMessages.GLOBAL_MESSAGE,
+					new ActionMessage("message.generalmessage", "Please Enter a valid User ID."));
+			addErrors(request, messages);
+			return mapping.findForward("loginAdmin");
+		}
+		if (!gen.isNumeric(mdForm.getAdminStaff().getNumber().trim())){
+			//log.debug("MDApplicationsAction - loginStaff - AdminStaff - Number is not numeric");
+			messages.add(ActionMessages.GLOBAL_MESSAGE,
+					new ActionMessage("message.generalmessage", "Please Enter a valid User ID. ID not Numeric."));
+			addErrors(request, messages);
+			return mapping.findForward("loginAdmin");
+		}
+		mdForm.getAdminStaff().setPassword(stripXSS(mdForm.getAdminStaff().getPassword()));
+		if (mdForm.getAdminStaff().getPassword() == null || "".equalsIgnoreCase(mdForm.getAdminStaff().getPassword().trim()) || "userPWD".equalsIgnoreCase(mdForm.getAdminStaff().getPassword().trim())){
+			//log.debug("MDApplicationsAction - loginStaff - AdminStaff - Password is empty");
+			messages.add(ActionMessages.GLOBAL_MESSAGE,
+					new ActionMessage("message.generalmessage", "Please Enter a valid User Password."));
+			addErrors(request, messages);
+			return mapping.findForward("loginAdmin");
+		}
+		
+		//Call Menu95S to Authenticate User
+		//log.debug("MDApplicationsAction - loginStaff - START MENU95 LOGON");
+		
+		Menu95S op = new Menu95S();
+		operListener opl = new operListener();
+		op.addExceptionListener(opl);
+		op.clear();
+		
+		op.setInWsWorkstationCode("internet");
+		op.setInWsWorkstationMacCode("internet");
+		op.setInCsfClientServerCommunicationsAction("LI");
+			     
+		op.setInWsUserNumber(Integer.parseInt(mdForm.getAdminStaff().getNumber().trim()));
+		op.setInWsUserPassword(mdForm.getAdminStaff().getPassword().toUpperCase().trim());
+		op.setInWsUserPassword32cs(mdForm.getAdminStaff().getPassword().trim());
+
+		//log.debug("MDApplicationsAction - loginStaff - START MENU95 EXECUTE");
+		op.execute();
+		
+		if (opl.getException() != null) throw opl.getException();
+		if (op.getExitStateType() < 3) throw new Exception(op.getExitStateMsg());
+		
+		String result = op.getOutCsfStringsString500();
+		//log.debug("MDApplicationsAction - loginStaff - getOutCsfStringsString500="+result);
+		
+		boolean isAllow = false;
+		boolean isF894 = false;
+		if ("".equalsIgnoreCase(result)){
+
+			//Check if user has access to any menu items
+			if (op.getOutMenuGroupCount() > 0) {
+				//log.debug("MDApplicationsAction - loginStaff - User has access to getOutMenuGroupCount="+op.getOutMenuGroupCount());
+				for (int i = 0; i < op.getOutMenuGroupCount(); i++){
+					//log.debug("MDApplicationsAction - loginStaff - User has access - Menu95 Functions="+op.getOutGWsFunctionNumber(i));
+					if (op.getOutGWsFunctionNumber(i) == 894){
+						isF894 = true;
+						isAllow = true;
+						//log.debug("MDApplicationsAction - loginStaff - User has access to F894 - isF894="+isF894);
+					}
+				}	
+				if (isAllow && isF894){
+					//log.debug("MDApplicationsAction - loginStaff - Admission="+mdForm.getAdminStaff().getAdmission());
+					mdForm.getAdminStaff().setAdmin(true);
+					//Get Radio selection for Navigation
+					if (mdForm.getAdminStaff().getAdmission() == null || "".equalsIgnoreCase(mdForm.getAdminStaff().getAdmission())){
+						//log.debug("MDApplicationsAction - loginStaff - Admission is NULL (No Radio Selected) - Return to Admin Login");
+						messages.add(ActionMessages.GLOBAL_MESSAGE,
+								new ActionMessage("message.generalmessage", "Please select the required access type. (Step 1/Step 2)"));
+						addErrors(request, messages);
+						return mapping.findForward("loginAdmin");
+					}else{
+						mdForm.setLoginType(stripXSS(mdForm.getAdminStaff().getAdmission()));
+						//log.debug("MDApplicationsAction - loginStaff - getAdmission="+mdForm.getLoginType());
+						if ("APP".equalsIgnoreCase(mdForm.getLoginType())){
+							//log.debug("MDApplicationsAction - loginStaff - Admission: "+mdForm.getLoginType()+" - Goto Login for Application");
+							mdForm.setWebLoginMsg("Administrator - Master & Doctoral Application");
+							return mapping.findForward("login");
+						}else if ("DOC".equalsIgnoreCase(mdForm.getLoginType())){
+							//log.debug("MDApplicationsAction - loginStaff - Admission: "+mdForm.getLoginType()+" - Goto Login for Documents");
+							mdForm.setWebLoginMsg("Administrator - Master & Doctoral Document Upload");
+							return mapping.findForward("login");
+						}
+					}
+				}else if (isAllow && !isF894){
+					mdForm.getAdminStaff().setAdmin(false);
+					//log.debug("MDApplicationsAction - loginStaff - isAdmin="+mdForm.getAdminStaff().isAdmin()+" - No Access");
+					messages.add(ActionMessages.GLOBAL_MESSAGE,
+							new ActionMessage("message.generalmessage", "User not permitted to use Administration fuction"));
+					addErrors(request, messages);
+					return mapping.findForward("loginAdmin");
+				}else {
+					mdForm.getAdminStaff().setAdmin(false);
+					//log.debug("MDApplicationsAction - loginStaff - isAdmin="+mdForm.getAdminStaff().isAdmin()+" - No Access");
+					messages.add(ActionMessages.GLOBAL_MESSAGE,
+							new ActionMessage("message.generalmessage", "User not Authenticated"));
+					addErrors(request, messages);
+					return mapping.findForward("loginAdmin");
+				}
+			}else{
+				if (op.getOutMenuGroupCount() == 0){
+					//log.debug("MDApplicationsAction - loginStaff - You do not seem to have access to any Student Admin Functions. Please contact Support.");
+					isF894 = false;
+					messages.add(ActionMessages.GLOBAL_MESSAGE,
+							new ActionMessage("message.generalmessage", "User not assigned to any functions."));
+					addErrors(request, messages);
+					return mapping.findForward("loginAdmin");
+				}
+			}
+		}else{
+			//log.debug("MDApplicationsAction - loginStaff - ERROR MESSAGE RETURNED:" +result);
+			if (result.contains("PASSWORD EXPIRED")){
+				//log.debug("MDApplicationsAction - loginStaff - User Password Expired. Use the Student System to rest your password or contact the ICT Helpdesk.");
+				messages.add(ActionMessages.GLOBAL_MESSAGE,
+				new ActionMessage("message.generalmessage", "User Password Expired. Use the Student System to rest your password or contact the ICT Helpdesk."));
+					addErrors(request, messages);
+				return mapping.findForward("loginAdmin");
+			}else{
+				messages.add(ActionMessages.GLOBAL_MESSAGE,
+				new ActionMessage("message.generalmessage", result));
+					addErrors(request, messages);
+				return mapping.findForward("loginAdmin");
+			}
+		}
+		//log.debug("MDApplicationsAction - loginStaff - END MENU95 LOGON");
+		return mapping.findForward("loginAdmin");
+	}
+	
 	public ActionForward studinput(
 			ActionMapping mapping,
 			ActionForm form,
@@ -114,6 +305,8 @@ public class MdApplicationsAction extends LookupDispatchAction {
 			HttpServletResponse response)
 		 throws Exception {
 
+		//log.debug("MDApplicationsAction - studinput - START");
+		
 	/*		Type cast the incoming form to mdForm and reset
 	 */
 			MdApplicationsForm mdForm = (MdApplicationsForm) form;
@@ -121,8 +314,11 @@ public class MdApplicationsAction extends LookupDispatchAction {
 			mdForm.setStudentNumberSearchAttemp(0);
 			
 			mdForm.setLoginType(request.getParameter("select"));
-			
-			return mapping.findForward("login");
+			if ("loginAdmin".equalsIgnoreCase(mdForm.getLoginType())){
+				return mapping.findForward("loginAdmin");
+			}else{
+				return mapping.findForward("login");
+			}
 	}
 
 	public ActionForward submitDocuments(
@@ -130,6 +326,8 @@ public class MdApplicationsAction extends LookupDispatchAction {
 			ActionForm form,
 			HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
+
+		//log.debug("MDApplicationsAction - submitDocuments - START");
 
 		MdApplicationsForm mdForm = (MdApplicationsForm) form;
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
@@ -158,6 +356,8 @@ public class MdApplicationsAction extends LookupDispatchAction {
 			ActionForm form,
 			HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
+		
+		//log.debug("MDApplicationsAction - submit - START");
 
 		MdApplicationsForm mdForm = (MdApplicationsForm) form;
 		ActionMessages messages = new ActionMessages();
@@ -165,7 +365,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		
 		mdForm.setApplyType("F");
 		mdForm.setFromPage("page1");
-
+		
 		if (mdForm.getStudent().getNumber() == null || "".equalsIgnoreCase(mdForm.getStudent().getNumber())){
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "Enter student number."));
@@ -259,7 +459,10 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public String displayPersonal(MdApplicationsForm mdForm) throws Exception {
+		
+		//log.debug("MDApplicationsAction - displayPersonal - START");
 /*
  * 	F126-display-D
  */
@@ -505,9 +708,21 @@ public class MdApplicationsAction extends LookupDispatchAction {
 			result="The birthdate you have entered does not correspond with the information on the database";
 		}
 		// Closing date  --Integer.parseInt(String.valueOf(mdForm.getStudent().getAcademicYear())))){
+		//log.debug("MDApplicationsAction - displayPersonal - isAdmin="+mdForm.getAdminStaff().isAdmin());
+		//log.debug("MDApplicationsAction - displayPersonal - validateClosingDate - Year="+mdForm.getStudent().getAcademicYear()+", loginType="+mdForm.getLoginType());
+
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		if (!dao.validateClosingDate(mdForm.getStudent().getAcademicYear()) && "APP".equalsIgnoreCase(mdForm.getLoginType())){
-			result="The application period for study at Unisa is closed.";
+		if (mdForm.getAdminStaff().isAdmin()){
+			if (!dao.validateClosingDate(mdForm.getStudent().getAcademicYear(), "WEBMDADM") && "APP".equalsIgnoreCase(mdForm.getLoginType())){
+				result="The Administration option is closed.";
+				mdForm.setDateWEBMDADM(false);
+			}else{
+				mdForm.setDateWEBMDADM(true);
+			}
+		}else{
+			if (!dao.validateClosingDate(mdForm.getStudent().getAcademicYear(), "WEBMDAPP") && "APP".equalsIgnoreCase(mdForm.getLoginType())){
+				result="The application period for study at Unisa is closed.";
+			}
 		}
 
 		if (!"".equals(result)){
@@ -521,7 +736,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 			String qualcode;
 			String spescode;
 			String testYr="";
-			List mdlist = new ArrayList();
+			List<MdPrev> mdlist = new ArrayList<MdPrev>();
 			//dont use qual and spes any more, read by seq nr
 			//qualcode = mdForm.getQual().getQualCode();
 			//spescode = mdForm.getQual().getSpecCode();
@@ -613,12 +828,6 @@ public class MdApplicationsAction extends LookupDispatchAction {
 			}else{
 				if (teststu.getNumber() != null && !"".equalsIgnoreCase(teststu.getNumber())){
 					mdForm.getStudent().setAdmstatus(teststu.getAdmstatus());
-					/*2017 Edmund - Added as per BRS, but removed again on Elena's request
-					// Closing date  --Integer.parseInt(String.valueOf(mdForm.getStudent().getAcademicYear())))){
-					if (!dao.validateClosingDate(mdForm.getStudent().getAcademicYear())){
-						result="The application period for this qualification is closed, you will have to reapply for admission and upload your supporting documents during the next application period.";
-					}
-				*/
 				
 					//check if student has mdappl record
 					//log.debug("MDapplications: addAttachment for studnr="+mdForm.getStudent().getNumber()+" - Check if student has mdappl record");
@@ -642,7 +851,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 					Student tmpStu = new Student();
 					tmpStu = dao.getMDAPPLRecord(mdForm.getStudent().getNumber());
 					
-					if ("DE".equalsIgnoreCase(tmpStu.getAdmstatus())){
+					if ("N".equalsIgnoreCase(tmpStu.getAdmstatus())){
 						result="Your application has been declined. Please re-apply before uploading any files.";
 					}else if (tmpStu.getMediaAccess1() == null || "".equalsIgnoreCase(tmpStu.getMediaAccess1())){
 						result="You don't currently have an active application. Please apply before uploading any files.";
@@ -654,6 +863,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		return result;
 	}
 	
+	@SuppressWarnings("unused")
 	public void displayPersonalShort(MdApplicationsForm mdForm) throws Exception {
 /*
  * 	F126-display-D
@@ -695,6 +905,8 @@ public class MdApplicationsAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
+		//log.debug("MDApplicationsAction - applyStep2 - START");
+		
 		MdApplicationsForm mdForm = (MdApplicationsForm) form;
 		ActionMessages messages = new ActionMessages();
 		GeneralMethods gen = new GeneralMethods();
@@ -770,15 +982,6 @@ public class MdApplicationsAction extends LookupDispatchAction {
 			addErrors(request, messages);
 			return "step1forward";
 		}
-
-		/* Closing date  --Integer.parseInt(String.valueOf(mdForm.getStudent().getAcademicYear())))){
-			if (!dao.validateClosingDate(mdForm.getSelectedQual().substring(0,5), mdForm.getStudent().getAcademicYear())){
-				messages.add(ActionMessages.GLOBAL_MESSAGE,
-						new ActionMessage("message.generalmessage", "The application period for study at Unisa is closed."));
-				addErrors(request, messages);
-				return "step1forward";
-			}
-		 */
 
 		// Surname
 		if (mdForm.getStudent().getSurname()==null || "".equals(mdForm.getStudent().getSurname().trim())){
@@ -922,10 +1125,13 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		return "step2forward";
 	}
 
+	@SuppressWarnings("unused")
 	public String applyStep3(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
+		//log.debug("MDApplicationsAction - applyStep3 - START");
+		
 		MdApplicationsForm mdForm = (MdApplicationsForm) form;
 		ActionMessages messages = new ActionMessages();
 		GeneralMethods gen = new GeneralMethods();
@@ -1208,6 +1414,8 @@ public class MdApplicationsAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
+		//log.debug("MDApplicationsAction - applyStep4 - START");
+		
 		// call from M&D page next = address page = step2
 		MdApplicationsForm mdForm = (MdApplicationsForm) form;
 		String qualCode= mdForm.getQual().getQualCode();
@@ -1313,9 +1521,12 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		return "step3forward";
 	}
 
+	@SuppressWarnings("unused")
 	public String applyStep5(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+		
+		//log.debug("MDApplicationsAction - applyStep5 - START");
 
 		// call from M&D page next = address page = step2
 		MdApplicationsForm mdForm = (MdApplicationsForm) form;
@@ -1445,6 +1656,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		return "step5forward";
 	}
 
+	@SuppressWarnings("unused")
 	public ActionForward savePersonal(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
@@ -1664,6 +1876,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 	    return mapping.findForward("confirmforward");
 	}
 
+	@SuppressWarnings("unused")
 	public ActionForward nextStep(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
@@ -1682,6 +1895,8 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		}
 	
 		mdForm.setApplyType("F");
+		
+		//log.debug("MDApplicationsAction - next - nextPage="+request.getParameter("page"));
 
 		String nextPage = "";
 		if ("step1".equalsIgnoreCase(request.getParameter("page"))){
@@ -1699,6 +1914,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
  			nextPage = applyStep4(mapping,form,request, response);
 		}
 
+		//log.debug("MDApplicationsAction - next - Go To="+nextPage);
 		return mapping.findForward(nextPage);
 	}
 
@@ -1707,6 +1923,8 @@ public class MdApplicationsAction extends LookupDispatchAction {
 			throws Exception {
 
 		MdApplicationsForm mdForm = (MdApplicationsForm) form;
+		
+		//log.debug("MDApplicationsAction - back - prevPage="+request.getParameter("page"));
 		String prevPage = "";
 		String qualCode = mdForm.getQual().getQualCode();
 		String specCode = mdForm.getQual().getSpecCode();
@@ -1755,6 +1973,8 @@ public class MdApplicationsAction extends LookupDispatchAction {
 			HttpServletResponse response) throws Exception {
 
 		MdApplicationsForm mdForm = (MdApplicationsForm) form;
+		
+		//log.debug("MDApplicationsAction - cancel");
 		resetForm(mdForm);
 
 		return mapping.findForward("walkthroughforward");
@@ -1799,6 +2019,8 @@ public class MdApplicationsAction extends LookupDispatchAction {
 
 		//Type cast the incoming form to MdApplicationsForm and reset
 		MdApplicationsForm mdForm = (MdApplicationsForm) form;
+		
+		//log.debug("MDApplicationsAction - reset");
 		resetForm(mdForm);
 
 		return mapping.findForward("login");
@@ -1807,7 +2029,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 	private void setUpQualList(HttpServletRequest request, String appsType, String akdyear) throws Exception{
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		List list = dao.getQualList(appsType, akdyear);
+		List<LabelValueBean> list = dao.getQualList(appsType, akdyear);
 		list.add(0,new LabelValueBean("Select from Menu","-1"));
 		request.setAttribute("quallist",list);
 	}
@@ -1820,7 +2042,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		akdyear=mdForm.getStudent().getAcademicYear();
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		List list = dao.getSpesList(qualif,akdyear);
+		List<LabelValueBean> list = dao.getSpesList(qualif,akdyear, mdForm.getAdminStaff().isAdmin());
 		recc=list.size();
 		list.add(0,new LabelValueBean("Select from Menu","-1"));
 		request.setAttribute("speslist",list);
@@ -1831,7 +2053,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 	private void setUpTitleList(HttpServletRequest request) throws Exception{
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		List list = dao.getTitles();
+		List<LabelValueBean> list = dao.getTitles();
 		list.add(0,new LabelValueBean("Select from Menu","-1"));
 		request.setAttribute("titlelist",list);
 	}
@@ -1839,7 +2061,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 	private void setUpDisabilityList(HttpServletRequest request) throws Exception{
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		List list = dao.getDisabilities();
+		List<LabelValueBean> list = dao.getDisabilities();
 		// Add South Africa as first entry
 		list.add(0,new org.apache.struts.util.LabelValueBean("Not Applicable","1@Not Applicable"));
 		request.setAttribute("disabilitylist",list);
@@ -1849,7 +2071,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
 		//log.debug("setUpInterestArealist - QualCode: " + qualCode + " - SpecCode: " + specCode);
-		List list = dao.getInterestAreas(qualCode,specCode);
+		List<LabelValueBean> list = dao.getInterestAreas(qualCode,specCode);
 		//log.debug("setUpInterestArealist - List: " + list);
 		// Add "Select niche/focus area" as first entry
 		list.add(0,new LabelValueBean("Select niche/focus area","-1"));
@@ -1862,7 +2084,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 	private void setUpCountryList(HttpServletRequest request) throws Exception{
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		List list = dao.getCountries();
+		List<LabelValueBean> list = dao.getCountries();
 		// Add South Africa as first entry
 		//list.add(0,new org.apache.struts.util.LabelValueBean("South Africa","1015South Africa"));
 		list.add(0,new LabelValueBean("Select from Menu","-1"));
@@ -1872,7 +2094,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 	private void setUpExaminationCentreList(HttpServletRequest request) throws Exception{
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		List list = dao.getExaminationCentreList();
+		List<LabelValueBean> list = dao.getExaminationCentreList();
 		list.add(0,new LabelValueBean("Select from Menu","-1"));
 		request.setAttribute("examlist",list);
 	}
@@ -1880,7 +2102,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 	private void setUpHomeLanguageList(HttpServletRequest request) throws Exception{
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		List list = dao.getLanguages();
+		List<LabelValueBean> list = dao.getLanguages();
 		list.add(0,new LabelValueBean("Select from Menu","-1"));
 		request.setAttribute("languagelist",list);
 	}
@@ -1888,15 +2110,16 @@ public class MdApplicationsAction extends LookupDispatchAction {
 	private void setUpNationalityList(HttpServletRequest request) throws Exception{
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		List list = dao.getCountries();
+		List<LabelValueBean> list = dao.getCountries();
 		list.add(0,new LabelValueBean("Select from Menu","-1"));
 		request.setAttribute("nationalitylist",list);
 	}
 
+	
 	private void setUpPopulationGroupList(HttpServletRequest request) throws Exception{
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		List list = dao.getPopulationGroups();
+		List<LabelValueBean> list = dao.getPopulationGroups();
 		list.add(0,new LabelValueBean("Select from Menu","-1"));
 		request.setAttribute("populationlist",list);
 	}
@@ -1904,7 +2127,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 	private void setUpOccupationList(HttpServletRequest request) throws Exception{
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		List list = dao.getOccupations();
+		List<LabelValueBean> list = dao.getOccupations();
 		list.add(0,new LabelValueBean("Select from Menu","-1"));
 		request.setAttribute("occupationlist",list);
 	}
@@ -1912,7 +2135,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 	private void setUpEconomicSectorList(HttpServletRequest request) throws Exception{
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		List list = dao.getEconomicSectors();
+		List<LabelValueBean> list = dao.getEconomicSectors();
 		list.add(0,new LabelValueBean("Select from Menu","-1"));
 		request.setAttribute("economicsectorlist",list);
 	}
@@ -1920,7 +2143,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 	private void setPrevActivityList(HttpServletRequest request) throws Exception{
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		List list = dao.getPrevActivity();
+		List<LabelValueBean> list = dao.getPrevActivity();
 		list.add(0,new LabelValueBean("Select from Menu","-1"));
 		request.setAttribute("prevactivitylist",list);
 	}
@@ -1928,7 +2151,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 	private void setUpOtherUniversityList(HttpServletRequest request) throws Exception{
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		List list = dao.getOtherUniversities();
+		List<LabelValueBean> list = dao.getOtherUniversities();
 		list.add(0,new LabelValueBean("Select from Menu","-1"));
 		request.setAttribute("otheruniversitylist",list);
 	}
@@ -1936,7 +2159,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 	private void setUpProvinceList(HttpServletRequest request) throws Exception{
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
-		List list = dao.getProvinces();
+		List<LabelValueBean> list = dao.getProvinces();
 		list.add(0,new LabelValueBean("Select from Menu","-1"));
 		request.setAttribute("provincelist",list);
 	}
@@ -1959,6 +2182,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 
 		MdApplicationsForm mdForm = (MdApplicationsForm) form;
 
+		//log.debug("MDApplicationsAction - emptySession");
 		// Clear fields
 		resetForm(mdForm);
 		mdForm.setApplyType("");
@@ -2259,6 +2483,8 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		 return result;
 
 		}
+	
+	@SuppressWarnings("unused")
 	private void writeWorkflow(MdApplicationsForm mdForm, Date applyDateTime) throws Exception{
 
 		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
@@ -2429,7 +2655,6 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		
 		MdApplicationsForm mdForm = (MdApplicationsForm) form;
 		ActionMessages messages = new ActionMessages();
-		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
 		
 		// check document type
 		if("".equals(mdForm.getFileType())){
@@ -2442,7 +2667,6 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		return mapping.findForward("addattachmentforward");
 	}
 
-	@SuppressWarnings("deprecation") // Did we use deprecated classes ???
 	public ActionForward attachFile(
 			ActionMapping mapping,
 			ActionForm form,
@@ -2742,6 +2966,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 
 	}
 
+	@SuppressWarnings("unused")
 	public ActionForward saveDocuments(
 			ActionMapping mapping,
 			ActionForm form,
@@ -2814,6 +3039,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		return mapping.findForward("uploaddoneforward");
 	}
 
+	@SuppressWarnings("unused")
 	private boolean isNameValid(String anyname){
 		boolean result = true;
 		String test = "";
@@ -2873,6 +3099,7 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		return mapping.findForward("walkthroughforward");
 	}
 
+	@SuppressWarnings("static-access")
 	public String getCurrentAcademicYear() throws Exception {
 		int tYear;
 		String acaYear;
@@ -2889,12 +3116,17 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		return acaYear;
 	}
 	
-	public void resetForm(MdApplicationsForm form)
-	throws Exception {
+	public void resetForm(MdApplicationsForm form)	throws Exception {
+		
+		
+		MdApplicationsQueryDAO dao = new MdApplicationsQueryDAO();
+		
 		// Clear fields
 		form.setStudent(new Student());
+		form.setAdminStaff(new Staff());
+		
 		form.setQual(new Qualification());
-		List mdlist = new ArrayList();
+		List<MdPrev> mdlist = new ArrayList<MdPrev>();
 		form.setMdprevList(mdlist);
 		form.setSelectedQual("");
 		form.setSelectedSpes("");
@@ -2920,6 +3152,34 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		form.setFileName("");
 		form.setFileType("");
 		form.setLoginType("");
+		form.setDateWEBMDADM(false);
+		form.setDateWEBMDAPP(false);
+		form.setDateWEBMDDOC(false);
+
+		if (!dao.validateClosingDate(form.getStudent().getAcademicYear(), "WEBMDADM")){
+			form.setDateWEBMDADM(false);
+		}else{
+			form.setDateWEBMDADM(true);
+		}
+		if (!dao.validateClosingDate(form.getStudent().getAcademicYear(), "WEBMDAPP")){
+			form.setDateWEBMDAPP(false);
+		}else{
+			form.setDateWEBMDAPP(true);
+		}
+		if (!dao.validateClosingDate(form.getStudent().getAcademicYear(), "WEBMDDOC")){
+			form.setDateWEBMDDOC(false);
+		}else{
+			form.setDateWEBMDDOC(true);
+		}
+		//log.debug("MDApplicationsAction - resetForm -  WEBMDADM="+form.isDateWEBMDADM());
+		//log.debug("MDApplicationsAction - resetForm -  WEBMDAPP="+form.isDateWEBMDAPP());
+		//log.debug("MDApplicationsAction - resetForm -  WEBMDDOC="+form.isDateWEBMDDOC());
+		
+        if (form.isDateWEBMDAPP() || form.isDateWEBMDDOC() || form.isDateWEBMDAPP()){ 
+        	form.setWebLoginMsg("Applications for "+ form.getStudent().getAcademicYear());
+	    }else{
+	    	form.setWebLoginMsg("Applications are closed for Administrators");
+	    }
 		
 		//form.getStudent().setSurname("MOTLOUTSI");
 		//form.getStudent().setFirstnames("MASILO JEFFREY");
@@ -2929,4 +3189,77 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		//form.getStudent().setBirthYear("1982");
 		//form.getStudent().setEmailAddress("krugegj@unisa.ac.za");
 	}
+	
+	//Include some cross site scripting checks (XSS)
+    private String stripXSS(String value) { 
+
+    	//log.debug("MDApplicationsAction - stripXSS - Value="+value);
+        if (value != null) { 
+            // NOTE: It's highly recommended to use the ESAPI library and uncomment the following line to 
+            // avoid encoded attacks. 
+            //value = ESAPI.encoder().canonicalise(value); 
+
+            // Avoid null characters 
+            value = value.replaceAll("", ""); 
+
+            // Avoid anything between script tags 
+            Pattern scriptPattern = Pattern.compile("<script>(.*?)</script>", Pattern.CASE_INSENSITIVE); 
+            value = scriptPattern.matcher(value).replaceAll(""); 
+
+            // Avoid anything in a src='...' type of expression 
+            scriptPattern = Pattern.compile("src[\r\n]*=[\r\n]*\\\'(.*?)\\\'", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL); 
+
+            scriptPattern = Pattern.compile("src[\r\n]*=[\r\n]*\\\"(.*?)\\\"", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL); 
+            value = scriptPattern.matcher(value).replaceAll(""); 
+
+            // Remove any lonesome </script> tag 
+            scriptPattern = Pattern.compile("</script>", Pattern.CASE_INSENSITIVE); 
+            value = scriptPattern.matcher(value).replaceAll(""); 
+
+            // Remove any lonesome <script ...> tag 
+            scriptPattern = Pattern.compile("<script(.*?)>", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL); 
+            value = scriptPattern.matcher(value).replaceAll(""); 
+
+            // Avoid eval(...) expressions 
+            scriptPattern = Pattern.compile("eval\\((.*?)\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL); 
+            value = scriptPattern.matcher(value).replaceAll(""); 
+
+            // Avoid expression(...) expressions 
+            scriptPattern = Pattern.compile("expression\\((.*?)\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL); 
+            value = scriptPattern.matcher(value).replaceAll(""); 
+
+            // Avoid javascript:... expressions 
+            scriptPattern = Pattern.compile("javascript:", Pattern.CASE_INSENSITIVE); 
+            value = scriptPattern.matcher(value).replaceAll(""); 
+
+			// Avoid vbscript:... expressions 
+            scriptPattern = Pattern.compile("vbscript:", Pattern.CASE_INSENSITIVE); 
+            value = scriptPattern.matcher(value).replaceAll(""); 
+
+            // Avoid onload= expressions 
+            scriptPattern = Pattern.compile("onload(.*?)=", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL); 
+            value = scriptPattern.matcher(value).replaceAll(""); 
+        } 
+        return value; 
+    } 
+    
+	public void getAllRequestParamaters(HttpServletRequest req, HttpServletResponse res) throws Exception { 
+
+		  //log.debug("MDApplications -----------------------------------------------------------------");
+		  //log.debug("MDApplications - getAllRequestParamaters - Start");
+		  Enumeration<String> parameterNames = req.getParameterNames(); 
+
+		  while (parameterNames.hasMoreElements()) { 
+			  String paramName = parameterNames.nextElement(); 
+			  //log.debug("MDApplications - getAllRequestParamaters - param: " + paramName); 
+
+			  String[] paramValues = req.getParameterValues(paramName); 
+			  for (int i = 0; i < paramValues.length; i++) { 
+				  String paramValue = paramValues[i]; 
+				  //log.debug("MDApplications - getAllRequestParamaters - value: " + paramValue); 
+			  } 
+		  } 
+		  //log.debug("MDApplications - getAllRequestParamaters - End");
+		  //log.debug("MDApplications -----------------------------------------------------------------");
+	  } 
 }

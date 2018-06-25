@@ -18,13 +18,13 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class ImporterSaxParser extends DefaultHandler {
 
-	private Logger logger = Logger.getLogger(getClass());
+    private Logger logger = Logger.getLogger(getClass());
 
-	private Connection connection = null;
+    private Connection connection = null;
 
-	private SAXParser parser = null;
-	private SakaiProxy sakaiProxy = null;
-	private Post post = null;
+    private SAXParser parser = null;
+    private SakaiProxy sakaiProxy = null;
+    private Post post = null;
 
     private boolean processingTitle = false;
     private boolean processingShortText = false;
@@ -44,30 +44,30 @@ public class ImporterSaxParser extends DefaultHandler {
     private boolean processingLinkRuleDescription = false;
     private boolean processingLinkExpression = false;
 
-	private String currentFileId = "";
-	private String currentFileName = "";
+    private String currentFileId = "";
+    private String currentFileName = "";
 
-	private String currentImageId = "";
-	private String currentImageDescription = "";
+    private String currentImageId = "";
+    private String currentImageDescription = "";
 
-	private String currentLinkRuleDescription = "";
-	private String currentLinkExpression = "";
+    private String currentLinkRuleDescription = "";
+    private String currentLinkExpression = "";
 
-	private String collectedText = "";
-	private Comment comment = null;
+    private String collectedText = "";
+    private Comment comment = null;
 
-	public ImporterSaxParser(Connection connection, SakaiProxy sakaiProxy) throws Exception {
-		SAXParserFactory factory = SAXParserFactory.newInstance();
-		parser = factory.newSAXParser();
+    public ImporterSaxParser(Connection connection, SakaiProxy sakaiProxy) throws Exception {
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        parser = factory.newSAXParser();
 
-		this.connection = connection;
-		this.sakaiProxy = sakaiProxy;
-	}
+        this.connection = connection;
+        this.sakaiProxy = sakaiProxy;
+    }
 
-	public void populatePost(String xml, Post post) throws Exception {
-		this.post = post;
-		parser.parse(new InputSource(new StringReader(xml)), this);
-	}
+    public void populatePost(String xml, Post post) throws Exception {
+        this.post = post;
+        parser.parse(new InputSource(new StringReader(xml)), this);
+    }
 
     public void startElement(String uri, String localName, String qName, Attributes attrs) {
         if ("post".equals(qName))
@@ -140,86 +140,86 @@ public class ImporterSaxParser extends DefaultHandler {
         } else if ("image".equals(qName)) {
             processingImage = false;
 
-			Statement st = null;
-			ResultSet rs = null;
+            Statement st = null;
+            ResultSet rs = null;
 
-			try {
-				st = connection.createStatement();
-				rs = st.executeQuery("SELECT * FROM BLOGGER_IMAGE WHERE IMAGE_ID = '" + currentImageId + "'");
-				if (rs.next()) {
-					byte[] blob = rs.getBytes("IMAGE_CONTENT");
-					String resourceId = sakaiProxy.storeResource(blob, currentImageDescription, post.getSiteId(), post.getCreatorId());
-					if (resourceId != null) {
-						String fullUrl = sakaiProxy.getServerUrl() + "/access/content" + resourceId;
-						String img = "<img src=\"" + fullUrl + "\"/><br /><br />";
-						collectedText += img;
-					}
-				}
-			} catch (Exception e) {
-				logger.error("Caught exception whilst storing image.", e);
-			} finally {
-				if (rs != null) {
-					try {
-						rs.close();
-					} catch (Exception e) {
-					}
-				}
+            try {
+                st = connection.createStatement();
+                rs = st.executeQuery("SELECT * FROM BLOGGER_IMAGE WHERE IMAGE_ID = '" + currentImageId + "'");
+                if (rs.next()) {
+                    byte[] blob = rs.getBytes("IMAGE_CONTENT");
+                    String resourceId = sakaiProxy.storeResource(blob, currentImageDescription, post.getSiteId(), post.getCreatorId());
+                    if (resourceId != null) {
+                        String fullUrl = sakaiProxy.getServerUrl() + "/access/content" + resourceId;
+                        String img = "<img src=\"" + fullUrl + "\"/><br /><br />";
+                        collectedText += img;
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Caught exception whilst storing image.", e);
+            } finally {
+                if (rs != null) {
+                    try {
+                        rs.close();
+                    } catch (Exception e) {
+                    }
+                }
 
-				if (st != null) {
-					try {
-						st.close();
-					} catch (Exception e) {
-					}
-				}
-			}
-		} else if ("imageId".equals(qName))
-			processingImageId = false;
-		else if ("fileId".equals(qName))
-			processingFileId = false;
-		else if ("fileDescription".equals(qName))
-			processingFileDescription = false;
-		else if ("file".equals(qName)) {
-			Statement st = null;
-			ResultSet rs = null;
+                if (st != null) {
+                    try {
+                        st.close();
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        } else if ("imageId".equals(qName))
+            processingImageId = false;
+        else if ("fileId".equals(qName))
+            processingFileId = false;
+        else if ("fileDescription".equals(qName))
+            processingFileDescription = false;
+        else if ("file".equals(qName)) {
+            Statement st = null;
+            ResultSet rs = null;
 
-			try {
-				st = connection.createStatement();
-				rs = st.executeQuery("SELECT * FROM BLOGGER_FILE WHERE FILE_ID = '" + currentFileId + "'");
-				if (rs.next()) {
-					byte[] blob = rs.getBytes("FILE_CONTENT");
-					String resourceId = sakaiProxy.storeResource(blob, currentFileName, post.getSiteId(), post.getCreatorId());
-					if (resourceId != null) {
-						String fullUrl = sakaiProxy.getServerUrl() + "/access/content" + resourceId;
-						String link = "<a href=\"" + fullUrl + "\">" + currentFileName + "</a><br /><br />";
-						collectedText += link;
-					}
-				}
-			} catch (Exception e) {
-				logger.error("Caught exception whilst storing file.", e);
-			} finally {
-				if (rs != null) {
-					try {
-						rs.close();
-					} catch (Exception e) {
-					}
-				}
+            try {
+                st = connection.createStatement();
+                rs = st.executeQuery("SELECT * FROM BLOGGER_FILE WHERE FILE_ID = '" + currentFileId + "'");
+                if (rs.next()) {
+                    byte[] blob = rs.getBytes("FILE_CONTENT");
+                    String resourceId = sakaiProxy.storeResource(blob, currentFileName, post.getSiteId(), post.getCreatorId());
+                    if (resourceId != null) {
+                        String fullUrl = sakaiProxy.getServerUrl() + "/access/content" + resourceId;
+                        String link = "<a href=\"" + fullUrl + "\">" + currentFileName + "</a><br /><br />";
+                        collectedText += link;
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Caught exception whilst storing file.", e);
+            } finally {
+                if (rs != null) {
+                    try {
+                        rs.close();
+                    } catch (Exception e) {
+                    }
+                }
 
-				if (st != null) {
-					try {
-						st.close();
-					} catch (Exception e) {
-					}
-				}
-			}
-		} else if ("linkRuleDescription".equals(qName))
-			processingLinkRuleDescription = false;
-		else if ("linkExpression".equals(qName))
-			processingLinkExpression = false;
-		else if ("linkRule".equals(qName)) {
-			String link = "<a href=\"" + currentLinkExpression + "\">" + currentLinkRuleDescription + "</a><br /><br />";
-			collectedText += link;
-		}
-	}
+                if (st != null) {
+                    try {
+                        st.close();
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        } else if ("linkRuleDescription".equals(qName))
+            processingLinkRuleDescription = false;
+        else if ("linkExpression".equals(qName))
+            processingLinkExpression = false;
+        else if ("linkRule".equals(qName)) {
+            String link = "<a href=\"" + currentLinkExpression + "\">" + currentLinkRuleDescription + "</a><br /><br />";
+            collectedText += link;
+        }
+    }
 
     public void characters(char[] ch, int start, int length) {
         String data = new String(ch, start, length);

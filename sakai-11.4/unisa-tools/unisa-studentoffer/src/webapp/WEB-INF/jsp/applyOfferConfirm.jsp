@@ -135,9 +135,10 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 	
 	<input type="hidden" id="qualCode1" name="qualCode1" value="<bean:write name="studentOfferForm" property="offerQual1"/>" />
 	<input type="hidden" id="qualCode2" name="qualCode2" value="<bean:write name="studentOfferForm" property="offerQual2"/>" />
-	<input type="hidden" id="qualStatusCode1" name="qualStatusCode1" value="<bean:write name='studentOfferForm' property='qualStatusCode1' />" />
-	<input type="hidden" id="qualStatusCode2" name="qualStatusCode2" value="<bean:write name='studentOfferForm' property='qualStatusCode2' />" />
-	
+	<input type="hidden" id="statusCode1" name="statusCode1" value="<bean:write name='studentOfferForm' property='qualStatusCode1' />" />
+	<input type="hidden" id="statusCode2" name="statusCode2" value="<bean:write name='studentOfferForm' property='qualStatusCode2' />" />
+	<input type="hidden" id="radioOfferQual1" name="radioOfferQual1" value="<bean:write name='studentOfferForm' property='studentApplication.radioOfferQual1' />" />
+	<input type="hidden" id="radioOfferQual2" name="radioOfferQual2" value="<bean:write name='studentOfferForm' property='studentApplication.radioOfferQual2' />" />
 
 	<sakai:messages/>
 	<sakai:messages message="true"/>
@@ -206,11 +207,21 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 							</td>
 						</tr><tr>
 							<td colspan="2">&nbsp;</td>
-						</tr><tr>
-							<td colspan="2" style="height:30px"><fmt:message key="page.offer.complete.info4"/>&nbsp;
-								<strong><bean:write name="studentOfferForm" property="student.emailAddress"/></strong>
-							</td>
 						</tr>
+						<logic:notEqual name="studentOfferForm" property="student.emailAddress" value="">
+							<tr>
+								<td colspan="2" style="height:30px"><fmt:message key="page.offer.complete.info4"/>&nbsp;
+									<strong><bean:write name="studentOfferForm" property="student.emailAddress"/></strong>
+								</td>
+							</tr>
+						</logic:notEqual>
+						<logic:equal name="studentOfferForm" property="student.emailAddress" value="">
+							<tr>
+								<td colspan="2" style="height:30px">
+									<font size="3" color="red"><strong><fmt:message key="page.offer.complete.noEmail"/></strong></font>
+								</td>
+							</tr>
+						</logic:equal>
 					</table>
 				</div>
 			</div>

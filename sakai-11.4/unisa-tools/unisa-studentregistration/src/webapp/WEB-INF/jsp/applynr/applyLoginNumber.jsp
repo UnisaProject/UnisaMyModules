@@ -126,6 +126,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 	   	
 			$('form,input,select,textarea').attr("autocomplete", "off");
 			
+			/*
 			var showNO	= true;
 			var showYES	= true;
 			
@@ -144,6 +145,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 			if (showYES === false){
 				$('#showYES').hide();
 			}
+			*/
 			
 		});
 

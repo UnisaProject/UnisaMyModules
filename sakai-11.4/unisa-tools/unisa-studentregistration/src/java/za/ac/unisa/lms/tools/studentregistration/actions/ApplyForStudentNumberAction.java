@@ -38,12 +38,8 @@ import org.apache.struts.action.ActionMessages;
 import org.apache.struts.actions.LookupDispatchAction;
 import org.apache.struts.upload.FormFile;
 import org.apache.struts.util.LabelValueBean;
-import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
-import org.sakaiproject.event.api.EventTrackingService;
-import org.sakaiproject.tool.api.ToolManager;
 
-import za.ac.unisa.lms.constants.EventTrackingTypes;
 import za.ac.unisa.lms.tools.studentregistration.dao.ApplyForStudentNumberQueryDAO;
 import za.ac.unisa.lms.tools.studentregistration.dao.KeyValue;
 import za.ac.unisa.lms.tools.studentregistration.dao.SavedDocDao;
@@ -51,6 +47,7 @@ import za.ac.unisa.lms.tools.studentregistration.forms.GeneralItem;
 import za.ac.unisa.lms.tools.studentregistration.forms.HistoryArray;
 import za.ac.unisa.lms.tools.studentregistration.forms.HistoryOther;
 import za.ac.unisa.lms.tools.studentregistration.forms.HistoryUnisa;
+import za.ac.unisa.lms.tools.studentregistration.forms.Staff;
 import za.ac.unisa.lms.tools.studentregistration.forms.Student;
 import za.ac.unisa.lms.tools.studentregistration.forms.StudentFile;
 import za.ac.unisa.lms.tools.studentregistration.forms.StudentRegistrationForm;
@@ -200,7 +197,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	
 	public void reset(ActionMapping mapping, HttpServletRequest request) throws Exception {
 
-		log.debug("Initializing Action Form"); 
+		//log.debug("Initializing Action Form"); 
 		StudentRegistrationForm stuRegForm =  new StudentRegistrationForm();
 		resetForm(stuRegForm, "ApplyForStudentNumberAction WalkThrough");
 		
@@ -210,7 +207,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("IN walkthrough");
+		//log.debug("IN walkthrough");
 	    
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
@@ -223,9 +220,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		stuRegForm.setWebLoginMsg2("");
 		
 		//Write version number to log to check all servers
-		log.debug("Applications Version="+stuRegForm.getVersion());
+		//log.debug("Applications Version="+stuRegForm.getVersion());
 		
-		log.debug("ApplyForStudentNumberAction walkthrough - sessionID=" + request.getSession().getId());
+		//log.debug("ApplyForStudentNumberAction walkthrough - sessionID=" + request.getSession().getId());
 
 		
 		if (stuRegForm.getStudent().getAcademicYear() == null){
@@ -240,12 +237,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			addErrors(request, messages);
 			return mapping.findForward("loginSelect");
 		}
-		log.debug("ApplyForStudentNumberAction - walkthrough - dateCheck");
+		//log.debug("ApplyForStudentNumberAction - walkthrough - dateCheck");
 
 		ArrayList<String> dateCheck = dao.validateClosingDate(stuRegForm.getStudent().getAcademicYear());
 		if (!dateCheck.isEmpty()){ //Check Dates Array
 			for (int i=0; i < dateCheck.size(); i++){
-				log.debug("ApplyForStudentNumberAction - walkthrough - dateCheck="+dateCheck.get(i).toString());
+				//log.debug("ApplyForStudentNumberAction - walkthrough - dateCheck="+dateCheck.get(i).toString());
 				if ("WAPD".equalsIgnoreCase(dateCheck.get(i).toString())){
 					stuRegForm.getStudent().setDateWAPD(true);
 				}else if ("WAPDOC".equalsIgnoreCase(dateCheck.get(i).toString())){
@@ -290,9 +287,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 		}
 		
-		log.debug("ApplyForStudentNumberAction - walkthrough - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
+		//log.debug("ApplyForStudentNumberAction - walkthrough - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
 		
-		log.debug("ApplyForStudentNumberAction - walkthrough -Return to loginSelect");
+		//log.debug("ApplyForStudentNumberAction - walkthrough -Return to loginSelect");
 		return mapping.findForward("loginSelect");
 	}
 	
@@ -300,15 +297,15 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - loginAdmin - Start");
+		//log.debug("ApplyForStudentNumberAction - loginAdmin - Start");
 	    
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		
-		log.debug("ApplyForStudentNumberAction - loginAdmin - Session ID: " + request.getSession().getId());
-		log.debug("ApplyForStudentNumberAction - loginAdmin - Session State 1: " + request.getSession().getAttribute(SESSION_STATE));
+		//log.debug("ApplyForStudentNumberAction - loginAdmin - Session ID: " + request.getSession().getId());
+		//log.debug("ApplyForStudentNumberAction - loginAdmin - Session State 1: " + request.getSession().getAttribute(SESSION_STATE));
 		request.getSession().setAttribute(SESSION_STATE, Boolean.TRUE);
-		log.debug("ApplyForStudentNumberAction - loginAdmin - Session State 2: " + request.getSession().getAttribute(SESSION_STATE));
+		//log.debug("ApplyForStudentNumberAction - loginAdmin - Session State 2: " + request.getSession().getAttribute(SESSION_STATE));
 		
 		resetForm(stuRegForm, "ApplyForStudentNumberAction - loginAdmin");
 		
@@ -319,12 +316,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	
 		stuRegForm.setFromPage("stepLoginAdmin");
 		
-		log.debug("ApplyForStudentNumberAction - loginAdmin - dateCheck");
+		//log.debug("ApplyForStudentNumberAction - loginAdmin - dateCheck");
 
 		ArrayList<String> dateCheck = dao.validateClosingDate(stuRegForm.getStudent().getAcademicYear());
 		if (!dateCheck.isEmpty()){ //Check Dates Array
 			for (int i=0; i < dateCheck.size(); i++){
-				log.debug("ApplyForStudentNumberAction - loginAdmin - dateCheck="+dateCheck.get(i).toString());
+				//log.debug("ApplyForStudentNumberAction - loginAdmin - dateCheck="+dateCheck.get(i).toString());
 				if ("WAPD".equalsIgnoreCase(dateCheck.get(i).toString())){
 					stuRegForm.getStudent().setDateWAPD(true);
 				}else if ("WAPDOC".equalsIgnoreCase(dateCheck.get(i).toString())){
@@ -369,7 +366,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 		}
 		
-		log.debug("ApplyForStudentNumberAction - loginAdmin - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
+		//log.debug("ApplyForStudentNumberAction - loginAdmin - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
 
 		
         if (stuRegForm.getStudent().isDateWAPADMU() || stuRegForm.getStudent().isDateWAPADMH() || stuRegForm.getStudent().isDateWAPADMS() || stuRegForm.getStudent().isDateWAPADMD() || stuRegForm.getStudent().isDateWAPADMM() || stuRegForm.getStudent().isDateWAPADMNEW() || stuRegForm.getStudent().isDateWAPADMRET()){ 
@@ -378,9 +375,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	    	stuRegForm.setWebLoginMsg("Applications are closed for Administrators");
 	    }
 
-        log.debug("ApplyForStudentNumberAction - loginAdmin - WAPADMU="+stuRegForm.getStudent().isDateWAPADMU()+", WAPADMH="+stuRegForm.getStudent().isDateWAPADMH()+", WAPADMS="+stuRegForm.getStudent().isDateWAPADMS()+", WAPADMD="+stuRegForm.getStudent().isDateWAPADMD()+", WAPADMM="+stuRegForm.getStudent().isDateWAPADMM());
+        //log.debug("ApplyForStudentNumberAction - loginAdmin - WAPADMU="+stuRegForm.getStudent().isDateWAPADMU()+", WAPADMH="+stuRegForm.getStudent().isDateWAPADMH()+", WAPADMS="+stuRegForm.getStudent().isDateWAPADMS()+", WAPADMD="+stuRegForm.getStudent().isDateWAPADMD()+", WAPADMM="+stuRegForm.getStudent().isDateWAPADMM());
 
-		log.debug("Return to applyLoginAdmin");
+		//log.debug("Return to applyLoginAdmin");
 		setDropdownListsLogin(request,stuRegForm);
 		return mapping.findForward("applyLoginAdmin");
 	}
@@ -393,7 +390,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.setWebLoginMsg("");
 			stuRegForm.setWebLoginMsg2("");
 		
-			log.debug("IN loginStaff");
+			//log.debug("IN loginStaff");
 			return mapping.findForward("loginStaff");
 	}
 	
@@ -402,7 +399,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - IN stepLoginSelect");
+		//log.debug("ApplyForStudentNumberAction - IN stepLoginSelect");
 			
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		resetForm(stuRegForm, "stepLoginSelect");
@@ -419,12 +416,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 				
 			ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
-			log.debug("ApplyForStudentNumberAction - stepLoginSelect - dateCheck");
+			//log.debug("ApplyForStudentNumberAction - stepLoginSelect - dateCheck");
 
 			ArrayList<String> dateCheck = dao.validateClosingDate(stuRegForm.getStudent().getAcademicYear());
 			if (!dateCheck.isEmpty()){ //Check Dates Array
 				for (int i=0; i < dateCheck.size(); i++){
-					log.debug("ApplyForStudentNumberAction - stepLoginSelect - dateCheck="+dateCheck.get(i).toString());
+					//log.debug("ApplyForStudentNumberAction - stepLoginSelect - dateCheck="+dateCheck.get(i).toString());
 					if ("WAPD".equalsIgnoreCase(dateCheck.get(i).toString())){
 						stuRegForm.getStudent().setDateWAPD(true);
 					}else if ("WAPDOC".equalsIgnoreCase(dateCheck.get(i).toString())){
@@ -471,14 +468,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.setWebLoginMsg("");
 			stuRegForm.setWebLoginMsg2("");
 			
-			log.debug("ApplyForStudentNumberAction - stepLoginSelect - LoginSelectMain=" + stuRegForm.getLoginSelectMain());
-			log.debug("ApplyForStudentNumberAction - stepLoginSelect - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
+			//log.debug("ApplyForStudentNumberAction - stepLoginSelect - LoginSelectMain=" + stuRegForm.getLoginSelectMain());
+			//log.debug("ApplyForStudentNumberAction - stepLoginSelect - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
 			
 			if ("SLP".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-				log.debug("ApplyForStudentNumberAction - stepLoginSelect - Set isStuSLP");
+				//log.debug("ApplyForStudentNumberAction - stepLoginSelect - Set isStuSLP");
 				stuRegForm.getStudent().setStuSLP(true);
 			}
-			log.debug("ApplyForStudentNumberAction - stepLoginSelect - isStuSLP=" + stuRegForm.getStudent().isStuSLP());
+			//log.debug("ApplyForStudentNumberAction - stepLoginSelect - isStuSLP=" + stuRegForm.getStudent().isStuSLP());
 
 			stuRegForm.getStudent().setNumber("");
 			stuRegForm.getStudent().setSurname("");
@@ -486,7 +483,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.getStudent().setBirthYear("");
 			stuRegForm.getStudent().setBirthMonth("");
 			stuRegForm.getStudent().setBirthDay("");
-			log.debug("ApplyForStudentNumberAction - stepLoginSelect - GoTo applyLoginNumber");
+			//log.debug("ApplyForStudentNumberAction - stepLoginSelect - GoTo applyLoginNumber");
 			return mapping.findForward("applyLoginNumber");
 	}
 	
@@ -494,7 +491,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - IN stepSLPSelect");
+		//log.debug("ApplyForStudentNumberAction - IN stepSLPSelect");
 		
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		ActionMessages messages = new ActionMessages();
@@ -507,12 +504,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			return mapping.findForward("applySLPSelect");
 		}
 		
-		log.debug("ApplyForStudentNumberAction - applySLPSelect - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", selectSLP="+stuRegForm.getSelectSLP()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
+		//log.debug("ApplyForStudentNumberAction - applySLPSelect - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", selectSLP="+stuRegForm.getSelectSLP()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
 		if("YES".equalsIgnoreCase(stuRegForm.getSelectSLP())){
-			log.debug("ApplyForStudentNumberAction - applySLPSelect - selectSLP="+stuRegForm.getSelectSLP().trim()+" - Goto applyQualification");
+			//log.debug("ApplyForStudentNumberAction - applySLPSelect - selectSLP="+stuRegForm.getSelectSLP().trim()+" - Goto applyQualification");
 			return mapping.findForward("applyQualification");
 		}else{
-			log.debug("ApplyForStudentNumberAction - applySLPSelect - SLP Student Doesn't want to select a second Choice - Go to Upload");
+			//log.debug("ApplyForStudentNumberAction - applySLPSelect - SLP Student Doesn't want to select a second Choice - Go to Upload");
 			stuRegForm.setWebUploadMsg("You have already applied for admission to study at Unisa for the " + stuRegForm.getStudent().getAcademicYear() + " academic year.newLine You may only upload documents or make payments from the main menu.newLine  Send an email to the Applications office if this information is incorrect or if you now intend applying for formal studies at ucl@unisa.ac.za");
 			return mapping.findForward("dynamicUpload");
 		}
@@ -522,7 +519,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - IN stepAPSNumber");
+		//log.debug("ApplyForStudentNumberAction - IN stepAPSNumber");
 			
 			return mapping.findForward("applyIDNumber");
 	}
@@ -531,7 +528,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-			log.debug("ApplyForStudentNumberAction - stepAPSSelect - Start");
+			//log.debug("ApplyForStudentNumberAction - stepAPSSelect - Start");
 			
 			StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 			ActionMessages messages = new ActionMessages();
@@ -545,13 +542,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				return mapping.findForward("applyAPSSelect");
 			}
 			
-			log.debug("ApplyForStudentNumberAction - stepAPSSelect - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
+			//log.debug("ApplyForStudentNumberAction - stepAPSSelect - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
 			
 			if ("NSC".equalsIgnoreCase(stuRegForm.getSelectHEMain().trim())){
-				log.debug("ApplyForStudentNumberAction - stepAPSSelect - SelectHEMain="+stuRegForm.getSelectHEMain().trim()+" - Goto applyIDNumber");
+				//log.debug("ApplyForStudentNumberAction - stepAPSSelect - SelectHEMain="+stuRegForm.getSelectHEMain().trim()+" - Goto applyIDNumber");
 				return mapping.findForward("applyIDNumber");
 			}else{
-				log.debug("ApplyForStudentNumberAction - stepAPSSelect - SelectHEMain="+stuRegForm.getSelectHEMain().trim()+" - Goto applyQualification");
+				//log.debug("ApplyForStudentNumberAction - stepAPSSelect - SelectHEMain="+stuRegForm.getSelectHEMain().trim()+" - Goto applyQualification");
 				return mapping.findForward("applyQualification");
 			}	
 	}
@@ -560,7 +557,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-			log.debug("IN loginStu");
+			//log.debug("IN loginStu");
 			return mapping.findForward("loginStu");
 	}
 	
@@ -568,13 +565,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("IN applyLoginAdmin");
+		//log.debug("IN applyLoginAdmin");
 	    
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		GeneralMethods gen = new GeneralMethods();
 		
-		log.debug("ApplyForStudentNumberAction - applyLoginAdmin - AdminStaff " + stuRegForm.getAdminStaff().getNumber());
+		//log.debug("ApplyForStudentNumberAction - applyLoginAdmin - AdminStaff " + stuRegForm.getAdminStaff().getNumber());
 
     	//stripXSS(String value, String valueDesc, String action, String studentNr, String year, String period, boolean logYN)
 		stuRegForm.getAdminStaff().setNumber(stripXSS(stuRegForm.getAdminStaff().getNumber(), "AdminNumber", "loginADM", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
@@ -609,7 +606,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}
 		
 		//Call Menu95S to Authenticate User
-		log.debug("ApplyForStudentNumberAction - applyLoginAdmin - START MENU95 LOGON");
+		//log.debug("ApplyForStudentNumberAction - applyLoginAdmin - START MENU95 LOGON");
 		Menu95S op = new Menu95S();
 		operListener opl = new operListener();
 		op.addExceptionListener(opl);
@@ -630,7 +627,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		if (op.getExitStateType() < 3) throw new Exception(op.getExitStateMsg());
 		
 		String result = op.getOutCsfStringsString500();
-		log.debug("ApplyForStudentNumberAction - applyLoginAdmin - getOutCsfStringsString500="+result);
+		//log.debug("ApplyForStudentNumberAction - applyLoginAdmin - getOutCsfStringsString500="+result);
 		
 		boolean isAllow = false;
 		boolean isF894 = false;
@@ -638,18 +635,18 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 			//Check if user has access to any menu items
 			if (op.getOutMenuGroupCount() > 0) {
-				log.debug("ApplyForStudentNumberAction - applyLoginAdmin - User has access to getOutMenuGroupCount="+op.getOutMenuGroupCount());
+				//log.debug("ApplyForStudentNumberAction - applyLoginAdmin - User has access to getOutMenuGroupCount="+op.getOutMenuGroupCount());
 				for (int i = 0; i < op.getOutMenuGroupCount(); i++){
-					log.debug("ApplyForStudentNumberAction - applyLoginAdmin - User has access - Menu95 Functions="+op.getOutGWsFunctionNumber(i));
+					//log.debug("ApplyForStudentNumberAction - applyLoginAdmin - User has access - Menu95 Functions="+op.getOutGWsFunctionNumber(i));
 					if (op.getOutGWsFunctionNumber(i) == 894){
 						isF894 = true;
 						isAllow = true;
-						log.debug("ApplyForStudentNumberAction - applyLoginAdmin - User has access to F894 - isF894="+isF894);
+						//log.debug("ApplyForStudentNumberAction - applyLoginAdmin - User has access to F894 - isF894="+isF894);
 					}
 				}	
 			}else{
 				if (op.getOutMenuGroupCount() == 0){
-					log.debug("ApplyForStudentNumberAction - applyLoginAdmin - You do not seem to have access to any Student Admin Functions. Please contact Support.");
+					//log.debug("ApplyForStudentNumberAction - applyLoginAdmin - You do not seem to have access to any Student Admin Functions. Please contact Support.");
 					isF894 = false;
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
 							new ActionMessage("message.generalmessage", "User not assigned to any functions."));
@@ -658,9 +655,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 			}
 		}else{
-			log.debug("ApplyForStudentNumberAction - applyLoginAdmin - ERROR MESSAGE RETURNED:" +result);
+			//log.debug("ApplyForStudentNumberAction - applyLoginAdmin - ERROR MESSAGE RETURNED:" +result);
 			if (result.contains("PASSWORD EXPIRED")){
-				log.debug("ApplyForStudentNumberAction - applyLoginAdmin - User Password Expired. Use the Student System to rest your password or contact the ICT Helpdesk.");
+				//log.debug("ApplyForStudentNumberAction - applyLoginAdmin - User Password Expired. Use the Student System to rest your password or contact the ICT Helpdesk.");
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 				new ActionMessage("message.generalmessage", "User Password Expired. Use the Student System to rest your password or contact the ICT Helpdesk."));
 					addErrors(request, messages);
@@ -672,19 +669,19 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				return mapping.findForward("applyLoginAdmin");
 			}
 		}
-		log.debug("ApplyForStudentNumberAction - applyLoginAdmin - END MENU95 LOGON");
+		//log.debug("ApplyForStudentNumberAction - applyLoginAdmin - END MENU95 LOGON");
 		
 		if (isAllow && isF894){
 			//Get Radio selection for UnderPostMD from Admin page
-			log.debug("ApplyForStudentNumberAction - applyLoginAdmin - Admission="+stuRegForm.getAdminStaff().getAdmission());
+			//log.debug("ApplyForStudentNumberAction - applyLoginAdmin - Admission="+stuRegForm.getAdminStaff().getAdmission());
 			String checkSelectADMAdmission = stripXSS(stuRegForm.getAdminStaff().getAdmission(), "Admission", "loginADM", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
 			if (checkSelectADMAdmission != null && !checkSelectADMAdmission.equals("")){
 				
 				stuRegForm.getAdminStaff().setAdmin(true);
 				stuRegForm.setLoginSelectMain(checkSelectADMAdmission);
 				
-				log.debug("ApplyForStudentNumberAction - applyLoginAdmin - isAdmin="+stuRegForm.getAdminStaff().isAdmin());
-				log.debug("ApplyForStudentNumberAction - applyLoginAdmin - LoginSelectMain="+stuRegForm.getLoginSelectMain());
+				//log.debug("ApplyForStudentNumberAction - applyLoginAdmin - isAdmin="+stuRegForm.getAdminStaff().isAdmin());
+				//log.debug("ApplyForStudentNumberAction - applyLoginAdmin - LoginSelectMain="+stuRegForm.getLoginSelectMain());
 				if ("SLP".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 					stuRegForm.getStudent().setStuSLP(true);
 				}
@@ -695,19 +692,19 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					if (checkSelectADMType.equalsIgnoreCase("NEW")){
 						stuRegForm.setLoginSelectYesNo("NO");
 						if ("UD".equalsIgnoreCase(stuRegForm.getLoginSelectMain()) || "HON".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-							log.debug("IN applyLoginAdmin (New Student) - getLoginSelectMain - NO/UD: "+stuRegForm.getLoginSelectMain());
+							//log.debug("IN applyLoginAdmin (New Student) - getLoginSelectMain - NO/UD: "+stuRegForm.getLoginSelectMain());
 							stuRegForm.setWebLoginMsg("Administrator - First-time applicant");
 							stuRegForm.setWebLoginMsg2("");
 							setDropdownListsLogin(request,stuRegForm);
 							return mapping.findForward("applyLogin");
 						}else if ("SLP".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-							log.debug("IN applyLoginAdmin (New Student - SLP) - getLoginSelectMain - NO/UD: "+stuRegForm.getLoginSelectMain());
+							//log.debug("IN applyLoginAdmin (New Student - SLP) - getLoginSelectMain - NO/UD: "+stuRegForm.getLoginSelectMain());
 							stuRegForm.setWebLoginMsg("Administrator - First-time applicant - Short Learning Programme");
 							stuRegForm.setWebLoginMsg2("Enter your student number for short learning programmes with 7 digits");
 							setDropdownListsLogin(request,stuRegForm);
 							return mapping.findForward("applyLogin");
 						}else if ("MD".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-							log.debug("IN applyLoginAdmin (New Student) - getLoginSelectMain - NO/MD: "+stuRegForm.getLoginSelectMain());
+							//log.debug("IN applyLoginAdmin (New Student) - getLoginSelectMain - NO/MD: "+stuRegForm.getLoginSelectMain());
 							stuRegForm.setWebLoginMsg("Administrator - First-time applicant - Master's or Doctoral");
 							stuRegForm.setWebLoginMsg2("");
 							setDropdownListsLogin(request,stuRegForm);
@@ -717,20 +714,20 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 						stuRegForm.setLoginSelectYesNo("YES");
 						if ("UD".equalsIgnoreCase(stuRegForm.getLoginSelectMain()) || "HON".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 							//Student selected Undergrad/Honours
-							log.debug("IN applyLoginAdmin (Returning Student) - getLoginSelectMain - RET/UD: "+stuRegForm.getLoginSelectMain());
+							//log.debug("IN applyLoginAdmin (Returning Student) - getLoginSelectMain - RET/UD: "+stuRegForm.getLoginSelectMain());
 							stuRegForm.setWebLoginMsg("Administrator - Returning student applying for OR changing to a new qualification");
 							stuRegForm.setWebLoginMsg2("");
 							setDropdownListsLogin(request,stuRegForm);
 							return mapping.findForward("applyLogin");
 						}else if ("SLP".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-							log.debug("IN applyLoginAdmin (Returning Student - SLP) - getLoginSelectMain - NO/UD: "+stuRegForm.getLoginSelectMain());
+							//log.debug("IN applyLoginAdmin (Returning Student - SLP) - getLoginSelectMain - NO/UD: "+stuRegForm.getLoginSelectMain());
 							stuRegForm.setWebLoginMsg("Administrator - Returning student - Short Learning Programme");
 							stuRegForm.setWebLoginMsg2("Enter your student number for short learning programmes with 7 digits");
 							setDropdownListsLogin(request,stuRegForm);
 							return mapping.findForward("applyLogin");
 						}else if ("MD".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 							//Student selected Masters & Doctorial
-							log.debug("IN applyLoginAdmin (Returning Student) - getLoginSelectMain - RET/MD: "+stuRegForm.getLoginSelectMain());
+							//log.debug("IN applyLoginAdmin (Returning Student) - getLoginSelectMain - RET/MD: "+stuRegForm.getLoginSelectMain());
 							String serverpath = ServerConfigurationService.getServerUrl();
 							return new ActionForward(serverpath+"/unisa-findtool/default.do?sharedTool=unisa.mdapplications",true);
 						}
@@ -767,12 +764,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
-		log.debug("IN submitLoginSelect");
+		//log.debug("IN submitLoginSelect");
 	    
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		ActionMessages messages = new ActionMessages();
 		
-		log.debug("ApplyForStudentNumberAction - submitLoginSelect - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
+		//log.debug("ApplyForStudentNumberAction - submitLoginSelect - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
 
 		stuRegForm.setApplyType("F");
 		stuRegForm.setFromPage("applyLoginSelect");
@@ -794,7 +791,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}
 		if (stuRegForm.getLoginSelectYesNo() == null || "".equals(stuRegForm.getLoginSelectYesNo())){
 			if (request.getParameter("loginSelectYesNo") != null && !"".equals(request.getParameter("loginSelectYesNo"))){
-				checkSelectYesNo = stripXSS(request.getParameter("loginSelectYesNo").toUpperCase().trim(), "SubmitLoginSelect", "SelectYesNo", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
+				checkSelectYesNo = stripXSS(request.getParameter("loginSelectYesNo").toUpperCase().trim(), "SubmitLoginSelect", "SelectYN", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
 			}else{
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "An error ocurred while processing your request. Please log on again."));
@@ -805,13 +802,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			checkSelectYesNo = stuRegForm.getLoginSelectYesNo().toUpperCase().trim();
 		}
 		
-		log.debug("ApplyForStudentNumberAction submitLoginSelect - checkSelectMain " + checkSelectMain + " checkSelectYesNo [" + checkSelectYesNo+"]");
+		//log.debug("ApplyForStudentNumberAction submitLoginSelect - checkSelectMain " + checkSelectMain + " checkSelectYesNo [" + checkSelectYesNo+"]");
 			
 		if (checkSelectMain != null && !checkSelectMain.equalsIgnoreCase("")){
 			stuRegForm.setLoginSelectMain(checkSelectMain);
-			log.debug("ApplyForStudentNumberAction - submitLoginSelect - LoginSelectMain Exists=["+checkSelectMain+"]");
+			//log.debug("ApplyForStudentNumberAction - submitLoginSelect - LoginSelectMain Exists=["+checkSelectMain+"]");
 		}else{
-			log.debug("ApplyForStudentNumberAction - No Main Input parameters submitted - Nowhere to go...");
+			//log.debug("ApplyForStudentNumberAction - No Main Input parameters submitted - Nowhere to go...");
 			if (stuRegForm.getAdminStaff().isAdmin()){
 				return mapping.findForward("loginStaff");
 			}else{
@@ -820,22 +817,25 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}
 		if (checkSelectYesNo != null && !checkSelectYesNo.equalsIgnoreCase("")){
 		   stuRegForm.setLoginSelectYesNo(checkSelectYesNo);
-		   log.debug("ApplyForStudentNumberAction - submitLoginSelect - LoginSelectYesNo Exists=["+checkSelectYesNo+"]");
+		   //log.debug("ApplyForStudentNumberAction - submitLoginSelect - LoginSelectYesNo Exists=["+checkSelectYesNo+"]");
 		}else{
-			log.debug("ApplyForStudentNumberAction - No YesNo Input parameters submitted - Nowhere to go...");
+			//log.debug("ApplyForStudentNumberAction - No YesNo Input parameters submitted - Nowhere to go...");
+			messages.add(ActionMessages.GLOBAL_MESSAGE,
+					new ActionMessage("message.generalmessage", "Student indication of exiting number not found. Please log on again."));
+				addErrors(request, messages);
 			return mapping.findForward("loginSelect");
 		}
 		
-		log.debug("IN submitLoginSelect (Check for New or Returning Student) - LoginSelectYesNo: " + stuRegForm.getLoginSelectYesNo());
+		//log.debug("IN submitLoginSelect (Check for New or Returning Student) - LoginSelectYesNo: " + stuRegForm.getLoginSelectYesNo());
 
 		if ("YES".equalsIgnoreCase(stuRegForm.getLoginSelectYesNo())){
 			//Student Confirms that He/She does have a Student Number already
-			log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectYesNo: YES");
+			//log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectYesNo: YES");
 			stuRegForm.getStudent().setStuExist("curStu");
 			//request.setAttribute("stuRegForm", stuRegForm);
 			if ("UD".equalsIgnoreCase(stuRegForm.getLoginSelectMain()) || "HON".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 				//Student selected Undergrad/Honours
-				log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectMain = "+stuRegForm.getLoginSelectMain());
+				//log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectMain = "+stuRegForm.getLoginSelectMain());
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - Returning student applying for OR changing to a new qualification");
 					stuRegForm.setWebLoginMsg2("");
@@ -849,7 +849,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 			}else if ("SLP".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 				//Student selected Undergrad/Honours
-				log.debug("IN submitLoginSelect (Returning Student - SLP) - getLoginSelectMain = "+stuRegForm.getLoginSelectMain());
+				//log.debug("IN submitLoginSelect (Returning Student - SLP) - getLoginSelectMain = "+stuRegForm.getLoginSelectMain());
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - Returning SLP Student applying for OR changing to a new qualification.");
 					stuRegForm.setWebLoginMsg2("Enter your student number for short learning programmes with 7 digits");
@@ -863,11 +863,11 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 			}else if ("MD".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 				//Student selected Masters & Doctorial
-				log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectMain - MD: "+stuRegForm.getLoginSelectMain());
+				//log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectMain - MD: "+stuRegForm.getLoginSelectMain());
 				String serverpath = ServerConfigurationService.getServerUrl();
 				return new ActionForward(serverpath+"/unisa-findtool/default.do?sharedTool=unisa.mdapplications",true);
 			}else if ("DOC".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-				log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectMain: DOC");
+				//log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectMain: DOC");
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - Returning student - Document Upload");
 					stuRegForm.setWebLoginMsg2("");
@@ -880,7 +880,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyLogin");
 				}
 			}else if ("STATUS".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-				log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectMain: STATUS");
+				//log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectMain: STATUS");
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - Returning student - Application Status");
 					stuRegForm.setWebLoginMsg2("");
@@ -893,7 +893,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyLogin");
 				}
 			}else if ("APPEAL".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-				log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectMain: APPEAL");
+				//log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectMain: APPEAL");
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - Appeal Process");
 					stuRegForm.setWebLoginMsg2("");
@@ -906,7 +906,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyLogin");
 				}
 			}else if ("OFFER".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-				log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectMain: OFFER");
+				//log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectMain: OFFER");
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - Offer Process");
 					stuRegForm.setWebLoginMsg2("");
@@ -919,24 +919,24 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyLogin");
 				}
 			}else if ("PAY".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-				log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectMain: PAY");
+				//log.debug("IN submitLoginSelect (Returning Student) - getLoginSelectMain: PAY");
 				String serverpath = ServerConfigurationService.getServerUrl();
 				return new ActionForward(serverpath+"/unisa-findtool/default.do?sharedTool=unisa.creditcardpayment",true);
 			}
 		}else {
 			//Student doesn't have a number yet, thus new student
-			log.debug("IN submitLoginSelect (New Student) - getLoginSelectYesNo: NO");
+			//log.debug("IN submitLoginSelect (New Student) - getLoginSelectYesNo: NO");
 			stuRegForm.getStudent().setStuExist("newStu");
 			//request.setAttribute("stuRegForm", stuRegForm);
 			if ("UD".equalsIgnoreCase(stuRegForm.getLoginSelectMain()) || "HON".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-				log.debug("IN submitLoginSelect (New Student) - getLoginSelectMain: "+stuRegForm.getLoginSelectMain());
+				//log.debug("IN submitLoginSelect (New Student) - getLoginSelectMain: "+stuRegForm.getLoginSelectMain());
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - First-time applicant");
 					stuRegForm.setWebLoginMsg2("");
 					setDropdownListsLogin(request,stuRegForm);
 					return mapping.findForward("applyLogin");
 				}else{
-					if (stuRegForm.getStudent().isDateWAPU() || stuRegForm.getStudent().isDateWAPM() || stuRegForm.getStudent().isDateWAPD() ){
+					if (stuRegForm.getStudent().isDateWAPU() || stuRegForm.getStudent().isDateWAPM() || stuRegForm.getStudent().isDateWAPD() || stuRegForm.getStudent().isDateWAPH()){
 						stuRegForm.setWebLoginMsg("First-time applicant");
 						stuRegForm.setWebLoginMsg2("");
 						setDropdownListsLogin(request,stuRegForm);
@@ -947,7 +947,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					}
 				}
 			}else if ("SLP".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-				log.debug("IN submitLoginSelect (New Student - SLP) - getLoginSelectMain: "+stuRegForm.getLoginSelectMain());
+				//log.debug("IN submitLoginSelect (New Student - SLP) - getLoginSelectMain: "+stuRegForm.getLoginSelectMain());
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - First-time SLP Applicant");
 					stuRegForm.setWebLoginMsg2("");
@@ -965,7 +965,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					}
 				}
 			}else if ("MD".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-				log.debug("IN submitLoginSelect (New Student) - getLoginSelectMain: "+stuRegForm.getLoginSelectMain());
+				//log.debug("IN submitLoginSelect (New Student) - getLoginSelectMain: "+stuRegForm.getLoginSelectMain());
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - First-time applicant - Master's or Doctoral");
 					stuRegForm.setWebLoginMsg2("");
@@ -978,14 +978,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyLogin");
 				}
 			}else if ("DOC".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-				log.debug("IN submitLogin (New Student) - getLoginSelectMain: DOC");
+				//log.debug("IN submitLogin (New Student) - getLoginSelectMain: DOC");
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - First-time applicant - Document Upload");
 					stuRegForm.setWebLoginMsg2("");
 					setDropdownListsLogin(request,stuRegForm);
 					return mapping.findForward("applyLogin");
 				}else{
-					if (stuRegForm.getStudent().isDateWAPU() || stuRegForm.getStudent().isDateWAPM() || stuRegForm.getStudent().isDateWAPD() ){
+					if (stuRegForm.getStudent().isDateWAPU() || stuRegForm.getStudent().isDateWAPM() || stuRegForm.getStudent().isDateWAPD() || stuRegForm.getStudent().isDateWAPH()){
 						stuRegForm.setWebLoginMsg("First-time applicant - Document Upload");
 						stuRegForm.setWebLoginMsg2("");
 						setDropdownListsLogin(request,stuRegForm);
@@ -996,14 +996,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					}
 				}
 			}else if ("PAY".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-				log.debug("IN submitLoginSelect (New Student) - getLoginSelectMain: PAY");
+				//log.debug("IN submitLoginSelect (New Student) - getLoginSelectMain: PAY");
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - First-time applicant - Credit Payment");
 					stuRegForm.setWebLoginMsg2("");
 					setDropdownListsLogin(request,stuRegForm);
 					return mapping.findForward("applyLogin");
 				}else{
-					if (stuRegForm.getStudent().isDateWAPU() || stuRegForm.getStudent().isDateWAPM() || stuRegForm.getStudent().isDateWAPD() ){
+					if (stuRegForm.getStudent().isDateWAPU() || stuRegForm.getStudent().isDateWAPM() || stuRegForm.getStudent().isDateWAPD() || stuRegForm.getStudent().isDateWAPH()){
 						stuRegForm.setWebLoginMsg("First-time applicant - Credit Payment");
 						stuRegForm.setWebLoginMsg2("");
 						setDropdownListsLogin(request,stuRegForm);
@@ -1014,14 +1014,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					}
 				}
 			}else if ("STATUS".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-				log.debug("IN submitLoginSelect (New Student) - getLoginSelectMain: STATUS");
+				//log.debug("IN submitLoginSelect (New Student) - getLoginSelectMain: STATUS");
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - First-time applicant - Application Status");
 					stuRegForm.setWebLoginMsg2("");
 					setDropdownListsLogin(request,stuRegForm);
 					return mapping.findForward("applyLogin");
 				}else{
-					if (stuRegForm.getStudent().isDateWAPU() || stuRegForm.getStudent().isDateWAPM() || stuRegForm.getStudent().isDateWAPD() ){
+					if (stuRegForm.getStudent().isDateWAPU() || stuRegForm.getStudent().isDateWAPM() || stuRegForm.getStudent().isDateWAPD() || stuRegForm.getStudent().isDateWAPH()){
 						stuRegForm.setWebLoginMsg("Application Status");
 						stuRegForm.setWebLoginMsg2("");
 						setDropdownListsLogin(request,stuRegForm);
@@ -1032,14 +1032,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					}
 				}
 			}else if ("APPEAL".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-				log.debug("IN submitLoginSelect (New Student) - getLoginSelectMain: APPEAL");
+				//log.debug("IN submitLoginSelect (New Student) - getLoginSelectMain: APPEAL");
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - First-time applicant - Appeal Process");
 					stuRegForm.setWebLoginMsg2("");
 					setDropdownListsLogin(request,stuRegForm);
 					return mapping.findForward("applyLogin");
 				}else{
-					if (stuRegForm.getStudent().isDateWAPU() || stuRegForm.getStudent().isDateWAPM() || stuRegForm.getStudent().isDateWAPD() ){
+					if (stuRegForm.getStudent().isDateWAPU() || stuRegForm.getStudent().isDateWAPM() || stuRegForm.getStudent().isDateWAPD() || stuRegForm.getStudent().isDateWAPH()){
 						stuRegForm.setWebLoginMsg("Appeal Process");
 						stuRegForm.setWebLoginMsg2("");
 						setDropdownListsLogin(request,stuRegForm);
@@ -1050,14 +1050,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					}
 				}
 			}else if ("OFFER".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
-				log.debug("IN submitLoginSelect (New Student) - getLoginSelectMain: OFFER");
+				//log.debug("IN submitLoginSelect (New Student) - getLoginSelectMain: OFFER");
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - First-time applicant - Offer Process");
 					stuRegForm.setWebLoginMsg2("");
 					setDropdownListsLogin(request,stuRegForm);
 					return mapping.findForward("applyLogin");
 				}else{
-					if (stuRegForm.getStudent().isDateWAPU() || stuRegForm.getStudent().isDateWAPM() || stuRegForm.getStudent().isDateWAPD() ){
+					if (stuRegForm.getStudent().isDateWAPU() || stuRegForm.getStudent().isDateWAPM() || stuRegForm.getStudent().isDateWAPD() || stuRegForm.getStudent().isDateWAPH()){
 						stuRegForm.setWebLoginMsg("Offer Process");
 						stuRegForm.setWebLoginMsg2("");
 						setDropdownListsLogin(request,stuRegForm);
@@ -1079,7 +1079,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 
 		stuRegForm.getStudent().setStuExist("newStu");
-		log.debug("ApplyForStudentNumberAction - checkNewBack - Admin="+stuRegForm.getAdminStaff().isAdmin());
+		//log.debug("ApplyForStudentNumberAction - checkNewBack - Admin="+stuRegForm.getAdminStaff().isAdmin());
 		if (stuRegForm.getAdminStaff().isAdmin()){
 			return mapping.findForward("loginStaff");
 		}else{
@@ -1091,14 +1091,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("IN applyLoginNew");
+		//log.debug("IN applyLoginNew");
 	    
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		GeneralMethods gen = new GeneralMethods();
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		
-		log.debug("ApplyForStudentNumberAction - applyLoginNew - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
+		//log.debug("ApplyForStudentNumberAction - applyLoginNew - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
 
 		if (stuRegForm.getStudent().getAcademicYear() == null){
 			stuRegForm.getStudent().setAcademicYear(getCurrentAcademicYear());
@@ -1114,7 +1114,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		
 		
 		stuRegForm.getStudent().setSurname(stripXSS(stuRegForm.getStudent().getSurname(), "Surname", "LoginNew", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-		log.debug("ApplyForStudentNumberAction - applyLoginNew - StudentNr=" + stuRegForm.getStudent().getNumber()+", Surname=" + stuRegForm.getStudent().getSurname());
+		//log.debug("ApplyForStudentNumberAction - applyLoginNew - StudentNr=" + stuRegForm.getStudent().getNumber()+", Surname=" + stuRegForm.getStudent().getSurname());
 		if (stuRegForm.getStudent().getSurname() == null || "".equalsIgnoreCase(stuRegForm.getStudent().getSurname())){
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "Enter student surname."));
@@ -1131,7 +1131,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}
 
 		stuRegForm.getStudent().setFirstnames(stripXSS(stuRegForm.getStudent().getFirstnames(), "Firstnames", "LoginNew", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-		log.debug("ApplyForStudentNumberAction - applyLoginNew - StudentNr=" + stuRegForm.getStudent().getNumber()+", Firstnames=" + stuRegForm.getStudent().getFirstnames());
+		//log.debug("ApplyForStudentNumberAction - applyLoginNew - StudentNr=" + stuRegForm.getStudent().getNumber()+", Firstnames=" + stuRegForm.getStudent().getFirstnames());
 		if (stuRegForm.getStudent().getFirstnames() == null || "".equalsIgnoreCase(stuRegForm.getStudent().getFirstnames())){
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "Enter student first names."));
@@ -1149,7 +1149,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		
 		stuRegForm.getStudent().setBirthYear(stripXSS(stuRegForm.getStudent().getBirthYear(), "BrithYear", "LoginNew", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 		stuRegForm.getStudent().setBirthYear(stuRegForm.getStudent().getBirthYear().trim());
-		log.debug("ApplyForStudentNumberAction - applyLoginNew - StudentNr=" + stuRegForm.getStudent().getNumber()+", BirthYear=" + stuRegForm.getStudent().getBirthYear());
+		//log.debug("ApplyForStudentNumberAction - applyLoginNew - StudentNr=" + stuRegForm.getStudent().getNumber()+", BirthYear=" + stuRegForm.getStudent().getBirthYear());
 		if (stuRegForm.getStudent().getBirthYear() == null){
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "Student Date of Birth (Year) is blank - must be numeric format [CCYY]."));
@@ -1172,7 +1172,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			return mapping.findForward("applyLogin");
 		}
 		
-		log.debug("ApplyForStudentNumberAction - applyLoginNew - BirthYear=" + stuRegForm.getStudent().getBirthYear()+", Academic_Year="+stuRegForm.getStudent().getAcademicYear());
+		//log.debug("ApplyForStudentNumberAction - applyLoginNew - BirthYear=" + stuRegForm.getStudent().getBirthYear()+", Academic_Year="+stuRegForm.getStudent().getAcademicYear());
 		if (Integer.parseInt(stuRegForm.getStudent().getBirthYear()) <= 1900 || Integer.parseInt(stuRegForm.getStudent().getBirthYear()) >= Integer.parseInt(stuRegForm.getStudent().getAcademicYear())){
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "Student Date of Birth (Year) invalid."));
@@ -1190,7 +1190,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		
 		stuRegForm.getStudent().setBirthMonth(stripXSS(stuRegForm.getStudent().getBirthMonth(), "BirthMonth", "LoginNew", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 		stuRegForm.getStudent().setBirthMonth(stuRegForm.getStudent().getBirthMonth().trim());
-		log.debug("ApplyForStudentNumberAction - applyLoginNew - StudentNr=" + stuRegForm.getStudent().getNumber()+", BirthMonth=" + stuRegForm.getStudent().getBirthMonth());
+		//log.debug("ApplyForStudentNumberAction - applyLoginNew - StudentNr=" + stuRegForm.getStudent().getNumber()+", BirthMonth=" + stuRegForm.getStudent().getBirthMonth());
 		if (stuRegForm.getStudent().getBirthMonth() == null){
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "Student Date of Birth (Month) is blank - must be numeric format [MM]."));
@@ -1240,7 +1240,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		
 		stuRegForm.getStudent().setBirthDay(stripXSS(stuRegForm.getStudent().getBirthDay(), "BirthDay", "LoginNew", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 		stuRegForm.getStudent().setBirthDay(stuRegForm.getStudent().getBirthDay().trim());
-		log.debug("ApplyForStudentNumberAction - applyLoginNew - StudentNr=" + stuRegForm.getStudent().getNumber()+", BirthDay=" + stuRegForm.getStudent().getBirthDay());
+		//log.debug("ApplyForStudentNumberAction - applyLoginNew - StudentNr=" + stuRegForm.getStudent().getNumber()+", BirthDay=" + stuRegForm.getStudent().getBirthDay());
 		if (stuRegForm.getStudent().getBirthDay() == null){
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "Student Date of Birth (Day) is blank - must be numeric format [DD]."));
@@ -1337,14 +1337,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		 **/
 
 		/** Check the code against the flow diagram by the numbers provided **/
-		log.debug("ApplyForStudentNumberAction - applyLoginNew (1) - Check if Student has number");
+		//log.debug("ApplyForStudentNumberAction - applyLoginNew (1) - Check if Student has number");
 
 		String vNumCheck = dao.validateStudentLogin(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay, stuRegForm.getLoginSelectMain());
-		log.debug("ApplyForStudentNumberAction - applyLoginNew - StuExist: " + vNumCheck);
+		//log.debug("ApplyForStudentNumberAction - applyLoginNew - StuExist: " + vNumCheck);
 		
 		/** Flow Check: (1) **/
 		if ("newStu".equalsIgnoreCase(vNumCheck)){ //Student doesn't have a number yet
-			log.debug("ApplyForStudentNumberAction - applyLoginNew - N " + stuRegForm.getStudent().getNumber() + " vN " + vNumCheck);
+			//log.debug("ApplyForStudentNumberAction - applyLoginNew - N " + stuRegForm.getStudent().getNumber() + " vN " + vNumCheck);
 			
 			if ("STATUS".equalsIgnoreCase(stuRegForm.getLoginSelectMain()) || "APPEAL".equalsIgnoreCase(stuRegForm.getLoginSelectMain()) || "OFFER".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 				stuRegForm.setWebLoginMsg("Student not found.");
@@ -1353,7 +1353,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 						new ActionMessage("message.generalmessage", "No Student exists - Please apply for a student number before you can view your application status or appeal a decision."));
 				addErrors(request, messages);
 				/** Flow Check: (xx) **/
-				log.debug("ApplyForStudentNumberAction - applyLoginNew (8) - New Student with no Student Number. Return to main page");
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew (8) - New Student with no Student Number. Return to main page");
 				return mapping.findForward("applyLoginSelect");
 			}
 			
@@ -1376,22 +1376,22 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				int randomHigh = 99999999;
 				int randomStu = random.nextInt((randomHigh-randomLow) + 1) + randomLow;
 	
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - Random Initial: " + randomStu);
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - Random Initial: " + randomStu);
 				boolean existRandom = dao.getXMLRandom(randomStu);
 				while(existRandom){ //Make sure you get a unique number by checking STUXML and STU to ensure that it doesn't exist already
-					log.debug("ApplyForStudentNumberAction - applyLoginNew - Random Exists: " + randomStu);
+					//log.debug("ApplyForStudentNumberAction - applyLoginNew - Random Exists: " + randomStu);
 						randomStu = random.nextInt((randomHigh-randomLow) + 1) + randomLow;
 						existRandom = dao.getXMLRandom(randomStu);
-					log.debug("ApplyForStudentNumberAction - applyLoginNew - New Random: " + randomStu);
+					//log.debug("ApplyForStudentNumberAction - applyLoginNew - New Random: " + randomStu);
 				}
 				if (!existRandom){
 					//Write student details to STUXML for later verification - Testing Thread security
-					log.debug("ApplyForStudentNumberAction - applyLoginNew - applyLoginNew - Write student details to STUXML");
+					//log.debug("ApplyForStudentNumberAction - applyLoginNew - applyLoginNew - Write student details to STUXML");
 					boolean stuError = false;
 					String checkStu = "";
 					int nextRef = 0;
 					String queryResultRef = dao.getSTUXMLRef(Integer.toString(randomStu), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "StuInfo", "1", "applyLoginNew");
-					log.debug("ApplyForStudentNumberAction - applyLoginNew - applyLoginNew - queryResultRef="+queryResultRef);
+					//log.debug("ApplyForStudentNumberAction - applyLoginNew - applyLoginNew - queryResultRef="+queryResultRef);
 					if (queryResultRef.toUpperCase().contains("ERROR")){
 						stuError = true;
 					}
@@ -1402,20 +1402,20 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 						}catch(Exception e){
 							log.warn("ApplyForStudentNumberAction - applyLoginNew - applyLoginNew - nextRef not Numeric - nextRef="+nextRef);
 						}
-						log.debug("ApplyForStudentNumberAction - applyLoginNew - queryResultRef="+queryResultRef+", nextRef="+nextRef);
+						//log.debug("ApplyForStudentNumberAction - applyLoginNew - queryResultRef="+queryResultRef+", nextRef="+nextRef);
 						checkStu = dao.saveSTUXML(Integer.toString(randomStu), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "StuInfo", "1", nextRef, referenceData, "applyLoginNew", "INSERT");
 						if (checkStu.toUpperCase().contains("ERROR")){
 							stuError = true;
 						}
 					}
-					log.debug("ApplyForStudentNumberAction - applyLoginNew - Write student details to STUXML - Done - checkStu="+checkStu+", referenceData="+referenceData+", referenceSequence="+nextRef);
+					//log.debug("ApplyForStudentNumberAction - applyLoginNew - Write student details to STUXML - Done - checkStu="+checkStu+", referenceData="+referenceData+", referenceSequence="+nextRef);
 	
 				}
 				
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - Final Random: " + randomStu);
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - Final Random: " + randomStu);
 				
 				stuRegForm.getStudent().setNumber(Integer.toString(randomStu));
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - Random Stu Nr: " + stuRegForm.getStudent().getNumber());
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - Random Stu Nr: " + stuRegForm.getStudent().getNumber());
 			/** String tempStuNr = "";
 			}
 			/* */
@@ -1423,12 +1423,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			//Check if Student Log Exists, if so, set Application Sequence Number
 			int currLogSeq = 0;
         	currLogSeq = dao.getSTULOGRef(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber());
-        	log.debug("ApplyForStudentNumberAction - applyLoginNew - currLogSeq="+currLogSeq+", studentSeqNr="+stuRegForm.getApplySEQUENCE());
+        	//log.debug("ApplyForStudentNumberAction - applyLoginNew - currLogSeq="+currLogSeq+", studentSeqNr="+stuRegForm.getApplySEQUENCE());
         	if (currLogSeq != stuRegForm.getApplySEQUENCE() || currLogSeq == 0 || stuRegForm.getApplySEQUENCE() == 0){
         		currLogSeq++;
         	}
         	stuRegForm.setApplySEQUENCE(currLogSeq);
-        	log.debug("ApplyForStudentNumberAction - applyLoginNew - STULOG Sequence Number to Use="+stuRegForm.getApplySEQUENCE());
+        	//log.debug("ApplyForStudentNumberAction - applyLoginNew - STULOG Sequence Number to Use="+stuRegForm.getApplySEQUENCE());
 
 			//Get Browser Details
 			//Is client behind something like a Proxy Server?
@@ -1443,16 +1443,16 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				int pos = browser.indexOf("@");
 				stuRegForm.getStudent().setStuBrowser(browser.substring(0,pos));
 				stuRegForm.getStudent().setStuWksOS(browser.substring(pos+1,browser.length()));
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - Write Browser details to STUXML");
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - Write Browser details to STUXML");
 				//Write Browser details to STUXML for later verification - Testing Thread security
 				String browserData = stuRegForm.getStudent().getNumber()+","+stuRegForm.getStudent().getStuIPAddress()+","+stuRegForm.getStudent().getStuBrowser()+","+stuRegForm.getStudent().getStuWksOS();
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - browserData="+browserData);
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - browserData="+browserData);
 				boolean browserError = false;
 				String queryResultBrowser = "";
 				String checkBrowser = "";
 				int nextBrowser = 1;
 				queryResultBrowser = dao.getSTUXMLRef(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "WKSInfo", "1", "applyLoginNew");
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - queryResultRef="+queryResultBrowser);
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - queryResultRef="+queryResultBrowser);
 				if (queryResultBrowser.toUpperCase().contains("ERROR")){
 					browserError = true;
 				}
@@ -1463,60 +1463,81 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					}catch(Exception e){
 						log.warn("ApplyForStudentNumberAction - applyLoginNew - nextRef not Numeric - nextRef="+nextBrowser);
 					}
-					log.debug("ApplyForStudentNumberAction - applyLoginNew - queryResultBrowser="+queryResultBrowser+", nextRef="+nextBrowser);
+					//log.debug("ApplyForStudentNumberAction - applyLoginNew - queryResultBrowser="+queryResultBrowser+", nextRef="+nextBrowser);
 					checkBrowser = dao.saveSTUXML(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "WKSInfo", "1", nextBrowser, browserData, "applyLoginNew", "INSERT");
 					if (checkBrowser.toUpperCase().contains("ERROR")){
 						browserError = true;
 					}
 				}
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - Write student details to STUXML - Done - checkStu="+checkBrowser+", browserData="+browserData+", referenceSequence="+nextBrowser);
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - Write student details to STUXML - Done - checkStu="+checkBrowser+", browserData="+browserData+", referenceSequence="+nextBrowser);
 			}
-			log.debug("ApplyForStudentNumberAction - applyLoginNew - N " + stuRegForm.getStudent().getNumber() + " S " + stuRegForm.getStudent().getSurname() + " F " + stuRegForm.getStudent().getFirstnames() + " Y " + stuRegForm.getStudent().getBirthYear() + " M " + stuRegForm.getStudent().getBirthMonth() + " D " + stuRegForm.getStudent().getBirthDay());
+			//log.debug("ApplyForStudentNumberAction - applyLoginNew - N " + stuRegForm.getStudent().getNumber() + " S " + stuRegForm.getStudent().getSurname() + " F " + stuRegForm.getStudent().getFirstnames() + " Y " + stuRegForm.getStudent().getBirthYear() + " M " + stuRegForm.getStudent().getBirthMonth() + " D " + stuRegForm.getStudent().getBirthDay());
 
 			/** Flow Check: (2) **/
-			log.debug("ApplyForStudentNumberAction - applyLoginNew (2) - New Student - No Student Number - Goto application for admission form / function: applyQualification");
+			//log.debug("ApplyForStudentNumberAction - applyLoginNew (2) - New Student - No Student Number - Goto application for admission form / function: applyQualification");
 			stuRegForm.getStudent().setStuExist("newStu");
 			
-			log.debug(stuRegForm.getStudent().getSurname() + ":" +  stuRegForm.getStudent().getFirstnames() + ":" + bDay);
+			//log.debug(stuRegForm.getStudent().getSurname() + ":" +  stuRegForm.getStudent().getFirstnames() + ":" + bDay);
 			
 			/** Flow Check: (3) **/
 			/* Edmund Update 2018 - Now flowing to APS*/
 			if ("HON".equalsIgnoreCase(stuRegForm.getLoginSelectMain()) || "MD".equalsIgnoreCase(stuRegForm.getLoginSelectMain()) || "SLP".equalsIgnoreCase(stuRegForm.getLoginSelectMain()) || stuRegForm.getAdminStaff().isAdmin()){
-				log.debug("ApplyForStudentNumberAction - applyLoginNew (2a) - New Student - No Student Number - HONS or M&D - Goto ApplyQualification");
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew (2a) - New Student - No Student Number - HONS or M&D - Goto ApplyQualification");
 				return mapping.findForward("applyQualification");
 			}else{
-				log.debug("ApplyForStudentNumberAction - applyLoginNew (2b) - New Student - No Student Number - Undergrad - Goto APS 1 Forward");
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew (2b) - New Student - No Student Number - Undergrad - Goto APS 1 Forward");
 				return mapping.findForward("applyAPSSelect");
 			}
 		} else { 
 			
 			//Student does have a number already
-			log.debug("ApplyForStudentNumberAction - applyLoginNew - N " + stuRegForm.getStudent().getNumber() + " IN (Else) " + vNumCheck);
+			//log.debug("ApplyForStudentNumberAction - applyLoginNew - N " + stuRegForm.getStudent().getNumber() + " IN (Else) " + vNumCheck);
 
 			/** Flow Check: (4) **/
-			log.debug("ApplyForStudentNumberAction - applyLoginNew (4) - Student has a number");
+			//log.debug("ApplyForStudentNumberAction - applyLoginNew (4) - Student has a number");
 			stuRegForm.getStudent().setNumber(vNumCheck);
 			stuRegForm.getStudent().setStuExist("curStu");
+			
+			//Block SLP students if coming in via the formal route, even if they are new students, they must use the SLP route.
+			if (stuRegForm.getStudent().getNumber() != null && !"".equals(stuRegForm.getStudent().getNumber().trim())){
+				if ("7".equalsIgnoreCase(stuRegForm.getStudent().getNumber().substring(0,1))){
+					if (stuRegForm.getStudent().getNumber().length() == 8 ){ 
+						//log.debug("ApplyForStudentNumberAction - applyLoginNew - Check if Student number = 8 characters");
+						if (!stuRegForm.getStudent().isStuSLP() && "7".equalsIgnoreCase(stuRegForm.getStudent().getNumber().substring(0,1))){
+							//log.debug("ApplyForStudentNumberAction - applyLoginNew - Student number = 8 characters and starts with 7 - Set No SLP Message");
+							messages.add(ActionMessages.GLOBAL_MESSAGE,
+									new ActionMessage("message.generalmessage", "You must apply for Qualifications via the SLP route. Please select Short Learning Programmes from the main menu to continue or email <a href='mailto:applications@unisa.ac.za'>applications@unisa.ac.za</a>"));
+							addErrors(request, messages);
+							setDropdownListsLogin(request,stuRegForm);
+							return mapping.findForward("applyLoginSelect");
+						}else if (stuRegForm.getStudent().isStuSLP() && "7".equalsIgnoreCase(stuRegForm.getStudent().getNumber().substring(0,1))){
+							//Student has come in via SLP link and is a 7 series student
+							//log.debug("ApplyForStudentNumberAction - applyLoginNew - Student number = 8 characters and starts with 7 - Allow SLP");
+						}
+					}
+				}
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - After check if Student number = 8 characters and starts with 7 ");
+			}
 			/** Flow Check: (5) **/
-			log.debug("ApplyForStudentNumberAction - applyLoginNew (5) - Check if Student number is 7 chars");
+			//log.debug("ApplyForStudentNumberAction - applyLoginNew (5) - Check if Student number is 7 chars");
 			// If student no is only 7 characters (old), then add a 0 to the beginning
 			if (stuRegForm.getStudent().getNumber().length() == 7 ){
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - 7 char Student Number - Old Number: " + stuRegForm.getStudent().getNumber());
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - 7 char Student Number - Old Number: " + stuRegForm.getStudent().getNumber());
 				stuRegForm.getStudent().setNumber("0" + stuRegForm.getStudent().getNumber());
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - 7 char Student Number - New Number: " + stuRegForm.getStudent().getNumber());
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - 7 char Student Number - New Number: " + stuRegForm.getStudent().getNumber());
 			}
-			log.debug("ApplyForStudentNumberAction - applyLoginNew - After check if Student number = 8 characters");
+			//log.debug("ApplyForStudentNumberAction - applyLoginNew - After check if Student number = 8 characters");
 			stuRegForm.getStudent().setNumberCheck(stuRegForm.getStudent().getNumber());
 			
 			//Check if Student Log Exists, if so, set Application Sequence Number
 			int currLogSeq = 0;
         	currLogSeq = dao.getSTULOGRef(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber());
-        	log.debug("ApplyForStudentNumberAction - applyLoginNew - currLogSeq="+currLogSeq+", studentSeqNr="+stuRegForm.getApplySEQUENCE());
+        	//log.debug("ApplyForStudentNumberAction - applyLoginNew - currLogSeq="+currLogSeq+", studentSeqNr="+stuRegForm.getApplySEQUENCE());
         	if (currLogSeq != stuRegForm.getApplySEQUENCE() || currLogSeq == 0 || stuRegForm.getApplySEQUENCE() == 0){
         		currLogSeq++;
         	}
         	stuRegForm.setApplySEQUENCE(currLogSeq);
-        	log.debug("ApplyForStudentNumberAction - applyLoginNew - STULOG Sequence Number to Use="+stuRegForm.getApplySEQUENCE());
+        	//log.debug("ApplyForStudentNumberAction - applyLoginNew - STULOG Sequence Number to Use="+stuRegForm.getApplySEQUENCE());
 
 			//Get Browser Details
 			//Is client behind something like a Proxy Server?
@@ -1531,16 +1552,16 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				int pos = browser.indexOf("@");
 				stuRegForm.getStudent().setStuBrowser(browser.substring(0,pos));
 				stuRegForm.getStudent().setStuWksOS(browser.substring(pos+1,browser.length()));
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - Write Browser details to STUXML");
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - Write Browser details to STUXML");
 				//Write Browser details to STUXML for later verification - Testing Thread security
 				String browserData = stuRegForm.getStudent().getNumber()+","+stuRegForm.getStudent().getStuIPAddress()+","+stuRegForm.getStudent().getStuBrowser()+","+stuRegForm.getStudent().getStuWksOS();
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - browserData="+browserData);
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - browserData="+browserData);
 				boolean browserError = false;
 				String queryResultBrowser = "";
 				String checkBrowser = "";
 				int nextBrowser = 1;
 				queryResultBrowser = dao.getSTUXMLRef(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "WKSInfo", "1", "applyLoginNew");
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - queryResultRef="+queryResultBrowser);
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - queryResultRef="+queryResultBrowser);
 				if (queryResultBrowser.toUpperCase().contains("ERROR")){
 					browserError = true;
 				}
@@ -1551,25 +1572,25 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					}catch(Exception e){
 						log.warn("ApplyForStudentNumberAction - applyLoginNew - nextRef not Numeric - nextRef="+nextBrowser);
 					}
-					log.debug("ApplyForStudentNumberAction - applyLoginNew - queryResultBrowser="+queryResultBrowser+", nextRef="+nextBrowser);
+					//log.debug("ApplyForStudentNumberAction - applyLoginNew - queryResultBrowser="+queryResultBrowser+", nextRef="+nextBrowser);
 					checkBrowser = dao.saveSTUXML(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "WKSInfo", "1", nextBrowser, browserData, "applyLoginNew", "INSERT");
 					if (checkBrowser.toUpperCase().contains("ERROR")){
 						browserError = true;
 					}
 				}
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - Write student details to STUXML - Done - checkStu="+checkBrowser+", browserData="+browserData+", referenceSequence="+nextBrowser);
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - Write student details to STUXML - Done - checkStu="+checkBrowser+", browserData="+browserData+", referenceSequence="+nextBrowser);
 			}
 			
 			/** Flow Check: (6) **/
-			log.debug("ApplyForStudentNumberAction - applyLoginNew (6) - Check if Student has an Academic record");
+			//log.debug("ApplyForStudentNumberAction - applyLoginNew (6) - Check if Student has an Academic record");
 			boolean vAcaCheck = dao.validateStudentRec(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear());
-			log.debug("ApplyForStudentNumberAction - applyLoginNew - vAcaCheck: " + vAcaCheck);
+			//log.debug("ApplyForStudentNumberAction - applyLoginNew - vAcaCheck: " + vAcaCheck);
 			
 			if (vAcaCheck){
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - N " + stuRegForm.getStudent().getNumber() + " vACA " + vAcaCheck);
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - N " + stuRegForm.getStudent().getNumber() + " vACA " + vAcaCheck);
 
 				/** Flow Check: (7) **/
-				log.debug("ApplyForStudentNumberAction - applyLoginNew (7) - Existing Student with Academic Year Record. Set Message");
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew (7) - Existing Student with Academic Year Record. Set Message");
 				//Existing Student with Academic Year Record. Return to main page and either go to Existing Student or Quit application
 				stuRegForm.setWebLoginMsg("Student exists with Academic Year or Annual Record");
 				stuRegForm.setWebLoginMsg2("Should be Returning Student, Not New!");
@@ -1577,100 +1598,100 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 						new ActionMessage("message.generalmessage", "Student exists - Should be Returning Student, Not New. Please re-select your login as a student with a student number. Use the link provided to search for a forgotten Student number."));
 				addErrors(request, messages);
 				/** Flow Check: (8) **/
-				log.debug("ApplyForStudentNumberAction - applyLoginNew (8) - Existing Student with Academic Year or Annual Record. Return to main page");
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew (8) - Existing Student with Academic Year or Annual Record. Return to main page");
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					return mapping.findForward("loginStaff");
 				}else{
 					return mapping.findForward("loginStu");
 				}
 			}else{
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - N " + stuRegForm.getStudent().getNumber() + " vACA (Else) " + vAcaCheck);
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - N " + stuRegForm.getStudent().getNumber() + " vACA (Else) " + vAcaCheck);
 				/** Flow Check: (10) **/
-				log.debug("ApplyForStudentNumberAction - applyLoginNew (10) - Existing Student with No Academic Year Record");
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew (10) - Existing Student with No Academic Year Record");
 				//Existing Student with no Academic Year Record either go to Existing Student or block if 'AP'
 				stuRegForm.getStudent().setStuExist("newStu");
-				log.debug("ApplyForStudentNumberAction - applyLoginNew - StuExist: " + vNumCheck + " vAcaCheck: " + vAcaCheck);
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew - StuExist: " + vNumCheck + " vAcaCheck: " + vAcaCheck);
 
 				/** Flow Check: (11) **/
-				log.debug("ApplyForStudentNumberAction - applyLoginNew (11) - Check STUAPQ Record");
-				boolean vSTUAPQCheck = dao.validateSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay, stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod());
+				//log.debug("ApplyForStudentNumberAction - applyLoginNew (11) - Check STUAPQ Record");
+				boolean vSTUAPQCheck = dao.validateSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay, stuRegForm.getStudent().getAcademicYear());
 
 					if (vSTUAPQCheck){ 
 						/** Flow Check: (12) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginNew (12) - Student has a STUAPQ Record - Student already applied during this application period");
+						//log.debug("ApplyForStudentNumberAction - applyLoginNew (12) - Student has a STUAPQ Record - Student already applied during this application period");
 						//Student already applied during this application period (Only allowed one application per year)
 						
 						/** Flow Check: (13) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginNew (13) - Check if Doc selected from main page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginNew (13) - Check if Doc selected from main page");
 						if ("DOC".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 							/** Flow Check: (14) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginNew (14) - Doc was selected from main page");
+							//log.debug("ApplyForStudentNumberAction - applyLoginNew (14) - Doc was selected from main page");
 							//Student Selected to upload Documents from Main Selection screen - goto Upload
 							/** Flow Check: (15) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginNew (15) - Goto upload page");
+							//log.debug("ApplyForStudentNumberAction - applyLoginNew (15) - Goto upload page");
 							return mapping.findForward("dynamicUpload");
 						}else if ("STATUS".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 							/** Flow Check: (xx) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginNew (xx) - Status was selected from main page");
+							//log.debug("ApplyForStudentNumberAction - applyLoginNew (xx) - Status was selected from main page");
 							//Student Selected to Status from Main Selection screen - goto Status
 							/** Flow Check: (xx) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginNew (xx) - Goto Status page");
+							//log.debug("ApplyForStudentNumberAction - applyLoginNew (xx) - Goto Status page");
 							applyStatus(request, stuRegForm);
 							return mapping.findForward("applyStatus");
 						}else if ("APPEAL".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 							/** Flow Check: (xx) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginNew (xx) - Appeal was selected from main page");
+							//log.debug("ApplyForStudentNumberAction - applyLoginNew (xx) - Appeal was selected from main page");
 							//Student Selected the Appeal Process from Main Selection screen - goto Appeal
 							/** Flow Check: (xx) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginNew (xx) - Goto Appeal page");
+							//log.debug("ApplyForStudentNumberAction - applyLoginNew (xx) - Goto Appeal page");
 							applyStatus(request, stuRegForm);
 							setDropdownListsAppeal(request,stuRegForm);
 							return mapping.findForward("appealSelect");
 						}else if ("OFFER".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 							/** Flow Check: (xx) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginNew (xx) - Offer was selected from main page");
+							//log.debug("ApplyForStudentNumberAction - applyLoginNew (xx) - Offer was selected from main page");
 							//Student Selected the Appeal Process from Main Selection screen - goto Appeal
 							/** Flow Check: (xx) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginNew (xx) - Goto Offer page");
+							//log.debug("ApplyForStudentNumberAction - applyLoginNew (xx) - Goto Offer page");
 							applyOfferStatus(request, stuRegForm);
 							return mapping.findForward("applyOffer");
 						}else{ //To Check this flow
 							/** Flow Check: (16) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginNew (16) - Doc, Pay, Status, Appeal and Offer was Not selected from main page");
+							//log.debug("ApplyForStudentNumberAction - applyLoginNew (16) - Doc, Pay, Status, Appeal and Offer was Not selected from main page");
 							//Student Did not Select to upload Documents from Main Selection screen - Show Msg, then goto Upload
 							/** Flow Check: (17) **/
 							
 							if (stuRegForm.getStudent().isStuSLP()){
 								/**Check if SLP Student and if Student already has a STUAPQ Record**/
 								/**SLP Students with only one STUAPQ may apply for a second, while those with two may only upload, pay etc**/
-								log.debug("ApplyForStudentNumberAction - applyLoginNew - SLP Student="+stuRegForm.getStudent().isStuSLP());
+								//log.debug("ApplyForStudentNumberAction - applyLoginNew - SLP Student="+stuRegForm.getStudent().isStuSLP());
 								int slpCount = 0;
 								slpCount = dao.validateSLPSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay,stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod());
-								log.debug("ApplyForStudentNumberAction - applyLoginNew - slpCount="+slpCount);
+								//log.debug("ApplyForStudentNumberAction - applyLoginNew - slpCount="+slpCount);
 								if (slpCount > 0){
 									stuRegForm.getStudent().setStuapq(true);
 								}
-								log.debug("ApplyForStudentNumberAction - applyLoginNew - SLP STUAPQ="+stuRegForm.getStudent().isStuapq());
+								//log.debug("ApplyForStudentNumberAction - applyLoginNew - SLP STUAPQ="+stuRegForm.getStudent().isStuapq());
 								if (slpCount == 1){
-									log.debug("ApplyForStudentNumberAction - applyLoginNew (17) - SLP Student with Choice 1 record - Go to Choice for Qual 2");
+									//log.debug("ApplyForStudentNumberAction - applyLoginNew (17) - SLP Student with Choice 1 record - Go to Choice for Qual 2");
 									return mapping.findForward("applyLoginSLP");
 								}
 								if (slpCount > 1){
-									log.debug("ApplyForStudentNumberAction - applyLoginNew (17) - SLP Student with 2 records - Go to Upload");
+									//log.debug("ApplyForStudentNumberAction - applyLoginNew (17) - SLP Student with 2 records - Go to Upload");
 									stuRegForm.setWebUploadMsg("You have already applied for admission to study at Unisa for the " + stuRegForm.getStudent().getAcademicYear() + " academic year.newLine You may only upload documents or make payments from the main menu.newLine  Send an email to the Applications office if this information is incorrect or if you now intend applying for formal studies at ucl@unisa.ac.za");
 								}
 							}else{
-								log.debug("ApplyForStudentNumberAction - applyLoginNew (17) - Set Doc message");
+								//log.debug("ApplyForStudentNumberAction - applyLoginNew (17) - Set Doc message");
 								stuRegForm.setWebUploadMsg("You have already applied for admission to study at Unisa for the " + stuRegForm.getStudent().getAcademicYear() + " academic year.newLine You may only upload documents or make payments from the main menu.newLine Send an email to the Applications office if this information is incorrect or if you now intend applying for formal studies at applications@unisa.ac.za");
 							}
-							log.debug("ApplyForStudentNumberAction - applyLoginNew (17) - Get Doc message - " + stuRegForm.getWebUploadMsg());
+							//log.debug("ApplyForStudentNumberAction - applyLoginNew (17) - Get Doc message - " + stuRegForm.getWebUploadMsg());
 							/** Flow Check: (18) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginNew (18) - Goto upload page");
+							//log.debug("ApplyForStudentNumberAction - applyLoginNew (18) - Goto upload page");
 							return mapping.findForward("dynamicUpload");
 						}
 					}else{
 						/** Flow Check: (19) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginNew (19) - Student has Student Number, but no STUACA and no STUAPQ");
+						//log.debug("ApplyForStudentNumberAction - applyLoginNew (19) - Student has Student Number, but no STUACA and no STUAPQ");
 						if ("STATUS".equalsIgnoreCase(stuRegForm.getLoginSelectMain()) || "APPEAL".equalsIgnoreCase(stuRegForm.getLoginSelectMain()) || "OFFER".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 							stuRegForm.setWebLoginMsg("Student not found!");
 							stuRegForm.setWebLoginMsg2("Please use the main options to apply for a qualification change before you can use this function. newline Click OK retry or click Cancel if you wish to quit the application process.");
@@ -1678,11 +1699,11 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 									new ActionMessage("message.generalmessage", "No application record was found for you for this academic year. Please use the main options to apply for a qualification change before you can use this function."));
 							addErrors(request, messages);
 							/** Flow Check: (xx) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginNew (xx) - New Student with no STUAPQ Record. Return to main page");
+							//log.debug("ApplyForStudentNumberAction - applyLoginNew (xx) - New Student with no STUAPQ Record. Return to main page");
 							return mapping.findForward("loginSelect");
 						}
 						/** Flow Check: (20) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginNew (20) - Set Message - You already have a student number. newline Click OK retry or click Cancel if you wish to quit the application process.");
+						//log.debug("ApplyForStudentNumberAction - applyLoginNew (20) - Set Message - You already have a student number. newline Click OK retry or click Cancel if you wish to quit the application process.");
 						if (stuRegForm.getStudent().isStuSLP()){
 							messages.add(ActionMessages.GLOBAL_MESSAGE,
 									new ActionMessage("message.generalmessage", "You already have a student number - Please select the \"Yes\" option to login as a returning student or contact the Application Office at <a href='mailto:ucl@unisa.ac.za'>ucl@unisa.ac.za</a>"));
@@ -1693,7 +1714,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 							addErrors(request, messages);
 						}
 						/** Flow Check: (21) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginNew (20) - Redirect to Login Select");
+						//log.debug("ApplyForStudentNumberAction - applyLoginNew (20) - Redirect to Login Select");
 						if (stuRegForm.getAdminStaff().isAdmin()){
 							return mapping.findForward("loginStaff");
 						}else{
@@ -1709,16 +1730,16 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request,	HttpServletResponse response)
 			throws Exception {
 
-		log.debug("IN applyLoginReturn");
+		//log.debug("IN applyLoginReturn");
 	    
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		GeneralMethods gen = new GeneralMethods();
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		
-		log.debug("ApplyForStudentNumberAction - applyLoginReturn - N " + stuRegForm.getStudent().getNumber() + " S " + stuRegForm.getStudent().getSurname() + " F " + stuRegForm.getStudent().getSurname() + " Y " + stuRegForm.getStudent().getBirthYear() + " M " + stuRegForm.getStudent().getBirthMonth() + " D " + stuRegForm.getStudent().getBirthDay());
+		//log.debug("ApplyForStudentNumberAction - applyLoginReturn - N " + stuRegForm.getStudent().getNumber() + " S " + stuRegForm.getStudent().getSurname() + " F " + stuRegForm.getStudent().getSurname() + " Y " + stuRegForm.getStudent().getBirthYear() + " M " + stuRegForm.getStudent().getBirthMonth() + " D " + stuRegForm.getStudent().getBirthDay());
 
-		log.debug("ApplyForStudentNumberAction - applyLoginReturn - AcademicYear=" + stuRegForm.getStudent().getAcademicYear());
+		//log.debug("ApplyForStudentNumberAction - applyLoginReturn - AcademicYear=" + stuRegForm.getStudent().getAcademicYear());
 		if (stuRegForm.getStudent().getAcademicYear() == null){
 			stuRegForm.getStudent().setAcademicYear(getCurrentAcademicYear());
 			stuRegForm.getStudent().setAcademicPeriod(getCurrentAcademicPeriod());
@@ -1748,26 +1769,36 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		if ("7".equalsIgnoreCase(stuRegForm.getStudent().getNumber().substring(0,1))){
 			
 			if (stuRegForm.getStudent().getNumber().length() == 8 ){ 
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn - Student number = 8 characters and starts with 7 - Set isStuSLP");
-				stuRegForm.getStudent().setStuSLP(true);
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn - Check if Student number = 8 characters");
+				if (!stuRegForm.getStudent().isStuSLP() && "7".equalsIgnoreCase(stuRegForm.getStudent().getNumber().substring(0,1))){
+					//log.debug("ApplyForStudentNumberAction - applyLoginReturn - Student number = 8 characters and starts with 7 - Set No SLP Message");
+					messages.add(ActionMessages.GLOBAL_MESSAGE,
+							new ActionMessage("message.generalmessage", "You must apply for a formal Unisa student number. The number you have entered is reserved for non-formal studies only. Send an email to the Applications office if this information is incorrect or if you now intend applying for formal studies at <a href='mailto:applications@unisa.ac.za'>applications@unisa.ac.za</a>"));
+					addErrors(request, messages);
+					setDropdownListsLogin(request,stuRegForm);
+					return mapping.findForward("applyLogin");
+				}else if (stuRegForm.getStudent().isStuSLP() && "7".equalsIgnoreCase(stuRegForm.getStudent().getNumber().substring(0,1))){
+					//Student has come in via SLP link and is a 7 series student
+					//log.debug("ApplyForStudentNumberAction - applyLoginReturn - Student number = 8 characters and starts with 7 - Allow SLP");
+				}
 			}else if (stuRegForm.getStudent().getNumber().length() == 7 ){
 				// If student no is only 7 characters (old), then add a 0 to the beginning
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn - 7 char Student Number - Old Number: " + stuRegForm.getStudent().getNumber());
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn - 7 char Student Number - Old Number: " + stuRegForm.getStudent().getNumber());
 				stuRegForm.getStudent().setNumber("0" + stuRegForm.getStudent().getNumber());
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn - 7 char Student Number - New Number: " + stuRegForm.getStudent().getNumber());
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn - 7 char Student Number - New Number: " + stuRegForm.getStudent().getNumber());
 			}
 		}
-		log.debug("ApplyForStudentNumberAction - applyLoginReturn - After check if Student number = 8 characters and starts with 7 ");
+		//log.debug("ApplyForStudentNumberAction - applyLoginReturn - After check if Student number = 8 characters and starts with 7 ");
 
 		//Check if Student Log Exists, if so, set Application Sequence Number
 		int currLogSeq = 0;
     	currLogSeq = dao.getSTULOGRef(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber());
-    	log.debug("ApplyForStudentNumberAction - applyLoginNew - currLogSeq="+currLogSeq+", studentSeqNr="+stuRegForm.getApplySEQUENCE());
+    	//log.debug("ApplyForStudentNumberAction - applyLoginReturn - currLogSeq="+currLogSeq+", studentSeqNr="+stuRegForm.getApplySEQUENCE());
     	if (currLogSeq != stuRegForm.getApplySEQUENCE() || currLogSeq == 0 || stuRegForm.getApplySEQUENCE() == 0){
     		currLogSeq++;
     	}
     	stuRegForm.setApplySEQUENCE(currLogSeq);
-    	log.debug("ApplyForStudentNumberAction - applyLoginNew - STULOG Sequence Number to Use="+stuRegForm.getApplySEQUENCE());
+    	//log.debug("ApplyForStudentNumberAction - applyLoginReturn - STULOG Sequence Number to Use="+stuRegForm.getApplySEQUENCE());
 
 		stuRegForm.getStudent().setSurname(stripXSS(stuRegForm.getStudent().getSurname(), "Surname", "LoginRet", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 		if (stuRegForm.getStudent().getSurname() == null || "".equalsIgnoreCase(stuRegForm.getStudent().getSurname())){
@@ -1990,7 +2021,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.getStudent().setBirthMonth(stuRegForm.getStudent().getBirthMonth());
 			stuRegForm.getStudent().setBirthDay(stuRegForm.getStudent().getBirthDay());
 			
-			log.debug("ApplyForStudentNumberAction - applyLoginReturn - Write student details to STUXML");
+			//log.debug("ApplyForStudentNumberAction - applyLoginReturn - Write student details to STUXML");
 			//Write student details to STUXML for later verification - Testing Thread security
 			String referenceData = stuRegForm.getStudent().getNumber()+","+stuRegForm.getStudent().getSurname().toUpperCase()+","+stuRegForm.getStudent().getFirstnames().toUpperCase()+","+stuRegForm.getStudent().getBirthYear()+stuRegForm.getStudent().getBirthMonth()+stuRegForm.getStudent().getBirthDay();
 			boolean stuError = false;
@@ -1998,7 +2029,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			String checkStu = "";
 			int nextRef = 1;
 			queryResultRef = dao.getSTUXMLRef(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "StuInfo", "1", "applyLoginReturn");
-			log.debug("ApplyForStudentNumberAction - applyLoginReturn - queryResultRef="+queryResultRef);
+			//log.debug("ApplyForStudentNumberAction - applyLoginReturn - queryResultRef="+queryResultRef);
 			if (queryResultRef.toUpperCase().contains("ERROR")){
 				stuError = true;
 			}
@@ -2009,13 +2040,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}catch(Exception e){
 					log.warn("ApplyForStudentNumberAction - applyLoginReturn - nextRef not Numeric - nextRef="+nextRef);
 				}
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn - queryResultRef="+queryResultRef+", nextRef="+nextRef);
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn - queryResultRef="+queryResultRef+", nextRef="+nextRef);
 				checkStu = dao.saveSTUXML(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "StuInfo", "1", nextRef, referenceData, "applyLoginReturn", "INSERT");
 				if (checkStu.toUpperCase().contains("ERROR")){
 					stuError = true;
 				}
 			}
-			log.debug("ApplyForStudentNumberAction - applyLoginReturn - Write student details to STUXML - Done - checkStu="+checkStu+", referenceData="+referenceData+", referenceSequence="+nextRef);
+			//log.debug("ApplyForStudentNumberAction - applyLoginReturn - Write student details to STUXML - Done - checkStu="+checkStu+", referenceData="+referenceData+", referenceSequence="+nextRef);
 			
 			//Get Browser Details
 			//Is client behind something like a Proxy Server?
@@ -2030,16 +2061,16 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				int pos = browser.indexOf("@");
 				stuRegForm.getStudent().setStuBrowser(browser.substring(0,pos));
 				stuRegForm.getStudent().setStuWksOS(browser.substring(pos+1,browser.length()));
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn - Write Browser details to STUXML");
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn - Write Browser details to STUXML");
 				//Write Browser details to STUXML for later verification - Testing Thread security
 				String browserData = stuRegForm.getStudent().getNumber()+","+stuRegForm.getStudent().getStuIPAddress()+","+stuRegForm.getStudent().getStuBrowser()+","+stuRegForm.getStudent().getStuWksOS();
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn - browserData="+browserData);
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn - browserData="+browserData);
 				boolean browserError = false;
 				String queryResultBrowser = "";
 				String checkBrowser = "";
 				int nextBrowser = 1;
 				queryResultBrowser = dao.getSTUXMLRef(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "WKSInfo", "1", "applyLoginReturn");
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn - queryResultRef="+queryResultBrowser);
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn - queryResultRef="+queryResultBrowser);
 				if (queryResultBrowser.toUpperCase().contains("ERROR")){
 					browserError = true;
 				}
@@ -2050,13 +2081,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					}catch(Exception e){
 						log.warn("ApplyForStudentNumberAction - applyLoginReturn - nextRef not Numeric - nextRef="+nextBrowser);
 					}
-					log.debug("ApplyForStudentNumberAction - applyLoginReturn - queryResultBrowser="+queryResultBrowser+", nextRef="+nextBrowser);
+					//log.debug("ApplyForStudentNumberAction - applyLoginReturn - queryResultBrowser="+queryResultBrowser+", nextRef="+nextBrowser);
 					checkBrowser = dao.saveSTUXML(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "WKSInfo", "1", nextBrowser, browserData, "applyLoginReturn", "INSERT");
 					if (checkBrowser.toUpperCase().contains("ERROR")){
 						browserError = true;
 					}
 				}
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn - Write student details to STUXML - Done - checkStu="+checkBrowser+", browserData="+browserData+", referenceSequence="+nextBrowser);
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn - Write student details to STUXML - Done - checkStu="+checkBrowser+", browserData="+browserData+", referenceSequence="+nextBrowser);
 			}
 			
 			/**
@@ -2065,132 +2096,132 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			
 			/** Continue to check the code against the flow diagram by the numbers provided **/
 			/** Flow Check: (2) **/
-			log.debug("ApplyForStudentNumberAction - applyLoginReturn (2) - Check if Student has Academic record");
+			//log.debug("ApplyForStudentNumberAction - applyLoginReturn (2) - Check if Student has Academic record");
 			boolean vAcaCheck = dao.validateStudentRec(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear());
-			log.debug("ApplyForStudentNumberAction - applyLoginReturn - vAcaCheck: " + vAcaCheck);
+			//log.debug("ApplyForStudentNumberAction - applyLoginReturn - vAcaCheck: " + vAcaCheck);
 			if (vAcaCheck){
 				/** Flow Check: (3) **/
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn (3) - Student has Academic record");
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn (3) - Student has Academic record");
 				String bDay = stuRegForm.getStudent().getBirthDay() + "/" + stuRegForm.getStudent().getBirthMonth() + "/" + stuRegForm.getStudent().getBirthYear();
 				/** Flow Check: (4) **/
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn (4) - Check STUAPQ (F851)");
-				boolean checkSTUAPQ = dao.validateSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay,stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod());
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn (4) - Check STUAPQ (F851)");
+				boolean checkSTUAPQ = dao.validateSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay,stuRegForm.getStudent().getAcademicYear());
 				stuRegForm.getStudent().setStuapqExist(checkSTUAPQ);
 				
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn - (IF) vAcaCheck=True - checkSTUAPQ: " + checkSTUAPQ + " - setStuExist:curStu - goto - MenuReturnStu");
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn - (IF) vAcaCheck=True - checkSTUAPQ: " + checkSTUAPQ + " - setStuExist:curStu - goto - MenuReturnStu");
 				if (checkSTUAPQ){ //Student already applied during this application period (Only allowed one application per year)
 					/** Flow Check: (5) **/
-					log.debug("ApplyForStudentNumberAction - applyLoginReturn (5) - Student already applied during this application period");
+					//log.debug("ApplyForStudentNumberAction - applyLoginReturn (5) - Student already applied during this application period");
 					//Check if Doc upload was selected from the Main selection page
 					/** Flow Check: (6) **/
-					log.debug("ApplyForStudentNumberAction - applyLoginReturn (6) - doc flow check");
+					//log.debug("ApplyForStudentNumberAction - applyLoginReturn (6) - doc flow check");
 					if ("DOC".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (7) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (7) - Student selected to go directly to upload page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (7) - Student selected to go directly to upload page");
 						stuRegForm.getStudent().setStuExist("curStu");
 						/** Flow Check: (8) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (8) - Redirect to upload page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (8) - Redirect to upload page");
 						return mapping.findForward("dynamicUpload");
 					}else if ("STATUS".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Student selected to go directly to Status page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Student selected to go directly to Status page");
 						stuRegForm.getStudent().setStuExist("curStu");
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Redirect to Status page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Redirect to Status page");
 						applyStatus(request, stuRegForm);
 						return mapping.findForward("applyStatus");
 					}else if ("APPEAL".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Student selected to go directly to Appeal page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Student selected to go directly to Appeal page");
 						stuRegForm.getStudent().setStuExist("curStu");
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Redirect to Appeal page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Redirect to Appeal page");
 						applyStatus(request, stuRegForm);
 						setDropdownListsAppeal(request,stuRegForm);
 						return mapping.findForward("appealSelect");
 					}else if ("OFFER".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Student selected to go directly to Offer page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Student selected to go directly to Offer page");
 						stuRegForm.getStudent().setStuExist("curStu");
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Redirect to Offer page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Redirect to Offer page");
 						applyOfferStatus(request, stuRegForm);
 						return mapping.findForward("applyOffer");	
 					}else{
 						/** Flow Check: (9) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (9) - Student did not select to go directly to upload page but already has STUAPQ");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (9) - Student did not select to go directly to upload page but already has STUAPQ");
 						//Student did not select to go directly to upload page but already has STUAPQ
 						if (stuRegForm.getStudent().isStuSLP()){
 							/**Check if SLP Student and if Student already has a STUAPQ Record**/
 							/**SLP Students with only one STUAPQ may apply for a second, while those with two may only upload, pay etc**/
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn - SLP Student="+stuRegForm.getStudent().isStuSLP());
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn - SLP Student="+stuRegForm.getStudent().isStuSLP());
 							int slpCount = 0;
 							slpCount = dao.validateSLPSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay,stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod());
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn - slpCount="+slpCount);
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn - slpCount="+slpCount);
 							if (slpCount > 0){
 								stuRegForm.getStudent().setStuapq(true);
 							}
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn - SLP STUAPQ="+stuRegForm.getStudent().isStuapq());
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn - SLP STUAPQ="+stuRegForm.getStudent().isStuapq());
 							if (slpCount == 1){
-								log.debug("ApplyForStudentNumberAction - applyLoginReturn (9) - SLP Student with Choice 1 record - Go to Choice for Qual 2");
+								//log.debug("ApplyForStudentNumberAction - applyLoginReturn (9) - SLP Student with Choice 1 record - Go to Choice for Qual 2");
 								return mapping.findForward("applyLoginSLP");
 							}
 							if (slpCount > 1){
-								log.debug("ApplyForStudentNumberAction - applyLoginReturn (9) - SLP Student with 2 records - Go to Upload");
+								//log.debug("ApplyForStudentNumberAction - applyLoginReturn (9) - SLP Student with 2 records - Go to Upload");
 								stuRegForm.setWebUploadMsg("You have already applied for admission to study at Unisa for the " + stuRegForm.getStudent().getAcademicYear() + " academic year.newLine You may only upload documents or make payments from the main menu.newLine  Send an email to the Applications office if this information is incorrect or if you now intend applying for formal studies at ucl@unisa.ac.za");
 								return mapping.findForward("dynamicUpload");
 							}
 						}else{
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn - Student already has a STUAPQ Record for this Academic Year - Thus block");
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn - Student already has a STUAPQ Record for this Academic Year - Thus block");
 							/** Flow Check: (10) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn (10) - Set Doc message");
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn (10) - Set Doc message");
 							stuRegForm.setWebUploadMsg("You have already applied for a qualification change for the " + stuRegForm.getStudent().getAcademicYear() + " academic year.newLine Please select to upload documents or make payments or alternatively send an email to the Applications office at applications@unisa.ac.za if this information is incorrect ");
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn (10) - Get Doc message - " + stuRegForm.getWebUploadMsg());
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn (10) - Get Doc message - " + stuRegForm.getWebUploadMsg());
 							stuRegForm.getStudent().setStuExist("curStu");
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn - checkSTUAPQ - Return to dynamicUpload");
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn - checkSTUAPQ - Return to dynamicUpload");
 							/** Flow Check: (11) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn (11) - Go to upload page");
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn (11) - Go to upload page");
 							return mapping.findForward("dynamicUpload");
 						}
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (11) - Fallback - Go to upload page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (11) - Fallback - Go to upload page");
 						return mapping.findForward("dynamicUpload");
 					}
 				} else{ //Student thus doesn't have a STUAPQ record for this Academic Year & Period yet
 					/** Flow Check: (12) **/
-					log.debug("ApplyForStudentNumberAction - applyLoginReturn (12) - Student thus doesn't have a STUAPQ record for this Academic Year & Period yet");
+					//log.debug("ApplyForStudentNumberAction - applyLoginReturn (12) - Student thus doesn't have a STUAPQ record for this Academic Year & Period yet");
 					/** Flow Check: (13) **/
-					log.debug("ApplyForStudentNumberAction - applyLoginReturn (13) - Check if Doc was selected from main page");
+					//log.debug("ApplyForStudentNumberAction - applyLoginReturn (13) - Check if Doc was selected from main page");
 					stuRegForm.getStudent().setStuExist("curStu");
 					if ("DOC".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (14) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (14) - Doc was selected from main page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (14) - Doc was selected from main page");
 						//Student Selected to upload Documents from Main Selection screen but doesn't have a STUAPQ record, thus display message and goto applyQualification
 						/** Flow Check: (15) **/					
 						if ("UD".equalsIgnoreCase(stuRegForm.getLoginSelectMain()) && !stuRegForm.getAdminStaff().isAdmin()){
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn (15) - Set Message - Your do not have a current application record for this academic year.");
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn (15) - Set Message - Your do not have a current application record for this academic year.");
 							stuRegForm.setWebUploadMsg("You do not have a current application record for this academic year.newLine You must apply for a new qualification or change your existing qualification in order to use this function to upload documents.");
 							/** Flow Check: (16a) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn (16a) - Returning Student - Undergrad - Goto LoginSelect Forward");
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn (16a) - Returning Student - Undergrad - Goto LoginSelect Forward");
 							return mapping.findForward("loginSelect");
 						}else{
 							/** Flow Check: (16c) **/
 							//Check if M&D Student if so, redirect to M&D Admissions
 							boolean isMDStudent = false;
 							isMDStudent = dao.getMDAPPLRecord(stuRegForm.getStudent().getNumber());
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn (16c) - Returning Student - M&D Check="+isMDStudent);
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn (16c) - Returning Student - M&D Check="+isMDStudent);
 							if (isMDStudent){
 								/** Flow Check: (16d) **/
-								log.debug("ApplyForStudentNumberAction - applyLoginReturn (16d) - Returning Student - M&D - Goto MD Admissions");
+								//log.debug("ApplyForStudentNumberAction - applyLoginReturn (16d) - Returning Student - M&D - Goto MD Admissions");
 								String serverpath = ServerConfigurationService.getServerUrl();
 								return new ActionForward(serverpath+"/unisa-findtool/default.do?sharedTool=unisa.mdapplications",true);
 							}else{
 								/** Flow Check: (16e) **/
 								if (stuRegForm.getAdminStaff().isAdmin()){
-									log.debug("ApplyForStudentNumberAction - applyLoginReturn (16e) - Returning Student Admin - Goto ApplyQualification");
+									//log.debug("ApplyForStudentNumberAction - applyLoginReturn (16e) - Returning Student Admin - Goto ApplyQualification");
 									return mapping.findForward("applyQualification");
 								}else{
 									if (stuRegForm.getStudent().isDateWAPRU()){
-										log.debug("ApplyForStudentNumberAction - applyLoginReturn (16f) - Returning Student - Goto ApplyQualification");
+										//log.debug("ApplyForStudentNumberAction - applyLoginReturn (16f) - Returning Student - Goto ApplyQualification");
 										return mapping.findForward("applyQualification");
 									}else{
 										stuRegForm.setAllowLogin(false);
@@ -2201,50 +2232,50 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 						}
 					}else if ("STATUS".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Status was selected from main page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Status was selected from main page");
 						//Student Selected to review Application Status from Main Selection screen but doesn't have a STUAPQ record, thus display message and goto applyQualification
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Set Message - You do not have a current application record for this academic year. newline Click OK retry or click Cancel if you wish to quit the application process.");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Set Message - You do not have a current application record for this academic year. newline Click OK retry or click Cancel if you wish to quit the application process.");
 						stuRegForm.setWebLoginMsg("You do not have a current application record for this academic year.");
 						stuRegForm.setWebLoginMsg2("You must apply for a new qualification or change your existing qualification in order to view your application status.");
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Goto loginSelect");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Goto loginSelect");
 						return mapping.findForward("loginSelect");
 					}else if ("APPEAL".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Appeal was selected from main page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Appeal was selected from main page");
 						//Student Selected Application Appeal Process from Main Selection screen but doesn't have a STUAPQ record, thus display message and goto applyQualification
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Set Message - You do not have a current application record for this academic year. newline Click OK retry or click Cancel if you wish to quit the application process.");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Set Message - You do not have a current application record for this academic year. newline Click OK retry or click Cancel if you wish to quit the application process.");
 						stuRegForm.setWebLoginMsg("You do not have a current application record for this academic year.");
 						stuRegForm.setWebLoginMsg2("You must apply for a new qualification or change your existing qualification in order to appeal an application decision.");
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Goto loginSelect");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Goto loginSelect");
 						return mapping.findForward("loginSelect");	
 					}else if ("OFFER".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Offer was selected from main page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Offer was selected from main page");
 						//Student Selected Application Appeal Process from Main Selection screen but doesn't have a STUAPQ record, thus display message and goto applyQualification
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Set Message - You do not have a current application record for this academic year. newline Click OK retry or click Cancel if you wish to quit the application process.");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Set Message - You do not have a current application record for this academic year. newline Click OK retry or click Cancel if you wish to quit the application process.");
 						stuRegForm.setWebLoginMsg("You do not have a current application record for this academic year.");
 						stuRegForm.setWebLoginMsg2("You must apply for a new qualification or change your existing qualification in order to accept or decline an enrollment offer.");
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Goto loginSelect");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (xx) - Goto loginSelect");
 						return mapping.findForward("loginSelect");	
 					}else{
 						/** Flow Check: (14) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (17) - Doc, Pay, Status, Appeal and Offer was NOT selected from main page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (17) - Doc, Pay, Status, Appeal and Offer was NOT selected from main page");
 						/** Flow Check: (18) **/
 						stuRegForm.setWebLoginMsg("");
 						stuRegForm.setWebLoginMsg2("");
 						if (stuRegForm.getAdminStaff().isAdmin()){
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn (18) - Returning Student Admin - HONS - Goto ApplyQualification");
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn (18) - Returning Student Admin - HONS - Goto ApplyQualification");
 							return mapping.findForward("applyQualification");
 						}else{
 							if ("UD".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 								if (stuRegForm.getStudent().isDateWAPRU()){
-									log.debug("ApplyForStudentNumberAction - applyLoginReturn (18a) - Returning Student - Undergrad - Goto APS Select");
+									//log.debug("ApplyForStudentNumberAction - applyLoginReturn (18a) - Returning Student - Undergrad - Goto APS Select");
 									return mapping.findForward("applyAPSSelect");
 								}else{
 									stuRegForm.setAllowLogin(false);
@@ -2256,7 +2287,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 								}
 							}else{
 								if (stuRegForm.getStudent().isDateWAPRH()){
-									log.debug("ApplyForStudentNumberAction - applyLoginReturn (18b) - Returning Student - HONS - Goto ApplyQualification");
+									//log.debug("ApplyForStudentNumberAction - applyLoginReturn (18b) - Returning Student - HONS - Goto ApplyQualification");
 									return mapping.findForward("applyQualification");
 								}else{
 									stuRegForm.setAllowLogin(false);
@@ -2273,91 +2304,91 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				
 			}else{ //Student thus doesn't have an Academic record
 				/** Flow Check: (19) **/
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn (19) - Student thus doesn't have an Academic record");
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn - (ELSE) vAcaCheck=False - setStuExist:curStu");
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn (19) - Student thus doesn't have an Academic record");
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn - (ELSE) vAcaCheck=False - setStuExist:curStu");
 				stuRegForm.getStudent().setStuExist("curStu");
 				
 				String bDay = stuRegForm.getStudent().getBirthDay() + "/" + stuRegForm.getStudent().getBirthMonth() + "/" + stuRegForm.getStudent().getBirthYear();
 				/** Flow Check: (20) **/
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn (20) - Check for STUAPQ (F851) record");
-				boolean checkSTUAPQ = dao.validateSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay,stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod());
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn (20) - Check for STUAPQ (F851) record");
+				boolean checkSTUAPQ = dao.validateSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay,stuRegForm.getStudent().getAcademicYear());
 				stuRegForm.getStudent().setStuapqExist(checkSTUAPQ);
 				
-				log.debug("ApplyForStudentNumberAction - applyLoginReturn - (IF) vAcaCheck=True - checkSTUAPQ: " + checkSTUAPQ + " - setStuExist:curStu - goto - MenuReturnStu");
+				//log.debug("ApplyForStudentNumberAction - applyLoginReturn - (IF) vAcaCheck=True - checkSTUAPQ: " + checkSTUAPQ + " - setStuExist:curStu - goto - MenuReturnStu");
 				if (checkSTUAPQ){ //Student already applied during this application period (Only allowed one application per year)
 					/** Flow Check: (21) **/
-					log.debug("ApplyForStudentNumberAction - applyLoginReturn (21) - Student already applied during this application period");
+					//log.debug("ApplyForStudentNumberAction - applyLoginReturn (21) - Student already applied during this application period");
 					//Check if Doc upload was selected from the Main selection page
 					/** Flow Check: (22) **/
-					log.debug("ApplyForStudentNumberAction - applyLoginReturn (22) - Check if Doc upload was selected from the Main selection page");
+					//log.debug("ApplyForStudentNumberAction - applyLoginReturn (22) - Check if Doc upload was selected from the Main selection page");
 					if ("DOC".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (23) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (23) - Student selected to go directly to upload page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (23) - Student selected to go directly to upload page");
 						stuRegForm.getStudent().setStuExist("curStu");
 						/** Flow Check: (24) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (24) - Redirect to upload page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (24) - Redirect to upload page");
 						return mapping.findForward("dynamicUpload");
 					}else if ("STATUS".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (23) - Student selected to go to Status page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (23) - Student selected to go to Status page");
 						stuRegForm.getStudent().setStuExist("curStu");
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (24) - Redirect to Status page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (24) - Redirect to Status page");
 						applyStatus(request, stuRegForm);
 						return mapping.findForward("applyStatus");
 					}else if ("APPEAL".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (23) - Student selected to go to Appeal page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (23) - Student selected to go to Appeal page");
 						stuRegForm.getStudent().setStuExist("curStu");
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (24) - Redirect to Appeal page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (24) - Redirect to Appeal page");
 						applyStatus(request, stuRegForm);
 						setDropdownListsAppeal(request,stuRegForm);
 						return mapping.findForward("appealSelect");
 					}else if ("OFFER".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (23) - Student selected to go to Offer page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (23) - Student selected to go to Offer page");
 						stuRegForm.getStudent().setStuExist("curStu");
 						/** Flow Check: (xx) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (24) - Redirect to Offer page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (24) - Redirect to Offer page");
 						applyOfferStatus(request, stuRegForm);
 						return mapping.findForward("applyOffer");
 					}else{
 						/** Flow Check: (25) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (25) - Student did not select anything to go directly to upload page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (25) - Student did not select anything to go directly to upload page");
 						//Student did not select to go directly to upload page but already has STUAPQ - see below
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn - Student already has a STUAPQ Record for this Academic Year - Thus block");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn - Student already has a STUAPQ Record for this Academic Year - Thus block");
 						/** Flow Check: (26) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (26) - Set Doc message");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (26) - Set Doc message");
 						if (stuRegForm.getStudent().isStuSLP()){
 							/**Check if SLP Student and if Student already has a STUAPQ Record**/
 							/**SLP Students with only one STUAPQ may apply for a second, while those with two may only upload, pay etc**/
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn - SLP Student="+stuRegForm.getStudent().isStuSLP());
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn - SLP Student="+stuRegForm.getStudent().isStuSLP());
 							int slpCount = 0;
 							slpCount = dao.validateSLPSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay,stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod());
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn - slpCount="+slpCount);
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn - slpCount="+slpCount);
 							if (slpCount > 0){
 								stuRegForm.getStudent().setStuapq(true);
 							}
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn - SLP STUAPQ="+stuRegForm.getStudent().isStuapq());
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn - SLP STUAPQ="+stuRegForm.getStudent().isStuapq());
 							if (slpCount == 1){
-								log.debug("ApplyForStudentNumberAction - applyLoginReturn (26) - SLP Student with Choice 1 record - Go to Choice for Qual 2");
+								//log.debug("ApplyForStudentNumberAction - applyLoginReturn (26) - SLP Student with Choice 1 record - Go to Choice for Qual 2");
 								return mapping.findForward("applyLoginSLP");
 							}
 							if (slpCount > 1){
-								log.debug("ApplyForStudentNumberAction - applyLoginReturn (26) - SLP Student with 2 records - Go to Upload");
+								//log.debug("ApplyForStudentNumberAction - applyLoginReturn (26) - SLP Student with 2 records - Go to Upload");
 								stuRegForm.setWebUploadMsg("You have already applied for admission to study at Unisa for the " + stuRegForm.getStudent().getAcademicYear() + " academic year.newLine You may only upload documents or make payments from the main menu.newLine  Send an email to the Applications office if this information is incorrect or if you now intend applying for formal studies at ucl@unisa.ac.za");
 								return mapping.findForward("dynamicUpload");
 							}
 						}else{
 								stuRegForm.setWebUploadMsg("You have already applied for a qualification change for the " + stuRegForm.getStudent().getAcademicYear() + " academic year.newLine Please select to upload documents or make payments or alternatively send an email to the Applications office at applications@unisa.ac.za if this information is incorrect ");
-								log.debug("ApplyForStudentNumberAction - applyLoginReturn (27) - Get Doc message - " + stuRegForm.getWebUploadMsg());
+								//log.debug("ApplyForStudentNumberAction - applyLoginReturn (27) - Get Doc message - " + stuRegForm.getWebUploadMsg());
 								stuRegForm.getStudent().setStuExist("curStu");
 								/** Flow Check: (27) **/
-								log.debug("ApplyForStudentNumberAction - applyLoginReturn (27) - Redirect to upload page");
+								//log.debug("ApplyForStudentNumberAction - applyLoginReturn (27) - Redirect to upload page");
 								return mapping.findForward("dynamicUpload");
 						}
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (27) - Fallback - Go to upload page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (27) - Fallback - Go to upload page");
 						return mapping.findForward("dynamicUpload");
 					}
 				} else{ //Student thus doesn't have a STUAPQ record for this Academic Year yet & Period
@@ -2365,45 +2396,45 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 						//Check if M&D Student if so, redirect to M&D Admissions
 						boolean isMDStudent = false;
 						isMDStudent = dao.getMDAPPLRecord(stuRegForm.getStudent().getNumber());
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (28) - Returning Student No STUACA - NO STUAPQ - M&D Check="+isMDStudent);
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (28) - Returning Student No STUACA - NO STUAPQ - M&D Check="+isMDStudent);
 						if (isMDStudent){
 							/** Flow Check: (29) **/
-							log.debug("ApplyForStudentNumberAction - applyLoginReturn (29) - Returning Student No STUACA - NO STUAPQ - M&D - Goto MD Admissions");
+							//log.debug("ApplyForStudentNumberAction - applyLoginReturn (29) - Returning Student No STUACA - NO STUAPQ - M&D - Goto MD Admissions");
 							String serverpath = ServerConfigurationService.getServerUrl();
 							return new ActionForward(serverpath+"/unisa-findtool/default.do?sharedTool=unisa.mdapplications",true);
 						}
 					}else if ("STATUS".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (30) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (30) - Status was selected from main page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (30) - Status was selected from main page");
 						//Student Selected to review Application Status from Main Selection screen but doesn't have a STUAPQ record, thus display message and goto applyQualification
 						/** Flow Check: (30a) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (30a) - Set Message - You do not have a current application record for this academic year.newline Click OK retry or click Cancel if you wish to quit the application process.");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (30a) - Set Message - You do not have a current application record for this academic year.newline Click OK retry or click Cancel if you wish to quit the application process.");
 						stuRegForm.setWebLoginMsg("You do not have a current application record for this academic year.");
 						stuRegForm.setWebLoginMsg2("You must apply for a new qualification or change your existing qualification in order to view your application status.");
 						/** Flow Check: (30b) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (30b) - Goto loginSelect");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (30b) - Goto loginSelect");
 						return mapping.findForward("loginSelect");
 					}else if ("APPEAL".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (31) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (31) - Appeal was selected from main page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (31) - Appeal was selected from main page");
 						//Student Selected Application Appeal Process from Main Selection screen but doesn't have a STUAPQ record, thus display message and goto applyQualification
 						/** Flow Check: (31a) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (31a) - Set Message - You do not have a current application record for this academic year.newline Click OK retry or click Cancel if you wish to quit the application process.");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (31a) - Set Message - You do not have a current application record for this academic year.newline Click OK retry or click Cancel if you wish to quit the application process.");
 						stuRegForm.setWebLoginMsg("You do not have a current application record for this academic year.");
 						stuRegForm.setWebLoginMsg2("You must apply for a new qualification or change your existing qualification in order to appeal an application decision.");
 						/** Flow Check: (31b) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (31b) - Goto loginSelect");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (31b) - Goto loginSelect");
 						return mapping.findForward("loginSelect");	
 					}else if ("OFFER".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 						/** Flow Check: (32) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (32) - Offer was selected from main page");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (32) - Offer was selected from main page");
 						//Student Selected Application Appeal Process from Main Selection screen but doesn't have a STUAPQ record, thus display message and goto applyQualification
 						/** Flow Check: (32a) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (32a) - Set Message - You do not have a current application record for this academic year.newline Click OK retry or click Cancel if you wish to quit the application process.");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (32a) - Set Message - You do not have a current application record for this academic year.newline Click OK retry or click Cancel if you wish to quit the application process.");
 						stuRegForm.setWebLoginMsg("You do not have a current application record for this academic year.");
 						stuRegForm.setWebLoginMsg2("You must apply for a new qualification or change your existing qualification in order to accept or decline an enrollment offer.");
 						/** Flow Check: (32b) **/
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (32b) - Goto loginSelect");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (32b) - Goto loginSelect");
 						return mapping.findForward("loginSelect");	
 					}
 					//2016 Change for Vinesh to allow previously unregistered students to re-apply as returning students.
@@ -2411,15 +2442,15 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					stuRegForm.setWebLoginMsg("");
 					stuRegForm.setWebLoginMsg2("");
 					if (stuRegForm.getAdminStaff().isAdmin()){
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (28) - Returning Student ADMIN - Goto ApplyQualification");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (28) - Returning Student ADMIN - Goto ApplyQualification");
 						return mapping.findForward("applyQualification");
 					}else if (stuRegForm.getStudent().isStuSLP()){
-						log.debug("ApplyForStudentNumberAction - applyLoginReturn (28) - Returning Student - Goto ApplyQualification");
+						//log.debug("ApplyForStudentNumberAction - applyLoginReturn (28) - Returning Student - Goto ApplyQualification");
 						return mapping.findForward("applyQualification");
 					}else{
 						if ("UD".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 							if (stuRegForm.getStudent().isDateWAPRU()){
-								log.debug("ApplyForStudentNumberAction - applyLoginReturn (28a) - Returning Student - Undergrad - Goto APS Select");
+								//log.debug("ApplyForStudentNumberAction - applyLoginReturn (28a) - Returning Student - Undergrad - Goto APS Select");
 								return mapping.findForward("applyAPSSelect");
 							}else{
 								stuRegForm.setAllowLogin(false);
@@ -2431,7 +2462,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 							}
 						}else{
 							if (stuRegForm.getStudent().isDateWAPRH()){
-								log.debug("ApplyForStudentNumberAction - applyLoginReturn (28b) - Returning Student - HONS or M&D - Goto ApplyQualification");
+								//log.debug("ApplyForStudentNumberAction - applyLoginReturn (28b) - Returning Student - HONS or M&D - Goto ApplyQualification");
 								return mapping.findForward("applyQualification");
 							}else{
 								stuRegForm.setAllowLogin(false);
@@ -2453,26 +2484,26 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		JSONObject pdfObj = new JSONObject();
 		Map<String, String> mapPDF = new LinkedHashMap<String, String>();
 
-		log.debug("ApplyForStudentNumberAction - getPDFtoPrint - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - getPDFtoPrint - **************************************************************");
 		
 		//StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		
-		log.debug("ApplyForStudentNumberAction - getPDFtoPrint");
+		//log.debug("ApplyForStudentNumberAction - getPDFtoPrint");
 
 		String pdfFileName = "DSAR31.pdf";
 		String serverpath = ServerConfigurationService.getServerUrl();
-		log.debug("ApplyForStudentNumberAction - getPDFtoPrint - serverpath="+serverpath);
-		log.debug("ApplyForStudentNumberAction - getPDFtoPrint - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - getPDFtoPrint - serverpath="+serverpath);
+		//log.debug("ApplyForStudentNumberAction - getPDFtoPrint - **************************************************************");
 		
 		String pdfPath = serverpath + "/unisa-studentregistration/resources/forms";
 		
-		log.debug("ApplyForStudentNumberAction - getPDFtoPrint - pdfFile="+pdfPath+"/"+pdfFileName);
+		//log.debug("ApplyForStudentNumberAction - getPDFtoPrint - pdfFile="+pdfPath+"/"+pdfFileName);
 
-		log.debug("ApplyForStudentNumberAction - getPDFtoPrint - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - getPDFtoPrint - **************************************************************");
 
 		try{
 			if (pdfPath == null || "".equals(pdfPath) || pdfFileName == null || "".equals(pdfFileName)){
-				log.debug("ApplyForStudentNumberAction - getPDFtoPrint - PDF Path or FileName Empty");
+				//log.debug("ApplyForStudentNumberAction - getPDFtoPrint - PDF Path or FileName Empty");
 				mapPDF.put("Error","PDF Not found. Please try again.");
 			}else{
 				PdfDownloader pdfViewer=new PdfDownloader();
@@ -2480,20 +2511,20 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				mapPDF.put("PFDFile","PDF found - Successfully");
 			}
 		}catch (Exception e){
-			log.debug("ApplyForStudentNumberAction - getPDFtoPrint - Error Occurred recalling PDF / "+e);
+			//log.debug("ApplyForStudentNumberAction - getPDFtoPrint - Error Occurred recalling PDF / "+e);
 			mapPDF.put("Error","PDF process crashed. Please try again.");
 		}
 		
-		log.debug("ApplyForStudentNumberAction - getPDFtoPrint - **************************************************************");
-		log.debug("ApplyForStudentNumberAction - getPDFtoPrint - Done");
-		log.debug("ApplyForStudentNumberAction - getPDFtoPrint - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - getPDFtoPrint - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - getPDFtoPrint - Done");
+		//log.debug("ApplyForStudentNumberAction - getPDFtoPrint - **************************************************************");
 
 		// Convert the map to JSON
 		PrintWriter out = response.getWriter();
 		JSONObject jsonObject = JSONObject.fromObject(pdfObj);
-		log.debug("ApplyForStudentNumberAction - getPDFtoPrint - Final - **************************************************************");
-		log.debug("ApplyForStudentNumberAction - getPDFtoPrint - Final - jsonObject="+jsonObject.toString());
-		log.debug("ApplyForStudentNumberAction - getPDFtoPrint - Final - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - getPDFtoPrint - Final - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - getPDFtoPrint - Final - jsonObject="+jsonObject.toString());
+		//log.debug("ApplyForStudentNumberAction - getPDFtoPrint - Final - **************************************************************");
 		out.write(jsonObject.toString());
 		out.flush();
 
@@ -2507,7 +2538,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		
 		stuRegForm.getStudent().setStuExist("curStu");
-		log.debug("ApplyForStudentNumberAction - checkReturnBack - Admin="+stuRegForm.getAdminStaff().isAdmin());
+		//log.debug("ApplyForStudentNumberAction - checkReturnBack - Admin="+stuRegForm.getAdminStaff().isAdmin());
 		if (stuRegForm.getAdminStaff().isAdmin()){
 			return mapping.findForward("loginStaff");
 		}else{
@@ -2519,7 +2550,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		
-		log.debug("displayPersonal");
+		//log.debug("displayPersonal");
 		Student teststu = new Student();
 		teststu.setNumber(stuRegForm.getStudent().getNumber().trim());
 		teststu.setFirstnames(stuRegForm.getStudent().getFirstnames().trim());
@@ -2536,7 +2567,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			return result;
 		}else{
 			stuRegForm.getStudent().setNumber(checkNumber);
-			log.debug("Student Number: " + stuRegForm.getStudent().getNumber());
+			//log.debug("Student Number: " + stuRegForm.getStudent().getNumber());
 		}
 		
 		String checkSurname = dao.personalDetails(stuRegForm.getStudent().getNumber(),"surname").trim();
@@ -2545,7 +2576,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			return result;
 		}else{
 			stuRegForm.getStudent().setSurname(checkSurname);
-			log.debug("Surname: " + stuRegForm.getStudent().getSurname());
+			//log.debug("Surname: " + stuRegForm.getStudent().getSurname());
 		}
 		
 		String checkFirstnames = dao.personalDetails(stuRegForm.getStudent().getNumber(),"first_names").trim();
@@ -2554,7 +2585,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			return result;
 		}else{
 			stuRegForm.getStudent().setFirstnames(checkFirstnames);
-			log.debug("First Names: " + stuRegForm.getStudent().getFirstnames());
+			//log.debug("First Names: " + stuRegForm.getStudent().getFirstnames());
 		}
 
 		String checkMaidenname = dao.personalDetails(stuRegForm.getStudent().getNumber(),"previous_surname").trim();
@@ -2563,7 +2594,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			return result;
 		}else{
 			stuRegForm.getStudent().setMaidenName(checkMaidenname);
-			log.debug("Prev Surname: " + stuRegForm.getStudent().getMaidenName());
+			//log.debug("Prev Surname: " + stuRegForm.getStudent().getMaidenName());
 		}
 		
 		String checkIDnumber = dao.personalDetails(stuRegForm.getStudent().getNumber(),"identity_nr").trim();
@@ -2572,7 +2603,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			return result;
 		}else{
 			stuRegForm.getStudent().setIdNumber(checkIDnumber);
-			log.debug("ID: " + stuRegForm.getStudent().getIdNumber());
+			//log.debug("ID: " + stuRegForm.getStudent().getIdNumber());
 		}
 		if (stuRegForm.getStudent().getIdNumber() == null || "".equals(stuRegForm.getStudent().getIdNumber().trim())){
 			String checkPassport = dao.personalDetails(stuRegForm.getStudent().getNumber(),"passport_no").trim();
@@ -2582,8 +2613,8 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}else{
 				stuRegForm.getStudent().setPassportNumber(checkPassport);
 				stuRegForm.getStudent().setForeignIdNumber(checkPassport);
-				log.debug("PassportNumber: " + stuRegForm.getStudent().getPassportNumber());
-				log.debug("ForeignIdNumber: " + stuRegForm.getStudent().getForeignIdNumber());
+				//log.debug("PassportNumber: " + stuRegForm.getStudent().getPassportNumber());
+				//log.debug("ForeignIdNumber: " + stuRegForm.getStudent().getForeignIdNumber());
 			}
 		}
 		
@@ -2594,21 +2625,21 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			return result;
 		}else{
 			YYYYMMDD = checkBDate;
-			log.debug("Birth Date: " + YYYYMMDD);
+			//log.debug("Birth Date: " + YYYYMMDD);
 		}
 
-		log.debug("BirthDay: " + stuRegForm.getStudent().getBirthYear() + "/" + stuRegForm.getStudent().getBirthMonth() + "/" + stuRegForm.getStudent().getBirthDay());
+		//log.debug("BirthDay: " + stuRegForm.getStudent().getBirthYear() + "/" + stuRegForm.getStudent().getBirthMonth() + "/" + stuRegForm.getStudent().getBirthDay());
 		if(YYYYMMDD.length()>=8){
-			log.debug("ApplyForStudentNumberAction - displayPersonal - - N " + stuRegForm.getStudent().getNumber() + " Success BirthDay " + YYYYMMDD);
+			//log.debug("ApplyForStudentNumberAction - displayPersonal - - N " + stuRegForm.getStudent().getNumber() + " Success BirthDay " + YYYYMMDD);
 			stuRegForm.getStudent().setBirthYear(YYYYMMDD.substring(0,4));
 			stuRegForm.getStudent().setBirthMonth(YYYYMMDD.substring(4,6));
 			stuRegForm.getStudent().setBirthDay(YYYYMMDD.substring(6,8));
 		}else{
-			log.debug("ApplyForStudentNumberAction - displayPersonal - - N " + stuRegForm.getStudent().getNumber() + " UnSuccess BirthDay " + YYYYMMDD);
+			//log.debug("ApplyForStudentNumberAction - displayPersonal - - N " + stuRegForm.getStudent().getNumber() + " UnSuccess BirthDay " + YYYYMMDD);
 			result = "The birth day information was not successfully retrieved from the database";
 			return result;
 		}
-		log.debug("ApplyForStudentNumberAction - displayPersonal - BirthDay: " + stuRegForm.getStudent().getBirthYear() + "/" + stuRegForm.getStudent().getBirthMonth() + "/" + stuRegForm.getStudent().getBirthDay());
+		//log.debug("ApplyForStudentNumberAction - displayPersonal - BirthDay: " + stuRegForm.getStudent().getBirthYear() + "/" + stuRegForm.getStudent().getBirthMonth() + "/" + stuRegForm.getStudent().getBirthDay());
 
 		String tmpCellNr = dao.personalDetails(stuRegForm.getStudent().getNumber(),"cell_number").trim();
 		if (!"error".equalsIgnoreCase(tmpCellNr)){
@@ -2616,9 +2647,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}else{
 			stuRegForm.getStudent().setCellNr("");
 		}
-		log.debug("ApplyForStudentNumberAction - displayPersonal - Cell Number: " + stuRegForm.getStudent().getCellNr());
+		//log.debug("ApplyForStudentNumberAction - displayPersonal - Cell Number: " + stuRegForm.getStudent().getCellNr());
 
-		log.debug("ApplyForStudentNumberAction - displayPersonal - - N " + stuRegForm.getStudent().getNumber() + " Cell " + stuRegForm.getStudent().getCellNr());
+		//log.debug("ApplyForStudentNumberAction - displayPersonal - - N " + stuRegForm.getStudent().getNumber() + " Cell " + stuRegForm.getStudent().getCellNr());
 		
 		String tmpEmail = dao.personalDetails(stuRegForm.getStudent().getNumber(),"email_address").trim();
 		if (!"error".equalsIgnoreCase(tmpEmail)){
@@ -2626,9 +2657,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}else{
 			stuRegForm.getStudent().setEmailAddress("");
 		}
-		log.debug("ApplyForStudentNumberAction - displayPersonal - Email Address: " + stuRegForm.getStudent().getEmailAddress());
+		//log.debug("ApplyForStudentNumberAction - displayPersonal - Email Address: " + stuRegForm.getStudent().getEmailAddress());
 
-		log.debug("ApplyForStudentNumberAction - displayPersonal - - N " + stuRegForm.getStudent().getNumber() + " Email " + stuRegForm.getStudent().getEmailAddress());
+		//log.debug("ApplyForStudentNumberAction - displayPersonal - - N " + stuRegForm.getStudent().getNumber() + " Email " + stuRegForm.getStudent().getEmailAddress());
 
 		String checkMailMyLife = "";
 		checkMailMyLife = stuRegForm.getStudent().getEmailAddress().trim();
@@ -2670,7 +2701,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.getStudent().setBirthYear(teststu.getBirthYear());
 		//}
 		//if any error message =result
-		log.debug("ApplyForStudentNumberAction - displayPersonal - Result: " + result);
+		//log.debug("ApplyForStudentNumberAction - displayPersonal - Result: " + result);
 		return result;
 	}
 
@@ -2683,7 +2714,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - populateCategories");
+		//log.debug("ApplyForStudentNumberAction - populateCategories");
 		
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
@@ -2695,7 +2726,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.setWebLoginMsg2("");
 					
 			ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
-			log.debug("ApplyForStudentNumberAction - populateCategories - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
+			//log.debug("ApplyForStudentNumberAction - populateCategories - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
 
 			Categories categories = dao.getCategories(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getLoginSelectMain(), stuRegForm.getAdminStaff().isAdmin(), stuRegForm.getStudent().isDateWAPU(),stuRegForm.getStudent().isDateWAPRU(),stuRegForm.getStudent().isDateWAPADMU(),stuRegForm.getStudent().isDateWAPH(),stuRegForm.getStudent().isDateWAPRH(),stuRegForm.getStudent().isDateWAPADMH(),stuRegForm.getStudent().isDateWAPD(),stuRegForm.getStudent().isDateWAPADMD(),stuRegForm.getStudent().isDateWAPM(),stuRegForm.getStudent().isDateWAPADMM(),stuRegForm.getStudent().isDateWAPS(),stuRegForm.getStudent().isDateWAPADMS());
 			
@@ -2703,7 +2734,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			List<String> descs = categories.getCatDescs();
 		    
 			String jsonString = generateSortedString(codes, descs);
-			log.debug(jsonString);
+			//log.debug(jsonString);
 			PrintWriter out = response.getWriter();
 			out.write(jsonString);
 			out.flush();
@@ -2769,7 +2800,6 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	 * populates the qualifications dropdown
 	 */
 
-	@SuppressWarnings("unused")
 	public ActionForward populateQualifications(ActionMapping mapping,
 			ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception  {
@@ -2784,14 +2814,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			String selCategoryCode = stripXSS(request.getParameter("selCategoryCode"), "selCategoryCode", "popQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
 			
 			ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
-			log.debug("ApplyForStudentNumberAction - populateQualifications - selCategoryCode: " + selCategoryCode + " - acaYear: " + stuRegForm.getStudent().getAcademicYear() + " - catSelect: " + selCategoryCode+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
+			//log.debug("ApplyForStudentNumberAction - populateQualifications - selCategoryCode: " + selCategoryCode + " - acaYear: " + stuRegForm.getStudent().getAcademicYear() + " - catSelect: " + selCategoryCode+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
 
-			log.debug("ApplyForStudentNumberAction - populateQualifications - selCategoryCode: " + selCategoryCode + " - acaYear: " + stuRegForm.getStudent().getAcademicYear() + " - catSelect: " + selCategoryCode+", isAdmin="+stuRegForm.getAdminStaff().isAdmin()+", isQualIDMatch="+stuRegForm.isQualIDMatch());
+			//log.debug("ApplyForStudentNumberAction - populateQualifications - selCategoryCode: " + selCategoryCode + " - acaYear: " + stuRegForm.getStudent().getAcademicYear() + " - catSelect: " + selCategoryCode+", isAdmin="+stuRegForm.getAdminStaff().isAdmin()+", isQualIDMatch="+stuRegForm.isQualIDMatch());
 
 			boolean isQualListOK = false;
 			if ("NSC".equalsIgnoreCase(stuRegForm.getSelectHEMain()) && ("02".equals(selCategoryCode) || "03".equals(selCategoryCode) || "04".equals(selCategoryCode) || "05".equals(selCategoryCode) || "06".equals(selCategoryCode) || "07".equals(selCategoryCode))){
 
-				log.debug("ApplyForStudentNumberAction - populateQualifications - (Staae05sAppAdmissionEvaluator) - ID Match");
+				//log.debug("ApplyForStudentNumberAction - populateQualifications - (Staae05sAppAdmissionEvaluator) - ID Match");
 				Staae05sAppAdmissionEvaluator op = new Staae05sAppAdmissionEvaluator();
 				operListener opl = new operListener();
 				op.addExceptionListener(opl);
@@ -2811,27 +2841,27 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					//op.setInGcQualLevelCsfStringsString2(selCategoryCode);
 					op.setInGencodQualLevelCsfStringsString2(selCategoryCode);
 						
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Staae05sAppAdmissionEvaluator) - Student ID Number=" + stuRegForm.getStudent().getIdNumber()+", Year="+stuRegForm.getStudent().getAcademicYear()+", Category="+selCategoryCode);
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Staae05sAppAdmissionEvaluator) - Student ID Number=" + stuRegForm.getStudent().getIdNumber()+", Year="+stuRegForm.getStudent().getAcademicYear()+", Category="+selCategoryCode);
 	
 					op.execute();
 	
 					if (opl.getException() != null) throw opl.getException();
 					if (op.getExitStateType() < 3) throw new Exception(op.getExitStateMsg());
 	
-					log.debug("ApplyForStudentNumberAction - populateQualifications - After ID Execute");
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - After ID Execute");
 					String opResult = op.getOutCsfStringsString500();
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) opResult: " + opResult);
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) opResult: " + opResult);
 					
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - getOutCsfStringsString500="+op.getOutCsfStringsString500());
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - getOutCsfStringsString500="+op.getOutCsfStringsString500());
 
 					
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - After F915 ID Check");
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - =================================================================================");
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - getOutGroupCount="+op.getOutGroupCount());
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - After F915 ID Check");
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - =================================================================================");
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - getOutGroupCount="+op.getOutGroupCount());
 					
 					//Are there Proxy Rows returned?
 					if (op.getOutGroupCount() > 0){
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - In getOutGroupCount");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - In getOutGroupCount");
 						//Set Qualifications from Proxy
 						//Get GENCOD Categories to filter list
 						ArrayList<String> codList = dao.getGENCODCategory(selCategoryCode);
@@ -2840,49 +2870,49 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 						
 						
 						//Debug
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - =================================================================================");
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Before F915 First List Check");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - =================================================================================");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Before F915 First List Check");
 						for (int x = 0; x < op.getOutGroupCount(); x++){
 							
-							log.debug("ApplyForStudentNumberAction - populateQualifications - ==================================================================================");
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - ==================================================================================");
 					
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutGroupCount                                     ="+op.getOutGroupCount());
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutGWsQualificationCode                           ="+op.getOutGWsQualificationCode(x).toString());
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutGWsQualificationSpecialityTypeSpecialityCode   ="+op.getOutGWsQualificationSpecialityTypeSpecialityCode(x).toString());
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutGWsQualificationType                           ="+op.getOutGWsQualificationType(x).toString());
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutGCsfStringsString2                             ="+op.getOutGCsfStringsString2(x).toString());
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutGCsfStringsString3                             ="+op.getOutGCsfStringsString3(x).toString());
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutGCsfStringsString4                             ="+op.getOutGCsfStringsString4(x).toString());
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutWsMatricRecordApsScore                         ="+op.getOutWsMatricRecordApsScore());
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutWsMatricStatusCode                             ="+op.getOutWsMatricStatusCode().toString());
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutGroupCount                                     ="+op.getOutGroupCount());
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutGWsQualificationCode                           ="+op.getOutGWsQualificationCode(x).toString());
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutGWsQualificationSpecialityTypeSpecialityCode   ="+op.getOutGWsQualificationSpecialityTypeSpecialityCode(x).toString());
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutGWsQualificationType                           ="+op.getOutGWsQualificationType(x).toString());
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutGCsfStringsString2                             ="+op.getOutGCsfStringsString2(x).toString());
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutGCsfStringsString3                             ="+op.getOutGCsfStringsString3(x).toString());
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutGCsfStringsString4                             ="+op.getOutGCsfStringsString4(x).toString());
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutWsMatricRecordApsScore                         ="+op.getOutWsMatricRecordApsScore());
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - F915 - getOutWsMatricStatusCode                             ="+op.getOutWsMatricStatusCode().toString());
 							
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - After F915 List Check");
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - ==================================================================================");
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Count="+x+" - After F915 List Check");
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - ==================================================================================");
 						}
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - After F915 First List Check");
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - =================================================================================");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - After F915 First List Check");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - =================================================================================");
 
 						String qualCodeFound = "";
 						for (int i = 0; i < op.getOutGroupCount(); i++){ 
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - ==================================================================================");
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - If For Loop getOutGroupCount="+i);
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - ==================================================================================");
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - If For Loop getOutGroupCount="+i);
 							
 							String QualCode = "";
 							String QualDesc = "";
 							String QualNotOK = " - (You may not qualify)";
 							
 							//If in the correct Category
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Checking Category="+selCategoryCode+" == "+op.getOutGCsfStringsString3(i).toString());
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Checking Category="+selCategoryCode+" == "+op.getOutGCsfStringsString3(i).toString());
 			
 							if ((selCategoryCode.toString().trim()).equalsIgnoreCase(op.getOutGCsfStringsString3(i).toString().trim())){ //Example 07 = 07
-								log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Category Matched - In Category Loop");
+								//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Category Matched - In Category Loop");
 								
 								for (int j = 0; j < codList.size(); j++){
-									log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Checking CatCode from CENCOD =  codList.size()="+codList.size());
-									log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Checking CatCode="+codList.get(j).toString().trim()+" ==  codList="+op.getOutGCsfStringsString2(i).toString().trim());
+									//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Checking CatCode from CENCOD =  codList.size()="+codList.size());
+									//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Checking CatCode="+codList.get(j).toString().trim()+" ==  codList="+op.getOutGCsfStringsString2(i).toString().trim());
 									if (codList.get(j).toString().trim().equals(op.getOutGCsfStringsString2(i).toString().trim()) && !qualCodeFound.trim().equalsIgnoreCase(op.getOutGWsQualificationCode(i).toString().trim())){
-										log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - ===================================================================================");
-										log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - In CatCode Check");
+										//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - ===================================================================================");
+										//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - In CatCode Check");
 										
 										//Get Qualification and Description
 										qualCodeFound = op.getOutGWsQualificationCode(i).toString().trim();
@@ -2894,26 +2924,26 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 										}
 										codes.add(QualCode);
 										descs.add(QualDesc);
-										log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - ===================================================================================");
-										log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Previous No - Qualification Found="+QualCode+", QualDesc="+QualDesc);
+										//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - ===================================================================================");
+										//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - Previous No - Qualification Found="+QualCode+", QualDesc="+QualDesc);
 									}
 								}
 							}
 						}
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - ==================================================================================");
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - STAAE01H ID Done");
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - ==================================================================================");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - ==================================================================================");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - STAAE01H ID Done");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - ==================================================================================");
 
 					}else{
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - ==================================================================================");
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - getOutGroupCount Was Empty");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - ==================================================================================");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (ID) - getOutGroupCount Was Empty");
 
 					}
 					op.clear();
 				}else{ //No Matric Match, thus send in Matric Subjects to Proxy for APS Score test
 					
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ==================================================================================");
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Staae05sAppAdmissionEvaluator) - APS Match");
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ==================================================================================");
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Staae05sAppAdmissionEvaluator) - APS Match");
 					op.setInCsfClientServerCommunicationsClientVersionNumber((short) 3);
 					op.setInCsfClientServerCommunicationsClientRevisionNumber((short) 1);
 					op.setInCsfClientServerCommunicationsAction("NL");
@@ -2925,29 +2955,29 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					//op.setInGcQualLevelCsfStringsString2(selCategoryCode); 
 					op.setInGencodQualLevelCsfStringsString2(selCategoryCode);
 						
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Staae05sAppAdmissionEvaluator) - Student ID Number=" + stuRegForm.getStudent().getIdNumber());
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Staae05sAppAdmissionEvaluator) - Student ID Number=" + stuRegForm.getStudent().getIdNumber());
 	
 					//Add Matric Subjects
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Subject Count="+stuRegForm.getSubjects().size());
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Subject Count="+stuRegForm.getSubjects().size());
 					
 					//Set In Group View
 					op.setInGroupMatricCount((short) stuRegForm.getSubjects().size());
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Matric Count="+stuRegForm.getSubjects().size());
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Matric Count="+stuRegForm.getSubjects().size());
 					
 					if ("MATR".equalsIgnoreCase(stuRegForm.getSelectMatric()) || "SENR".equalsIgnoreCase(stuRegForm.getSelectMatric()) || "ONBK".equalsIgnoreCase(stuRegForm.getSelectMatric())){
 						op.setInWsMatricCertificateCode("SC");
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Matric Certificate=SC");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Matric Certificate=SC");
 					}else{
 						op.setInWsMatricCertificateCode("NSC");
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Matric Certificate=NSC");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Matric Certificate=NSC");
 					}
 					op.setInWsMatricStatusCode(stuRegForm.getSelectMatric()); //MATR, DEGR etc
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Matric StatusCode Set="+stuRegForm.getSelectMatric());
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Matric StatusCode Set="+stuRegForm.getSelectMatric());
 										
 					for (int s = 0; s < stuRegForm.getSubjects().size(); s++){
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Check Subject"+s+"="+stuRegForm.getSubjects().get(s).getSubjectName()+", Grade="+stuRegForm.getSubjects().get(s).getSubjectGrade()+", Symbol="+stuRegForm.getSubjects().get(s).getSubjectSymbol()+", Result="+stuRegForm.getSubjects().get(s).getSubjectResult());
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Check Subject"+s+"="+stuRegForm.getSubjects().get(s).getSubjectName()+", Grade="+stuRegForm.getSubjects().get(s).getSubjectGrade()+", Symbol="+stuRegForm.getSubjects().get(s).getSubjectSymbol()+", Result="+stuRegForm.getSubjects().get(s).getSubjectResult());
 						op.setInGmWsMatricSubjectCode(s, stuRegForm.getSubjects().get(s).getSubjectName());
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Check Subject"+s+" - Subject="+stuRegForm.getSubjects().get(s).getSubjectName());
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Check Subject"+s+" - Subject="+stuRegForm.getSubjects().get(s).getSubjectName());
 						//Send in Lowest Score. Example: A 80-100, use 80%
 						if ("MATR".equalsIgnoreCase(stuRegForm.getSelectMatric()) || "SENR".equalsIgnoreCase(stuRegForm.getSelectMatric()) || "ONBK".equalsIgnoreCase(stuRegForm.getSelectMatric())){
 							
@@ -2967,7 +2997,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 							}else if ("G".equalsIgnoreCase(stuRegForm.getSubjects().get(s).getSubjectSymbol())){
 								subMark = 0;
 							}
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Check Subject"+s+" - SC - Mark="+subMark);
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Check Subject"+s+" - SC - Mark="+subMark);
 							op.setInGmWsMatricSubjectResultMark(s, (short) subMark);
 							
 							String subGrade = "L";
@@ -2978,7 +3008,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 							}else if ("LG".equalsIgnoreCase(stuRegForm.getSubjects().get(s).getSubjectGrade())){
 								subGrade = "L";
 							}
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Check Subject"+s+" - SC - Grade="+subGrade);
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Check Subject"+s+" - SC - Grade="+subGrade);
 							op.setInGmWsMatricSubjectResultGrade(s, subGrade);
 
 						}else{
@@ -2998,9 +3028,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 							}else if ("G".equalsIgnoreCase(stuRegForm.getSubjects().get(s).getSubjectResult())){
 								subMark = 0;
 							}
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Check Subject"+s+" - NSC - Mark="+subMark);
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Check Subject"+s+" - NSC - Mark="+subMark);
 							op.setInGmWsMatricSubjectResultMark(s, (short) subMark);
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Check Subject"+s+" - NSC - Grade=N");
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Check Subject"+s+" - NSC - Grade=N");
 							op.setInGmWsMatricSubjectResultGrade(s, "N");
 						}					
 					}
@@ -3008,40 +3038,40 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	
 					if (opl.getException() != null) throw opl.getException();
 					if (op.getExitStateType() < 3) throw new Exception(op.getExitStateMsg());	
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - After APS Execute");
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - After APS Execute");
 					
 					String opResult = op.getOutCsfStringsString500();
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - opResult: " + opResult);
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - opResult: " + opResult);
 					
-					log.debug("ApplyForStudentNumberAction - populateQualifications - Staae05sAppAdmissionEvaluator (Matric)- getOutCsfStringsString500="+op.getOutCsfStringsString500());
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - Staae05sAppAdmissionEvaluator (Matric)- getOutCsfStringsString500="+op.getOutCsfStringsString500());
 
 					
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - After F915 ID Check");
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ==============================================================================");
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - getOutGroupCount="+op.getOutGroupCount());
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - After F915 ID Check");
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ==============================================================================");
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - getOutGroupCount="+op.getOutGroupCount());
 
 					//Debug
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - =================================================================================");
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Before F915 First List Check");
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - =================================================================================");
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Before F915 First List Check");
 					for (int x = 0; x < op.getOutGroupCount(); x++){
 						
-						log.debug("ApplyForStudentNumberAction - populateQualifications - ==================================================================================");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - ==================================================================================");
 				
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutGroupCount                                     ="+op.getOutGroupCount());
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutGWsQualificationCode                           ="+op.getOutGWsQualificationCode(x).toString());
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutGWsQualificationSpecialityTypeSpecialityCode   ="+op.getOutGWsQualificationSpecialityTypeSpecialityCode(x).toString());
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutGWsQualificationType                           ="+op.getOutGWsQualificationType(x).toString());
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutGCsfStringsString2                             ="+op.getOutGCsfStringsString2(x).toString());
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutGCsfStringsString3                             ="+op.getOutGCsfStringsString3(x).toString());
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutGCsfStringsString4                             ="+op.getOutGCsfStringsString4(x).toString());
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutWsMatricRecordApsScore                         ="+op.getOutWsMatricRecordApsScore());
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutWsMatricStatusCode                             ="+op.getOutWsMatricStatusCode().toString());
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutGroupCount                                     ="+op.getOutGroupCount());
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutGWsQualificationCode                           ="+op.getOutGWsQualificationCode(x).toString());
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutGWsQualificationSpecialityTypeSpecialityCode   ="+op.getOutGWsQualificationSpecialityTypeSpecialityCode(x).toString());
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutGWsQualificationType                           ="+op.getOutGWsQualificationType(x).toString());
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutGCsfStringsString2                             ="+op.getOutGCsfStringsString2(x).toString());
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutGCsfStringsString3                             ="+op.getOutGCsfStringsString3(x).toString());
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutGCsfStringsString4                             ="+op.getOutGCsfStringsString4(x).toString());
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutWsMatricRecordApsScore                         ="+op.getOutWsMatricRecordApsScore());
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - F915 - getOutWsMatricStatusCode                             ="+op.getOutWsMatricStatusCode().toString());
 						
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - After F915 List Check");
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ==================================================================================");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Count="+x+" - After F915 List Check");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ==================================================================================");
 					}
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - After F915 First List Check");
-					log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - =================================================================================");
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - After F915 First List Check");
+					//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - =================================================================================");
 
 					//Are there Proxy Rows returned?
 					if (op.getOutGroupCount() > 0){
@@ -3057,16 +3087,16 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 							String QualNotOK = " - (You may not qualify)";
 							
 							//If in the correct Category
-							log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) -selCategoryCode=["+selCategoryCode+"], & getOutGCsfStringsString3=["+op.getOutGCsfStringsString3(i).toString().trim()+"]" );
+							//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) -selCategoryCode=["+selCategoryCode+"], & getOutGCsfStringsString3=["+op.getOutGCsfStringsString3(i).toString().trim()+"]" );
 							if (selCategoryCode.equals(op.getOutGCsfStringsString3(i).toString().trim())){ //Example 07 = 07
-								log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Checking CatCode from CENCOD =  codList.size()="+codList.size());
+								//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Checking CatCode from CENCOD =  codList.size()="+codList.size());
 
 								for (int j = 0; j < codList.size(); j++){
-									log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Checking CatCode="+codList.get(j).toString().trim()+" ==  codList="+op.getOutGCsfStringsString2(i).toString().trim());
+									//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Checking CatCode="+codList.get(j).toString().trim()+" ==  codList="+op.getOutGCsfStringsString2(i).toString().trim());
 									if (codList.get(j).toString().equals(op.getOutGCsfStringsString2(i).toString().trim())  && !qualCodeFound.equalsIgnoreCase(op.getOutGWsQualificationCode(i).toString().trim())){
 										
-										log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ===================================================================================");
-										log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - In CatCode Check");
+										//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ===================================================================================");
+										//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - In CatCode Check");
 
 										//Get Qualification and Description
 										qualCodeFound = op.getOutGWsQualificationCode(i).toString().trim();
@@ -3078,21 +3108,21 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 										}
 										codes.add(QualCode);
 										descs.add(QualDesc);
-										log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ===================================================================================");
-										log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Qualification Found="+QualCode+", QualDesc="+QualDesc);
+										//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ===================================================================================");
+										//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - Qualification Found="+QualCode+", QualDesc="+QualDesc);
 
 									}
 								}
 							}
 						}
 
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ==================================================================================");
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - STAAE05H ID Done");
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ==================================================================================");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ==================================================================================");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - STAAE05H ID Done");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ==================================================================================");
 
 					}else{
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ==================================================================================");
-						log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - getOutGroupCount Was Empty");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - ==================================================================================");
+						//log.debug("ApplyForStudentNumberAction - populateQualifications - (Matric) - getOutGroupCount Was Empty");
 					}
 				}
 			}
@@ -3105,7 +3135,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	
 			}
 			String jsonString = generateSortedString(codes, descs);
-			log.debug(jsonString);
+			//log.debug(jsonString);
 			PrintWriter out = response.getWriter();
 			out.write(jsonString);
 			out.flush();
@@ -3171,7 +3201,6 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	 * populates the specializations drop down
 	 */
 
-	@SuppressWarnings("unused")
 	public ActionForward populateSpecializations(ActionMapping mapping,
 			ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
@@ -3188,9 +3217,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			String selQualCode = stripXSS(request.getParameter("selQualCode"), "selQualCode", "popSpec", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
 			
 			ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
-			log.debug("ApplyForStudentNumberAction - populateSpecializations - selCategoryCode: " + selCategoryCode + " - acaYear: " + stuRegForm.getStudent().getAcademicYear() + " - selQualCode: " + selQualCode+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
+			//log.debug("ApplyForStudentNumberAction - populateSpecializations - selCategoryCode: " + selCategoryCode + " - acaYear: " + stuRegForm.getStudent().getAcademicYear() + " - selQualCode: " + selQualCode+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
 
-			log.debug("ApplyForStudentNumberAction - populateSpecializations - selCategoryCode: " + selCategoryCode + " - acaYear: " + stuRegForm.getStudent().getAcademicYear() + " - selQualCode: " + selQualCode+", isAdmin="+stuRegForm.getAdminStaff().isAdmin()+", isQualIDMatch="+stuRegForm.isQualIDMatch());
+			//log.debug("ApplyForStudentNumberAction - populateSpecializations - selCategoryCode: " + selCategoryCode + " - acaYear: " + stuRegForm.getStudent().getAcademicYear() + " - selQualCode: " + selQualCode+", isAdmin="+stuRegForm.getAdminStaff().isAdmin()+", isQualIDMatch="+stuRegForm.isQualIDMatch());
 
 			boolean isSpecListOK = false;
 			if ("NSC".equalsIgnoreCase(stuRegForm.getSelectHEMain()) && ("02".equals(selCategoryCode) || "03".equals(selCategoryCode) || "04".equals(selCategoryCode) || "05".equals(selCategoryCode) || "06".equals(selCategoryCode) || "07".equals(selCategoryCode))){
@@ -3214,23 +3243,23 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					op.setInGencodQualLevelCsfStringsString2(selCategoryCode);
 					//op.setInGcQualLevelCsfStringsString2(selCategoryCode); 
 
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - (Staae05sAppAdmissionEvaluator) - Student ID Number=" + stuRegForm.getStudent().getIdNumber());
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - (Staae05sAppAdmissionEvaluator) - Student ID Number=" + stuRegForm.getStudent().getIdNumber());
 	
 					op.execute();
 	
 					if (opl.getException() != null) throw opl.getException();
 					if (op.getExitStateType() < 3) throw new Exception(op.getExitStateMsg());
 	
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - After ID Execute");
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - After ID Execute");
 					String opResult = op.getOutCsfStringsString500();
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - opResult: " + opResult);
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - opResult: " + opResult);
 					
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - Staae05sAppAdmissionEvaluator - (ID) - getOutCsfStringsString500="+op.getOutCsfStringsString500());
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - Staae05sAppAdmissionEvaluator - (ID) - getOutCsfStringsString500="+op.getOutCsfStringsString500());
 
 					
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - After F915 ID Check");
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - ========================================================================================");
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - getOutGroupCount="+op.getOutGroupCount());
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - After F915 ID Check");
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - ========================================================================================");
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - getOutGroupCount="+op.getOutGroupCount());
 					
 					//Are there Proxy Rows returned?
 					if (op.getOutGroupCount() > 0){
@@ -3276,10 +3305,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					//op.setInGcQualLevelCsfStringsString2(selCategoryCode); 
 					op.setInGencodQualLevelCsfStringsString2(selCategoryCode);
 						
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - (Staae05sAppAdmissionEvaluator) - Student ID Number=" + stuRegForm.getStudent().getIdNumber());
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - (Staae05sAppAdmissionEvaluator) - Student ID Number=" + stuRegForm.getStudent().getIdNumber());
 	
 					//Add Matric Subjects
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - Subject Count="+stuRegForm.getSubjects().size());
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - Subject Count="+stuRegForm.getSubjects().size());
 					
 					//Set In Group View
 					op.setInGroupMatricCount((short) stuRegForm.getSubjects().size());
@@ -3292,7 +3321,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					op.setInWsMatricStatusCode(stuRegForm.getSelectMatric()); //MATR, DEGR etc
 										
 					for (int s = 0; s < stuRegForm.getSubjects().size(); s++){
-						log.debug("ApplyForStudentNumberAction - populateSpecializations - Check Subject"+s+"="+stuRegForm.getSubjects().get(s).getSubjectName()+", Grade="+stuRegForm.getSubjects().get(s).getSubjectGrade()+", Symbol="+stuRegForm.getSubjects().get(s).getSubjectSymbol()+", Result="+stuRegForm.getSubjects().get(s).getSubjectResult());
+						//log.debug("ApplyForStudentNumberAction - populateSpecializations - Check Subject"+s+"="+stuRegForm.getSubjects().get(s).getSubjectName()+", Grade="+stuRegForm.getSubjects().get(s).getSubjectGrade()+", Symbol="+stuRegForm.getSubjects().get(s).getSubjectSymbol()+", Result="+stuRegForm.getSubjects().get(s).getSubjectResult());
 						op.setInGmWsMatricSubjectCode(s, stuRegForm.getSubjects().get(s).getSubjectName());
 						
 						//Send in Lowest Score. Example: A 80-100, use 80%
@@ -3350,15 +3379,15 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					if (opl.getException() != null) throw opl.getException();
 					if (op.getExitStateType() < 3) throw new Exception(op.getExitStateMsg());
 	
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - After APS Execute");
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - After APS Execute");
 					String opResult = op.getOutCsfStringsString500();
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - opResult: " + opResult);
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - opResult: " + opResult);
 					
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - Staae05sAppAdmissionEvaluator - (Matric) = getOutCsfStringsString500="+op.getOutCsfStringsString500());
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - Staae05sAppAdmissionEvaluator - (Matric) = getOutCsfStringsString500="+op.getOutCsfStringsString500());
 					
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - After F915 ID Check");
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - ========================================================================================");
-					log.debug("ApplyForStudentNumberAction - populateSpecializations - getOutGroupCount="+op.getOutGroupCount());
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - After F915 ID Check");
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - ========================================================================================");
+					//log.debug("ApplyForStudentNumberAction - populateSpecializations - getOutGroupCount="+op.getOutGroupCount());
 					
 					//Are there Proxy Rows returned?
 					if (op.getOutGroupCount() > 0){
@@ -3393,14 +3422,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 			}
 			if (!isSpecListOK || codes.isEmpty()){ //Catch-all: If no specializations from proxy, then give list anyway as not to turn students away - Claudette
-				log.debug("populateSpecializations - selQualCode: " + selQualCode + " - acaYear: " + stuRegForm.getStudent().getAcademicYear());
+				//log.debug("populateSpecializations - selQualCode: " + selQualCode + " - acaYear: " + stuRegForm.getStudent().getAcademicYear());
 				specializations = dao.getSpecializations(selQualCode,stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod());
 
 				codes = specializations.getSpecCodes();
 				descs = specializations.getSpecDescs();
 			}			
 			String jsonString = generateSortedString(codes, descs);
-			log.debug(jsonString);
+			//log.debug(jsonString);
 			PrintWriter out = response.getWriter();
 			out.write(jsonString);
 			out.flush();
@@ -3466,7 +3495,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - stepPrevQual - Start");
+		//log.debug("ApplyForStudentNumberAction - stepPrevQual - Start");
 		
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
@@ -3477,45 +3506,45 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			ArrayList<HistoryArray> qualList = new ArrayList<HistoryArray>();
 			
 			//Start at 2 because that is how the tabs on the space are numbered, so easier to debug
-			log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set");
-			log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Seq2="+stripXSS(request.getParameter("qualOther.historyOTHERSEQ2"), "Sequence2", "prevQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), false));
+			//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set");
+			//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Seq2="+stripXSS(request.getParameter("qualOther.historyOTHERSEQ2"), "Sequence2", "prevQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), false));
 			boolean isQual = false;
 			
 			int seqCounter = 1; //Although the Tab starts with 2, the Database sequence will start at 1
 			for (int i=2; i < 16; i++){ //Just use an arbitrary 15 as max qualifications. do not think that any student will ever reach it.
 				HistoryArray qual = new HistoryArray();
-				log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Check SEQ="+i);
+				//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Check SEQ="+i);
 				if (request.getParameter("qualOther.historyOTHERQual"+i) != null && !"".equals(request.getParameter("qualOther.historyOTHERQual"+i).trim())){
 					isQual = true;
-					log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", Data Found");
+					//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", Data Found");
 					
 					qual.setOtherSEQ(seqCounter);
-					log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherSEQ="+qual.getOtherSEQ());
+					//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherSEQ="+qual.getOtherSEQ());
 					
 					qual.setOtherUniv(stripXSS(request.getParameter("qualOther.historyOTHERUniv"+i).trim(), "OtherUniv"+i, "prevQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-					log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherUniv="+qual.getOtherUniv());
+					//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherUniv="+qual.getOtherUniv());
 
 					if ("OTHR".equals(stripXSS(request.getParameter("qualOther.historyOTHERUniv"+i).trim(), "OtherUniv"+i, "prevQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), false)) || !"1015".equals(stripXSS(request.getParameter("qualOther.historyOTHERCountry"+i).trim(), "OtherCountry"+i, "prevQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), false))){
 						qual.setOtherUnivText(stripXSS(request.getParameter("qualOther.historyOTHERUnivText"+i).trim(), "OtherUnivText"+i, "prevQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 					}else{
 						qual.setOtherUnivText(" ");
 					}
-					log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherUnivText="+qual.getOtherUnivText());
+					//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherUnivText="+qual.getOtherUnivText());
 					
 					qual.setOtherStudnr(stripXSS(request.getParameter("qualOther.historyOTHERStudnr"+i).trim(), "OtherStudnr"+i, "prevQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-					log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherStudnr="+qual.getOtherStudnr());
+					//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherStudnr="+qual.getOtherStudnr());
 					
 					qual.setOtherQual(stripXSS(request.getParameter("qualOther.historyOTHERQual"+i).trim(), "OtherQual"+i, "prevQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-					log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherQual="+qual.getOtherQual());
+					//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherQual="+qual.getOtherQual());
 					
 					qual.setOtherYearStart(stripXSS(request.getParameter("qualOther.historyOTHERYearStart"+i).trim(), "OtherYearStart"+i, "prevQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-					log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherYearStart="+qual.getOtherYearStart());
+					//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherYearStart="+qual.getOtherYearStart());
 					
 					qual.setOtherYearEnd(stripXSS(request.getParameter("qualOther.historyOTHERYearEnd"+i).trim(), "OtherYearEnd"+i, "prevQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-					log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherYearEnd="+qual.getOtherYearEnd());
+					//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherYearEnd="+qual.getOtherYearEnd());
 					
 					if (Integer.parseInt(qual.getOtherYearStart().trim()) > Integer.parseInt(qual.getOtherYearEnd())){
-						log.debug("ApplyForStudentNumberAction - stepPrevQual - Invalid End Date");
+						//log.debug("ApplyForStudentNumberAction - stepPrevQual - Invalid End Date");
 						messages.add(ActionMessages.GLOBAL_MESSAGE,
 							new ActionMessage("message.generalmessage", "The Qualification cannot End before the Start date."));
 						addErrors(request, messages);
@@ -3524,22 +3553,22 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					}
 					
 					qual.setOtherCountry(stripXSS(request.getParameter("qualOther.historyOTHERCountry"+i).trim(), "OtherCountry"+i, "prevQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-					log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherCountry="+qual.getOtherCountry());
+					//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherCountry="+qual.getOtherCountry());
 					
 					if ("1015".equals(qual.getOtherCountry())){
 						qual.setOtherForeign("N");
 					}else{
 						qual.setOtherForeign("Y");
 					}
-					log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherForeign="+qual.getOtherForeign());
+					//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherForeign="+qual.getOtherForeign());
 					
-					String lock = stripXSS(request.getParameter("qualOther.historyOTHERLock"+i).trim(), "OtherOTHERLock"+i, "prevQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
+					String lock = stripXSS(request.getParameter("qualOther.historyOTHERLock"+i).trim(), "OtherOTHERLock"+i, "prevQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), false);
 					if (lock == null || "".equals(lock) || "undefined".equalsIgnoreCase(lock)){
 						qual.setOtherLock("N");
 					}else{
 						qual.setOtherLock(lock);
 					}
-					log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherLock="+qual.getOtherLock());
+					//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherLock="+qual.getOtherLock());
 
 					if (request.getParameter("qualOther.historyOTHERComplete"+i) == null){
 						String complete = stripXSS(request.getParameter("qualOther.historyOTHERHiddenComplete"+i).trim(), "OtherHiddenComplete"+i, "prevQual", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
@@ -3556,7 +3585,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 							qual.setOtherComplete(complete);
 						}
 					}
-					log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherComplete="+qual.getOtherComplete());
+					//log.debug("ApplyForStudentNumberAction - stepPrevQual - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Set No="+i+", getOtherComplete="+qual.getOtherComplete());
 					
 					seqCounter++;
 					qualList.add(qual);
@@ -3565,14 +3594,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.setQualArray(qualList);
 			
 			if (!isQual && !stuRegForm.isQualUnisaFound()){
-				log.debug("ApplyForStudentNumberAction - stepPrevQual - historyOTHERUniv2 Empty");
+				//log.debug("ApplyForStudentNumberAction - stepPrevQual - historyOTHERUniv2 Empty");
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "Please Enter at least one completed degree or diploma"));
 				addErrors(request, messages);
 				setDropdownListsPrev(request, form);
 				return mapping.findForward("applyPrevQual");
 			}
-
 			
 		}catch(Exception ex){
 			log.warn("ApplyForStudentNumberAction - stepPrevQual - Error="+ex);
@@ -3594,13 +3622,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - populateUniv - Start");
+		//log.debug("ApplyForStudentNumberAction - populateUniv - Start");
 
 		JSONObject univObj = new JSONObject();
 		Map<String, String> mapUniversities = new LinkedHashMap<String, String>();
 		int keyCounter = 0;
 		
-		log.debug("ApplyForStudentNumberAction - populateUniv - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - populateUniv - **************************************************************");
 
 		// Query database
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
@@ -3622,9 +3650,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		// Convert the map to JSON
 		PrintWriter out = response.getWriter();
        	JSONObject jsonObject = JSONObject.fromObject(univObj);
-       	log.debug("ApplyForStudentNumberAction - populateUniv - Final - **************************************************************");
-       	log.debug("ApplyForStudentNumberAction - populateUniv - Final - jsonObject="+jsonObject.toString());
-       	log.debug("ApplyForStudentNumberAction - populateUniv - Final - **************************************************************");
+       	//log.debug("ApplyForStudentNumberAction - populateUniv - Final - **************************************************************");
+       	//log.debug("ApplyForStudentNumberAction - populateUniv - Final - jsonObject="+jsonObject.toString());
+       	//log.debug("ApplyForStudentNumberAction - populateUniv - Final - **************************************************************");
        	out.write(jsonObject.toString());
        	out.flush();
 
@@ -3638,13 +3666,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - populateNQF - Start");
+		//log.debug("ApplyForStudentNumberAction - populateNQF - Start");
 
 		JSONObject nqfObj = new JSONObject();
 		Map<String, String> mapNQF = new LinkedHashMap<String, String>();
 		int keyCounter = 0;
 		
-		log.debug("ApplyForStudentNumberAction - populateNQF - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - populateNQF - **************************************************************");
 
 		try{
 			int startNQF = 5;
@@ -3661,9 +3689,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		// Convert the map to JSON
 		PrintWriter out = response.getWriter();
        	JSONObject jsonObject = JSONObject.fromObject(nqfObj);
-       	log.debug("ApplyForStudentNumberAction - populateNQF - Final - **************************************************************");
-       	log.debug("ApplyForStudentNumberAction - populateNQF - Final - jsonObject="+jsonObject.toString());
-       	log.debug("ApplyForStudentNumberAction - populateNQF - Final - **************************************************************");
+       	//log.debug("ApplyForStudentNumberAction - populateNQF - Final - **************************************************************");
+       	//log.debug("ApplyForStudentNumberAction - populateNQF - Final - jsonObject="+jsonObject.toString());
+       	//log.debug("ApplyForStudentNumberAction - populateNQF - Final - **************************************************************");
        	out.write(jsonObject.toString());
        	out.flush();
 
@@ -3677,21 +3705,21 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - populateYear - Start");
+		//log.debug("ApplyForStudentNumberAction - populateYear - Start");
 
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		JSONObject yearObj = new JSONObject();
 		Map<String, String> mapYear = new LinkedHashMap<String, String>();
 		int keyCounter = 0;
 		
-		log.debug("ApplyForStudentNumberAction - populateYear - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - populateYear - **************************************************************");
 
 		try{
 			int startYear = 1960; //Don't think student can be more than 100 years old
 			
 			//Ensure that End year is later than Start year
 			String startYearSelected = stripXSS(request.getParameter("startYearSelected"), "startYearSelected", "popYear", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
-			log.debug("ApplyForStudentNumberAction - populateYear - startYearSelected="+startYearSelected);
+			//log.debug("ApplyForStudentNumberAction - populateYear - startYearSelected="+startYearSelected);
 	
 			if (startYearSelected != null && !"".equals(startYearSelected) && !"0".equals(startYearSelected) && Integer.parseInt(startYearSelected) > 0){
 				startYear = Integer.parseInt(startYearSelected);
@@ -3712,9 +3740,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		// Convert the map to JSON
 		PrintWriter out = response.getWriter();
        	JSONObject jsonObject = JSONObject.fromObject(yearObj);
-       	log.debug("ApplyForStudentNumberAction - populateYear - Final - **************************************************************");
-       	log.debug("ApplyForStudentNumberAction - populateYear - Final - jsonObject="+jsonObject.toString());
-       	log.debug("ApplyForStudentNumberAction - populateYear - Final - **************************************************************");
+       	//log.debug("ApplyForStudentNumberAction - populateYear - Final - **************************************************************");
+       	//log.debug("ApplyForStudentNumberAction - populateYear - Final - jsonObject="+jsonObject.toString());
+       	//log.debug("ApplyForStudentNumberAction - populateYear - Final - **************************************************************");
        	out.write(jsonObject.toString());
        	out.flush();
 
@@ -3728,13 +3756,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - populateCountry - Start");
+		//log.debug("ApplyForStudentNumberAction - populateCountry - Start");
 
 		JSONObject countryObj = new JSONObject();
 		Map<String, String> mapCountry = new LinkedHashMap<String, String>();
 		int keyCounter = 0;
 		
-		log.debug("ApplyForStudentNumberAction - populateCountry - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - populateCountry - **************************************************************");
 
 		// Query database
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
@@ -3751,15 +3779,15 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		    	countryObj.put("COUNTRY",mapCountry);
 	        }catch(Exception ex){
 	        	countryObj.put("Error","The populateCountry retrieval Failed! Please try again.");
-	        	log.debug("ApplyForStudentNumberAction - populateCountry - Crashed / " + ex);
+	        	//log.debug("ApplyForStudentNumberAction - populateCountry - Crashed / " + ex);
 	        }
 		
 		// Convert the map to JSON
 		PrintWriter out = response.getWriter();
        	JSONObject jsonObject = JSONObject.fromObject(countryObj);
-       	log.debug("ApplyForStudentNumberAction - populateCountry - Final - **************************************************************");
-       	log.debug("ApplyForStudentNumberAction - populateCountry - Final - jsonObject="+jsonObject.toString());
-       	log.debug("ApplyForStudentNumberAction - populateCountry - Final - **************************************************************");
+       	//log.debug("ApplyForStudentNumberAction - populateCountry - Final - **************************************************************");
+       	//log.debug("ApplyForStudentNumberAction - populateCountry - Final - jsonObject="+jsonObject.toString());
+       	//log.debug("ApplyForStudentNumberAction - populateCountry - Final - **************************************************************");
        	out.write(jsonObject.toString());
        	out.flush();
 
@@ -3770,7 +3798,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - populateSTUPREV - Start");
+		//log.debug("ApplyForStudentNumberAction - populateSTUPREV - Start");
 
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
@@ -3779,7 +3807,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		Map<String, String> mapPREV = new LinkedHashMap<String, String>();
 		int keyCounter = 0;
 		
-		log.debug("ApplyForStudentNumberAction - populateSTUPREV - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - populateSTUPREV - **************************************************************");
 			
 			try{
 				//Check if a Record for this year exists
@@ -3790,7 +3818,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		    	while(it.hasNext()){
 		    		KeyValue record = (KeyValue) it.next();
 		    		mapPREV.put(Integer.toString(keyCounter), record.getKey()+"@"+record.getValue());
-		    		log.debug("ApplyForStudentNumberAction - populateSTUPREV - "+keyCounter+" - "+record.getKey()+"@"+record.getValue());
+		    		//log.debug("ApplyForStudentNumberAction - populateSTUPREV - "+keyCounter+" - "+record.getKey()+"@"+record.getValue());
 		    		keyCounter++;
 		    	}
 		    	if (keyCounter > 0){
@@ -3806,9 +3834,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		// Convert the map to JSON
 		PrintWriter out = response.getWriter();
        	JSONObject jsonObject = JSONObject.fromObject(prevObj);
-       	log.debug("ApplyForStudentNumberAction - populateSTUPREV - Final - **************************************************************");
-       	log.debug("ApplyForStudentNumberAction - populateSTUPREV - Final - jsonObject="+jsonObject.toString());
-       	log.debug("ApplyForStudentNumberAction - populateSTUPREV - Final - **************************************************************");
+       	//log.debug("ApplyForStudentNumberAction - populateSTUPREV - Final - **************************************************************");
+       	//log.debug("ApplyForStudentNumberAction - populateSTUPREV - Final - jsonObject="+jsonObject.toString());
+       	//log.debug("ApplyForStudentNumberAction - populateSTUPREV - Final - **************************************************************");
        	out.write(jsonObject.toString());
        	out.flush();
 
@@ -3820,7 +3848,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - saveStudyRet - Start");
+		//log.debug("ApplyForStudentNumberAction - saveStudyRet - Start");
 				
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
@@ -3863,15 +3891,15 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.setSelSpecCode2Desc(dao.getSpecDesc(stuRegForm.getStudent().getQual2(), stuRegForm.getStudent().getSpec2()));
 
 		
-			log.debug("ApplyForStudentNumberAction - saveStudyRet - " + stuRegForm.getStudent().getNumber() +" - CategoryCode1 = " + stuRegForm.getStudent().getCategory1());
-			log.debug("ApplyForStudentNumberAction - saveStudyRet - " + stuRegForm.getStudent().getNumber() +" - CategoryCode2 = " + stuRegForm.getStudent().getCategory2());
-			log.debug("ApplyForStudentNumberAction - saveStudyRet - " + stuRegForm.getStudent().getNumber() +" - QualCode1     = " + stuRegForm.getStudent().getQual1());
-			log.debug("ApplyForStudentNumberAction - saveStudyRet - " + stuRegForm.getStudent().getNumber() +" - QualCode2     = " + stuRegForm.getStudent().getQual2());
-			log.debug("ApplyForStudentNumberAction - saveStudyRet - " + stuRegForm.getStudent().getNumber() +" - SpecCode1     = " + stuRegForm.getStudent().getSpec1());
-			log.debug("ApplyForStudentNumberAction - saveStudyRet - " + stuRegForm.getStudent().getNumber() +" - SpecCode2     = " + stuRegForm.getStudent().getSpec2());
+			//log.debug("ApplyForStudentNumberAction - saveStudyRet - " + stuRegForm.getStudent().getNumber() +" - CategoryCode1 = " + stuRegForm.getStudent().getCategory1());
+			//log.debug("ApplyForStudentNumberAction - saveStudyRet - " + stuRegForm.getStudent().getNumber() +" - CategoryCode2 = " + stuRegForm.getStudent().getCategory2());
+			//log.debug("ApplyForStudentNumberAction - saveStudyRet - " + stuRegForm.getStudent().getNumber() +" - QualCode1     = " + stuRegForm.getStudent().getQual1());
+			//log.debug("ApplyForStudentNumberAction - saveStudyRet - " + stuRegForm.getStudent().getNumber() +" - QualCode2     = " + stuRegForm.getStudent().getQual2());
+			//log.debug("ApplyForStudentNumberAction - saveStudyRet - " + stuRegForm.getStudent().getNumber() +" - SpecCode1     = " + stuRegForm.getStudent().getSpec1());
+			//log.debug("ApplyForStudentNumberAction - saveStudyRet - " + stuRegForm.getStudent().getNumber() +" - SpecCode2     = " + stuRegForm.getStudent().getSpec2());
 				
 			if (stuRegForm.getStudent().getQual1().equalsIgnoreCase(stuRegForm.getStudent().getQual2())){
-				log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 1 & 2 - Qual1="+stuRegForm.getStudent().getQual1()+" = Qual2="+stuRegForm.getStudent().getQual2());
+				//log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 1 & 2 - Qual1="+stuRegForm.getStudent().getQual1()+" = Qual2="+stuRegForm.getStudent().getQual2());
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "You have selected the same primary and alternative/secondary and qualification. Please change one application or remove it by setting its Category to 'Select Category' "));
 				addErrors(request, messages);
@@ -3879,7 +3907,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 
 			if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-				log.debug("ApplyForStudentNumberAction - saveStudyRet - Temp Student Nr is null or empty when saving qualifications");
+				//log.debug("ApplyForStudentNumberAction - saveStudyRet - Temp Student Nr is null or empty when saving qualifications");
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "You performed and invalid action or a technical error has occurred. Please log on again to retry."));
 				addErrors(request, messages);
@@ -3924,8 +3952,8 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					}
 				}
 				
-				log.debug("ApplyForStudentNumberAction - saveStudyRet - N " + stuRegForm.getStudent().getNumber() + " Cat1 " + stuRegForm.getStudent().getCategory1() + " Qual1=" + stuRegForm.getStudent().getQual1() + " Spec1=" + stuRegForm.getStudent().getSpec1());
-				log.debug("ApplyForStudentNumberAction - saveStudyRet - N " + stuRegForm.getStudent().getNumber() + " Cat2 " + stuRegForm.getStudent().getCategory2() + " Qual2=" + stuRegForm.getStudent().getQual2() + " Spec2=" + stuRegForm.getStudent().getSpec2());
+				//log.debug("ApplyForStudentNumberAction - saveStudyRet - N " + stuRegForm.getStudent().getNumber() + " Cat1 " + stuRegForm.getStudent().getCategory1() + " Qual1=" + stuRegForm.getStudent().getQual1() + " Spec1=" + stuRegForm.getStudent().getSpec1());
+				//log.debug("ApplyForStudentNumberAction - saveStudyRet - N " + stuRegForm.getStudent().getNumber() + " Cat2 " + stuRegForm.getStudent().getCategory2() + " Qual2=" + stuRegForm.getStudent().getQual2() + " Spec2=" + stuRegForm.getStudent().getSpec2());
 			}
 		}catch(Exception ex){
 			log.warn("ApplyForStudentNumberAction - saveStudyRet - N " + stuRegForm.getStudent().getNumber() + " Error="+ex);
@@ -3940,13 +3968,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			String specCode = prevQuals.getSpecCodes().get(i).toString().trim();
 			String specDesc = prevQuals.getSpecDescs().get(i).toString().trim();
 			if (qualCode.equalsIgnoreCase(stuRegForm.getStudent().getQual1())){
-				log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 1 Qual="+qualCode+" = Prev Qual1="+stuRegForm.getStudent().getQual1());
+				//log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 1 Qual="+qualCode+" = Prev Qual1="+stuRegForm.getStudent().getQual1());
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "You have previously registered for your selected primary qualification "+qualCode+". You, therefore, do not have to re-apply for this qualification."));
 				addErrors(request, messages);
 				return "applyQualification";
 			}else if (qualCode.equalsIgnoreCase(stuRegForm.getStudent().getQual2())){
-				log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 2 Qual="+qualCode+" = Prev Qual2="+stuRegForm.getStudent().getQual2());
+				//log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 2 Qual="+qualCode+" = Prev Qual2="+stuRegForm.getStudent().getQual2());
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "You have previously registered for your selected alternative qualification ("+qualCode+" - "+qualDesc+") and specialisation ("+specCode+" - "+specDesc+"). You, therefore, do not have to re-apply for this qualification or specialisation."));
 				addErrors(request, messages);
@@ -3955,7 +3983,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}
 		
 		if (stuRegForm.getStudent().getQual1().equalsIgnoreCase(stuRegForm.getStudent().getQual2())){
-			log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 1 & 2 - Qual1="+stuRegForm.getStudent().getQual1()+" = Qual2="+stuRegForm.getStudent().getQual2());
+			//log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 1 & 2 - Qual1="+stuRegForm.getStudent().getQual1()+" = Qual2="+stuRegForm.getStudent().getQual2());
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 				new ActionMessage("message.generalmessage", "You have selected the same primary and alternative/secondary and qualification. Please change one application or remove it by setting its Category to 'Select Category' "));
 			addErrors(request, messages);
@@ -3972,7 +4000,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				return "loginStu";
 			}
 		}
-		log.debug("ApplyForStudentNumberAction - saveStudyRet - " + stuRegForm.getStudent().getNumber() +" - Done");
+		//log.debug("ApplyForStudentNumberAction - saveStudyRet - " + stuRegForm.getStudent().getNumber() +" - Done");
 		return "applyQualificationConfirm";
 	}
 
@@ -3984,7 +4012,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		
-		log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - Start");
+		//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - Start");
 
 		
 		//Reset web messages
@@ -4024,15 +4052,15 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.setSelSpecCode2Desc(dao.getSpecDesc(stuRegForm.getStudent().getQual2(), stuRegForm.getStudent().getSpec2()));
 
 		
-			log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - CategoryCode1 =" + stuRegForm.getStudent().getCategory1());
-			log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - CategoryCode2 =" + stuRegForm.getStudent().getCategory2());
-			log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - QualCode1     =" + stuRegForm.getStudent().getQual1() +" - "+stuRegForm.getSelQualCode1Desc());
-			log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - QualCode2     =" + stuRegForm.getStudent().getQual2() +" - "+stuRegForm.getSelQualCode2Desc());
-			log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - SpecCode1     =" + stuRegForm.getStudent().getSpec1() +" - "+stuRegForm.getSelSpecCode1Desc());
-			log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - SpecCode2     =" + stuRegForm.getStudent().getSpec2() +" - "+stuRegForm.getSelSpecCode2Desc());
+			//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - CategoryCode1 =" + stuRegForm.getStudent().getCategory1());
+			//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - CategoryCode2 =" + stuRegForm.getStudent().getCategory2());
+			//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - QualCode1     =" + stuRegForm.getStudent().getQual1() +" - "+stuRegForm.getSelQualCode1Desc());
+			//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - QualCode2     =" + stuRegForm.getStudent().getQual2() +" - "+stuRegForm.getSelQualCode2Desc());
+			//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - SpecCode1     =" + stuRegForm.getStudent().getSpec1() +" - "+stuRegForm.getSelSpecCode1Desc());
+			//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - SpecCode2     =" + stuRegForm.getStudent().getSpec2() +" - "+stuRegForm.getSelSpecCode2Desc());
 			
 			if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-				log.debug("ApplyForStudentNumberAction - saveStudyNew - Temp Student Nr is null or empty when saving qualifications");
+				//log.debug("ApplyForStudentNumberAction - saveStudyNew - Temp Student Nr is null or empty when saving qualifications");
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "You performed and invalid action or a technical error has occurred. Please log on again to retry."));
 				addErrors(request, messages);
@@ -4042,71 +4070,71 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return "loginStu";
 				}
 			}else{
-				log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - CategoryCode1 =" + stuRegForm.getStudent().getCategory1());
-				log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - Check Category1");
+				//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - CategoryCode1 =" + stuRegForm.getStudent().getCategory1());
+				//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - Check Category1");
 				queryResultCAT1 = doSTUXML(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "catCode1", "1", stuRegForm.getStudent().getCategory1(), "saveStudyNew");
 				if (queryResultCAT1.toUpperCase().contains("ERROR")){
 					isError = true;
 				}
-				log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - queryResultCAT1="+queryResultCAT1 + ", isError="+isError);
+				//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - queryResultCAT1="+queryResultCAT1 + ", isError="+isError);
 				
 				if (!isError){
-					log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - Check Category2");
+					//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - Check Category2");
 					queryResultCAT2 = doSTUXML(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "catCode2", "2", stuRegForm.getStudent().getCategory2(), "saveStudyNew");
 					if (queryResultCAT2.toUpperCase().contains("ERROR")){
 						isError = true;
 					}
-					log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - queryResultCAT2="+queryResultCAT2 + ", isError="+isError);
+					//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - queryResultCAT2="+queryResultCAT2 + ", isError="+isError);
 					}
 				}
 
 				if (!isError){
-					log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - Check Qualification1");
+					//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - Check Qualification1");
 					queryResultQUAL1 = doSTUXML(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "qualCode1", "1", stuRegForm.getStudent().getQual1(), "saveStudyNew");
 					if (queryResultQUAL1.toUpperCase().contains("ERROR")){
 						isError = true;
 					}
-					log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - queryResultQUAL1="+queryResultQUAL1 + ", isError="+isError);
+					//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - queryResultQUAL1="+queryResultQUAL1 + ", isError="+isError);
 				}
 				
 				if (!isError){
-					log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - Check Qualification2");
+					//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - Check Qualification2");
 					queryResultQUAL2 = doSTUXML(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "qualCode2", "2", stuRegForm.getStudent().getQual2(), "saveStudyNew");
 					if (queryResultQUAL2.toUpperCase().contains("ERROR")){
 						isError = true;
 					}
-					log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - queryResultQUAL2="+queryResultQUAL2 + ", isError="+isError);
+					//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - queryResultQUAL2="+queryResultQUAL2 + ", isError="+isError);
 				}
 				
 				if (!isError){
-					log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - Check Spesialisation1");
+					//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - Check Spesialisation1");
 					queryResultSPEC1 = doSTUXML(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "specCode1", "1", stuRegForm.getStudent().getSpec1(), "saveStudyNew");
 					if (queryResultSPEC1.toUpperCase().contains("ERROR")){
 						isError = true;
 					}
-					log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - queryResultSPEC1="+queryResultSPEC1 + ", isError="+isError);
+					//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - queryResultSPEC1="+queryResultSPEC1 + ", isError="+isError);
 				}
 				
 				if (!isError){
-					log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - Check Spesialisation2");
+					//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - Check Spesialisation2");
 					queryResultSPEC2 = doSTUXML(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "specCode2", "2", stuRegForm.getStudent().getSpec2(), "saveStudyNew");
 					if (queryResultSPEC2.toUpperCase().contains("ERROR")){
 						isError = true;
 					}
-					log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - queryResultSPEC2="+queryResultSPEC2 + ", isError="+isError);
+					//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - STUXML - queryResultSPEC2="+queryResultSPEC2 + ", isError="+isError);
 				}
 
-				log.debug("ApplyForStudentNumberAction - saveStudyNew - N " + stuRegForm.getStudent().getNumber() + " Cat1=" + stuRegForm.getStudent().getCategory1() + " Qual1=" + stuRegForm.getStudent().getQual1() + " Spec1=" + stuRegForm.getStudent().getSpec1());
-				log.debug("ApplyForStudentNumberAction - saveStudyNew - N " + stuRegForm.getStudent().getNumber() + " Cat2=" + stuRegForm.getStudent().getCategory2() + " Qual2=" + stuRegForm.getStudent().getQual2() + " Spec2=" + stuRegForm.getStudent().getSpec2());
+				//log.debug("ApplyForStudentNumberAction - saveStudyNew - N " + stuRegForm.getStudent().getNumber() + " Cat1=" + stuRegForm.getStudent().getCategory1() + " Qual1=" + stuRegForm.getStudent().getQual1() + " Spec1=" + stuRegForm.getStudent().getSpec1());
+				//log.debug("ApplyForStudentNumberAction - saveStudyNew - N " + stuRegForm.getStudent().getNumber() + " Cat2=" + stuRegForm.getStudent().getCategory2() + " Qual2=" + stuRegForm.getStudent().getQual2() + " Spec2=" + stuRegForm.getStudent().getSpec2());
 			
 		}catch(Exception ex){
-			log.debug("ApplyForStudentNumberAction - saveStudyNew - N " + stuRegForm.getStudent().getNumber() + " Error="+ex);
+			//log.debug("ApplyForStudentNumberAction - saveStudyNew - N " + stuRegForm.getStudent().getNumber() + " Error="+ex);
 			log.warn("ApplyForStudentNumberAction - saveStudyNew - N " + stuRegForm.getStudent().getNumber() + " Error="+ex);
 			isError = true;
 		}
 		
 		if (stuRegForm.getStudent().getQual1().equalsIgnoreCase(stuRegForm.getStudent().getQual2())){
-			log.debug("ApplyForStudentNumberAction - saveStudyNew - Same Choice 1 & 2 - Qual1="+stuRegForm.getStudent().getQual1()+" = Qual2="+stuRegForm.getStudent().getQual2());
+			//log.debug("ApplyForStudentNumberAction - saveStudyNew - Same Choice 1 & 2 - Qual1="+stuRegForm.getStudent().getQual1()+" = Qual2="+stuRegForm.getStudent().getQual2());
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 				new ActionMessage("message.generalmessage", "You have selected the same primary and alternative/secondary and qualification. Please change one application or remove it by setting its Category to 'Select Category' "));
 			addErrors(request, messages);
@@ -4115,7 +4143,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		
 		if (isError){
-			log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - Error");
+			//log.debug("ApplyForStudentNumberAction - saveStudyNew - " + stuRegForm.getStudent().getNumber() +" - Error");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 				new ActionMessage("message.generalmessage", "An Error occurred Saving your Qualification selection. Please log on again to retry."));
 			addErrors(request, messages);
@@ -4125,7 +4153,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				return "loginStu";
 			}
 		}
-		log.debug("ApplyForStudentNumberAction - saveStudyNew - Goto applyQualificationConfirm");
+		//log.debug("ApplyForStudentNumberAction - saveStudyNew - Goto applyQualificationConfirm");
 		return "applyQualificationConfirm";
 	}
 	
@@ -4144,7 +4172,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}else if (result.toUpperCase().equalsIgnoreCase("TRUE")){
 			dbMethod = "UPDATE";
 		}
-		log.debug("ApplyForStudentNumberAction - doSTUXML - " + StudentNr +" - STUXML - queryResult="+result + ", queryType="+dbMethod+ ", isError="+isError+ ", callingMethod="+callingMethod);
+		//log.debug("ApplyForStudentNumberAction - doSTUXML - " + StudentNr +" - STUXML - queryResult="+result + ", queryType="+dbMethod+ ", isError="+isError+ ", callingMethod="+callingMethod);
 		
 		int count = 0;
 		while (!isSuccess && count < 5 && !isError){
@@ -4152,23 +4180,23 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			isSuccess = false;
 			int nextRef = 0;
 			String queryResultRef = dao.getSTUXMLRef(StudentNr, acaYear, acaPeriod, referenceType, referenceValue, "doSTUXML");
-			log.debug("ApplyForStudentNumberAction - doSTUXML - queryResultRef="+queryResultRef + " / " + StudentNr+", "+acaYear+", "+acaPeriod+", "+referenceType+", "+referenceValue+", doSTUXML - Count="+count+", NextRef="+nextRef);
+			//log.debug("ApplyForStudentNumberAction - doSTUXML - queryResultRef="+queryResultRef + " / " + StudentNr+", "+acaYear+", "+acaPeriod+", "+referenceType+", "+referenceValue+", doSTUXML - Count="+count+", NextRef="+nextRef);
 			if (queryResultRef.toUpperCase().contains("ERROR")){
-				log.debug("ApplyForStudentNumberAction - doSTUXML - queryResultRef Returned an Error");
+				//log.debug("ApplyForStudentNumberAction - doSTUXML - queryResultRef Returned an Error");
 				isError = true;
 			}
 			if (!isError){
 				try{
 					nextRef = Integer.parseInt(queryResultRef);
 					nextRef++;
-					log.debug("ApplyForStudentNumberAction - doSTUXML - Calling saveSTUXML="+queryResultRef+", referenceType="+referenceType+", referenceValue="+referenceValue+", nextRef="+nextRef+". referenceData="+referenceData);
+					//log.debug("ApplyForStudentNumberAction - doSTUXML - Calling saveSTUXML="+queryResultRef+", referenceType="+referenceType+", referenceValue="+referenceValue+", nextRef="+nextRef+". referenceData="+referenceData);
 					result = dao.saveSTUXML(StudentNr, acaYear, acaPeriod, referenceType, referenceValue, nextRef, referenceData, callingMethod, dbMethod);
-					log.debug("ApplyForStudentNumberAction - doSTUXML - After Calling saveSTUXML- result="+result);
+					//log.debug("ApplyForStudentNumberAction - doSTUXML - After Calling saveSTUXML- result="+result);
 					if (result.equalsIgnoreCase("TRUE")){
-						log.debug("ApplyForStudentNumberAction - doSTUXML - saveSTUXML Returned OK");
+						//log.debug("ApplyForStudentNumberAction - doSTUXML - saveSTUXML Returned OK");
 						isSuccess = true;
 					}else if (result.toUpperCase().contains("ERROR")){
-						log.debug("ApplyForStudentNumberAction - doSTUXML - saveSTUXML Returned an Error");
+						//log.debug("ApplyForStudentNumberAction - doSTUXML - saveSTUXML Returned an Error");
 						isError = true;
 					}
 				}catch(Exception e){
@@ -4176,7 +4204,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 			}
 			count++;
-			log.debug("ApplyForStudentNumberAction - doSTUXML - " + StudentNr +" - STUXML - "+dbMethod+ "Result="+result + ", count="+count+ ", isError="+isError+ ", callingMethod="+callingMethod);
+			//log.debug("ApplyForStudentNumberAction - doSTUXML - " + StudentNr +" - STUXML - "+dbMethod+ "Result="+result + ", count="+count+ ", isError="+isError+ ", callingMethod="+callingMethod);
 		}
 		return result;
 	}
@@ -4197,9 +4225,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
-		log.debug("In submitNewQual");
+		//log.debug("In submitNewQual");
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - submitNewQual - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - submitNewQual - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -4209,10 +4237,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				return mapping.findForward("loginStu");
 			}
 		}
-		log.debug("ApplyForStudentNumberAction - submitNewQual studentNr: " + stuRegForm.getStudent().getNumber());
-		log.debug("ApplyForStudentNumberAction - submitNewQual acaYear: " + stuRegForm.getStudent().getAcademicYear());
-		log.debug("ApplyForStudentNumberAction - submitNewQual acaPeriod: " + stuRegForm.getStudent().getAcademicPeriod());
-		log.debug("ApplyForStudentNumberAction - submitNewQual stuExist: " + stuRegForm.getStudent().getStuExist());
+		//log.debug("ApplyForStudentNumberAction - submitNewQual studentNr: " + stuRegForm.getStudent().getNumber());
+		//log.debug("ApplyForStudentNumberAction - submitNewQual acaYear: " + stuRegForm.getStudent().getAcademicYear());
+		//log.debug("ApplyForStudentNumberAction - submitNewQual acaPeriod: " + stuRegForm.getStudent().getAcademicPeriod());
+		//log.debug("ApplyForStudentNumberAction - submitNewQual stuExist: " + stuRegForm.getStudent().getStuExist());
 		return mapping.findForward("applyQualification");
 	}
 
@@ -4224,7 +4252,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - submitCngQual - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - submitCngQual - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -4234,10 +4262,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				return mapping.findForward("loginStu");
 			}
 		}
-		log.debug("ApplyForStudentNumberAction - submitCngQual studentNr: " + stuRegForm.getStudent().getNumber());
-		log.debug("ApplyForStudentNumberAction - submitCngQual acaYear: " + stuRegForm.getStudent().getAcademicYear());
-		log.debug("ApplyForStudentNumberAction - submitCngQual acaPeriod: " + stuRegForm.getStudent().getAcademicPeriod());
-		log.debug("ApplyForStudentNumberAction - submitCngQual stuExist: " + stuRegForm.getStudent().getStuExist());
+		//log.debug("ApplyForStudentNumberAction - submitCngQual studentNr: " + stuRegForm.getStudent().getNumber());
+		//log.debug("ApplyForStudentNumberAction - submitCngQual acaYear: " + stuRegForm.getStudent().getAcademicYear());
+		//log.debug("ApplyForStudentNumberAction - submitCngQual acaPeriod: " + stuRegForm.getStudent().getAcademicPeriod());
+		//log.debug("ApplyForStudentNumberAction - submitCngQual stuExist: " + stuRegForm.getStudent().getStuExist());
 		return mapping.findForward("applyQualification");
 	}
 
@@ -4249,7 +4277,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - submitReturnDoc - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - submitReturnDoc - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -4259,10 +4287,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				return mapping.findForward("loginStu");
 			}
 		}
-		log.debug("ApplyForStudentNumberAction - submitReturnDoc studentNr: " + stuRegForm.getStudent().getNumber());
-		log.debug("ApplyForStudentNumberAction - submitReturnDoc acaYear: " + stuRegForm.getStudent().getAcademicYear());
-		log.debug("ApplyForStudentNumberAction - submitReturnDoc acaPeriod: " + stuRegForm.getStudent().getAcademicPeriod());
-		log.debug("ApplyForStudentNumberAction - submitReturnDoc stuExist: " + stuRegForm.getStudent().getStuExist());
+		//log.debug("ApplyForStudentNumberAction - submitReturnDoc studentNr: " + stuRegForm.getStudent().getNumber());
+		//log.debug("ApplyForStudentNumberAction - submitReturnDoc acaYear: " + stuRegForm.getStudent().getAcademicYear());
+		//log.debug("ApplyForStudentNumberAction - submitReturnDoc acaPeriod: " + stuRegForm.getStudent().getAcademicPeriod());
+		//log.debug("ApplyForStudentNumberAction - submitReturnDoc stuExist: " + stuRegForm.getStudent().getStuExist());
 		return mapping.findForward("dynamicUpload");
 	}
 
@@ -4274,7 +4302,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - submitNewDoc - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - submitNewDoc - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -4284,13 +4312,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				return mapping.findForward("loginStu");
 			}
 		}
-		log.debug("ApplyForStudentNumberAction - submitNewDoc studentNr: " + stuRegForm.getStudent().getNumber());
-		log.debug("ApplyForStudentNumberAction - submitNewDoc acaYear: " + stuRegForm.getStudent().getAcademicYear());
-		log.debug("ApplyForStudentNumberAction - submitNewDoc acaPeriod: " + stuRegForm.getStudent().getAcademicPeriod());
-		log.debug("ApplyForStudentNumberAction - submitNewDoc stuExist: " + stuRegForm.getStudent().getStuExist());
+		//log.debug("ApplyForStudentNumberAction - submitNewDoc studentNr: " + stuRegForm.getStudent().getNumber());
+		//log.debug("ApplyForStudentNumberAction - submitNewDoc acaYear: " + stuRegForm.getStudent().getAcademicYear());
+		//log.debug("ApplyForStudentNumberAction - submitNewDoc acaPeriod: " + stuRegForm.getStudent().getAcademicPeriod());
+		//log.debug("ApplyForStudentNumberAction - submitNewDoc stuExist: " + stuRegForm.getStudent().getStuExist());
 		return mapping.findForward("dynamicUpload");
 	}
 
+	@SuppressWarnings("unused")
 	public ActionForward submitPay(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
@@ -4301,6 +4330,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		return new ActionForward(serverpath+"/unisa-findtool/default.do?sharedTool=unisa.creditcardpayment",true);
 	}
 
+	@SuppressWarnings("unused")
 	public ActionForward submitPayLater(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
@@ -4319,7 +4349,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction -  applyNewPersonal - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction -  applyNewPersonal - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occured. Please log on again to retry."));
 			addErrors(request, messages);
@@ -4334,7 +4364,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		if (stuRegForm.getFromPage() == null){
 			//Error: Session empty
-			log.debug("ApplyForStudentNumberAction - applyNewPersonal Empty Session");
+			//log.debug("ApplyForStudentNumberAction - applyNewPersonal Empty Session");
 			return emptySession(mapping,form,request,response);
 		}else{
 			stuRegForm.setFromPage("page2");
@@ -4342,12 +4372,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		stuRegForm.getSelQualCode();
 
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +" - CategoryCode1 =" + stuRegForm.getStudent().getCategory1());
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +" - CategoryCode2 =" + stuRegForm.getStudent().getCategory2());
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +" - QualCode1     =" + stuRegForm.getStudent().getQual1());
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +" - QualCode2     =" + stuRegForm.getStudent().getQual2());
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +" - SpecCode1     =" + stuRegForm.getStudent().getSpec1());
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +" - SpecCode2     =" + stuRegForm.getStudent().getSpec2());		
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +" - CategoryCode1 =" + stuRegForm.getStudent().getCategory1());
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +" - CategoryCode2 =" + stuRegForm.getStudent().getCategory2());
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +" - QualCode1     =" + stuRegForm.getStudent().getQual1());
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +" - QualCode2     =" + stuRegForm.getStudent().getQual2());
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +" - SpecCode1     =" + stuRegForm.getStudent().getSpec1());
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +" - SpecCode2     =" + stuRegForm.getStudent().getSpec2());		
 
 		// ---------- Check input
 		String code1 = " ";
@@ -4361,7 +4391,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		// Closing date  --Integer.parseInt(String.valueOf(stuRegForm.getStudent().getAcademicYear())))){
 		if (stuRegForm.getStudent().getQual1() != null && !stuRegForm.getStudent().getQual1().equalsIgnoreCase("") && !stuRegForm.getStudent().getQual1().equalsIgnoreCase("0") && !stuRegForm.getStudent().getQual1().equalsIgnoreCase("undefined")){
-			log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +", GetUnderpostGrad1");
+			//log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +", GetUnderpostGrad1");
 			code1 = dao.validateQualification(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getQual1());
 			underpost1 = code1.substring(0,1);
 			qtype1 = code1.substring(1,2);
@@ -4375,7 +4405,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}
 
 		if (stuRegForm.getStudent().getQual2() != null && !stuRegForm.getStudent().getQual2().equalsIgnoreCase("") && !stuRegForm.getStudent().getQual2().equalsIgnoreCase("0") && !stuRegForm.getStudent().getQual2().equalsIgnoreCase("undefined")){
-			log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +", GetUnderpostGrad2");
+			//log.debug("ApplyForStudentNumberAction - applyNewPersonal - " + stuRegForm.getStudent().getNumber() +", GetUnderpostGrad2");
 			code2 = dao.validateQualification(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getQual2());
 			underpost2 = code2.substring(0,1);
 			qtype2 = code2.substring(1,2);
@@ -4383,15 +4413,15 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.getQual().setUnderpostGrad2(underpost2);
 		}
 		
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual1 - code1: " + code1);
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual1 - underpost1: " + underpost1);
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual1 - qtype1: " + qtype1);
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual1 - qkat1: " + qkat1);
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual1 - code1: " + code1);
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual1 - underpost1: " + underpost1);
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual1 - qtype1: " + qtype1);
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual1 - qkat1: " + qkat1);
 		
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual2 - code2: " + code2);
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual2 - underpost2: " + underpost2);
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual2 - qtype2: " + qtype2);
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual2 - qkat2: " + qkat2);
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual2 - code2: " + code2);
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual2 - underpost2: " + underpost2);
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual2 - qtype2: " + qtype2);
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - getQual2 - qkat2: " + qkat2);
 
 		// Year
 		if (stuRegForm.getStudent().getAcademicYear()== null || "".equals(stuRegForm.getStudent().getAcademicYear())){
@@ -4597,7 +4627,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}
 
 		setDropdownListsStep2(request, stuRegForm);
-		log.debug("ApplyForStudentNumberAction - applyNewPersonal - GoTo applyNewContact");
+		//log.debug("ApplyForStudentNumberAction - applyNewPersonal - GoTo applyNewContact");
 		return "applyNewContact";
 	}
 
@@ -4605,7 +4635,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("ApplyForStudentNumberaction - stepQualConfirm - Start");
+		//log.debug("ApplyForStudentNumberaction - stepQualConfirm - Start");
 		
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
@@ -4614,7 +4644,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		stuRegForm.setFromPage("stepQualConfirm");
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - stepQualConfirm - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - stepQualConfirm - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -4632,7 +4662,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		if (stuRegForm.getStudent().getQual2() != null && !"".equals(stuRegForm.getStudent().getQual2())){
 			isPrevQual2 = dao.getQualCategory(stuRegForm.getStudent().getQual2());
 		}
-		log.debug("ApplyForStudentNumberAction - stepQualConfirm -  PrevQual1="+isPrevQual1+", PrevQual2="+isPrevQual2);
+		//log.debug("ApplyForStudentNumberAction - stepQualConfirm -  PrevQual1="+isPrevQual1+", PrevQual2="+isPrevQual2);
 		if (isPrevQual1 || isPrevQual2){
 			stuRegForm.setQualUnisa(dao.getQualsUnisa(stuRegForm.getStudent().getNumber()));
 			if (stuRegForm.getQualUnisa().size() > 0){
@@ -4640,146 +4670,146 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 			HistoryOther daoHistory = dao.getPREVADM(stuRegForm.getStudent().getNumber());
 			if (daoHistory != null){
-				log.debug("ApplyForStudentNumberAction - stepQualConfirm -  isHistoryOTHERSEQ2="+daoHistory.getHistoryOTHERSEQ2());
+				//log.debug("ApplyForStudentNumberAction - stepQualConfirm -  isHistoryOTHERSEQ2="+daoHistory.getHistoryOTHERSEQ2());
 				if (daoHistory.getHistoryOTHERSEQ2() != 0){
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm -------------------------------------------------------");
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN isHistoryOTHERSEQ2");
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm -------------------------------------------------------");
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN isHistoryOTHERSEQ2");
 					stuRegForm.getQualOther().setHistoryOTHERSEQ2(daoHistory.getHistoryOTHERSEQ2());
 					if (" ".equals(daoHistory.getHistoryOTHERUniv2())){
 						stuRegForm.getQualOther().setHistoryOTHERUniv2("OTHR");
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERUniv2(daoHistory.getHistoryOTHERUniv2().trim());
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERUniv2="+stuRegForm.getQualOther().getHistoryOTHERUniv2());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERUniv2="+stuRegForm.getQualOther().getHistoryOTHERUniv2());
 					if (daoHistory.getHistoryOTHERUnivText2() != null && !"".equals(daoHistory.getHistoryOTHERUnivText2().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERUnivText2(daoHistory.getHistoryOTHERUnivText2().toString().toUpperCase().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERUnivText2(" ");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERUnivText2="+stuRegForm.getQualOther().getHistoryOTHERUnivText2());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERUnivText2="+stuRegForm.getQualOther().getHistoryOTHERUnivText2());
 
 					if (daoHistory.getHistoryOTHERStudnr2() != null && !"".equals(daoHistory.getHistoryOTHERStudnr2().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERStudnr2(daoHistory.getHistoryOTHERStudnr2().toString().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERStudnr2(" ");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERStudnr2="+stuRegForm.getQualOther().getHistoryOTHERStudnr2());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERStudnr2="+stuRegForm.getQualOther().getHistoryOTHERStudnr2());
 
 					if (daoHistory.getHistoryOTHERQual2() != null && !"".equals(daoHistory.getHistoryOTHERQual2().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERQual2(daoHistory.getHistoryOTHERQual2().toString().toUpperCase().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERQual2(" ");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERQual2="+stuRegForm.getQualOther().getHistoryOTHERQual2());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERQual2="+stuRegForm.getQualOther().getHistoryOTHERQual2());
 					if (daoHistory.getHistoryOTHERYearStart2() != null && !"".equals(daoHistory.getHistoryOTHERYearStart2().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERYearStart2(daoHistory.getHistoryOTHERYearStart2().toString().toUpperCase().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERYearStart2("-1");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERYearStart2="+stuRegForm.getQualOther().getHistoryOTHERYearStart2());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERYearStart2="+stuRegForm.getQualOther().getHistoryOTHERYearStart2());
 					if (daoHistory.getHistoryOTHERYearEnd2() != null && !"".equals(daoHistory.getHistoryOTHERYearEnd2().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERYearEnd2(daoHistory.getHistoryOTHERYearEnd2().toString().toUpperCase().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERYearEnd2("-1");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERYearEnd2="+stuRegForm.getQualOther().getHistoryOTHERYearEnd2());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERYearEnd2="+stuRegForm.getQualOther().getHistoryOTHERYearEnd2());
 					stuRegForm.getQualOther().setHistoryOTHERYearEndDB2(daoHistory.getHistoryOTHERYearEndDB2());
 					if (daoHistory.getHistoryOTHERCountry2() != null && !"".equals(daoHistory.getHistoryOTHERCountry2().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERCountry2(daoHistory.getHistoryOTHERCountry2().toString().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERCountry2("-1");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERCountry2="+stuRegForm.getQualOther().getHistoryOTHERCountry2());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERCountry2="+stuRegForm.getQualOther().getHistoryOTHERCountry2());
 					if (daoHistory.getHistoryOTHERComplete2() != null && !"".equals(daoHistory.getHistoryOTHERComplete2().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERComplete2(daoHistory.getHistoryOTHERComplete2().toString().toUpperCase().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERComplete2("N");
 					}
 					stuRegForm.getQualOther().setHistoryOTHERHiddenComplete2(stuRegForm.getQualOther().getHistoryOTHERComplete2());
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERComplete2="+stuRegForm.getQualOther().getHistoryOTHERComplete2());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERComplete2="+stuRegForm.getQualOther().getHistoryOTHERComplete2());
 					if (daoHistory.getHistoryOTHERForeign2() != null && !"".equals(daoHistory.getHistoryOTHERForeign2().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERForeign2(daoHistory.getHistoryOTHERForeign2().toString().toUpperCase().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERForeign2("N");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERForeign2="+stuRegForm.getQualOther().getHistoryOTHERForeign2());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERForeign2="+stuRegForm.getQualOther().getHistoryOTHERForeign2());
 					if (daoHistory.getHistoryOTHERLock2() != null && !"".equals(daoHistory.getHistoryOTHERLock2().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERLock2(daoHistory.getHistoryOTHERLock2().toString().toUpperCase().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERLock2("N");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERLock2="+stuRegForm.getQualOther().getHistoryOTHERLock2());
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm -------------------------------------------------------");
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERLock2="+stuRegForm.getQualOther().getHistoryOTHERLock2());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm -------------------------------------------------------");
 					
 				}
 				
 				if (daoHistory.getHistoryOTHERSEQ3() != 0){
 					stuRegForm.getQualOther().setHistoryOTHERSEQ3(daoHistory.getHistoryOTHERSEQ3());
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm -------------------------------------------------------");
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN isHistoryOTHERSEQ3");
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm -------------------------------------------------------");
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN isHistoryOTHERSEQ3");
 					if (" ".equals(daoHistory.getHistoryOTHERUniv3())){
 						stuRegForm.getQualOther().setHistoryOTHERUniv3("OTHR");
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERUniv3(daoHistory.getHistoryOTHERUniv3().trim());
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERUniv3="+stuRegForm.getQualOther().getHistoryOTHERUniv3());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERUniv3="+stuRegForm.getQualOther().getHistoryOTHERUniv3());
 					if (daoHistory.getHistoryOTHERUnivText3() != null && !"".equals(daoHistory.getHistoryOTHERUnivText3().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERUnivText3(daoHistory.getHistoryOTHERUnivText3().toString().toUpperCase().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERUnivText3(" ");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERUnivText3="+stuRegForm.getQualOther().getHistoryOTHERUnivText3());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERUnivText3="+stuRegForm.getQualOther().getHistoryOTHERUnivText3());
 					if (daoHistory.getHistoryOTHERStudnr3() != null && !"".equals(daoHistory.getHistoryOTHERStudnr3().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERStudnr3(daoHistory.getHistoryOTHERStudnr3().toString().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERStudnr3(" ");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERStudnr3="+stuRegForm.getQualOther().getHistoryOTHERStudnr3());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERStudnr3="+stuRegForm.getQualOther().getHistoryOTHERStudnr3());
 					if (daoHistory.getHistoryOTHERQual3() != null && !"".equals(daoHistory.getHistoryOTHERQual3().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERQual3(daoHistory.getHistoryOTHERQual3().toString().toUpperCase().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERQual3(" ");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERQual3="+stuRegForm.getQualOther().getHistoryOTHERQual3());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERQual3="+stuRegForm.getQualOther().getHistoryOTHERQual3());
 					if (daoHistory.getHistoryOTHERYearStart3() != null && !"".equals(daoHistory.getHistoryOTHERYearStart3().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERYearStart3(daoHistory.getHistoryOTHERYearStart3().toString().toUpperCase().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERYearStart3("-1");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERYearStart3="+stuRegForm.getQualOther().getHistoryOTHERYearStart3());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERYearStart3="+stuRegForm.getQualOther().getHistoryOTHERYearStart3());
 					if (daoHistory.getHistoryOTHERYearEnd3() != null && !"".equals(daoHistory.getHistoryOTHERYearEnd3().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERYearEnd3(daoHistory.getHistoryOTHERYearEnd3().toString().toUpperCase().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERYearEnd3("-1");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERYearEnd3="+stuRegForm.getQualOther().getHistoryOTHERYearEnd3());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERYearEnd3="+stuRegForm.getQualOther().getHistoryOTHERYearEnd3());
 					stuRegForm.getQualOther().setHistoryOTHERYearEndDB3(daoHistory.getHistoryOTHERYearEndDB3());
 					if (daoHistory.getHistoryOTHERCountry3() != null && !"".equals(daoHistory.getHistoryOTHERCountry3().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERCountry3(daoHistory.getHistoryOTHERCountry3().toString().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERCountry3("-1");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERCountry3="+stuRegForm.getQualOther().getHistoryOTHERCountry3());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERCountry3="+stuRegForm.getQualOther().getHistoryOTHERCountry3());
 					if (daoHistory.getHistoryOTHERComplete3() != null && !"".equals(daoHistory.getHistoryOTHERComplete3().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERComplete3(daoHistory.getHistoryOTHERComplete3().toString().toUpperCase().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERComplete3("N");
 					}
 					stuRegForm.getQualOther().setHistoryOTHERHiddenComplete3(stuRegForm.getQualOther().getHistoryOTHERComplete3());
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERComplete3="+stuRegForm.getQualOther().getHistoryOTHERComplete3());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERComplete3="+stuRegForm.getQualOther().getHistoryOTHERComplete3());
 					if (daoHistory.getHistoryOTHERForeign3() != null && !"".equals(daoHistory.getHistoryOTHERForeign3().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERForeign3(daoHistory.getHistoryOTHERForeign3().toString().toUpperCase().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERForeign3("N");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERForeign3="+stuRegForm.getQualOther().getHistoryOTHERForeign3());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERForeign3="+stuRegForm.getQualOther().getHistoryOTHERForeign3());
 					if (daoHistory.getHistoryOTHERLock3() != null && !"".equals(daoHistory.getHistoryOTHERLock3().toString().trim())){
 						stuRegForm.getQualOther().setHistoryOTHERLock3(daoHistory.getHistoryOTHERLock3().toString().toUpperCase().trim());
 					}else{
 						stuRegForm.getQualOther().setHistoryOTHERLock3("N");
 					}
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERLock3="+stuRegForm.getQualOther().getHistoryOTHERLock3());
-					log.debug("ApplyForStudentNumberAction - stepQualConfirm -------------------------------------------------------");
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm - IN HistoryOTHERLock3="+stuRegForm.getQualOther().getHistoryOTHERLock3());
+					//log.debug("ApplyForStudentNumberAction - stepQualConfirm -------------------------------------------------------");
 					
 				}
 				
@@ -5476,16 +5506,16 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					}
 				}
 			}
-			log.debug("ApplyForStudentNumberAction - stepQualConfirm -  GoTo PrevQual");
+			//log.debug("ApplyForStudentNumberAction - stepQualConfirm -  GoTo PrevQual");
 			setDropdownListsPrev(request, form);
 			return mapping.findForward("applyPrevQual");
 		}else{
 			if ("newStu".equalsIgnoreCase(stuRegForm.getStudent().getStuExist())){
-				log.debug("ApplyForStudentNumberAction - stepQualConfirm -  NewStu - GoTo applyNewPersonal");
+				//log.debug("ApplyForStudentNumberAction - stepQualConfirm -  NewStu - GoTo applyNewPersonal");
 				setDropdownListsStep1(request,stuRegForm);
 				return mapping.findForward("applyNewPersonal");
 			}else{
-				log.debug("ApplyForStudentNumberAction - stepQualConfirm -  CurStu - GoTo applyRetContact");
+				//log.debug("ApplyForStudentNumberAction - stepQualConfirm -  CurStu - GoTo applyRetContact");
 				return mapping.findForward("applyRetContact");
 			}
 		}
@@ -5495,7 +5525,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("ApplyForStudentNumberaction - stepSLPConfirm - Start");
+		//log.debug("ApplyForStudentNumberaction - stepSLPConfirm - Start");
 		
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
@@ -5504,7 +5534,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		stuRegForm.setFromPage("stepQualConfirm");
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -5517,35 +5547,35 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		//Save Second SLP Choice to STUAPQ
 		//Get Status of First SLP Choice and make Second Choice the same
 		String firstStatus = dao.getBasicStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "1");
-		log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Choice1 - firstStatus: " + firstStatus);
+		//log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Choice1 - firstStatus: " + firstStatus);
 		
 		String firstPassed = dao.getBasicSTUAPQInfo(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "1", "PASSED");
-		log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Choice1 - firstPassed: " + firstPassed);
+		//log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Choice1 - firstPassed: " + firstPassed);
 		
 		String firstApplied = dao.getBasicSTUAPQInfo(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "1", "APPLIED");
-		log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Choice1 - firstApplied: " + firstApplied);
+		//log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Choice1 - firstApplied: " + firstApplied);
 		
 		String firstRPL = dao.getBasicSTUAPQInfo(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "1", "RPL");
-		log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Choice1 - firstRPL: " + firstRPL);
+		//log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Choice1 - firstRPL: " + firstRPL);
 		
 		String collegeCode2 = dao.getCollegeCategory(stuRegForm.getSelQualCode2());
-		log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Choice2 - CollegeCategory2: " + collegeCode2);
+		//log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Choice2 - CollegeCategory2: " + collegeCode2);
 		
 		String adminSection2 = dao.getQualAdminSection(stuRegForm.getStudent().getQual2());
-		log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Choice2 - adminSection2: " + adminSection2);
+		//log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Choice2 - adminSection2: " + adminSection2);
 		
 		//There should be no second choice entry, unless student went back and forward again, if so, delete it, then insert new entry.
 		boolean getResult = dao.getSTUAPQDetail(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "2", "stepSLPConfirm");
-		log.debug("ApplyForStudentNumberAction - stepSLPConfirm - newQual1 - Check STUAPQ Detail= " + getResult);
+		//log.debug("ApplyForStudentNumberAction - stepSLPConfirm - newQual1 - Check STUAPQ Detail= " + getResult);
 		for (int i = 0; i < 5; i++){
 			if (getResult){
 				int delResult = dao.delSTUAPQ(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "2", "stepSLPConfirm");
-				log.debug("ApplyForStudentNumberAction - stepSLPConfirm - newQual2 - Delete STUAPQ ("+i+")= " + delResult);
+				//log.debug("ApplyForStudentNumberAction - stepSLPConfirm - newQual2 - Delete STUAPQ ("+i+")= " + delResult);
 				Thread.sleep(1000);
 				getResult = dao.getSTUAPQDetail(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "2", "stepSLPConfirm");
 			}
 		}
-		log.debug("ApplyForStudentNumberAction - stepSLPConfirm - No STUAPQ for Choice 2- Saving STUAPQ");
+		//log.debug("ApplyForStudentNumberAction - stepSLPConfirm - No STUAPQ for Choice 2- Saving STUAPQ");
 		
 		boolean isError = false;
 		if (!getResult){
@@ -5558,11 +5588,11 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			} else {
 				isError = false;
 			}
-			log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Saving Qual2 - isError="+isError);
+			//log.debug("ApplyForStudentNumberAction - stepSLPConfirm - Saving Qual2 - isError="+isError);
 			boolean getResult2 = dao.getSTUAPQDetail(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "2", "stepSLPConfirm");					
 			if (!getResult2){
-				log.debug("ApplyForStudentNumberAction - stepSLPConfirm - STUAPQ SLP Choice 2 not Saved - Stu=" + stuRegForm.getStudent().getNumber() + " / Qual2=" + stuRegForm.getSelQualCode2() + " / Spec2=" + stuRegForm.getSelSpecCode2());
-				log.warn("ApplyForStudentNumberAction - applyRetDeclare - STUAPQ SLP Choice 2 not Saved - Stu=" + stuRegForm.getStudent().getNumber() + " / Qual2=" + stuRegForm.getSelQualCode2() + " / Spec2=" + stuRegForm.getSelSpecCode2());
+				//log.debug("ApplyForStudentNumberAction - stepSLPConfirm - STUAPQ SLP Choice 2 not Saved - Stu=" + stuRegForm.getStudent().getNumber() + " / Qual2=" + stuRegForm.getSelQualCode2() + " / Spec2=" + stuRegForm.getSelSpecCode2());
+				log.warn("ApplyForStudentNumberAction - stepSLPConfirm - STUAPQ SLP Choice 2 not Saved - Stu=" + stuRegForm.getStudent().getNumber() + " / Qual2=" + stuRegForm.getSelQualCode2() + " / Spec2=" + stuRegForm.getSelSpecCode2());
 			}
 		}
 		
@@ -5574,10 +5604,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		request.setAttribute("email",stuRegForm.getStudent().getEmailAddress());
 		
 		/*Write work flow document */
-		log.debug("ApplyForStudentNumberAction - stepSLPConfirm -  writeWorkflowSLP: " + date);
+		//log.debug("ApplyForStudentNumberAction - stepSLPConfirm -  writeWorkflowSLP: " + date);
 		writeWorkflowSLP(stuRegForm,date);
 		
-		log.debug("ApplyForStudentNumberAction - stepSLPConfirm - GoTo dynamicUpload");
+		//log.debug("ApplyForStudentNumberAction - stepSLPConfirm - GoTo dynamicUpload");
 		return mapping.findForward("dynamicUpload");
 	}
 	
@@ -5585,7 +5615,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
-		log.debug("ApplyForStudentNumberaction - stepRetContact - Start");
+		//log.debug("ApplyForStudentNumberaction - stepRetContact - Start");
 		
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
@@ -5594,7 +5624,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		stuRegForm.setFromPage("applyRetContact");
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction SaveStudyAction - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction SaveStudyAction - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -5649,7 +5679,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		stuRegForm.getStudent().setEmailAddress(stripXSS(stuRegForm.getStudent().getEmailAddress(), "EmailAddress", "RetContact", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 		stuRegForm.getStudent().setEmailAddress2(stripXSS(stuRegForm.getStudent().getEmailAddress2(), "EmailAddress2", "RetContact", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 		if(!stuRegForm.getStudent().getEmailAddressGood()){
-			log.debug("MyLife Good");
+			//log.debug("MyLife Good");
 			if (stuRegForm.getStudent().getEmailAddress() == null || "".equals(stuRegForm.getStudent().getEmailAddress())){
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 						new ActionMessage("message.generalmessage", "The e-mail address is mandatory, please supply a valid e-mail address."));
@@ -5705,13 +5735,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				return mapping.findForward("applyRetContact");
 			}
 		}else{
-			log.debug("MyLife NOT Good");
+			//log.debug("MyLife NOT Good");
 		}
 		
 		//Update Student Email Address and Cellular Number
 		dao.updStudentContact(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getEmailAddress(), stuRegForm.getStudent().getCellNr());
 
-		log.debug("ApplyForStudentNumberAction - stepRetContact - GoTo applyRetRadio");
+		//log.debug("ApplyForStudentNumberAction - stepRetContact - GoTo applyRetRadio");
 		return mapping.findForward("applyRetRadio");
 	}
 	
@@ -5719,7 +5749,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
-		log.debug("ApplyForStudentNumberaction - stepRetRadio - Start");
+		//log.debug("ApplyForStudentNumberaction - stepRetRadio - Start");
 
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
@@ -5727,7 +5757,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		stuRegForm.setFromPage("applyRetRadio");
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - stepRetRadio - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - stepRetRadio - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -5748,7 +5778,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			addErrors(request, messages);
 			return mapping.findForward("applyRetRadio");
 		}
-		log.debug("ApplyForStudentNumberaction - stepRetRadio - StaffCurrent=" + stuRegForm.getStudentApplication().getStaffCurrent());
+		//log.debug("ApplyForStudentNumberaction - stepRetRadio - StaffCurrent=" + stuRegForm.getStudentApplication().getStaffCurrent());
 
 		stuRegForm.getStudentApplication().setStaffDeceased(stripXSS(stuRegForm.getStudentApplication().getStaffDeceased(), "StaffDeceased", "RetRadio", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 		if (stuRegForm.getStudentApplication().getStaffDeceased() == null || "".equalsIgnoreCase(stuRegForm.getStudentApplication().getStaffDeceased())){
@@ -5757,7 +5787,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			addErrors(request, messages);
 			return mapping.findForward("applyRetRadio");
 		}
-		log.debug("ApplyForStudentNumberaction - stepRetRadio - StaffDeceased=" + stuRegForm.getStudentApplication().getStaffDeceased());
+		//log.debug("ApplyForStudentNumberaction - stepRetRadio - StaffDeceased=" + stuRegForm.getStudentApplication().getStaffDeceased());
 
 		stuRegForm.getStudentApplication().setPrisoner(stripXSS(stuRegForm.getStudentApplication().getPrisoner(), "Prisoner", "RetRadio", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 		if (stuRegForm.getStudentApplication().getPrisoner() == null || "".equalsIgnoreCase(stuRegForm.getStudentApplication().getPrisoner())){
@@ -5766,7 +5796,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			addErrors(request, messages);
 			return mapping.findForward("applyRetRadio");
 		}
-		log.debug("ApplyForStudentNumberaction - stepRetRadio - Prisoner=" + stuRegForm.getStudentApplication().getPrisoner());
+		//log.debug("ApplyForStudentNumberaction - stepRetRadio - Prisoner=" + stuRegForm.getStudentApplication().getPrisoner());
 
 		stuRegForm.getStudentApplication().setCompleteQual(stripXSS(stuRegForm.getStudentApplication().getCompleteQual(), "CompleteQual", "RetRadio", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 		if (stuRegForm.getStudentApplication().getCompleteQual() == null || "".equalsIgnoreCase(stuRegForm.getStudentApplication().getCompleteQual()) || "0".equalsIgnoreCase(stuRegForm.getStudentApplication().getCompleteQual())){
@@ -5775,10 +5805,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			addErrors(request, messages);
 			return mapping.findForward("applyRetRadio");
 		}
-		log.debug("ApplyForStudentNumberaction - stepRetRadio - CompleteQual=" + stuRegForm.getStudentApplication().getCompleteQual());
+		//log.debug("ApplyForStudentNumberaction - stepRetRadio - CompleteQual=" + stuRegForm.getStudentApplication().getCompleteQual());
 
 		if (stuRegForm.getStudentApplication().getCompleteQual().equalsIgnoreCase("Y")){
-			log.debug("ApplyForStudentNumberaction - stepRetRadio - CompleteText Get=" + stuRegForm.getStudentApplication().getCompleteText());
+			//log.debug("ApplyForStudentNumberaction - stepRetRadio - CompleteText Get=" + stuRegForm.getStudentApplication().getCompleteText());
 			
 			if (stuRegForm.getStudentApplication().getCompleteText() == null || "".equalsIgnoreCase(stuRegForm.getStudentApplication().getCompleteText().trim()) || stuRegForm.getStudentApplication().getCompleteText().trim().length() < 1){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -5793,7 +5823,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				return mapping.findForward("applyRetRadio");
 			}
 		}
-		log.debug("ApplyForStudentNumberaction - stepRetRadio - CompleteText Final=" + stuRegForm.getStudentApplication().getCompleteText());
+		//log.debug("ApplyForStudentNumberaction - stepRetRadio - CompleteText Final=" + stuRegForm.getStudentApplication().getCompleteText());
 
 		return mapping.findForward("applyRetDeclare");
 		
@@ -5804,7 +5834,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
-		log.debug("ApplyForStudentNumberaction - applyRetDeclare - Start");
+		//log.debug("ApplyForStudentNumberaction - applyRetDeclare - Start");
 
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
@@ -5813,7 +5843,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		stuRegForm.setFromPage("applyRetDeclare");
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -5839,15 +5869,15 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	
 		//test agreement flag
 		if (!"Y".equalsIgnoreCase(stuRegForm.getAgree())){
+			messages.add(ActionMessages.GLOBAL_MESSAGE,
+					new ActionMessage("message.generalmessage", "Student has declined the Decleration agreement. Please log on again if you wish to retry."));
+			addErrors(request, messages);
 			return mapping.findForward(cancel(form));
 		}
-		log.debug("ApplyForStudentNumberaction - applyRetDeclare - StaffCurrent=" + stuRegForm.getStudentApplication().getStaffCurrent());
+		//log.debug("ApplyForStudentNumberaction - applyRetDeclare - StaffCurrent=" + stuRegForm.getStudentApplication().getStaffCurrent());
 
 		//Update Student Staff or Dependent details
 		boolean isSTUANN = dao.validateStudentAnnual(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear());
-
-		//2018 Edmund - Add code so student cannot submit more than once, even if an error occurs.
-		stuRegForm.setDoneSubmit(true);
 		
 		if (!isSTUANN){
 			Srrsa01sRegStudentPersDetail op = new Srrsa01sRegStudentPersDetail();
@@ -5864,19 +5894,19 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			op.setInStudentAnnualRecordMkAcademicPeriod(Short.parseShort("1")); //Must be hardcoded to 1 !!!!
 			op.setInStudentAnnualRecordMkStudentNr(Integer.parseInt(stuRegForm.getStudent().getNumber()));
 		
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare - (Srrsa01sRegStudentPersDetail) - Student Number=" + Integer.parseInt(stuRegForm.getStudent().getNumber()) + ", Year: " + String.valueOf(stuRegForm.getStudent().getAcademicYear()));
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare - (Srrsa01sRegStudentPersDetail) - Student Number=" + Integer.parseInt(stuRegForm.getStudent().getNumber()) + ", Year: " + String.valueOf(stuRegForm.getStudent().getAcademicYear()));
 		
 			op.execute();
 		
 			if (opl.getException() != null) throw opl.getException();
 			if (op.getExitStateType() < 3) throw new Exception(op.getExitStateMsg());
 		
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare - displayPersonal - After Execute");
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare - displayPersonal - After Execute");
 			String errorMessage = op.getOutCsfStringsString500();
 			
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare - displayPersonal - getOutCsfStringsString500="+op.getOutCsfStringsString500());
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare - displayPersonal - getOutCsfStringsString500="+op.getOutCsfStringsString500());
 			
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare - displayPersonal - errorMessage: " + errorMessage);
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare - displayPersonal - errorMessage: " + errorMessage);
 			if(!"".equalsIgnoreCase(errorMessage)){
 				if ("WARNING".equalsIgnoreCase(errorMessage.substring(0,7))){
 					errorMessage="";
@@ -5897,7 +5927,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		dao.updateStudentCorrespondence(stuRegForm.getStudent().getNumber());
 		
 		//Save Qualification to STUAPQ - Start
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare -  Save Qualification to STUAPQ - Start");
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare -  Save Qualification to STUAPQ - Start");
 		
 		//Save Qualification and Specialization and contact details before going to File Upload
 		String newCat1 = dao.getXMLSelected("catCode1", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "applyRetDeclare");
@@ -5908,41 +5938,41 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		String newQual2 = dao.getXMLSelected("qualCode2", "2", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "applyRetDeclare");
 		String newSpec2 = dao.getXMLSelected("specCode2", "2", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "applyRetDeclare");
 	
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare get studentNr: " + stuRegForm.getStudent().getNumber());
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare get acaYear: " + stuRegForm.getStudent().getAcademicYear());
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare get acaPeriod: " + stuRegForm.getStudent().getAcademicPeriod());
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare get studentNr: " + stuRegForm.getStudent().getNumber());
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare get acaYear: " + stuRegForm.getStudent().getAcademicYear());
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare get acaPeriod: " + stuRegForm.getStudent().getAcademicPeriod());
 		
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare get newCat1:  " + newCat1);
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare get newCat2:  " + newCat2);
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare get newQual1: " + newQual1);
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare get newQual2: " + newQual2);
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare get newSpec1: " + newSpec1);
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare get newSpec2: " + newSpec2);
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare get newCat1:  " + newCat1);
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare get newCat2:  " + newCat2);
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare get newQual1: " + newQual1);
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare get newQual2: " + newQual2);
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare get newSpec1: " + newSpec1);
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare get newSpec2: " + newSpec2);
 		
 		//---------- Check input - Primary Qualification
 		if (stuRegForm.getStudent().getCategory1() == null || newCat1 == null || stuRegForm.getStudent().getQual1() == null || newQual1 == null || stuRegForm.getStudent().getSpec1() == null || newSpec1 == null){
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare Student Has Null Entry Student="+stuRegForm.getStudent().getNumber()+", Cat1=" + stuRegForm.getStudent().getCategory1() +", XMLCat1="+newCat1+", Qual1=" + stuRegForm.getStudent().getQual1() +", XMLQual1="+newQual1+", Spec1=" + stuRegForm.getStudent().getSpec1() +", XMLSpec1="+newSpec1);
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare Student Has Null Entry Student="+stuRegForm.getStudent().getNumber()+", Cat1=" + stuRegForm.getStudent().getCategory1() +", XMLCat1="+newCat1+", Qual1=" + stuRegForm.getStudent().getQual1() +", XMLQual1="+newQual1+", Spec1=" + stuRegForm.getStudent().getSpec1() +", XMLSpec1="+newSpec1);
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 				new ActionMessage("message.generalmessage", "An Error occurred while processing your Primary Qualification selection (2aN). Please try again."));
 			addErrors(request, messages);
 			return mapping.findForward("applyQualification");
 		}else{
 			if (!stuRegForm.getStudent().getCategory1().equalsIgnoreCase(newCat1)){
-				log.debug("ApplyForStudentNumberAction - applyRetDeclare Student Cat1=" + stuRegForm.getStudent().getCategory1() +", XMLCat1="+newCat1);
+				//log.debug("ApplyForStudentNumberAction - applyRetDeclare Student Cat1=" + stuRegForm.getStudent().getCategory1() +", XMLCat1="+newCat1);
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "An Error occurred while processing your primary category selection (2a). Please try again."));
 				addErrors(request, messages);
 				return mapping.findForward("applyQualification");
 			}
 			if (!stuRegForm.getStudent().getQual1().equalsIgnoreCase(newQual1)){
-				log.debug("ApplyForStudentNumberAction - applyRetDeclare Student Qual1=" + stuRegForm.getStudent().getQual1() +", XMLQual1="+newQual1);
+				//log.debug("ApplyForStudentNumberAction - applyRetDeclare Student Qual1=" + stuRegForm.getStudent().getQual1() +", XMLQual1="+newQual1);
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "An Error occurred while processing your primary qualification selection (2a). Please try again."));
 				addErrors(request, messages);
 				return mapping.findForward("applyQualification");
 			}
 			if (!stuRegForm.getStudent().getSpec1().equalsIgnoreCase(newSpec1)){
-				log.debug("ApplyForStudentNumberAction - applyRetDeclare Student Spec1=" + stuRegForm.getStudent().getSpec1() +", XMLSpec1="+newSpec1);
+				//log.debug("ApplyForStudentNumberAction - applyRetDeclare Student Spec1=" + stuRegForm.getStudent().getSpec1() +", XMLSpec1="+newSpec1);
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "An Error occurred while processing your primary specialisation selection (2a). Please try again."));
 				addErrors(request, messages);
@@ -5952,28 +5982,28 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		
 		// ---------- Check input - Secondary Qualification
 		if (stuRegForm.getStudent().getCategory2() == null || newCat2 == null || stuRegForm.getStudent().getQual2() == null || newQual2 == null || stuRegForm.getStudent().getSpec2() == null || newSpec2 == null){
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare Student Has Null Entry Student="+stuRegForm.getStudent().getNumber()+", Cat2=" + stuRegForm.getStudent().getCategory2() +", XMLCat2="+newCat2+", Qual2=" + stuRegForm.getStudent().getQual2() +", XMLQual2="+newQual2+", Spec2=" + stuRegForm.getStudent().getSpec2() +", XMLSpec2="+newSpec2);
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare Student Has Null Entry Student="+stuRegForm.getStudent().getNumber()+", Cat2=" + stuRegForm.getStudent().getCategory2() +", XMLCat2="+newCat2+", Qual2=" + stuRegForm.getStudent().getQual2() +", XMLQual2="+newQual2+", Spec2=" + stuRegForm.getStudent().getSpec2() +", XMLSpec2="+newSpec2);
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 				new ActionMessage("message.generalmessage", "An Error occurred while processing your Secondary Qualification selection (2aN). Please try again."));
 			addErrors(request, messages);
 			return mapping.findForward("applyQualification");
 		}else{
 			if (!stuRegForm.getStudent().getCategory2().equalsIgnoreCase(newCat2)){
-				log.debug("ApplyForStudentNumberAction - stepRetQual Student Cat2=" + stuRegForm.getStudent().getCategory2() +", XMLCat2="+newCat2);
+				//log.debug("ApplyForStudentNumberAction - stepRetQual Student Cat2=" + stuRegForm.getStudent().getCategory2() +", XMLCat2="+newCat2);
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "An Error occurred while processing your secondary category selection (2a). Please try again."));
 				addErrors(request, messages);
 				return mapping.findForward("applyQualification");
 			}
 			if (!stuRegForm.getStudent().getQual2().equalsIgnoreCase(newQual2)){
-				log.debug("ApplyForStudentNumberAction - applyRetDeclare Student Qual2=" + stuRegForm.getStudent().getQual2() +", XMLQual2="+newQual2);
+				//log.debug("ApplyForStudentNumberAction - applyRetDeclare Student Qual2=" + stuRegForm.getStudent().getQual2() +", XMLQual2="+newQual2);
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "An Error occurred while processing your secondary qualification selection (2a). Please try again."));
 				addErrors(request, messages);
 				return mapping.findForward("applyQualification");
 			}
 			if (!stuRegForm.getStudent().getSpec2().equalsIgnoreCase(newSpec2)){
-				log.debug("ApplyForStudentNumberAction - applyRetDeclare Student Spec2=" + stuRegForm.getStudent().getSpec2() +", XMLSpec2="+newSpec2);
+				//log.debug("ApplyForStudentNumberAction - applyRetDeclare Student Spec2=" + stuRegForm.getStudent().getSpec2() +", XMLSpec2="+newSpec2);
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "An Error occurred while processing your secondary specialisation selection (2a). Please try again."));
 				addErrors(request, messages);
@@ -6005,7 +6035,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}
 				
 		// Proposed Secondary qualification
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare - Proposed Secondary qualification - newQual2: " + newQual2);
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare - Proposed Secondary qualification - newQual2: " + newQual2);
 		if (newQual2 != null && !"0".equals(newQual2) && !"".equals(newQual2) && !"undefined".equalsIgnoreCase(newQual2)){
 			code2 = dao.validateQualification(stuRegForm.getStudent().getNumber(), newQual2);
 			underpost2 = code2.substring(0,1);
@@ -6028,10 +6058,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		String adminSection1 = dao.getQualAdminSection(stuRegForm.getStudent().getQual1());
 		String adminSection2 = dao.getQualAdminSection(stuRegForm.getStudent().getQual2());
 		
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - CollegeCategory: " + collegeCode1);
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - CollegeCategory: " + collegeCode2);
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - AdminSectio: " + adminSection1);
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - AdminSectio: " + adminSection2);
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - CollegeCategory: " + collegeCode1);
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - CollegeCategory: " + collegeCode2);
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - AdminSectio: " + adminSection1);
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - AdminSectio: " + adminSection2);
 	
 		boolean getResult1 = false;
 		boolean getResult2 = false;
@@ -6041,28 +6071,28 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		//Edmund 2018 Add Status Check for Semester 1 Applications and set Semester 2 the same, thus if Status was ND or NP in Aug, it must be ND or NP in Apr/May
 		String statusResult1 = "AP";
 		String statusResult2 = "AP";
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare - Check Semester 1 Status - Make semester 2 the same");
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare - Check Semester 1 Status - Make semester 2 the same");
 	
 		if  (stuRegForm.getStudent().getAcademicPeriod().equals("2")){
 			statusResult1 = dao.getSTUAPQStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), "1", "1", "applyRetDeclare"); //Period and Choice Hardcoded
 			statusResult2 = dao.getSTUAPQStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), "1", "2", "applyRetDeclare"); //Period and Choice Hardcoded
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - STUAPQStatus - acaPeriod1= " + statusResult1);
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - STUAPQStatus - acaPeriod1= " + statusResult2);
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - STUAPQStatus - acaPeriod1= " + statusResult1);
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - STUAPQStatus - acaPeriod1= " + statusResult2);
 		}
 		
 		getResult1 = dao.getSTUAPQDetail(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "1", "applyRetDeclare");
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - Check STUAPQ Detail= " + getResult1);
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - Check STUAPQ Detail= " + getResult1);
 		for (int i = 0; i < 5; i++){
 			if (getResult1){
 				int delResult1 = dao.delSTUAPQ(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "1", "applyRetDeclare");
-				log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - Delete STUAPQ ("+i+")= " + delResult1);
+				//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - Delete STUAPQ ("+i+")= " + delResult1);
 				Thread.sleep(1000);
 				getResult1 = dao.getSTUAPQDetail(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "1", "applyRetDeclare");
 			}
 		}
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - No STUAPQ - Saving STUAPQ");
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - No STUAPQ - Saving STUAPQ");
 		/*
-		 	log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - STUAPQ Parameters="+
+		 	//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - STUAPQ Parameters="+
 				newQual1+", "+newSpec1+", 1, "+stuRegForm.getStudent().getNumber()+", "+stuRegForm.getStudent().getAcademicYear()+", "+stuRegForm.getStudent().getAcademicPeriod()+", "+
 				statusResult1+", "+collegeCode1+", "+adminSection1+", "+stuRegForm.getStudentApplication().getRadioPrev()+", "+stuRegForm.getStudentApplication().getRadioRPL()+", "+
 				stuRegForm.getStudentApplication().getRadioNDP()+", applyRetDeclare");
@@ -6099,10 +6129,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			} else {
 				isError1 = false;
 			}
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - Saving Qual1 - isError1="+isError1);
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual1 - Saving Qual1 - isError1="+isError1);
 			getResult1 = dao.getSTUAPQDetail(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "1", "applyRetDeclare");					
 			if (!getResult1){
-				log.debug("ApplyForStudentNumberAction - applyRetDeclare - STUAPQ not Saved - Stu=" + stuRegForm.getStudent().getNumber() + " / Qual1=" + newQual1 + " / Spec1=" + newSpec1);
+				//log.debug("ApplyForStudentNumberAction - applyRetDeclare - STUAPQ not Saved - Stu=" + stuRegForm.getStudent().getNumber() + " / Qual1=" + newQual1 + " / Spec1=" + newSpec1);
 				log.warn("ApplyForStudentNumberAction - applyRetDeclare - STUAPQ not Saved - Stu=" + stuRegForm.getStudent().getNumber() + " / Qual1=" + newQual1 + " / Spec1=" + newSpec1);
 			}
 	
@@ -6110,20 +6140,20 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		
 		if (!isError1){
 			//Secondary Selection
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - Starting - Saving STUAPQ");
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - Starting - Saving STUAPQ");
 			getResult2 = dao.getSTUAPQDetail(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "2", "applyRetDeclare");
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - Check STUAPQ Detail= " + getResult2);
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - Check STUAPQ Detail= " + getResult2);
 	
 			for (int i = 0; i < 5; i++){
 				if (getResult2){
 					int delResult2 = dao.delSTUAPQ(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "2", "applyRetDeclare");
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - Delete STUAPQ ("+i+")= " + delResult2);
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - Delete STUAPQ ("+i+")= " + delResult2);
 					Thread.sleep(1000);
 					getResult2 = dao.getSTUAPQDetail(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "2", "applyRetDeclare");
 				}
 			}
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - No STUAPQ - Saving STUAPQ");
-			/*log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - STUAPQ Parameters="+
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - No STUAPQ - Saving STUAPQ");
+			/*//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - STUAPQ Parameters="+
 					newQual2+", "+newSpec2+", 2, "+stuRegForm.getStudent().getNumber()+", "+stuRegForm.getStudent().getAcademicYear()+", "+stuRegForm.getStudent().getAcademicPeriod()+", "+
 					statusResult1+", "+collegeCode1+", "+adminSection1+", "+stuRegForm.getStudentApplication().getRadioPrev()+", "+stuRegForm.getStudentApplication().getRadioRPL()+", "+
 					stuRegForm.getStudentApplication().getRadioNDP()+", applyRetDeclare");
@@ -6161,16 +6191,16 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					} else {
 						isError2 = false;
 					}
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - Saving Qual2 - isError2="+isError1);
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - newQual2 - Saving Qual2 - isError2="+isError1);
 					getResult2 = dao.getSTUAPQDetail(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "2", "applyRetDeclare");					
 					if (!getResult2){
-						log.debug("ApplyForStudentNumberAction - applyRetDeclare - STUAPQ not Saved - Stu=" + stuRegForm.getStudent().getNumber() + " / Qual2=" + newQual2 + " / Spec2=" + newSpec2);
+						//log.debug("ApplyForStudentNumberAction - applyRetDeclare - STUAPQ not Saved - Stu=" + stuRegForm.getStudent().getNumber() + " / Qual2=" + newQual2 + " / Spec2=" + newSpec2);
 						log.warn("ApplyForStudentNumberAction - applyRetDeclare - STUAPQ not Saved - Stu=" + stuRegForm.getStudent().getNumber() + " / Qual2=" + newQual2 + " / Spec2=" + newSpec2);
 					}
 				}
 			}
 		}
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare - After Save - Error1="+isError1+", Error2="+isError2);
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare - After Save - Error1="+isError1+", Error2="+isError2);
 	
 		if (isError1){
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -6184,14 +6214,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			return mapping.findForward("applyQualification");
 		}
 		
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare -  Save Qualification to STUAPQ - End");
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare -  Save Qualification to STUAPQ - End");
 		//Save Qualification to STUAPQ - End
 		
 		//Save Previous Qualifications - Start
 		int resultUpdate = 0;
 		int resultSave = 0;
 		//Save
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug");
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug");
 		if (stuRegForm.getQualArray() != null && !stuRegForm.getQualArray().isEmpty()){
 			//List now starts at 0;
 			if (stuRegForm.getQualArray().size() > 0){
@@ -6199,22 +6229,22 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				for (int i=0; i < stuRegForm.getQualArray().size(); i++){
 					other = (HistoryArray) stuRegForm.getQualArray().get(i);
 					//Debug
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERSEQ="+other.getOtherSEQ());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERSEQ="+other.getOtherSEQ());
 					
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERUniv="+other.getOtherUniv());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERUnivText="+other.getOtherUnivText());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERStudnr="+other.getOtherStudnr());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERQual="+other.getOtherQual());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERUniv="+other.getOtherUniv());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERUnivText="+other.getOtherUnivText());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERStudnr="+other.getOtherStudnr());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERQual="+other.getOtherQual());
 					
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERYearStart="+other.getOtherYearStart());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERYearEnd="+other.getOtherYearEnd());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERCountry="+other.getOtherCountry());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERYearStart="+other.getOtherYearStart());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERYearEnd="+other.getOtherYearEnd());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERCountry="+other.getOtherCountry());
 					
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERLock="+other.getOtherLock());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERForeign="+other.getOtherForeign());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERComplete="+other.getOtherComplete());		
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERLock="+other.getOtherLock());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERForeign="+other.getOtherForeign());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERComplete="+other.getOtherComplete());		
 	
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save");
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save");
 					//Save PrevQual
 					boolean exists = dao.checkPREV(stuRegForm.getStudent().getNumber(), other.getOtherSEQ());
 					if (exists){
@@ -6223,15 +6253,15 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 						//Update only if Final year has changed and row is not locked
 						if ("N".equalsIgnoreCase(other.getOtherLock())){
 							resultUpdate = dao.updatePREVADM(stuRegForm.getStudent().getNumber(), other.getOtherSEQ(), other.getOtherYearEnd(), other.getOtherComplete());
-							log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", resultUpdate="+resultUpdate);
+							//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", resultUpdate="+resultUpdate);
 						}
 					}else{
 						// Save to database if there are any Qualifications added
 						int maxPrev = 0;
 						maxPrev = dao.getSTUPREVMax(stuRegForm.getStudent().getNumber());
-						log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", maxPrev="+maxPrev);
+						//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", maxPrev="+maxPrev);
 						maxPrev++;
-						log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", maxPrev Plus 1="+maxPrev);
+						//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", maxPrev Plus 1="+maxPrev);
 	
 						//Write STUXML Entry to save Sequence number
 						String saveSTUXML =  dao.saveSTUXML(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "stuPrev", "1", other.getOtherSEQ(),  "YES",  "stepPrevQual", "INSERT");
@@ -6239,27 +6269,27 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 								other.getOtherYearEnd(), other.getOtherUnivText(), 
 								other.getOtherStudnr(), other.getOtherQual(), other.getOtherForeign(), 
 								other.getOtherComplete(), other.getOtherUniv(), other.getOtherCountry());
-						log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", saveSTUXML="+saveSTUXML+", resultSave="+resultSave);
+						//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", saveSTUXML="+saveSTUXML+", resultSave="+resultSave);
 					}
 					
 				}
-				log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Save Done");
+				//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Save Done");
 			}else{
-				log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", No Qualifications Entered or found!");
+				//log.debug("ApplyForStudentNumberAction - applyRetDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", No Qualifications Entered or found!");
 			}
 			//Save Previous Qualifications - End
 		}
 		
 		//Check if NDP Modules exist. If not, insert them.
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare -  Check if NDP Modules");
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare -  Check if NDP Modules");
 		if ("Y".equals(stuRegForm.getStudentApplication().getRadioNDP())){
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare - Save NDP Modules");
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare - Save NDP Modules");
 			if ((stuRegForm.getStudentApplication().getNdpRegSu1() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu1())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
 				boolean isNDP1 = dao.getNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu1());
 			
 				if (!isNDP1){
 					dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu1());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (1) = "+stuRegForm.getStudentApplication().getNdpRegSu1());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (1) = "+stuRegForm.getStudentApplication().getNdpRegSu1());
 				}
 			}
 			if ((stuRegForm.getStudentApplication().getNdpRegSu2() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu2())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -6267,7 +6297,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			
 				if (!isNDP2){
 					dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu2());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (2) = "+stuRegForm.getStudentApplication().getNdpRegSu2());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (2) = "+stuRegForm.getStudentApplication().getNdpRegSu2());
 				}
 			}
 			if ((stuRegForm.getStudentApplication().getNdpRegSu3() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu3())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -6275,7 +6305,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			
 				if (!isNDP3){
 					dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu3());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (3) = "+stuRegForm.getStudentApplication().getNdpRegSu3());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (3) = "+stuRegForm.getStudentApplication().getNdpRegSu3());
 				}
 			}
 			if ((stuRegForm.getStudentApplication().getNdpRegSu4() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu4())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -6283,7 +6313,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			
 				if (!isNDP4){
 					dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu4());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (4) = "+stuRegForm.getStudentApplication().getNdpRegSu4());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (4) = "+stuRegForm.getStudentApplication().getNdpRegSu4());
 				}
 			}
 			if ((stuRegForm.getStudentApplication().getNdpRegSu5() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu5())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -6291,14 +6321,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			
 				if (!isNDP5){
 					dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu5());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (5) = "+stuRegForm.getStudentApplication().getNdpRegSu5());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (5) = "+stuRegForm.getStudentApplication().getNdpRegSu5());
 				}
 			}if ((stuRegForm.getStudentApplication().getNdpRegSu6() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu6())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
 				boolean isNDP6 = dao.getNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu6());
 			
 				if (!isNDP6){
 					dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu6());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (6) = "+stuRegForm.getStudentApplication().getNdpRegSu6());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (6) = "+stuRegForm.getStudentApplication().getNdpRegSu6());
 				}
 			}
 			if ((stuRegForm.getStudentApplication().getNdpRegSu7() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu7())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -6306,7 +6336,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			
 				if (!isNDP7){
 					dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu7());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (7) = "+stuRegForm.getStudentApplication().getNdpRegSu7());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (7) = "+stuRegForm.getStudentApplication().getNdpRegSu7());
 				}
 			}
 			if ((stuRegForm.getStudentApplication().getNdpRegSu8() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu8())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -6314,7 +6344,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			
 				if (!isNDP8){
 					dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu8());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (8) = "+stuRegForm.getStudentApplication().getNdpRegSu8());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (8) = "+stuRegForm.getStudentApplication().getNdpRegSu8());
 				}
 			}
 			if ((stuRegForm.getStudentApplication().getNdpRegSu9() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu9())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -6322,7 +6352,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			
 				if (!isNDP9){
 					dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu9());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (9) = "+stuRegForm.getStudentApplication().getNdpRegSu9());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (9) = "+stuRegForm.getStudentApplication().getNdpRegSu9());
 				}
 			}
 			if ((stuRegForm.getStudentApplication().getNdpRegSu10() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu10())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -6330,11 +6360,11 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			
 				if (!isNDP10){
 					dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu10());
-					log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (10) = "+stuRegForm.getStudentApplication().getNdpRegSu10());
+					//log.debug("ApplyForStudentNumberAction - applyRetDeclare - Saving NDP Module (10) = "+stuRegForm.getStudentApplication().getNdpRegSu10());
 				}
 			}
 		}else{
-			log.debug("ApplyForStudentNumberAction - applyRetDeclare - NDP = No, no Modules to save");
+			//log.debug("ApplyForStudentNumberAction - applyRetDeclare - NDP = No, no Modules to save");
 		}
 	
 		
@@ -6345,10 +6375,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		request.setAttribute("email",stuRegForm.getStudent().getEmailAddress());
 		
 		/*Write work flow document */
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare -  writeWorkflowRet: " + date);
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare -  writeWorkflowRet: " + date);
 		writeWorkflowRet(stuRegForm,date);
 			
-		log.debug("ApplyForStudentNumberAction - applyRetDeclare -  GoTo Upload");
+		//2018 Edmund - Add code so student cannot submit more than once, even if an error occurs.
+		//stuRegForm.setDoneSubmit(true);
+		
+		//log.debug("ApplyForStudentNumberAction - applyRetDeclare -  GoTo Upload");
 		return mapping.findForward("dynamicUpload");
 	}
 	
@@ -6356,7 +6389,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
-		log.debug("ApplyForStudentNumberaction - applyNDP - Start");
+		//log.debug("ApplyForStudentNumberaction - applyNDP - Start");
 
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
@@ -6365,7 +6398,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		stuRegForm.setFromPage("applyNDP");
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - applyNDP - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - applyNDP - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -6383,7 +6416,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			addErrors(request, messages);
 			return mapping.findForward("applyNDP");
 		}
-		log.debug("ApplyForStudentNumberaction - applyNDP - RadioPrev=" + stuRegForm.getStudentApplication().getRadioPrev());
+		//log.debug("ApplyForStudentNumberaction - applyNDP - RadioPrev=" + stuRegForm.getStudentApplication().getRadioPrev());
 
 		stuRegForm.getStudentApplication().setRadioRPL(stripXSS(stuRegForm.getStudentApplication().getRadioRPL(), "RadioRPL", "applyNDP", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 		if (stuRegForm.getStudentApplication().getRadioRPL() == null || "".equalsIgnoreCase(stuRegForm.getStudentApplication().getRadioRPL())){
@@ -6392,7 +6425,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			addErrors(request, messages);
 			return mapping.findForward("applyNDP");
 		}
-		log.debug("ApplyForStudentNumberaction - applyNDP - RadioRPL=" + stuRegForm.getStudentApplication().getRadioRPL());
+		//log.debug("ApplyForStudentNumberaction - applyNDP - RadioRPL=" + stuRegForm.getStudentApplication().getRadioRPL());
 
 		stuRegForm.getStudentApplication().setRadioNDP(stripXSS(stuRegForm.getStudentApplication().getRadioNDP(), "RadioNDP", "applyNDP", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 		if (stuRegForm.getStudentApplication().getRadioNDP() == null || "".equalsIgnoreCase(stuRegForm.getStudentApplication().getRadioNDP())){
@@ -6401,7 +6434,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			addErrors(request, messages);
 			return mapping.findForward("applyNDP");
 		}
-		log.debug("ApplyForStudentNumberaction - applyNDP - RadioNDP=" + stuRegForm.getStudentApplication().getRadioNDP());
+		//log.debug("ApplyForStudentNumberaction - applyNDP - RadioNDP=" + stuRegForm.getStudentApplication().getRadioNDP());
 
 		if ("Y".equalsIgnoreCase(stuRegForm.getStudentApplication().getRadioNDP())){
 			if (stuRegForm.getStudentApplication().getNdpRegSu1() == null || "".equalsIgnoreCase(stuRegForm.getStudentApplication().getNdpRegSu1().toString().trim()) || stuRegForm.getStudentApplication().getNdpRegSu1().toString().trim().length() < 1){
@@ -6419,7 +6452,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyNDP");
 			}else{
 				stuRegForm.getStudentApplication().setNdpRegSu1(stripXSS(request.getParameter("studentApplication.ndpRegSu1").trim(), "NdpRegSu1", "applyNDP", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-				log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu1=" + stuRegForm.getStudentApplication().getNdpRegSu1());
+				//log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu1=" + stuRegForm.getStudentApplication().getNdpRegSu1());
 			}
 			if (request.getParameter("studentApplication.ndpRegSu2") != null && request.getParameter("studentApplication.ndpRegSu2").trim().length() > 7){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -6428,7 +6461,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyNDP");
 			}else{
 				stuRegForm.getStudentApplication().setNdpRegSu2(stripXSS(request.getParameter("studentApplication.ndpRegSu2").trim(), "NdpRegSu2", "applyNDP", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-				log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu2=" + stuRegForm.getStudentApplication().getNdpRegSu2());
+				//log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu2=" + stuRegForm.getStudentApplication().getNdpRegSu2());
 			}
 			
 			if (request.getParameter("studentApplication.ndpRegSu3") != null && request.getParameter("studentApplication.ndpRegSu3").trim().length() > 7){
@@ -6438,7 +6471,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyNDP");
 			}else{
 				stuRegForm.getStudentApplication().setNdpRegSu3(stripXSS(request.getParameter("studentApplication.ndpRegSu3").trim(), "NdpRegSu3", "applyNDP", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-				log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu3=" + stuRegForm.getStudentApplication().getNdpRegSu3());
+				//log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu3=" + stuRegForm.getStudentApplication().getNdpRegSu3());
 			}
 			if (request.getParameter("studentApplication.ndpRegSu4") != null && request.getParameter("studentApplication.ndpRegSu4").trim().length() > 7){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -6447,7 +6480,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyNDP");
 			}else{
 				stuRegForm.getStudentApplication().setNdpRegSu4(stripXSS(request.getParameter("studentApplication.ndpRegSu4").trim(), "NdpRegSu4", "applyNDP", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-				log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu4=" + stuRegForm.getStudentApplication().getNdpRegSu4());
+				//log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu4=" + stuRegForm.getStudentApplication().getNdpRegSu4());
 			}
 			if (request.getParameter("studentApplication.ndpRegSu5") != null && request.getParameter("studentApplication.ndpRegSu5").trim().length() > 7){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -6456,7 +6489,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyNDP");
 			}else{
 				stuRegForm.getStudentApplication().setNdpRegSu5(stripXSS(request.getParameter("studentApplication.ndpRegSu5").trim(), "NdpRegSu5", "applyNDP", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-				log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu5=" + stuRegForm.getStudentApplication().getNdpRegSu5());
+				//log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu5=" + stuRegForm.getStudentApplication().getNdpRegSu5());
 			}
 			if (request.getParameter("studentApplication.ndpRegSu6") != null && request.getParameter("studentApplication.ndpRegSu6").trim().length() > 7){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -6465,7 +6498,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyNDP");
 			}else{
 				stuRegForm.getStudentApplication().setNdpRegSu6(stripXSS(request.getParameter("studentApplication.ndpRegSu6").trim(), "NdpRegSu6", "applyNDP", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-				log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu6=" + stuRegForm.getStudentApplication().getNdpRegSu6());
+				//log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu6=" + stuRegForm.getStudentApplication().getNdpRegSu6());
 			}
 			if (request.getParameter("studentApplication.ndpRegSu7") != null && request.getParameter("studentApplication.ndpRegSu7").trim().length() > 7){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -6474,7 +6507,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyNDP");
 			}else{
 				stuRegForm.getStudentApplication().setNdpRegSu7(stripXSS(request.getParameter("studentApplication.ndpRegSu7").trim(), "NdpRegSu7", "applyNDP", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-				log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu7=" + stuRegForm.getStudentApplication().getNdpRegSu7());
+				//log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu7=" + stuRegForm.getStudentApplication().getNdpRegSu7());
 			}
 			if (request.getParameter("studentApplication.ndpRegSu8") != null && request.getParameter("studentApplication.ndpRegSu8").trim().length() > 7){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -6483,7 +6516,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyNDP");
 			}else{
 				stuRegForm.getStudentApplication().setNdpRegSu8(stripXSS(request.getParameter("studentApplication.ndpRegSu8").trim(), "NdpRegSu8", "applyNDP", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-				log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu8=" + stuRegForm.getStudentApplication().getNdpRegSu8());
+				//log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu8=" + stuRegForm.getStudentApplication().getNdpRegSu8());
 			}
 			if (request.getParameter("studentApplication.ndpRegSu9") != null && request.getParameter("studentApplication.ndpRegSu9").trim().length() > 7){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -6492,7 +6525,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyNDP");
 			}else{
 				stuRegForm.getStudentApplication().setNdpRegSu9(stripXSS(request.getParameter("studentApplication.ndpRegSu9").trim(), "NdpRegSu9", "applyNDP", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-				log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu9=" + stuRegForm.getStudentApplication().getNdpRegSu9());
+				//log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu9=" + stuRegForm.getStudentApplication().getNdpRegSu9());
 			}
 			if (request.getParameter("studentApplication.ndpRegSu10") != null && request.getParameter("studentApplication.ndpRegSu10").trim().length() > 7){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -6501,16 +6534,16 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					return mapping.findForward("applyNDP");
 			}else{
 				stuRegForm.getStudentApplication().setNdpRegSu10(stripXSS(request.getParameter("studentApplication.ndpRegSu10").trim(), "NdpRegSu10", "applyNDP", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-				log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu10=" + stuRegForm.getStudentApplication().getNdpRegSu10());
+				//log.debug("ApplyForStudentNumberaction - applyNDP - setNdpRegSu10=" + stuRegForm.getStudentApplication().getNdpRegSu10());
 			}
 		}
 
 		if ("newStu".equalsIgnoreCase(stuRegForm.getStudent().getStuExist())){
-			log.debug("ApplyForStudentNumberAction - applyNDP - NewStu - GoTo applyNewPersonal");
+			//log.debug("ApplyForStudentNumberAction - applyNDP - NewStu - GoTo applyNewPersonal");
 			setDropdownListsStep1(request,stuRegForm);
 			return mapping.findForward("applyNewPersonal");
 		}else{
-			log.debug("ApplyForStudentNumberAction - applyNDP - CurStu - GoTo applyRetContact");
+			//log.debug("ApplyForStudentNumberAction - applyNDP - CurStu - GoTo applyRetContact");
 			return mapping.findForward("applyRetContact");
 		}
 	}
@@ -6520,13 +6553,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - applyNewContact - Start");
+		//log.debug("ApplyForStudentNumberAction - applyNewContact - Start");
 		
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction SaveStudyAction - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction SaveStudyAction - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -6540,7 +6573,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		if (stuRegForm.getFromPage() == null){
 			//Error: Session empty
-			log.debug("ApplyForStudentNumberAction - applyNewContact Empty Session");
+			//log.debug("ApplyForStudentNumberAction - applyNewContact Empty Session");
 			return emptySession(mapping,form,request,response);
 		}else{
 			stuRegForm.setFromPage("page3");
@@ -6638,8 +6671,8 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}
 		
 		// Email
-		log.debug("ApplyForStudentNumberAction - applyStep3 - Email1: " + stuRegForm.getStudent().getEmailAddress().trim());
-		log.debug("ApplyForStudentNumberAction - applyStep3 - Email2: " + stuRegForm.getStudent().getEmailAddress2().trim());
+		//log.debug("ApplyForStudentNumberAction - applyStep3 - Email1: " + stuRegForm.getStudent().getEmailAddress().trim());
+		//log.debug("ApplyForStudentNumberAction - applyStep3 - Email2: " + stuRegForm.getStudent().getEmailAddress2().trim());
 
 		boolean hasEmail = false;
 		boolean hasEmail2 = false;
@@ -6715,8 +6748,8 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 
 		}
-		log.debug("ApplyForStudentNumberAction - applyNewContact - End");
-		log.debug("ApplyForStudentNumberAction - applyNewContact - Goto applyNewAddress");
+		//log.debug("ApplyForStudentNumberAction - applyNewContact - End");
+		//log.debug("ApplyForStudentNumberAction - applyNewContact - Goto applyNewAddress");
 		setDropdownListsStep2(request, form);
 		return "applyNewAddress1";
 	}
@@ -6726,7 +6759,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - applyNewAddress1 - Start");
+		//log.debug("ApplyForStudentNumberAction - applyNewAddress1 - Start");
 
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
@@ -6734,7 +6767,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - applyNewAddress1 - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - applyNewAddress1 - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -6748,7 +6781,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		if (stuRegForm.getFromPage() == null){
 			//Error: Session empty
-			log.debug("ApplyForStudentNumberAction - applyNewAddress1 Empty Session");
+			//log.debug("ApplyForStudentNumberAction - applyNewAddress1 Empty Session");
 			return emptySession(mapping,form,request,response);
 		}else{
 			stuRegForm.setFromPage("applyNewAddress1");
@@ -6907,36 +6940,36 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			//log.debug("ApplyForStudentNumberAction - isAddressValid - Postal Code/Suburb validation");
 			boolean postalSuburbPostalCheck = false;
 			//Checking Postal Address Suburb vs Postal Code
-			log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Postal Suburb/Town va Code");
+			//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Postal Suburb/Town va Code");
 			if(!postalSuburbPostalCheck && stuRegForm.getStudent().getPostalAddress().getLine1().toString()!= null && !"".equals(stuRegForm.getStudent().getPostalAddress().getLine1().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line1 - PostalCode="+ stuRegForm.getStudent().getPostalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPostalAddress().getLine1().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line1 - PostalCode="+ stuRegForm.getStudent().getPostalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPostalAddress().getLine1().toString().trim());
 				postalSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getPostalAddress().getAreaCode(),stuRegForm.getStudent().getPostalAddress().getLine1().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - postalSuburbPostalCheck="+postalSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - postalSuburbPostalCheck="+postalSuburbPostalCheck);
 			}
 			if(!postalSuburbPostalCheck && stuRegForm.getStudent().getPostalAddress().getLine2().toString()!= null && !"".equals(stuRegForm.getStudent().getPostalAddress().getLine2().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line2 - PostalCode="+ stuRegForm.getStudent().getPostalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPostalAddress().getLine2().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line2 - PostalCode="+ stuRegForm.getStudent().getPostalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPostalAddress().getLine2().toString().trim());
 				postalSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getPostalAddress().getAreaCode(),stuRegForm.getStudent().getPostalAddress().getLine2().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - postalSuburbPostalCheck="+postalSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - postalSuburbPostalCheck="+postalSuburbPostalCheck);
 			}
 			if(!postalSuburbPostalCheck && stuRegForm.getStudent().getPostalAddress().getLine3().toString()!= null && !"".equals(stuRegForm.getStudent().getPostalAddress().getLine3().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line3 - PostalCode="+ stuRegForm.getStudent().getPostalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPostalAddress().getLine3().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line3 - PostalCode="+ stuRegForm.getStudent().getPostalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPostalAddress().getLine3().toString().trim());
 				postalSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getPostalAddress().getAreaCode(),stuRegForm.getStudent().getPostalAddress().getLine3().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - postalSuburbPostalCheck="+postalSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - postalSuburbPostalCheck="+postalSuburbPostalCheck);
 			}
 			if(!postalSuburbPostalCheck && stuRegForm.getStudent().getPostalAddress().getLine4().toString()!= null && !"".equals(stuRegForm.getStudent().getPostalAddress().getLine4().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line4 - PostalCode="+ stuRegForm.getStudent().getPostalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPostalAddress().getLine4().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line4 - PostalCode="+ stuRegForm.getStudent().getPostalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPostalAddress().getLine4().toString().trim());
 				postalSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getPostalAddress().getAreaCode(),stuRegForm.getStudent().getPostalAddress().getLine4().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - postalSuburbPostalCheck="+postalSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - postalSuburbPostalCheck="+postalSuburbPostalCheck);
 			}
 			if(!postalSuburbPostalCheck && stuRegForm.getStudent().getPostalAddress().getLine5().toString()!= null && !"".equals(stuRegForm.getStudent().getPostalAddress().getLine5().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line5 - PostalCode="+ stuRegForm.getStudent().getPostalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPostalAddress().getLine5().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line5 - PostalCode="+ stuRegForm.getStudent().getPostalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPostalAddress().getLine5().toString().trim());
 				postalSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getPostalAddress().getAreaCode(),stuRegForm.getStudent().getPostalAddress().getLine5().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - postalSuburbPostalCheck="+postalSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - postalSuburbPostalCheck="+postalSuburbPostalCheck);
 			}
 			if(!postalSuburbPostalCheck && stuRegForm.getStudent().getPostalAddress().getLine6().toString()!= null && !"".equals(stuRegForm.getStudent().getPostalAddress().getLine6().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line6 - PostalCode="+ stuRegForm.getStudent().getPostalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPostalAddress().getLine6().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line6 - PostalCode="+ stuRegForm.getStudent().getPostalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPostalAddress().getLine6().toString().trim());
 				postalSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getPostalAddress().getAreaCode(),stuRegForm.getStudent().getPostalAddress().getLine6().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - postalSuburbPostalCheck="+postalSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - postalSuburbPostalCheck="+postalSuburbPostalCheck);
 			}
 			if (!postalSuburbPostalCheck){
 				//log.debug("RegistrationStudentBroker - isAddressValid - postalSuburbPostalCheck: " + postalSuburbPostalCheck);
@@ -6946,12 +6979,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				setDropdownListsStep2(request, form);
 				return "applyNewAddress1";
 	        }else{
-		      	  //log.debug("RegistrationStudentBroker - isAddressValid - Postal Address Suburb result="+result);
+		      	  //log.debug("RegistrationStudentBroker - isAddressValid - Postal Address Suburb result="+postalSuburbPostalCheck);
 			}
 		}
 
-		log.debug("ApplyForStudentNumberAction - applyNewAddress1 - End");
-		log.debug("ApplyForStudentNumberAction - applyNewAddress1 - Goto applyNewAddress2");
+		//log.debug("ApplyForStudentNumberAction - applyNewAddress1 - End");
+		//log.debug("ApplyForStudentNumberAction - applyNewAddress1 - Goto applyNewAddress2");
 
 		return "applyNewAddress2";
 	}
@@ -6960,7 +6993,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - applyNewAddress2 - Start");
+		//log.debug("ApplyForStudentNumberAction - applyNewAddress2 - Start");
 
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
@@ -6968,7 +7001,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - applyNewAddress2 - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - applyNewAddress2 - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -6982,7 +7015,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		if (stuRegForm.getFromPage() == null){
 			//Error: Session empty
-			log.debug("ApplyForStudentNumberAction - applyNewAddress2 Empty Session");
+			//log.debug("ApplyForStudentNumberAction - applyNewAddress2 Empty Session");
 			return emptySession(mapping,form,request,response);
 		}else{
 			stuRegForm.setFromPage("applyNewAddress2");
@@ -7102,36 +7135,36 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			//log.debug("ApplyForStudentNumberAction - isAddressValid - Postal Code/Suburb validation");
 			boolean physicalSuburbPostalCheck = false;
 			//Checking Postal Address Suburb vs Postal Code
-			log.debug("RegistrationStudentBroker - isAddressValid - Checking Physical Suburb/Town vs Code");
+			//log.debug("RegistrationStudentBroker - isAddressValid - Checking Physical Suburb/Town vs Code");
 			if(!physicalSuburbPostalCheck && stuRegForm.getStudent().getPhysicalAddress().getLine1().toString()!= null && !"".equals(stuRegForm.getStudent().getPhysicalAddress().getLine1().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line1 - PostalCode="+ stuRegForm.getStudent().getPhysicalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPhysicalAddress().getLine1().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line1 - PostalCode="+ stuRegForm.getStudent().getPhysicalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPhysicalAddress().getLine1().toString().trim());
 				physicalSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getPhysicalAddress().getAreaCode(),stuRegForm.getStudent().getPhysicalAddress().getLine1().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - physicalSuburbPostalCheck="+physicalSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - physicalSuburbPostalCheck="+physicalSuburbPostalCheck);
 			}
 			if(!physicalSuburbPostalCheck && stuRegForm.getStudent().getPhysicalAddress().getLine2().toString()!= null && !"".equals(stuRegForm.getStudent().getPhysicalAddress().getLine2().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line2 - PostalCode="+ stuRegForm.getStudent().getPhysicalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPhysicalAddress().getLine2().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line2 - PostalCode="+ stuRegForm.getStudent().getPhysicalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPhysicalAddress().getLine2().toString().trim());
 				physicalSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getPhysicalAddress().getAreaCode(),stuRegForm.getStudent().getPhysicalAddress().getLine2().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - physicalSuburbPostalCheck="+physicalSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - physicalSuburbPostalCheck="+physicalSuburbPostalCheck);
 			}
 			if(!physicalSuburbPostalCheck && stuRegForm.getStudent().getPhysicalAddress().getLine3().toString()!= null && !"".equals(stuRegForm.getStudent().getPhysicalAddress().getLine3().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line3 - PostalCode="+ stuRegForm.getStudent().getPhysicalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPhysicalAddress().getLine3().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line3 - PostalCode="+ stuRegForm.getStudent().getPhysicalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPhysicalAddress().getLine3().toString().trim());
 				physicalSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getPhysicalAddress().getAreaCode(),stuRegForm.getStudent().getPhysicalAddress().getLine3().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - physicalSuburbPostalCheck="+physicalSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - physicalSuburbPostalCheck="+physicalSuburbPostalCheck);
 			}
 			if(!physicalSuburbPostalCheck && stuRegForm.getStudent().getPhysicalAddress().getLine4().toString()!= null && !"".equals(stuRegForm.getStudent().getPhysicalAddress().getLine4().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line4 - PostalCode="+ stuRegForm.getStudent().getPhysicalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPhysicalAddress().getLine4().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line4 - PostalCode="+ stuRegForm.getStudent().getPhysicalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPhysicalAddress().getLine4().toString().trim());
 				physicalSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getPhysicalAddress().getAreaCode(),stuRegForm.getStudent().getPhysicalAddress().getLine4().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - physicalSuburbPostalCheck="+physicalSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - physicalSuburbPostalCheck="+physicalSuburbPostalCheck);
 			}
 			if(!physicalSuburbPostalCheck && stuRegForm.getStudent().getPhysicalAddress().getLine5().toString()!= null && !"".equals(stuRegForm.getStudent().getPhysicalAddress().getLine5().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line5 - PostalCode="+ stuRegForm.getStudent().getPhysicalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPhysicalAddress().getLine5().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line5 - PostalCode="+ stuRegForm.getStudent().getPhysicalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPhysicalAddress().getLine5().toString().trim());
 				physicalSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getPhysicalAddress().getAreaCode(),stuRegForm.getStudent().getPhysicalAddress().getLine5().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - physicalSuburbPostalCheck="+physicalSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - physicalSuburbPostalCheck="+physicalSuburbPostalCheck);
 			}
 			if(!physicalSuburbPostalCheck && stuRegForm.getStudent().getPhysicalAddress().getLine6().toString()!= null && !"".equals(stuRegForm.getStudent().getPhysicalAddress().getLine6().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line6 - PostalCode="+ stuRegForm.getStudent().getPhysicalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPhysicalAddress().getLine6().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line6 - PostalCode="+ stuRegForm.getStudent().getPhysicalAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getPhysicalAddress().getLine6().toString().trim());
 				physicalSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getPhysicalAddress().getAreaCode(),stuRegForm.getStudent().getPhysicalAddress().getLine6().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - physicalSuburbPostalCheck="+physicalSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - physicalSuburbPostalCheck="+physicalSuburbPostalCheck);
 			}
 			if (!physicalSuburbPostalCheck){
 				//log.debug("RegistrationStudentBroker - isAddressValid - physicalSuburbPostalCheck: " + physicalSuburbPostalCheck);
@@ -7140,12 +7173,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				addErrors(request, messages);
 				return "applyNewAddress2";
 			}else{
-				//log.debug("ApplyForStudentNumberAction - isAddressValid - Physical Address Suburb result="+result);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Physical Address Suburb result="+physicalSuburbPostalCheck);
 			}
 		}
 		
-		log.debug("ApplyForStudentNumberAction - applyNewAddress2 - End");
-		log.debug("ApplyForStudentNumberAction - applyNewAddress2 - Goto applyNewAddress3");
+		//log.debug("ApplyForStudentNumberAction - applyNewAddress2 - End");
+		//log.debug("ApplyForStudentNumberAction - applyNewAddress2 - Goto applyNewAddress3");
 
 		return "applyNewAddress3";
 	}
@@ -7154,7 +7187,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - applyNewAddress3 - Start");
+		//log.debug("ApplyForStudentNumberAction - applyNewAddress3 - Start");
 
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
@@ -7162,7 +7195,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - applyNewAddress3 - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - applyNewAddress3 - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -7176,7 +7209,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		if (stuRegForm.getFromPage() == null){
 			//Error: Session empty
-			log.debug("ApplyForStudentNumberAction - applyNewAddress3 Empty Session");
+			//log.debug("ApplyForStudentNumberAction - applyNewAddress3 Empty Session");
 			return emptySession(mapping,form,request,response);
 		}else{
 			stuRegForm.setFromPage("applyNewAddress3");
@@ -7316,36 +7349,36 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			//log.debug("ApplyForStudentNumberAction - isAddressValid - Postal Code/Suburb validation");
 			boolean courierSuburbPostalCheck = false;
 			//Checking Postal Address Suburb vs Postal Code
-			log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Courier Suburb/Town vs Code");
+			//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Courier Suburb/Town vs Code");
 			if(!courierSuburbPostalCheck && stuRegForm.getStudent().getCourierAddress().getLine1().toString()!= null && !"".equals(stuRegForm.getStudent().getCourierAddress().getLine1().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line1 - PostalCode="+ stuRegForm.getStudent().getCourierAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getCourierAddress().getLine1().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line1 - PostalCode="+ stuRegForm.getStudent().getCourierAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getCourierAddress().getLine1().toString().trim());
 				courierSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getCourierAddress().getAreaCode(),stuRegForm.getStudent().getCourierAddress().getLine1().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - courierSuburbPostalCheck="+courierSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - courierSuburbPostalCheck="+courierSuburbPostalCheck);
 			}
 			if(!courierSuburbPostalCheck && stuRegForm.getStudent().getCourierAddress().getLine2().toString()!= null && !"".equals(stuRegForm.getStudent().getCourierAddress().getLine2().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line2 - PostalCode="+ stuRegForm.getStudent().getCourierAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getCourierAddress().getLine2().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line2 - PostalCode="+ stuRegForm.getStudent().getCourierAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getCourierAddress().getLine2().toString().trim());
 				courierSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getCourierAddress().getAreaCode(),stuRegForm.getStudent().getCourierAddress().getLine2().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - courierSuburbPostalCheck="+courierSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - courierSuburbPostalCheck="+courierSuburbPostalCheck);
 			}
 			if(!courierSuburbPostalCheck && stuRegForm.getStudent().getCourierAddress().getLine3().toString()!= null && !"".equals(stuRegForm.getStudent().getCourierAddress().getLine3().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line3 - PostalCode="+ stuRegForm.getStudent().getCourierAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getCourierAddress().getLine3().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line3 - PostalCode="+ stuRegForm.getStudent().getCourierAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getCourierAddress().getLine3().toString().trim());
 				courierSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getCourierAddress().getAreaCode(),stuRegForm.getStudent().getCourierAddress().getLine3().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - courierSuburbPostalCheck="+courierSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - courierSuburbPostalCheck="+courierSuburbPostalCheck);
 			}
 			if(!courierSuburbPostalCheck && stuRegForm.getStudent().getCourierAddress().getLine4().toString()!= null && !"".equals(stuRegForm.getStudent().getCourierAddress().getLine4().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line4 - PostalCode="+ stuRegForm.getStudent().getCourierAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getCourierAddress().getLine4().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line4 - PostalCode="+ stuRegForm.getStudent().getCourierAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getCourierAddress().getLine4().toString().trim());
 				courierSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getCourierAddress().getAreaCode(),stuRegForm.getStudent().getCourierAddress().getLine4().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - courierSuburbPostalCheck="+courierSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - courierSuburbPostalCheck="+courierSuburbPostalCheck);
 			}
 			if(!courierSuburbPostalCheck && stuRegForm.getStudent().getCourierAddress().getLine5().toString()!= null && !"".equals(stuRegForm.getStudent().getCourierAddress().getLine5().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line5 - PostalCode="+ stuRegForm.getStudent().getCourierAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getCourierAddress().getLine5().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line5 - PostalCode="+ stuRegForm.getStudent().getCourierAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getCourierAddress().getLine5().toString().trim());
 				courierSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getCourierAddress().getAreaCode(),stuRegForm.getStudent().getCourierAddress().getLine5().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - courierSuburbPostalCheck="+courierSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - courierSuburbPostalCheck="+courierSuburbPostalCheck);
 			}
 			if(!courierSuburbPostalCheck && stuRegForm.getStudent().getCourierAddress().getLine6().toString()!= null && !"".equals(stuRegForm.getStudent().getCourierAddress().getLine6().toString().trim())){                    
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line6 - PostalCode="+ stuRegForm.getStudent().getCourierAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getCourierAddress().getLine6().toString().trim());
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking Line6 - PostalCode="+ stuRegForm.getStudent().getCourierAddress().getAreaCode()+", PostalAddress="+stuRegForm.getStudent().getCourierAddress().getLine6().toString().trim());
 				courierSuburbPostalCheck = dao.checkSuburbExact(stuRegForm.getStudent().getCourierAddress().getAreaCode(),stuRegForm.getStudent().getCourierAddress().getLine6().toString().trim());
-				log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - courierSuburbPostalCheck="+courierSuburbPostalCheck);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Checking - courierSuburbPostalCheck="+courierSuburbPostalCheck);
 			}
 			if (!courierSuburbPostalCheck){
 				//log.debug("ApplyForStudentNumberAction - isAddressValid - courierSuburbPostalCheck: " + courierSuburbPostalCheck);
@@ -7354,12 +7387,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				addErrors(request, messages);
 				return "applyNewAddress3";
 			}else{
-				//log.debug("ApplyForStudentNumberAction - isAddressValid - Courier Address Suburb result="+result);
+				//log.debug("ApplyForStudentNumberAction - isAddressValid - Courier Address Suburb result="+courierSuburbPostalCheck);
 			}
 		}
 		
-		log.debug("ApplyForStudentNumberAction - applyNewAddress3 - End");
-		log.debug("ApplyForStudentNumberAction - applyNewAddress3 - Goto applyNewInfo1");
+		//log.debug("ApplyForStudentNumberAction - applyNewAddress3 - End");
+		//log.debug("ApplyForStudentNumberAction - applyNewAddress3 - Goto applyNewInfo1");
 
 		// setup drop down lists
 		setDropdownListsStep3(request, stuRegForm);
@@ -7370,14 +7403,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - applyNewInfo1 - Start");
+		//log.debug("ApplyForStudentNumberAction - applyNewInfo1 - Start");
 
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - applyNewInfo1 - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - applyNewInfo1 - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -7390,7 +7423,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		if (stuRegForm.getFromPage() == null){
 			//Error: Session empty
-			log.debug("ApplyForStudentNumberAction - applyNewInfo1 Empty Session");
+			//log.debug("ApplyForStudentNumberAction - applyNewInfo1 Empty Session");
 			return emptySession(mapping,form,request,response);
 		}else{
 			stuRegForm.setFromPage("applyNewInfo1");
@@ -7401,7 +7434,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		// home language
 		stuRegForm.setSelectedHomeLanguage(stripXSS(stuRegForm.getSelectedHomeLanguage(), "SelectedHomeLanguage", "NewInfo1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-		log.debug("ApplyForStudentNumberAction - applyNewInfo1 - HomeLanguage="+stuRegForm.getSelectedHomeLanguage());
+		//log.debug("ApplyForStudentNumberAction - applyNewInfo1 - HomeLanguage="+stuRegForm.getSelectedHomeLanguage());
 		if (stuRegForm.getSelectedHomeLanguage() == null || "-1".equals(stuRegForm.getSelectedHomeLanguage())){
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "Select your home language."));
@@ -7416,9 +7449,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}
 		//Twin siblings
 		stuRegForm.getStudent().setTwinflag(stripXSS(stuRegForm.getStudent().getTwinflag(), "TwinFlag", "NewInfo1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-		log.debug("ApplyForStudentNumberAction - applyNewInfo1 - Twins="+stuRegForm.getStudent().getTwinflag());
+		//log.debug("ApplyForStudentNumberAction - applyNewInfo1 - Twins="+stuRegForm.getStudent().getTwinflag());
 		if (stuRegForm.getStudent().getTwinflag() == null || "".equals(stuRegForm.getStudent().getTwinflag().trim()) || "undefined".equals(stuRegForm.getStudent().getTwinflag().trim())){
-			log.debug("ApplyForStudentNumberAction - applyNewInfo1 - Twinflag="+stuRegForm.getStudent().getTwinflag());
+			//log.debug("ApplyForStudentNumberAction - applyNewInfo1 - Twinflag="+stuRegForm.getStudent().getTwinflag());
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "Please indicate if you have a twin sibling."));
 			addErrors(request, messages);
@@ -7497,8 +7530,8 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.getStudent().getPrevActivity().setDesc(genItem.getDesc());
 		}
 		
-		log.debug("ApplyForStudentNumberAction - applyNewInfo1 - End");
-		log.debug("ApplyForStudentNumberAction - applyNewInfo1 - Goto applyNewInfo2");
+		//log.debug("ApplyForStudentNumberAction - applyNewInfo1 - End");
+		//log.debug("ApplyForStudentNumberAction - applyNewInfo1 - Goto applyNewInfo2");
 		return "applyNewInfo2";
 	}
 	
@@ -7506,14 +7539,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - applyNewInfo2 - Start");
+		//log.debug("ApplyForStudentNumberAction - applyNewInfo2 - Start");
 
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - applyNewInfo2 - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - applyNewInfo2 - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -7526,7 +7559,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		if (stuRegForm.getFromPage() == null){
 			//Error: Session empty
-			log.debug("ApplyForStudentNumberAction - applyNewInfo2 Empty Session");
+			//log.debug("ApplyForStudentNumberAction - applyNewInfo2 Empty Session");
 			return emptySession(mapping,form,request,response);
 		}else{
 			stuRegForm.setFromPage("applyNewInfo2");
@@ -7608,8 +7641,8 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		
 		// Qualification to be completed
 		if (stuRegForm.getStudentApplication().getCompleteQual().equalsIgnoreCase("Y")){
-			log.debug("ApplyForStudentNumberaction - applyNewInfo2- CompleteText Request=" + request.getParameter("completeText"));
-			log.debug("ApplyForStudentNumberaction - applyNewInfo2 - CompleteText Get=" + stuRegForm.getStudentApplication().getCompleteText());
+			//log.debug("ApplyForStudentNumberaction - applyNewInfo2- CompleteText Request=" + request.getParameter("completeText"));
+			//log.debug("ApplyForStudentNumberaction - applyNewInfo2 - CompleteText Get=" + stuRegForm.getStudentApplication().getCompleteText());
 			
 			if (stuRegForm.getStudentApplication().getCompleteText() == null || "".equalsIgnoreCase(stuRegForm.getStudentApplication().getCompleteText().trim()) || stuRegForm.getStudentApplication().getCompleteText().trim().length() < 1){
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -7625,11 +7658,11 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 		}
 		
-		log.debug("ApplyForStudentNumberaction - applyNewInfo2 - CompleteText Final=" + stuRegForm.getStudentApplication().getCompleteText());
+		//log.debug("ApplyForStudentNumberaction - applyNewInfo2 - CompleteText Final=" + stuRegForm.getStudentApplication().getCompleteText());
 
 		
-		log.debug("ApplyForStudentNumberAction - applyNewInfo2 - End");
-		log.debug("ApplyForStudentNumberAction - applyNewInfo2 - Goto applyNewInfo3");
+		//log.debug("ApplyForStudentNumberAction - applyNewInfo2 - End");
+		//log.debug("ApplyForStudentNumberAction - applyNewInfo2 - Goto applyNewInfo3");
 		setUpUniversityList(request);
 		return "applyNewInfo3";
 	}
@@ -7638,14 +7671,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - applyNewInfo3 - Start");
+		//log.debug("ApplyForStudentNumberAction - applyNewInfo3 - Start");
 		
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - applyNewInfo3 - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - applyNewInfo3 - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -7659,7 +7692,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		if (stuRegForm.getFromPage() == null){
 			//Error: Session empty
-			log.debug("ApplyForStudentNumberAction - applyNewInfo3 - Empty Session");
+			//log.debug("ApplyForStudentNumberAction - applyNewInfo3 - Empty Session");
 			return emptySession(mapping,form,request,response);
 		}else{
 			stuRegForm.setFromPage("applyNewInfo3");
@@ -7693,9 +7726,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				return "applyNewInfo3";
 			}
 			
-			log.debug("ApplyForStudentNumberAction - applyStep3 - N " + stuRegForm.getStudent().getNumber() + " PrevInstCode " + stuRegForm.getStudent().getPrevInstitution().getCode());
+			//log.debug("ApplyForStudentNumberAction - applyStep3 - N " + stuRegForm.getStudent().getNumber() + " PrevInstCode " + stuRegForm.getStudent().getPrevInstitution().getCode());
 		}else{
-			log.debug("ApplyForStudentNumberAction - applyStep3 - N " + stuRegForm.getStudent().getNumber() + " PrevInstCode is Null or Empty (Thus not selected)");
+			//log.debug("ApplyForStudentNumberAction - applyStep3 - N " + stuRegForm.getStudent().getNumber() + " PrevInstCode is Null or Empty (Thus not selected)");
 		}
 
 		if (stuRegForm.getStudent().getLastRegYear() != null && !"".equals(stuRegForm.getStudent().getLastRegYear().trim())){
@@ -7715,8 +7748,8 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.getStudentApplication().setApplyExemptions("N");
 		}
 		
-		log.debug("ApplyForStudentNumberAction - applyNewInfo3 - End");
-		log.debug("ApplyForStudentNumberAction - applyNewInfo3 - Goto applyNewSchool");
+		//log.debug("ApplyForStudentNumberAction - applyNewInfo3 - End");
+		//log.debug("ApplyForStudentNumberAction - applyNewInfo3 - Goto applyNewSchool");
 		setUpProvinceList(request);
 		return "applyNewSchool";
 	}
@@ -7730,7 +7763,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - applyNewSchool - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - applyNewSchool - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -7743,7 +7776,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		if (stuRegForm.getFromPage() == null){
 			//Error: Session empty
-			log.debug("ApplyForStudentNumberAction - applyNewSchool - Empty Session");
+			//log.debug("ApplyForStudentNumberAction - applyNewSchool - Empty Session");
 			return emptySession(mapping,form,request,response);
 		}else{
 			stuRegForm.setFromPage("applyNewSchool");
@@ -7756,7 +7789,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		if ("U".equalsIgnoreCase(stuRegForm.getQual().getUnderpostGrad1()) || "U".equalsIgnoreCase(stuRegForm.getQual().getUnderpostGrad2())){
 			//Matric Certificate and admission mandatory for Undergrad
-			log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " Matric UG1 " + stuRegForm.getQual().getUnderpostGrad1() + " UG2 " + stuRegForm.getQual().getUnderpostGrad2());
+			//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " Matric UG1 " + stuRegForm.getQual().getUnderpostGrad1() + " UG2 " + stuRegForm.getQual().getUnderpostGrad2());
 
 			if("".equalsIgnoreCase(stuRegForm.getStudentApplication().getMatricCertificate()) || stuRegForm.getStudentApplication().getMatricCertificate() ==null){
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -7767,7 +7800,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 			}
 			//Admission not mandatory for CG
-			log.debug("ApplyForStudentNumberAction - applyNewSchool - HE admission MatricCert: " + stuRegForm.getStudentApplication().getMatricCertificate());
+			//log.debug("ApplyForStudentNumberAction - applyNewSchool - HE admission MatricCert: " + stuRegForm.getStudentApplication().getMatricCertificate());
 			if (!"CG".equalsIgnoreCase(stuRegForm.getStudentApplication().getMatricCertificate())){
 				if("".equalsIgnoreCase(stuRegForm.getStudentApplication().getHeAdmission()) || stuRegForm.getStudentApplication().getHeAdmission() ==null){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -7776,7 +7809,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					setUpProvinceList(request);
 					return "applyNewSchool";
 				}
-				log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " Matric Not CG UG1" + stuRegForm.getQual().getUnderpostGrad1() + " UG2 " + stuRegForm.getQual().getUnderpostGrad2());
+				//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " Matric Not CG UG1" + stuRegForm.getQual().getUnderpostGrad1() + " UG2 " + stuRegForm.getQual().getUnderpostGrad2());
 
 			}
 		}
@@ -7788,7 +7821,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				setUpProvinceList(request);
 				return "applyNewSchool";
 			}
-			log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " Matric SC UG1 " + stuRegForm.getQual().getUnderpostGrad1() + " UG2 " + stuRegForm.getQual().getUnderpostGrad2());
+			//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " Matric SC UG1 " + stuRegForm.getQual().getUnderpostGrad1() + " UG2 " + stuRegForm.getQual().getUnderpostGrad2());
 
 		}
 		if ("NC".equalsIgnoreCase(stuRegForm.getStudentApplication().getMatricCertificate())){
@@ -7799,7 +7832,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				setUpProvinceList(request);
 					return "applyNewSchool";
 			}
-			log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " Matric NC UG1 " + stuRegForm.getQual().getUnderpostGrad1() + " UG2 " + stuRegForm.getQual().getUnderpostGrad2());
+			//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " Matric NC UG1 " + stuRegForm.getQual().getUnderpostGrad1() + " UG2 " + stuRegForm.getQual().getUnderpostGrad2());
 
 		}
 		// populate certificate description to move to M30 if needed
@@ -7834,9 +7867,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}
 		stuRegForm.getStudentApplication().setCertificateDesc(matric);
 
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " MatricCert: " + stuRegForm.getStudentApplication().getCertificateDesc());
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " MatricCert: " + stuRegForm.getStudentApplication().getCertificateDesc());
 		
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " Matrix:     " + stuRegForm.getStudent().getMatrix());
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " Matrix:     " + stuRegForm.getStudent().getMatrix());
 		
 		// Computer Training previously removed - Hardcoded to "N"
 		stuRegForm.getStudent().setComputerTraining(stripXSS(stuRegForm.getStudent().getComputerTraining(), "ComputerTraining", "NewSchool", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));		
@@ -7858,7 +7891,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 	
 			// Matric number
-			log.debug("ApplyForStudentNumberAction - applyNewSchool - Matric number=[" + stuRegForm.getStudentApplication().getMatricExamnr()+"]");
+			//log.debug("ApplyForStudentNumberAction - applyNewSchool - Matric number=[" + stuRegForm.getStudentApplication().getMatricExamnr()+"]");
 			stuRegForm.getStudentApplication().setMatricExamnr(stripXSS(stuRegForm.getStudentApplication().getMatricExamnr(), "MatricExamNr", "NewSchool", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));		
 			if (stuRegForm.getStudentApplication().getMatricExamnr()!= null && !"".equals(stuRegForm.getStudentApplication().getMatricExamnr())){
 				if (stuRegForm.getStudentApplication().getMatricExamnr().length() > 13){
@@ -7877,7 +7910,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				provItem = getItem(stuRegForm.getSelectedProvince());
 				stuRegForm.getStudentApplication().getMatricProvince().setCode(provItem.getCode());
 				stuRegForm.getStudentApplication().getMatricProvince().setDesc(provItem.getDesc());
-				log.debug("ApplyForStudentNumberAction - applyNewSchool - MatricProvince=[" + stuRegForm.getStudentApplication().getMatricProvince().getCode()+"/"+stuRegForm.getStudentApplication().getMatricProvince().getDesc()+"]");
+				//log.debug("ApplyForStudentNumberAction - applyNewSchool - MatricProvince=[" + stuRegForm.getStudentApplication().getMatricProvince().getCode()+"/"+stuRegForm.getStudentApplication().getMatricProvince().getDesc()+"]");
 	
 				// check if matric school entered
 				stuRegForm.setSelectedSchool(stripXSS(stuRegForm.getSelectedSchool(), "MatricSchool", "NewSchool", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));		
@@ -7894,13 +7927,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					stuRegForm.getStudentApplication().getMatricSchool().setDesc(schoolItem.getDesc());
 					stuRegForm.getMatric().setSchoolName(schoolItem.getDesc());
 				}
-				log.debug("ApplyForStudentNumberAction - applyNewSchool - MatricSchool=[" + stuRegForm.getStudentApplication().getMatricSchool().getCode()+"/"+stuRegForm.getStudentApplication().getMatricSchool().getDesc()+"]");
+				//log.debug("ApplyForStudentNumberAction - applyNewSchool - MatricSchool=[" + stuRegForm.getStudentApplication().getMatricSchool().getCode()+"/"+stuRegForm.getStudentApplication().getMatricSchool().getDesc()+"]");
 
 			}
 		}
 
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - applyNewSchool - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - applyNewSchool - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -7917,7 +7950,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		String newSpec2 = dao.getXMLSelected("specCode2", "2",stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod(), "applyNewSchool");
 
 		if (stuRegForm.getStudent().getQual1() == null || newQual1 == null || stuRegForm.getStudent().getSpec1() == null || newSpec1 == null || stuRegForm.getStudent().getQual2() == null || newQual2 == null || stuRegForm.getStudent().getSpec2() == null || newSpec2 == null){
-			log.debug("ApplyForStudentNumberAction - applyNewSchool Student Has Null Entry Student="+stuRegForm.getStudent().getNumber()+", Qual1=" + stuRegForm.getStudent().getQual1() +", XMLQual1="+newQual1+", Qual2=" + stuRegForm.getStudent().getQual2() +", XMLQual2="+newQual2+", Spec1=" + stuRegForm.getStudent().getSpec1() +", XMLSpec1="+newSpec1+", Spec2=" + stuRegForm.getStudent().getSpec2() +", XMLSpec2="+newSpec2);
+			//log.debug("ApplyForStudentNumberAction - applyNewSchool Student Has Null Entry Student="+stuRegForm.getStudent().getNumber()+", Qual1=" + stuRegForm.getStudent().getQual1() +", XMLQual1="+newQual1+", Qual2=" + stuRegForm.getStudent().getQual2() +", XMLQual2="+newQual2+", Spec1=" + stuRegForm.getStudent().getSpec1() +", XMLSpec1="+newSpec1+", Spec2=" + stuRegForm.getStudent().getSpec2() +", XMLSpec2="+newSpec2);
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 				new ActionMessage("message.generalmessage", "An Error occurred while processing your Qualification selection (4N). Please try again."));
 			addErrors(request, messages);
@@ -7929,10 +7962,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		stuRegForm.getStudent().setQual2(newQual2);
 		stuRegForm.getStudent().setSpec2(newSpec2);
 
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - get Action newQual1: " + newQual1);
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - get Action newSpec1: " + newSpec1);
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - get Action newQual2: " + newQual2);
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - get Action newSpec2: " + newSpec2);
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - get Action newQual1: " + newQual1);
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - get Action newSpec1: " + newSpec1);
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - get Action newQual2: " + newQual2);
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - get Action newSpec2: " + newSpec2);
 				
 		// ---------- Check input
 		String underpost1 = " ";
@@ -7944,7 +7977,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		String qkat1 = " ";
 		String qkat2 = " ";
 
-		log.debug("ApplyForStudentNumberAction - applyForStudentNumberAction - applyNewSchool - getQual1: " + newQual1);
+		//log.debug("ApplyForStudentNumberAction - applyForStudentNumberAction - applyNewSchool - getQual1: " + newQual1);
 		// Proposed qualification
 		if (newQual1 != null && !"0".equals(newQual1) && !"undefined".equalsIgnoreCase(newQual1)){
 			code1 = dao.validateQualification(stuRegForm.getStudent().getNumber(), newQual1);
@@ -7959,7 +7992,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			return "applyNewSchool";
 		}
 
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - getQual2: " + newQual2);
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - getQual2: " + newQual2);
 		
 		if (newQual2 != null && !"0".equals(newQual2) && !"undefined".equalsIgnoreCase(newQual2) && !"".equalsIgnoreCase(newQual2)){
 			code2 = dao.validateQualification(stuRegForm.getStudent().getNumber(), newQual2);
@@ -7968,34 +8001,34 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			qkat2 = code2.substring(2);
 		}
 		
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual1 - code1: " + code1);
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual1 - underpost1: " + underpost1);
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual1 - qtype1: " + qtype1);
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual1 - qkat1: " + qkat1);
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual1 - code1: " + code1);
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual1 - underpost1: " + underpost1);
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual1 - qtype1: " + qtype1);
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual1 - qkat1: " + qkat1);
 		
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual2 - code2: " + code2);
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual2 - underpost2: " + underpost2);
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual2 - qtype2: " + qtype2);
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual2 - qkat2: " + qkat2);
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual2 - code2: " + code2);
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual2 - underpost2: " + underpost2);
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual2 - qtype2: " + qtype2);
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " getQual2 - qkat2: " + qkat2);
 		
 		// continue from Name page next = Submit page or M30 page
-		log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + "  Test for M30 MatricCert: " + stuRegForm.getStudentApplication().getMatricCertificate());
+		//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + "  Test for M30 MatricCert: " + stuRegForm.getStudentApplication().getMatricCertificate());
 		if (("G".equalsIgnoreCase(qtype1) && "U".equalsIgnoreCase(underpost1) && !"26".equals(qkat1)) || ("G".equalsIgnoreCase(qtype2) && "U".equalsIgnoreCase(underpost2) && !"26".equals(qkat2))){
 			if (!"CG".equals( stuRegForm.getStudentApplication().getMatricCertificate())){
 				if ("M".equals(stuRegForm.getStudentApplication().getHeAdmission()) || "S".equals(stuRegForm.getStudentApplication().getHeAdmission()) || "O".equals(stuRegForm.getStudentApplication().getHeAdmission()) || "F".equals(stuRegForm.getStudentApplication().getHeAdmission())){
-					log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " HE Admission - MSOF: " + stuRegForm.getStudentApplication().getHeAdmission());
-					log.debug("ApplyForStudentNumberAction - applyNewSchool - Goto m30step1");
+					//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " HE Admission - MSOF: " + stuRegForm.getStudentApplication().getHeAdmission());
+					//log.debug("ApplyForStudentNumberAction - applyNewSchool - Goto m30step1");
 					return "m30step1";
 				}else{
-					log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " NOT MSOF - return applyNewSchool 1");
+					//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " NOT MSOF - return applyNewSchool 1");
 					return "applyNewDeclare";
 				}
 			}else{
-				log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " NOT CG: " + stuRegForm.getStudentApplication().getMatricCertificate() + " return applyNewSchool 2");
+				//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " NOT CG: " + stuRegForm.getStudentApplication().getMatricCertificate() + " return applyNewSchool 2");
 				return "applyNewDeclare";
 			}
 		}else{
-			log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " NOT CAT1 & CAT2 not GU26  return applyNewDeclare 3");
+			//log.debug("ApplyForStudentNumberAction - applyNewSchool - N " + stuRegForm.getStudent().getNumber() + " NOT CAT1 & CAT2 not GU26  return applyNewDeclare 3");
 			return "applyNewDeclare";
 	}
 		//return "applyNewDeclare" is next screen if not M30 case;
@@ -8005,7 +8038,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - applym30p1 - Start");
+		//log.debug("ApplyForStudentNumberAction - applym30p1 - Start");
 		
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
@@ -8013,7 +8046,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - applym30p1 - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - applym30p1 - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -8026,7 +8059,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		String newQual1 = dao.getXMLSelected("qualCode1", "1",stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod(), "applym30p1");
 
-		log.debug(stuRegForm.getStudent().getNumber() + " ApplyForStudentNumberAction - applym30p1 FromXML Qual1: " + newQual1);
+		//log.debug(stuRegForm.getStudent().getNumber() + " ApplyForStudentNumberAction - applym30p1 FromXML Qual1: " + newQual1);
 
 		stuRegForm.getMatric().setSchoolCertificate(stripXSS(stuRegForm.getMatric().getSchoolCertificate(), "SchoolCertificate", "applym30p1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));		
 		if (stuRegForm.getMatric().getSchoolCertificate() ==null || "".equals(stuRegForm.getMatric().getSchoolCertificate().trim())){
@@ -8050,8 +8083,8 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		//Add Matric School
 		
 		// call from M30 page1 next = M30 page2
-		log.debug("ApplyForStudentNumberAction - m30step1 - End");
-		log.debug("ApplyForStudentNumberAction - m30step1 - Goto m30step2");
+		//log.debug("ApplyForStudentNumberAction - m30step1 - End");
+		//log.debug("ApplyForStudentNumberAction - m30step1 - Goto m30step2");
 		return "m30step2";
 	}
 
@@ -8059,12 +8092,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - applym30p2 - Start");
+		//log.debug("ApplyForStudentNumberAction - applym30p2 - Start");
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - applym30p2 - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - applym30p2 - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -8196,8 +8229,8 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}
 
 		// call from M30 page1 next = Submit page
-		log.debug("ApplyForStudentNumberAction - m30step2 - End");
-		log.debug("ApplyForStudentNumberAction - m30step2 - Goto applyNewDeclare");
+		//log.debug("ApplyForStudentNumberAction - m30step2 - End");
+		//log.debug("ApplyForStudentNumberAction - m30step2 - Goto applyNewDeclare");
 		return "applyNewDeclare";
 	}
 
@@ -8215,7 +8248,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		toolManager = (ToolManager) ComponentManager.get(ToolManager.class);
 		*/
 		
-		log.debug("ApplyForStudentNumberAction - applyNewDeclare - Start");
+		//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Start");
 
 		// if student number is null, block application
 		ActionMessages messages = new ActionMessages();
@@ -8223,7 +8256,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		
 		if(stuRegForm.getStudent().getNumber() == null || "".equals(stuRegForm.getStudent().getNumber())){
-			log.debug("ApplyForStudentNumberAction - applyNewDeclare - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -8236,7 +8269,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		if (stuRegForm.getFromPage() == null){
 			//Error: Session empty
-			log.debug("ApplyForStudentNumberAction - applyNewDeclare - Empty Session");
+			//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Empty Session");
 			return mapping.findForward(emptySession(mapping,form,request,response));
 		}
 
@@ -8300,11 +8333,11 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		//test agreement flag
 		if (!"Y".equalsIgnoreCase(stuRegForm.getAgree())){
+			messages.add(ActionMessages.GLOBAL_MESSAGE,
+					new ActionMessage("message.generalmessage", "Student has declined the Decleration agreement. Please log on again if you wish to retry."));
+			addErrors(request, messages);
 			return mapping.findForward(cancel(form));
 		}
-
-		//2018 Edmund - Add code so student cannot submit more than once, even if an error occurs.
-		stuRegForm.setDoneSubmit(true);
 
 		/* Set submission time stamp */
 		Date date = new java.util.Date();
@@ -8342,7 +8375,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			int resultUpdate = 0;
 			int resultSave = 0;
 			//Save
-			log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug");
+			//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug");
 			if (stuRegForm.getQualArray() != null && !stuRegForm.getQualArray().isEmpty()){
 				//List now starts at 0;
 				if (stuRegForm.getQualArray().size() > 0){
@@ -8350,22 +8383,22 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					for (int i=0; i < stuRegForm.getQualArray().size(); i++){
 						other = (HistoryArray) stuRegForm.getQualArray().get(i);
 						//Debug
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERSEQ="+other.getOtherSEQ());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERSEQ="+other.getOtherSEQ());
 						
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERUniv="+other.getOtherUniv());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERUnivText="+other.getOtherUnivText());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERStudnr="+other.getOtherStudnr());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERQual="+other.getOtherQual());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERUniv="+other.getOtherUniv());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERUnivText="+other.getOtherUnivText());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERStudnr="+other.getOtherStudnr());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERQual="+other.getOtherQual());
 						
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERYearStart="+other.getOtherYearStart());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERYearEnd="+other.getOtherYearEnd());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERCountry="+other.getOtherCountry());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERYearStart="+other.getOtherYearStart());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERYearEnd="+other.getOtherYearEnd());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERCountry="+other.getOtherCountry());
 						
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERLock="+other.getOtherLock());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERForeign="+other.getOtherForeign());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERComplete="+other.getOtherComplete());		
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERLock="+other.getOtherLock());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERForeign="+other.getOtherForeign());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save/Debug - Found="+i+", historyOTHERComplete="+other.getOtherComplete());		
 	
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save");
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Do Save");
 						//Save PrevQual
 						boolean exists = dao.checkPREV(stuRegForm.getStudent().getNumber(), other.getOtherSEQ());
 						if (exists){
@@ -8374,15 +8407,15 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 							//Update only if Final year has changed and row is not locked
 							if ("N".equalsIgnoreCase(other.getOtherLock())){
 								resultUpdate = dao.updatePREVADM(stuRegForm.getStudent().getNumber(), other.getOtherSEQ(), other.getOtherYearEnd(), other.getOtherComplete());
-								log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", resultUpdate="+resultUpdate);
+								//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", resultUpdate="+resultUpdate);
 							}
 						}else{
 							// Save to database if there are any Qualifications added
 							int maxPrev = 0;
 							maxPrev = dao.getSTUPREVMax(stuRegForm.getStudent().getNumber());
-							log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", maxPrev="+maxPrev);
+							//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", maxPrev="+maxPrev);
 							maxPrev++;
-							log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", maxPrev Plus 1="+maxPrev);
+							//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", maxPrev Plus 1="+maxPrev);
 	
 							//Write STUXML Entry to save Sequence number
 							String saveSTUXML =  dao.saveSTUXML(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "stuPrev", "1", other.getOtherSEQ(), "YES",  "stepPrevQual", "INSERT");
@@ -8390,28 +8423,28 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 									other.getOtherYearEnd(), other.getOtherUnivText(), 
 									other.getOtherStudnr(), other.getOtherQual(), other.getOtherForeign(), 
 									other.getOtherComplete(), other.getOtherUniv(), other.getOtherCountry());
-							log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", saveSTUXML="+saveSTUXML+", resultSave="+resultSave);
+							//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", RecordNo="+i+", saveSTUXML="+saveSTUXML+", resultSave="+resultSave);
 						}
 						
 					}
-					log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Save Done");
+					//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", Save Done");
 				}else{
-					log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", No Qualifications Entered or found!");
+					//log.debug("ApplyForStudentNumberAction - applyNewDeclare - studentNr=" + stuRegForm.getStudent().getNumber()+", No Qualifications Entered or found!");
 				}
 				//Save Previous Qualifications - End
 			}
 			
 			//Write NDP Modules if any
 			//Check if NDP Modules exist. If not, insert them.
-			log.debug("ApplyForStudentNumberAction - applyNewDeclare -  Check if NDP Modules");
+			//log.debug("ApplyForStudentNumberAction - applyNewDeclare -  Check if NDP Modules");
 			if ("Y".equals(stuRegForm.getStudentApplication().getRadioNDP())){
-				log.debug("ApplyForStudentNumberAction - applyNewDeclare - Save NDP Modules");
+				//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Save NDP Modules");
 				if ((stuRegForm.getStudentApplication().getNdpRegSu1() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu1())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
 					boolean isNDP1 = dao.getNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu1());
 				
 					if (!isNDP1){
 						dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu1());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (1) = "+stuRegForm.getStudentApplication().getNdpRegSu1());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (1) = "+stuRegForm.getStudentApplication().getNdpRegSu1());
 					}
 				}
 				if ((stuRegForm.getStudentApplication().getNdpRegSu2() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu2())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -8419,7 +8452,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				
 					if (!isNDP2){
 						dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu2());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (2) = "+stuRegForm.getStudentApplication().getNdpRegSu2());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (2) = "+stuRegForm.getStudentApplication().getNdpRegSu2());
 					}
 				}
 				if ((stuRegForm.getStudentApplication().getNdpRegSu3() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu3())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -8427,7 +8460,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				
 					if (!isNDP3){
 						dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu3());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (3) = "+stuRegForm.getStudentApplication().getNdpRegSu3());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (3) = "+stuRegForm.getStudentApplication().getNdpRegSu3());
 					}
 				}
 				if ((stuRegForm.getStudentApplication().getNdpRegSu4() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu4())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -8435,7 +8468,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				
 					if (!isNDP4){
 						dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu4());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (4) = "+stuRegForm.getStudentApplication().getNdpRegSu4());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (4) = "+stuRegForm.getStudentApplication().getNdpRegSu4());
 					}
 				}
 				if ((stuRegForm.getStudentApplication().getNdpRegSu5() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu5())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -8443,14 +8476,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				
 					if (!isNDP5){
 						dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu5());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (5) = "+stuRegForm.getStudentApplication().getNdpRegSu5());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (5) = "+stuRegForm.getStudentApplication().getNdpRegSu5());
 					}
 				}if ((stuRegForm.getStudentApplication().getNdpRegSu6() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu6())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
 					boolean isNDP6 = dao.getNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu6());
 				
 					if (!isNDP6){
 						dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu6());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (6) = "+stuRegForm.getStudentApplication().getNdpRegSu6());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (6) = "+stuRegForm.getStudentApplication().getNdpRegSu6());
 					}
 				}
 				if ((stuRegForm.getStudentApplication().getNdpRegSu7() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu7())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -8458,7 +8491,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				
 					if (!isNDP7){
 						dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu7());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (7) = "+stuRegForm.getStudentApplication().getNdpRegSu7());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (7) = "+stuRegForm.getStudentApplication().getNdpRegSu7());
 					}
 				}
 				if ((stuRegForm.getStudentApplication().getNdpRegSu8() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu8())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -8466,7 +8499,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				
 					if (!isNDP8){
 						dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu8());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (8) = "+stuRegForm.getStudentApplication().getNdpRegSu8());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (8) = "+stuRegForm.getStudentApplication().getNdpRegSu8());
 					}
 				}
 				if ((stuRegForm.getStudentApplication().getNdpRegSu9() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu9())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -8474,7 +8507,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				
 					if (!isNDP9){
 						dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu9());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (9) = "+stuRegForm.getStudentApplication().getNdpRegSu9());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (9) = "+stuRegForm.getStudentApplication().getNdpRegSu9());
 					}
 				}
 				if ((stuRegForm.getStudentApplication().getNdpRegSu10() != null && !"".equals(stuRegForm.getStudentApplication().getNdpRegSu10())) && ("00019".equals(stuRegForm.getStudent().getQual1()) || "00019".equals(stuRegForm.getStudent().getQual2()))) {
@@ -8482,11 +8515,11 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				
 					if (!isNDP10){
 						dao.saveNDPMod(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), "00019", stuRegForm.getStudentApplication().getNdpRegSu10());
-						log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (10) = "+stuRegForm.getStudentApplication().getNdpRegSu10());
+						//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Saving NDP Module (10) = "+stuRegForm.getStudentApplication().getNdpRegSu10());
 					}
 				}
 			}else{
-				log.debug("ApplyForStudentNumberAction - applyNewDeclare - NDP = No, no Modules to save");
+				//log.debug("ApplyForStudentNumberAction - applyNewDeclare - NDP = No, no Modules to save");
 			}
 			writeWorkflow(stuRegForm,date);
 		}
@@ -8504,24 +8537,30 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	    //resetForm(stuRegForm);
 		
 		//Update STUXML and STULOG with official Student number as it only contains Random Temp Number - Assists in matching records in future and reporting
-		int resultXML = dao.updateSTUXML(stuRegForm.getStudent().getNumberTmp(), stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod());
-		int resultLOG = dao.updateSTULOG(stuRegForm.getStudent().getNumberTmp(), stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod());
+		//2018 Edmund - I have commented the below two lines out for now, could be implemented later
+		//int resultXML = dao.updateSTUXML(stuRegForm.getStudent().getNumberTmp(), stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod());
+		//int resultLOG = dao.updateSTULOG(stuRegForm.getStudent().getNumberTmp(), stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod());
 		
 		if ("MD".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 			
-			log.debug("ApplyForStudentNumberAction - applyNewDeclare - moveDocuments for MD as now upload page: " + stuRegForm.getStudent().getNumber());
+			//log.debug("ApplyForStudentNumberAction - applyNewDeclare - moveDocuments for MD as now upload page: " + stuRegForm.getStudent().getNumber());
 			 
-			 moveDocuments(stuRegForm.getStudent().getNumber());
-			 		
-			log.debug("ApplyForStudentNumberAction - applyNewDeclare - End");
-			log.debug("ApplyForStudentNumberAction - applyNewDeclare - Goto submitNewMD");
+			moveDocuments(stuRegForm.getStudent().getNumber());
+			 
+			//2018 Edmund - Add code so student cannot submit more than once, even if an error occurs.
+			//stuRegForm.setDoneSubmit(true);
+			
+			//log.debug("ApplyForStudentNumberAction - applyNewDeclare - End");
+			//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Goto submitNewMD");
 			return mapping.findForward("submitNewMD"); 
 		}else{
-			log.debug("ApplyForStudentNumberAction - applyNewDeclare - End");
-			log.debug("ApplyForStudentNumberAction - applyNewDeclare - Goto dynamicUpload");
+			//2018 Edmund - Add code so student cannot submit more than once, even if an error occurs.
+			//stuRegForm.setDoneSubmit(true);
+			
+			//log.debug("ApplyForStudentNumberAction - applyNewDeclare - End");
+			//log.debug("ApplyForStudentNumberAction - applyNewDeclare - Goto dynamicUpload");
 			return mapping.findForward("dynamicUpload");
 		}
-
 	}
 
 	/**
@@ -8545,14 +8584,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		String newSpec2 = dao.getXMLSelected("specCode2", "2",stuRegForm.getStudent().getNumberTmp(),stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod(), "writeWorkflow");
 
 		if (stuRegForm.getStudent().getQual1() == null || newQual1 == null || stuRegForm.getStudent().getSpec1() == null || newSpec1 == null || stuRegForm.getStudent().getQual2() == null || newQual2 == null || stuRegForm.getStudent().getSpec2() == null || newSpec2 == null){
-			log.debug("ApplyForStudentNumberAction - writeWorkflow Student Has Null Entry Student="+stuRegForm.getStudent().getNumber()+", Qual1=" + stuRegForm.getStudent().getQual1() +", XMLQual1="+newQual1+", Qual2=" + stuRegForm.getStudent().getQual2() +", XMLQual2="+newQual2+", Spec1=" + stuRegForm.getStudent().getSpec1() +", XMLSpec1="+newSpec1+", Spec2=" + stuRegForm.getStudent().getSpec2() +", XMLSpec2="+newSpec2);
+			//log.debug("ApplyForStudentNumberAction - writeWorkflow Student Has Null Entry Student="+stuRegForm.getStudent().getNumber()+", Qual1=" + stuRegForm.getStudent().getQual1() +", XMLQual1="+newQual1+", Qual2=" + stuRegForm.getStudent().getQual2() +", XMLQual2="+newQual2+", Spec1=" + stuRegForm.getStudent().getSpec1() +", XMLSpec1="+newSpec1+", Spec2=" + stuRegForm.getStudent().getSpec2() +", XMLSpec2="+newSpec2);
 		}
 		
-		log.debug("ApplyForStudentNumberAction - writeWorkflow - get Action newQual1: " + newQual1);
-		log.debug("ApplyForStudentNumberAction - writeWorkflow - get Action newSpec1: " + newSpec1);
+		//log.debug("ApplyForStudentNumberAction - writeWorkflow - get Action newQual1: " + newQual1);
+		//log.debug("ApplyForStudentNumberAction - writeWorkflow - get Action newSpec1: " + newSpec1);
 		
-		log.debug("ApplyForStudentNumberAction - writeWorkflow - get Action newQual2: " + newQual2);
-		log.debug("ApplyForStudentNumberAction - writeWorkflow - get Action newSpec2: " + newSpec2);
+		//log.debug("ApplyForStudentNumberAction - writeWorkflow - get Action newQual2: " + newQual2);
+		//log.debug("ApplyForStudentNumberAction - writeWorkflow - get Action newSpec2: " + newSpec2);
 		
 		String newQual1Desc = dao.getQualDesc(newQual1);
 		String newQual2Desc = "";
@@ -8571,8 +8610,8 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			newSpec2 = " ";
 		}
 
-		log.debug("ApplyForStudentNumberAction - writeWorkflow - get Action newQual1Desc: " + newQual1Desc);
-		log.debug("ApplyForStudentNumberAction - writeWorkflow - get Action newQual2Desc: " + newQual2Desc);
+		//log.debug("ApplyForStudentNumberAction - writeWorkflow - get Action newQual1Desc: " + newQual1Desc);
+		//log.debug("ApplyForStudentNumberAction - writeWorkflow - get Action newQual2Desc: " + newQual2Desc);
 				
 		String type = "L"; /* L = local F=Foreign */
 		String wflType = "APP";
@@ -8699,7 +8738,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		//applyPrevQual Info
 		HistoryUnisa unisa = new HistoryUnisa();
 		if (stuRegForm.getQualUnisa() != null && !stuRegForm.getQualUnisa().isEmpty()){
-			log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Unisa Qualifications is not Empty="+stuRegForm.getQualUnisa().size());
+			//log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Unisa Qualifications is not Empty="+stuRegForm.getQualUnisa().size());
 
 			if (stuRegForm.getQualUnisa().size() > 0){
 				file.add(" --------------------------------------------------------------------------\r\n");
@@ -8713,13 +8752,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 			}
 		}else{
-			log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Other Qualifications is Empty");
+			//log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Other Qualifications is Empty");
 		}
 
 
 		HistoryArray other = new HistoryArray();
 		if (stuRegForm.getQualArray() != null && !stuRegForm.getQualArray().isEmpty()){
-			log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Other Qualifications is not Empty="+stuRegForm.getQualArray().size());
+			//log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Other Qualifications is not Empty="+stuRegForm.getQualArray().size());
 
 			
 			if (stuRegForm.getQualArray().size() > 0){
@@ -8742,11 +8781,11 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 			
 		}else{
-			log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Other Qualifications is Empty");
+			//log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Other Qualifications is Empty");
 		}
 	
 		if (stuRegForm.getSubjects() != null && !stuRegForm.getSubjects().isEmpty()){
-			log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Subjects not Empty="+stuRegForm.getSubjects().size());
+			//log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Subjects not Empty="+stuRegForm.getSubjects().size());
 			Subject sub = new Subject();
 			if (stuRegForm.getSubjects().size() > 0){
 				file.add(" --------------------------------------------------------------------------\r\n");
@@ -8760,7 +8799,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 			}
 		}else{
-			log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Subjects is Empty");
+			//log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Subjects is Empty");
 		}
 		
 		//NDP Modules
@@ -8854,7 +8893,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		
 		file.close(stuRegForm.getStudent().getNumber());
 
-		log.debug("ApplyForStudentNumber: Workflow for studnr="+stuRegForm.getStudent().getNumber());
+		//log.debug("ApplyForStudentNumber: Workflow for studnr="+stuRegForm.getStudent().getNumber());
 
 		// ---------- Check input
 		String underpost1 = " ";
@@ -8881,7 +8920,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			qkat2 = code2.substring(2);
 		}
 		
-		log.debug("Apply4Nr - Workflow MatricCert: " + stuRegForm.getStudentApplication().getMatricCertificate());
+		//log.debug("Apply4Nr - Workflow MatricCert: " + stuRegForm.getStudentApplication().getMatricCertificate());
 		if (("G".equalsIgnoreCase(qtype1) && "U".equalsIgnoreCase(underpost1) && !"26".equals(qkat1)) || ("G".equalsIgnoreCase(qtype2) && "U".equalsIgnoreCase(underpost2) && !"26".equals(qkat2))){
 			String matric="";
 			String matricres="";
@@ -9063,19 +9102,19 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		String newSpec2 = dao.getXMLSelected("specCode2", "2", stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod(), "writeWorkflowRet");
 
 		if (stuRegForm.getStudent().getQual1() == null || newQual1 == null || stuRegForm.getStudent().getSpec1() == null || newSpec1 == null){
-			log.debug("ApplyForStudentNumberAction - writeWorkflowRet Student Has Null Entry Student="+stuRegForm.getStudent().getNumber()+", Qual1=" + stuRegForm.getStudent().getQual1() +", XMLQual1="+newQual1+", Spec1=" + stuRegForm.getStudent().getSpec1() +", XMLSpec1="+newSpec1);
+			//log.debug("ApplyForStudentNumberAction - writeWorkflowRet Student Has Null Entry Student="+stuRegForm.getStudent().getNumber()+", Qual1=" + stuRegForm.getStudent().getQual1() +", XMLQual1="+newQual1+", Spec1=" + stuRegForm.getStudent().getSpec1() +", XMLSpec1="+newSpec1);
 		}
 		if (stuRegForm.getStudent().getQual2() == null || newQual2 == null || stuRegForm.getStudent().getSpec2() == null || newSpec2 == null){
-			log.debug("ApplyForStudentNumberAction - writeWorkflowRet Student Has Null Entry Student="+stuRegForm.getStudent().getNumber()+", Qual2=" + stuRegForm.getStudent().getQual2() +", XMLQual2="+newQual2+", Spec2=" + stuRegForm.getStudent().getSpec2() +", XMLSpec2="+newSpec2);
+			//log.debug("ApplyForStudentNumberAction - writeWorkflowRet Student Has Null Entry Student="+stuRegForm.getStudent().getNumber()+", Qual2=" + stuRegForm.getStudent().getQual2() +", XMLQual2="+newQual2+", Spec2=" + stuRegForm.getStudent().getSpec2() +", XMLSpec2="+newSpec2);
 		}
 		
-		log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action existQual1: " + existQual);
-		log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action existSpec1: " + existSpec);
+		//log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action existQual1: " + existQual);
+		//log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action existSpec1: " + existSpec);
 
-		log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action newQual1: " + newQual1);
-		log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action newSpec1: " + newSpec1);
-		log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action newQual2: " + newQual2);
-		log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action newSpec2: " + newSpec2);
+		//log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action newQual1: " + newQual1);
+		//log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action newSpec1: " + newSpec1);
+		//log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action newQual2: " + newQual2);
+		//log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action newSpec2: " + newSpec2);
 		
 		if (existSpec == null || "".equals(existSpec) || "0".equals(existSpec) || "undefined".equalsIgnoreCase(existSpec)){
 			existSpec = " ";
@@ -9090,7 +9129,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				newSpec1 = "N/A - Not Applicable";
 			}
 		}else{
-		  log.debug("ApplyForQualChange: WARNING! - getQual1 for studnr="+stuRegForm.getStudent().getNumber() + " is empty");
+		  //log.debug("ApplyForQualChange: WARNING! - getQual1 for studnr="+stuRegForm.getStudent().getNumber() + " is empty");
 		  if (stuRegForm.getSelQualCode1() != null && !"".equals(stuRegForm.getSelQualCode1()) && !"0".equals(stuRegForm.getSelQualCode1()) && !"undefined".equalsIgnoreCase(stuRegForm.getSelQualCode1())){
 			  newQual1 = stuRegForm.getSelQualCode1();
 			  newQual1Desc = dao.getQualDesc(newQual1);
@@ -9101,7 +9140,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					newSpec1 = "N/A - Not Applicable";
 				}
 		  }else{
-			  log.debug("ApplyForQualChange: WARNING! - getSelQualCode1 for studnr="+stuRegForm.getStudent().getNumber() + " is ALSO empty");
+			  //log.debug("ApplyForQualChange: WARNING! - getSelQualCode1 for studnr="+stuRegForm.getStudent().getNumber() + " is ALSO empty");
 		  }
 		}
 		
@@ -9114,7 +9153,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				newSpec2 = "N/A - Not Applicable";
 			}
 		}else{
-		  log.debug("ApplyForQualChange: WARNING! - getQual2 for studnr="+stuRegForm.getStudent().getNumber() + " is empty");
+		  //log.debug("ApplyForQualChange: WARNING! - getQual2 for studnr="+stuRegForm.getStudent().getNumber() + " is empty");
 		  if (stuRegForm.getSelQualCode2() != null && !"".equals(stuRegForm.getSelQualCode2()) && !"0".equals(stuRegForm.getSelQualCode2()) && !"undefined".equalsIgnoreCase(stuRegForm.getSelQualCode2())){
 			  newQual2 = stuRegForm.getSelQualCode2();
 			  newQual2Desc = dao.getQualDesc(newQual2);
@@ -9125,15 +9164,15 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					newSpec2 = "N/A - Not Applicable";
 				}
 		  }else{
-			  log.debug("ApplyForQualChange: WARNING! - getSelQualCode2 for studnr="+stuRegForm.getStudent().getNumber() + " is ALSO empty");
+			  //log.debug("ApplyForQualChange: WARNING! - getSelQualCode2 for studnr="+stuRegForm.getStudent().getNumber() + " is ALSO empty");
 			  newQual2 = "N/A";
 			  newQual2Desc = "Not Applicable";
 			  newSpec2 = "N/A - Not Applicable";
 		  }
 		}
 
-		log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action newQual1Desc: " + newQual1Desc);
-		log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action newQual2Desc: " + newQual2Desc);
+		//log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action newQual1Desc: " + newQual1Desc);
+		//log.debug("ApplyForStudentNumberAction - writeWorkflowRet - get Action newQual2Desc: " + newQual2Desc);
 		
 		String type = "L"; /* L = local F=Foreign */
 		String wflType = "APP";
@@ -9172,7 +9211,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		//applyPrevQual Info
 		HistoryUnisa unisa = new HistoryUnisa();
 		if (stuRegForm.getQualUnisa() != null && !stuRegForm.getQualUnisa().isEmpty()){
-			log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Unisa Qualifications is not Empty="+stuRegForm.getQualUnisa().size());
+			//log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Unisa Qualifications is not Empty="+stuRegForm.getQualUnisa().size());
 
 			if (stuRegForm.getQualUnisa().size() > 0){
 				file.add(" --------------------------------------------------------------------------\r\n");
@@ -9186,12 +9225,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 			}
 		}else{
-			log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Other Qualifications is Empty");
+			//log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Other Qualifications is Empty");
 		}
 
 		HistoryArray other = new HistoryArray();
 		if (stuRegForm.getQualArray() != null && !stuRegForm.getQualArray().isEmpty()){
-			log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Other Qualifications is not Empty="+stuRegForm.getQualArray().size());
+			//log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Other Qualifications is not Empty="+stuRegForm.getQualArray().size());
 
 			if (stuRegForm.getQualArray().size() > 0){
 				file.add(" --------------------------------------------------------------------------\r\n");
@@ -9212,11 +9251,11 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 			}
 		}else{
-			log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Other Qualifications is Empty");
+			//log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Other Qualifications is Empty");
 		}
 		
 		if (stuRegForm.getSubjects() != null && !stuRegForm.getSubjects().isEmpty()){
-			log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Subjects not Empty="+stuRegForm.getSubjects().size());
+			//log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Subjects not Empty="+stuRegForm.getSubjects().size());
 			Subject sub = new Subject();
 			if (stuRegForm.getSubjects().size() > 0){
 				file.add(" --------------------------------------------------------------------------\r\n");
@@ -9230,7 +9269,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 			}
 		}else{
-			log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Subjects is Empty");
+			//log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Subjects is Empty");
 		}
 		
 		//NDP Modules
@@ -9289,7 +9328,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		file.add(" ==========================================================================\r\n");
 		file.close(stuRegForm.getStudent().getNumber());
 
-		log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Completed");
+		//log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Completed");
 		
 	}
 	
@@ -9343,7 +9382,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		file.add(" ==========================================================================\r\n");
 		file.close(stuRegForm.getStudent().getNumber());
 
-		log.debug("ApplyForStudentNumberAction: SLP Choice 2 Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Completed");
+		//log.debug("ApplyForStudentNumberAction: SLP Choice 2 Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Completed");
 		
 	}
 	/**
@@ -9356,36 +9395,36 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	*/
 	private void writeWorkflowAppeal(StudentRegistrationForm stuRegForm, Date applyDateTime) throws Exception{
 		
-		log.debug("ApplyForStudentNumberAction - writeWorkflowAppeal for studnr="+stuRegForm.getStudent().getNumber() + " Started");
+		//log.debug("ApplyForStudentNumberAction - writeWorkflowAppeal for studnr="+stuRegForm.getStudent().getNumber() + " Started");
 
 		//ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 
 		// Qualifications Appealed - Debug
 		/*
 		if ("Y".equalsIgnoreCase(stuRegForm.getAppealSelect1())){
-			log.debug("ApplyForStudentNumberAction - writeWorkflowAppeal - AppealQual1: " + stuRegForm.getSelQualCode1());
+			//log.debug("ApplyForStudentNumberAction - writeWorkflowAppeal - AppealQual1: " + stuRegForm.getSelQualCode1());
 		}
 		if ("Y".equalsIgnoreCase(stuRegForm.getAppealSelect2())){
-			log.debug("ApplyForStudentNumberAction - writeWorkflowAppeal - AppealQual2: " + stuRegForm.getSelQualCode2());
+			//log.debug("ApplyForStudentNumberAction - writeWorkflowAppeal - AppealQual2: " + stuRegForm.getSelQualCode2());
 		}
 		
-		log.debug("ApplyForStudentNumberAction - writeWorkflowAppeal - AppealText: " + stuRegForm.getAppealText());
+		//log.debug("ApplyForStudentNumberAction - writeWorkflowAppeal - AppealText: " + stuRegForm.getAppealText());
 		
-		log.debug("ApplyForStudentNumberAction - writeWorkflowAppeal - No of: AppealTypeFiles" + stuRegForm.getAppealTypeFiles().size()+", AppealSourceFiles" + stuRegForm.getAppealSourceFiles().size()+", AppealWorkflowFiles" + stuRegForm.getAppealWorkflowFiles().size());
+		//log.debug("ApplyForStudentNumberAction - writeWorkflowAppeal - No of: AppealTypeFiles" + stuRegForm.getAppealTypeFiles().size()+", AppealSourceFiles" + stuRegForm.getAppealSourceFiles().size()+", AppealWorkflowFiles" + stuRegForm.getAppealWorkflowFiles().size());
 		
 		if (stuRegForm.getAppealTypeFiles().size() > 0){
 			for (int i = 0; i < stuRegForm.getAppealTypeFiles().size(); i++){
-				log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Done - Type File "+i+" - File=" + stuRegForm.getAppealTypeFiles().get(i).toString());
+				//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Done - Type File "+i+" - File=" + stuRegForm.getAppealTypeFiles().get(i).toString());
 			}
 		}
 		if (stuRegForm.getAppealWorkflowFiles().size() > 0){
 			for (int i = 0; i < stuRegForm.getAppealWorkflowFiles().size(); i++){
-				log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Done - Workflow File "+i+" - File=" + stuRegForm.getAppealWorkflowFiles().get(i).toString());
+				//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Done - Workflow File "+i+" - File=" + stuRegForm.getAppealWorkflowFiles().get(i).toString());
 			}
 		}
 		if (stuRegForm.getAppealSourceFiles().size() > 0){
 			for (int i = 0; i < stuRegForm.getAppealSourceFiles().size(); i++){
-				log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Done - Source File "+i+" - File=" + stuRegForm.getAppealSourceFiles().get(i).toString());
+				//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Done - Source File "+i+" - File=" + stuRegForm.getAppealSourceFiles().get(i).toString());
 			}
 		}
 		*/
@@ -9456,7 +9495,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		file.add(" ==========================================================================\r\n");
 		file.close(stuRegForm.getStudent().getNumber());
 
-		log.debug("ApplyForQualChange: writeWorkflowAppeal for studnr="+stuRegForm.getStudent().getNumber() + " Completed");
+		//log.debug("ApplyForQualChange: writeWorkflowAppeal for studnr="+stuRegForm.getStudent().getNumber() + " Completed");
 		
 	}
 
@@ -9470,11 +9509,11 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		String nextPage = "";
 		String page = stripXSS(request.getParameter("page"), "page", "nextPage", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
-		log.debug("ApplyForStudentNumberAction - Nextpage - page="+page+", nextPage=" + nextPage);
+		//log.debug("ApplyForStudentNumberAction - Nextpage - page="+page+", nextPage=" + nextPage);
 		
 
 		if(stuRegForm.getStudent().getNumber() == null){
-			log.debug("ApplyForStudentNumberAction - Nextpage - Student Nr is null or empty when saving qualifications");
+			//log.debug("ApplyForStudentNumberAction - Nextpage - Student Nr is null or empty when saving qualifications");
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "You performed and invalid action or an Error occurred. Please log on again to retry."));
 			addErrors(request, messages);
@@ -9490,10 +9529,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		
 		if ("applyQualification".equalsIgnoreCase(page)){
 			if ("NO".equalsIgnoreCase(stuRegForm.getLoginSelectYesNo())){
-				log.debug("ApplyForStudentNumberAction - Nextpage - StudentNr="+stuRegForm.getStudent().getNumber()+" - Goto saveStudyNew");
+				//log.debug("ApplyForStudentNumberAction - Nextpage - StudentNr="+stuRegForm.getStudent().getNumber()+" - Goto saveStudyNew");
 				nextPage = saveStudyNew(mapping,form,request, response);
 			}else{
-				log.debug("ApplyForStudentNumberAction - Nextpage - StudentNr="+stuRegForm.getStudent().getNumber()+" - Goto saveStudyRet");
+				//log.debug("ApplyForStudentNumberAction - Nextpage - StudentNr="+stuRegForm.getStudent().getNumber()+" - Goto saveStudyRet");
 				nextPage = saveStudyRet(mapping,form,request, response);
 			}
 			
@@ -9555,7 +9594,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}else if ("search".equalsIgnoreCase(page)){
 			stuRegForm.setSearchResult(stripXSS(stuRegForm.getSearchResult(), "SearchResult", "nextPage", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 			if (stuRegForm.getSearchResult() == null || stuRegForm.getSearchResult().length() <= 0 || stuRegForm.getSearchResult().length() < 4){
-				log.debug("ApplyForStudentNumberAction - Nextpage - Postal code less than 4 characters: " + stuRegForm.getSearchResult());
+				//log.debug("ApplyForStudentNumberAction - Nextpage - Postal code less than 4 characters: " + stuRegForm.getSearchResult());
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 				new ActionMessage("message.generalmessage", "Invalid postal code, should be 4 characters. Please try again."));
 				addErrors(request, messages);
@@ -9566,7 +9605,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 		}
 		
-		log.debug("ApplyForStudentNumberAction Nextpage - Nextpage=" + nextPage);
+		//log.debug("ApplyForStudentNumberAction Nextpage - Nextpage=" + nextPage);
 		return mapping.findForward(nextPage);
 	}
 
@@ -9585,7 +9624,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		String applyType=stuRegForm.getApplyType();
 		String prevPage = "";
 		String page = stripXSS(request.getParameter("page"), "page", "back", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
-		log.debug("ApplyForStudentNumberAction - Back - Page="+page+", prevPage="+prevPage);
+		//log.debug("ApplyForStudentNumberAction - Back - Page="+page+", prevPage="+prevPage);
 		
 		
 		if ("applyLoginSLP".equalsIgnoreCase(page)) {
@@ -9651,23 +9690,23 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			boolean isPrevQual1 = false;
 			boolean isPrevQual2 = false;
 			try {
-				log.debug("ApplyForStudentNumberAction - Back - " + stuRegForm.getStudent().getNumber() +" - Done");
+				//log.debug("ApplyForStudentNumberAction - Back - " + stuRegForm.getStudent().getNumber() +" - Done");
 				//Flow to Honours screen for specific qualifications - Claudette 2018
 				// continue from Name page next = address page or m&d page
 				isPrevQual1 = dao.getQualCategory(stuRegForm.getStudent().getQual1());
 				if (stuRegForm.getStudent().getQual2() != null && !"".equals(stuRegForm.getStudent().getQual2())){
 					isPrevQual2 = dao.getQualCategory(stuRegForm.getStudent().getQual2());
 				}
-				log.debug("ApplyForStudentNumberAction - Back - applyPrevQual isPrevQual1: " + isPrevQual1 + " isPrevQual2: " + isPrevQual2);
+				//log.debug("ApplyForStudentNumberAction - Back - applyPrevQual isPrevQual1: " + isPrevQual1 + " isPrevQual2: " + isPrevQual2);
 			} catch (Exception e) {
-				log.debug("ApplyForStudentNumberAction - Back - " + stuRegForm.getStudent().getNumber() +" - Exception / " + e);
-				log.debug("ApplyForStudentNumberAction - Back - N " + stuRegForm.getStudent().getNumber() + " Error="+e);
+				//log.debug("ApplyForStudentNumberAction - Back - " + stuRegForm.getStudent().getNumber() +" - Exception / " + e);
+				//log.debug("ApplyForStudentNumberAction - Back - N " + stuRegForm.getStudent().getNumber() + " Error="+e);
 			}
 			if (isPrevQual1 || isPrevQual2){
-				log.debug("ApplyForStudentNumberAction - Back - Goto applyPrevQual");
+				//log.debug("ApplyForStudentNumberAction - Back - Goto applyPrevQual");
 				prevPage =  "applyNDP";
 			}else{
-				log.debug("ApplyForStudentNumberAction - Back - Goto applyQualification");
+				//log.debug("ApplyForStudentNumberAction - Back - Goto applyQualification");
 				prevPage =  "applyQualification";
 			}
 
@@ -9699,23 +9738,23 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			boolean isPrevQual1 = false;
 			boolean isPrevQual2 = false;
 			try {
-				log.debug("ApplyForStudentNumberAction - Back - " + stuRegForm.getStudent().getNumber() +" - Done");
+				//log.debug("ApplyForStudentNumberAction - Back - " + stuRegForm.getStudent().getNumber() +" - Done");
 				//Flow to Honours screen for specific qualifications - Claudette 2018
 				// continue from Name page next = address page or m&d page
 				isPrevQual1 = dao.getQualCategory(stuRegForm.getStudent().getQual1());
 				if (stuRegForm.getStudent().getQual2() != null && !"".equals(stuRegForm.getStudent().getQual2())){
 					isPrevQual2 = dao.getQualCategory(stuRegForm.getStudent().getQual2());
 				}
-				log.debug("ApplyForStudentNumberAction - Back - applyPrevQual isPrevQual1: " + isPrevQual1 + " isPrevQual2: " + isPrevQual2);
+				//log.debug("ApplyForStudentNumberAction - Back - applyPrevQual isPrevQual1: " + isPrevQual1 + " isPrevQual2: " + isPrevQual2);
 			} catch (Exception e) {
-				log.debug("ApplyForStudentNumberAction - Back - " + stuRegForm.getStudent().getNumber() +" - Exception / " + e);
-				log.debug("ApplyForStudentNumberAction - Back - N " + stuRegForm.getStudent().getNumber() + " Error="+e);
+				//log.debug("ApplyForStudentNumberAction - Back - " + stuRegForm.getStudent().getNumber() +" - Exception / " + e);
+				//log.debug("ApplyForStudentNumberAction - Back - N " + stuRegForm.getStudent().getNumber() + " Error="+e);
 			}
 			if (isPrevQual1 || isPrevQual2){
-				log.debug("ApplyForStudentNumberAction - Back - Goto applyPrevQual");
+				//log.debug("ApplyForStudentNumberAction - Back - Goto applyPrevQual");
 				prevPage =  "applyNDP";
 			}else{
-				log.debug("ApplyForStudentNumberAction - Back - Goto applyQualification");
+				//log.debug("ApplyForStudentNumberAction - Back - Goto applyQualification");
 				prevPage =  "applyQualification";
 			}
 
@@ -9741,7 +9780,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}else if ("m30p2".equalsIgnoreCase(page)) {
 			prevPage = "m30step1";
 		}else if ("stepSelect".equalsIgnoreCase(page) || ("stepSelectNew".equalsIgnoreCase(page))) {
-			log.debug("ApplyForStudentNumberAction - Back (Select) - Page="+page);
+			//log.debug("ApplyForStudentNumberAction - Back (Select) - Page="+page);
 			if (stuRegForm.getAdminStaff().isAdmin()){
 				prevPage = "loginStaff";
 			}else{
@@ -9752,39 +9791,38 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 			}
 		}
-		log.debug("ApplyForStudentNumberAction - Back - Prevpage=" + prevPage);
+		//log.debug("ApplyForStudentNumberAction - Back - Prevpage=" + prevPage);
 		return mapping.findForward(prevPage);
 	}
 
-	@SuppressWarnings("unused")
 	private void setDropdownListsLogin(HttpServletRequest request, ActionForm form) throws Exception{
 		
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		
-		log.debug("ApplyForStudentNumberAction - setDropdownListLogin - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
+		//log.debug("ApplyForStudentNumberAction - setDropdownListLogin - AcademicYear="+stuRegForm.getStudent().getAcademicYear()+", LoginSelectMain="+stuRegForm.getLoginSelectMain()+", isAdmin="+stuRegForm.getAdminStaff().isAdmin());
 
-		log.debug("ApplyForStudentNumberAction - setDropdownListsLogin - Start");
+		//log.debug("ApplyForStudentNumberAction - setDropdownListsLogin - Start");
 		setUpYearList(request);
 		setUpMonthList(request);
 		setUpDayList(request);
-		log.debug("ApplyForStudentNumberAction - setDropdownListsLogin - End");
+		//log.debug("ApplyForStudentNumberAction - setDropdownListsLogin - End");
 	}
 
 	private void setDropdownListsPrev(HttpServletRequest request,ActionForm form) throws Exception{
-		log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - --------------------------------------------------------");
-		log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - Start");
-		log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - --------------------------------------------------------");
-		log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - setUpCountryList");
+		//log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - --------------------------------------------------------");
+		//log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - Start");
+		//log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - --------------------------------------------------------");
+		//log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - setUpCountryList");
 		setUpCountryListShort(request);
-		log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - setUpUniversityList");
+		//log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - setUpUniversityList");
 		setUpUniversityListShort(request);
-		log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - setUpYearListStart");
+		//log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - setUpYearListStart");
 		setUpYearListStart(request);
-		log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - setUpYearListEnd");
+		//log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - setUpYearListEnd");
 		setUpYearListEnd(request);
-		log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - --------------------------------------------------------");
-		log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - End");
-		log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - --------------------------------------------------------");
+		//log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - --------------------------------------------------------");
+		//log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - End");
+		//log.debug("ApplyForStudentNumberAction - setDropdownListsPrev - --------------------------------------------------------");
 	}
 	
 	private void setUpYearListStart(HttpServletRequest request) throws Exception{
@@ -10012,7 +10050,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - populateExamCentres - Start");
+		//log.debug("ApplyForStudentNumberAction - populateExamCentres - Start");
 
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		JSONObject examObj = new JSONObject();
@@ -10021,14 +10059,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		
 		String examCentreType = stripXSS(request.getParameter("type"), "ExamCentreType", "popExamCen", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
 
-		log.debug("ApplyForStudentNumberAction - populateExamCentres - **************************************************************");
-		log.debug("ApplyForStudentNumberAction - populateExamCentres - examCentreType="+examCentreType);
-		log.debug("ApplyForStudentNumberAction - populateExamCentres - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - populateExamCentres - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - populateExamCentres - examCentreType="+examCentreType);
+		//log.debug("ApplyForStudentNumberAction - populateExamCentres - **************************************************************");
 		
 
 		// Query database
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
-		log.debug("populateExamCentres - Type="+examCentreType);
+		//log.debug("populateExamCentres - Type="+examCentreType);
 			
 			try{
 				ArrayList<KeyValue> getValues = dao.getExamCentres(examCentreType);
@@ -10047,9 +10085,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		// Convert the map to JSON
 		PrintWriter out = response.getWriter();
        	JSONObject jsonObject = JSONObject.fromObject(examObj);
-       	log.debug("ApplyForStudentNumberAction - populateExamCentres - Final - **************************************************************");
-       	log.debug("ApplyForStudentNumberAction - populateExamCentres - Final - jsonObject="+jsonObject.toString());
-       	log.debug("ApplyForStudentNumberAction - populateExamCentres - Final - **************************************************************");
+       	//log.debug("ApplyForStudentNumberAction - populateExamCentres - Final - **************************************************************");
+       	//log.debug("ApplyForStudentNumberAction - populateExamCentres - Final - jsonObject="+jsonObject.toString());
+       	//log.debug("ApplyForStudentNumberAction - populateExamCentres - Final - **************************************************************");
        	out.write(jsonObject.toString());
        	out.flush();
 
@@ -10064,7 +10102,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - populateSchools - Start");
+		//log.debug("ApplyForStudentNumberAction - populateSchools - Start");
 
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		JSONObject schoolObj = new JSONObject();
@@ -10082,14 +10120,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}else{
 			selectedProvince = province.substring(0,pos);
 
-			log.debug("ApplyForStudentNumberAction - populateSchools - **************************************************************");
-			log.debug("ApplyForStudentNumberAction - populateSchools - Matric Selected Province="+selectedProvince);
-			log.debug("ApplyForStudentNumberAction - populateSchools - **************************************************************");
+			//log.debug("ApplyForStudentNumberAction - populateSchools - **************************************************************");
+			//log.debug("ApplyForStudentNumberAction - populateSchools - Matric Selected Province="+selectedProvince);
+			//log.debug("ApplyForStudentNumberAction - populateSchools - **************************************************************");
 		
 
 			// Query database
 			ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
-			log.debug("populateSchools - selectedProvince: " + selectedProvince);
+			//log.debug("populateSchools - selectedProvince: " + selectedProvince);
 			
 			try{
 				ArrayList<KeyValue> getValues = dao.getSchools(selectedProvince);
@@ -10109,9 +10147,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		// Convert the map to JSON
 		PrintWriter out = response.getWriter();
        	JSONObject jsonObject = JSONObject.fromObject(schoolObj);
-       	   log.debug("ApplyForStudentNumberAction - populateSchools - Final - **************************************************************");
-       	   log.debug("ApplyForStudentNumberAction - populateSchools - Final - jsonObject="+jsonObject.toString());
-       	   log.debug("ApplyForStudentNumberAction - populateSchools - Final - **************************************************************");
+       	   //log.debug("ApplyForStudentNumberAction - populateSchools - Final - **************************************************************");
+       	   //log.debug("ApplyForStudentNumberAction - populateSchools - Final - jsonObject="+jsonObject.toString());
+       	   //log.debug("ApplyForStudentNumberAction - populateSchools - Final - **************************************************************");
        	out.write(jsonObject.toString());
        	out.flush();
 
@@ -10198,7 +10236,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			String checkSpec2 = dao.getXMLSelected("specCode2", "2",stuRegForm.getStudent().getNumberTmp(),stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod(), "createStudentNr");
 			
 			if (checkQual1 == null || stuRegForm.getStudent().getQual1() == null || !checkQual1.equalsIgnoreCase(stuRegForm.getStudent().getQual1())){
-				log.debug("ApplyForStudentNumberAction - createStudentNr - newQual1=[" + checkQual1 +"] <> SelQualCode1=["+stuRegForm.getStudent().getQual1()+"]");
+				//log.debug("ApplyForStudentNumberAction - createStudentNr - newQual1=[" + checkQual1 +"] <> SelQualCode1=["+stuRegForm.getStudent().getQual1()+"]");
 				errorMessage = "Primary Qualification verification error";
 				// error returned
 				return errorMessage;
@@ -10207,7 +10245,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 
 			if (stuRegForm.getStudent().getQual2() == null || !checkQual2.equalsIgnoreCase(stuRegForm.getStudent().getQual2().trim())){
-				log.debug("ApplyForStudentNumberAction - createStudentNr - newQual2=[" + checkQual2 +"] <> SelSpecCode1=["+stuRegForm.getStudent().getQual2()+"]");
+				//log.debug("ApplyForStudentNumberAction - createStudentNr - newQual2=[" + checkQual2 +"] <> SelSpecCode1=["+stuRegForm.getStudent().getQual2()+"]");
 				errorMessage = "Secondary Qualification verification error";
 				// error returned
 				return errorMessage;
@@ -10220,7 +10258,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 			
 			if (stuRegForm.getStudent().getSpec1() == null || !checkSpec1.equalsIgnoreCase(stuRegForm.getStudent().getSpec1().trim())){
-				log.debug("ApplyForStudentNumberAction - createStudentNr - newSpec1=[" + checkSpec1 +"] <> SelSpecCode1=["+stuRegForm.getStudent().getSpec1()+"]");
+				//log.debug("ApplyForStudentNumberAction - createStudentNr - newSpec1=[" + checkSpec1 +"] <> SelSpecCode1=["+stuRegForm.getStudent().getSpec1()+"]");
 				errorMessage = "Primary Spesialisation verification error";
 				// error returned
 				return errorMessage;
@@ -10232,7 +10270,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 			}
 			if (stuRegForm.getStudent().getSpec2() == null || !checkSpec2.equalsIgnoreCase(stuRegForm.getStudent().getSpec2().trim())){
-				log.debug("ApplyForStudentNumberAction - createStudentNr - newSpec2=[" + checkSpec2 +"] <> SelSpecCode2=["+stuRegForm.getStudent().getSpec2()+"]");
+				//log.debug("ApplyForStudentNumberAction - createStudentNr - newSpec2=[" + checkSpec2 +"] <> SelSpecCode2=["+stuRegForm.getStudent().getSpec2()+"]");
 				errorMessage = "Secondary Spesialisation verification error";
 				// error returned
 				return errorMessage;
@@ -10244,21 +10282,21 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 			}
 		  
-			log.debug("ApplyForStudentNumberAction - createStudentNr - after get Action tempQual1: " + tempQual1);
-			log.debug("ApplyForStudentNumberAction - createStudentNr - after get Action tempSpec1: " + tempSpec1);
-			log.debug("ApplyForStudentNumberAction - createStudentNr - after get Action tempQual2: " + tempQual2);
-			log.debug("ApplyForStudentNumberAction - createStudentNr - after get Action tempSpec2: " + tempSpec2);
+			//log.debug("ApplyForStudentNumberAction - createStudentNr - after get Action tempQual1: " + tempQual1);
+			//log.debug("ApplyForStudentNumberAction - createStudentNr - after get Action tempSpec1: " + tempSpec1);
+			//log.debug("ApplyForStudentNumberAction - createStudentNr - after get Action tempQual2: " + tempQual2);
+			//log.debug("ApplyForStudentNumberAction - createStudentNr - after get Action tempSpec2: " + tempSpec2);
 			
 		  op2.setInWsQualificationCode(tempQual1);
 		  op2.setInStudentAnnualRecordSpecialityCode(tempSpec1);
-		  log.debug("ApplyForStudentNumberAction - createStudentNr -get Action Qual1-Spec1: " + tempQual1 +"-"+ tempSpec1);
+		  //log.debug("ApplyForStudentNumberAction - createStudentNr -get Action Qual1-Spec1: " + tempQual1 +"-"+ tempSpec1);
 
 		  op2.setInRotorMblFlagsCsfStringsString100(tempQual2+"-"+tempSpec2);
-		  log.debug("ApplyForStudentNumberAction - createStudentNr -get Action Qual2-Spec2: " + tempQual2+"-"+tempSpec2);
+		  //log.debug("ApplyForStudentNumberAction - createStudentNr -get Action Qual2-Spec2: " + tempQual2+"-"+tempSpec2);
 		  
 		  //stuann
-		  log.debug("ApplyForStudentNumberAction - createStudentNr - getAcademicYear: " + String.valueOf(stuRegForm.getStudent().getAcademicYear()));
-		  log.debug("ApplyForStudentNumberAction - createStudentNr - getAcademicPeriod: " + String.valueOf("1"));
+		  //log.debug("ApplyForStudentNumberAction - createStudentNr - getAcademicYear: " + String.valueOf(stuRegForm.getStudent().getAcademicYear()));
+		  //log.debug("ApplyForStudentNumberAction - createStudentNr - getAcademicPeriod: " + String.valueOf("1"));
 		  op2.setInStudentAnnualRecordMkAcademicYear(Short.parseShort(String.valueOf(stuRegForm.getStudent().getAcademicYear())));
 		  op2.setInStudentAnnualRecordMkAcademicPeriod(Short.parseShort("1")); //Must be hardcoded to 1 !!!!
 		  
@@ -10434,7 +10472,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			  op2.setInWsStudentApplicationMatricCertificate(stuRegForm.getStudentApplication().getMatricCertificate());
 		  }
 		  if (stuRegForm.getStudentApplication().getMatricExamnr()!=null && !stuRegForm.getStudentApplication().getMatricExamnr().equals("")){
-			  log.debug("ApplyForStudentNumberAction - CreateStudentNr - Setting Matric number for Proxy=[" + stuRegForm.getStudentApplication().getMatricExamnr()+"]");
+			  //log.debug("ApplyForStudentNumberAction - CreateStudentNr - Setting Matric number for Proxy=[" + stuRegForm.getStudentApplication().getMatricExamnr()+"]");
 			  op2.setInWsStudentApplicationMatricExamNr(stuRegForm.getStudentApplication().getMatricExamnr());
 		  }
 		  if (stuRegForm.getStudentApplication().getMatricProvince().getCode()!=null && !stuRegForm.getStudentApplication().getMatricProvince().getCode().equals("")){
@@ -10485,12 +10523,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		  //july2012-write to form to print on uniflow if necessary
 		  stuRegForm.setString500back("");
 	
-		  log.debug("ApplyForStudentNumberAction - createStudentNr - Srrsa01sRegStudentPersDetail (F126) - getOutCsfStringsString500="+op.getOutCsfStringsString500());
+		  //log.debug("ApplyForStudentNumberAction - createStudentNr - Srrsa01sRegStudentPersDetail (F126) - getOutCsfStringsString500="+op.getOutCsfStringsString500());
 
 		  errorMessage = op2.getOutCsfStringsString500();
 		  if(op2.getOutCsfClientServerCommunicationsReturnCode()== 99){
 			  // error returned
-			  log.debug("ApplyForStudentNumberAction - CreateStudentNr - getOutCsfClientServerCommunicationsReturnCode=99 - N " + stuRegForm.getStudent().getNumber() + " errorMessage: " + errorMessage);
+			  //log.debug("ApplyForStudentNumberAction - CreateStudentNr - getOutCsfClientServerCommunicationsReturnCode=99 - N " + stuRegForm.getStudent().getNumber() + " errorMessage: " + errorMessage);
 			  return errorMessage;
 		  }
 	
@@ -10519,24 +10557,24 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			    // set application reference number
 			    stuRegForm.getStudent().setNumber(Integer.toString(op2.getOutStudentAnnualRecordMkStudentNr()));// convert int to String
 			    
-			    log.debug("ApplyForStudentNumberAction - createStudentNr - Random Stu Number="+stuRegForm.getStudent().getNumberTmp());
-			    log.debug("ApplyForStudentNumberAction - createStudentNr - New Student Numner="+op2.getOutStudentAnnualRecordMkStudentNr());
+			    //log.debug("ApplyForStudentNumberAction - createStudentNr - Random Stu Number="+stuRegForm.getStudent().getNumberTmp());
+			    //log.debug("ApplyForStudentNumberAction - createStudentNr - New Student Numner="+op2.getOutStudentAnnualRecordMkStudentNr());
 			    		
 
 			    queryResult = dao.isSTUXML(stuRegForm.getStudent().getNumberTmp(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "TempStu", "1", "createStudentNr");
-			    log.debug("ApplyForStudentNumberAction - createStudentNr - queryResult="+queryResult);
+			    //log.debug("ApplyForStudentNumberAction - createStudentNr - queryResult="+queryResult);
 			    if (queryResult.toUpperCase().contains("ERROR")){
 					isError = true;
 				}else if (queryResult.toUpperCase().equalsIgnoreCase("TRUE")){
 					queryType = "UPDATE";
 				}
-			    log.debug("ApplyForStudentNumberAction - createStudentNr - isError="+isError+", queryType="+queryType);
+			    //log.debug("ApplyForStudentNumberAction - createStudentNr - isError="+isError+", queryType="+queryType);
 				boolean isSuccess = false;
 				int countTmpStu = 0;
 				while (!isSuccess && countTmpStu < 5 && !isError){
 					int nextRef = 0;
 					String queryResultRef = dao.getSTUXMLRef(stuRegForm.getStudent().getNumberTmp(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "TempStu", "1", "doSTUXML");
-					log.debug("ApplyForStudentNumberAction - createStudentNr - queryResultRef="+queryResultRef);
+					//log.debug("ApplyForStudentNumberAction - createStudentNr - queryResultRef="+queryResultRef);
 					if (queryResultRef.toUpperCase().contains("ERROR")){
 						isError = true;
 					}
@@ -10544,9 +10582,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 						try{
 							nextRef = Integer.parseInt(queryResultRef);
 							nextRef++;
-							log.debug("ApplyForStudentNumberAction - doSTUXML - queryResultRef="+queryResultRef+", nextRef="+nextRef+", referenceType=TempStu, referenceValue=1, referenceData="+stuRegForm.getStudent().getNumber());
+							//log.debug("ApplyForStudentNumberAction - doSTUXML - queryResultRef="+queryResultRef+", nextRef="+nextRef+", referenceType=TempStu, referenceValue=1, referenceData="+stuRegForm.getStudent().getNumber());
 							result = dao.saveSTUXML(stuRegForm.getStudent().getNumberTmp(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "TempStu", "1", nextRef, stuRegForm.getStudent().getNumber(), "createStudentNr", queryType);
-							log.debug("ApplyForStudentNumberAction - createStudentNr - result="+result);
+							//log.debug("ApplyForStudentNumberAction - createStudentNr - result="+result);
 							if (result.toUpperCase().equalsIgnoreCase("TRUE")){
 								isSuccess = true;
 							}else if (result.toUpperCase().contains("ERROR")){
@@ -10569,24 +10607,23 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		  }else{
 			    // Error Occurred
 		 		result = errorMessage;
-				log.debug("ApplyForStudentNumberAction - createStudentNr - Error Occurred - TMP " + stuRegForm.getStudent().getNumberTmp() + " NEW " + stuRegForm.getStudent().getNumber()+ " errorMessage: " + result);
+				//log.debug("ApplyForStudentNumberAction - createStudentNr - Error Occurred - TMP " + stuRegForm.getStudent().getNumberTmp() + " NEW " + stuRegForm.getStudent().getNumber()+ " errorMessage: " + result);
 		  }
 	  }catch(Exception ex){
 		  log.warn("ApplyForStudentNumberAction - CreateStudentNr - Error Occurred - TMP " + stuRegForm.getStudent().getNumber() + " errorMessage: " + result + " / " + ex);
 		  log.warn("ApplyForStudentNumberAction - CreateStudentNr - Error Occurred - NEW " + stuRegForm.getStudent().getNumber() + " errorMessage: " + result + " / " + ex);
 	  }
-		log.debug("ApplyForStudentNumberAction - CreateStudentNr - Final - TMP " + stuRegForm.getStudent().getNumberTmp());
-		log.debug("ApplyForStudentNumberAction - CreateStudentNr - Final - NEW " + stuRegForm.getStudent().getNumber());
+		//log.debug("ApplyForStudentNumberAction - CreateStudentNr - Final - TMP " + stuRegForm.getStudent().getNumberTmp());
+		//log.debug("ApplyForStudentNumberAction - CreateStudentNr - Final - NEW " + stuRegForm.getStudent().getNumber());
 
 	 return result;
 	}
 
-	@SuppressWarnings("unused")
 	public ActionForward appealUpload(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - appealUpload - Start");
+		//log.debug("ApplyForStudentNumberAction - appealUpload - Start");
 		
-		log.debug("ApplyForStudentNumberAction - appealUpload - Button Next="+request.getParameter("Next")+", Upload="+request.getParameter("Upload"));
+		//log.debug("ApplyForStudentNumberAction - appealUpload - Button Next="+request.getParameter("Next")+", Upload="+request.getParameter("Upload"));
 
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
@@ -10617,17 +10654,17 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				setDropdownListsAppeal(request,stuRegForm);
 				return mapping.findForward("appealSelect");
 			}
-	    	log.debug("ApplyForStudentNumberAction - appealUpload - Continue to Declaration............");
+	    	//log.debug("ApplyForStudentNumberAction - appealUpload - Continue to Declaration............");
 	    	return mapping.findForward("appealDeclare");
 	    }else{
-			log.debug("ApplyForStudentNumberAction - appealUpload - Doing File Upload............");
-			log.debug("ApplyForStudentNumberAction - appealUpload - Checking Number of Files="+stuRegForm.getFileCount());
+			//log.debug("ApplyForStudentNumberAction - appealUpload - Doing File Upload............");
+			//log.debug("ApplyForStudentNumberAction - appealUpload - Checking Number of Files="+stuRegForm.getFileCount());
 			//Check that no more than 5 files are  uploaded
 	    	if (stuRegForm.getFileCount() > 4){ //Counting 0 to 4 
 	    		messages.add(ActionMessages.GLOBAL_MESSAGE,
 						new ActionMessage("message.generalmessage", "You have reached the maximum of 5 Files that may be uploaded."));
 				addErrors(request, messages);
-				log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Maximum 5 files reached");
+				//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Maximum 5 files reached");
 				setDropdownListsAppeal(request,stuRegForm);
 				return mapping.findForward("appealSelect");
 	    	}else{
@@ -10644,13 +10681,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
 						new ActionMessage("message.generalmessage", "File upload type was not selected. Please try again."));
 					addErrors(request, messages);
-					log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File Type unknown");
+					//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File Type unknown");
 					setDropdownListsAppeal(request,stuRegForm);
 					return mapping.findForward("appealSelect");
 				}
 				if (stuRegForm.getFile() != null){
 					//Get Motivation to re-display after upload
-					log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - Validate Optional File");
+					//log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - Validate Optional File");
 					if (file != null && file.getFileName() != null
 							&& file.getFileName().trim().length() > 0) {
 						//Enable this if you wish to validate for optional documents
@@ -10658,16 +10695,16 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 							messages.add(ActionMessages.GLOBAL_MESSAGE,
 								new ActionMessage("message.generalmessage", "Please select a document type from the list"));
 							addErrors(request, messages);
-							log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - No File Type Selected");
+							//log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - No File Type Selected");
 							setDropdownListsAppeal(request,stuRegForm);
 							return mapping.findForward("appealSelect");
 						}else{
-							log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - File Type is OK");
+							//log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - File Type is OK");
 						}
 						int size = file.getFileSize();
-						log.debug("ApplyForStudentNumberAction - appealUpload - File: " + file.getFileName() + " & size = " + size);
+						//log.debug("ApplyForStudentNumberAction - appealUpload - File: " + file.getFileName() + " & size = " + size);
 						String readFileSize = readableFileSize(size);
-						log.debug("ApplyForStudentNumberAction - appealUpload - validate - N " + stuRegForm.getStudent().getNumber() + " Upload Optional: " + file.getFileName() + " size = " + readFileSize);
+						//log.debug("ApplyForStudentNumberAction - appealUpload - validate - N " + stuRegForm.getStudent().getNumber() + " Upload Optional: " + file.getFileName() + " size = " + readFileSize);
 						if (readFileSize.contains("Error"))	{
 							messages.add(ActionMessages.GLOBAL_MESSAGE,
 								new ActionMessage("message.generalmessage", readFileSize));
@@ -10676,38 +10713,38 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 							return mapping.findForward("appealSelect");
 						}else {
 							if (size > 2097152) {// check file size,  not greater than 2 MB (2097152) measured in BYTES!
-								log.debug("ApplyForStudentNumberAction - appealUpload - Validate - N " + stuRegForm.getStudent().getNumber() + " Upload Optional: " + file.getFileName() + " size = " + readFileSize + " File size too large");
+								//log.debug("ApplyForStudentNumberAction - appealUpload - Validate - N " + stuRegForm.getStudent().getNumber() + " Upload Optional: " + file.getFileName() + " size = " + readFileSize + " File size too large");
 								messages.add(ActionMessages.GLOBAL_MESSAGE,
 									new ActionMessage("message.generalmessage", "File cannot be larger than 2MB (2048K). Your file is "+readFileSize));
 								addErrors(request, messages);
-								log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - File larger than 2MB");
+								//log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - File larger than 2MB");
 								setDropdownListsAppeal(request,stuRegForm);
 								return mapping.findForward("appealSelect");
 							}else {
-								log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - File Validation size OK...............");
+								//log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - File Validation size OK...............");
 							}
 						}
 						String name = file.getFileName().toLowerCase();
 						String fileExtension = name.substring(name.lastIndexOf(".")+1);
-						log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - fileExtension:" + fileExtension + "............");
+						//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - fileExtension:" + fileExtension + "............");
 						if (!name.endsWith(".doc") && !name.endsWith(".docx") && !name.endsWith(".pdf") && !name.endsWith(".tif") && !name.endsWith(".tiff")) {
-							log.debug("ApplyForStudentNumberAction validate - N " + stuRegForm.getStudent().getNumber() + " Upload Optional: " + file.getFileName() + " File wrong type ");
+							//log.debug("ApplyForStudentNumberAction validate - N " + stuRegForm.getStudent().getNumber() + " Upload Optional: " + file.getFileName() + " File wrong type ");
 							messages.add(ActionMessages.GLOBAL_MESSAGE,
 								new ActionMessage("message.generalmessage", "Only doc, docx, pdf, tif and tiff files are allowed"));
 							addErrors(request, messages);
-							log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - Appeal File File wrong type");
+							//log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - Appeal File File wrong type");
 							setDropdownListsAppeal(request,stuRegForm);
 							return mapping.findForward("appealSelect");
 						}else if (!"doc".equalsIgnoreCase(fileExtension) && !"docx".equalsIgnoreCase(fileExtension) && !"pdf".equalsIgnoreCase(fileExtension) && !"tif".equalsIgnoreCase(fileExtension) && !"tiff".equalsIgnoreCase(fileExtension)) {
-								log.debug("ApplyForStudentNumberAction validate - N " + stuRegForm.getStudent().getNumber() + " Upload Optional: " + file.getFileName() + " File wrong type ");
+								//log.debug("ApplyForStudentNumberAction validate - N " + stuRegForm.getStudent().getNumber() + " Upload Optional: " + file.getFileName() + " File wrong type ");
 								messages.add(ActionMessages.GLOBAL_MESSAGE,
 									new ActionMessage("message.generalmessage", "Only doc, docx, pdf, tif and tiff files are allowed"));
 								addErrors(request, messages);
-								log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - Appeal File File wrong type (2)");
+								//log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - Appeal File File wrong type (2)");
 								setDropdownListsAppeal(request,stuRegForm);
 								return mapping.findForward("appealSelect");
 						}else {
-							log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - File Validation Extension OK...............");
+							//log.debug("ApplyForStudentNumberAction - appealUpload - AppealFile - File Validation Extension OK...............");
 						}
 					}
 				} //End of Validation
@@ -10715,19 +10752,19 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				//Rename and Upload File
 				if (file != null && file.getFileName() != null && file.getFileName().trim().length() > 0) {
 					int size = file.getFileSize();
-					log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - File size: " +size+"............");
+					//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - File size: " +size+"............");
 						
 					//save file
 					//String dir = servlet.getServletContext().getRealPath("/upload");
 					String appDir = ServerConfigurationService.getString("application.path");
-					log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - FileBean - application.path:" + appDir + " ............");
+					//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - FileBean - application.path:" + appDir + " ............");
 						
 					String stuGroupDir = stuRegForm.getStudent().getNumber().toString().substring(0, 1);
 					String stuDir = stuRegForm.getStudent().getNumber().toString();
 				    	
 					String filePath = appDir + "/tmp/" + stuGroupDir + "/" + stuDir;
 		
-					log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - FileBean -  upload dest path:" + filePath + " ............");
+					//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - FileBean -  upload dest path:" + filePath + " ............");
 						
 					File folder = new File(filePath);
 					if(!folder.exists()){
@@ -10740,30 +10777,30 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					StudentFile stuFile = new StudentFile();
 					stuFile.setFileName(writeFile);
 					
-					log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - fileDesc Before Rename:" + writeFile + "............");
+					//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - fileDesc Before Rename:" + writeFile + "............");
 		
-					log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - fileDesc Code:" + docCode + "............");
+					//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - fileDesc Code:" + docCode + "............");
 					
-					log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - fileDesc Type:" + docType + "............");
+					//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - fileDesc Type:" + docType + "............");
 						
 					String fileExtension = writeFile.substring(writeFile.lastIndexOf(".")+1);
-					log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - fileExtension:" + fileExtension + "............");
+					//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - fileExtension:" + fileExtension + "............");
 						
 					String time = (new java.text.SimpleDateFormat("hhmmssss").format(new java.util.Date()).toString());
-					log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - time:" + time + "............");
+					//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - time:" + time + "............");
 						
 					String newFileName = stuRegForm.getStudent().getNumber()+"_"+ docType + "_"+ time +"." + fileExtension;
 					stuFile.setNewFileName(newFileName);
 					
 					// set filename to changed name for workflow purposes
-					log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - After Rename:" + newFileName + "............");
+					//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploading - After Rename:" + newFileName + "............");
 						
 					String fullFileName = filePath+System.getProperty("file.separator")+newFileName;
 					String success = "None";
 					success = uploadFile(fullFileName, file.getInputStream());
 		
 					File testFile = new File(fullFileName);
-					log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Check if File Exists="+testFile.exists());
+					//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Check if File Exists="+testFile.exists());
 
 					if(testFile.exists() && success.equalsIgnoreCase("Success")){
 		
@@ -10771,30 +10808,30 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 						stuRegForm.getAppealSourceFiles().add(writeFile);
 						stuRegForm.getAppealTypeFiles().add(docType);
 						stuRegForm.getAppealWorkflowFiles().add(newFileName);
-						log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - List - Type="+docType+", Sournce="+writeFile+", Workflow="+newFileName);
+						//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - List - Type="+docType+", Sournce="+writeFile+", Workflow="+newFileName);
 						
-						log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Appeal File exists - Saving to Database");
+						//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Appeal File exists - Saving to Database");
 						SavedDoc optionDoc = new SavedDoc();
 						optionDoc.setDocCode(docCode);
 						optionDoc.setDocName(file.getFileName());
-						log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Calling addSavedDoc 2 - optionDoc:" + optionDoc + "............");
+						//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Calling addSavedDoc 2 - optionDoc:" + optionDoc + "............");
 						docDao.addSavedDocSTUAPD(optionDoc,"N",stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod(),"2");
 						docDao.addSavedDocSTUXML(optionDoc,"N",stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod(),"2");
-						log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Check File Number Before Exit="+stuRegForm.getFileCount());
+						//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Check File Number Before Exit="+stuRegForm.getFileCount());
 						stuRegForm.setFileCount(stuRegForm.getFileCount() + 1);
-						log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Check File Number After Exit="+stuRegForm.getFileCount());
+						//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Check File Number After Exit="+stuRegForm.getFileCount());
 					}else {
 						//Uploaded file not found on Filesystem
 						messages.add(ActionMessages.GLOBAL_MESSAGE,
 							new ActionMessage("message.generalmessage", "File upload failed, was interrupted or could not be completed. Please try again."));
 						addErrors(request, messages);
-						log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploaded file not found on filesystem "+ success);
+						//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Uploaded file not found on filesystem "+ success);
 						setDropdownListsAppeal(request,stuRegForm);
 						return mapping.findForward("appealSelect");
 					}
 				}else{
 					if(request.getParameter("Next") == null){ //Only log null if doing upload, not continue
-						log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File= - / " + stuRegForm.getStudent().getNumber() + " Uploading appeal filename is null" );
+						//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File= - / " + stuRegForm.getStudent().getNumber() + " Uploading appeal filename is null" );
 						//No File Selected for Upload
 						messages.add(ActionMessages.GLOBAL_MESSAGE,
 							new ActionMessage("message.generalmessage", "No File was selected for upload. Please try again or Continue if you don't wish to upload any documents"));
@@ -10805,28 +10842,28 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 				//Debug
 				/*
-				log.debug("ApplyForStudentNumberAction - writeWorkflowAppeal - No of: AppealTypeFiles" + stuRegForm.getAppealTypeFiles().size()+", AppealSourceFiles" + stuRegForm.getAppealSourceFiles().size()+", AppealWorkflowFiles" + stuRegForm.getAppealWorkflowFiles().size());
+				//log.debug("ApplyForStudentNumberAction - writeWorkflowAppeal - No of: AppealTypeFiles" + stuRegForm.getAppealTypeFiles().size()+", AppealSourceFiles" + stuRegForm.getAppealSourceFiles().size()+", AppealWorkflowFiles" + stuRegForm.getAppealWorkflowFiles().size());
 	
 				if (stuRegForm.getAppealTypeFiles().size() > 0){
 					for (int i = 0; i < stuRegForm.getAppealTypeFiles().size(); i++){
-						log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Done - Type File "+i+" - File=" + stuRegForm.getAppealTypeFiles().get(i).toString());
+						//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Done - Type File "+i+" - File=" + stuRegForm.getAppealTypeFiles().get(i).toString());
 					}
 				}	
 				if (stuRegForm.getAppealWorkflowFiles().size() > 0){
 					for (int i = 0; i < stuRegForm.getAppealWorkflowFiles().size(); i++){
-						log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Done - Workflow File "+i+" - File=" + stuRegForm.getAppealWorkflowFiles().get(i).toString());
+						//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Done - Workflow File "+i+" - File=" + stuRegForm.getAppealWorkflowFiles().get(i).toString());
 					}
 				}
 				if (stuRegForm.getAppealSourceFiles().size() > 0){
 					for (int i = 0; i < stuRegForm.getAppealSourceFiles().size(); i++){
-						log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Done - Source File "+i+" - File=" + stuRegForm.getAppealSourceFiles().get(i).toString());
+						//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Done - Source File "+i+" - File=" + stuRegForm.getAppealSourceFiles().get(i).toString());
 					}
 				}
 				*/
 				
 				request.setAttribute("listSourceFiles", stuRegForm.getAppealSourceFiles());
 				request.setAttribute("listWorkflowFiles", stuRegForm.getAppealWorkflowFiles());
-				log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Done");
+				//log.debug("ApplyForStudentNumberAction - appealUpload - Appeal File - Done");
 				setDropdownListsAppeal(request,stuRegForm);
 				return mapping.findForward("appealSelect");
 	    	}
@@ -10838,7 +10875,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		 String result = "Error";
 		  try {
 			  
-			  log.debug("ApplyForStudentNumberAction - Entering uploadFile, Filepath:"+filePath);
+			  //log.debug("ApplyForStudentNumberAction - Entering uploadFile, Filepath:"+filePath);
 			  
 	        OutputStream os = new FileOutputStream(filePath);
 
@@ -10885,46 +10922,46 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	*   This method is only called if all required documents have been uploaded
 	*   @author Edmund Wilschewski 2013
 	**/
-	@SuppressWarnings("unused")
+
 	public void moveDocuments(final String studentNr) throws Exception {
 
 		StudentRegistrationForm stuRegForm = new StudentRegistrationForm();
 
         try {
         	String appdir = ServerConfigurationService.getString("application.path");
-			log.debug("ApplyForStudentNumberAction - moveDocuments - application.path:" + appdir + " ............");
+			//log.debug("ApplyForStudentNumberAction - moveDocuments - application.path:" + appdir + " ............");
 			
 			String stuGroupDir = studentNr.substring(0, 1);
 	    	String stuDir = studentNr;
         	String groupDir = ServerConfigurationService.getString("application.path") + "/tmp/" + stuGroupDir;
         	String sourceDir =  groupDir + "/" + stuDir;
 
-			log.debug("ApplyForStudentNumberAction - moveDocuments - move source path:" + sourceDir + " ............");
+			//log.debug("ApplyForStudentNumberAction - moveDocuments - move source path:" + sourceDir + " ............");
 
 			File dest = new File(ServerConfigurationService.getString("application.path"));
-        	log.debug("ApplyForStudentNumberAction - moveDocuments - move dest path: " + dest + "/ ............");
+        	//log.debug("ApplyForStudentNumberAction - moveDocuments - move dest path: " + dest + "/ ............");
 
         	File f = new File(sourceDir); // Source directory
-        	log.debug("ApplyForStudentNumberAction - moveDocuments - folder=" + f);
+        	//log.debug("ApplyForStudentNumberAction - moveDocuments - folder=" + f);
         	
 			if (!f.exists()) {
-				log.debug("ApplyForStudentNumberAction - moveDocuments - move source path doesn't exist - Exiting");
+				//log.debug("ApplyForStudentNumberAction - moveDocuments - move source path doesn't exist - Exiting");
 			} else {
-				log.debug("ApplyForStudentNumberAction - moveDocuments - move source path exists");
+				//log.debug("ApplyForStudentNumberAction - moveDocuments - move source path exists");
 
    	        	FilenameFilter textFilter = new FilenameFilter() {
    	        		public boolean accept(File dir, String name) {
    		        		String lowercaseName = name.toLowerCase();
-   		        		log.debug("ApplyForStudentNumberAction - moveDocuments - lowercaseName: " + lowercaseName);
+   		        		//log.debug("ApplyForStudentNumberAction - moveDocuments - lowercaseName: " + lowercaseName);
    		        		
    		        		if (lowercaseName.startsWith(studentNr)) {
-   		        			log.debug("ApplyForStudentNumberAction - moveDocuments - lowercaseName Starts with: " + studentNr + " : true");
+   		        			//log.debug("ApplyForStudentNumberAction - moveDocuments - lowercaseName Starts with: " + studentNr + " : true");
    		        			return true;
    		        		}else if (lowercaseName.toString().contains(studentNr)) {
-   		        			log.debug("ApplyForStudentNumberAction - moveDocuments - lowercaseName Contains: " + studentNr + " : true");
+   		        			//log.debug("ApplyForStudentNumberAction - moveDocuments - lowercaseName Contains: " + studentNr + " : true");
    		        			return true;
    		        		} else {
-    		        		log.debug("ApplyForStudentNumberAction - moveDocuments - lowercaseName Doesn't Contain: " + studentNr + " : false");
+    		        		//log.debug("ApplyForStudentNumberAction - moveDocuments - lowercaseName Doesn't Contain: " + studentNr + " : false");
         		        	return false;
    		        		}
    	        		}
@@ -10932,15 +10969,15 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
         	        	
    	        	File[] files = f.listFiles(textFilter);
     	        	for (File file : files) {
-    	        		log.debug("ApplyForStudentNumberAction - moveDocuments - file: " + file);
+    	        		//log.debug("ApplyForStudentNumberAction - moveDocuments - file: " + file);
         	        	File fileToBeCopied = new File(sourceDir + "/" + file);
-        	        	log.debug("ApplyForStudentNumberAction - moveDocuments - fileToBeCopied: " + fileToBeCopied);
-        	        	log.debug("ApplyForStudentNumberAction - moveDocuments - fileToBeCopied name: " + fileToBeCopied.getName());
+        	        	//log.debug("ApplyForStudentNumberAction - moveDocuments - fileToBeCopied: " + fileToBeCopied);
+        	        	//log.debug("ApplyForStudentNumberAction - moveDocuments - fileToBeCopied name: " + fileToBeCopied.getName());
         	        	File destFile = new File(dest + "/" + fileToBeCopied.getName());
-        	        	log.debug("ApplyForStudentNumberAction - moveDocuments - destFile: " + destFile);
+        	        	//log.debug("ApplyForStudentNumberAction - moveDocuments - destFile: " + destFile);
         	        	boolean success = file.renameTo(destFile);
         	        	if (success) {
-        	        		log.debug("File " + file + " was successfully moved.\n");
+        	        		//log.debug("File " + file + " was successfully moved.\n");
         	        	} else {
         	       			log.error("File " + file + " was not successfully moved. It can be because file with file name already exists in destination\n");
         	       		}
@@ -10962,10 +10999,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
                     	//	}
                     	if (children.length == 0){ //folder empty
                     		testStuDir.delete();
-                    		log.debug("ApplyForStudentNumberAction - MoveDocuments - StuDir Empty, thus Deleted: " + testStuDir);
-                    		log.debug("ApplyForStudentNumberAction - moveDocuments " + stuRegForm.getStudent().getNumber() + " - StuDir Empty, thus Deleted: " + testStuDir);
+                    		//log.debug("ApplyForStudentNumberAction - MoveDocuments - StuDir Empty, thus Deleted: " + testStuDir);
+                    		//log.debug("ApplyForStudentNumberAction - moveDocuments " + stuRegForm.getStudent().getNumber() + " - StuDir Empty, thus Deleted: " + testStuDir);
                     	}else{
-                    		log.debug("ApplyForStudentNumberAction - MoveDocuments - StuDir not empty: " + testStuDir + ":" + children.length);
+                    		//log.debug("ApplyForStudentNumberAction - MoveDocuments - StuDir not empty: " + testStuDir + ":" + children.length);
                     	}
                     }
                     //Now do Group Folder if it is empty (/tmp/group)
@@ -10982,10 +11019,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
                     	//	}
                     	if (children.length == 0){ //folder empty
                     		testGroupDir.delete();
-                    		log.debug("ApplyForStudentNumberAction - MoveDocuments - GroupDir Empty, thus Deleted: " + testGroupDir);
+                    		//log.debug("ApplyForStudentNumberAction - MoveDocuments - GroupDir Empty, thus Deleted: " + testGroupDir);
                     		log.error("ApplyForStudentNumberAction MoveDocuments " + stuRegForm.getStudent().getNumber() + " - GroupDir Empty, thus Deleted: " + testGroupDir);
                     	}else{
-                    		log.debug("ApplyForStudentNumberAction - MoveDocuments - GroupDir not empty: " + testGroupDir + ":" + children.length);
+                    		//log.debug("ApplyForStudentNumberAction - MoveDocuments - GroupDir not empty: " + testGroupDir + ":" + children.length);
                     	}
                     }
 			}
@@ -11051,7 +11088,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				if ("~".equals(test) || "<".equals(test) || ">".equals(test) || "@".equals(test) || "^".equals(test) || "1".equals(test) || "2".equals(test) || "3".equals(test) || "4".equals(test) || "5".equals(test) || "6".equals(test) || "7".equals(test) || "8".equals(test) || "9".equals(test) || "0".equals(test)){
 					result=false;
 				}else{
-//					log.debug(test);
+//					//log.debug(test);
 				}
 			}else{
 				result=false;
@@ -11070,7 +11107,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 //			test2=number.valueOf(i);
 			if (test !=null && !"".equals(test) && !" ".equals(test) && !"-".equals(test) && !"/".equals(test) && !"+".equals(test)){
 				if ("0".equals(test) || "1".equals(test) || "2".equals(test) || "3".equals(test) || "4".equals(test) || "5".equals(test) || "6".equals(test) || "7".equals(test) || "8".equals(test)  || "9".equals(test)){
-//					log.debug(test);
+//					//log.debug(test);
 				}else{
 					result=false;
 				}
@@ -11096,7 +11133,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			test= number.substring(i,i+1);
 			if (test !=null && !"".equals(test)&& !" ".equals(test) && !"-".equals(test) && !"/".equals(test) && !"+".equals(test)){
 				if ("0".equals(test) || "1".equals(test) || "2".equals(test) || "3".equals(test) || "4".equals(test) || "5".equals(test) || "6".equals(test) || "7".equals(test) || "8".equals(test)  || "9".equals(test)){
-					log.debug(test);
+					//log.debug(test);
 				}else{
 					result=false;
 				}
@@ -11129,304 +11166,17 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 	public void resetForm(StudentRegistrationForm stuRegForm, String callAction)	throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - resetForm - callAction="+callAction);
+		//log.debug("ApplyForStudentNumberAction - resetForm - callAction="+callAction);
 		// Clear fields
 		
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		
 		stuRegForm.resetFormFields();
-		/*
-		// Clear fields - Just in case
-		stuRegForm.setWebUploadMsg("");
-		stuRegForm.setWebLoginMsg("");
-		stuRegForm.setWebLoginMsg2("");
-		
-		stuRegForm.setApplyType("");
-		stuRegForm.setRegistrationType("");
-		stuRegForm.setStudent(null);
-		stuRegForm.setQual(null);
-		stuRegForm.setQualtwo(null);
-		stuRegForm.setStudentApplication(null);
-		stuRegForm.setAdminStaff(null);
-
-		// History (MasterDoctor)
-
-		
-		stuRegForm.setMatric(null);
-		stuRegForm.setSpescount(0);
-		stuRegForm.setRegqualtype("");
-
-		// ----- Walkthrough
-		stuRegForm.setQuestion1("");
-		stuRegForm.setQuestion2("");
-
-		// Apply for student nr
-		stuRegForm.setSelectedDisability(null);
-		stuRegForm.setSelectedQual(null);
-		stuRegForm.setSelectedQualtwo(null);
-		stuRegForm.setSelectedSpes(null);
-		stuRegForm.setSelectedSpestwo(null);
-		stuRegForm.setSelectedCountry(null);
-		stuRegForm.setSelectedExamCentre(null);
-		stuRegForm.setSelectedExamCenprov(null);
-		stuRegForm.setSelectedHomeLanguage(null);
-		stuRegForm.setSelectedNationality(null);
-		stuRegForm.setSelectedPopulationGroup(null);
-		stuRegForm.setSelectedOccupation(null);
-		stuRegForm.setSelectedEconomicSector(null);
-		stuRegForm.setSelectedOtherUniversity(null);
-		stuRegForm.setSelectedPrevInstitution(null);
-		stuRegForm.setSelectedProvince(null);
-
-		stuRegForm.setSelectedSchool(null);
-		stuRegForm.setSchoolCode("");
-		stuRegForm.setSchoolDesc("");
-		
-		stuRegForm.setSelectedPrevActivity(null);
-
-		stuRegForm.setSavedCategory(null);
-		stuRegForm.setSavedCategory1(null);
-		stuRegForm.setSavedCategory2(null);
-		stuRegForm.setSavedQual(null);
-		stuRegForm.setSavedQual1(null);
-		stuRegForm.setSavedQual2(null);
-		stuRegForm.setSavedSpec(null);
-		stuRegForm.setSavedSpec1(null);
-		stuRegForm.setSavedSpec2(null);
-		
-		stuRegForm.setAgree(null);
-		stuRegForm.setNumberBack(null);
-		stuRegForm.setEmailBack(null);
-		stuRegForm.setTimeBack(null);
-		stuRegForm.setDonesubmit(null);
-		stuRegForm.setString500back(null);
-
-		//variable used to test session throughout process
-		stuRegForm.setFromPage(null);
-
-		// variable used to indicate that document upload is application specific
-		stuRegForm.setApplication(true);
-
-		// File upload
-		stuRegForm.setAddressLink("");
-		stuRegForm.setFileCount(0);
-		stuRegForm.setFileName("");
-		stuRegForm.setFileNewName("");
-		stuRegForm.setFileType("");
-		stuRegForm.setTheFile(null);
-		stuRegForm.setStudentFiles(null);
-		stuRegForm.setAppealSourceFiles(null);
-		stuRegForm.setAppealWorkflowFiles(null);
-		stuRegForm.setSelectedPostalCode(null);
-		stuRegForm.setSearchListIdentifier("Postal");
-		stuRegForm.setSearchSuburb("");
-		stuRegForm.setSearchTown("");
-		stuRegForm.setSearchResult("");
-
-		
-		stuRegForm.setHiddenButton(false);
-		stuRegForm.setHiddenQualButton(false);
-
-		// 2014 New Login Select
-		stuRegForm.setSelected("1");
-		
-		stuRegForm.setLoginSelectMain("");
-		stuRegForm.setLoginSelectDocPay("");
-		stuRegForm.setLoginSelectYesNo("");
-		stuRegForm.setWebLoginMsg("");
-		stuRegForm.setWebLoginMsg2("");
-		stuRegForm.setWebUploadMsg("");
-		stuRegForm.setSelectReset("");
-		
-		stuRegForm.setSelCategoryCode(null);
-		stuRegForm.setSelCategoryCode1(null);
-		stuRegForm.setSelCategoryCode2(null);
-		
-		stuRegForm.setSelQualCode(null);
-		stuRegForm.setSelQualCode1(null);
-		stuRegForm.setSelQualCode2(null);
-		
-		stuRegForm.setSelSpecCode(null);
-		stuRegForm.setSelSpecCode1(null);
-		stuRegForm.setSelSpecCode2(null);
-		
-		stuRegForm.setExistQual("");
-		stuRegForm.setExistSpec("");
-		
-		stuRegForm.setSelQualPrevCode(null);
-
-		stuRegForm.setCategoryCodeList(null);
-		stuRegForm.setCategoryCodeList1(null);
-		stuRegForm.setCategoryCodeList2(null);
-
-		stuRegForm.setCategoryDescList(null);
-		stuRegForm.setCategoryDescList1(null);
-		stuRegForm.setCategoryDescList2(null);
-		
-		stuRegForm.setQualCodeList(null);
-		stuRegForm.setQualCodeList1(null);
-		stuRegForm.setQualCodeList2(null);
-		
-		stuRegForm.setQualCodeDescList(null);
-		stuRegForm.setQualCodeDescList1(null);
-		stuRegForm.setQualCodeDescList2(null);
-		
-		stuRegForm.setQualDescList(null);
-		stuRegForm.setQualDescList1(null);
-		stuRegForm.setQualDescList2(null);
-		
-		stuRegForm.setSpecCodeList(null);
-		stuRegForm.setSpecCodeList1(null);
-		stuRegForm.setSpecCodeList2(null);
-		
-		stuRegForm.setSpecCodeDescList(null);
-		stuRegForm.setSpecCodeDescList1(null);
-		stuRegForm.setSpecCodeDescList2(null);
-		
-		stuRegForm.setSpecDescList(null);
-		stuRegForm.setSpecDescList1(null);
-		stuRegForm.setSpecDescList2(null);
-
-		stuRegForm.setQualPrevCodeList(null);
-		stuRegForm.setQualPrevDescList(null);
-		stuRegForm.setQualPrevCodeDescList(null);
-		
-		//FileUpload
-		//for showing optional docs
-
-		stuRegForm.setDesc(null);
-		stuRegForm.setMap(null);
-			
-		stuRegForm.setRequiredDocs (null);
-		stuRegForm.setOptionalDocs (null);
-
-		stuRegForm.setOptionLabels(null);
-		stuRegForm.setOptionCodes(null);
-
-		stuRegForm.setRequiredFileBeans(null);
-		stuRegForm.setOptionFileBean(null);
-
-		stuRegForm.setDocMsg("");
-
-		stuRegForm.setHiddenButtonUpload(false);
-		
-	
-		//Matric Results for APS Calculator
-		stuRegForm.setSelectHEMain("");
-		
-		stuRegForm.setSelectMatric("");
-		stuRegForm.setApsScore(0);
-		stuRegForm.setApsSize(0);
-		stuRegForm.setSubjects(null);
-		stuRegForm.setQualUnisa(null);
-		stuRegForm.setQualOther(null);
-
-		stuRegForm.setApsSubjectName1("");
-		stuRegForm.setApsSubjectName2("");
-		stuRegForm.setApsSubjectName3("");
-		stuRegForm.setApsSubjectName4("");
-		stuRegForm.setApsSubjectName5("");
-		stuRegForm.setApsSubjectName6("");
-		stuRegForm.setApsSubjectName7("");
-		stuRegForm.setApsSubjectName8("");
-		stuRegForm.setApsSubjectName9("");
-		stuRegForm.setApsSubjectName10("");
-		stuRegForm.setApsSubjectName11("");
-		stuRegForm.setApsSubjectName12("");
-		
-		stuRegForm.setApsSubjectGrade1("");
-		stuRegForm.setApsSubjectGrade2("");
-		stuRegForm.setApsSubjectGrade3("");
-		stuRegForm.setApsSubjectGrade4("");
-		stuRegForm.setApsSubjectGrade5("");
-		stuRegForm.setApsSubjectGrade6("");
-		stuRegForm.setApsSubjectGrade7("");
-		stuRegForm.setApsSubjectGrade8("");
-		stuRegForm.setApsSubjectGrade9("");
-		stuRegForm.setApsSubjectGrade10("");
-		stuRegForm.setApsSubjectGrade11("");
-		stuRegForm.setApsSubjectGrade12("");
-		
-		stuRegForm.setApsSubjectSymbol1("");
-		stuRegForm.setApsSubjectSymbol2("");
-		stuRegForm.setApsSubjectSymbol3("");
-		stuRegForm.setApsSubjectSymbol4("");
-		stuRegForm.setApsSubjectSymbol5("");
-		stuRegForm.setApsSubjectSymbol6("");
-		stuRegForm.setApsSubjectSymbol7("");
-		stuRegForm.setApsSubjectSymbol8("");
-		stuRegForm.setApsSubjectSymbol9("");
-		stuRegForm.setApsSubjectSymbol10("");
-		stuRegForm.setApsSubjectSymbol11("");
-		stuRegForm.setApsSubjectSymbol12("");
-		
-		stuRegForm.setApsSubjectResult1("");
-		stuRegForm.setApsSubjectResult2("");
-		stuRegForm.setApsSubjectResult3("");
-		stuRegForm.setApsSubjectResult4("");
-		stuRegForm.setApsSubjectResult5("");
-		stuRegForm.setApsSubjectResult6("");
-		stuRegForm.setApsSubjectResult7("");
-		stuRegForm.setApsSubjectResult8("");
-		stuRegForm.setApsSubjectResult9("");
-		stuRegForm.setApsSubjectResult10("");
-		stuRegForm.setApsSubjectResult11("");
-		stuRegForm.setApsSubjectResult12("");
-		
-		//Appeal Process
-		stuRegForm.setAppealSelect1("");
-		stuRegForm.setAppealSelect2("");
-		stuRegForm.setAppealText("");
-		stuRegForm.setAppealSourceFiles(null);
-		stuRegForm.setAppealTypeFiles(null);
-		stuRegForm.setAppealWorkflowFiles(null);
-
-		stuRegForm.setQualSTAAE01(false);
-
-		stuRegForm.setSelectedPrevActivity("");
-
-		stuRegForm.setLoginSelectAPS("");
-
-		stuRegForm.setSelQualCodeDesc("");
-		stuRegForm.setSelQualCode1Desc("");
-		stuRegForm.setSelQualCode2Desc("");
-
-		stuRegForm.setSelSpecCodeDesc("");
-		stuRegForm.setSelSpecCode1Desc("");
-		stuRegForm.setSelSpecCode2Desc("");
-
-		stuRegForm.setExistQualDesc("");
-		stuRegForm.setExistSpecDesc("");
-
-		stuRegForm.setQualStatus1("");
-		stuRegForm.setQualStatus2("");
-		stuRegForm.setQualStatusCode1("");
-		stuRegForm.setQualStatusCode2("");
-		stuRegForm.setQualStatus1Reason("");
-		stuRegForm.setQualStatus2Reason("");
-
-		stuRegForm.setOfferRadio("");
-
-		stuRegForm.setQualUnisaFound(false);
-		stuRegForm.setQualIDMatch(false);
-		stuRegForm.setQualAPSMatch(false);
-			
-		stuRegForm.setAppealSelect1("");
-		stuRegForm.setAppealSelect2("");
-		stuRegForm.setAppealText("");
-
-		stuRegForm.setAppealSourceFiles(null);
-		stuRegForm.setAppealTypeFiles(null);
-		stuRegForm.setAppealWorkflowFiles(null);
-		
-		stuRegForm.setStudent(new Student());
-		stuRegForm.setAdminStaff(new Staff());
-		*/
 		
 		ArrayList<String> dateCheck = dao.validateClosingDate(stuRegForm.getStudent().getAcademicYear());
 		if (!dateCheck.isEmpty()){ //Check Dates Array
 			for (int i=0; i < dateCheck.size(); i++){
-				log.debug("ApplyForStudentNumberAction - Cancel - dateCheck="+dateCheck.get(i).toString());
+				//log.debug("ApplyForStudentNumberAction - Cancel - dateCheck="+dateCheck.get(i).toString());
 				if ("WAPD".equalsIgnoreCase(dateCheck.get(i).toString())){
 					stuRegForm.getStudent().setDateWAPD(true);
 				}else if ("WAPDOC".equalsIgnoreCase(dateCheck.get(i).toString())){
@@ -11473,7 +11223,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		stuRegForm.setAllowLogin(true);
 		stuRegForm.getStudent().setAcademicYear(getCurrentAcademicYear());
 		stuRegForm.getStudent().setAcademicPeriod(getCurrentAcademicPeriod());
-		log.debug("ApplyForStudentNumberaction - All StudentRegistrationForm Variables Cleared - Year="+stuRegForm.getStudent().getAcademicYear()+". Period="+stuRegForm.getStudent().getAcademicPeriod());
+		//log.debug("ApplyForStudentNumberaction - All StudentRegistrationForm Variables Cleared - Year="+stuRegForm.getStudent().getAcademicYear()+". Period="+stuRegForm.getStudent().getAcademicPeriod());
 		
 	}
 	
@@ -11490,7 +11240,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		}else{
 			acaYear = Integer.toString(year);
 		}
-		log.debug("ApplyForStudentNumberAction - getCurrentAcademicYear: " + acaYear);
+		//log.debug("ApplyForStudentNumberAction - getCurrentAcademicYear: " + acaYear);
 		return acaYear;
 	}
 
@@ -11504,7 +11254,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		int currentYear = cal.get(Calendar.YEAR);
 		int acaYear = Integer.parseInt(getCurrentAcademicYear());
 		
-		log.debug("ApplyForStudentNumberAction - currentYear: " + currentYear+", acaYear: " + acaYear+", month="+month);
+		//log.debug("ApplyForStudentNumberAction - currentYear: " + currentYear+", acaYear: " + acaYear+", month="+month);
 		
 		if (currentYear < acaYear){
 			acaPeriod = "1";
@@ -11515,7 +11265,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				acaPeriod = "1";
 			}
 		}
-		log.debug("ApplyForStudentNumberAction - getCurrentAcademicPeriod: " + acaPeriod);
+		//log.debug("ApplyForStudentNumberAction - getCurrentAcademicPeriod: " + acaPeriod);
 		return acaPeriod;
 	}
 
@@ -11598,14 +11348,18 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletResponse response) throws Exception {
 
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
+		ActionMessages messages = new ActionMessages();
 		
-		log.debug("emptySession");
-		log.debug("emptySession: " + stuRegForm.getFromPage());
+		//log.debug("emptySession");
+		//log.debug("emptySession: " + stuRegForm.getFromPage());
 
 		// Clear fields
 		resetForm(stuRegForm, "ApplyForStudentNumberAction - emptySession");
 		stuRegForm.setApplyType("");
 
+		messages.add(ActionMessages.GLOBAL_MESSAGE,
+				new ActionMessage("message.generalmessage", "An empty Session was encountered or your session timed out. Please log on again."));
+			addErrors(request, messages);
 		return "loginSelect";
 	}
 
@@ -11615,7 +11369,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - cancel");
+		//log.debug("ApplyForStudentNumberAction - cancel");
 
 		StudentRegistrationForm stuRegFormOld = (StudentRegistrationForm) form;
 		boolean checkAdmin=false;
@@ -11636,7 +11390,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ArrayList<String> dateCheck = dao.validateClosingDate(stuRegForm.getStudent().getAcademicYear());
 		if (!dateCheck.isEmpty()){ //Check Dates Array
 			for (int i=0; i < dateCheck.size(); i++){
-				log.debug("ApplyForStudentNumberAction - Cancel - dateCheck="+dateCheck.get(i).toString());
+				//log.debug("ApplyForStudentNumberAction - Cancel - dateCheck="+dateCheck.get(i).toString());
 				if ("WAPD".equalsIgnoreCase(dateCheck.get(i).toString())){
 					stuRegForm.getStudent().setDateWAPD(true);
 				}else if ("WAPDOC".equalsIgnoreCase(dateCheck.get(i).toString())){
@@ -11681,19 +11435,19 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 		}
 		
-		log.debug("ApplyForStudentNumberAction - Cancel - validateClosingDate - AcademicYear="+ stuRegForm.getStudent().getAcademicYear() + ",  AcademicPeriod=" + stuRegForm.getStudent().getAcademicPeriod());
+		//log.debug("ApplyForStudentNumberAction - Cancel - validateClosingDate - AcademicYear="+ stuRegForm.getStudent().getAcademicYear() + ",  AcademicPeriod=" + stuRegForm.getStudent().getAcademicPeriod());
 
 		stuRegForm.setWebLoginMsg("");
 		stuRegForm.setWebLoginMsg2("");
 		
-		log.debug("ApplyForStudentNumberAction -Cancel - validateClosingDate: AcademicYear="+ stuRegForm.getStudent().getAcademicYear() + ",  AcademicPeriod=" + stuRegForm.getStudent().getAcademicPeriod());
+		//log.debug("ApplyForStudentNumberAction -Cancel - validateClosingDate: AcademicYear="+ stuRegForm.getStudent().getAcademicYear() + ",  AcademicPeriod=" + stuRegForm.getStudent().getAcademicPeriod());
 
-		log.debug("ApplyForStudentNumberAction - Cancel - CheckAdmin="+checkAdmin);
+		//log.debug("ApplyForStudentNumberAction - Cancel - CheckAdmin="+checkAdmin);
 		if (checkAdmin){
-			log.debug("ApplyForStudentNumberAction - Cancel - Return applyLoginAdmin");
+			//log.debug("ApplyForStudentNumberAction - Cancel - Return applyLoginAdmin");
 			return mapping.findForward("loginStaff");
 		}else{
-			log.debug("ApplyForStudentNumberAction - Cancel - Return applyLoginSelect");
+			//log.debug("ApplyForStudentNumberAction - Cancel - Return applyLoginSelect");
 			return mapping.findForward("loginSelect");
 		}
 	}
@@ -11704,7 +11458,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - Quit");
+		//log.debug("ApplyForStudentNumberAction - Quit");
 		StudentRegistrationForm stuRegForm = new StudentRegistrationForm();
 		boolean checkAdmin=false;
 		if (stuRegForm.getAdminStaff().isAdmin()){
@@ -11723,7 +11477,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ArrayList<String> dateCheck = dao.validateClosingDate(stuRegForm.getStudent().getAcademicYear());
 		if (!dateCheck.isEmpty()){ //Check Dates Array
 			for (int i=0; i < dateCheck.size(); i++){
-				log.debug("ApplyForStudentNumberAction - Quit - dateCheck=["+dateCheck.get(i).toString()+"]");
+				//log.debug("ApplyForStudentNumberAction - Quit - dateCheck=["+dateCheck.get(i).toString()+"]");
 				if ("WAPD".equalsIgnoreCase(dateCheck.get(i).toString())){
 					stuRegForm.getStudent().setDateWAPD(true);
 				}else if ("WAPDOC".equalsIgnoreCase(dateCheck.get(i).toString())){
@@ -11768,45 +11522,45 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 		}
 		
-		log.debug("ApplyForStudentNumberAction - Quit - validateClosingDate: AcademicYear="+ stuRegForm.getStudent().getAcademicYear() + ",  AcademicPeriod=" + stuRegForm.getStudent().getAcademicPeriod());
+		//log.debug("ApplyForStudentNumberAction - Quit - validateClosingDate: AcademicYear="+ stuRegForm.getStudent().getAcademicYear() + ",  AcademicPeriod=" + stuRegForm.getStudent().getAcademicPeriod());
 		
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPU="+stuRegForm.getStudent().isDateWAPU());
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPH="+stuRegForm.getStudent().isDateWAPH());
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPM="+stuRegForm.getStudent().isDateWAPM());
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPD="+stuRegForm.getStudent().isDateWAPD());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPU="+stuRegForm.getStudent().isDateWAPU());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPH="+stuRegForm.getStudent().isDateWAPH());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPM="+stuRegForm.getStudent().isDateWAPM());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPD="+stuRegForm.getStudent().isDateWAPD());
 		
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPRU="+stuRegForm.getStudent().isDateWAPRU());
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPRH="+stuRegForm.getStudent().isDateWAPRH());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPRU="+stuRegForm.getStudent().isDateWAPRU());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPRH="+stuRegForm.getStudent().isDateWAPRH());
 		
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPDOC="+stuRegForm.getStudent().isDateWAPDOC());
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPPAY="+stuRegForm.getStudent().isDateWAPPAY());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPDOC="+stuRegForm.getStudent().isDateWAPDOC());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPPAY="+stuRegForm.getStudent().isDateWAPPAY());
 		
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPADMU="+stuRegForm.getStudent().isDateWAPADMU());
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPADMH="+stuRegForm.getStudent().isDateWAPADMH());
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPADMS="+stuRegForm.getStudent().isDateWAPADMS());
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPADMM="+stuRegForm.getStudent().isDateWAPADMM());
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPADMD="+stuRegForm.getStudent().isDateWAPADMD());
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPADMNEW="+stuRegForm.getStudent().isDateWAPADMNEW());
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPADMRET="+stuRegForm.getStudent().isDateWAPADMRET());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPADMU="+stuRegForm.getStudent().isDateWAPADMU());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPADMH="+stuRegForm.getStudent().isDateWAPADMH());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPADMS="+stuRegForm.getStudent().isDateWAPADMS());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPADMM="+stuRegForm.getStudent().isDateWAPADMM());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPADMD="+stuRegForm.getStudent().isDateWAPADMD());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPADMNEW="+stuRegForm.getStudent().isDateWAPADMNEW());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPADMRET="+stuRegForm.getStudent().isDateWAPADMRET());
 		
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPSTAT="+stuRegForm.getStudent().isDateWAPSTAT());
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPAPL="+stuRegForm.getStudent().isDateWAPAPL());
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPOFFER="+stuRegForm.getStudent().isDateWAPOFFER());
-		log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPOFFICE="+stuRegForm.getStudent().isDateWAPOFFICE());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPSTAT="+stuRegForm.getStudent().isDateWAPSTAT());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPAPL="+stuRegForm.getStudent().isDateWAPAPL());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPOFFER="+stuRegForm.getStudent().isDateWAPOFFER());
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckDates - WAPOFFICE="+stuRegForm.getStudent().isDateWAPOFFICE());
 		
-		log.debug("ApplyForStudentNumberAction - Quit - CheckAdmin="+checkAdmin);
+		//log.debug("ApplyForStudentNumberAction - Quit - CheckAdmin="+checkAdmin);
 		if (checkAdmin){
-			log.debug("ApplyForStudentNumberAction - Quit - Return applyLoginAdmin");
+			//log.debug("ApplyForStudentNumberAction - Quit - Return applyLoginAdmin");
 			return mapping.findForward("loginStaff");
 		}else{
-			log.debug("ApplyForStudentNumberAction - Quit - Return applyLoginSelect");
+			//log.debug("ApplyForStudentNumberAction - Quit - Return applyLoginSelect");
 			return mapping.findForward("loginSelect");
 		}
 	}
 
 	public String cancel(ActionForm form) throws Exception {
 
-		log.debug("String - cancel");
+		//log.debug("String - cancel");
 		
 		StudentRegistrationForm stuRegForm = new StudentRegistrationForm();
 
@@ -11831,7 +11585,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ArrayList<String> dateCheck = dao.validateClosingDate(stuRegForm.getStudent().getAcademicYear());
 		if (!dateCheck.isEmpty()){ //Check Dates Array
 			for (int i=0; i < dateCheck.size(); i++){
-				log.debug("ApplyForStudentNumberAction - Cancel - dateCheck="+dateCheck.get(i).toString());
+				//log.debug("ApplyForStudentNumberAction - Cancel - dateCheck="+dateCheck.get(i).toString());
 				if ("WAPD".equalsIgnoreCase(dateCheck.get(i).toString())){
 					stuRegForm.getStudent().setDateWAPD(true);
 				}else if ("WAPDOC".equalsIgnoreCase(dateCheck.get(i).toString())){
@@ -11876,14 +11630,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 		}
 		
-		log.debug("ApplyForStudentNumberAction - Cancel - validateClosingDate: AcademicYear="+ stuRegForm.getStudent().getAcademicYear() + ",  AcademicPeriod=" + stuRegForm.getStudent().getAcademicPeriod());
+		//log.debug("ApplyForStudentNumberAction - Cancel - validateClosingDate: AcademicYear="+ stuRegForm.getStudent().getAcademicYear() + ",  AcademicPeriod=" + stuRegForm.getStudent().getAcademicPeriod());
 
-		log.debug("ApplyForStudentNumberAction - Cancel(String) - CheckAdmin="+checkAdmin);
+		//log.debug("ApplyForStudentNumberAction - Cancel(String) - CheckAdmin="+checkAdmin);
 		if (checkAdmin){
-			log.debug("ApplyForStudentNumberAction - Cancel(String) - Return applyLoginAdmin");
+			//log.debug("ApplyForStudentNumberAction - Cancel(String) - Return applyLoginAdmin");
 			return "loginStaff";
 		}else{
-			log.debug("ApplyForStudentNumberAction - Cancel(String) - Return applyLoginSelect");
+			//log.debug("ApplyForStudentNumberAction - Cancel(String) - Return applyLoginSelect");
 			return "applyLoginSelect";
 		}
 	}
@@ -11892,7 +11646,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("Action - cancelSearch");
+		//log.debug("Action - cancelSearch");
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		String nextPage = "applyNewAddress1";
 
@@ -11919,7 +11673,11 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request,
 			HttpServletResponse response) throws Exception{
 
-		log.debug("ApplyForStudentNumber: unspecified method call - no value for parameter in request");
+		ActionMessages messages = new ActionMessages();
+		//log.debug("ApplyForStudentNumber: unspecified method call - no value for parameter in request");
+		messages.add(ActionMessages.GLOBAL_MESSAGE,
+				new ActionMessage("message.generalmessage", "An unspecified Session was encountered or your session timed out. Please log on again."));
+			addErrors(request, messages);
 		return mapping.findForward("loginSelect");
 	}
 
@@ -11948,7 +11706,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		stuRegForm.setSearchResult(stripXSS(stuRegForm.getSearchResult(), "SearchResult", "posCodeSel", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 
 		if (stuRegForm.getSearchResult() == null || "".equals(stuRegForm.getSearchResult()) || stuRegForm.getSearchResult().length() < 4){
-			log.debug("ApplyForStudentNumberAction postalCodeSelected - Postal code less than 4 characters: " + stuRegForm.getSearchResult());
+			//log.debug("ApplyForStudentNumberAction postalCodeSelected - Postal code less than 4 characters: " + stuRegForm.getSearchResult());
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 			new ActionMessage("message.generalmessage", "Invalid postal code selection. Please try again."));
 			addErrors(request, messages);
@@ -11961,14 +11719,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					stuRegForm.getStudent().getPostalAddress().setAreaCode(code);
 					
 					if (stuRegForm.getSearchResult() != null && !"".equalsIgnoreCase(stuRegForm.getSearchResult().trim())){
-						log.debug("ApplyForStudentNumberAction - postalCodeSelected - SearchResult="+stuRegForm.getSearchResult());
+						//log.debug("ApplyForStudentNumberAction - postalCodeSelected - SearchResult="+stuRegForm.getSearchResult());
 						int numChars = stuRegForm.getSearchResult().length();
 						numChars = numChars -1;
 						String rAddress = stuRegForm.getSearchResult().substring(6, numChars); // Only after Box or Street - Example: "1865 B DOBSONVILLE: SOWETO"
-						log.debug("ApplyForStudentNumberAction - postalCodeSelected - Right-hand part of SearchResult="+rAddress);
+						//log.debug("ApplyForStudentNumberAction - postalCodeSelected - Right-hand part of SearchResult="+rAddress);
 						int pos = rAddress.indexOf(":");
 						stuRegForm.setAddressSubResultPos(rAddress.substring(0,pos));
-						log.debug("ApplyForStudentNumberAction - postalCodeSelected - AddressSubResult="+stuRegForm.getAddressSubResultPos());
+						//log.debug("ApplyForStudentNumberAction - postalCodeSelected - AddressSubResult="+stuRegForm.getAddressSubResultPos());
 					}
 					nextPage = "applyNewAddress1";
 				}
@@ -11976,14 +11734,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					stuRegForm.getStudent().getPhysicalAddress().setAreaCode(code);
 					
 					if (stuRegForm.getSearchResult() != null && !"".equalsIgnoreCase(stuRegForm.getSearchResult().trim())){
-						log.debug("ApplyForStudentNumberAction - postalCodeSelected - SearchResult="+stuRegForm.getSearchResult());
+						//log.debug("ApplyForStudentNumberAction - postalCodeSelected - SearchResult="+stuRegForm.getSearchResult());
 						int numChars = stuRegForm.getSearchResult().length();
 						numChars = numChars -1;
 						String rAddress = stuRegForm.getSearchResult().substring(6, numChars); // Only after Box or Street - Example: "1865 B DOBSONVILLE: SOWETO"
-						log.debug("ApplyForStudentNumberAction - postalCodeSelected - Right-hand part of SearchResult="+rAddress);
+						//log.debug("ApplyForStudentNumberAction - postalCodeSelected - Right-hand part of SearchResult="+rAddress);
 						int pos = rAddress.indexOf(":");
 						stuRegForm.setAddressSubResultPhys(rAddress.substring(0,pos));
-						log.debug("ApplyForStudentNumberAction - postalCodeSelected - AddressSubResult="+stuRegForm.getAddressSubResultPhys());
+						//log.debug("ApplyForStudentNumberAction - postalCodeSelected - AddressSubResult="+stuRegForm.getAddressSubResultPhys());
 					}
 					nextPage = "applyNewAddress2";
 				}
@@ -11991,19 +11749,19 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					stuRegForm.getStudent().getCourierAddress().setAreaCode(code);
 					
 					if (stuRegForm.getSearchResult() != null && !"".equalsIgnoreCase(stuRegForm.getSearchResult().trim())){
-						log.debug("ApplyForStudentNumberAction - postalCodeSelected - SearchResult="+stuRegForm.getSearchResult());
+						//log.debug("ApplyForStudentNumberAction - postalCodeSelected - SearchResult="+stuRegForm.getSearchResult());
 						int numChars = stuRegForm.getSearchResult().length();
 						numChars = numChars -1;
 						String rAddress = stuRegForm.getSearchResult().substring(6, numChars); // Only after Box or Street - Example: "1865 B DOBSONVILLE: SOWETO"
-						log.debug("ApplyForStudentNumberAction - postalCodeSelected - Right-hand part of SearchResult="+rAddress);
+						//log.debug("ApplyForStudentNumberAction - postalCodeSelected - Right-hand part of SearchResult="+rAddress);
 						int pos = rAddress.indexOf(":");
 						stuRegForm.setAddressSubResultCour(rAddress.substring(0,pos));
-						log.debug("ApplyForStudentNumberAction - postalCodeSelected - AddressSubResult="+stuRegForm.getAddressSubResultCour());
+						//log.debug("ApplyForStudentNumberAction - postalCodeSelected - AddressSubResult="+stuRegForm.getAddressSubResultCour());
 					}
 					nextPage = "applyNewAddress3";
 				}
 			}catch(Exception e){
-				log.debug("ApplyForStudentNumberAction - postalCodeSelected - Postal code selection failed / "+ e);
+				//log.debug("ApplyForStudentNumberAction - postalCodeSelected - Postal code selection failed / "+ e);
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 						new ActionMessage("message.generalmessage", "Postal code selection failed. Please try again."));
 				addErrors(request, messages);
@@ -12035,7 +11793,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		ArrayList<LabelValueBean> list = new ArrayList<LabelValueBean>();
 			
-		log.debug("ApplyForStudentNumberAction - listPostalCode - SearchSuburb="+stuRegForm.getSearchSuburb()+", - SearchTown="+stuRegForm.getSearchTown()+", - SearchListIdentifier="+stuRegForm.getSearchListIdentifier());
+		//log.debug("ApplyForStudentNumberAction - listPostalCode - SearchSuburb="+stuRegForm.getSearchSuburb()+", - SearchTown="+stuRegForm.getSearchTown()+", - SearchListIdentifier="+stuRegForm.getSearchListIdentifier());
 		list=dao.getPostalCodes(stuRegForm.getSearchSuburb(), stuRegForm.getSearchTown(), stuRegForm.getSearchListIdentifier(), stuRegForm.getStudent().getPostalAddress().getBoxStreet());
 
 		if(list.isEmpty()){
@@ -12097,7 +11855,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ActionMessages messages = new ActionMessages();
 		
 		stuRegForm.setSearchListIdentifier(searchField);
-		log.debug("ApplyForStudentNumberAction - search (Postal Code) - searchField="+searchField);
+		//log.debug("ApplyForStudentNumberAction - search (Postal Code) - searchField="+searchField);
 		
 		if (stuRegForm.getSearchListIdentifier().equalsIgnoreCase("Postal")){
 			if(stuRegForm.getStudent().getPostalAddress().getLine1().toString()== null || "".equals(stuRegForm.getStudent().getPostalAddress().getLine1().toString().trim())){
@@ -12123,7 +11881,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		ActionMessages messages = new ActionMessages();
 
-		log.debug("ApplyForStudentNumberAction - applyStatus");
+		//log.debug("ApplyForStudentNumberAction - applyStatus");
 		
 		stuRegForm.setWebLoginMsg("");
 		stuRegForm.setWebLoginMsg2("");
@@ -12134,33 +11892,33 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.setSelSpecCode1(dao.getStatusQual("Spec", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
 			stuRegForm.setSelSpecCode2(dao.getStatusQual("Spec", "2", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
 			
-			log.debug("ApplyForStudentNumberAction - applyStatus - " + stuRegForm.getStudent().getNumber() +" - Qual1     = " + stuRegForm.getSelQualCode1());
-			log.debug("ApplyForStudentNumberAction - applyStatus - " + stuRegForm.getStudent().getNumber() +" - Qual2     = " + stuRegForm.getSelQualCode2());
-			log.debug("ApplyForStudentNumberAction - applyStatus - " + stuRegForm.getStudent().getNumber() +" - Spec1     = " + stuRegForm.getSelSpecCode1());
-			log.debug("ApplyForStudentNumberAction - applyStatus - " + stuRegForm.getStudent().getNumber() +" - Spec2     = " + stuRegForm.getSelSpecCode2());
+			//log.debug("ApplyForStudentNumberAction - applyStatus - " + stuRegForm.getStudent().getNumber() +" - Qual1     = " + stuRegForm.getSelQualCode1());
+			//log.debug("ApplyForStudentNumberAction - applyStatus - " + stuRegForm.getStudent().getNumber() +" - Qual2     = " + stuRegForm.getSelQualCode2());
+			//log.debug("ApplyForStudentNumberAction - applyStatus - " + stuRegForm.getStudent().getNumber() +" - Spec1     = " + stuRegForm.getSelSpecCode1());
+			//log.debug("ApplyForStudentNumberAction - applyStatus - " + stuRegForm.getStudent().getNumber() +" - Spec2     = " + stuRegForm.getSelSpecCode2());
 
 			if ((stuRegForm.getSelQualCode1() == null || "Not Found".equalsIgnoreCase(stuRegForm.getSelQualCode1())) && (stuRegForm.getSelQualCode2() == null || "Not Found".equalsIgnoreCase(stuRegForm.getSelQualCode2()))){
-				log.debug("ApplyForStudentNumberAction - applyStatus - QualCode1 NOT Found!!!");	
+				//log.debug("ApplyForStudentNumberAction - applyStatus - QualCode1 NOT Found!!!");	
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 	        			new ActionMessage("message.generalmessage", "No Application or Qualification found"));
 				addErrors(request, messages);
 			}else{
 				//Appeal & Offer Status
 				String status1 = dao.getApplyStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "1");
-				log.debug("ApplyForStudentNumberAction - applyStatus - Status1="+status1);
+				//log.debug("ApplyForStudentNumberAction - applyStatus - Status1="+status1);
 				stuRegForm.setQualStatusCode1(status1);
 				if (status1 != null && !"".equals(status1)){
 					stuRegForm.setQualStatus1(dao.getStatusDesc(status1));
-					log.debug("ApplyForStudentNumberAction - applyStatus - Status1 Desc="+stuRegForm.getQualStatus1());					
+					//log.debug("ApplyForStudentNumberAction - applyStatus - Status1 Desc="+stuRegForm.getQualStatus1());					
 				}
 				
 				if (stuRegForm.getSelQualCode2() != null && !"Not Found".equalsIgnoreCase(stuRegForm.getSelQualCode2())){
 					String status2 = dao.getApplyStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "2");
 					stuRegForm.setQualStatusCode2(status2);
-					log.debug("ApplyForStudentNumberAction - applyStatus - Status2="+status2);
+					//log.debug("ApplyForStudentNumberAction - applyStatus - Status2="+status2);
 					if (status2 != null && !"".equals(status2)){
 						stuRegForm.setQualStatus2(dao.getStatusDesc(status2));
-						log.debug("ApplyForStudentNumberAction - applyStatus - Status2 Desc="+stuRegForm.getQualStatus2());
+						//log.debug("ApplyForStudentNumberAction - applyStatus - Status2 Desc="+stuRegForm.getQualStatus2());
 					}
 				}
 				
@@ -12168,14 +11926,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				if ("AX".equalsIgnoreCase(stuRegForm.getQualStatusCode1())){
 					String reason1 = dao.getDeclineReason(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), stuRegForm.getSelQualCode1());
 					stuRegForm.setQualStatus1Reason(reason1);
-					log.debug("ApplyForStudentNumberAction - applyStatus - Reason1="+reason1);
+					//log.debug("ApplyForStudentNumberAction - applyStatus - Reason1="+reason1);
 				}	
 				
 				if (stuRegForm.getSelQualCode2() != null && !"Not Found".equalsIgnoreCase(stuRegForm.getSelQualCode2())){
 					if ("AX".equalsIgnoreCase(stuRegForm.getQualStatusCode2())){
 						String reason2 = dao.getDeclineReason(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), stuRegForm.getSelQualCode2());
 						stuRegForm.setQualStatus2Reason(reason2);
-						log.debug("ApplyForStudentNumberAction - applyStatus - Reason2="+reason2);
+						//log.debug("ApplyForStudentNumberAction - applyStatus - Reason2="+reason2);
 					}
 				}
 				//Get Application Fee Information
@@ -12183,10 +11941,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					Status status = new Status();
 					status = dao.getStatusFee(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod());
 					
-					log.debug("ApplyForStudentNumberAction - applyStatus - dao PayDate="+status.getPayDate());
-			    	log.debug("ApplyForStudentNumberAction - applyStatus - dao PayFee ="+status.getPayFee());
-			    	log.debug("ApplyForStudentNumberAction - applyStatus - dao PayFull="+status.isPayFull());
-			    	log.debug("ApplyForStudentNumberAction - applyStatus - dao PayCom ="+status.getPayComment());
+					//log.debug("ApplyForStudentNumberAction - applyStatus - dao PayDate="+status.getPayDate());
+			    	//log.debug("ApplyForStudentNumberAction - applyStatus - dao PayFee ="+status.getPayFee());
+			    	//log.debug("ApplyForStudentNumberAction - applyStatus - dao PayFull="+status.isPayFull());
+			    	//log.debug("ApplyForStudentNumberAction - applyStatus - dao PayCom ="+status.getPayComment());
 			    	
 					stuRegForm.getStatus().setPayDate(status.getPayDate());
 					stuRegForm.getStatus().setPayFee(status.getPayFee());
@@ -12194,10 +11952,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					stuRegForm.getStatus().setPayComment(status.getPayComment());
 					
 					//Debug
-					log.debug("ApplyForStudentNumberAction - applyStatus - form PayDate="+stuRegForm.getStatus().getPayDate());
-			    	log.debug("ApplyForStudentNumberAction - applyStatus - form PayFee ="+stuRegForm.getStatus().getPayFee());
-			    	log.debug("ApplyForStudentNumberAction - applyStatus - form PayFull="+stuRegForm.getStatus().isPayFull());
-			    	log.debug("ApplyForStudentNumberAction - applyStatus - form PayCom ="+stuRegForm.getStatus().getPayComment());
+					//log.debug("ApplyForStudentNumberAction - applyStatus - form PayDate="+stuRegForm.getStatus().getPayDate());
+			    	//log.debug("ApplyForStudentNumberAction - applyStatus - form PayFee ="+stuRegForm.getStatus().getPayFee());
+			    	//log.debug("ApplyForStudentNumberAction - applyStatus - form PayFull="+stuRegForm.getStatus().isPayFull());
+			    	//log.debug("ApplyForStudentNumberAction - applyStatus - form PayCom ="+stuRegForm.getStatus().getPayComment());
 			    	
 				}
 			}
@@ -12214,7 +11972,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		ActionMessages messages = new ActionMessages();
 
-		log.debug("ApplyForStudentNumberAction - applyOfferStatus - Start");
+		//log.debug("ApplyForStudentNumberAction - applyOfferStatus - Start");
 		
 		stuRegForm.setWebLoginMsg("");
 		stuRegForm.setWebLoginMsg2("");
@@ -12225,8 +11983,8 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			isQualOffer1 = dao.getOfferStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "1", "applyOfferStatus");
 			isQualOffer2 = dao.getOfferStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "2", "applyOfferStatus");
 
-			log.debug("ApplyForStudentNumberAction - applyOfferStatus - isQualOffer1="+isQualOffer1);
-			log.debug("ApplyForStudentNumberAction - applyOfferStatus - isQualOffer2="+isQualOffer2);
+			//log.debug("ApplyForStudentNumberAction - applyOfferStatus - isQualOffer1="+isQualOffer1);
+			//log.debug("ApplyForStudentNumberAction - applyOfferStatus - isQualOffer2="+isQualOffer2);
 			
 			if (isQualOffer1){
 				stuRegForm.setOfferQual1(dao.getStatusQual("Qual", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
@@ -12236,11 +11994,11 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				stuRegForm.setOfferQual2(dao.getStatusQual("Qual", "2", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
 				stuRegForm.setOfferSpec2(dao.getStatusQual("Spec", "2", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
 			}
-			log.debug("ApplyForStudentNumberAction - applyOfferStatus - After - " + stuRegForm.getStudent().getNumber() +" - Qual1     = " + stuRegForm.getOfferQual1());
-			log.debug("ApplyForStudentNumberAction - applyOfferStatus - After - " + stuRegForm.getStudent().getNumber() +" - Spec1     = " + stuRegForm.getOfferSpec1());
+			//log.debug("ApplyForStudentNumberAction - applyOfferStatus - After - " + stuRegForm.getStudent().getNumber() +" - Qual1     = " + stuRegForm.getOfferQual1());
+			//log.debug("ApplyForStudentNumberAction - applyOfferStatus - After - " + stuRegForm.getStudent().getNumber() +" - Spec1     = " + stuRegForm.getOfferSpec1());
 
-			log.debug("ApplyForStudentNumberAction - applyOfferStatus - After - " + stuRegForm.getStudent().getNumber() +" - Qual2     = " + stuRegForm.getOfferQual2());
-			log.debug("ApplyForStudentNumberAction - applyOfferStatus - After - " + stuRegForm.getStudent().getNumber() +" - Spec2     = " + stuRegForm.getOfferSpec2());
+			//log.debug("ApplyForStudentNumberAction - applyOfferStatus - After - " + stuRegForm.getStudent().getNumber() +" - Qual2     = " + stuRegForm.getOfferQual2());
+			//log.debug("ApplyForStudentNumberAction - applyOfferStatus - After - " + stuRegForm.getStudent().getNumber() +" - Spec2     = " + stuRegForm.getOfferSpec2());
 
 			//Appeal & Offer Status
 			stuRegForm.setQualStatusCode1("");
@@ -12251,43 +12009,43 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.setQualStatus2Reason("");
 			if (isQualOffer1 && (stuRegForm.getOfferQual1() != null && !"Not Found".equalsIgnoreCase(stuRegForm.getOfferQual1()))){
 				String status1 = dao.getApplyStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "1");
-				log.debug("ApplyForStudentNumberAction - applyOfferStatus - Status1="+status1);
+				//log.debug("ApplyForStudentNumberAction - applyOfferStatus - Status1="+status1);
 				stuRegForm.setQualStatusCode1(status1);
 				if (status1 != null && !"".equals(status1)){
 					stuRegForm.setQualStatus1(dao.getStatusDesc(status1));
-					log.debug("ApplyForStudentNumberAction - applyOfferStatus - Status1 Desc="+stuRegForm.getQualStatus1());					
+					//log.debug("ApplyForStudentNumberAction - applyOfferStatus - Status1 Desc="+stuRegForm.getQualStatus1());					
 				}
 				//Offer Reason
 				if ("AX".equalsIgnoreCase(stuRegForm.getQualStatusCode1()) || "EX".equalsIgnoreCase(stuRegForm.getQualStatusCode1()) || "TX".equalsIgnoreCase(stuRegForm.getQualStatusCode1())){
 					String reason1 = dao.getDeclineReason(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), stuRegForm.getSelQualCode1());
 					stuRegForm.setQualStatus1Reason(reason1);
-					log.debug("ApplyForStudentNumberAction - applyOfferStatus - Reason1="+reason1);
+					//log.debug("ApplyForStudentNumberAction - applyOfferStatus - Reason1="+reason1);
 				}	
 			}else{
-				log.debug("ApplyForStudentNumberAction - applyOfferStatus - QualCode1 NOT Found!!!");	
+				//log.debug("ApplyForStudentNumberAction - applyOfferStatus - QualCode1 NOT Found!!!");	
 			}
 			
 			if (isQualOffer2 && (stuRegForm.getOfferQual2() != null && !"Not Found".equalsIgnoreCase(stuRegForm.getOfferQual2()))){
 				String status2 = dao.getApplyStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "2");
 				stuRegForm.setQualStatusCode2(status2);
-				log.debug("ApplyForStudentNumberAction - applyOfferStatus - Status2="+status2);
+				//log.debug("ApplyForStudentNumberAction - applyOfferStatus - Status2="+status2);
 				if (status2 != null && !"".equals(status2)){
 					stuRegForm.setQualStatus2(dao.getStatusDesc(status2));
-					log.debug("ApplyForStudentNumberAction - applyOfferStatus - Status2 Desc="+stuRegForm.getQualStatus2());
+					//log.debug("ApplyForStudentNumberAction - applyOfferStatus - Status2 Desc="+stuRegForm.getQualStatus2());
 				}
 				//Offer Reason
 				if ("AX".equalsIgnoreCase(stuRegForm.getQualStatusCode2()) || "EX".equalsIgnoreCase(stuRegForm.getQualStatusCode2()) || "TX".equalsIgnoreCase(stuRegForm.getQualStatusCode2())){
 						String reason2 = dao.getDeclineReason(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber(), stuRegForm.getSelQualCode2());
 						stuRegForm.setQualStatus2Reason(reason2);
-						log.debug("ApplyForStudentNumberAction - applyOfferStatus - Reason2="+reason2);
+						//log.debug("ApplyForStudentNumberAction - applyOfferStatus - Reason2="+reason2);
 				}
 			}else{
-				log.debug("ApplyForStudentNumberAction - applyOfferStatus - QualCode2 NOT Found!!!");	
+				//log.debug("ApplyForStudentNumberAction - applyOfferStatus - QualCode2 NOT Found!!!");	
 			}
 		}catch(Exception e){
 			log.warn("ApplyForStudentNumberAction - applyOfferStatus - crashed / " + e);
 		}
-		log.debug("ApplyForStudentNumberAction - applyOfferStatus - Done");
+		//log.debug("ApplyForStudentNumberAction - applyOfferStatus - Done");
 	}
 	
 	public String applyOffer(ActionMapping mapping, ActionForm form,
@@ -12298,20 +12056,20 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 		ActionMessages messages = new ActionMessages();
 
-		log.debug("ApplyForStudentNumberAction - applyOffer - Start");
+		//log.debug("ApplyForStudentNumberAction - applyOffer - Start");
 		
 		stuRegForm.getStudent().setQual1(dao.vrfyNewQualShort("Qual","1",stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
 		stuRegForm.getStudent().setQual2(dao.vrfyNewQualShort("Qual","2",stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
 		
-		log.debug("ApplyForStudentNumberAction - applyOffer check - Qual1="+stuRegForm.getStudent().getQual1());
-		log.debug("ApplyForStudentNumberAction - applyOffer check - Qual2="+stuRegForm.getStudent().getQual2());
+		//log.debug("ApplyForStudentNumberAction - applyOffer check - Qual1="+stuRegForm.getStudent().getQual1());
+		//log.debug("ApplyForStudentNumberAction - applyOffer check - Qual2="+stuRegForm.getStudent().getQual2());
 
 		try{
 			stuRegForm.getStudentApplication().setRadioOfferQual1(stripXSS(stuRegForm.getStudentApplication().getRadioOfferQual1(), "RadioOfferQual1", "applyOffer", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 			stuRegForm.getStudentApplication().setRadioOfferQual2(stripXSS(stuRegForm.getStudentApplication().getRadioOfferQual2(), "RadioOfferQual2", "applyOffer", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
 			
-			log.debug("ApplyForStudentNumberAction - applyOffer check - Qual1 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual1());
-			log.debug("ApplyForStudentNumberAction - applyOffer check - Qual2 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual2());
+			//log.debug("ApplyForStudentNumberAction - applyOffer check - Qual1 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual1());
+			//log.debug("ApplyForStudentNumberAction - applyOffer check - Qual2 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual2());
 
 			boolean isRadio1 = false;
 			boolean isRadio2 = false;
@@ -12324,7 +12082,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 			
 			if (!isRadio1 && !isRadio2){
-				log.debug("ApplyForStudentNumberAction - applyOffer check - Radio1 & Radio2 Not Selected?="+isRadio1+" & "+isRadio2);
+				//log.debug("ApplyForStudentNumberAction - applyOffer check - Radio1 & Radio2 Not Selected?="+isRadio1+" & "+isRadio2);
 
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 						new ActionMessage("message.generalmessage", "Please select an offer of enrolment to accept or decline or cancel to exit"));
@@ -12334,11 +12092,11 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			
 			//int updResult = dao.updateOffer(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getOfferRadio());
 		
-			log.debug("ApplyForStudentNumberAction - applyOffer check - Qual1 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual1());
-			log.debug("ApplyForStudentNumberAction - applyOffer check - Qual2 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual2());
+			//log.debug("ApplyForStudentNumberAction - applyOffer check - Qual1 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual1());
+			//log.debug("ApplyForStudentNumberAction - applyOffer check - Qual2 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual2());
 
 			if (isRadio1 || isRadio2){
-				log.debug("ApplyForStudentNumberAction - applyOffer In Proxy Call");
+				//log.debug("ApplyForStudentNumberAction - applyOffer In Proxy Call");
 				//Use STAAE05H Proxy to save Offer
 				Staae05sAppAdmissionEvaluator op = new Staae05sAppAdmissionEvaluator();
 				operListener opl = new operListener();
@@ -12346,7 +12104,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				op.clear();
 				
 				if (isRadio1){
-					log.debug("ApplyForStudentNumberAction - applyOffer - Qual1="+stuRegForm.getOfferQual1()+", Qual1 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual1());
+					//log.debug("ApplyForStudentNumberAction - applyOffer - Qual1="+stuRegForm.getOfferQual1()+", Qual1 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual1());
 					//Student Input fields
 					op.setInCsfClientServerCommunicationsClientVersionNumber((short) 3);
 					op.setInCsfClientServerCommunicationsClientRevisionNumber((short) 1);
@@ -12358,25 +12116,25 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					op.setInWebStuApplicationQualApplicationPeriod((short) Integer.parseInt(stuRegForm.getStudent().getAcademicPeriod()));
 					//op.setInWsQualificationCode(stuRegForm.getStudent().getQual1());
 					String qual1 = (stuRegForm.getOfferQual1().substring(0,5));
-					log.debug("ApplyForStudentNumberAction - applyOffer - Qual1 Offer Input="+qual1);
+					//log.debug("ApplyForStudentNumberAction - applyOffer - Qual1 Offer Input="+qual1);
 					op.setInWebStuApplicationQualNewQual(qual1);
 					op.setInWebStuApplicationQualChoiceNr((short) 1);
 					op.setInWebStuApplicationQualOfferAccepted(stuRegForm.getStudentApplication().getRadioOfferQual1());
 				
-					log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Student Number         ="+stuRegForm.getStudent().getNumber());
-					log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Academic Year          ="+stuRegForm.getStudent().getAcademicYear());
-					log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Academic Period        ="+stuRegForm.getStudent().getAcademicPeriod());
-					log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Qualification Accepted ="+stuRegForm.getOfferQual1());
-					log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Qualification Radio    ="+stuRegForm.getStudentApplication().getRadioOfferQual1());
+					//log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Student Number         ="+stuRegForm.getStudent().getNumber());
+					//log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Academic Year          ="+stuRegForm.getStudent().getAcademicYear());
+					//log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Academic Period        ="+stuRegForm.getStudent().getAcademicPeriod());
+					//log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Qualification Accepted ="+stuRegForm.getOfferQual1());
+					//log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 1 - Qualification Radio    ="+stuRegForm.getStudentApplication().getRadioOfferQual1());
 					
 					op.execute();
 		
 					if (opl.getException() != null) throw opl.getException();
 					if (op.getExitStateType() < 3) throw new Exception(op.getExitStateMsg());
 		
-					log.debug("ApplyForStudentNumberAction - applyOffer - 1 - After Execute");
+					//log.debug("ApplyForStudentNumberAction - applyOffer - 1 - After Execute");
 					String opResult1 = op.getOutCsfStringsString500();
-					log.debug("ApplyForStudentNumberAction - applyOffer - 1 - opResult: " + opResult1);
+					//log.debug("ApplyForStudentNumberAction - applyOffer - 1 - opResult: " + opResult1);
 					op.clear();
 					if (!opResult1.contains("generated")){
 						messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -12384,7 +12142,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 						addErrors(request, messages);
 						applyOfferStatus(request, stuRegForm);
 						if ((stuRegForm.getOfferQual1() == null || "".equalsIgnoreCase(stuRegForm.getOfferQual1())) && (stuRegForm.getOfferQual2() == null || "".equalsIgnoreCase(stuRegForm.getOfferQual2()))){
-							log.debug("ApplyForStudentNumberAction - applyOffer - Qual1 Done - Goto applyOfferConfirm");
+							//log.debug("ApplyForStudentNumberAction - applyOffer - Qual1 Done - Goto applyOfferConfirm");
 							return "applyOfferConfirm";
 						}else{
 							return "applyOffer";
@@ -12394,7 +12152,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 								
 				if (isRadio2){
-					log.debug("ApplyForStudentNumberAction - applyOffer - Qual2="+stuRegForm.getOfferQual2()+", Qual2 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual2());
+					//log.debug("ApplyForStudentNumberAction - applyOffer - Qual2="+stuRegForm.getOfferQual2()+", Qual2 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual2());
 					//Student Input fields
 					op.setInCsfClientServerCommunicationsClientVersionNumber((short) 3);
 					op.setInCsfClientServerCommunicationsClientRevisionNumber((short) 1);
@@ -12406,25 +12164,25 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 					op.setInWebStuApplicationQualApplicationPeriod((short) Integer.parseInt(stuRegForm.getStudent().getAcademicPeriod()));
 					//op.setInWsQualificationCode(stuRegForm.getStudent().getQual2());
 					String qual2 = (stuRegForm.getOfferQual2().substring(0,5));
-					log.debug("ApplyForStudentNumberAction - applyOffer - Qual2 Offer Input="+qual2);
+					//log.debug("ApplyForStudentNumberAction - applyOffer - Qual2 Offer Input="+qual2);
 					op.setInWebStuApplicationQualNewQual(qual2);
 					op.setInWebStuApplicationQualChoiceNr((short) 2);
 					op.setInWebStuApplicationQualOfferAccepted(stuRegForm.getStudentApplication().getRadioOfferQual2());
 				
-					log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Student Number         ="+stuRegForm.getStudent().getNumber());
-					log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Academic Year          ="+stuRegForm.getStudent().getAcademicYear());
-					log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Academic Period        ="+stuRegForm.getStudent().getAcademicPeriod());
-					log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Qualification Accepted ="+stuRegForm.getOfferQual2());
-					log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Qualification Radio    ="+stuRegForm.getStudentApplication().getRadioOfferQual2());
+					//log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Student Number         ="+stuRegForm.getStudent().getNumber());
+					//log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Academic Year          ="+stuRegForm.getStudent().getAcademicYear());
+					//log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Academic Period        ="+stuRegForm.getStudent().getAcademicPeriod());
+					//log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Qualification Accepted ="+stuRegForm.getOfferQual2());
+					//log.debug("ApplyForStudentNumberAction - applyOffer - (Staae05sAppAdmissionEvaluator) - 2 - Qualification Radio    ="+stuRegForm.getStudentApplication().getRadioOfferQual2());
 										
 					op.execute();
 		
 					if (opl.getException() != null) throw opl.getException();
 					if (op.getExitStateType() < 3) throw new Exception(op.getExitStateMsg());
 		
-					log.debug("ApplyForStudentNumberAction - applyOffer - 2 - After Execute");
+					//log.debug("ApplyForStudentNumberAction - applyOffer - 2 - After Execute");
 					String opResult2 = op.getOutCsfStringsString500();
-					log.debug("ApplyForStudentNumberAction - applyOffer - 2 - opResult: " + opResult2);
+					//log.debug("ApplyForStudentNumberAction - applyOffer - 2 - opResult: " + opResult2);
 					op.clear();
 					if (!opResult2.contains("generated")){
 						messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -12432,7 +12190,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 						addErrors(request, messages);
 						applyOfferStatus(request, stuRegForm);
 						if ((stuRegForm.getOfferQual1() == null || "".equalsIgnoreCase(stuRegForm.getOfferQual1())) && (stuRegForm.getOfferQual2() == null || "".equalsIgnoreCase(stuRegForm.getOfferQual2()))){
-							log.debug("ApplyForStudentNumberAction - applyOffer - Qual2 Done - Goto applyOfferConfirm");
+							//log.debug("ApplyForStudentNumberAction - applyOffer - Qual2 Done - Goto applyOfferConfirm");
 							return "applyOfferConfirm";
 						}else{
 							return "applyOffer";
@@ -12441,7 +12199,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				}
 				
 			}else{
-				log.debug("ApplyForStudentNumberAction - applyOffer - Staae05sAppAdmissionEvaluator - No Qualifications were accepted.");
+				//log.debug("ApplyForStudentNumberAction - applyOffer - Staae05sAppAdmissionEvaluator - No Qualifications were accepted.");
 			}
 		
 		}catch(Exception e){
@@ -12453,7 +12211,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		String displayDate = (new java.text.SimpleDateFormat("EEEEE dd MMMMM yyyy hh:mm:ss").format(date).toString());
 		stuRegForm.getStudent().setAppTime(displayDate);
 		
-		log.debug("ApplyForStudentNumberAction - applyOffer - End - Goto applyOfferConfirm");
+		//log.debug("ApplyForStudentNumberAction - applyOffer - End - Goto applyOfferConfirm");
 		return "applyOfferConfirm";
 	}
 	
@@ -12461,12 +12219,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - applyOfferConfirm - Start");
+		//log.debug("ApplyForStudentNumberAction - applyOfferConfirm - Start");
 
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm)form;
 		//Nothing to do here. No additional workflow files or confirmation screens requested.
 		
-		log.debug("ApplyForStudentNumberAction - applyOfferConfirm - Done - Goto Cancel");
+		//log.debug("ApplyForStudentNumberAction - applyOfferConfirm - Done - Goto Cancel");
 		
 		/* Set submission time stamp */
 		Date date = new java.util.Date();
@@ -12479,7 +12237,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - stepID - Start");
+		//log.debug("ApplyForStudentNumberAction - stepID - Start");
 		
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm)form;
 		GeneralMethods gen = new GeneralMethods();
@@ -12487,7 +12245,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 		// RSA id number
 		String stuID  = stripXSS(stuRegForm.getStudent().getIdNumber().trim(), "IDNumber", "stepID", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
-		log.debug("ApplyForStudentNumberAction - stepID - ID="+stuID);
+		//log.debug("ApplyForStudentNumberAction - stepID - ID="+stuID);
 		
 		if (stuID == null && "".equals(stuID)){
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -12525,18 +12283,18 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		//Hardcoded to Undergrad Degrees, because all we're interested in here is the Matric Matching, not any returned Qualifications
 		op.setInGencodQualLevelCsfStringsString2("07");
 			
-		log.debug("ApplyForStudentNumberAction - stepID - (Staae05sAppAdmissionEvaluator) - Student ID Number=" + stuRegForm.getStudent().getIdNumber());
+		//log.debug("ApplyForStudentNumberAction - stepID - (Staae05sAppAdmissionEvaluator) - Student ID Number=" + stuRegForm.getStudent().getIdNumber());
 
 		op.execute();
 
 		if (opl.getException() != null) throw opl.getException();
 		if (op.getExitStateType() < 3) throw new Exception(op.getExitStateMsg());
 
-		log.debug("ApplyForStudentNumberAction - stepID - After Execute");
+		//log.debug("ApplyForStudentNumberAction - stepID - After Execute");
 		String opResult = op.getOutCsfStringsString500();
-		log.debug("ApplyForStudentNumberAction - stepID - opResult: " + opResult);
+		//log.debug("ApplyForStudentNumberAction - stepID - opResult: " + opResult);
 		
-		  log.debug("ApplyForStudentNumberAction - stepID - Staae05sAppAdmissionEvaluator - getOutCsfStringsString500="+op.getOutCsfStringsString500());
+		  //log.debug("ApplyForStudentNumberAction - stepID - Staae05sAppAdmissionEvaluator - getOutCsfStringsString500="+op.getOutCsfStringsString500());
 
 		
 		if(opResult.contains("Matric data not found")){
@@ -12545,20 +12303,20 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.setQualIDMatch(true);
 			
 		}
-		log.debug("ApplyForStudentNumberAction - stepID - After F915 ID Check");
-		log.debug("ApplyForStudentNumberAction - stepID - ========================================================================================");
-		log.debug("ApplyForStudentNumberAction - stepID - getOutGroupCount="+op.getOutGroupCount());
-		log.debug("ApplyForStudentNumberAction - stepID - getOutGroupMatricCount="+op.getOutGroupMatricCount());	
-		log.debug("ApplyForStudentNumberAction - stepID - ========================================================================================");
+		//log.debug("ApplyForStudentNumberAction - stepID - After F915 ID Check");
+		//log.debug("ApplyForStudentNumberAction - stepID - ========================================================================================");
+		//log.debug("ApplyForStudentNumberAction - stepID - getOutGroupCount="+op.getOutGroupCount());
+		//log.debug("ApplyForStudentNumberAction - stepID - getOutGroupMatricCount="+op.getOutGroupMatricCount());	
+		//log.debug("ApplyForStudentNumberAction - stepID - ========================================================================================");
 
 		op.clear();
 	
 		//If Matric Exists, go To Qualification Screen (SelectNew), Else go to Matric APS Screen 1
 		if (stuRegForm.isQualIDMatch()){
-			log.debug("ApplyForStudentNumberAction - stepID - Matric Matched - Goto applyQualification");
+			//log.debug("ApplyForStudentNumberAction - stepID - Matric Matched - Goto applyQualification");
 			return mapping.findForward("applyQualification");
 		}else{
-			log.debug("ApplyForStudentNumberAction - stepID - Matric NOT Matched - Goto APS Screen 1 ()");
+			//log.debug("ApplyForStudentNumberAction - stepID - Matric NOT Matched - Goto APS Screen 1 ()");
 			return mapping.findForward("applyMatric");
 		}
 	}
@@ -12568,7 +12326,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - stepID - Start");
+		//log.debug("ApplyForStudentNumberAction - stepID - Start");
 		
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm)form;
 		GeneralMethods gen = new GeneralMethods();
@@ -12576,7 +12334,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		
 		// RSA id number
 		String stuID  = stripXSS(stuRegForm.getStudent().getIdNumber().trim(), "IDNumber", "QualSubj", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
-		log.debug("ApplyForStudentNumberAction - stepID - ID="+stuID);
+		//log.debug("ApplyForStudentNumberAction - stepID - ID="+stuID);
 		
 		if (stuID == null && "".equals(stuID)){
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
@@ -12615,18 +12373,18 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		//Hardcoded to "07" just to do matrick Match check to know where to flow to.
 		op.setInGencodQualLevelCsfStringsString2("07");
 			
-		log.debug("ApplyForStudentNumberAction - stepID - (Staae05sAppAdmissionEvaluator) - Student ID Number=" + stuRegForm.getStudent().getIdNumber());
+		//log.debug("ApplyForStudentNumberAction - stepID - (Staae05sAppAdmissionEvaluator) - Student ID Number=" + stuRegForm.getStudent().getIdNumber());
 
 		op.execute();
 
 		if (opl.getException() != null) throw opl.getException();
 		if (op.getExitStateType() < 3) throw new Exception(op.getExitStateMsg());
 
-		log.debug("ApplyForStudentNumberAction - stepID - After Execute");
+		//log.debug("ApplyForStudentNumberAction - stepID - After Execute");
 		String opResult = op.getOutCsfStringsString500();
-		log.debug("ApplyForStudentNumberAction - stepID - opResult: " + opResult);
+		//log.debug("ApplyForStudentNumberAction - stepID - opResult: " + opResult);
 		
-		  log.debug("ApplyForStudentNumberAction - stepID - Staae05sAppAdmissionEvaluator (ID) - getOutCsfStringsString500="+op.getOutCsfStringsString500());
+		  //log.debug("ApplyForStudentNumberAction - stepID - Staae05sAppAdmissionEvaluator (ID) - getOutCsfStringsString500="+op.getOutCsfStringsString500());
 
 		
 		if(opResult.contains("Matric data not found")){
@@ -12635,37 +12393,37 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			stuRegForm.setQualSTAAE01(true);
 			matricCheck = true;
 		}
-		log.debug("ApplyForStudentNumberAction - stepID - After F915 ID Check");
-		log.debug("ApplyForStudentNumberAction - stepID - ========================================================================================");
-		log.debug("ApplyForStudentNumberAction - stepID - getOutGroupCount="+op.getOutGroupCount());
+		//log.debug("ApplyForStudentNumberAction - stepID - After F915 ID Check");
+		//log.debug("ApplyForStudentNumberAction - stepID - ========================================================================================");
+		//log.debug("ApplyForStudentNumberAction - stepID - getOutGroupCount="+op.getOutGroupCount());
 				
 		for (int i = 0; i < op.getOutGroupCount(); i++){
-			log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - ========================================================================================");
+			//log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - ========================================================================================");
 
-			log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGroupCount                                    ="+op.getOutGroupCount());
-			log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGroupMatricCount                              ="+op.getOutGroupMatricCount());
-			log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGWsQualificationCode                          ="+op.getOutGWsQualificationCode(i).toString());
-			log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGWsQualificationSpecialityTypeSpecialityCode  ="+op.getOutGWsQualificationSpecialityTypeSpecialityCode(i).toString());
-			log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGWsQualificationType                          ="+op.getOutGWsQualificationType(i).toString());
-			log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGCsfStringsString2                            ="+op.getOutGCsfStringsString2(i).toString());
-			log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGCsfStringsString3                            ="+op.getOutGCsfStringsString3(i).toString());
-			log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGCsfStringsString4                            ="+op.getOutGCsfStringsString4(i).toString());
-			log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutWsMatricRecordAcsScore                        ="+op.getOutWsMatricRecordAcsScore());
-			log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutWsMatricRecordApsScore                        ="+op.getOutWsMatricRecordApsScore());
-			log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutWsMatricStatusCode                            ="+op.getOutWsMatricStatusCode().toString());
+			//log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGroupCount                                    ="+op.getOutGroupCount());
+			//log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGroupMatricCount                              ="+op.getOutGroupMatricCount());
+			//log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGWsQualificationCode                          ="+op.getOutGWsQualificationCode(i).toString());
+			//log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGWsQualificationSpecialityTypeSpecialityCode  ="+op.getOutGWsQualificationSpecialityTypeSpecialityCode(i).toString());
+			//log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGWsQualificationType                          ="+op.getOutGWsQualificationType(i).toString());
+			//log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGCsfStringsString2                            ="+op.getOutGCsfStringsString2(i).toString());
+			//log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGCsfStringsString3                            ="+op.getOutGCsfStringsString3(i).toString());
+			//log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutGCsfStringsString4                            ="+op.getOutGCsfStringsString4(i).toString());
+			//log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutWsMatricRecordAcsScore                        ="+op.getOutWsMatricRecordAcsScore());
+			//log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutWsMatricRecordApsScore                        ="+op.getOutWsMatricRecordApsScore());
+			//log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - F915 - getOutWsMatricStatusCode                            ="+op.getOutWsMatricStatusCode().toString());
 			
-			log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - After F915 List Check");
-			log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - ========================================================================================");
+			//log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - After F915 List Check");
+			//log.debug("ApplyForStudentNumberAction - stepID - Count="+i+" - ========================================================================================");
 			
 		}
 		op.clear();
 	
 		//If Matric Exists, go To SelectNew, Else go to APS Screen 1
 		if (matricCheck){
-			log.debug("ApplyForStudentNumberAction - stepID - Goto applyQualification");
+			//log.debug("ApplyForStudentNumberAction - stepID - Goto applyQualification");
 			return mapping.findForward("applyQualification");
 		}else{
-			log.debug("ApplyForStudentNumberAction - stepID - Goto APS Screen 1 ()");
+			//log.debug("ApplyForStudentNumberAction - stepID - Goto APS Screen 1 ()");
 			return mapping.findForward("applyMatric");
 		}
 	}
@@ -12675,7 +12433,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - applyMatric - Start");
+		//log.debug("ApplyForStudentNumberAction - applyMatric - Start");
 		
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm)form;
 		GeneralMethods gen = new GeneralMethods();
@@ -12690,7 +12448,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			return "applyMatric";
 		}
 		
-		log.debug("ApplyForStudentNumberAction - applyMatric - End");
+		//log.debug("ApplyForStudentNumberAction - applyMatric - End");
 		
 		request.setAttribute("subjectList", stuRegForm.getSubjects());
 		return "applyMatricSubject";
@@ -12701,7 +12459,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - applyMatricSubject - Start");
+		//log.debug("ApplyForStudentNumberAction - applyMatricSubject - Start");
 		
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm)form;
 		GeneralMethods gen = new GeneralMethods();
@@ -12713,7 +12471,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			boolean isEntered = false;
 			if(request.getParameter("subjectName"+i)!=null && !"".equals(request.getParameter("subjectName"+i))   && !"0".equals(request.getParameter("subjectName"+i))) {
 				subject.setSubjectName(stripXSS(request.getParameter("subjectName" + i), "subjectName" + i, "MatSubject", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true));
-				log.debug("ApplyForStudentNumberAction - applyMatricSubject - Subject"+i+"="+request.getParameter("subjectName" + i));
+				//log.debug("ApplyForStudentNumberAction - applyMatricSubject - Subject"+i+"="+request.getParameter("subjectName" + i));
 				isEntered = true;
 				
 				if(request.getParameter("subjectGrade"+i)!=null && !"".equals(request.getParameter("subjectGrade"+i)) && !"0".equals(request.getParameter("subjectGrade"+i))) {
@@ -12740,13 +12498,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		request.setAttribute("subjectList", stuRegForm.getSubjects());
 		
 		//Debug
-		log.debug("ApplyForStudentNumberAction - applyMatricSubject - Subject Count="+stuRegForm.getSubjects().size());
+		//log.debug("ApplyForStudentNumberAction - applyMatricSubject - Subject Count="+stuRegForm.getSubjects().size());
 				
 		for (int j = 0; j < stuRegForm.getSubjects().size(); j++){
-			log.debug("ApplyForStudentNumberAction - applyMatricSubject - Check Subject"+j+"="+stuRegForm.getSubjects().get(j).getSubjectName()+", Grade="+stuRegForm.getSubjects().get(j).getSubjectGrade()+", Symbol="+stuRegForm.getSubjects().get(j).getSubjectSymbol()+", Result="+stuRegForm.getSubjects().get(j).getSubjectResult());
+			//log.debug("ApplyForStudentNumberAction - applyMatricSubject - Check Subject"+j+"="+stuRegForm.getSubjects().get(j).getSubjectName()+", Grade="+stuRegForm.getSubjects().get(j).getSubjectGrade()+", Symbol="+stuRegForm.getSubjects().get(j).getSubjectSymbol()+", Result="+stuRegForm.getSubjects().get(j).getSubjectResult());
 		}
 		
-		log.debug("ApplyForStudentNumberAction - applyMatricSubject - End");
+		//log.debug("ApplyForStudentNumberAction - applyMatricSubject - End");
 		
 		if (stripXSS(request.getParameter("subjectName1"), "subjectName1", "MatSubject", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), false) == null || "".equals(stripXSS(request.getParameter("subjectName1"), "subjectName1", "MatSubject", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), false))){
 			if (stuRegForm.getSelectMatric() == null || "".equals(stuRegForm.getSelectMatric())){
@@ -12762,7 +12520,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	public String appealSelect(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - appealSelect - Start");
+		//log.debug("ApplyForStudentNumberAction - appealSelect - Start");
 	    
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm)form;
 		ActionMessages messages = new ActionMessages();
@@ -12791,14 +12549,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			setDropdownListsAppeal(request,stuRegForm);
 			return "appealSelect";
 		}
-    	log.debug("ApplyForStudentNumberAction - appealSelect - Continue to Declaration............");
+    	//log.debug("ApplyForStudentNumberAction - appealSelect - Continue to Declaration............");
 		return "appealDeclare";
 	}
 	
 	public String appealDeclare(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - appealDeclare -Start");
+		//log.debug("ApplyForStudentNumberAction - appealDeclare -Start");
 		
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm)form;
 		ActionMessages messages = new ActionMessages();
@@ -12826,13 +12584,13 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				
 		//Write work flow document
 		writeWorkflowAppeal(stuRegForm,date);
-		log.debug("ApplyForStudentNumberAction - appealDeclare - WriteWorkflowAppeal");
+		//log.debug("ApplyForStudentNumberAction - appealDeclare - WriteWorkflowAppeal");
 		
 		//Move Documents from Temp Folder to main folder 
 		moveDocuments(stuRegForm.getStudent().getNumber());
-		log.debug("ApplyForStudentNumberAction - appealDeclare - MoveDocuments");
+		//log.debug("ApplyForStudentNumberAction - appealDeclare - MoveDocuments");
     	
-		log.debug("ApplyForStudentNumberAction - appealDeclare - Done - GoTo appealConfirm");
+		//log.debug("ApplyForStudentNumberAction - appealDeclare - Done - GoTo appealConfirm");
 
 		return "appealConfirm";
 	}
@@ -12840,9 +12598,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	public String appealConfirm(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		log.debug("ApplyForStudentNumberAction - appealConfirm -Start");
+		//log.debug("ApplyForStudentNumberAction - appealConfirm -Start");
     	
-		log.debug("ApplyForStudentNumberAction - appealConfirm - Done - GoTo Unisa Eb Page");
+		//log.debug("ApplyForStudentNumberAction - appealConfirm - Done - GoTo Unisa Eb Page");
 		
 		return "cancel";
 	}
@@ -12856,7 +12614,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		
-		log.debug("ApplyForStudentNumberAction - populateMatSubjects - Start");
+		//log.debug("ApplyForStudentNumberAction - populateMatSubjects - Start");
 
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm)form;
 		JSONObject matricObj = new JSONObject();
@@ -12875,9 +12633,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		String subject11 = stripXSS(request.getParameter("subject11"), "Subject11", "popMatSubj", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
 		String subject12 = stripXSS(request.getParameter("subject12"), "Subject12", "popMatSubj", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), true);
 
-		log.debug("ApplyForStudentNumberAction - populateMatSubjects - **************************************************************");
-		log.debug("ApplyForStudentNumberAction - populateMatSubjects - MatCert="+stuRegForm.getSelectMatric());
-		log.debug("ApplyForStudentNumberAction - populateMatSubjects - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - populateMatSubjects - **************************************************************");
+		//log.debug("ApplyForStudentNumberAction - populateMatSubjects - MatCert="+stuRegForm.getSelectMatric());
+		//log.debug("ApplyForStudentNumberAction - populateMatSubjects - **************************************************************");
 
 			// Query database
 			ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
@@ -12898,9 +12656,9 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		// Convert the map to JSON
 		PrintWriter out = response.getWriter();
 	   	JSONObject jsonObject = JSONObject.fromObject(matricObj);
-	   	   log.debug("ApplyForStudentNumberAction - populateMatSubjects - Final - **************************************************************");
-	   	   log.debug("ApplyForStudentNumberAction - populateMatSubjects - Final - jsonObject="+jsonObject.toString());
-	   	   log.debug("ApplyForStudentNumberAction - populateMatSubjects - Final - **************************************************************");
+	   	   //log.debug("ApplyForStudentNumberAction - populateMatSubjects - Final - **************************************************************");
+	   	   //log.debug("ApplyForStudentNumberAction - populateMatSubjects - Final - jsonObject="+jsonObject.toString());
+	   	   //log.debug("ApplyForStudentNumberAction - populateMatSubjects - Final - **************************************************************");
 	   	out.write(jsonObject.toString());
 	   	out.flush();
 
@@ -12916,7 +12674,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	       String browser = "";
 	       String os = "";
 	       
-	       log.debug("ApplyForStudentNumberAction - getBrowserInfo - stuBrowserAgent="+stuBrowserAgent);
+	       //log.debug("ApplyForStudentNumberAction - getBrowserInfo - stuBrowserAgent="+stuBrowserAgent);
 
 	       //=================OS=======================
 	        if (userAgent.toLowerCase().indexOf("windows") >= 0 ){
@@ -12938,7 +12696,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	        }else{
 	            os = "UnKnown, More-Info: "+userAgent;
 	        }
-	        log.debug("ApplyForStudentNumberAction - getBrowserInfo - Operating System="+os);
+	        //log.debug("ApplyForStudentNumberAction - getBrowserInfo - Operating System="+os);
 	        //===============Browser===========================
 	       if (user.contains("msie") || user.contains("rv:")){
 		       	if (user.contains("msie")){
@@ -12972,7 +12730,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	       }else{
 	           browser = "UnKnown, More-Info: "+userAgent;
 	       }
-	       log.debug("ApplyForStudentNumberAction - getBrowserInfo - Browser Name="+browser);
+	       //log.debug("ApplyForStudentNumberAction - getBrowserInfo - Browser Name="+browser);
 	       
 	       return browser + "@" + os;
    }
@@ -12981,10 +12739,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
     private String stripXSS(String value, String valueDesc, String action, String studentNr, String year, String period, int seqNr, boolean logYN) { 
 
         if (value != null) { 
-        	log.debug("ApplyForStudentNumberAction - stripXSS - INPUT_DETAIL="+value+", INPUT_DESC="+valueDesc+", TYPE_GC303="+action+", STUDENT="+studentNr+", YEAR="+year+", PERIOD="+period+", APP_TYPE=APP, LOG Input="+logYN);
+        	//log.debug("ApplyForStudentNumberAction - stripXSS - INPUT_DETAIL="+value+", INPUT_DESC="+valueDesc+", TYPE_GC303="+action+", STUDENT="+studentNr+", YEAR="+year+", PERIOD="+period+", APP_TYPE=APP, LOG Input="+logYN);
         	if (studentNr != null && !"".equalsIgnoreCase(studentNr)) { 
 	        	if (logYN){
-	        		log.debug("ApplyForStudentNumberAction - stripXSS - Sequence Number to use="+seqNr);
+	        		//log.debug("ApplyForStudentNumberAction - stripXSS - Sequence Number to use="+seqNr);
 	        		//Check if Entry already Exists. 
 	        		ApplyForStudentNumberQueryDAO dao = new ApplyForStudentNumberQueryDAO();
 	        		
@@ -12997,10 +12755,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		        			result = dao.saveSTULOG(year, period, studentNr, value, valueDesc, action, seqNr, "Insert");
 		        		}
 	        		} catch (Exception ex) {
-	        			log.debug("ApplyForStudentNumberAction - stripXSS - Error saving STULOG / " + ex);
+	        			//log.debug("ApplyForStudentNumberAction - stripXSS - Error saving STULOG / " + ex);
 	        			result = "ApplyForStudentNumberAction - Error saving STULOG";
 	        		}
-	            	log.debug("ApplyForStudentNumberAction - stripXSS - saveSTULOG - Result="+result);
+	            	//log.debug("ApplyForStudentNumberAction - stripXSS - saveSTULOG - Result="+result);
 	        	}
         	}
             // NOTE: It's highly recommended to use the ESAPI library and uncomment the following line to 
@@ -13087,22 +12845,22 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 	  @SuppressWarnings("unchecked")
 	public void getAllRequestParamaters(HttpServletRequest req, HttpServletResponse res) throws Exception { 
 
-		  log.debug("ApplyForStudentNumberAction -----------------------------------------------------------------");
-		  log.debug("ApplyForStudentNumberAction - getAllRequestParamaters - Start");
+		  //log.debug("ApplyForStudentNumberAction -----------------------------------------------------------------");
+		  //log.debug("ApplyForStudentNumberAction - getAllRequestParamaters - Start");
 		  Enumeration<String> parameterNames = req.getParameterNames(); 
 
 		  while (parameterNames.hasMoreElements()) { 
 			  String paramName = parameterNames.nextElement(); 
-			  log.debug("param: " + paramName); 
+			  //log.debug("param: " + paramName); 
 
 			  String[] paramValues = req.getParameterValues(paramName); 
 			  for (int i = 0; i < paramValues.length; i++) { 
 				  String paramValue = paramValues[i]; 
-				  log.debug("value: " + paramValue); 
+				  //log.debug("value: " + paramValue); 
 			  } 
 		  } 
-		  log.debug("ApplyForStudentNumberAction - getAllRequestParamaters - End");
-		  log.debug("ApplyForStudentNumberAction -----------------------------------------------------------------");
+		  //log.debug("ApplyForStudentNumberAction - getAllRequestParamaters - End");
+		  //log.debug("ApplyForStudentNumberAction -----------------------------------------------------------------");
 	  } 
 	  
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -13119,7 +12877,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
     	}else{
     		action = stripXSS(request.getParameter("act"), "Action", "execute", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getApplySEQUENCE(), false);
     	}
-		log.debug("ApplyForStudentNumberAction - execute - Action="+action);
+		//log.debug("ApplyForStudentNumberAction - execute - Action="+action);
 
         if (request.getParameter("action.search1") != null)
         {

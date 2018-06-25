@@ -23,7 +23,7 @@ public class StudentOfferForm extends ValidatorActionForm {
 	// --------------------------------------------------------- Instance Variables
 
 	private static final long serialVersionUID = 1L;
-	private static final String version = "2018001b";
+	private static final String version = "2018002";
 	public static Log log = LogFactory.getLog(StudentOfferAction.class);
 	
 	private String applyType = "";
@@ -55,6 +55,8 @@ public class StudentOfferForm extends ValidatorActionForm {
 	private String qualStatus2 = "";
 	private String qualStatusCode1 = "";
 	private String qualStatusCode2 = "";
+	private String qualPeriodCode1 = "";
+	private String qualPeriodCode2 = "";
 	private String qualStatus1Reason = "";
 	private String qualStatus2Reason = "";
 	
@@ -323,6 +325,22 @@ public class StudentOfferForm extends ValidatorActionForm {
 		this.qualStatusCode2 = qualStatusCode2;
 	}
 
+	public String getQualPeriodCode1() {
+		return qualPeriodCode1;
+	}
+
+	public void setQualPeriodCode1(String qualPeriodCode1) {
+		this.qualPeriodCode1 = qualPeriodCode1;
+	}
+
+	public String getQualPeriodCode2() {
+		return qualPeriodCode2;
+	}
+
+	public void setQualPeriodCode2(String qualPeriodCode2) {
+		this.qualPeriodCode2 = qualPeriodCode2;
+	}
+
 	public String getQualStatus1Reason() {
 		return qualStatus1Reason;
 	}
@@ -378,6 +396,8 @@ public class StudentOfferForm extends ValidatorActionForm {
 		qualStatus2 = "";
 		qualStatusCode1 = "";
 		qualStatusCode2 = "";
+		qualPeriodCode1 = "";
+		qualPeriodCode2 = "";
 		qualStatus1Reason = "";
 		qualStatus2Reason = "";
 		
@@ -430,6 +450,8 @@ public class StudentOfferForm extends ValidatorActionForm {
 		qualStatus2 = "";
 		qualStatusCode1 = "";
 		qualStatusCode2 = "";
+		qualPeriodCode1 = "";
+		qualPeriodCode2 = "";
 		qualStatus1Reason = "";
 		qualStatus2Reason = "";
 		

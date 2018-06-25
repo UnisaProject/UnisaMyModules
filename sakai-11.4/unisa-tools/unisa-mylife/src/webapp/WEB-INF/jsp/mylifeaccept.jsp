@@ -6,13 +6,14 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <fmt:setBundle basename="za.ac.unisa.lms.tools.mylife.ApplicationResources"/>
 
+
+<sakai:html>
 <script language="JavaScript">
 function setAction() {
 		document.getElementById("sbmt").style.visibility='hidden';
 		document.getElementById("process").style.display="block";  
 	}
 </script>
-<sakai:html>
 	<html:form action="/myUnisaMylife.do" >
 	<html:hidden property="atstep" value="stepUnisaAcknowledge"/>
 
