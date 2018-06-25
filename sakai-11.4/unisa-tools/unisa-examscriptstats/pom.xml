@@ -2,7 +2,7 @@
   <parent>
     <artifactId>unisa-base</artifactId>
     <groupId>org.sakaiproject</groupId>
-    <version>10.5</version>
+    <version>11.4</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.sakaiproject</groupId>
@@ -51,11 +51,11 @@
       <artifactId>spring</artifactId>
       <version>2.0.6</version>
     </dependency>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
-    </dependency>
+<!--     <dependency> -->
+<!--       <groupId>commons-logging</groupId> -->
+<!--       <artifactId>commons-logging</artifactId> -->
+<!--       <version>1.1.1</version> -->
+<!--     </dependency> -->
     <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
