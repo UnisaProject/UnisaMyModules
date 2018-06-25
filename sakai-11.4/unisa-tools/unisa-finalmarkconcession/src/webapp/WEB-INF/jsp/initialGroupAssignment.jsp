@@ -6,14 +6,14 @@
 <%@ taglib uri="http://sakaiproject.org/struts/sakai" prefix="sakai" %>
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.finalmarkconcession.ApplicationResources"/>
+
+<sakai:html>	
 <script language="javascript">
 	function doAction() {
 		document.finalMarkConcessionForm.action = 'finalMarkConcession.do?act=submitGroupAssignment';  
 		document.finalMarkConcessionForm.submit();
 	}
 </script>
-<sakai:html>	
-
 	<html:form action="/finalMarkConcession">
 		<sakai:heading><fmt:message key="heading.initialGroupAssignment"/>
 		</sakai:heading>
