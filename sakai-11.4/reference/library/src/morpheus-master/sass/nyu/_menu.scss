@@ -1,0 +1,10 @@
+/* If we're running in a full portal context, keep the margins as they were in Morpheus */
+.#{$namespace}portalWrapper .navIntraTool {
+	margin: -14px -14px 0 -14px !important;
+}
+
+/* If we're not, no top margin as it cuts off (CLASSES-320) */
+.navIntraTool {
+	margin-top: 0 !important;
+}
+

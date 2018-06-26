@@ -16,17 +16,17 @@ body.is-logged-out{
 @media #{$nonPhone} {
 	// LHS tool menu collapsed to show icons only and not tool titles.
 	body.#{$namespace}toolMenu-collapsed{
-	
+
 		#content, .Mrphs-container--footer {
 			margin: 0 0 0 0;
 		}
-	
+
 		#toolMenuWrap{
 			max-width: #{ $tool-menu-width-collapsed };
 			min-width: #{ $tool-menu-width-collapsed };
 			width: #{ $tool-menu-width-collapsed };
 		}
-		#toolMenu, #subSites{
+		#toolMenu, #subSites, .floatingToolMenu{
 			.img_site_toolmenu{
 				display: none;
 			}
@@ -206,7 +206,7 @@ nav#subSites{
 	}
 }
 
-#toolMenu, #subSites{
+#toolMenu, #subSites, .floatingToolMenu{
 	ul{
 		padding: 0;
 		margin:  0;
@@ -233,11 +233,6 @@ nav#subSites{
 					justify-content:center; /* center the arrows when collapsed */
 				}
 				
-				i
-				{
-					@include transition( transform, 0.25s, ease-out, 0s ); /* animate the arrow direction change */
-				}
-				
 				@media #{$phone}{
 					display: none;
 				}
@@ -255,7 +250,7 @@ nav#subSites{
 					margin: 0 0.25em 0 0;
 				}
 			}
-			a{
+			.Mrphs-toolsNav__menuitem--link{
 				border-bottom: 1px solid darken( $tool-menu-background-color, 20% );
 				color: $tool-menu-color;
 				display: block;
@@ -308,6 +303,7 @@ nav#subSites{
 						position: absolute;
 						top: 4px;
 						right: 4px;
+						font-size: 16px;
 					}
 					.#{$namespace}toolsNav__menuitem--icon{
 						font-style: italic;
@@ -316,7 +312,7 @@ nav#subSites{
 			}
 			&.is-current{
 				background: $tool-menu-current-background-color;
-				a{
+				.Mrphs-toolsNav__menuitem--link{
 					border-left: 4px solid $tool-menu-current-border-color;
 					border-bottom: 1px solid $tool-menu-current-border-color;
 					color: $tool-menu-current-color;
@@ -337,7 +333,7 @@ nav#subSites{
 				padding: 0 0 0 0;
 				li{
 					border-bottom: 1px solid $tool-sub-menu-border-color;
-					a{
+					.Mrphs-toolsNav__menuitem--link{
 			  			padding: 0.6em 0 0.6em 0em;
 						background: $tool-sub-menu-background-color;
 						&:hover{
@@ -349,7 +345,7 @@ nav#subSites{
 						}
 					}
 					&.is-current{
-						a{
+						.Mrphs-toolsNav__menuitem--link{
 							background: $tool-sub-menu-current-background-color;
 							color: $tool-sub-menu-current-color;
 							.#{$namespace}toolsNav__menuitem--title{
@@ -370,5 +366,22 @@ nav#subSites{
 				}
 			}
 		}
+	}
+}
+
+
+.#{$namespace}collapseTools {
+	display: none !important;
+}
+
+.floatingToolMenu {
+	background-color: #F6F6F6 !important;
+	border-top: 2px solid darken( $tool-menu-background-color, 10% );
+	color: black !important;
+	display: inline-block !important;
+	text-align: right;
+
+	@media #{$phone}{
+		display: none !important;
 	}
 }

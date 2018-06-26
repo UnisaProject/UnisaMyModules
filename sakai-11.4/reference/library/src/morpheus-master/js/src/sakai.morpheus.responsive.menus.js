@@ -9,8 +9,8 @@ function toggleToolsNav(event){
     
   $PBJQ('body').toggleClass('toolsNav--displayed');
   if ($PBJQ('body').hasClass('toolsNav--displayed')) {
-    /* Add the mask to grey out the top headers - re-use code in more.sites.js */
-    createDHTMLMask(toggleToolsNav)
+//    /* Add the mask to grey out the top headers - re-use code in more.sites.js */
+//    createDHTMLMask(toggleToolsNav)
     // Set the height of the tools/subsites menu (depending on the tools nav position and any scrolling)
     // so that a scroll bar is added to the tools/subsites list if necessary.
     var toolsViewportPosition = $PBJQ('.js-toggle-tools-nav').offset().top - $(window).scrollTop();
