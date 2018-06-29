@@ -2429,7 +2429,11 @@ private boolean askOdlQuestion(ArrayList<StudyUnit> suList ){
 			StudyUnit su = new StudyUnit();
 			su = (StudyUnit) regDetailsForm.getAdditionalStudyUnits().get(i);
 			if (su.getCode() != null && !"".equals(su.getCode())) {
-				dao.writeQueue(regDetailsForm.getStudentNr(), regDetailsForm.getAcadYear(), regDetailsForm.getAcadPeriod(), su.getCode(), regDetailsForm.getQual().getQualCode(), regDetailsForm.getSelfHelpReason(), prevSeq);
+				String shReason = "AUN";
+				if (regDetailsForm.getSelfHelpReason() != null && !"".equalsIgnoreCase(regDetailsForm.getSelfHelpReason().trim())){
+					shReason = regDetailsForm.getSelfHelpReason();
+				}
+				dao.writeQueue(regDetailsForm.getStudentNr(), regDetailsForm.getAcadYear(), regDetailsForm.getAcadPeriod(), su.getCode(), regDetailsForm.getQual().getQualCode(), shReason, prevSeq);
 			}
 		}
 	}
