@@ -11,6 +11,7 @@ body.active-more-sites{
 	position: fixed;
         z-index: 1005;
 	overflow:visible;
+	outline: none;
 	@include transition( left 0.4s linear 0s );
 	&.dhtml_more_tabs{
 		background: $tool-menu-background-color;
@@ -263,8 +264,8 @@ ul.otherSitesCategorList{
 
 	.other-site-search-clear:before{
 		position: absolute;
-		top: -3px;
-		right: 8px;
+		top: -5px;
+		right: 14px;
 		content: '\f057';
 		font-family: 'FontAwesome';
 		color: #ccc;
@@ -373,7 +374,7 @@ ul.favoriteSiteList{
 		display: inline-block;
 	}
 
-	@media #{$phone}{
+	@media #{$tablet}{
 		.favorites-desktop{
 			display: none;
 		}
@@ -405,7 +406,52 @@ ul.favoriteSiteList{
 	.site-favorite-btn{
 		padding-right: 0.5em;
 	}
+
+	.site-favorite-is-past-max {
+		opacity: 0.5;
+	}
 }
+
+
+li.organizeFavorites:not(.active) .favoriteCountAndWarning.maxFavoritesReached {
+	font-weight: bold;
+	color: #de8e07;
+}
+
+/* If we've hit max favorites, show a warning icon */
+.favoriteCountAndWarning {
+	&.maxFavoritesReached {
+		#favoriteMaxWarningIndicator {
+			display: inline;
+		}
+	}
+	&:not(.maxFavoritesReached) {
+		#favoriteMaxWarningIndicator {
+			display: none;
+		}
+	}
+}
+
+/* Selector length arms race! */
+#selectSiteModal #selectSite .tab-pane .organizeFavoritesList li.favorites-max-marker {
+	font-family: $header-font-family;
+	width: 95%;
+	border: 0;
+	background: transparent !important;
+	border-top: rgb(229, 229, 229) 2px dashed;
+	padding-left: 12px !important;
+	&:hover {
+		border-top: rgb(229, 229, 229) 2px dashed;
+		background: transparent !important;
+	}
+
+	.warning-icon {
+		color: #de8e07;
+		padding-right: 8px;
+	}
+
+}
+
 
 #organizeFavoritesPurgatoryList{
 	.fav-drag-handle{
@@ -445,6 +491,20 @@ ul.favoriteSiteList{
 	top: 2px;
 }
 
+.favorites-select-all-none {
+    margin-left: 14px;
+    margin-right: 6px;
+    cursor: pointer;
+
+    .site-favorite-icon {
+        font-size: 100%;
+    }
+}
+
+.favorites-help-text {
+    margin-top: 1em;
+}
+
 .site-favorite-icon.site-favorite:hover{
 	text-shadow: -1px 0 #F49D08, 0 1px #F49D08, 1px 0 #F49D08, 0 -1px #F49D08;
 }
@@ -454,14 +514,15 @@ ul.favoriteSiteList{
 }
 
 
-.moresites-refresh-notification{
+#loginLinks .moresites-refresh-notification{
 	position: absolute;
 	left: 50%;
 	transform: translateX(-50%);
 	top: 13px;
-	border: 1px solid $tool-border-color;
+	border: 1px solid #EAC276;
 	z-index: 1000;
 	display: inline-block;
+	box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
 
 	-webkit-transition: background-color 0.2s, color 0.2s;
 	-moz-transition: background-color 0.2s, color 0.2s;
@@ -469,20 +530,65 @@ ul.favoriteSiteList{
 	-o-transition: background-color 0.2s, color 0.2s;
 	transition: background-color 0.2s, color 0.2s;
 
-	background-color: #f7e084;
+	background-color: #F9EDBE;
 	color: #000 !important;
 	text-align: center;
 	padding: 6px 8px;
-	border-radius: 3px;
 	text-decoration: none;
 
 	a
 	{
 		display: inline-block; // to override flex on login links
-		color: $primary-color;
+		color: #191919;
+		text-decoration: underline !important;
 	}
 
 	@media #{$phone}{
 		display: none;
 	}
+}
+
+#organize-favorites-pane {
+	float: left;
+	width: 70%;
+	border-right: solid 1px #ababab;
+}
+
+
+#favorite-settings-pane {
+	float: left;
+	width: 28%;
+	padding-left: 1em;
+}
+
+.favorites-visible-nonmobile {
+    display: block;
+}
+
+@media #{$tablet}{
+    #organize-favorites-pane {
+        border-right: none;
+    }
+
+    #favorite-settings-pane {
+        display: none;
+    }
+
+    .favorites-visible-nonmobile {
+        display: none;
+    }
+
+    ul.favoriteSiteList > li.favorites-max-marker {
+        display: none;
+    }
+
+    .organizeFavoritesList{
+        .site-favorite-is-past-max {
+	    opacity: 1.0;
+        }
+    }
+}
+
+.student-unpublished-warning {
+	color: #999;
 }

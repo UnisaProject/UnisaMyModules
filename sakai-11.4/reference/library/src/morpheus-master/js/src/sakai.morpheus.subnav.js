@@ -14,7 +14,7 @@ var buildDropdownMenu = function(container, siteId, callback) {
   var navsubmenu = "<ul class=\"Mrphs-sitesNav__submenu\" role=\"menu\">";
   var maxToolsInt = parseInt($PBJQ('#linkNav').attr('data-max-tools-int'));
   var maxToolsText = $PBJQ('#linkNav').attr('data-max-tools-anchor');
-  var goToSite = '<li class=\"Mrphs-sitesNav__submenuitem\"><a role=\"menuitem\" href=\"' + portal.portalPath + '/site/' + siteId + '\" title=\"' + maxToolsText + '\"><span class=\"toolMenuIcon icon-sakai--see-all-tools\"></span>' + maxToolsText + '</a></li>';
+  var goToSite = '<li class=\"Mrphs-sitesNav__submenuitem Mrphs-sitesNav__submenuitem__gotosite\"><a role=\"menuitem\" href=\"' + portal.portalPath + '/site/' + siteId + '\" title=\"' + maxToolsText + '\"><span class=\"toolMenuIcon icon-sakai-see-all-tools\"></span>' + maxToolsText + '</a></li>';
   var siteURL = '/direct/site/' + siteId + '/pages.json';
   var currentSite = window.location.pathname.split('/').pop();
 
@@ -52,9 +52,16 @@ var buildDropdownMenu = function(container, siteId, callback) {
               '</li>';
           }
 
+          var display_title = item.title;
+
+          // defined by settings-renamer.js
+          var NYURewriteItemTitle = (typeof renameSettingsToJoinable != 'undefined') ? renameSettingsToJoinable : function (arg) { return arg; };
+
+          display_title = NYURewriteItemTitle(display_title);
+
           navsubmenu += (li_template
                          .replace(/{{tool_url}}/g, item.tools[0].url)
-                         .replace(/{{item_title}}/g, item.title)
+                         .replace(/{{item_title}}/g, display_title)
                          .replace(/{{item_toolpopupurl}}/g, item.toolpopupurl)
                          .replace(/{{icon}}/g, item.tools[0].toolId.replace(/\./gi, '-'))
                          .replace(/{{is_current}}/g, isCurrent));

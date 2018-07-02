@@ -1,0 +1,141 @@
+.profile-popup.nyu {
+  display: table;
+  background-color: #FFF;
+  width: 280px;
+
+  .profile-popup-top,
+  .profile-popup-bottom {
+    display: flex;
+  }
+
+  .profile-popup-picture,
+  .profile-popup-details {
+    vertical-align: top;
+    padding: 20px;
+  }
+  .profile-popup-picture {
+  }
+  .profile-popup-details {
+    padding-left: 0;
+    word-break: break-word;
+    width: 100%;
+  }
+
+  .profile-popup-picture span {
+    min-width: 64px;
+    max-width: 64px;
+    height: 64px;
+    background-position: 50%;
+    background-size: auto 100%;
+    border-radius: 50%;
+    display: block;
+    border: 1px solid #000;
+  }
+  .profile-popup-display-role {
+    margin-top: 5px;
+    border-top: 1px solid #EEE;
+    padding-top: 5px;
+  }
+  .profile-popup-bottom {
+    background-color: $nyu-purple;
+  }
+  .profile-popup-actions {
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+
+    ul {
+      margin: 0;
+      list-style: none;
+
+      li {
+        display: inline-block;
+      }
+    }
+
+    a {
+      color: #FFF;
+
+      .fa {
+        font-size: 24px !important;
+      }
+    }
+  }
+}
+.qtip-profile-popup {
+    border-color: #AAA !important;
+    background-color: #FFF !important;
+
+    .qtip-content {
+        padding: 0 !important;
+    }
+}
+
+#profile-drawer {
+    position: fixed;
+    height: 100%;
+    background: #FFF;
+    width: 420px;
+    top: 0;
+    right: 0;
+    box-shadow: -1px 1px 5px #999;
+    z-index: 10000;
+    overflow: auto;
+
+    .close {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        color: #FFF;
+        opacity: 0.5;
+        font-size: 20px;
+    }
+
+    .profile-drawer {
+        .profile-drawer-header {
+            min-height: 200px;
+
+            .profile-drawer-pretty-background {
+                height: 100px;
+                background-color: $nyu-purple;
+                box-shadow: 0 1px 3px #AAA;
+            }
+
+            .profile-drawer-picture {
+                position: absolute;
+                top: 50px;
+                height: 100px;
+                width: 100px;
+                left: 50%;
+                margin-left: -50px;
+
+                span {
+                    min-width: 100px;
+                    max-width: 100px;
+                    height: 100px;
+                    background-position: 50%;
+                    background-size: auto 100%;
+                    border-radius: 50%;
+                    display: block;
+                    border: 1px solid #000;
+                }
+            }
+            .profile-drawer-details {
+                padding: 20px;
+                text-align: center;
+
+                .profile-drawer-name {
+                    margin-top: 50px;
+                    font-size: 20px;
+                }
+            }
+        }
+        .profile-drawer-content {
+            padding: 20px;
+        }
+        .profile-drawer-footer {
+            padding-top: 20px;
+            text-align: center;
+        }
+    }
+}

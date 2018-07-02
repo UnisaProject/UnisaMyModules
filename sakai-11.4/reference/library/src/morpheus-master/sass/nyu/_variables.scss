@@ -1,0 +1,284 @@
+// Breakpoints for Responsive Design
+
+// essentially disable the phone view
+$nyu-breakpoint-mobile:                                       1px;
+// and this becomes the one breakpoint for all small viewports
+$nyu-breakpoint-tablet:                                       770px;
+
+// Desktop / General Variables
+$nyu-purple:                                                  #57068C;
+$nyu-text-color:                                              #191919;
+
+$nyu-link-color:                                              #347EB2;
+$nyu-link-decoration:                                         underline;
+$nyu-link-hover-color:                                        #347EB2;
+$nyu-link-hover-decoration:                                   underline;
+
+$nyu-body-background-color:                                   #FAFAFA;
+
+$nyu-header-height:                                           52px;
+$nyu-header-background:                                       $nyu-purple;
+$nyu-header-logo-text-size:                                   50px;
+$nyu-header-logo-padding:                                     0;
+$nyu-header-logo-color:                                       #FFFFFF;
+$nyu-header-menu-color:                                       #FFFFFF;
+$nyu-header-menu-padding:                                     0 5px 0 0;
+$nyu-header-menu-text-size:                                   14.5px;
+$nyu-header-menu-divider-color:                               #FFFFFF;
+
+$nyu-profile-picture-change-color:                            #FFFFFF;
+$nyu-profile-picture-change-background-color:                 #888888;
+$nyu-profile-picture-change-opacity:                          0.9;
+
+$nyu-divider-color:                                           #E5E5E5;
+$nyu-divider-width:                                           1px;
+$nyu-divider-shadow:                                          0 1px 5px rgba(0,0,0,.3);
+
+$nyu-role-switch-background-color:                            transparent;
+
+$nyu-favorite-sites-height:                                   52px;
+$nyu-favorite-sites-padding:                                  4px 4px 4px 8px;
+$nyu-favorite-sites-background-color:                         #FAFAFA;
+$nyu-favorite-sites-button-background-color:                  #FFFFFF;
+$nyu-favorite-sites-button-border-color:                      #E5E5E5;
+$nyu-favorite-sites-button-text-color:                        #4C4C4C;
+$nyu-favorite-sites-button-icon-color:                        #666666;
+$nyu-favorite-sites-button-text-size:                         14px;
+$nyu-favorite-sites-button-hover-background-color:            #FFFFFF;
+$nyu-favorite-sites-button-hover-border-color:                #7F7F7F;
+$nyu-favorite-sites-button-hover-text-color:                  #191919;
+$nyu-favorite-sites-button-hover-icon-color:                  #424242;
+$nyu-favorite-sites-button-current-background-color:          #3374A3;
+$nyu-favorite-sites-button-current-border-color:              #24567A;
+$nyu-favorite-sites-button-current-text-color:                #FFFFFF;
+$nyu-favorite-sites-button-current-icon-color:                #FFFFFF;
+$nyu-favorite-sites-button-current-text-size:                 14px;
+$nyu-favorite-sites-button-current-hover-background-color:    #3374A3;
+$nyu-favorite-sites-button-current-hover-border-color:        #24567A;
+$nyu-favorite-sites-button-current-hover-text-color:          #FFFFFF;
+$nyu-favorite-sites-button-current-hover-icon-color:          #FFFFFF;
+$nyu-favorite-sites-tool-menu-max-width:                      225px;
+$nyu-favorite-sites-tool-menu-background-color:               #FFFFFF;
+$nyu-favorite-sites-tool-menu-border-color:                   #7F7F7F;
+$nyu-favorite-sites-tool-menu-topleft-border-color:           #FFFFFF;
+$nyu-favorite-sites-tool-menu-icon-color:                     #666666;
+$nyu-favorite-sites-tool-menu-text-color:                     #4C4C4C;
+$nyu-favorite-sites-tool-menu-text-size:                      12px;
+$nyu-favorite-sites-tool-menu-divider-color:                  #E5E5E5;
+$nyu-favorite-sites-tool-menu-active-border-color:            #3F7FA8;
+$nyu-favorite-sites-tool-menu-active-topleft-border-color:    #3374A3;
+$nyu-favorite-sites-tool-menu-drop-shadow:                    1px 2px 3px rgba(0,0,0,.3);
+$nyu-favorite-sites-tool-menu-item-hover-background-color:    #ECECEC;
+$nyu-favorite-sites-tool-menu-item-hover-left-border-color:   #7F7F7F;
+$nyu-favorite-sites-tool-menu-item-hover-icon-color:          #424242;
+$nyu-favorite-sites-tool-menu-item-hover-text-color:          #191919;
+
+$nyu-tool-nav-padding:                                        9px 0 0 0;
+$nyu-tool-nav-background-color:                               #FAFAFA;
+$nyu-tool-nav-border-color:                                   #E5E5E5;
+$nyu-tool-nav-item-height:                                    42px;
+$nyu-tool-nav-item-text-color:                                #333333;
+$nyu-tool-nav-item-icon-color:                                #666666;
+$nyu-tool-nav-item-text-size:                                 13px;
+$nyu-tool-nav-item-text-weight:                               normal;
+$nyu-tool-nav-item-background-color:                          #FAFAFA;
+$nyu-tool-nav-item-border-left:                               4px solid transparent;
+$nyu-tool-nav-item-hover-text-color:                          #191919;
+$nyu-tool-nav-item-hover-icon-color:                          #424242;
+$nyu-tool-nav-item-hover-background-color:                    #ECECEC;
+$nyu-tool-nav-item-hover-border-left:                         4px solid #7F7F7F;
+$nyu-tool-nav-item-hidden-text-color:                         #9A9A9A;
+$nyu-tool-nav-item-hidden-icon-color:                         #A9A9A9;
+$nyu-tool-nav-item-hidden-background-color:                   #FAFAFA;
+$nyu-tool-nav-item-hidden-hover-color:                        #808080;
+$nyu-tool-nav-item-hidden-hover-icon-color:                   #929292;
+$nyu-tool-nav-item-hidden-hover-background-color:             #ECECEC;
+$nyu-tool-nav-item-hidden-hover-border-left:                  4px solid #7F7F7F;
+$nyu-tool-nav-item-selected-text-color:                       #3374A3;
+$nyu-tool-nav-item-selected-icon-color:                       #3374A3;
+$nyu-tool-nav-item-selected-background-color:                 #FFFFFF;
+$nyu-tool-nav-item-selected-border-left:                      4px solid #3374A3;
+$nyu-tool-nav-item-selected-text-size:                        13px;
+$nyu-tool-nav-item-selected-hover-text-color:                 #3374A3;
+$nyu-tool-nav-item-selected-hover-icon-color:                 #3374A3;
+$nyu-tool-nav-item-selected-hover-background-color:           #FFFFFF;
+$nyu-tool-nav-item-selected-hover-border-left:                4px solid #3374A3;
+$nyu-tool-nav-collapse-text-color:                            #4C4C4C;
+$nyu-tool-nav-collapse-background-color:                      #FAFAFA;
+$nyu-tool-nav-collapse-border-top:                            none;
+$nyu-tool-nav-collapse-shadow:                                0 -1px 3px rgba(0,0,0,0.3);
+$nyu-tool-nav-collapse-hover-text-color:                      #191919;
+$nyu-tool-nav-collapse-hover-background-color:                #FAFAFA;
+$nyu-tool-nav-collapse-hover-border-top:                      none;
+$nyu-tool-nav-collapse-hover-shadow:                          0 -1px 3px rgba(0,0,0,0.3);
+$nyu-tool-nav-collapse-active-text-color:                     #FFFFFF;
+$nyu-tool-nav-collapse-active-background-color:               #3374A3;
+$nyu-tool-nav-collapse-active-border-top:                     none;
+$nyu-tool-nav-collapse-active-shadow:                         0 -1px 3px rgba(0,0,0,0.3);
+$nyu-tool-nav-collapse-active-hover-text-color:               #FFFFFF;
+$nyu-tool-nav-collapse-active-hover-background-color:         #3374A3;
+$nyu-tool-nav-collapse-active-hover-border-top:               none;
+$nyu-tool-nav-collapse-active-hover-shadow:                   0 -1px 3px rgba(0,0,0,0.3);
+
+$nyu-content-border-color:                                    #F0F0F0;
+
+$nyu-reset-button-height:                                     50px;
+$nyu-reset-button-text-color:                                 #347EB2;
+$nyu-reset-button-text-size:                                  15.5px;
+
+$nyu-site-status-height:                                      $nyu-reset-button-height;
+$nyu-site-status-background-color:                            #F6ECB7;
+$nyu-site-status-text-color:                                  #8a6d3b;
+$nyu-site-status-border-color:                                #E5E5E5;
+$nyu-site-status-border-radius:                               0;
+
+$nyu-button-radius:                                           3px;
+$nyu-button-text-transform:                                   none;
+$nyu-button-primary-text-color:                               #FFFFFF;
+$nyu-button-primary-background-color:                         #3374A3;
+$nyu-button-primary-border-color:                             #24567A;
+$nyu-button-primary-hover-text-color:                         #FFFFFF;
+$nyu-button-primary-hover-background-color:                   #176691;
+$nyu-button-primary-hover-border-color:                       #124466;
+$nyu-button-secondary-text-color:                             #333333;
+$nyu-button-secondary-icon-color:                             #777777;
+$nyu-button-secondary-background-color:                       #FAFAFA;
+$nyu-button-secondary-border-color:                           #CCCCCC;
+$nyu-button-secondary-hover-text-color:                       #191919;
+$nyu-button-secondary-hover-icon-color:                       #424242;
+$nyu-button-secondary-hover-background-color:                 #FAFAFA;
+$nyu-button-secondary-hover-border-color:                     #7F7F7F;
+
+$nyu-tool-tab-height:                                         32px;
+$nyu-tool-tab-text-color:                                     #333333;
+$nyu-tool-tab-text-size:                                      12px;
+$nyu-tool-tab-text-transform:                                 none;
+$nyu-tool-tab-text-letter-spacing:                            normal;
+$nyu-tool-tab-background-color:                               #FAFAFA;
+$nyu-tool-tab-border-color:                                   #E5E5E5;
+$nyu-tool-tab-hover-text-color:                               #191919;
+$nyu-tool-tab-hover-background-color:                         #ECECEC;
+$nyu-tool-tab-hover-highlight-color:                          #7F7F7F;
+$nyu-tool-tab-active-text-color:                              #3374A3;
+$nyu-tool-tab-active-text-size:                               12.5px;
+$nyu-tool-tab-active-background-color:                        #FFFFFF;
+$nyu-tool-tab-active-highlight-color:                         #3374A3;
+
+$nyu-timeout-alert-shadow:                                    0px 0px 10px rgba(0,0,0,.6);
+$nyu-timeout-alert-background-color:                          #F0F0F0;
+
+$nyu-all-sites-link-color:                                    #FFFFFF;
+$nyu-all-sites-mask-background:                               rgba(255,255,255,.8);
+$nyu-all-sites-background-color:                              #FFFFFF;
+$nyu-all-sites-drop-shadow:                                   1px 2px 3px rgba(0,0,0,.3);
+$nyu-all-sites-tab-height:                                    $nyu-tool-tab-height;
+$nyu-all-sites-tab-text-color:                                $nyu-tool-tab-text-color;
+$nyu-all-sites-tab-text-size:                                 $nyu-tool-tab-text-size;
+$nyu-all-sites-tab-background-color:                          $nyu-tool-tab-background-color;
+$nyu-all-sites-tab-border-color:                              $nyu-tool-tab-border-color;
+$nyu-all-sites-tab-hover-text-color:                          $nyu-tool-tab-hover-text-color;
+$nyu-all-sites-tab-hover-background-color:                    $nyu-tool-tab-hover-background-color;
+$nyu-all-sites-tab-hover-highlight:                           $nyu-tool-tab-hover-highlight-color;
+$nyu-all-sites-tab-active-text-color:                         $nyu-tool-tab-active-text-color;
+$nyu-all-sites-tab-active-text-size:                          $nyu-tool-tab-active-text-size;
+$nyu-all-sites-tab-active-background-color:                   $nyu-tool-tab-active-background-color;
+$nyu-all-sites-tab-active-highlight-color:                    $nyu-tool-tab-active-highlight-color;
+$nyu-all-sites-title-text-size:                               18px;
+$nyu-all-sites-title-text-weight:                             normal;
+$nyu-all-sites-title-text-color:                              #4C4C4C;
+$nyu-all-sites-button-text-color:                             #4C4C4C;
+$nyu-all-sites-button-text-size:                              13px;
+$nyu-all-sites-button-text-weight:                            normal;
+$nyu-all-sites-button-background-color:                       #FAFAFA;
+$nyu-all-sites-button-border-color:                           #E5E5E5;
+$nyu-all-sites-button-border-radius:                          3px;
+$nyu-all-sites-button-dropdown-color:                         #666666;
+$nyu-all-sites-button-star-full-color:                        #F49D09;
+$nyu-all-sites-button-star-empty-color:                       #CECECE;
+$nyu-all-sites-button-selected-text-color:                    #191919;
+$nyu-all-sites-button-selected-text-size:                     13px;
+$nyu-all-sites-button-selected-text-weight:                   medium;
+$nyu-all-sites-button-selected-background-color:              #FFFFFF;
+$nyu-all-sites-button-selected-border-color:                  #7F7F7F;
+$nyu-all-sites-button-selected-border-radius:                 3px;
+$nyu-all-sites-button-selected-dropdown-color:                #4C4C4C;
+$nyu-all-sites-button-selected-star-full-color:               #F49D09;
+$nyu-all-sites-button-selected-star-empty-color:              #CECECE;
+$nyu-all-sites-button-hover-text-color:                       #191919;
+$nyu-all-sites-button-hover-text-size:                        13px;
+$nyu-all-sites-button-hover-text-weight:                      normal;
+$nyu-all-sites-button-hover-background-color:                 #ECECEC;
+$nyu-all-sites-button-hover-border-color:                     #7F7F7F;
+$nyu-all-sites-button-hover-dropdown-color:                   #4C4C4C;
+$nyu-all-sites-button-hover-star-full-color:                  #EA9609;
+$nyu-all-sites-button-hover-star-empty-color:                 #999999;
+$nyu-all-sites-tool-menu-divider-color:                       #E5E5E5;
+$nyu-all-sites-tool-menu-background-color:                    #FFFFFF;
+$nyu-all-sites-tool-menu-text-color:                          #4C4C4C;
+$nyu-all-sites-tool-menu-text-size:                           12px;
+$nyu-all-sites-tool-menu-text-weight:                         normal;
+$nyu-all-sites-tool-menu-icon-color:                          #666666;
+$nyu-all-sites-tool-menu-left-border:                         4px solid transparent;
+$nyu-all-sites-tool-menu-hover-background-color:              #ECECEC;
+$nyu-all-sites-tool-menu-hover-text-color:                    #191919;
+$nyu-all-sites-tool-menu-hover-icon-color:                    #424242;
+$nyu-all-sites-tool-menu-hover-left-border:                   4px solid #7F7F7F;
+$nyu-all-sites-close-action-color:                            #666666;
+$nyu-all-sites-close-action-hover-color:                      #4C4C4C;
+$nyu-all-sites-button-drag-color:                             #E5E5E5;
+$nyu-all-sites-button-drag-hover-color:                       #CECECE;
+
+// Overview (synoptic tools) portlet layout
+$nyu-overview-portlet-border-color:                           #E5E5E5;
+$nyu-overview-portlet-shadow:                                 1px 1px 5px rgba(0,0,0,0.2);
+$nyu-overview-portlet-title-color:                            #4C4C4C;
+$nyu-overview-portlet-title-background-color:                 #FAFAFA;
+$nyu-overview-portlet-title-text-size:                        1em;
+$nyu-overview-portlet-title-letter-spacing:                   normal;
+
+$nyu-dropdown-background-color:                               #FFFFFF;
+
+$nyu-active-button-outline-color:                             rgb(59, 153, 252); // matches default color in Chrome
+
+// Tablet Specific Variables ($nyu-breakpoint-mobile < viewport width < $nyu-breakpoint-tablet)
+// TODO all of these:
+$nyu-tablet-header-logo-height:                               52px;
+$nyu-tablet-header-logo-background-color:                     #FFFFFF;
+$nyu-tablet-header-logo-text-size:                            30px;
+$nyu-tablet-header-logo-offset-left:                          25px;
+$nyu-tablet-header-logo-text-color:                           $nyu-purple;
+$nyu-tablet-header-logo-dropdown-text-size:                   14px;
+$nyu-tablet-header-logo-dropdown-text-color:                  #333333;
+
+$nyu-tablet-divider-color:                                    $nyu-divider-color;
+$nyu-tablet-divider-width:                                    $nyu-divider-width;
+$nyu-tablet-divider-shadow:                                   $nyu-divider-shadow;
+
+$nyu-tablet-header-site-height:                               52px;
+$nyu-tablet-header-site-text-color:                           #4C4C4C;
+$nyu-tablet-header-site-text-size:                            17px;
+$nyu-tablet-header-site-icon-color:                           #666666;
+$nyu-tablet-header-site-button-text-color:                    #4C4C4C;
+$nyu-tablet-header-site-button-text-size:                     14px;
+
+$nyu-tablet-header-tool-height:                               52px;
+$nyu-tablet-header-tool-button-icon-color:                    #666666;
+$nyu-tablet-header-tool-button-text-color:                    #4C4C4C;
+$nyu-tablet-header-tool-button-text-size:                     14px;
+$nyu-tablet-header-tool-reset-icon-color:                     #124466;
+$nyu-tablet-header-tool-reset-text-color:                     #124466;
+$nyu-tablet-header-tool-reset-text-size:                      14px;
+$nyu-tablet-header-tool-breadcrumb-separator-color:           #4C4C4C;
+$nyu-tablet-header-tool-tab-text-color:                       #4C4C4C;
+$nyu-tablet-header-tool-tab-icon-color:                       #666666;
+$nyu-tablet-header-tool-help-icon-color:                      #666666;
+$nyu-tablet-header-tool-help-text-color:                      #4C4C4C;
+$nyu-tablet-header-tool-help-text-size:                       14px;
+
+$nyu-tablet-breadcrumb-background-color:                      #FFFFFF;
+
+$nyu-tablet-all-sites-link-color:                             $nyu-text-color;
+
+// Mobile Specific Variables (viewport width < $nyu-breakpoint-mobile)
+
+$nyu-mobile-body-background-color:                            #FFFFFF;

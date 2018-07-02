@@ -6,6 +6,8 @@
 <%@ taglib uri="http://sakaiproject.org/struts/sakai" prefix="sakai" %>
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.finalmarkconcession.ApplicationResources"/>
+
+<sakai:html>
 <script language="javascript">
 	function doActionDean() {
 		document.finalMarkConcessionForm.action = 'authorisation.do?act=confirm';  
@@ -15,9 +17,7 @@
 		document.finalMarkConcessionForm.action = 'authorisation.do?act=confirm';  
 		document.finalMarkConcessionForm.submit();
 	}
-</script>
-
-<sakai:html>		
+</script>		
 	<html:form action="/authorisation">
 		<logic:equal name="finalMarkConcessionForm" property="authorisationType" value="AUTHREQCOD">
 			<sakai:heading><fmt:message key="heading.altExamOptCodAuthorisation"/></sakai:heading>

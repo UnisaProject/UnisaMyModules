@@ -6,13 +6,14 @@
 <%@ taglib uri="http://sakaiproject.org/struts/sakai" prefix="sakai" %>
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.finalmarkconcession.ApplicationResources"/>
+
+<sakai:html>
 <script language="javascript">
 	function doAction() {
 		document.finalMarkConcessionForm.action = 'finalMarkConcession.do?act=nextStep';  
 		document.finalMarkConcessionForm.submit();
 	}
 </script>
-<sakai:html>
 	<html:form action="/finalMarkConcession">
 		<html:hidden property="currentPage" value="fiAssignmentSelection"/>
 		<sakai:messages/>
