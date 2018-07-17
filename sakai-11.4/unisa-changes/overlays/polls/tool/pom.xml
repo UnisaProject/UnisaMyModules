@@ -7,7 +7,7 @@
   <parent>
     <artifactId>unisa-overlays-polls</artifactId>
     <groupId>unisa.overlays.polls</groupId>
-    <version>10.5</version>
+    <version>11.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Unisa overlay Polls App</name>

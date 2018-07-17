@@ -10,7 +10,7 @@
   <parent>
     <artifactId>master</artifactId>
     <groupId>org.sakaiproject</groupId>
-     <version>10.5</version>
+     <version>11.4</version>
 <!--    <version>${sakai.version}</version>-->
 <!--    <version>SNAPSHOT</version>-->
     <relativePath>../master/pom.xml</relativePath>
