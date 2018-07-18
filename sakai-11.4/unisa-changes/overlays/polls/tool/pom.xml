@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.sakaiproject.polls</groupId>
       <artifactId>polls-tool</artifactId>
-      <version>10.5</version>
+      <version>11.4</version>
       <type>war</type>
       <scope>runtime</scope>
     </dependency>
