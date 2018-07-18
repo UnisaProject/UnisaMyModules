@@ -13,21 +13,20 @@
   <packaging>pom</packaging>
   <modules>
 	<module>overlays/assignment</module>
-	<module>overlays/bbb-tool</module>
+	<!-- module>overlays/bbb-tool</module-->
 	<module>overlays/calendar</module>
 	<module>overlays/chat</module>
 	<module>overlays/content</module>
 	<module>overlays/gradebook</module>
-    <module>overlays/mailarchive</module>
+    <!-- >module>overlays/mailarchive</module-->
 	<module>overlays/podcasts</module>
 	<module>overlays/polls</module>
-	<module>overlays/qna</module> 
+	<!-- >module>overlays/qna</module--> 
 	<module>overlays/reference</module>
     <module>overlays/rwiki</module>
-     <module>overlays/osp</module>
+    <!-- >module>overlays/osp</module-->
 	<module>overlays/sections</module>
 	<module>overlays/site-manage</module>
 	<module>overlays/syllabus</module>
-	<module>overlays/web</module>
   </modules>
 </project>
