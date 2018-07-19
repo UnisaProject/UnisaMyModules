@@ -29,7 +29,7 @@
 	<module>unisa-canceluser</module>
 	<module>unisa-changepassword</module>
 	<!-- >module>unisa-contactus</module-->
-	<module>unisa-creditcardpayment</module> -->
+	<module>unisa-creditcardpayment</module>
 	<!--module>unisa-cronjobs</module --> <!-- this tool will only be deployed on node 10 on production -->
 	<module>unisa-discussionforums</module>
 	<module>unisa-ebookshop</module>
@@ -89,18 +89,6 @@
 	<module>unisa-tutorstudentgrouping</module>
 	<module>unisa-unmarkassfollowup</module>
 	<module>unisa-welcome</module>
-	<module>unisa-tpustudentplacement</module>
-	<module>unisa-unmarkassfollowup</module>
-	<module>unisa-tutoringplanAdministration</module>
-	<module>unisa-tutorstudentgrouping</module>
-	<module>unisa-tutoringplan</module>
-	<module>unisa-studentnosearch</module>
-	<module>unisa-studyquotation</module>
-	<module>unisa-exampapers</module>
-	<module>unisa-exampaperonline</module>
-	<module>unisa-payments</module>
-	<module>unisa-finalmarkconcession</module>
-	<module>unisa-acadhistory</module>
  </modules>
 </project>
 
