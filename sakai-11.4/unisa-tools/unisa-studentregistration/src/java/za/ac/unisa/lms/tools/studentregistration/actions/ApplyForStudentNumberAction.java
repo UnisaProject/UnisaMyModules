@@ -6212,7 +6212,55 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				new ActionMessage("message.generalmessage", "An error occurred while saving Secondary Qualification. Please try again."));
 			addErrors(request, messages);
 			return mapping.findForward("applyQualification");
+		}			
+		
+		/**2018 Johanet Start of Send Letter**/
+		/**2018 July - Johanet Add code for returning student - email application received letter - BRD SR198094 5.1**/
+		/**/
+		try{
+			Staae05sAppAdmissionEvaluator op = new Staae05sAppAdmissionEvaluator();
+			operListener opl = new operListener();
+			op.addExceptionListener(opl);
+			op.clear();
+
+			op.setInCsfClientServerCommunicationsClientVersionNumber((short) 3);
+			op.setInCsfClientServerCommunicationsClientRevisionNumber((short) 1);
+			op.setInCsfClientServerCommunicationsAction("PR");
+			op.setInCsfClientServerCommunicationsClientDevelopmentPhase("C");
+			op.setInWsUserNumber(99998);
+			log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Academic Year=" + stuRegForm.getStudent().getAcademicYear());
+			op.setInWsAcademicYearYear((short) Integer.parseInt(stuRegForm.getStudent().getAcademicYear()));
+			op.setInWebStuApplicationQualAcademicYear((short) Integer.parseInt(stuRegForm.getStudent().getAcademicYear()));
+			log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Academic Period=" + stuRegForm.getStudent().getAcademicPeriod());
+			op.setInWebStuApplicationQualApplicationPeriod((short) Integer.parseInt(stuRegForm.getStudent().getAcademicPeriod()));
+			log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Student Number=" + stuRegForm.getStudent().getNumber());
+			op.setInWebStuApplicationQualMkStudentNr(Integer.parseInt(stuRegForm.getStudent().getNumber()));
+			log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Qual1=" + stuRegForm.getStudent().getQual1());
+			op.setInWebStuApplicationQualNewQual(stuRegForm.getStudent().getQual1());
+			//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Choice Nr= 1");
+			//op.setInWebStuApplicationQualChoiceNr((short) 1);
+			//Get Current Status
+			//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Get Basic Status");
+			//String status = applyDAO.getBasicStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod(), "1");
+			//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Basic Status="+status);
+			//op.setInWebStuApplicationQualStatusCode(status);
+			
+			log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Execute");
+
+			op.execute();
+
+			if (opl.getException() != null) throw opl.getException();
+			if (op.getExitStateType() < 3) throw new Exception(op.getExitStateMsg());
+
+			log.debug("UploadAction - Upload - Staae05sAppAdmissionEvaluator - After Execute");
+			String opResult = "No Result";
+			opResult = op.getOutCsfStringsString500();
+			log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) opResult: " + opResult);
+		}catch(Exception e){
+			log.debug("Unisa-StudentRegistration - UploadAction - Upload - Staae05sAppAdmissionEvaluator - After Execute / sessionID=" + request.getSession().getId() + " / Error=" + e );
+			log.warn("Unisa-StudentRegistration - UploadAction - Upload - Staae05sAppAdmissionEvaluator - After Execute / sessionID=" + request.getSession().getId() + " / Error=" + e );
 		}
+		/**End of Send Letter**/
 		
 		//log.debug("ApplyForStudentNumberAction - applyRetDeclare -  Save Qualification to STUAPQ - End");
 		//Save Qualification to STUAPQ - End
