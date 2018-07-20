@@ -624,9 +624,7 @@ public class UploadAction extends DispatchAction {
 					//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Academic Period=" + stuRegForm.getStudent().getAcademicPeriod());
 					op.setInWebStuApplicationQualApplicationPeriod((short) Integer.parseInt(stuRegForm.getStudent().getAcademicPeriod()));
 					//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Student Number=" + stuRegForm.getStudent().getNumber());
-					op.setInWebStuApplicationQualMkStudentNr(Integer.parseInt(stuRegForm.getStudent().getNumber()));
-					log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Qual1=" + stuRegForm.getStudent().getRetQualOneFinal());
-					op.setInWebStuApplicationQualNewQual(stuRegForm.getStudent().getRetQualOneFinal());
+					op.setInWebStuApplicationQualMkStudentNr(Integer.parseInt(stuRegForm.getStudent().getNumber()));					
 					////log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - RetQualOneFinal=" + stuRegForm.getStudent().getRetQualOneFinal());
 					//op.setInWebStuApplicationQualNewQual(stuRegForm.getStudent().getRetQualOneFinal());
 					////log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Choice Nr= 1");
