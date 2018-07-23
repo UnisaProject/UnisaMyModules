@@ -10334,7 +10334,8 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			//log.debug("ApplyForStudentNumberAction - createStudentNr - after get Action tempSpec1: " + tempSpec1);
 			//log.debug("ApplyForStudentNumberAction - createStudentNr - after get Action tempQual2: " + tempQual2);
 			//log.debug("ApplyForStudentNumberAction - createStudentNr - after get Action tempSpec2: " + tempSpec2);
-			
+		  //Johanet July2018 BRD - apply via RPL - 1.2 - value in stuRegForm.selectHEMain
+		  //End July 2019 BRD RPL 1.2
 		  op2.setInWsQualificationCode(tempQual1);
 		  op2.setInStudentAnnualRecordSpecialityCode(tempSpec1);
 		  //log.debug("ApplyForStudentNumberAction - createStudentNr -get Action Qual1-Spec1: " + tempQual1 +"-"+ tempSpec1);
