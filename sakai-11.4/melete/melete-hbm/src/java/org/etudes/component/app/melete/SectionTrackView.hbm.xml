@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!--
+ ***********************************************************************************
+ * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/melete-hbm/src/java/org/etudes/component/app/melete/SectionTrackView.hbm.xml $
+ * $Id: SectionTrackView.hbm.xml 3641 2012-12-02 21:43:44Z ggolden $  
+ ***********************************************************************************
+ *
+ * Copyright (c) 2010, 2011 Etudes, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ *
+ **********************************************************************************
+-->
+<!DOCTYPE hibernate-mapping
+    PUBLIC "-//Hibernate/Hibernate Mapping DTD//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+  <class name="org.etudes.component.app.melete.SectionTrackView" table="melete_section_track_view"> 
+     <composite-id>
+     <key-property name="sectionId" column="SECTION_ID"  type="int" />
+     <key-property name="userId" column="USER_ID" type="string" length="99" />
+     </composite-id>
+     <property name="firstViewDate"  column="FIRST_VIEW_DATE"  type="timestamp"  />
+     <property name="viewDate"  column="VIEW_DATE"  type="timestamp"  />
+     <many-to-one name="section" class="org.etudes.component.app.melete.Section" insert="false" update="false" column="SECTION_ID" lazy="false"/>  				
+  </class>
+    <query name="trackSectionItem">
+        <![CDATA[from org.etudes.component.app.melete.SectionTrackView as item where item.sectionId = :sectionId]]>
+    </query> 
+    
+    <query name="trackSectionCount">
+        <![CDATA[select count(item.userId) from org.etudes.component.app.melete.SectionTrackView as item where item.sectionId = :sectionId]]>
+    </query>
+ </hibernate-mapping>
+	 
+	 

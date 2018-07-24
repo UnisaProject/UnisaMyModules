@@ -1,0 +1,1 @@
+CREATE INDEX USER_ID_IDX ON `melete_section_track_view` (USER_ID);
