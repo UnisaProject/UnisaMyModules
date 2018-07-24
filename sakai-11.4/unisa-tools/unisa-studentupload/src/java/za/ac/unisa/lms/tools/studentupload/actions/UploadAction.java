@@ -605,7 +605,8 @@ public class UploadAction extends DispatchAction {
 				
 				//log.debug("UploadAction - Upload - Do Staae05sAppAdmissionEvaluator Letter");
 				/**2018 Edmund Start of Send Letter**/
-				/**
+				/**2018 July - Johanet enable code that was commented out to email application received letter - BRD SR198094 5.1**/
+				/* studentUpload tool*/
 				try{
 					Staae05sAppAdmissionEvaluator op = new Staae05sAppAdmissionEvaluator();
 					operListener opl = new operListener();
@@ -623,7 +624,7 @@ public class UploadAction extends DispatchAction {
 					//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Academic Period=" + stuRegForm.getStudent().getAcademicPeriod());
 					op.setInWebStuApplicationQualApplicationPeriod((short) Integer.parseInt(stuRegForm.getStudent().getAcademicPeriod()));
 					//log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Student Number=" + stuRegForm.getStudent().getNumber());
-					op.setInWebStuApplicationQualMkStudentNr(Integer.parseInt(stuRegForm.getStudent().getNumber()));
+					op.setInWebStuApplicationQualMkStudentNr(Integer.parseInt(stuRegForm.getStudent().getNumber()));					
 					////log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - RetQualOneFinal=" + stuRegForm.getStudent().getRetQualOneFinal());
 					//op.setInWebStuApplicationQualNewQual(stuRegForm.getStudent().getRetQualOneFinal());
 					////log.debug("UploadAction - Upload - (Staae05sAppAdmissionEvaluator) - Choice Nr= 1");
@@ -648,8 +649,8 @@ public class UploadAction extends DispatchAction {
 					log.debug("Unisa-StudentUpload - UploadAction - Upload - Staae05sAppAdmissionEvaluator - After Execute / sessionID=" + request.getSession().getId() + " / Error=" + e );
 					log.warn("Unisa-StudentUpload - UploadAction - Upload - Staae05sAppAdmissionEvaluator - After Execute / sessionID=" + request.getSession().getId() + " / Error=" + e );
 				}
-				/**End of Send Letter
-				*/
+				/**End of Send Letter**/
+				/*Johanet 2018July - end of enabling code*/
 				
 				//log.debug("UploadAction moveDocuments if any: " + stuRegForm.getStudent().getNumber());
 				 

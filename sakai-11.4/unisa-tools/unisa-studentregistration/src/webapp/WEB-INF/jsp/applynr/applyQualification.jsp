@@ -145,6 +145,16 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 				populateSelectedCategory1();
 			}
 			
+			//Johanet 2018July BRD hide second choice for RPL
+			var aspGRD = $("#selectHEMain").val();
+				if (aspGRD === "RPL"){
+					$("#second").hide();
+				    $("#secondCat").hide();
+				    $("#secondQual").hide();
+				    $("#secondSpec").hide();
+				}
+			//end RPL
+			
 			var catSelect = $("#catSelect").val();
 			if(catSelect == "MD"){
 				//alert("selectStudy - catSelect - MD - catSelect=" + catSelect);
