@@ -418,7 +418,24 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 			    	return false;
 			    }
 		    }
-		    	doSubmit('Continue');
+		    
+		    if((jQuery.trim(qual1) == "02623" && jQuery.trim(spec1) == "NEW") ||
+		    		(jQuery.trim(qual1) == "02631" && jQuery.trim(spec1) == "FDP") ||
+		    		(jQuery.trim(qual1) == "03980" && jQuery.trim(spec1) == "NEW") ||
+		    		(jQuery.trim(qual2) == "02623" && jQuery.trim(spec2) == "NEW") ||
+		    		(jQuery.trim(qual2) == "02631" && jQuery.trim(spec2) == "FDP") ||
+		    		(jQuery.trim(qual2) == "03980" && jQuery.trim(spec2) == "NEW")){
+		    	var newLine = "\r\n";
+		    	var msg = "Please note that you should have completed an undergraduate degree or National diploma to comply with admission requirements of the qualification you have selected.";
+		    	msg += newLine;
+		    	msg += newLine;
+		    	msg += "If you selected either of the PGCEs 02623 NEW or 02631 FDP as qualifications, please note that you must have passed 2 official languages (English 1 and Afrikaans 1 or African languages 1) in the degree or diploma that you completed.";
+		    	msg += newLine;
+		    	msg += newLine;
+		    	msg += "NB: If you do not comply with any of the admission requirements for the qualification you selected, you will not be admitted to the PGCE.";
+		        alert(msg);
+		    }    
+		    doSubmit('Continue');
 		}
 		
 		//This will sort your array

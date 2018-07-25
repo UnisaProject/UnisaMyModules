@@ -3967,20 +3967,58 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			String qualDesc = prevQuals.getQualDescs().get(i).toString().trim();
 			String specCode = prevQuals.getSpecCodes().get(i).toString().trim();
 			String specDesc = prevQuals.getSpecDescs().get(i).toString().trim();
-			if (qualCode.equalsIgnoreCase(stuRegForm.getStudent().getQual1())){
+			//Johanet 2018July BRD 5.2
+			if (qualCode.equalsIgnoreCase(stuRegForm.getStudent().getQual1()) && specCode.equalsIgnoreCase(stuRegForm.getStudent().getSpec1())){
 				//log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 1 Qual="+qualCode+" = Prev Qual1="+stuRegForm.getStudent().getQual1());
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
-					new ActionMessage("message.generalmessage", "You have previously registered for your selected primary qualification "+qualCode+". You, therefore, do not have to re-apply for this qualification."));
+					new ActionMessage("message.generalmessage", "You have previously registered for your selected primary qualification ("+qualCode+" - "+qualDesc+") and specialisation ("+specCode+" - "+specDesc+"). You, therefore, do not have to re-apply for this qualification and specialisation."));
 				addErrors(request, messages);
 				return "applyQualification";
-			}else if (qualCode.equalsIgnoreCase(stuRegForm.getStudent().getQual2())){
+
+			}else if (qualCode.equalsIgnoreCase(stuRegForm.getStudent().getQual2()) && specCode.equalsIgnoreCase(stuRegForm.getStudent().getSpec2())){
 				//log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 2 Qual="+qualCode+" = Prev Qual2="+stuRegForm.getStudent().getQual2());
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
-					new ActionMessage("message.generalmessage", "You have previously registered for your selected alternative qualification ("+qualCode+" - "+qualDesc+") and specialisation ("+specCode+" - "+specDesc+"). You, therefore, do not have to re-apply for this qualification or specialisation."));
+					new ActionMessage("message.generalmessage", "You have previously registered for your selected alternative qualification ("+qualCode+" - "+qualDesc+") and specialisation ("+specCode+" - "+specDesc+"). You, therefore, do not have to re-apply for this qualification and specialisation."));
 				addErrors(request, messages);
 				return "applyQualification";
 			}
+			//END Johanet 2018July BRD 5.2
+		
+//			if (qualCode.equalsIgnoreCase(stuRegForm.getStudent().getQual1())){
+//				//log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 1 Qual="+qualCode+" = Prev Qual1="+stuRegForm.getStudent().getQual1());
+//				messages.add(ActionMessages.GLOBAL_MESSAGE,
+//					new ActionMessage("message.generalmessage", "You have previously registered for your selected primary qualification "+qualCode+". You, therefore, do not have to re-apply for this qualification."));
+//				addErrors(request, messages);
+//				return "applyQualification";
+//			}else if (qualCode.equalsIgnoreCase(stuRegForm.getStudent().getQual2())){
+//				//log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 2 Qual="+qualCode+" = Prev Qual2="+stuRegForm.getStudent().getQual2());
+//				messages.add(ActionMessages.GLOBAL_MESSAGE,
+//					new ActionMessage("message.generalmessage", "You have previously registered for your selected alternative qualification ("+qualCode+" - "+qualDesc+") and specialisation ("+specCode+" - "+specDesc+"). You, therefore, do not have to re-apply for this qualification or specialisation."));
+//				addErrors(request, messages);
+//				return "applyQualification";
+//			}
 		}
+		
+		//Johanet 2018July BRD 5.2
+		Qualifications completedQuals = dao.getCompletedQualifications(stuRegForm.getStudent().getNumber());
+		for (int i = 0; i < completedQuals.getQualCodes().size(); i++){
+			String qualCode = completedQuals.getQualCodes().get(i).toString().trim();
+			String qualDesc = completedQuals.getQualDescs().get(i).toString().trim();		
+			if (qualCode.equalsIgnoreCase(stuRegForm.getStudent().getQual1())){				
+				//log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 1 Qual="+qualCode+" = Completed Qual1="+stuRegForm.getStudent().getQual1());
+				messages.add(ActionMessages.GLOBAL_MESSAGE,
+					new ActionMessage("message.generalmessage", "You have already completed your selected primary qualification ("+qualCode+" - "+qualDesc+"). You, therefore, cannot re-apply for this qualification."));
+				addErrors(request, messages);
+				return "applyQualification";
+			}else if (qualCode.equalsIgnoreCase(stuRegForm.getStudent().getQual2())){
+				//log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 2 Qual="+qualCode+" = Completed Qual2="+stuRegForm.getStudent().getQual2());
+				messages.add(ActionMessages.GLOBAL_MESSAGE,
+					new ActionMessage("message.generalmessage", "You have already completed your selected alternative qualification ("+qualCode+" - "+qualDesc+"). You, therefore, cannot re-apply for this qualification"));
+				addErrors(request, messages);
+				return "applyQualification";
+			}
+		}	
+		//END Johanet 2018July BRD 5.2
 		
 		if (stuRegForm.getStudent().getQual1().equalsIgnoreCase(stuRegForm.getStudent().getQual2())){
 			//log.debug("ApplyForStudentNumberAction - saveStudyRet - Same Choice 1 & 2 - Qual1="+stuRegForm.getStudent().getQual1()+" = Qual2="+stuRegForm.getStudent().getQual2());
@@ -10334,7 +10372,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			//log.debug("ApplyForStudentNumberAction - createStudentNr - after get Action tempSpec1: " + tempSpec1);
 			//log.debug("ApplyForStudentNumberAction - createStudentNr - after get Action tempQual2: " + tempQual2);
 			//log.debug("ApplyForStudentNumberAction - createStudentNr - after get Action tempSpec2: " + tempSpec2);
+			
 		  //Johanet July2018 BRD - apply via RPL - 1.2 - value in stuRegForm.selectHEMain
+		  //use InSblQualificationCsfStringsString1 for RPL value if stuRegForm.selectHEMain=RPL set to Y
+		  op2.setInWsStudentApplicationCaoPaidFlag("N");	
+		  if (stuRegForm.getSelectHEMain()!=null && stuRegForm.getSelectHEMain().equalsIgnoreCase("RPL")) {
+			op2.setInWsStudentApplicationCaoPaidFlag("Y");			
+		  }
+			
 		  //End July 2019 BRD RPL 1.2
 		  op2.setInWsQualificationCode(tempQual1);
 		  op2.setInStudentAnnualRecordSpecialityCode(tempSpec1);

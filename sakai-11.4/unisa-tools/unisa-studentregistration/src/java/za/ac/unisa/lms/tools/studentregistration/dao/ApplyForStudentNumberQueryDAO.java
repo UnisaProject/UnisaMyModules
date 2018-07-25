@@ -2361,20 +2361,22 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 	/**
 	 * Retrieve student's previous or current qualification
 	 */
-	public Qualifications getCompletedQualifications(String studentNr, String acaYear) throws Exception{
+	//Johanet 2018July BRD - added qualdesc
+	public Qualifications getCompletedQualifications(String studentNr) throws Exception{
 
 		//log.debug("ApplyForStudentNumberQueryDAO - getCompletedQualifications studentNr: " + studentNr + ", acaYear: " + acaYear);
 		
+		ArrayList qualCodes = new ArrayList();
+		ArrayList qualDescs = new ArrayList();
+		
 		Qualifications qualifications = new Qualifications();
 		
-		String query = " select distinct mk_qualification_c as CODE, substr(trim(fk_speciality_code)||'NVT',1,3) as SPEC "
-					+ " from stuaca "
-					+ " where mk_student_nr = ? "
-					+ " and status_code = 'CO' "
+		String query = " select distinct stuaca.mk_qualification_c as CODE, upper(grd.long_eng_descripti) as QUALDESC "
+					+ " from stuaca, grd"  
+					+ " where stuaca.mk_qualification_c = grd.code"
+					+ " and stuaca.mk_student_nr = ? "
+					+ " and stuaca.status_code = 'CO' "
 					+ " order by CODE asc ";
-		
-		ArrayList qualPrevCodes = new ArrayList();
-		ArrayList qualPrevDescs = new ArrayList();
 
 		try {
 			//log.debug("ApplyForStudentNumberQueryDAO - getCompletedQualifications: " + query);
@@ -2384,8 +2386,8 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			Iterator i = queryList.iterator();
 			while (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
-				qualPrevCodes.add(data.get("CODE").toString());
-				qualPrevDescs.add(data.get("SPEC").toString());
+				qualCodes.add(data.get("CODE").toString());
+				qualDescs.add(data.get("QUALDESC").toString());
 			}
 		} catch (Exception ex) {
 			throw new Exception(
@@ -2394,19 +2396,20 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		} finally {
 
 		}
-		qualifications.setQualPrevCodes(qualPrevCodes);
-		qualifications.setQualPrevDescs(qualPrevDescs);
+		qualifications.setQualCodes(qualCodes);
+		qualifications.setQualDescs(qualDescs);
 
 		return qualifications;
 
 	}
+	//END Johanet 2018July BRD - added qualdesc
 
 	/**
 	 * Retrieve student's previous or current qualification
-	 */
+	 */	
 	public ArrayList<String> getPrevQualifications(String studentNr) throws Exception{
 
-		//log.debug("ApplyForStudentNumberQueryDAO - getPrevQualifications studentNr: " + studentNr);
+	//log.debug("ApplyForStudentNumberQueryDAO - getPrevQualifications studentNr: " + studentNr);
 		
 		String query = " select distinct mk_qualification_c as CODE, substr(trim(fk_speciality_code)||'NVT',1,3) as SPEC "
 					+ " from stuaca "
@@ -2447,11 +2450,11 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		ArrayList specCodes = new ArrayList();
 		ArrayList specDescs = new ArrayList();
 		
-		Qualifications qualifications = new Qualifications();
+		Qualifications qualifications = new Qualifications();	
 		
 		String query = " select * from ( "
 					+ " select distinct stuaca.mk_qualification_c as QUALCODE, upper(grd.long_eng_descripti) as QUALDESC, "
-					+ " COALESCE(stuaca.fk_speciality_code,' ') as SPECCODE, quaspc.ENGLISH_DESCRIPTIO as SPECDESC "
+					+ " COALESCE(stuaca.fk_speciality_code,'0') as SPECCODE, quaspc.ENGLISH_DESCRIPTIO as SPECDESC "
 					+ " from stuaca, grd, quaspc "
 					+ " where stuaca.mk_qualification_c = grd.code "
 					+ " and stuaca.mk_qualification_c = quaspc.MK_QUALIFICATION_C "
@@ -2460,7 +2463,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ " and stuaca.last_academic_regi > 0 "
 					+ " union "
 					+ " select distinct(stuann.MK_HIGHEST_QUALIFI) AS QUALCODE, upper(grd.long_eng_descripti) as QUALDESC, "
-					+ " COALESCE(stuann.speciality_code,' ') as SPECCODE, quaspc.ENGLISH_DESCRIPTIO as SPECDESC "
+					+ " COALESCE(stuann.speciality_code,'0') as SPECCODE, quaspc.ENGLISH_DESCRIPTIO as SPECDESC "
 					+ " from stuann, grd, quaspc "
 					+ " where stuann.MK_HIGHEST_QUALIFI = grd.code "
 					+ " and stuann.MK_HIGHEST_QUALIFI = quaspc.MK_QUALIFICATION_C "
@@ -2471,7 +2474,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 		try {
 			//log.debug("ApplyForStudentNumberQueryDAO - getPrevSTUACA: " + query+", StudentNr="+studentNr);
 
-			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
+			JdbcTemplate jdt = new JdbcTemplate(getDataSource());			
 			List queryList = jdt.queryForList(query, new Object []{studentNr, studentNr});
 			Iterator i = queryList.iterator();
 			while (i.hasNext()) {
