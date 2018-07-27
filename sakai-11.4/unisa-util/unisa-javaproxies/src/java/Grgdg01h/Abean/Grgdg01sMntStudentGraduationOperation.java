@@ -29,14 +29,14 @@ public class Grgdg01sMntStudentGraduationOperation
                                              "Grgdg01sMntStudentGraduation",
                                              "GRGDG01S",
                                              "DEV SRC STUDENT ACADEMIC REC C",
-                                             "F326",
+                                             "grgdg01",
                                               new String [] {"","","","","","","",""},
                                               new String [] {"","","","","","","",""},
-                                             "f326",
-                                             "f326",
+                                             "grgdg01",
+                                             "grgdg01",
                                              "",
                                              "",
-                                             "f326",
+                                             "grgdg01",
                                              "com.ca.gen80.odc.ITPIPTranEntry",
                                              new String [] {"", "0","Y"});
  
