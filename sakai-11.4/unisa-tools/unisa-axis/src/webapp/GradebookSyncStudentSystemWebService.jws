@@ -35,8 +35,8 @@ import org.w3c.dom.*;
 
 import org.apache.axis.AxisFault;
 import org.apache.axis.utils.JavaUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import org.sakaiproject.component.cover.ServerConfigurationService;
@@ -212,7 +212,7 @@ public class GradebookSyncStudentSystemWebService {
         
 		/* =========== end variables =========== */
     
-		Log log = LogFactory.getLog(this.getClass());
+		Logger log	= LoggerFactory.getLogger(CalendarBean.class);
           
 		try {
                                                     
