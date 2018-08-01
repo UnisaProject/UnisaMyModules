@@ -47,8 +47,7 @@
 -->
 	<bean id="org.sakaiproject.calendar.api.ExternalCalendarSubscriptionService"
 		class="org.sakaiproject.calendar.impl.BaseExternalCalendarSubscriptionService"
-		init-method="init" destroy-method="destroy"
-		singleton="true">
+		init-method="init" destroy-method="destroy">
 		<property name="calendarService"><ref bean="org.sakaiproject.calendar.api.CalendarService"/></property>
  		<property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService"/></property>
 		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
@@ -63,8 +62,7 @@
 	</bean>
 
 	<bean id="org.sakaiproject.calendar.api.OpaqueUrlDao" 
-		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
-		singleton="true">
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager">
 			<ref bean="org.sakaiproject.springframework.orm.hibernate.GlobalTransactionManager" />
 		</property>
