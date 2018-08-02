@@ -7,7 +7,7 @@
   <parent>
     <artifactId>unisa-overlays-gradebook</artifactId>
     <groupId>unisa.overlays.gradebook</groupId>
-    <version>11.4</version>
+    <version>10.5</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <name>Unisa overlay Gradebook tool</name>
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.sakaiproject</groupId>
       <artifactId>sakai-gradebook-tool</artifactId>
-      <version>11.4</version>
+      <version>10.5</version>
       <type>war</type>
       <scope>runtime</scope>
     </dependency>

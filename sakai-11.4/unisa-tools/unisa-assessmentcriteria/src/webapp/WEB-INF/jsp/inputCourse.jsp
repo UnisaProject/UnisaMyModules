@@ -13,6 +13,9 @@
 		<sakai:messages/>
 		<sakai:messages message="true"/>
 		<logic:equal  name="assessmentCriteriaForm"  property="siteId" value="Course Admin">
+			<sakai:instruction>
+				<fmt:message key="page.accessControlInfo"/>
+			</sakai:instruction>
 			<sakai:heading>
 				<fmt:message key="heading.assessmentCriteria"/>
 			</sakai:heading>		

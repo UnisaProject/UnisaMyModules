@@ -5,12 +5,13 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <fmt:setBundle
 	basename="za.ac.unisa.lms.tools.honsadmission.ApplicationResources" />
+<sakai:html>
 <sakai:tool_bar>
 	<html:link href="honsAdmission.do?act=displayStudentReferrals">
 		<fmt:message key="link.viewStudentReferrals"/>
 	</html:link>
 </sakai:tool_bar>
-<sakai:html>
+
 <html:form action="/honsAdmission" >
 	<sakai:messages />
 	<sakai:messages message="true" />

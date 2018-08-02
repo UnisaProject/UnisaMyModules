@@ -7,14 +7,14 @@
   <parent>
     <artifactId>unisa-overlays-osp</artifactId>
     <groupId>unisa.overlays.osp</groupId>
-    <version>11.4</version>
+    <version>10.5</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <name>Unisa overlay OSP glossary tool</name>
   <groupId>unisa-overlays-osp</groupId>
   <artifactId>osp-glossary-tool</artifactId>
   <packaging>war</packaging>
-  <version>11.4</version>
+  <version>10.5</version>
     <build>
         <plugins>
             <plugin>
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.sakaiproject.osp</groupId>
       <artifactId>osp-glossary-tool</artifactId>
-      <version>11.4</version>
+      <version>10.5</version>
       <type>war</type>
       <scope>runtime</scope>
     </dependency>

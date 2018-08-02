@@ -18,6 +18,7 @@
 	<module>overlays/chat</module>
 	<module>overlays/content</module>
 	<module>overlays/gradebook</module>
+    <module>overlays/mailarchive</module>
 	<module>overlays/podcasts</module>
 	<module>overlays/polls</module>
 	<module>overlays/qna</module> 

@@ -17,8 +17,8 @@
 
 package org.sakaiproject.clog.api;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.sakaiproject.clog.api.datamodel.Visibilities;
@@ -35,32 +35,37 @@ public class QueryBean {
     private String siteId = "";
     private String title = "";
     private String group = "";
-	private String caller = "";
-	private boolean searchAutoSaved = false;
+    private String caller = "";
+    private boolean searchAutoSaved = false;
+    private int page = 0;
 
-	public boolean hasConditions() {
+    public boolean hasConditions() {
 
         return creator.length() > 0 || siteId.length() > 0 || visibilities.size() > 0
                 || title.length() > 0 || group.length() > 0;
     }
 
-	public boolean queryBySiteId() {
-		return !siteId.equals("");
-	}
+    public boolean queryBySiteId() {
+        return !siteId.equals("");
+    }
 
-	public boolean queryByVisibility() {
-		return visibilities.size() > 0;
-	}
+    public boolean queryByVisibility() {
+        return visibilities.size() > 0;
+    }
 
-	public boolean queryByTitle() {
-		return title.length() > 0;
-	}
+    public boolean queryByTitle() {
+        return title.length() > 0;
+    }
 
     public boolean queryByCreator() {
         return !creator.trim().equals("");
     }
 
     public boolean queryByGroup() {
-		return !group.trim().equals("");
+        return !group.trim().equals("");
+    }
+
+    public boolean byPublic() {
+        return visibilities.contains(Visibilities.PUBLIC);
     }
 }

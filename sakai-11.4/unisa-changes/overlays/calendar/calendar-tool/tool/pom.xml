@@ -7,7 +7,7 @@
   <parent>
     <artifactId>unisa-overlays-calendar</artifactId>
     <groupId>unisa.overlays.calendar</groupId>
-    <version>11.4</version>
+    <version>10.5</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <name>sakai-calendar-tool</name>

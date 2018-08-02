@@ -3,8 +3,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic"%>
 <%@ taglib uri="http://sakaiproject.org/struts/sakai" prefix="sakai"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
-<fmt:setBundle
-	basename="za.ac.unisa.lms.tools.honsadmission.ApplicationResources" />
+<fmt:setBundle basename="za.ac.unisa.lms.tools.honsadmission.ApplicationResources" />
 
 <sakai:html>
 <html:form action="/honsAdmission" >
