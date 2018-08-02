@@ -7,15 +7,13 @@
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.maintainstaff.ApplicationResources"/>
 
-
+<sakai:html>
 <script language="JavaScript">
 	function setAction() {
 		document.courseForm.action = 'course.do?act=updatePrimLecturer';
 		document.courseForm.submit();
 	}
 </script>
-
-<sakai:html>
 <html:form action="/course">
 	<html:hidden property="atstep" value="updPrimLectConfirm"/>
 	<sakai:group_heading>

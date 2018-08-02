@@ -8,14 +8,15 @@
 
 <!-- document.sitestatsexportForm.action = 'sitestatsexport.do?act=mainview'; -->
 <fmt:setBundle basename="za.ac.unisa.lms.tools.sitestatsexport.ApplicationResources"/>
+
+
+<sakai:html>
 <script language="JavaScript">
 	function setAction() {
 		document.sitestatsexportForm.action = 'sitestatsexport.do?act=mainview';
 		document.sitestatsexportForm.submit();
 	}
 </script>
-
-<sakai:html>
 	<html:form action="/sitestatsexport">
  	
     <sakai:tool_bar>	   	

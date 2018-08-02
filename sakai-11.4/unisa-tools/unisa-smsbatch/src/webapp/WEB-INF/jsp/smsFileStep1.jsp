@@ -7,7 +7,7 @@
 <%@ page import="java.util.*" %>
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.smsbatch.ApplicationResources"/>
-
+<sakai:html>
 <script type="text/JavaScript" language="JavaScript">		
 			function textCounter(field, maxlimit) {
 				if (field.value.length > maxlimit)
@@ -47,7 +47,6 @@
 		</script>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<sakai:html>
   <br/>
   <h1><fmt:message key="page.file.heading"/></h1>    
   <html:form action="/smsFile" enctype="multipart/form-data">

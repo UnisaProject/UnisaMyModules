@@ -7,6 +7,7 @@
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.maintainstaff.ApplicationResources"/>
 
+<sakai:html>
 <script language="JavaScript">
 	function setAction() {
 		document.mainForm.action = 'main.do?act=displayPerDpt';
@@ -14,7 +15,6 @@
 	}
 </script>
 
-<sakai:html>
 <html:form action="/main"> 
 	<sakai:messages/>
 	<sakai:messages message="true"/>

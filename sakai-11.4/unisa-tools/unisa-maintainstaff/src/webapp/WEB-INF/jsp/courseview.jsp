@@ -9,6 +9,9 @@
 
 <!--  onchange="setTotalSelected();" -->
 
+
+
+<sakai:html>
 <script language="JavaScript">
 	function setAction() {
 		document.courseForm.action = 'course.do?act=courseDisplay&changeview=changed';
@@ -19,8 +22,6 @@
 		document.courseForm.submit();
 	}
 </script>
-
-<sakai:html>
 <html:form action="/course.do"> 
 <html:hidden property="atstep" value="confirm"/> 
 <html:hidden property="changeview" value=""/>

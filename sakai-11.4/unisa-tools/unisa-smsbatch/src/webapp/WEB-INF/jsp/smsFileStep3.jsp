@@ -6,6 +6,7 @@
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.smsbatch.ApplicationResources"/>
 
+<sakai:html>
 <script type="text/JavaScript" language="JavaScript">
 		<!--
 			function textCounter(field, maxlimit) {
@@ -16,7 +17,7 @@
 		</script>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<sakai:html>
+
   <body>
   <br/>
   <h1><fmt:message key="page.file.heading"/></h1>

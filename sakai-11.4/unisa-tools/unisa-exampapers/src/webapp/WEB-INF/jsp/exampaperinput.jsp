@@ -7,12 +7,12 @@
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.exampapers.ApplicationResources"/>
 
+<sakai:html>
 <sakai:tool_bar>
 	<html:link href="managementInfo.do?action=displayInput">
 		<fmt:message key="link.managementInfo"/>
 	</html:link>
 </sakai:tool_bar>
-<sakai:html>
 	<html:form action="/examPaperCoverDocket">
 	<sakai:heading><fmt:message key="heading.coverDocket"/></sakai:heading>
 		<sakai:messages/>
