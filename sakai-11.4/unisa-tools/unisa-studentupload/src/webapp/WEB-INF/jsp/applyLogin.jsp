@@ -120,10 +120,11 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		var bDay = $("select[name='student.birthDay']").find("option:selected").val();
 		
 		//alert("validate - number="+number+", surname="+surname+", firstname="+firstname+", bYear="+bYear+", bMonth="+bMonth+", bDay="+bDay );
-		if(number == null || number.trim() == "" || number == "undefinded"){
-			showError("Error", "Please enter your Student number");
-			return false;
-		}
+		//Johanet July2018 BRD student number optional
+// 		if(number == null || number.trim() == "" || number == "undefinded"){
+// 			showError("Error", "Please enter your Student number");
+// 			return false;
+// 		}
 		if(surname == null || surname.trim() == "" || surname == "undefinded"){
 			showError("Error", "Please enter your Surname");
 			return false;
@@ -214,13 +215,16 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 			               	<logic:equal name="studentUploadForm" property="allowLogin" value="true">
 					               	<tr>
 						              	<td style="width:180px;height:30px" valign="top"><fmt:message key="page.login.studnumber"/></td>
-						              	<td style="height:30px"><html:text name="studentUploadForm" property="student.number" maxlength="8" size="24" onfocus="this.select();" />&nbsp;</td>
+						              	<td style="height:30px" valign="top"><html:text name="studentUploadForm" property="student.number" maxlength="8" size="24" onfocus="this.select();" />&nbsp;</td>
+						              	<td><fmt:message key="page.login.studnumber.note"/></td>
 						            </tr><tr>
 					              		<td style="width:180px;height:30px" valign="top"><fmt:message key="page.login.studsurname"/></td>
 					              		<td valign="bottom"><html:text name="studentUploadForm" property="student.surname" maxlength="28" size="24"/>&nbsp;</td>
+					              		<td>&nbsp;</td>					              		
 					            	</tr><tr>
 					              		<td style="width:180px;height:30px" valign="top"><fmt:message key="page.login.studfullname"/></td>
 					              		<td valign="bottom"><html:text name="studentUploadForm" property="student.firstnames" maxlength="60" size="24" onfocus="this.select();" />&nbsp;</td>
+					              		<td>&nbsp;</td>					              		
 					            	</tr><tr>
 					            		<td style="width:180px;height:30px" valign="bottom"><fmt:message key="page.login.studbirthdate"/></td>
 					            		<td valign="bottom">
@@ -249,11 +253,13 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 							              		</tr>
 							              	</table>
 										</td>
+										<td>&nbsp;</td>
+										<td>&nbsp;</td>
 						            </tr>
 							</logic:equal>
 							<logic:equal name="studentUploadForm" property="allowLogin" value="false">
 								<tr>
-									<td colspan="2"><strong><font color="red" size="large"><fmt:message key="page.login.newClosed"/></font></strong></td>
+									<td colspan="3"><strong><font color="red" size="large"><fmt:message key="page.login.newClosed"/></font></strong></td>
 						        </tr>
 							</logic:equal>
 			        	</table>

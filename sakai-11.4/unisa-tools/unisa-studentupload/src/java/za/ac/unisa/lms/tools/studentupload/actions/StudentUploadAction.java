@@ -189,40 +189,55 @@ public class StudentUploadAction extends LookupDispatchAction {
 		stuUpForm.setApplyType("F");
 		stuUpForm.setFromPage("stepLoginReturn");
 		
-		
-		stuUpForm.getStudent().setNumber(stripXSS(stuUpForm.getStudent().getNumber()));
-		if (stuUpForm.getStudent().getNumber() == null || "".equalsIgnoreCase(stuUpForm.getStudent().getNumber())){
-			messages.add(ActionMessages.GLOBAL_MESSAGE,
-					new ActionMessage("message.generalmessage", "Enter student number."));
-			addErrors(request, messages);
-			setDropdownListsLogin(request,stuUpForm);
-			//log.debug("StudentUploadAction - applyLogin - Input Required - Return to applyLogin");
-			return mapping.findForward("applyLogin");
-		}
-		if (!isValidNumber(stuUpForm.getStudent().getNumber())){
-			messages.add(ActionMessages.GLOBAL_MESSAGE,
-					new ActionMessage("message.generalmessage", "Enter a valid student number."));
-			addErrors(request, messages);
-			setDropdownListsLogin(request,stuUpForm);
-			//log.debug("StudentUploadAction - applyLogin - Input Required - Return to applyLogin");
-			return mapping.findForward("applyLogin");
-		}
-		/** Check the code against the flow diagram by the numbers provided **/
-		/** Flow Check: (1) **/
-		// We already check for 7 series numbers in JSP and SQL, but double-check if Student number = 8 characters and if 7 student, don't let them in...
-		// Student should never get this far with a 7 series number, but we block him anyway.
-		if (stuUpForm.getStudent().getNumber().length() == 8 ){ 
-			//log.debug("check if Student number = 8 characters");
-			if ("7".equalsIgnoreCase(stuUpForm.getStudent().getNumber().substring(0,1))){
-				stuUpForm.getStudent().setStuSLP(true);
+		boolean executeJP = false;
+		if (executeJP==true) {
+			stuUpForm.getStudent().setNumber(stripXSS(stuUpForm.getStudent().getNumber()));
+			if (stuUpForm.getStudent().getNumber() == null || "".equalsIgnoreCase(stuUpForm.getStudent().getNumber())){
+				messages.add(ActionMessages.GLOBAL_MESSAGE,
+						new ActionMessage("message.generalmessage", "Enter student number."));
+				addErrors(request, messages);
+				setDropdownListsLogin(request,stuUpForm);
+				//log.debug("StudentUploadAction - applyLogin - Input Required - Return to applyLogin");
+				return mapping.findForward("applyLogin");
 			}
-		}else if (stuUpForm.getStudent().getNumber().length() == 7 ){
-			// If student no is only 7 characters (old), then add a 0 to the beginning
-			//log.debug("StudentUploadAction - applyLogin - 7 char Student Number - Old Number: " + stuUpForm.getStudent().getNumber());
-			stuUpForm.getStudent().setNumber("0" + stuUpForm.getStudent().getNumber());
-			//log.debug("StudentUploadAction - applyLogin - 7 char Student Number - New Number: " + stuUpForm.getStudent().getNumber());
+			if (!isValidNumber(stuUpForm.getStudent().getNumber())){
+				messages.add(ActionMessages.GLOBAL_MESSAGE,
+						new ActionMessage("message.generalmessage", "Enter a valid student number."));
+				addErrors(request, messages);
+				setDropdownListsLogin(request,stuUpForm);
+				//log.debug("StudentUploadAction - applyLogin - Input Required - Return to applyLogin");
+				return mapping.findForward("applyLogin");
+			}
+			/** Check the code against the flow diagram by the numbers provided **/
+			/** Flow Check: (1) **/
+			// We already check for 7 series numbers in JSP and SQL, but double-check if Student number = 8 characters and if 7 student, don't let them in...
+			// Student should never get this far with a 7 series number, but we block him anyway.
+			if (stuUpForm.getStudent().getNumber().length() == 8 ){ 
+				//log.debug("check if Student number = 8 characters");
+				if ("7".equalsIgnoreCase(stuUpForm.getStudent().getNumber().substring(0,1))){
+					stuUpForm.getStudent().setStuSLP(true);
+				}
+			}else if (stuUpForm.getStudent().getNumber().length() == 7 ){
+				// If student no is only 7 characters (old), then add a 0 to the beginning
+				//log.debug("StudentUploadAction - applyLogin - 7 char Student Number - Old Number: " + stuUpForm.getStudent().getNumber());
+				stuUpForm.getStudent().setNumber("0" + stuUpForm.getStudent().getNumber());
+				//log.debug("StudentUploadAction - applyLogin - 7 char Student Number - New Number: " + stuUpForm.getStudent().getNumber());
+			}
+			//log.debug("StudentUploadAction - applyLogin - After check if Student number = 8 characters");
 		}
-		//log.debug("StudentUploadAction - applyLogin - After check if Student number = 8 characters");
+		
+		//Johanet 2018July BRD 
+		if (stuUpForm.getStudent().getNumber() != null && !"".equalsIgnoreCase(stuUpForm.getStudent().getNumber())){
+			if (!isValidNumber(stuUpForm.getStudent().getNumber())){
+				messages.add(ActionMessages.GLOBAL_MESSAGE,
+						new ActionMessage("message.generalmessage", "Enter a valid student number."));
+				addErrors(request, messages);
+				setDropdownListsLogin(request,stuUpForm);
+				//log.debug("StudentUploadAction - applyLogin - Input Required - Return to applyLogin");
+				return mapping.findForward("applyLogin");
+			}		
+		}
+		//END Johanet 2018July BRD 
 
 		stuUpForm.getStudent().setSurname(stripXSS(stuUpForm.getStudent().getSurname()));
 		if (stuUpForm.getStudent().getSurname() == null || "".equalsIgnoreCase(stuUpForm.getStudent().getSurname())){
@@ -453,26 +468,59 @@ public class StudentUploadAction extends LookupDispatchAction {
 		}
 		
 		String errorMsg="";
-		errorMsg = displayPersonal(stuUpForm, request);
-
-		if(!"".equals(errorMsg)){
-			messages.add(ActionMessages.GLOBAL_MESSAGE,
-						new ActionMessage("message.generalmessage", errorMsg));
-				addErrors(request, messages);
-				setDropdownListsLogin(request,stuUpForm);
-				//log.debug("StudentUploadAction - applyLogin - DisplayPersonal - Return to applyLogin");
-				return mapping.findForward("applyLogin");
-		}else{
-			stuUpForm.getStudent().setNumber(stuUpForm.getStudent().getNumber());
+		//Johanet 2018July BRD 
+		//Student number entered - check personal data entered against database		
+		if (stuUpForm.getStudent().getNumber() != null && !"".equalsIgnoreCase(stuUpForm.getStudent().getNumber())){
+			errorMsg = displayPersonal(stuUpForm, request);
+		}else {
+			//Validate new Applicant - get student number		
 			stuUpForm.getStudent().setSurname(stuUpForm.getStudent().getSurname().toUpperCase());
 			stuUpForm.getStudent().setFirstnames(stuUpForm.getStudent().getFirstnames().toUpperCase());
 			stuUpForm.getStudent().setBirthYear(stuUpForm.getStudent().getBirthYear());
 			stuUpForm.getStudent().setBirthMonth(stuUpForm.getStudent().getBirthMonth());
 			stuUpForm.getStudent().setBirthDay(stuUpForm.getStudent().getBirthDay());
 			
+			String referenceData = stuUpForm.getStudent().getSurname().toUpperCase()+","+stuUpForm.getStudent().getFirstnames().toUpperCase()+","+stuUpForm.getStudent().getBirthYear()+stuUpForm.getStudent().getBirthMonth()+stuUpForm.getStudent().getBirthDay();
+			String newApplicantNumber = dao.validateNewApplicant(stuUpForm.getStudent().getAcademicYear(), stuUpForm.getStudent().getAcademicPeriod(), "TempStu" ,"StuInfo", referenceData);
+			
+			if (newApplicantNumber.equalsIgnoreCase("")) {
+				errorMsg="No application was submitted for the student details below, either verify that the detial is correct or enter a valid student number if your are not a new applicant.";			
+			}else {
+				stuUpForm.getStudent().setNumber(newApplicantNumber);	
+			}
+		}
+		
+		if(!"".equals(errorMsg)){
+					messages.add(ActionMessages.GLOBAL_MESSAGE,
+								new ActionMessage("message.generalmessage", errorMsg));
+						addErrors(request, messages);
+						setDropdownListsLogin(request,stuUpForm);
+						//log.debug("StudentUploadAction - applyLogin - DisplayPersonal - Return to applyLogin");
+						return mapping.findForward("applyLogin");
+		}else{	
+			//Johanet 2018July BRD move code after student number determined
+			/** Check the code against the flow diagram by the numbers provided **/
+			/** Flow Check: (1) **/
+			// We already check for 7 series numbers in JSP and SQL, but double-check if Student number = 8 characters and if 7 student, don't let them in...
+			// Student should never get this far with a 7 series number, but we block him anyway.
+			if (stuUpForm.getStudent().getNumber().length() == 8 ){ 
+				//log.debug("check if Student number = 8 characters");
+				if ("7".equalsIgnoreCase(stuUpForm.getStudent().getNumber().substring(0,1))){
+					stuUpForm.getStudent().setStuSLP(true);
+				}
+			}else if (stuUpForm.getStudent().getNumber().length() == 7 ){
+				// If student no is only 7 characters (old), then add a 0 to the beginning
+				//log.debug("StudentUploadAction - applyLogin - 7 char Student Number - Old Number: " + stuUpForm.getStudent().getNumber());
+				stuUpForm.getStudent().setNumber("0" + stuUpForm.getStudent().getNumber());
+				//log.debug("StudentUploadAction - applyLogin - 7 char Student Number - New Number: " + stuUpForm.getStudent().getNumber());
+			}
+			//Johanet 2018July BRD move code after student number determined
+			
+			//log.debug("StudentUploadAction - applyLogin - After check if Student number = 8 characters");
 			//log.debug("StudentUploadAction - applyLogin - Write student details to STUXML");
 			//Write student details to STUXML for later verification - Testing Thread security
 			String referenceData = stuUpForm.getStudent().getNumber()+","+stuUpForm.getStudent().getSurname().toUpperCase()+","+stuUpForm.getStudent().getFirstnames().toUpperCase()+","+stuUpForm.getStudent().getBirthYear()+stuUpForm.getStudent().getBirthMonth()+stuUpForm.getStudent().getBirthDay();
+			
 			boolean stuError = false;
 			String queryResultRef = "";
 			String checkStu = "";
@@ -1941,7 +1989,7 @@ public class StudentUploadAction extends LookupDispatchAction {
 		form.getMap().clear();
 		SavedDocDao savedDocDao = new SavedDocDao();
 		//log.debug("StudentUploadForm - reLoad - Reloading uploaded docs..");
-		savedDocDao.getAllNonRequiredDocInfo(form.getDesc(), form.getMap(), form.getStudent().getNumber(),form.getStudent().getAcademicYear(),form.getStudent().isStuExist());
+		savedDocDao.getAllNonRequiredDocInfo(form.getDesc(), form.getMap(), form.getStudent().getNumber(),form.getStudent().getAcademicYear(),form.getStudent().isStuExist(), form.getStudent().getMatrix());
 		for(FileBean fb : form.getRequiredFileBeans()){
 			//log.debug("StudentUploadForm - reLoad - Setting FileBean Uploaded..");
 			fb.setUploaded(savedDocDao.getSavedDocByDoc(fb.getDoc().getDocCode(),form.getStudent().getNumber(),form.getStudent().getAcademicYear()));

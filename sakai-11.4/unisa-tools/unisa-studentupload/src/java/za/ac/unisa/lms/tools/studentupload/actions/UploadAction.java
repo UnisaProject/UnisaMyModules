@@ -1198,7 +1198,7 @@ public class UploadAction extends DispatchAction {
 		form.getMap().clear();
 		SavedDocDao savedDocDao = new SavedDocDao();
 		//log.debug("StudentRegistrationForm - reLoad - Reloading uploaded docs..");
-		savedDocDao.getAllNonRequiredDocInfo(form.getDesc(), form.getMap(), form.getStudent().getNumber(),form.getStudent().getAcademicYear(),form.getStudent().isStuExist());
+		savedDocDao.getAllNonRequiredDocInfo(form.getDesc(), form.getMap(), form.getStudent().getNumber(),form.getStudent().getAcademicYear(),form.getStudent().isStuExist(),form.getStudent().getMatrix());
 		for(FileBean fb : form.getRequiredFileBeans()){
 			//log.debug("StudentRegistrationForm - reLoad - Settigng FileBean Uploaded..");
 			fb.setUploaded(savedDocDao.getSavedDocByDoc(fb.getDoc().getDocCode(),form.getStudent().getNumber(),form.getStudent().getAcademicYear()));

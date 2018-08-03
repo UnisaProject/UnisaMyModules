@@ -174,6 +174,39 @@ public class StudentUploadDAO extends StudentSystemDAO {
 		//log.debug("StudentUploadDAO - validateSTUAPQ - stuapqCheck: " +  stuapqCheck);
 		return stuapqCheck;
 	}
+	
+	/**
+	 * Check if student has a student/reference number
+	 */
+	
+	public String validateNewApplicant(String acaYear, String acaPeriod, String referenceType1 ,String referenceType2, String referenceValue) throws Exception {
+		
+		String newApplicantNr = "";	
+		
+		String query  = "select a.DETAIL as studentNr from stuxml a where  a.mk_academic_year=? and a.mk_academic_period=? and a.reference_type=?" +
+				" and exists (select * from stuxml b where B.MK_ACADEMIC_YEAR=A.MK_ACADEMIC_YEAR" + 
+				" and B.MK_ACADEMIC_PERIOD=A.MK_ACADEMIC_PERIOD" + 
+				" and B.REFERENCE_TYPE=?" + 
+				" and B.MK_STUDENT_NR=A.MK_STUDENT_NR" +
+				" and b.detail=?)";
+		try {
+			//log.debug("StudentUploadDAO - validateSTUAPQ - query="+query+", surname="+surname.toUpperCase()+", firstNames="+firstNames.toUpperCase()+", bDay="+bDay+", acaYear="+acaYear);
+			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
+			List queryList = jdt.queryForList(query, new Object []{acaYear, acaPeriod, referenceType1, referenceType2, referenceValue.toUpperCase()});
+			
+			Iterator i = queryList.iterator();
+			if (i.hasNext()) {
+				ListOrderedMap data = (ListOrderedMap) i.next();
+				//log.debug("StudentUploadDAO - validateNewApplicant - isNumber= " +  data.get("mk_student_nr").toString());
+				newApplicantNr=data.get("studentNr").toString();
+			}
+		} catch (Exception ex) {
+			throw new Exception(
+					"StudentUploadDAO : Error validating STUXML new Applicant / " + ex);
+		}
+		//log.debug("StudentUploadDAO - validateNewApplicant - newApplicantNr: " +  newApplicantNr);
+		return newApplicantNr;
+	}
 
 	/**
 	 * Validate student birthday

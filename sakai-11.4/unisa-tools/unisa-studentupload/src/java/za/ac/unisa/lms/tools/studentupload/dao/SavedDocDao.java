@@ -79,7 +79,7 @@ public class SavedDocDao extends StudentSystemDAO {
 	 * @param acaYear
 	 * @throws Exception
 	 */
-	public void getAllNonRequiredDocInfo(List<String> docDescs,Map<String, List<String>> map, String studentNr, String acaYear, boolean isStuExist) throws Exception{
+	public void getAllNonRequiredDocInfo(List<String> docDescs,Map<String, List<String>> map, String studentNr, String acaYear, boolean isStuExist, String matrix) throws Exception{
 
 		//log.debug("SavedDocDao - Entering getAllNonRequiredDocInfo");
 		StudentUploadDAO dao = new StudentUploadDAO();
@@ -116,31 +116,50 @@ public class SavedDocDao extends StudentSystemDAO {
 						spec2 = selected.getSpec2()==null ||"0".equals(selected.getSpec2()) ? " " :selected.getSpec2();
 					}
 					
-					 query = "select stuxml.reference_type as DocCode, stuxml.detail as DocName, gencod.eng_description as docDescription "
-							+ "	from stuxml "
-							+ "	inner join gencod on stuxml.reference_type = gencod.code " 
-							+ "	where gencod.fk_gencatcode = '208' "
-							+ " and stuxml.reference_value = '2' "
-							+ " and stuxml.mk_student_nr = ? "
-							+ " and stuxml.mk_academic_year = ? "
-							+ "	and gencod.code not in ( "
-							+ "	(select gencod.code "
-							+ "	from qspdoc, gencod "
-							+ "	where qspdoc.document_code = gencod.code "
-							+ "	and gencod.in_use_flag = 'Y' "
-							+ "	and gencod.fk_gencatcode = '208' "
-							+ "	and qspdoc.mk_qual_code = ? "
-							+ "	and qspdoc.mk_spes_code = ?) "
-							+ "	UNION  "
-							+ "	(select gencod.code "
-							+ "	from qspdoc, gencod "
-							+ "	where qspdoc.document_code = gencod.code "
-							+ "	and gencod.in_use_flag = 'Y' "
-							+ "	and gencod.fk_gencatcode = '208' "
-							+ "	and qspdoc.mk_qual_code = ? "
-							+ "	and qspdoc.mk_spes_code = ?) "
-							+ "	)order by docDescription asc";
-					queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, qual1, spec1, qual2, spec2});
+					if (null !=  matrix && "CG".equalsIgnoreCase(matrix)){ //Current Grade 12 only ID
+						//log.debug("DocDao - getDocs - In Matrix");
+						query =  "select stuxml.reference_type as DocCode, stuxml.detail as DocName, gencod.eng_description as docDescription "
+								+ "	from stuxml "
+								+ "	inner join gencod on stuxml.reference_type = gencod.code " 
+								+ "	where gencod.fk_gencatcode = '208' "
+								+ " and stuxml.reference_value = '2' "
+								+ " and stuxml.mk_student_nr = ? "
+								+ " and stuxml.mk_academic_year = ? "
+								+ "	and gencod.code not in ("
+								+ " select distinct code AS docCode"  
+								+ " from gencod " 
+								+ " where fk_gencatcode = '208' " 
+								+ " and in_use_flag = 'Y' " 
+								+ " and code = 'UG01')";
+						//log.debug("DocDao - getDocs - query=" + query);
+						queryList = jdt.queryForList(query, new Object []{studentNr, acaYear});					
+					} else {
+							 query = "select stuxml.reference_type as DocCode, stuxml.detail as DocName, gencod.eng_description as docDescription "
+										+ "	from stuxml "
+										+ "	inner join gencod on stuxml.reference_type = gencod.code " 
+										+ "	where gencod.fk_gencatcode = '208' "
+										+ " and stuxml.reference_value = '2' "
+										+ " and stuxml.mk_student_nr = ? "
+										+ " and stuxml.mk_academic_year = ? "
+										+ "	and gencod.code not in ( "
+										+ "	(select gencod.code "
+										+ "	from qspdoc, gencod "
+										+ "	where qspdoc.document_code = gencod.code "
+										+ "	and gencod.in_use_flag = 'Y' "
+										+ "	and gencod.fk_gencatcode = '208' "
+										+ "	and qspdoc.mk_qual_code = ? "
+										+ "	and qspdoc.mk_spes_code = ?) "
+										+ "	UNION  "
+										+ "	(select gencod.code "
+										+ "	from qspdoc, gencod "
+										+ "	where qspdoc.document_code = gencod.code "
+										+ "	and gencod.in_use_flag = 'Y' "
+										+ "	and gencod.fk_gencatcode = '208' "
+										+ "	and qspdoc.mk_qual_code = ? "
+										+ "	and qspdoc.mk_spes_code = ?) "
+										+ "	)order by docDescription asc";
+								queryList = jdt.queryForList(query, new Object []{studentNr, acaYear, qual1, spec1, qual2, spec2});
+						}
 				}
 				
 			//log.debug("SavedDocDao - getAllNonRequiredDocInfo Query=" + query);
