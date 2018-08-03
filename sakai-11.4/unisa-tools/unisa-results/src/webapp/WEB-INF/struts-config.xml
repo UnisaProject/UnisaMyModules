@@ -42,6 +42,10 @@
         	name="displayDetails" 
          	path="/WEB-INF/jsp/resultdetails.jsp"
           	contextRelative="true" />
+        <forward 
+        	name="error" 
+         	path="/WEB-INF/jsp/errorPage.jsp"
+          	contextRelative="true" />
       </action>
 
   </action-mappings>

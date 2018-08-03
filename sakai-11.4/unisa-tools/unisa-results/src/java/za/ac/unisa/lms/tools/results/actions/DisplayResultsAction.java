@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -60,17 +61,52 @@ public class DisplayResultsAction extends DispatchAction {
 	public ActionForward input(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
+		
 		ResultsForm resultsForm = (ResultsForm) form;
-		if (resultsForm.getExamYear() == null) {
-			ExamUtilities util = new ExamUtilities();
-			resultsForm.setExamYear(new Integer(util.getDefaultExamYear())
-					.toString());
-		}
+		ActionMessages errors = new ActionMessages();		
 		
 		//default system to logged into myUnisa
-		String fromSystem="";
+//		String fromSystem="";
+//	
+//		if (request.getParameter("SYSTEM")==null){
+//			//logged onto myUnisa - called from within myUnisa
+//			fromSystem="";
+//			sessionManager = (SessionManager) ComponentManager.get(SessionManager.class);
+//		    userDirectoryService = (UserDirectoryService) ComponentManager.get(UserDirectoryService.class);
+//			Session currentSession = sessionManager.getCurrentSession();
+//			String userID = currentSession.getUserId();
+//			if (userID != null) {
+//				User user = userDirectoryService.getUser(userID);
+//				if (user.getType().equalsIgnoreCase("student")) {
+//					//resultsForm.setStudentNr(user.getEid());
+//					resultsForm.setStudentUser(true);
+//				}else if (user.getType().equalsIgnoreCase("Instructor")){
+//					resultsForm.setStudentUser(false);
+//					resultsForm.setLecturerUser(true);
+//				}
+//			}else{
+//				resultsForm.setStudentUser(false);
+//				resultsForm.setLecturerUser(false);
+//			}
+//		}else{
+//			//called from outside myUnisa - not logged onto myUnisa
+//			fromSystem=request.getParameter("SYSTEM");
+//		}
+//		
+//		resultsForm.setStaffOnlineUser(false);	
+//		if (fromSystem!=""){
+//			resultsForm.setStudentNr("");
+//			resultsForm.setStudentUser(false);
+//			resultsForm.setLecturerUser(false);
+//		}
+		
+		//default system to logged into myUnisa
+		String fromSystem=request.getParameter("SYSTEM");
 	
-		if (request.getParameter("SYSTEM")==null){
+		resultsForm.setStaffOnlineUser(false);
+		resultsForm.setStudentUser(false);
+		resultsForm.setLecturerUser(false);
+		if (fromSystem==null || fromSystem.equalsIgnoreCase("")){
 			//logged onto myUnisa - called from within myUnisa
 			fromSystem="";
 			sessionManager = (SessionManager) ComponentManager.get(SessionManager.class);
@@ -87,30 +123,60 @@ public class DisplayResultsAction extends DispatchAction {
 					resultsForm.setLecturerUser(true);
 				}
 			}else{
-				resultsForm.setStudentUser(false);
-				resultsForm.setLecturerUser(false);
+//				resultsForm.setStudentUser(false);
+//				resultsForm.setLecturerUser(false);
+				errors.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage("error.coolgenerror","Invalid session, Please login to myUnisa to check your results"));
+				addErrors(request, errors);
+				return mapping.findForward("error");
 			}
 		}else{
 			//called from outside myUnisa - not logged onto myUnisa
-			fromSystem=request.getParameter("SYSTEM");
-		}
-		
-		resultsForm.setStaffOnlineUser(false);	
-		if (fromSystem!=""){
-			resultsForm.setStudentNr("");
-			resultsForm.setStudentUser(false);
-			resultsForm.setLecturerUser(false);
+			if("STF".equalsIgnoreCase(fromSystem)){
+				String novellUserCode = "";
+				Cookie[] mySiteCookies = request.getCookies();
+				if (mySiteCookies != null) {
+					for (int i = 0; i < mySiteCookies.length; i++) {
+						Cookie co = mySiteCookies[i];
+						if ("novelluser".equalsIgnoreCase(co.getName().toString()
+								.trim())) {
+							novellUserCode = co.getValue();
+						}
+					}
+					if ("".equals(novellUserCode)){
+						
+						errors.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage("error.coolgenerror","Valid login could not be determined, you are not authorised to view student results"));
+						addErrors(request, errors);
+						return mapping.findForward("error");
+					}
+					resultsForm.setStaffOnlineUser(true);
+					resultsForm.setStudentNr("");
+				}else{
+					errors.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage("error.coolgenerror","Valid login could not be determined, you are not authorised to view student results"));
+					addErrors(request, errors);
+					return mapping.findForward("error");
+				}
+			}else{
+				errors.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage("error.coolgenerror","Valid login could not be determined, you are not authorised to view student results"));
+				addErrors(request, errors);
+				return mapping.findForward("error");
+			}			
 		}
 				
-		request.setAttribute("fromSystem", "IMU");
-		
-		if("STF".equalsIgnoreCase(request.getParameter("SYSTEM"))){
-			// indicates that request is from staff online
-			resultsForm.setStaffOnlineUser(true);		
-		}
+//		request.setAttribute("fromSystem", "IMU");
+//		
+//		if("STF".equalsIgnoreCase(request.getParameter("SYSTEM"))){
+//			// indicates that request is from staff online
+//			resultsForm.setStaffOnlineUser(true);		
+//		}
 	
-		request.setAttribute("fromSystem", fromSystem);
-
+		request.setAttribute("fromSystem", fromSystem);	
+		
+		if (resultsForm.getExamYear() == null) {
+			ExamUtilities util = new ExamUtilities();
+			resultsForm.setExamYear(new Integer(util.getDefaultExamYear())
+					.toString());
+		}
+		
 		ResultsDAO dao = new ResultsDAO();
 		List examPeriods = dao.getExamPeriods();
 
