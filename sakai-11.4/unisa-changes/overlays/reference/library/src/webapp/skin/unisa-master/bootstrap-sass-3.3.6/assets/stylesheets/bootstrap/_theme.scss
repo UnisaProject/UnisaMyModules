@@ -1,0 +1,3227 @@
+/*!
+ * Bootstrap v3.3.6 (http://getbootstrap.com)
+ * Copyright 2011-2015 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ */
+
+//
+// Load core variables and mixins
+// --------------------------------------------------
+
+@import "variables";
+@import "mixins";
+
+//
+// Alignment
+// --------------------------------------------------
+.vertical-align {
+    vertical-align: middle;
+}
+
+.clearFloat {
+    clear: both;
+}
+
+//
+// Text size
+// --------------------------------------------------
+.text-size-base {
+    font-size: $font-size-base;
+}
+.text-size-large {
+    font-size: $font-size-large;
+}
+.text-size-small {
+    font-size: $font-size-small;
+}
+
+//
+// Buttons
+// --------------------------------------------------
+
+// Common styles
+.btn-default,
+.btn-primary,
+.btn-success,
+.btn-info,
+.btn-warning,
+.btn-danger {
+  text-shadow: 0 -1px 0 rgba(0,0,0,.2);
+  $shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 1px 1px rgba(0,0,0,.075);
+  @include box-shadow($shadow);
+
+  // Reset the shadow
+  &:active,
+  &.active {
+    @include box-shadow(inset 0 3px 5px rgba(0,0,0,.125));
+  }
+
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] & {
+    @include box-shadow(none);
+  }
+
+  .badge {
+    text-shadow: none;
+  }
+}
+
+// Mixin for generating new styles
+@mixin btn-styles($btn-color: #555) {
+  @include gradient-vertical($start-color: $btn-color, $end-color: darken($btn-color, 12%));
+  @include reset-filter; // Disable gradients for IE9 because filter bleeds through rounded corners; see https://github.com/twbs/bootstrap/issues/10620
+  background-repeat: repeat-x;
+  border-color: darken($btn-color, 14%);
+
+  &:hover,
+  &:focus  {
+    background-color: darken($btn-color, 12%);
+    background-position: 0 -15px;
+  }
+
+  &:active,
+  &.active {
+    background-color: darken($btn-color, 12%);
+    border-color: darken($btn-color, 14%);
+  }
+
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] & {
+    &,
+    &:hover,
+    &:focus,
+    &.focus,
+    &:active,
+    &.active {
+      background-color: darken($btn-color, 12%);
+      background-image: none;
+    }
+  }
+}
+
+// Common styles
+.btn {
+  // Remove the gradient for the pressed/active state
+  &:active,
+  &.active {
+    background-image: none;
+  }
+}
+
+// Apply the mixin to the buttons
+.btn-default { @include btn-styles($btn-default-bg); text-shadow: 0 1px 0 #fff; border-color: #ccc; }
+.btn-primary { @include btn-styles($btn-primary-bg); }
+.btn-success { @include btn-styles($btn-success-bg); }
+.btn-info    { @include btn-styles($btn-info-bg); }
+.btn-warning { @include btn-styles($btn-warning-bg); }
+.btn-danger  { @include btn-styles($btn-danger-bg); }
+
+//
+// CI branding
+// --------------------------------------------------
+.ci-white-text {
+	color: $white;
+}
+.ci-black-text {
+	color: $black;
+}
+.ci-red-text {
+	color: $brand-red;
+}
+.ci-blue-text {
+	color: $brand-blue;
+}
+.ci-yellow-text {
+	color: $brand-yellow;
+}
+.ci-purple-text {
+	color: $brand-purple;
+}
+.ci-gray-darker-text {
+	color: $gray-darker;
+}
+.ci-gray-dark-text {
+	color: $gray-dark;
+}
+.ci-gray-text {
+	color: $gray;
+}
+.ci-gray-light-text {
+	color: $gray-light;
+}
+.ci-gray-lighter-text {
+	color: $gray-lighter;
+}
+.ci-red-bg {
+	background-color: $brand-red;
+}
+.ci-blue-bg {
+	background-color: $brand-blue;
+}
+.ci-yellow-bg {
+	background-color: $brand-yellow;
+}
+.ci-purple-bg {
+	background-color: $brand-purple;
+}
+.ci-purple-library-bg {
+	background-color: $brand-purple-library;
+}
+.ci-brown-light-bg {
+	background-color: $brand-brown-light;
+}
+.ci-brown-lighter-bg {
+	background-color: $brand-brown-lighter;
+}
+.ci-black-bg {
+	background-color: $black;
+}
+.ci-gray-darker-bg {
+	background-color: $gray-darker;
+}
+.ci-gray-dark-bg {
+	background-color: $gray-dark;
+}
+.ci-gray-bg {
+	background-color: $gray;
+}
+.ci-gray-light-bg {
+	background-color: $gray-light;
+}
+.ci-gray-lighter-bg {
+	background-color: $gray-lighter;
+}
+.btn-ci-red-gradient { 
+  @include button-gradient($white, $brand-red, $btn-text-shadow-min, $gray-dark);
+}
+.btn-ci-blue-gradient {
+  @include button-gradient($white, $brand-blue, $btn-text-shadow-min, $gray-dark);
+}
+.btn-ci-yellow-gradient {
+  @include button-gradient($white, $brand-yellow, $btn-text-shadow-min, $gray-dark);
+}
+.btn-ci-purple-gradient {
+  @include button-gradient($white, $brand-purple, $btn-text-shadow-min, $gray-dark);
+}
+.btn-ci-gray-darker-gradient {
+  @include button-gradient($white, $gray-darker, $btn-text-shadow-min, $gray-base);
+}
+.btn-ci-gray-dark-gradient {
+  @include button-gradient($white, $gray-dark, $btn-text-shadow-min, $gray-darker);
+}
+.btn-ci-gray-gradient {
+  @include button-gradient($white, $gray, $btn-text-shadow-min, $gray-dark);
+}
+.btn-ci-gray-light-gradient {
+  @include button-gradient($white, $gray-light, $btn-text-shadow-min, $gray);
+}
+.btn-ci-gray-lighter-gradient {
+  @include button-gradient($black, $gray-lighter, $btn-text-shadow-min, $gray-light);
+}
+.btn-ci-red-variant {
+  @include button-variant($white, $brand-red, $brand-red);
+}
+.btn-ci-blue-variant {
+  @include button-variant($white, $brand-blue, $brand-blue);
+}
+.btn-ci-yellow-variant {
+  @include button-variant($white, $brand-yellow, $brand-yellow);
+}
+.btn-ci-purple-variant {
+  @include button-variant($white, $brand-purple, $brand-purple);
+}
+.btn-ci-gray-darker-variant {
+  @include button-variant($white, $gray-darker, $gray-darker);
+}
+.btn-ci-gray-dark-variant {
+  @include button-variant($white, $gray-dark, $gray-dark);
+}
+.btn-ci-gray-variant {
+  @include button-variant($white, $gray, $gray);
+}
+.btn-ci-gray-light-variant {
+  @include button-variant($white, $gray-light, $gray-light);
+}
+.btn-ci-gray-lighter-variant {
+  @include button-variant($black, $gray-lighter, $gray-lighter);
+}
+.btn-ci-red-variant-flames {
+  @include button-variant-flames($white, $brand-red, $brand-red);
+}
+.btn-ci-blue-variant-flames {
+  @include button-variant-flames($white, $brand-blue, $brand-blue);
+}
+.btn-ci-yellow-variant-flames {
+  @include button-variant-flames($white, $brand-yellow, $brand-yellow);
+}
+.btn-ci-purple-variant-flames {
+  @include button-variant-flames($white, $brand-purple, $brand-yellow);
+}
+.btn-ci-gray-darker-variant-flames {
+  @include button-variant-flames($white, $gray-darker, $gray-darker);
+}
+.btn-ci-gray-dark-variant-flames {
+  @include button-variant-flames($white, $gray-dark, $gray-dark);
+}
+.btn-ci-gray-variant-flames {
+  @include button-variant-flames($white, $gray, $gray);
+}
+.btn-ci-gray-light-variant-flames {
+  @include button-variant-flames($white, $gray-light, $gray-light);
+}
+.btn-ci-gray-lighter-variant-flames {
+  @include button-variant-flames($black, $gray-lighter, $gray-lighter);
+}
+
+//
+// College branding
+// --------------------------------------------------
+.cas-text {
+	color: $brand-cas;
+}
+.caes-text {
+	color: $brand-caes;
+}
+.cems-text {
+	color: $brand-cems;
+}
+.cedu-text {
+	color: $brand-cedu;
+}
+.chs-text {
+	color: $brand-chs;
+}
+.claw-text {
+	color: $brand-claw;
+}
+.cset-text {
+	color: $brand-cset;
+}
+.gs-text {
+  	color: $brand-gs;
+}
+.bl-text {
+  	color: $brand-bl;
+}
+.cas-bg {
+	background-color: $brand-cas;
+}
+.caes-bg {
+	background-color: $brand-caes;
+}
+.cems-bg {
+	background-color: $brand-cems;
+}
+.cedu-bg {
+	background-color: $brand-cedu;
+}
+.chs-bg {
+	background-color: $brand-chs;
+}
+.claw-bg {
+	background-color: $brand-claw;
+}
+.cset-bg {
+	background-color: $brand-cset;
+}
+.gs-bg {
+  	background-color: $brand-gs;
+}
+.bl-bg {
+  	background-color: $brand-bl;
+}
+.btn-cas-gradient {
+  @include button-gradient($white, $brand-cas, $btn-text-shadow-min, $gray-dark);
+}
+.btn-caes-gradient {
+  @include button-gradient($white, $brand-caes, $btn-text-shadow-min, $gray-dark);
+}
+.btn-cedu-gradient {
+  @include button-gradient($white, $brand-cedu, $btn-text-shadow-min, $gray-dark);
+}
+.btn-cems-gradient {
+  @include button-gradient($white, $brand-cems, $btn-text-shadow-min, $gray-dark);
+}
+.btn-chs-gradient {
+  @include button-gradient($white, $brand-chs, $btn-text-shadow-min, $gray-dark);
+}
+.btn-claw-gradient {
+  @include button-gradient($white, $brand-claw, $btn-text-shadow-min, $gray-dark);
+}
+.btn-cset-gradient {
+  @include button-gradient($white, $brand-cset, $btn-text-shadow-min, $gray-dark);
+}
+.btn-gs-gradient {
+  @include button-gradient($white, $brand-gs, $btn-text-shadow-min, $gray-dark);
+}
+.btn-bl-gradient {
+  @include button-gradient($white, $brand-bl, $btn-text-shadow-min, $gray-dark);
+}
+.btn-cas-variant {
+  @include button-variant($white, $brand-cas, $brand-cas);
+}
+.btn-caes-variant {
+  @include button-variant($white, $brand-caes, $brand-caes);
+}
+.btn-cedu-variant {
+  @include button-variant($white, $brand-cedu, $brand-cedu);
+}
+.btn-cems-variant {
+  @include button-variant($white, $brand-cems, $brand-cems);
+}
+.btn-chs-variant {
+  @include button-variant($white, $brand-chs, $brand-chs);
+}
+.btn-claw-variant {
+  @include button-variant($white, $brand-claw, $brand-claw);
+}
+.btn-cset-variant {
+  @include button-variant($white, $brand-cset, $brand-cset);
+}
+.btn-gs-variant {
+  @include button-variant($white, $brand-gs, $brand-gs);
+}
+.btn-bl-variant {
+  @include button-variant($white, $brand-bl, $brand-bl);
+}
+
+
+//
+// Images
+// --------------------------------------------------
+
+.thumbnail,
+.img-thumbnail {
+  @include box-shadow(0 1px 2px rgba(0,0,0,.075));
+}
+
+.pageBanner {
+    margin-bottom: $line-height-computed;
+}
+
+.img-align-left {
+    margin-right: $line-height-computed;
+    margin-bottom: $line-height-computed;
+    float:left;
+}
+
+.img-align-right {
+    margin-left: $line-height-computed;
+    margin-bottom: $line-height-computed;
+    float:right;
+}
+
+.img-align-center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: $line-height-computed;
+}
+
+img {    
+    height: auto;
+    max-width: 100%;
+}
+
+.captionImage.pull-left {
+    margin-bottom: floor(($line-height-computed/2));
+    margin-right: $line-height-computed;
+}
+
+.captionImage.pull-right {
+    margin-bottom: floor(($line-height-computed/2));
+    margin-left: $line-height-computed;
+}
+
+.captionImage > img {
+    margin-top: floor(($line-height-computed/3));
+}
+
+.captionImage p {
+    margin: 0;
+}
+
+
+//
+// Dropdowns
+// --------------------------------------------------
+
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus {
+  @include gradient-vertical($start-color: $dropdown-link-hover-bg, $end-color: darken($dropdown-link-hover-bg, 5%)); 
+  background-color: darken($dropdown-link-hover-bg, 5%);
+}
+.dropdown-menu > .active > a,
+.dropdown-menu > .active > a:hover,
+.dropdown-menu > .active > a:focus {
+  @include gradient-vertical($start-color: $dropdown-link-active-bg, $end-color: darken($dropdown-link-active-bg, 5%));
+  background-color: darken($dropdown-link-active-bg, 5%);
+}
+
+
+//
+// Navbar
+// --------------------------------------------------
+
+// Default navbar
+.navbar-default {
+  @include gradient-vertical($start-color: lighten($navbar-default-bg, 10%), $end-color: $navbar-default-bg);
+  @include reset-filter(); // Remove gradient in IE<10 to fix bug where dropdowns don't get triggered
+  border-radius: $navbar-border-radius;
+  $shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 1px 5px rgba(0,0,0,.075);
+  @include box-shadow($shadow);
+
+  .navbar-nav > .open > a,
+  .navbar-nav > .active > a {
+    @include gradient-vertical($start-color: darken($navbar-default-link-active-bg, 5%), $end-color: darken($navbar-default-link-active-bg, 2%));
+    @include box-shadow(inset 0 3px 9px rgba(0,0,0,.075));
+  }
+}
+.navbar-brand,
+.navbar-nav > li > a {
+  text-shadow: 0 1px 0 rgba(255,255,255,.25);
+}
+
+// Inverted navbar
+.navbar-inverse {
+  @include gradient-vertical($start-color: lighten($navbar-inverse-bg, 10%), $end-color: $navbar-inverse-bg);
+  @include reset-filter(); // Remove gradient in IE<10 to fix bug where dropdowns don't get triggered; see https://github.com/twbs/bootstrap/issues/10257
+  border-radius: $navbar-border-radius;
+  .navbar-nav > .open > a,
+  .navbar-nav > .active > a {
+    @include gradient-vertical($start-color: $navbar-inverse-link-active-bg, $end-color: lighten($navbar-inverse-link-active-bg, 2.5%));
+    @include box-shadow(inset 0 3px 9px rgba(0,0,0,.25));
+  }
+
+  .navbar-brand,
+  .navbar-nav > li > a {
+    text-shadow: 0 -1px 0 rgba(0,0,0,.25);
+  }
+}
+
+// Undo rounded corners in static and fixed navbars
+.navbar-static-top,
+.navbar-fixed-top,
+.navbar-fixed-bottom {
+  border-radius: 0;
+}
+
+// Fix active state of dropdown items in collapsed mode
+@media (max-width: $grid-float-breakpoint-max) {
+  .navbar .navbar-nav .open .dropdown-menu > .active > a {
+    &,
+    &:hover,
+    &:focus {
+      color: #fff;
+      @include gradient-vertical($start-color: $dropdown-link-active-bg, $end-color: darken($dropdown-link-active-bg, 5%));
+    }
+  }
+}
+
+// Corporate website navbar
+.navbar-cw {
+  background-color: $navbar-cw-bg;
+  border-color: $navbar-cw-color;
+  border-radius: $navbar-border-radius;
+
+  .navbar-brand {
+    color: $navbar-cw-brand-color;
+    &:hover,
+    &:focus {
+      color: $navbar-cw-brand-hover-color;
+      background-color: $navbar-cw-brand-hover-bg;
+    }
+  }
+
+  .navbar-header {
+    > a {
+	  text-shadow: none;
+	}
+  }
+
+  .navbar-text {
+    color: $navbar-cw-color;
+  }
+
+  .navbar-nav {
+    > li > a {
+      color: $navbar-cw-link-color;
+	  text-shadow: none;
+
+      &:hover,
+      &:focus {
+        color: $navbar-cw-link-hover-color;
+        background-color: $navbar-cw-link-hover-bg;
+      }
+    }
+    > .active > a {
+      &,
+      &:hover,
+      &:focus {
+        color: $navbar-cw-link-active-color;
+        background-color: $navbar-cw-link-active-bg;
+      }
+    }
+    > .disabled > a {
+      &,
+      &:hover,
+      &:focus {
+        color: $navbar-cw-link-disabled-color;
+        background-color: $navbar-cw-link-disabled-bg;
+      }
+    }
+  }
+
+  .navbar-toggle {
+    border-color: $navbar-cw-toggle-border-color;
+    &:hover,
+    &:focus {
+      background-color: $navbar-cw-toggle-hover-bg;
+    }
+    .icon-bar {
+      background-color: $navbar-cw-toggle-icon-bar-bg;
+    }
+  }
+
+  .navbar-collapse,
+  .navbar-form {
+    border-color: $navbar-cw-border;
+  }
+
+  // Dropdown menu items
+  .navbar-nav {
+    // Remove background color from open dropdown
+    > .open > a {
+      &,
+      &:hover,
+      &:focus {
+        background-color: $navbar-cw-link-active-bg;
+        color: $navbar-cw-link-active-color;
+      }
+    }
+
+    @media (max-width: $grid-float-breakpoint-max) {
+      // Dropdowns get custom display when collapsed
+      .open .dropdown-menu {
+        > li > a {
+          color: $navbar-cw-link-color;
+          &:hover,
+          &:focus {
+            color: $navbar-cw-link-hover-color;
+            background-color: $navbar-cw-link-hover-bg;
+          }
+        }
+        > .active > a {
+          &,
+          &:hover,
+          &:focus {
+            color: $navbar-cw-link-active-color;
+            background-color: $navbar-cw-link-active-bg;
+          }
+        }
+        > .disabled > a {
+          &,
+          &:hover,
+          &:focus {
+            color: $navbar-cw-link-disabled-color;
+            background-color: $navbar-cw-link-disabled-bg;
+          }
+        }
+      }
+    }
+  }
+
+//
+  // Links in navbars
+  // Add a class to ensure links outside the navbar nav are colored correctly.
+  // --------------------------------------------------
+
+  .navbar-link {
+    color: $navbar-cw-link-color;
+    &:hover {
+      color: $navbar-cw-link-hover-color;
+    }
+  }
+
+  .btn-link {
+    color: $navbar-cw-link-color;
+    &:hover,
+    &:focus {
+      color: $navbar-cw-link-hover-color;
+    }
+    &[disabled],
+    fieldset[disabled] & {
+      &:hover,
+      &:focus {
+        color: $navbar-cw-link-disabled-color;
+      }
+    }
+  }
+}
+  
+  
+// myUnisa website navbar
+.navbar-myunisa {
+  background-color: $navbar-myunisa-bg;
+  border-color: $navbar-myunisa-color;
+  border-radius: $navbar-border-radius;
+
+  .navbar-brand {
+    color: $navbar-myunisa-brand-color;
+    &:hover,
+    &:focus {
+      color: $navbar-myunisa-brand-hover-color;
+      background-color: $navbar-myunisa-brand-hover-bg;
+    }
+  }
+
+  .navbar-header {
+    > a {
+	  text-shadow: none;
+	}
+  }
+
+  .navbar-text {
+    color: $navbar-myunisa-color;
+  }
+
+  .navbar-nav {
+    > li > a {
+      color: $navbar-myunisa-link-color;
+	  text-shadow: none;
+
+      &:hover,
+      &:focus {
+        color: $navbar-myunisa-link-hover-color;
+        background-color: $navbar-myunisa-link-hover-bg;
+      }
+    }
+    > .active > a {
+      &,
+      &:hover,
+      &:focus {
+        color: $navbar-myunisa-link-active-color;
+        background-color: $navbar-myunisa-link-active-bg;
+      }
+    }
+    > .disabled > a {
+      &,
+      &:hover,
+      &:focus {
+        color: $navbar-myunisa-link-disabled-color;
+        background-color: $navbar-myunisa-link-disabled-bg;
+      }
+    }
+  }
+
+  .navbar-toggle {
+    border-color: $navbar-myunisa-toggle-border-color;
+    &:hover,
+    &:focus {
+      background-color: $navbar-myunisa-toggle-hover-bg;
+    }
+    .icon-bar {
+      background-color: $navbar-myunisa-toggle-icon-bar-bg;
+    }
+  }
+
+  .navbar-collapse,
+  .navbar-form {
+    border-color: $navbar-myunisa-border;
+  }
+
+  // Dropdown menu items
+  .navbar-nav {
+    // Remove background color from open dropdown
+    > .open > a {
+      &,
+      &:hover,
+      &:focus {
+        background-color: $navbar-myunisa-link-active-bg;
+        color: $navbar-myunisa-link-active-color;
+      }
+    }
+
+    @media (max-width: $grid-float-breakpoint-max) {
+      // Dropdowns get custom display when collapsed
+      .open .dropdown-menu {
+        > li > a {
+          color: $navbar-myunisa-link-color;
+          &:hover,
+          &:focus {
+            color: $navbar-myunisa-link-hover-color;
+            background-color: $navbar-myunisa-link-hover-bg;
+          }
+        }
+        > .active > a {
+          &,
+          &:hover,
+          &:focus {
+            color: $navbar-myunisa-link-active-color;
+            background-color: $navbar-myunisa-link-active-bg;
+          }
+        }
+        > .disabled > a {
+          &,
+          &:hover,
+          &:focus {
+            color: $navbar-myunisa-link-disabled-color;
+            background-color: $navbar-myunisa-link-disabled-bg;
+          }
+        }
+      }
+    }
+  }
+
+//
+  // Links in navbars
+  // Add a class to ensure links outside the navbar nav are colored correctly.
+  // --------------------------------------------------
+
+  .navbar-link {
+    color: $navbar-myunisa-link-color;
+    &:hover {
+      color: $navbar-myunisa-link-hover-color;
+    }
+  }
+
+  .btn-link {
+    color: $navbar-myunisa-link-color;
+    &:hover,
+    &:focus {
+      color: $navbar-myunisa-link-hover-color;
+    }
+    &[disabled],
+    fieldset[disabled] & {
+      &:hover,
+      &:focus {
+        color: $navbar-myunisa-link-disabled-color;
+      }
+    }
+  }
+}
+  
+  
+// SBL website navbar
+.navbar-sbl {
+  background-color: $navbar-sbl-bg;
+  border-color: $navbar-sbl-color;
+  border-radius: $navbar-border-radius;
+
+  .navbar-brand {
+    color: $navbar-sbl-brand-color;
+    &:hover,
+    &:focus {
+      color: $navbar-sbl-brand-hover-color;
+      background-color: $navbar-sbl-brand-hover-bg;
+    }
+  }
+
+  .navbar-header {
+    > a {
+	  text-shadow: none;
+	}
+  }
+
+  .navbar-text {
+    color: $navbar-sbl-color;
+  }
+
+  .navbar-nav {
+    > li > a {
+      color: $navbar-sbl-link-color;
+	  text-shadow: none;
+
+      &:hover,
+      &:focus {
+        color: $navbar-sbl-link-hover-color;
+        background-color: $navbar-sbl-link-hover-bg;
+      }
+    }
+    > .active > a {
+      &,
+      &:hover,
+      &:focus {
+        color: $navbar-sbl-link-active-color;
+        background-color: $navbar-sbl-link-active-bg;
+      }
+    }
+    > .disabled > a {
+      &,
+      &:hover,
+      &:focus {
+        color: $navbar-sbl-link-disabled-color;
+        background-color: $navbar-sbl-link-disabled-bg;
+      }
+    }
+  }
+
+  .navbar-toggle {
+    border-color: $navbar-sbl-toggle-border-color;
+    &:hover,
+    &:focus {
+      background-color: $navbar-sbl-toggle-hover-bg;
+    }
+    .icon-bar {
+      background-color: $navbar-sbl-toggle-icon-bar-bg;
+    }
+  }
+
+  .navbar-collapse,
+  .navbar-form {
+    border-color: $navbar-sbl-border;
+  }
+
+  // Dropdown menu items
+  .navbar-nav {
+    // Remove background color from open dropdown
+    > .open > a {
+      &,
+      &:hover,
+      &:focus {
+        background-color: $navbar-sbl-link-active-bg;
+        color: $navbar-sbl-link-active-color;
+      }
+    }
+
+    @media (max-width: $grid-float-breakpoint-max) {
+      // Dropdowns get custom display when collapsed
+      .open .dropdown-menu {
+        > li > a {
+          color: $navbar-sbl-link-color;
+          &:hover,
+          &:focus {
+            color: $navbar-sbl-link-hover-color;
+            background-color: $navbar-sbl-link-hover-bg;
+          }
+        }
+        > .active > a {
+          &,
+          &:hover,
+          &:focus {
+            color: $navbar-sbl-link-active-color;
+            background-color: $navbar-sbl-link-active-bg;
+          }
+        }
+        > .disabled > a {
+          &,
+          &:hover,
+          &:focus {
+            color: $navbar-sbl-link-disabled-color;
+            background-color: $navbar-sbl-link-disabled-bg;
+          }
+        }
+      }
+    }
+  }
+
+//
+  // Links in navbars
+  // Add a class to ensure links outside the navbar nav are colored correctly.
+  // --------------------------------------------------
+
+  .navbar-link {
+    color: $navbar-sbl-link-color;
+    &:hover {
+      color: $navbar-sbl-link-hover-color;
+    }
+  }
+
+  .btn-link {
+    color: $navbar-sbl-link-color;
+    &:hover,
+    &:focus {
+      color: $navbar-sbl-link-hover-color;
+    }
+    &[disabled],
+    fieldset[disabled] & {
+      &:hover,
+      &:focus {
+        color: $navbar-sbl-link-disabled-color;
+      }
+    }
+  }
+}
+
+
+//
+// Alerts
+// --------------------------------------------------
+
+// Common styles
+.alert {
+  text-shadow: 0 1px 0 rgba(255,255,255,.2);
+  $shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 2px rgba(0,0,0,.05);
+  @include box-shadow($shadow);
+}
+
+// Mixin for generating new styles
+@mixin alert-styles($color){
+  @include gradient-vertical($start-color: $color, $end-color: darken($color, 7.5%));
+  border-color: darken($color, 15%);
+}
+
+// Apply the mixin to the alerts
+.alert-success    { @include alert-styles($alert-success-bg); }
+.alert-info       { @include alert-styles($alert-info-bg); }
+.alert-warning    { @include alert-styles($alert-warning-bg); }
+.alert-danger     { @include alert-styles($alert-danger-bg); }
+
+
+//
+// Progress bars
+// --------------------------------------------------
+
+// Give the progress background some depth
+.progress {
+  @include gradient-vertical($start-color: darken($progress-bg, 4%), $end-color: $progress-bg)
+}
+
+// Mixin for generating new styles
+@mixin progress-bar-styles($color){
+  @include gradient-vertical($start-color: $color, $end-color: darken($color, 10%));
+}
+
+// Apply the mixin to the progress bars
+.progress-bar            { @include progress-bar-styles($progress-bar-bg); }
+.progress-bar-success    { @include progress-bar-styles($progress-bar-success-bg); }
+.progress-bar-info       { @include progress-bar-styles($progress-bar-info-bg); }
+.progress-bar-warning    { @include progress-bar-styles($progress-bar-warning-bg); }
+.progress-bar-danger     { @include progress-bar-styles($progress-bar-danger-bg); }
+
+// Reset the striped class because our mixins don't do multiple gradients and
+// the above custom styles override the new `.progress-bar-striped` in v3.2.0.
+.progress-bar-striped {
+  @include gradient-striped();
+}
+
+
+//
+// List groups
+// --------------------------------------------------
+
+.list-group {
+  border-radius: $border-radius-base;
+  @include box-shadow(0 1px 2px rgba(0,0,0,.075));
+}
+.list-group-item.active,
+.list-group-item.active:hover,
+.list-group-item.active:focus {
+  text-shadow: 0 -1px 0 darken($list-group-active-bg, 10%);
+  @include gradient-vertical($start-color: $list-group-active-bg, $end-color: darken($list-group-active-bg, 7.5%));
+  border-color: darken($list-group-active-border, 7.5%);
+
+  .badge {
+    text-shadow: none;
+  }
+}
+
+
+//
+// Panels
+// --------------------------------------------------
+
+// Common styles
+.panel {
+  @include box-shadow(0 1px 2px rgba(0,0,0,.05));
+}
+
+// Mixin for generating new styles
+@mixin panel-heading-styles($color){
+  @include gradient-vertical($start-color: $color, $end-color: darken($color, 5%));
+}
+
+// Apply the mixin to the panel headings only
+.panel-default > .panel-heading   { @include panel-heading-styles($panel-default-heading-bg); }
+.panel-primary > .panel-heading   { @include panel-heading-styles($panel-primary-heading-bg); }
+.panel-success > .panel-heading   { @include panel-heading-styles($panel-success-heading-bg); }
+.panel-info > .panel-heading      { @include panel-heading-styles($panel-info-heading-bg); }
+.panel-warning > .panel-heading   { @include panel-heading-styles($panel-warning-heading-bg); }
+.panel-danger > .panel-heading    { @include panel-heading-styles($panel-danger-heading-bg); }
+
+// Additional styles
+.panel-myUnisa {
+  @include panel-variant($panel-default-border, $white, $brand-yellow, $panel-default-border);
+}
+
+//Change cursor for item that isn't a link but a div
+div.list-group-item {
+    cursor: text !important;
+}
+
+//collapsable panel body
+
+.panel-collapsible .panel-heading {
+    cursor: pointer;
+}
+
+.panel.panel-collapsible .panel-heading.collapsed::before {
+    content: "\e114";
+    float: right;
+    font-family: "Glyphicons Halflings";
+}
+
+.panel.panel-collapsible .panel-heading:before {
+    content: "\e113";
+    float: right;
+    font-family: "Glyphicons Halflings";
+}
+.panel.panel-collapsible .panel-heading.collapsed::hover {
+    cursor: hand; 
+    cursor: pointer;
+}
+
+.panel.panel-collapsible .panel-heading:hover {
+    cursor: hand; 
+    cursor: pointer;
+}
+
+
+//
+// Wells
+// --------------------------------------------------
+
+.well {
+  @include gradient-vertical($start-color: darken($well-bg, 5%), $end-color: $well-bg);
+  border-color: darken($well-bg, 10%);
+  $shadow: inset 0 1px 3px rgba(0,0,0,.05), 0 1px 0 rgba(255,255,255,.1);
+  @include box-shadow($shadow);
+}
+
+//
+// Remove row padding
+// --------------------------------------------------
+
+.noRowPaddingLeft {
+    padding-left: 0px !important;
+}
+.noRowPaddingRight {
+    padding-right: 0px !important;
+}
+
+//
+//Social icons
+// --------------------------------------------------
+
+.facebook {
+    background-image:url(https://staff.unisa.ac.za/ecm/dev/CW%20responsive/images/facebook_icon.png);
+  background-repeat:no-repeat no-repeat;
+  font-size:36px;
+  margin-left:14px;
+}
+.twitter {
+  background-image:url(https://staff.unisa.ac.za/ecm/dev/CW%20responsive/images/twitter_icon.png);
+  background-repeat:no-repeat no-repeat;
+  font-size:36px;
+  margin-left:13px;
+}
+.youtube {
+  background-image:url(https://staff.unisa.ac.za/ecm/dev/CW%20responsive/images/youtube_icon.png);
+  background-repeat:no-repeat no-repeat;
+  font-size:36px;
+  margin-left:13px;
+}
+
+//
+//list-item-group-collapse-expand-glyphicons
+// --------------------------------------------------
+
+.panel.list-group .list-group-item.collapsed::after {
+    content: "\e114";
+    float: right;
+    font-family: "Glyphicons Halflings";
+}
+
+.panel.list-group .list-group-item:after {
+    content: "\e113";
+    float: right;
+    font-family: "Glyphicons Halflings";
+}
+.panel.list-group .list-group-item.collapsed::hover {
+    cursor: hand; 
+    cursor: pointer;
+}
+
+.panel.list-group .list-group-item:hover {
+    cursor: hand; 
+    cursor: pointer;
+}
+
+.panel.list-group .list-group-item.small::after {
+    content: "";
+    float: right;
+    font-family: "Glyphicons Halflings";
+}
+
+//
+//Tables
+// --------------------------------------------------
+
+th {
+    font-weight: bold;
+}
+
+//Topic List pages (Sub-channel lists)
+.topicDetails {
+    margin-top: $line-height-computed;
+}
+
+.bottom-devider {
+    border-bottom: 2px solid grey;
+    padding-bottom: $line-height-computed;
+    margin-bottom: $line-height-computed;
+}
+
+.bottom-margin {
+    margin-bottom: $line-height-computed;
+}
+
+.middle-column {
+    margin-right: 15px;
+    margin-left: -15px;
+}
+
+//
+//Lists
+// --------------------------------------------------
+
+ul, ol {
+    padding-left:0px;
+}
+
+ul > li { 
+   list-style-type: disc; 
+   list-style-position: outside; 
+   margin-left:$line-height-computed;
+   padding-left:floor($line-height-computed/2);
+}
+
+ol > li { 
+   list-style-type: inherit; 
+   list-style-position: outside; 
+   margin-left:$line-height-computed;
+   padding-left:floor($line-height-computed/2);
+}
+
+ul ul > li, ol ul > li { 
+   list-style-type: circle; 
+   list-style-position: inside; 
+   //margin-left: $line-height-computed; 
+}
+
+ol ol > li, ul ol > li { 
+   list-style-type: lower-latin; 
+   list-style-position: inside; 
+   //margin-left: $line-height-computed; 
+}
+
+ul.gallery-image > li {
+   list-style-type: none; 
+   list-style-position: outside; 
+   margin-left: 0px;
+}
+
+ul.gallery-image > li > img {
+    cursor: pointer;
+} 
+
+.breadcrumb > li {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+.dropdown-menu > li {
+    margin-left: 0 !important;
+    list-style: none;
+    padding-left: 0px;
+}
+
+.navbar-nav > li {
+    margin-left: 0 !important;
+}
+
+.carousel-indicators > li {
+    margin-left: 0 !important;
+}
+
+.list-group > li {
+    margin-left: 0 !important;
+}
+
+.panel-body ul {
+//padding-left: 20px !important; 
+}
+
+//
+//Homepage specific styles
+// --------------------------------------------------
+#billboard-carousel .carousel-indicators {
+    bottom: 0px;
+}
+.carousel-control-cw-homepage-billboard {
+  position: absolute;
+  top: 45%;
+  left: 0;
+  width: floor(($carousel-control-width*0.5));
+  @include opacity($carousel-control-opacity);
+  font-size: floor(($line-height-computed*1.5));
+  color: $carousel-control-color;
+  text-align: center;
+  text-shadow: $carousel-text-shadow;
+  // We can't have this transition here because WebKit cancels the carousel
+  // animation if you trip this while in the middle of another animation.
+
+  // Set gradients for backgrounds
+  &.left {
+    //#gradient > @include horizontal($start-color: rgba(0,0,0,.5); $end-color: rgba(0,0,0,.0001));
+  }
+  &.right {
+    left: auto;
+    right: 0;
+    //#gradient > @include horizontal($start-color: rgba(0,0,0,.0001); $end-color: rgba(0,0,0,.5));
+  }
+
+  // Hover/focus state
+  &:hover,
+  &:focus {
+    outline: 0;
+    color: $carousel-control-color;
+    text-decoration: none;
+    @include opacity(.9);
+  }
+
+  // Toggles
+  .icon-prev,
+  .icon-next,
+  .glyphicon-chevron-left,
+  .glyphicon-chevron-right {
+    position: absolute;
+    top: 50%;
+    z-index: 5;
+    display: inline-block;
+  }
+  .icon-prev,
+  .glyphicon-chevron-left {
+    left: 50%;
+    margin-left: -10px;
+  }
+  .icon-next,
+  .glyphicon-chevron-right {
+    right: 50%;
+    margin-right: -10px;
+  }
+  .icon-prev,
+  .icon-next {
+    width:  20px;
+    height: 20px;
+    margin-top: -10px;
+    line-height: 1;
+    font-family: serif;
+  }
+
+
+  .icon-prev {
+    &:before {
+      content: '\2039';// SINGLE LEFT-POINTING ANGLE QUOTATION MARK (U+2039)
+    }
+  }
+  .icon-next {
+    &:before {
+      content: '\203a';// SINGLE RIGHT-POINTING ANGLE QUOTATION MARK (U+203A)
+    }
+  }
+}
+#news-carousel .carousel-indicators {
+    bottom: floor(($line-height-computed*2.5));
+}
+#news-carousel .carousel-inner .item div {
+    min-height: floor(($line-height-computed*2.5));
+    padding: floor(($line-height-computed/4)) floor(($line-height-computed/2));
+}
+.homepage_main_links {
+	display:block;
+}
+.panel-cw-homepage-main-links {
+    background-color: #efefef;
+    border: 0;
+    border-radius: 4px;
+    box-shadow: none;
+    margin-bottom: 20px;
+}
+.panel-heading-apply {
+    background-color: $brand-red !important;
+    border-radius: 4px 4px 0 0;
+    text-align: center;
+}
+.panel-heading-apply > img {
+    margin-right: 55px;
+    padding: 8px 0 0 0;
+    width: 100px;
+}
+.panel-body-apply h4 {
+    color: $brand-red;
+    text-align: center;
+    line-height: 20px;
+    margin: 10px 0;
+}
+.panel-body-apply p {
+    color: #000;
+    text-align: center;
+    min-height: 80px;
+    padding: 10px;
+}
+.panel-heading-register {
+    background-color: $brand-blue !important;
+    background-repeat: no-repeat;
+    border-radius: 4px 4px 0 0;
+    text-align: center;
+}
+.panel-heading-register > img {
+    margin-right: 55px;
+    padding: 8px 0 0 0;
+    width: 100px;
+}
+.panel-body-register h4 {
+    color: $brand-blue;
+    text-align: center;
+    line-height: 20px;
+    margin: 10px 0;
+}
+.panel-body-register p {
+    color: #000;
+    text-align: center;
+    min-height: 80px;
+    padding: 10px;
+}
+.panel-heading-research {
+    background-color: $gray-darker !important;
+    background-repeat: no-repeat;
+    border-radius: 4px 4px 0 0;
+    text-align: center;
+}
+.panel-heading-research > img {
+    margin-right: 55px;
+    padding: 5px 0 0 0;
+    width: 100px;
+}
+.panel-body-research h4 {
+    color: $gray-darker;
+    text-align: center;
+    line-height: 40px;
+    margin: 10px 0;
+}
+.panel-body-research p {
+    color: #000;
+    text-align: center;
+    min-height: 80px;
+    padding: 10px;
+}
+.panel-heading-myunisa {
+    background-color: $brand-yellow !important;
+    background-repeat: no-repeat;
+    border-radius: 4px 4px 0 0;
+    text-align: center;
+}
+.panel-heading-myunisa > img {
+    margin-right: 55px;
+    padding: 11px 0 0 0;
+    width: 100px;
+}
+.panel-body-myunisa h4 {
+    color: $brand-yellow;
+    text-align: center;
+    line-height: 40px;
+    margin: 10px 0;
+}
+.panel-body-myunisa p {
+    color: #000;
+    text-align: center;
+    min-height: 80px;
+    padding: 10px;
+}
+.homepage_main_link_xs button {
+    text-align: left;
+}
+.homepage_main_link_xs img {
+    width: 100px;
+    margin-right: 20px;
+}
+.homepage_main_link_xs a:hover, .homepage_main_link_xs a:active, .homepage_main_link_xs a:focus {
+    text-decoration: none;
+}
+#cw-homepage-news-carousel, #cw-homepage-news-carousel-sm, #cw-homepage-news-carousel-xs {
+	//border-color: $gray-light;
+	//border-style: solid;
+	//border-width: 1px;
+}
+#cw-homepage-news-carousel h3, #cw-homepage-news-carousel-sm h3, #cw-homepage-news-carousel-xs h3 {
+    margin: 0;
+    padding: 0 20px 20px 0;
+}
+#cw-homepage-news-carousel .carousel-indicators, #cw-homepage-news-carousel-sm .carousel-indicators {
+    bottom: floor(($line-height-computed*1.5));
+}
+#cw-homepage-news-carousel .carousel-inner .item div, #cw-homepage-news-carousel-sm .carousel-inner .item div {
+    background-color: rgba(0, 0, 0, 0.6);
+    bottom: 0;
+    color: #fff;
+    padding: 10px;
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    background-image: none;
+}
+.carousel-control-cw-homepage-news {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: $carousel-control-width;
+  @include opacity($carousel-control-opacity);
+  font-size: $carousel-control-font-size;
+  color: $carousel-control-color;
+  text-align: center;
+  text-shadow: $carousel-text-shadow;
+  // We can't have this transition here because WebKit cancels the carousel
+  // animation if you trip this while in the middle of another animation.
+
+  // Set gradients for backgrounds
+  &.left {
+    //#gradient > @include horizontal($start-color: rgba(0,0,0,.5); $end-color: rgba(0,0,0,.0001));
+  }
+  &.right {
+    left: auto;
+    right: 0;
+    //#gradient > @include horizontal($start-color: rgba(0,0,0,.0001); $end-color: rgba(0,0,0,.5));
+  }
+
+  // Hover/focus state
+  &:hover,
+  &:focus {
+    outline: 0;
+    color: $carousel-control-color;
+    text-decoration: none;
+    @include opacity(.9);
+  }
+
+  // Toggles
+  .icon-prev,
+  .icon-next,
+  .glyphicon-chevron-left,
+  .glyphicon-chevron-right {
+    position: absolute;
+    top: 50%;
+    z-index: 5;
+    display: inline-block;
+  }
+  .icon-prev,
+  .glyphicon-chevron-left {
+    left: 50%;
+    margin-left: -10px;
+  }
+  .icon-next,
+  .glyphicon-chevron-right {
+    right: 50%;
+    margin-right: -10px;
+  }
+  .icon-prev,
+  .icon-next {
+    width:  20px;
+    height: 20px;
+    margin-top: -10px;
+    line-height: 1;
+    font-family: serif;
+  }
+
+
+  .icon-prev {
+    &:before {
+      content: '\2039';// SINGLE LEFT-POINTING ANGLE QUOTATION MARK (U+2039)
+    }
+  }
+  .icon-next {
+    &:before {
+      content: '\203a';// SINGLE RIGHT-POINTING ANGLE QUOTATION MARK (U+203A)
+    }
+  }
+}
+.cw-homepage-announcements {
+	//border-color: $gray-light;
+	//border-style: solid;
+	//border-width: 1px;
+}
+.cw-homepage-announcements h3 {
+    margin: 0;
+    padding: 0 20px 20px 0;
+}
+.cw-homepage-announcements ul {
+    padding-left: floor(($line-height-computed/2));
+}
+.cw-homepage-announcements li {
+    list-style-position: outside;
+    list-style-type: circle;
+    margin-left: $line-height-computed;
+    padding: 0 $line-height-computed floor(($line-height-computed/2)) floor(($line-height-computed/2));
+}
+.cw-homepage-announcements li, .cw-homepage-announcements a {
+    color: #000;
+}
+.homepage_secondary_links {
+    background-color: $gray-lighter;
+}
+.homepage_secondary_link {
+    text-align: center;
+}
+.homepage_secondary_link a {
+    color: $black;
+}
+.homepage_secondary_link a div {
+    margin: $line-height-computed $line-height-computed 0 $line-height-computed;
+}
+.homepage_secondary_link a p {
+    margin-bottom: $line-height-computed;
+}
+.homepage_secondary_link a:active, .homepage_secondary_link a:hover, .homepage_secondary_link a:focus {
+    color: $black;
+}
+.homepage_social_links {
+	display:block;
+}
+.homepage_social_link {
+    text-align: center;
+}
+.homepage_social_link a {
+    color: $gray-light;
+}
+.homepage_social_link i {
+    display: block;
+    font-size: floor(($font-size-base * 2.6));
+}
+.homepage_social_link a:active, .homepage_social_link a:hover, .homepage_social_link a:focus {
+    text-decoration: none;
+}
+.homepage_secondary_link img {
+    width:55px;
+    padding-bottom: $line-height-computed;
+}
+
+//
+//Landing pages styles
+// --------------------------------------------------
+
+.ch-landing-level-2-list {
+    margin-top:$line-height-computed;
+}
+
+.ch-landing-level-2-list h3 {
+    margin-top:0px;
+}
+
+.block-content {
+    padding:$line-height-computed; 
+    margin-bottom:$line-height-computed;
+}
+
+.bordered {
+    border:1px solid $gray-light;
+}
+
+.block-content h1, .block-content h2, .block-content h3, .block-content h4, .block-content h5, .block-content h6 {
+    margin-top:0px;
+}
+
+.landingpage_social_link {
+    text-align: center;
+}
+
+.landingpage_social_link a {
+    color: $gray-light;
+}
+
+.landingpage_social_link i {
+    display: block;
+    font-size: floor(($font-size-base * 2.6));
+}
+
+.landingpage_social_link a:active, .landingpage_social_link a:hover, .landingpage_social_link a:focus {
+    text-decoration: none;
+}
+
+//
+//Additional button styles
+// --------------------------------------------------
+.btn h1, .btn h2, .btn h3, .btn h4, .btn h5, .btn h6 {
+    margin: 0px;
+}
+.twoLinesText {
+    height:floor(($line-height-computed*2)+20);
+}
+
+button.twoLinesText span {
+	display: block;
+    padding-right: floor(($line-height-computed*1.5));
+    text-align: left;
+}
+
+a.twoLinesText span {
+    display: block;
+    padding-left: floor(($line-height-computed*1.5));
+    text-align: left;
+}
+
+button.twoLinesText > i {
+   position: absolute;
+   top: floor(($line-height-computed/2)-($line-height-computed/10));
+   right: floor(($line-height-computed*1.5));
+   font-size:floor(($line-height-computed*2));
+   opacity: 0.5;
+    filter: alpha(opacity=50);
+}
+
+a.twoLinesText {
+   color: $black;
+   font-weight: bold;
+	display: table-cell;
+}
+
+a.twoLinesText:hover {
+   text-decoration: underline;
+}
+
+a.twoLinesText > i {
+   position: absolute;
+   top: floor(($line-height-computed));
+   left: floor(($line-height-computed/2));
+   font-size:floor(($line-height-computed*2));
+   color: $gray;
+   opacity: 0.5;
+    filter: alpha(opacity=50);
+}
+
+a.twoLinesText > i:hover {
+   color: $gray-dark;
+   opacity: 0.5;
+    filter: alpha(opacity=50);
+}
+
+.threeLinesText {
+    height:floor(($line-height-computed*3)+20);
+}
+
+button.threeLinesText span {
+	display: block;
+    padding-right: floor(($line-height-computed*1.5));
+    text-align: left;
+}
+
+button.threeLinesText.twoIcons span {
+	display: block;
+    padding-right: floor(($line-height-computed*1.5));
+    text-align: left;
+    margin-left: floor(($line-height-computed*2.5));
+}
+
+a.threeLinesText span {
+    display: block;
+    padding-left: floor(($line-height-computed*1.5));
+    text-align: left;
+}
+
+button.threeLinesText > i {
+   position: absolute;
+   top: floor(($line-height-computed/2)-($line-height-computed/5));
+   right: floor(($line-height-computed*1.5));
+   font-size:floor(($line-height-computed*3));
+   opacity: 0.5;
+    filter: alpha(opacity=50);
+}
+
+button.threeLinesText.twoIcons > span > i {
+   position: absolute;
+   top: $line-height-computed;
+   left: floor(($line-height-computed*1.5));
+   font-size:floor(($line-height-computed*2));
+}
+
+a.threeLinesText {
+   color: $black;
+   font-weight: bold;
+	display: table-cell;
+}
+
+a.threeLinesText:hover {
+   text-decoration: underline;
+}
+
+a.threeLinesText > i {
+   position: absolute;
+   top: floor(($line-height-computed*1.25));
+   left: floor(($line-height-computed/2));
+   font-size:floor(($line-height-computed*1.5));
+   color: $black;
+   //opacity: 0.5;
+    //filter: alpha(opacity=50);
+}
+
+a.threeLinesText > i:hover {
+   //color: $gray-dark;
+   //opacity: 0.5;
+    //filter: alpha(opacity=50);
+}
+
+.linkButton a:hover, .linkButton a:active {
+    text-decoration: none;
+}
+
+.btn-two-tone .btn-two-tone-name, .btn-two-tone .btn-two-tone-description {
+	display: table; 
+	height:floor(($line-height-computed*3)+20);
+}
+
+.btn-two-tone  {
+	margin-bottom:floor($line-height-computed);
+}
+
+.btn-two-tone button {
+	border: 0px;
+	padding: 0px;
+}
+
+.btn-two-tone-name span {
+	display: table-cell; 
+	vertical-align: middle; 
+	text-align:left; 
+	color:white;
+}
+
+.btn-two-tone-description span {
+	display: table-cell; 
+	vertical-align: middle; 
+	text-align:left; 
+	padding-right:20px;
+	color:black;
+}
+
+.btn-two-tone .fa {
+	position:absolute; 
+	top:floor($line-height-computed/2); 
+	right:floor($line-height-computed*3/4);
+	font-size:floor(($line-height-computed*3));
+}
+
+.create-hover-effect {
+	position:relative; 
+	top:0px; 
+	left:0px; 
+	width:100%; 
+	height:floor(($line-height-computed*3)+20); 
+	background-color:black; 
+	display:block; 
+	-khtml-opacity: 00; 
+	-moz-opacity: 00; 
+	-ms-filter:"alpha(opacity=00)"; 
+	filter:alpha(opacity=00); 
+	filter: progid:DXImageTransform.Microsoft Alpha(opacity=0.0); 
+	opacity: 00;
+}
+
+.create-hover-effect:hover {
+	-khtml-opacity: 0.15; 
+	-moz-opacity: 0.15; 
+	-ms-filter:"alpha(opacity=15)"; 
+	filter:alpha(opacity=15); 
+	filter: progid:DXImageTransform.Microsoft Alpha(opacity=0.15); 
+	opacity: 0.15;
+}
+
+//
+//Podcast
+// --------------------------------------------------
+.podcast {
+    max-width:100%;
+}
+
+//
+//Header styling
+// --------------------------------------------------
+.unisa-logo {
+	margin-top:6px;
+	pointer-events: none; /*This is to make the object clickable*/
+}
+.navbar-brand-logo {
+	
+}
+.navbar-brand-logo a img {
+	margin: 10px;
+}
+.navbar-brand-links {
+	margin: 20px 0;
+}
+.navbar-brand-links a {
+	padding: 0 15px;
+}
+.navbar-brand-search form {
+	margin: 15px 0;
+	padding: 0;
+	float:right;
+}
+.taskNav {
+    margin-top: $line-height-computed;
+}
+
+//
+//Left Navigation styling
+// --------------------------------------------------
+#leftNavlinkTop {
+    border-bottom: 1px solid #c8c8c8;
+    display: block;
+    height: 1px;
+}
+#leftNavlink {
+    border-bottom: 1px solid #c8c8c8;
+    border-left: 0 solid #e5e5e5;
+    border-right: 0 solid #e5e5e5;
+    color: #434d54;
+    display: block;
+    font-size: 13px;
+    padding: 4px 6px;
+    width: 100%;
+}
+#leftNavlink:hover {
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #000000;
+    color: #000;
+    display: block;
+    text-decoration: none;
+}
+
+//
+//Footer styling
+// --------------------------------------------------
+#bottom {
+	margin-top: $line-height-computed;
+}
+.cwFooter {
+    padding-top: $line-height-computed;
+	background-color: $gray-light;
+}
+.myUnisaFooter {
+    padding-top: $line-height-computed;
+	background-color: $gray-light;
+}
+footer, footer a, footer a:hover, footer a:active, footer a:focus {
+	font-size:12px;
+	color: $white;
+}
+
+//
+//Apply UG navbar
+// --------------------------------------------------
+div#ugNav a:link, div#ugNav a:visited {
+    color: #666;
+    display: block;
+    float: left;
+    font-family: Arial;
+    font-size: 10px;
+    height: 60px;
+    line-height: 12px;
+    padding: 47px 10px 0;
+    text-align: center;
+    text-decoration: none;
+    width: 112px;
+    margin-bottom: 40px;
+}
+div#ugNav a.ugNav0:link, div#ugNav a.ugNav0:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/ugNav0.png") no-repeat scroll center top;
+}
+div#ugNav a.ugNav1:link, div#ugNav a.ugNav1:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/ugNav1.png") no-repeat scroll center top;
+}
+div#ugNav a.ugNav2:link, div#ugNav a.ugNav2:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/ugNav2.png") no-repeat scroll center top;
+}
+div#ugNav a.ugNav3:link, div#ugNav a.ugNav3:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/ugNav3.png") no-repeat scroll center top;
+}
+div#ugNav a.ugNav4:link, div#ugNav a.ugNav4:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/ugNav4.png") no-repeat scroll center top;
+}
+div#ugNav a.ugNav5:link, div#ugNav a.ugNav5:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/ugNav5.png") no-repeat scroll center top;
+}
+div#ugNav a.ugNav0:hover, div#ugNav a.ugNav0active:link, div#ugNav a.ugNav0active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/ugNav0-over.png") no-repeat scroll center top;
+    color: $brand-red;
+}
+div#ugNav a.ugNav1:hover, div#ugNav a.ugNav1active:link, div#ugNav a.ugNav1active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/ugNav1-over.png") no-repeat scroll center top;
+    color: $brand-red;
+}
+div#ugNav a.ugNav2:hover, div#ugNav a.ugNav2active:link, div#ugNav a.ugNav2active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/ugNav2-over.png") no-repeat scroll center top;
+    color: $brand-red;
+}
+div#ugNav a.ugNav3:hover, div#ugNav a.ugNav3active:link, div#ugNav a.ugNav3active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/ugNav3-over.png") no-repeat scroll center top;
+    color: $brand-red;
+}
+div#ugNav a.ugNav4:hover, div#ugNav a.ugNav4active:link, div#ugNav a.ugNav4active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/ugNav4-over.png") no-repeat scroll center top;
+    color: $brand-red;
+}
+div#ugNav a.ugNav5:hover, div#ugNav a.ugNav5active:link, div#ugNav a.ugNav5active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/ugNav5-over.png") no-repeat scroll center top;
+    color: $brand-red;
+}
+
+//
+//Apply HONS navbar
+// --------------------------------------------------
+div#honsNav a:link, div#honsNav a:visited {
+    color: #666;
+    display: block;
+    float: left;
+    font-family: Arial;
+    font-size: 10px;
+    height: 60px;
+    line-height: 12px;
+    padding: 47px 10px 0;
+    text-align: center;
+    text-decoration: none;
+    width: 138px;
+    margin-bottom: 40px;
+}
+div#honsNav a.honsNav0:link, div#honsNav a.honsNav0:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/honsNav0.png") no-repeat scroll center top;
+}
+div#honsNav a.honsNav1:link, div#honsNav a.honsNav1:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/honsNav1.png") no-repeat scroll center top;
+}
+div#honsNav a.honsNav2:link, div#honsNav a.honsNav2:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/honsNav2.png") no-repeat scroll center top;
+}
+div#honsNav a.honsNav3:link, div#honsNav a.honsNav3:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/honsNav3.png") no-repeat scroll center top;
+}
+div#honsNav a.honsNav4:link, div#honsNav a.honsNav4:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/honsNav4.png") no-repeat scroll center top;
+}
+div#honsNav a.honsNav0:hover, div#honsNav a.honsNav0active:link, div#honsNav a.honsNav0active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/honsNav0-over.png") no-repeat scroll center top;
+    color: $brand-red;
+}
+div#honsNav a.honsNav1:hover, div#honsNav a.honsNav1active:link, div#honsNav a.honsNav1active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/honsNav1-over.png") no-repeat scroll center top;
+    color: $brand-red;
+}
+div#honsNav a.honsNav2:hover, div#honsNav a.honsNav2active:link, div#honsNav a.honsNav2active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/honsNav2-over.png") no-repeat scroll center top;
+    color: $brand-red;
+}
+div#honsNav a.honsNav3:hover, div#honsNav a.honsNav3active:link, div#honsNav a.honsNav3active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/honsNav3-over.png") no-repeat scroll center top;
+    color: $brand-red;
+}
+div#honsNav a.honsNav4:hover, div#honsNav a.honsNav4active:link, div#honsNav a.honsNav4active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/honsNav4-over.png") no-repeat scroll center top;
+    color: $brand-red;
+}
+
+//
+//Registration UG navbar
+// --------------------------------------------------
+div#regNav a:link, div#regNav a:visited {
+    color: #666;
+    display: block;
+    float: left;
+    font-family: Arial;
+    font-size: 10px;
+    height: 60px;
+    line-height: 12px;
+    padding: 47px 10px 0;
+    text-align: center;
+    text-decoration: none;
+    width: 112px;
+    margin-bottom: 40px;
+}
+div#regNav a.regNav0:link, div#regNav a.regNav0:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/regNav0.png") no-repeat scroll center top;
+}
+div#regNav a.regNav1:link, div#regNav a.regNav1:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/regNav1.png") no-repeat scroll center top;
+}
+div#regNav a.regNav2:link, div#regNav a.regNav2:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/regNav2.png") no-repeat scroll center top;
+}
+div#regNav a.regNav3:link, div#regNav a.regNav3:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/regNav3.png") no-repeat scroll center top;
+}
+div#regNav a.regNav4:link, div#regNav a.regNav4:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/regNav4.png") no-repeat scroll center top;
+}
+div#regNav a.regNav5:link, div#regNav a.regNav5:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/regNav5.png") no-repeat scroll center top;
+}
+div#regNav a.regNav0:hover, div#regNav a.regNav0active:link, div#regNav a.regNav0active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/regNav0-over.png") no-repeat scroll center top;
+    color: $brand-blue;
+}
+div#regNav a.regNav1:hover, div#regNav a.regNav1active:link, div#regNav a.regNav1active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/regNav1-over.png") no-repeat scroll center top;
+    color: $brand-blue;
+}
+div#regNav a.regNav2:hover, div#regNav a.regNav2active:link, div#regNav a.regNav2active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/regNav2-over.png") no-repeat scroll center top;
+    color: $brand-blue;
+}
+div#regNav a.regNav3:hover, div#regNav a.regNav3active:link, div#regNav a.regNav3active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/regNav3-over.png") no-repeat scroll center top;
+    color: $brand-blue;
+}
+div#regNav a.regNav4:hover, div#regNav a.regNav4active:link, div#regNav a.regNav4active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/regNav4-over.png") no-repeat scroll center top;
+    color: $brand-blue;
+}
+div#regNav a.regNav5:hover, div#regNav a.regNav5active:link, div#regNav a.regNav5active:visited {
+    background: rgba(0, 0, 0, 0) url("/file_source/corporate_web/Design/themes/default/images/regNav5-over.png") no-repeat scroll center top;
+    color: $brand-blue;
+}
+
+//
+//Google maps API styling
+// --------------------------------------------------
+#map_canvas {
+	height:400px;
+}
+
+//
+// News and media templating
+// --------------------------------------------------
+.news_article_footer {
+    display: block;
+    border-bottom: 1px solid $gray-lighter;
+    margin-bottom: floor(($line-height-computed/2));
+}
+
+.news_article_footer p {
+    margin: 10px 0;
+}
+
+.search-toolbar-right-column {
+    margin-bottom: $line-height-computed;
+}
+
+//
+// Events templating
+// --------------------------------------------------
+.calendar_display_setting {
+	float:right;
+}
+.calendar_display_setting div {
+	float:left;
+}
+.calendar_display_setting > div > a {
+	display: block;
+    padding: 10px 15px;
+    position: relative;
+}
+.calendar_display_setting > div > a.active {
+	background-color:grey;
+}
+.table .time {
+	width: 25%;
+}
+.calendar_navigation {
+	margin:14px 0;
+}
+.calendar_month_display {
+	margin-top:20px;
+}
+.calendar_month_display h3 {
+	margin-top:0px;
+	text-align:center;
+}
+.calendar_table {
+	width:100%;
+	margin-bottom: 14px;
+}
+.calendar_table > tbody > tr > td, .calendar_table > tbody > tr > th {
+	width:14%;
+	text-align:center;
+}
+.calendar_table > tbody > tr > th {
+	background-color: #7D7D7D;
+	color: $white;
+}
+.calendar_table > tbody > tr > td {
+	background-color: #DDDDDD;
+}
+.calendar_table > tbody > tr > td.events {
+	background-color: #CDCDCD;
+}
+.calendar_table > tbody > tr > td.today {
+	background-color: #9A090C;
+	color: #FFF;
+}
+
+//
+// Left/right controls for news carousel nav
+// --------------------------------------------------
+
+.carousel-control-news {
+  position: absolute;
+  top: 35%;
+  left: 0;
+  width: $carousel-control-width;
+  @include opacity($carousel-control-opacity);
+  font-size: $carousel-control-font-size;
+  color: $carousel-control-color;
+  text-align: center;
+  text-shadow: $carousel-text-shadow;
+  // We can't have this transition here because WebKit cancels the carousel
+  // animation if you trip this while in the middle of another animation.
+
+  // Set gradients for backgrounds
+  &.left {
+    //#gradient > @include horizontal($start-color: rgba(0,0,0,.5); $end-color: rgba(0,0,0,.0001));
+  }
+  &.right {
+    left: auto;
+    right: 0;
+    //#gradient > @include horizontal($start-color: rgba(0,0,0,.0001); $end-color: rgba(0,0,0,.5));
+  }
+
+  // Hover/focus state
+  &:hover,
+  &:focus {
+    outline: 0;
+    color: $carousel-control-color;
+    text-decoration: none;
+    @include opacity(.9);
+  }
+
+  // Toggles
+  .icon-prev,
+  .icon-next,
+  .glyphicon-chevron-left,
+  .glyphicon-chevron-right {
+    position: absolute;
+    top: 50%;
+    z-index: 5;
+    display: inline-block;
+  }
+  .icon-prev,
+  .glyphicon-chevron-left {
+    left: 50%;
+    margin-left: -10px;
+  }
+  .icon-next,
+  .glyphicon-chevron-right {
+    right: 50%;
+    margin-right: -10px;
+  }
+  .icon-prev,
+  .icon-next {
+    width:  20px;
+    height: 20px;
+    margin-top: -10px;
+    line-height: 1;
+    font-family: serif;
+  }
+
+
+  .icon-prev {
+    &:before {
+      content: '\2039';// SINGLE LEFT-POINTING ANGLE QUOTATION MARK (U+2039)
+    }
+  }
+  .icon-next {
+    &:before {
+      content: '\203a';// SINGLE RIGHT-POINTING ANGLE QUOTATION MARK (U+203A)
+    }
+  }
+}
+
+//
+// News carousel details
+// --------------------------------------------------
+#news-carousel {
+	border-color: lighten($gray-base, 85%);
+	border-style: solid;
+	border-width: 1px 1px 0 1px;
+}
+
+.carousel-inner > div.news-detail > a > div {
+	@include gradient-vertical($white, $gray-lighter, 0%, 100%);
+	color: $gray-dark;
+}
+
+//
+// News carousel more stories link
+// --------------------------------------------------
+.news-carousel-read-more {
+	border-color: lighten($gray-base, 85%);
+	border-style: solid;
+	border-width: 0 1px 1px 1px;
+	@include gradient-vertical($gray-lighter, darken($gray-lighter, 10%), 0%, 100%);
+	padding-right: floor(($line-height-computed/2));
+	padding-bottom: floor(($line-height-computed/4));
+}
+.right-panel-news-carousel-read-more {
+	border-color: lighten($gray-base, 85%);
+	border-style: solid;
+	border-width: 0px 1px 1px 1px;
+	padding-right: floor(($line-height-computed/2));
+	padding-bottom: floor(($line-height-computed/4));
+}
+
+//
+// Homepage News list box
+// --------------------------------------------------
+.homepage-news-list {
+	border-color: lighten($gray-base, 85%);
+	border-style: solid;
+	border-width: 1px 1px 0 1px;
+	@include gradient-vertical($white, $gray-lighter, 0%, 100%);
+    padding-right: floor(($line-height-computed/2)); 
+    margin-top: $line-height-computed;
+}
+
+.news-list h3 {
+    margin-top: floor(($line-height-computed*0.75));
+}
+
+//
+// Homepage News list box more stories link
+// --------------------------------------------------
+.homepage-news-list-read-more {
+	border-color: lighten($gray-base, 85%);
+	border-style: solid;
+	border-width: 0 1px 1px 1px;
+	@include gradient-vertical($gray-lighter, darken($gray-lighter, 10%), 0%, 100%);
+	padding-right: floor(($line-height-computed/2));
+	padding-bottom: floor(($line-height-computed/4));
+}
+
+//
+// Homepage Calendar & Events link and Social icons box
+// --------------------------------------------------
+.ce-social-links {
+    margin: floor(($line-height-computed/4)) 0;
+}
+
+//
+// Homepage Calendar & Events link
+// --------------------------------------------------
+.homepage-calendar-events-link {
+    line-height: floor(($line-height-computed*1.8)); 
+    margin-top:0px;
+    
+    // Hover/focus state
+    &:hover,
+    &:focus {
+        text-decoration: none;
+    }
+}
+
+.homepage-calendar-events-link > div {
+    margin: floor(($line-height-computed*0.35)) 0;
+    padding: 0 floor(($line-height-computed/2));
+    border-radius: $border-radius-base;
+}
+
+//
+// Homepage Social icons
+// --------------------------------------------------
+.homepage-social-icon {
+    font-size: floor(($line-height-computed*2.5));
+    color: $black;
+    float: right;
+    margin-left: floor(($line-height-computed*0.6));
+    
+    // Hover/focus state
+    &:hover,
+    &:focus {
+        color: $black;
+    }
+}
+
+//
+// Unisa Shop styling
+// --------------------------------------------------
+.productListItemLG img {
+    max-height: 100px;
+    margin-bottom: floor(($line-height-computed/2));
+}
+
+.productListItemMD img {
+    max-height: 120px;
+    margin-bottom: floor(($line-height-computed/2));
+}
+
+.productListItemSM img {
+    max-height: 160px;
+    margin-bottom: floor(($line-height-computed/2));
+}
+
+.productListItemXS img {
+    max-height: 180px;
+    margin-bottom: floor(($line-height-computed/2));
+}
+
+.productListItemLG a:focus, .productListItemLG a:hover, .productListItemLG a:active, .productListItemMD a:focus, .productListItemMD a:hover, .productListItemMD a:active, .productListItemSM a:focus, .productListItemSM a:hover, .productListItemSM a:active, .productListItemXS a:focus, .productListItemXS a:hover, .productListItemXS a:active {
+    cursor: pointer;
+}   
+
+.productListItemLG a, .productListItemMD a, .productListItemSM a, .productListItemXS a {
+    color: $black;
+}
+
+//
+// myUnisa Logo
+// --------------------------------------------------
+.myunisa-logo {
+	margin-top: $line-height-computed;
+	pointer-events: none; /*This is to make the object clickable*/
+}
+
+//
+// myUnisa Login assistance links
+// --------------------------------------------------
+.loginAssistanceLinks {
+    margin-bottom: floor(($line-height-computed/2));;
+}
+
+.loginAssistanceLinks a, .loginAssistanceLinks a:hover, .loginAssistanceLinks a:active, .loginAssistanceLinks a:focus {
+    text-decoration: none;
+    color: $black;
+    margin-left: floor(($line-height-computed/2));
+}
+
+//
+// myUnisa homepage Social icons
+// --------------------------------------------------
+.myunisa-homepage-social-icon {
+    font-size: floor(($line-height-computed*2.5));
+    color: $black;
+    float: left;
+    margin-right: floor(($line-height-computed*0.6));
+    
+    // Hover/focus state
+    &:hover,
+    &:focus {
+        color: $black;
+    }
+}
+
+//
+// myUnisa homepage Main link list
+// --------------------------------------------------
+.myUnisaHomepageMainLink > div > a > button, .myUnisaHomepageMainLink > div > a > button:hover {
+    border: 1px solid $gray-lighter;
+}
+
+.myUnisaFirstMainLink {
+    margin-right: floor(($line-height-computed/2));
+}
+
+.myUnisaMiddleMainLink {
+    margin-left: floor(($line-height-computed/2));
+    margin-right: floor(($line-height-computed/2));
+}
+
+.myUnisaLasttMainLink {
+    margin-left: floor(($line-height-computed/2));
+}
+
+.myUnisaHomepageMainLink > div > a > button > i {
+    font-size: floor(($line-height-computed*1.25));
+    display: block;
+    color: $brand-yellow;
+    text-shadow: none;
+}
+
+.myUnisaFirstMainLink a:hover, .myUnisaMiddleMainLink a:hover, .myUnisaLasttMainLink a:hover, .myUnisaMainLink a:hover, .myUnisaFirstMainLink a:active, .myUnisaMiddleMainLink a:active, .myUnisaLasttMainLink a:active, .myUnisaMainLink a:active, .myUnisaFirstMainLink a:focus, .myUnisaMiddleMainLink a:focus, .myUnisaLasttMainLink a:focus, .myUnisaMainLink a:focus {
+    text-decoration: none;
+}
+
+.myUnisaHomepageMainLink > div > a > button > span {
+    display: block;
+    margin-top: floor(($line-height-computed/2));
+    min-height: floor(($line-height-computed*2));
+    text-shadow: none;
+}
+
+//
+// myUnisa homepage Right Panel link list
+// --------------------------------------------------
+
+.myUnisaRightPanelLink, .myUnisaRightPanelLink:hover, .myUnisaRightPanelLink:active, .myUnisaRightPanelLink:focus {
+    color: $black;
+}
+
+.myUnisaRightPanelLink i {
+    font-size: floor(($line-height-computed*1.25));
+    width: floor(($line-height-computed*1.5));
+    text-shadow: none;
+}
+
+.myUnisaRightPanelLink span {
+    margin-left: floor(($line-height-computed*0.75)); 
+    vertical-align: top; 
+    line-height: floor(($line-height-computed*1.25));
+    font-size: $font-size-base;
+}
+
+//
+// myUnisa homepage Right link list
+// --------------------------------------------------
+.myUnisaHomepageRightLink a:hover, .myUnisaHomepageRightLink a:active, .myUnisaHomepageRightLink a:focus {
+    text-decoration: none;
+}
+
+.myUnisaHomepageRightLink > a > button > i {
+    font-size: floor(($line-height-computed*1.25));
+    width: floor(($line-height-computed*1.5));
+}
+
+.myUnisaHomepageRightLink > a > button > span {
+    margin-left: floor(($line-height-computed/2)); 
+    vertical-align: top; 
+    line-height: floor(($line-height-computed*1.25));
+    font-size: $font-size-base;
+}
+
+
+//
+// myUnisa Social links footer
+// --------------------------------------------------
+.myUnisaFooterSocialLinks i {
+    color: $white;
+    font-size: 25px;
+    margin-right: 10px;
+    margin-top: 15px;
+}
+
+//
+// Right Column links
+// --------------------------------------------------
+.links-bordered-right-column {
+    border: 1px solid $gray-light;
+    padding: floor(($line-height-computed/2));
+    margin-bottom: $line-height-computed;
+}
+
+//
+// Site Identifier
+// --------------------------------------------------
+.site-identifier {
+    color: $white; 
+    display: block; 
+    margin-bottom: $line-height-computed; 
+    padding-top: floor(($line-height-computed/2));
+    padding-right: $line-height-computed;
+    padding-bottom: 0;
+    padding-left: $line-height-computed;
+    border-radius: $border-radius-base;
+}
+
+//
+// Institutes, centres, units etc branding
+// --------------------------------------------------
+.tmali-bg {
+	background-color: $brand-tmali !important;
+	background-image: none !important;
+}
+
+.tmali-text {
+  	color: $brand-tmali;
+}
+
+//
+// Zero margins
+// --------------------------------------------------
+.zeroTopMargin {
+	margin-top: 0px;
+}
+.zeroRightMargin {
+	margin-right: 0px;
+}
+.zeroBottomMargin {
+	margin-bottom: 0px;
+}
+.zeroLeftMargin {
+	margin-left: 0px;
+}
+
+//
+// Default margins
+// --------------------------------------------------
+.defaultTopMargin {
+	margin-top: $line-height-computed;
+}
+.defaultRightMargin {
+	margin-right: $line-height-computed;
+}
+.defaultBottomMargin {
+	margin-bottom: $line-height-computed;
+}
+.defaultLeftMargin {
+	margin-left: $line-height-computed;
+}
+
+//
+// One and a half margins
+// --------------------------------------------------
+.oneandhalfTopMargin {
+	margin-top: floor(($line-height-computed*1.5));
+}
+.oneandhalfRightMargin {
+	margin-right: floor(($line-height-computed*1.5));
+}
+.oneandhalfBottomMargin {
+	margin-bottom: floor(($line-height-computed*1.5));
+}
+.oneandhalfLeftMargin {
+	margin-left: floor(($line-height-computed*1.5));
+}
+
+//
+// Half margins
+// --------------------------------------------------
+.halfTopMargin {
+	margin-top: floor(($line-height-computed/2));
+}
+.halfRightMargin {
+	margin-right: floor(($line-height-computed/2));
+}
+.halfBottomMargin {
+	margin-bottom: floor(($line-height-computed/2));
+}
+.halfLeftMargin {
+	margin-left: floor(($line-height-computed/2));
+}
+
+//
+// Double margins
+// --------------------------------------------------
+.doubleTopMargin {
+	margin-top: floor(($line-height-computed*2));
+}
+.doubleRightMargin {
+	margin-right: floor(($line-height-computed*2));
+}
+.doubleBottomMargin {
+	margin-bottom: floor(($line-height-computed*2));
+}
+.doubleLeftMargin {
+	margin-left: floor(($line-height-computed*2));
+}
+
+//
+// Custom margins
+// --------------------------------------------------
+.onePxRightMargin {
+    margin-right: 1px;
+}
+.onePxLeftMargin {
+    margin-left: 1px;
+}
+
+//
+// Top borders
+// --------------------------------------------------
+.topBorderLighterGrey {
+    border-top: 1px solid $gray-lighter;
+    padding-top: floor(($line-height-computed/2));
+}
+
+//
+// Unordered list styles
+// --------------------------------------------------
+ul.rightSingleAngleQuote li:before {
+    color: $gray-light;
+    content: "\e080";
+    float: left;
+    font-family: Glyphicons Halflings;
+    font-size: floor(($font-size-small/3*2));
+    margin-left: -$line-height-computed;
+    margin-top: floor(($line-height-computed/5));
+}
+
+ul.rightSingleAngleQuote li {
+    list-style-type: none !important;
+}
+
+//
+// Library Colour-coded shelf guide
+// --------------------------------------------------
+.lib-sg-pink-bg {
+    background-color: $lib-shelf-guide-pink;
+}
+
+.lib-sg-orange-bg {
+    background-color: $lib-shelf-guide-orange;
+}
+
+.lib-sg-blue-bg {
+    background-color: $lib-shelf-guide-blue;
+}
+
+.lib-sg-green-bg {
+    background-color: $lib-shelf-guide-green;
+}
+
+.lib-sg-yellow-bg {
+    background-color: $lib-shelf-guide-yellow;
+}
+
+.lib-sg-light-blue-bg {
+    background-color: $lib-shelf-guide-light-blue;
+}
+
+.lib-sg-red-bg {
+    background-color: $lib-shelf-guide-red;
+}
+
+//
+// myUnisa login form
+// --------------------------------------------------
+
+.form-control-myunisa-login {
+  display: block;
+  width: 40%;
+  float: left;
+  margin-right: 20px;
+  height: $input-height-base; // Make inputs at least the height of their button counterpart (base line-height + padding + border)
+  padding: $padding-base-vertical $padding-base-horizontal;
+  font-size: $font-size-base;
+  line-height: $line-height-base;
+  color: $input-color;
+  background-color: $input-bg;
+  background-image: none; // Reset unusual Firefox-on-Android default style; see https://github.com/necolas/normalize.css/issues/214
+  border: 1px solid $input-border;
+  border-radius: $input-border-radius; // Note: This has no effect on <select>s in some browsers, due to the limited stylability of <select>s in CSS.
+  @include box-shadow(inset 0 1px 1px rgba(0,0,0,.075));
+  @include transition(#{"border-color ease-in-out .15s, box-shadow ease-in-out .15s"});
+
+  // Customize the `:focus` state to imitate native WebKit styles.
+  @include form-control-focus();
+
+  // Placeholder
+  @include placeholder();
+
+  // Disabled and read-only inputs
+  //
+  // HTML5 says that controls under a fieldset > legend:first-child won't be
+  // disabled if the fieldset is disabled. Due to implementation difficulty, we
+  // don't honor that edge case; we style them as disabled anyway.
+  &[disabled],
+  &[readonly],
+  fieldset[disabled] & {
+    background-color: $input-bg-disabled;
+    opacity: 1; // iOS fix for unreadable disabled content; see https://github.com/twbs/bootstrap/issues/11655
+  }
+
+  &[disabled],
+  fieldset[disabled] & {
+    cursor: $cursor-disabled;
+  }
+
+  // Reset height for `textarea`s
+  textarea {
+    height: auto;
+  }
+}
+
+//
+// Search string highlight
+// --------------------------------------------------
+
+.srchHighlight {
+    background-color: yellow;
+}
+
+//
+// Form select styling
+// --------------------------------------------------
+select {
+  height: $input-height-base !important; // Make inputs at least the height of their button counterpart (base line-height + padding + border)
+  padding: $padding-base-vertical $padding-base-horizontal;
+  font-size: $font-size-base;
+  line-height: $line-height-base;
+  color: $input-color;
+  background-color: $input-bg;
+  background-image: none; // Reset unusual Firefox-on-Android default style; see https://github.com/necolas/normalize.css/issues/214
+  border: 1px solid $input-border;
+  border-radius: $input-border-radius;
+}
+
+select > option {
+  height: $input-height-base; // Make inputs at least the height of their button counterpart (base line-height + padding + border)
+  padding: $padding-base-vertical $padding-base-horizontal;
+  font-size: $font-size-base;
+  line-height: $line-height-base;
+  color: $input-color;
+  background-color: $input-bg;
+  background-image: none; // Reset unusual Firefox-on-Android default style; see https://github.com/necolas/normalize.css/issues/214
+}
+
+//
+// SBL specific styling
+// --------------------------------------------------
+.sblHeader {
+    background-color: #4a4a4c;
+    padding: 10px 0 70px 0;
+    border-radius: $navbar-border-radius;
+    margin-bottom: 20px;
+}
+
+.sblHeaderText p {
+    color: #ffffff;
+    font-size: 20px;
+    margin-bottom: 0;
+    margin-top: 15px;
+}
+
+.sblHeaderSocialLinks i {
+    color: #929397;
+    float: right;
+    font-size: 25px;
+    margin-right: 10px;
+    margin-top: 15px;
+}
+
+.sbl_homepage_main_links, .sbl_homepage_news, .sbl_homepage_announcements, .sbl_homepage_announcements_sm {
+    display: block;
+    margin-top: 20px;
+}
+
+.sbl_homepage_announcements_sm {
+    margin-left: 10px;
+}
+
+.sbl_homepage_main_links a:hover, .sbl_homepage_main_links a:active, .sbl_homepage_main_links a:focus, .sbl_homepage_news a:hover, .sbl_homepage_news a:active, .sbl_homepage_news a:focus {
+    text-decoration: none;
+}
+
+.sblMainLinkBrown {
+    background-color: #b39860;
+    color: white;
+    margin-right: 20px;
+}
+
+.sblMainLinkBrown a, .sblMainLinkBrown a:active, .sblMainLinkBrown a:hover, .sblMainLinkBrown a:focus, .sblMainLinkBrownSM a, .sblMainLinkBrownSM a:active, .sblMainLinkBrownSM a:hover, .sblMainLinkBrownSM a:focus, .sblMainLinkBrownXS a, .sblMainLinkBrownXS a:active, .sblMainLinkBrownXS a:hover, .sblMainLinkBrownXS a:focus, .sbl_homepage_news a, .sbl_homepage_news a:active, .sbl_homepage_news a:hover, .sbl_homepage_news a:focus {
+    color: white;
+}
+
+.sblMainLinkGrey {
+    background-color: #dedcdd;
+    color: #b39860;
+    margin-right: 20px;
+}
+
+.sblMainLinkGrey a, .sblMainLinkGrey a:active, .sblMainLinkGrey a:hover, .sblMainLinkGrey a:focus, .sblMainLinkGreySM a, .sblMainLinkGreySM a:active, .sblMainLinkGreySM a:hover, .sblMainLinkGreySM a:focus, .sblMainLinkGreyXS a, .sblMainLinkGreyXS a:active, .sblMainLinkGreyXS a:hover, .sblMainLinkGreyXS a:focus {
+    color: #b39860;
+}
+
+.sblMainLinkBrownSM {
+    background-color: #b39860;
+    color: white;
+    margin-right: 10px;
+}
+
+.sblMainLinkGreySM {
+    background-color: #dedcdd;;
+    color: #b39860;
+    margin-left: 10px;
+}
+
+.sblMainLinkBrownXS {
+    background-color: #b39860;
+    color: white;
+    margin-top: 20px;
+}
+
+.sblMainLinkGreyXS {
+    background-color: #dedcdd;;
+    color: #b39860;
+    margin-top: 20px;
+}
+
+.mainLinkFooter {
+    
+}
+
+.mainLinkFooterText {
+    display:block; 
+    min-height:30px; 
+    padding:10px 15px;
+    font-weight: bold;
+}
+
+.mainLinkFooterReadMore {
+    float:right; 
+    display:block; 
+    margin-right:10px;
+}
+
+.sblHomepageNews {
+    background-color: #b39860;
+    color: white;
+    margin-right: 20px;
+}
+
+.sblHomepageNewsSM {
+    background-color: #b39860;
+    color: white;
+    margin-right: 10px;
+}
+
+.sblHomepageNewsMoreStoriesLink {
+    background-color: #b39860;
+    color: white;
+    margin-right: 20px;
+    min-height: 25px;
+}
+
+.sblHomepageNewsMoreStoriesLinkSM {
+    background-color: #b39860;
+    color: white;
+    margin-right: 10px;
+    min-height: 25px;
+}
+
+.sblHomepageNewsXS {
+    background-color: #b39860;
+    color: white;
+}
+
+.sblHomepageNewsMoreStoriesLinkXS {
+    background-color: #b39860;
+    color: white;
+    min-height: 25px;
+}
+
+.sblHomepageNewsXS h3 {
+    padding: 10px 15px 0 15px;
+}
+
+.sblHomepageNewsMoreStoriesLink a, .sblHomepageNewsMoreStoriesLinkSM a, .sblHomepageNewsMoreStoriesLinkXS a {
+    float:right;
+    margin-right: 20px;
+    color: white;
+}
+
+.sblHomepageNewsMoreStoriesLink a:active, .sblHomepageNewsMoreStoriesLink a:hover, .sblHomepageNewsMoreStoriesLink a:focus, .sblHomepageNewsMoreStoriesLinkSM a:active, .sblHomepageNewsMoreStoriesLinkSM a:hover, .sblHomepageNewsMoreStoriesLinkSM a:focus, .sblHomepageNewsMoreStoriesLinkXS a:active, .sblHomepageNewsMoreStoriesLinkXS a:hover, .sblHomepageNewsMoreStoriesLinkXS a:focus {
+    color: white;
+    text-decoration: none;
+}
+
+//
+// 5 Column layout
+// --------------------------------------------------
+.col-xs-5ths,
+.col-sm-5ths,
+.col-md-5ths,
+.col-lg-5ths {
+    position: relative;
+    min-height: 1px;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.col-xs-5ths {
+    width: 20%;
+    float: left;
+}
+@media (min-width: 768px) {
+.col-sm-5ths {
+        width: 20%;
+        float: left;
+    }
+}
+@media (min-width: 992px) {
+    .col-md-5ths {
+        width: 20%;
+        float: left;
+    }
+}
+@media (min-width: 1200px) {
+    .col-lg-5ths {
+        width: 20%;
+        float: left;
+    }
+}
+
+//
+// Leading change site
+// --------------------------------------------------
+#cw-leading-change-news-carousel .carousel-indicators {
+    bottom: floor(($line-height-computed/2));
+    position: absolute;
+    left: 25%;
+}
+.carousel-control-cw-leading-change-news {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: $carousel-control-width;
+  @include opacity($carousel-control-opacity);
+  font-size: 28px;
+  color: $carousel-control-color;
+  text-align: center;
+  text-shadow: $carousel-text-shadow;
+  // We can't have this transition here because WebKit cancels the carousel
+  // animation if you trip this while in the middle of another animation.
+
+  // Set gradients for backgrounds
+  &.left {
+    //#gradient > @include horizontal($start-color: rgba(0,0,0,.5); $end-color: rgba(0,0,0,.0001));
+  }
+  &.right {
+    left: auto;
+    right: 0;
+    //#gradient > @include horizontal($start-color: rgba(0,0,0,.0001); $end-color: rgba(0,0,0,.5));
+  }
+
+  // Hover/focus state
+  &:hover,
+  &:focus {
+    outline: 0;
+    color: $carousel-control-color;
+    text-decoration: none;
+    @include opacity(.9);
+  }
+
+  // Toggles
+  .icon-prev,
+  .icon-next,
+  .glyphicon-chevron-left,
+  .glyphicon-chevron-right {
+    position: absolute;
+    top: 50%;
+    z-index: 5;
+    display: inline-block;
+  }
+  .icon-prev,
+  .glyphicon-chevron-left {
+    left: 25%;
+    margin-left: -10px;
+  }
+  .icon-next,
+  .glyphicon-chevron-right {
+    right: 380%;
+    margin-right: -10px;
+  }
+  .icon-prev,
+  .icon-next {
+    width:  20px;
+    height: 20px;
+    margin-top: -10px;
+    line-height: 1;
+    font-family: serif;
+  }
+
+
+  .icon-prev {
+    &:before {
+      content: '\2039';// SINGLE LEFT-POINTING ANGLE QUOTATION MARK (U+2039)
+    }
+  }
+  .icon-next {
+    &:before {
+      content: '\203a';// SINGLE RIGHT-POINTING ANGLE QUOTATION MARK (U+203A)
+    }
+  }
+}
+
+
+//
+// Banner carousel full width
+// --------------------------------------------------
+
+.carousel-control-cw-banner-full-width {
+  position: absolute;
+  top: 45%;
+  width: floor(($carousel-control-width*0.5));
+  @include opacity($carousel-control-opacity);
+  font-size: floor(($line-height-computed*1.5));
+  color: $carousel-control-color;
+  text-align: center;
+  text-shadow: $carousel-text-shadow;
+  // We can't have this transition here because WebKit cancels the carousel
+  // animation if you trip this while in the middle of another animation.
+
+  // Set zero left margin for smaller screen views
+  &.zeroLeft {
+    left: 0px;
+  }
+
+  // Set gradients for backgrounds
+  &.left {
+    //#gradient > @include horizontal($start-color: rgba(0,0,0,.5); $end-color: rgba(0,0,0,.0001));
+  }
+  &.right {
+    left: auto;
+    right: 0;
+    //#gradient > @include horizontal($start-color: rgba(0,0,0,.0001); $end-color: rgba(0,0,0,.5));
+  }
+
+  // Hover/focus state
+  &:hover,
+  &:focus {
+    outline: 0;
+    color: $carousel-control-color;
+    text-decoration: none;
+    @include opacity(.9);
+  }
+
+  // Toggles
+  .icon-prev,
+  .icon-next,
+  .glyphicon-chevron-left,
+  .glyphicon-chevron-right {
+    position: absolute;
+    top: 50%;
+    z-index: 5;
+    display: inline-block;
+  }
+  .icon-prev,
+  .glyphicon-chevron-left {
+    left: 50%;
+    margin-left: -10px;
+  }
+  .icon-next,
+  .glyphicon-chevron-right {
+    right: 50%;
+    margin-right: -10px;
+  }
+  .icon-prev,
+  .icon-next {
+    width:  20px;
+    height: 20px;
+    margin-top: -10px;
+    line-height: 1;
+    font-family: serif;
+  }
+
+
+  .icon-prev {
+    &:before {
+      content: '\2039';// SINGLE LEFT-POINTING ANGLE QUOTATION MARK (U+2039)
+    }
+  }
+  .icon-next {
+    &:before {
+      content: '\203a';// SINGLE RIGHT-POINTING ANGLE QUOTATION MARK (U+203A)
+    }
+  }
+}
+
+//
+// Icon layout for bootstrap theme example page
+// --------------------------------------------------
+
+.bs-glyphicons-list > li {
+	background-color: lightgrey;
+	display: inline-block;
+	margin: 4px;
+	position: relative;
+	text-align: center;
+	top: 0;
+	width: 120px;
+}
+.bs-glyphicons-list > li:hover {
+	background-color: lightblue;
+}
+.bs-glyphicons-list > li > .glyphicon {
+	width:100%;
+	font-size: 18px;
+	padding: 10px 0;
+}
+.bs-glyphicons-list > li > .glyphicon-class {
+	width:100%;
+	display: block;
+	font-size: 12px;
+	padding: 10px 0;
+	height:80px;
+}
+
+.bs-ionicons-list > li {
+	background-color: lightgrey;
+	display: inline-block;
+	margin: 4px;
+	position: relative;
+	text-align: center;
+	top: 0;
+	width: 120px;
+}
+.bs-ionicons-list > li:hover {
+	background-color: lightblue;
+}
+.bs-ionicons-list > li > .ionicons {
+	width:100%;
+	font-size: 18px;
+	padding: 10px 0;
+}
+.bs-ionicons-list > li > .ionicons-class {
+	width:100%;
+	display: block;
+	font-size: 12px;
+	padding: 10px 0;
+	height:80px;
+}
+
+.bs-fa-list > li {
+	background-color: lightgrey;
+	display: inline-block;
+	margin: 4px;
+	position: relative;
+	text-align: center;
+	top: 0;
+	width: 120px;
+}
+.bs-fa-list > li:hover {
+	background-color: lightblue;
+}
+.bs-fa-list > li > .fa {
+	width:100%;
+	font-size: 18px;
+	padding: 10px 0;
+}
+.bs-fa-list > li > .fa-class {
+	width:100%;
+	display: block;
+	font-size: 12px;
+	padding: 10px 0;
+	height:80px;
+}
+	 
+
+
+.bs-fi-list > li {
+	background-color: lightgrey;
+	display: inline-block;
+	margin: 4px;
+	position: relative;
+	text-align: center;
+	top: 0;
+	width: 120px;
+}
+.bs-fi-list > li:hover {
+	background-color: lightblue;
+}
+.bs-fi-list > li > .fi {
+	width:100%;
+	font-size: 18px;
+	padding: 10px 0;
+}
+.bs-fi-list > li > .fi-class {
+	width:100%;
+	display: block;
+	font-size: 12px;
+	padding: 10px 0;
+	height:80px;
+}	 
