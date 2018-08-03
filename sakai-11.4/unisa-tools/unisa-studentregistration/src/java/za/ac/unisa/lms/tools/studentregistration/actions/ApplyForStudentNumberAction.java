@@ -1348,7 +1348,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			
 			if ("STATUS".equalsIgnoreCase(stuRegForm.getLoginSelectMain()) || "APPEAL".equalsIgnoreCase(stuRegForm.getLoginSelectMain()) || "OFFER".equalsIgnoreCase(stuRegForm.getLoginSelectMain())){
 				stuRegForm.setWebLoginMsg("Student not found.");
-				stuRegForm.setWebLoginMsg2("Please apply for a student number before using this fuction!newline Click OK retry or click Cancel if you wish to quit the application process.");
+				stuRegForm.setWebLoginMsg2("Please apply for a student number before using this function!newline Click OK retry or click Cancel if you wish to quit the application process.");
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 						new ActionMessage("message.generalmessage", "No Student exists - Please apply for a student number before you can view your application status or appeal a decision."));
 				addErrors(request, messages);
