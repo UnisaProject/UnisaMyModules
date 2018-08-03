@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -546,9 +547,22 @@ public class StudentAppealDAO extends StudentSystemDAO {
 	    		  //log.debug("StudentAppealDAO getQualSubscription - getApplyAppeal - studentNr="+studentNr+", - choice="+choice+" - IS NOT Oversubscribed");
 	    	  }
 
-			  String query2 = "select new_qual, status_code, admission_verified, docs_outstanding, "
+//			  String query2 = "select new_qual, status_code, admission_verified, docs_outstanding,admin_section, "
+//					  	+ " COALESCE(space_offered, ' ') as space_offered,"
+//					  	+ " COALESCE(results_outstanding, ' ') as results_outstanding"
+//			  			+ " from stuapq "
+//	    			  	+ " where choice_nr = ? "
+//	    			  	+ " and academic_year = ? "
+//	    			  	+ " and application_period = ? "
+//	    			  	+ " and mk_student_nr = ? ";
+			  
+			  String query2 = "select new_qual,admission_verified, docs_outstanding,admin_section,status_code,"
 					  	+ " COALESCE(space_offered, ' ') as space_offered,"
-					  	+ " COALESCE(results_outstanding, ' ') as results_outstanding"
+					  	+ " COALESCE(results_outstanding, ' ') as results_outstanding,"
+					  	+ " CASE WHEN status_code='AX' AND admin_section='083' THEN (select to_char(max(STUAPL.ACTION_TIMESTAMP),'YYYYMMDD') from stuapl where STUAPL.ACADEMIC_YEAR=STUAPQ.ACADEMIC_YEAR"
+					  	+ " and STUAPL.APPLICATION_PERIOD=STUAPQ.APPLICATION_PERIOD"
+					  	+ " and STUAPL.MK_STUDENT_NUMBER=STUAPQ.MK_STUDENT_NR"
+					  	+ " and STUAPL.ACTION_CODE_GC272='VERADM') END as decline_date"					  
 			  			+ " from stuapq "
 	    			  	+ " where choice_nr = ? "
 	    			  	+ " and academic_year = ? "
@@ -567,6 +581,7 @@ public class StudentAppealDAO extends StudentSystemDAO {
 	    		  String docs = data.get("docs_outstanding").toString().trim();
 	    		  String space = data.get("space_offered").toString().trim();
 	    		  String results = data.get("results_outstanding").toString().trim();
+	    		  String adminSection = data.get("admin_section").toString().trim();
 	    		  
 	    		  //log.debug("StudentAppealDAO getApplyAppeal - Qualification="+qual+", choice="+choice+", appeal="+status+", verified="+verified+", docs="+docs+", space="+space);
 	    		  if ("AP".equalsIgnoreCase(status)){
@@ -603,7 +618,26 @@ public class StudentAppealDAO extends StudentSystemDAO {
 		    		  }else{
 		    			  return "CG";
 		    		  }
-	    		  }else{
+	    		  //Johanet July2018 BRD Hons and PGD not allowed to appeal if 10 working days from decline date
+	    		  }else if ("AX".equalsIgnoreCase(status) && "083".equalsIgnoreCase(adminSection)){
+	    			 //Determine decline date	
+	    			  boolean withInTenDays = true;
+	    			  if (data.get("decline_date")!= null) {
+	    				  String declineDateStr = data.get("decline_date").toString().trim();
+		    			  SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+						  Date declineDate = formatter.parse(declineDateStr);
+						  Date currentDate = new Date();					  
+						  int duration = calculateDuration(declineDate, currentDate) - calculatePublicHolidays(declineDate, currentDate);						 
+						  if (duration > 10) {
+							  withInTenDays = false;
+						  }
+	    			  }	    			 
+	    			  if (withInTenDays) {
+	    				  return "AX";
+	    			  }else {
+	    				  return "AXE";
+	    			  }	    				  
+	    		  }else {
 	    			  return status;
 	    		  }
 	    	  }else{
@@ -614,6 +648,44 @@ public class StudentAppealDAO extends StudentSystemDAO {
 	      					"StudentAppealDAO: Error occured on reading Application Appeal / "+ex);
 	      	}
 	  }
+	  
+	  //Johanet 2018July BRD - 9.1 cannot appeal after 10 working days
+	  //Number of public holidays not on a Saturday or Sunday
+	  public int calculatePublicHolidays(Date startDate, Date endDate) throws Exception {		
+		  
+		  SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+		  String startDateString = df.format(startDate);
+		  String endDateString = df.format(endDate);
+		  Calendar cal = Calendar.getInstance();
+		  cal.setTime(startDate);
+		  int startYear = cal.get(Calendar.YEAR);
+		  cal.setTime(endDate);
+		  int endYear = cal.get(Calendar.YEAR);
+
+			int publicHolidays = 0; 
+			
+			//Check if student record exists by using Surname, First Names, Date of Birth and ID (Or ForeignID or Passport)
+			String query  = "select count(*) as days from regdat " + 
+					" where REGDAT.ACADEMIC_YEAR in (?,?)" + 
+					" and REGDAT.TYPE like 'PUBH_%'" + 
+					" and from_date <= to_date(?,'YYYYMMDD')" + 
+					" and from_date >= to_date(?,'YYYYMMDD')" + 
+					" and TO_CHAR(REGDAT.FROM_DATE,'DY','NLS_DATE_LANGUAGE=ENGLISH') not in ('SAT','SUN')";
+			
+			try {			
+				JdbcTemplate jdt = new JdbcTemplate(getDataSource());
+				List queryList = jdt.queryForList(query, new Object []{startYear, endYear,endDateString, startDateString});
+				Iterator i = queryList.iterator();
+				if (i.hasNext()) {
+					ListOrderedMap data = (ListOrderedMap) i.next();
+					publicHolidays = Integer.parseInt(data.get("days").toString()); //Current Student
+				}
+			} catch (Exception ex) {
+				throw new Exception(
+						"StudentAppealDAO : Error reading public holidays / " + ex);
+			}
+			return publicHolidays;
+		}
 	  
 	  public String getAppealDesc(String appeal) throws Exception{
 	    	
@@ -817,4 +889,35 @@ public class StudentAppealDAO extends StudentSystemDAO {
 		}
 		return list;
 	}	
+	
+	 //Johanet 2018July BRD - 9.1 cannot appeal after 10 working days
+	public static int calculateDuration(Date startDate, Date endDate)
+	{
+	  Calendar startCal = Calendar.getInstance();
+	  startCal.setTime(startDate);
+
+	  Calendar endCal = Calendar.getInstance();
+	  endCal.setTime(endDate);
+
+	  int workDays = 0;
+
+	  if (startCal.getTimeInMillis() > endCal.getTimeInMillis())
+	  {
+	    startCal.setTime(endDate);
+	    endCal.setTime(startDate);
+	  }
+
+	  do
+	  {
+	    startCal.add(Calendar.DAY_OF_MONTH, 1);
+	    if (startCal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && startCal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY)
+	    {
+	      workDays++;
+	    }
+	  }
+	  while (startCal.getTimeInMillis() <= endCal.getTimeInMillis());
+	  
+	  return workDays;
+	}
+
 }
