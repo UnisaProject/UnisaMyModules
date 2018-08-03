@@ -4137,10 +4137,10 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 			String errorFlag="N";
 			
 			while ("N".equalsIgnoreCase(errorFlag)){
-				Calendar calendar = Calendar.getInstance();
+				Calendar calDueDate = Calendar.getInstance();
 				SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-				Date dueDate = formatter.parse(assignment.getDueDate());		
-				calendar.setTime(dueDate);
+				Date dueDate = formatter.parse(assignment.getDueDate());	
+				calDueDate.setTime(dueDate);
 				//Validate due date against assignment due date control dates
 				//Do not validate due date for tests
 				if ("T".equalsIgnoreCase(assignment.getType())){
@@ -4184,15 +4184,17 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 							//20160622 changes for 2017
 							//Verify that all due dates for formative assessments with admission system AM(Submission of more than one assignment) are set before exam admission date for that academic period
 							//Verify that all due dates for formative assessments with admission system YM(Year mark subminimum achieved) are set at least 7 days before exam admission date for that academic period
-							calendar = Calendar.getInstance();
+							Calendar calExamAdmissionDate = Calendar.getInstance();
 							Date examAdmissionDate = formatter.parse(assessmentCritForm.getExamAdmissionDate());						
 							if (assessmentCritForm.getFinalMarkComp().getExamAdmissionMethod().equalsIgnoreCase("AM") ||
 								assessmentCritForm.getFinalMarkComp().getExamAdmissionMethod().equalsIgnoreCase("YM")){
 								if (assessmentCritForm.getFinalMarkComp().getExamAdmissionMethod().equalsIgnoreCase("YM") &&
-										assessmentCritForm.getYearMarkContributionYesNoFlag().equalsIgnoreCase("Y")){
-									calendar.setTime(examAdmissionDate);
-									calendar.add(Calendar.DATE, -6);
-									examAdmissionDate = calendar.getTime();
+										((assignment.getNormalWeight()!=null && Integer.parseInt(assignment.getNormalWeight())>0) ||
+												(assignment.getRepeatWeight()!=null && Integer.parseInt(assignment.getRepeatWeight())>0) ||
+												(assignment.getAegrotatWeight() !=null && Integer.parseInt(assignment.getAegrotatWeight() )>0))){
+									calExamAdmissionDate.setTime(examAdmissionDate);
+									calExamAdmissionDate.add(Calendar.DATE, -6);
+									examAdmissionDate = calExamAdmissionDate.getTime();
 									if (dueDate.before(examAdmissionDate)) {
 										//ok
 									} else {
@@ -4204,9 +4206,9 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 								//20170605 - change for 2018
 								//Verify that all due dates for formative assessments with admission system AM(Submission of more than one assignment) are set at least 3 days before exam admission date for that academic period
 								if (assessmentCritForm.getFinalMarkComp().getExamAdmissionMethod().equalsIgnoreCase("AM")){
-									calendar.setTime(examAdmissionDate);
-									calendar.add(Calendar.DATE, -2);
-									examAdmissionDate = calendar.getTime();
+									calExamAdmissionDate.setTime(examAdmissionDate);
+									calExamAdmissionDate.add(Calendar.DATE, -2);
+									examAdmissionDate = calExamAdmissionDate.getTime();
 									if (dueDate.before(examAdmissionDate)) {
 										//ok
 									} else {
@@ -4235,7 +4237,7 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 				
 					//Validate that due date do not fall on a weekend
 					if (assignment.getFormat()!=null && !assignment.getFormat().equalsIgnoreCase("XA")){
-						if (calendar.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY || calendar.get(Calendar.DAY_OF_WEEK)==Calendar.SATURDAY){
+						if (calDueDate.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY || calDueDate.get(Calendar.DAY_OF_WEEK)==Calendar.SATURDAY){
 							String stringDueDate="";
 							stringDueDate=formatter.format(dueDate);
 							if (stringDueDate.equalsIgnoreCase("20090801") && assessmentCritForm.getSemester().equalsIgnoreCase("0")){
