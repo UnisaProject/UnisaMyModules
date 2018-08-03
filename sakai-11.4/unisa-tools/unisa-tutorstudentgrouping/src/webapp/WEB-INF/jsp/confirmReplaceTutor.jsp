@@ -6,13 +6,14 @@
 <%@ taglib uri="http://sakaiproject.org/struts/sakai" prefix="sakai" %>
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.tutorstudentgrouping.ApplicationResources"/>
+
+<sakai:html>
 <script language="javascript">
 	function doAction() {
 		document.tutorStudentGroupForm.action = 'tutorStudentGrouping.do?act=replaceTutor';  
 		document.tutorStudentGroupForm.submit();
 	}
 </script>
-<sakai:html>
 	<html:form action="/tutorStudentGrouping">
 		<html:hidden property="currentPage" value="confirmReplaceTutor"/>
 		<sakai:messages/>
