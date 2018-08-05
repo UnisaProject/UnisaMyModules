@@ -34,5 +34,21 @@
         </dependency>
     </dependencies>
 
+	<profiles>
+		<profile>
+			<id>compile-skin</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<!-- SY replace skin.source from morpheus-master to unisa-master -->
+				<sakai.skin.source>unisa-master</sakai.skin.source>
+				<!-- sakai.skin.source>morpheus-master</sakai.skin.source-->
+				<sakai.skin.target>morpheus-default</sakai.skin.target>
+				<sakai.skin.customization.file>src/${sakai.skin.source}/sass/examples/_customization_example_empty.scss</sakai.skin.customization.file>
+				<sakai.skin.outputSyle>compressed</sakai.skin.outputSyle>
+			</properties>
+		</profile>
+	</profiles>
 </project>
 
