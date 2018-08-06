@@ -1420,8 +1420,9 @@ public class StudentUploadAction extends LookupDispatchAction {
 				//log.debug("StudentUploadAction - Upload - STUAPQ Done");
 				
 				//log.debug("StudentUploadAction - Upload - Do Staae05sAppAdmissionEvaluator Letter");
+				/**2018 July - Johanet enable code that was commented out to email application received letter - BRD SR198094 5.1**/
 				/**2018 Edmund Start of Send Letter**/
-				/**
+				
 				Staae05sAppAdmissionEvaluator op = new Staae05sAppAdmissionEvaluator();
 				operListener opl = new operListener();
 				op.addExceptionListener(opl);
