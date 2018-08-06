@@ -4295,7 +4295,7 @@ public class AssessmentCriteriaAction extends LookupDispatchAction{
 						(assignment.getFormat().equalsIgnoreCase("H") && (assignment.getType().equalsIgnoreCase("PF") ||
 								assignment.getType().equalsIgnoreCase("PJ") ||
 								assignment.getType().equalsIgnoreCase("PC"))) ||
-						(assignment.getFormat().equalsIgnoreCase("MS") && (assessmentCritForm.getAssignment().getType().equalsIgnoreCase("PF") ||
+						(assignment.getFormat().equalsIgnoreCase("MS") && (assignment.getType().equalsIgnoreCase("PF") ||
 								assignment.getType().equalsIgnoreCase("PJ") ||
 								assignment.getType().equalsIgnoreCase("PC") ||
 								assignment.getType().equalsIgnoreCase("R") ||
