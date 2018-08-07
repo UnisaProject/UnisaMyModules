@@ -5,7 +5,7 @@
 	padding: 0 170px 0 1em;
 	//max-width: calc(100% - 170px);
 	@media #{$phone}{
-		padding: 0.3em 0.7em;
+		padding: 0;
 		//max-width: 100%;
 	}
 	&:after{

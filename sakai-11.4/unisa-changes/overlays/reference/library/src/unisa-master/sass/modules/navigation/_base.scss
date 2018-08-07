@@ -80,11 +80,11 @@ body.is-logged-out{
 		}
 	}
 	@media #{$phone}{
-		background: $primary-color;
-		position: fixed;
-		top: 0;
+		//background: $primary-color;
+		//position: fixed;
+		//top: 0;
 		width: 100%;
-		z-index: 20;
+		//z-index: 20;
 	}
 }
 
@@ -220,9 +220,9 @@ body.is-logged-out{
 
 	@media #{$phone}{
 		@include display-flex( flex );
-		position: fixed;
+		//position: fixed;
 		width: 100%;
-		top: 0;
+		//top: 0;
 		font-size: 12px;
 		min-height: $header-size;
 		

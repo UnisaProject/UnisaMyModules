@@ -27,11 +27,11 @@
 		}
 	}
 	@media #{$phone}{
-		position: fixed;
-		z-index: 20;
-		top: 88px;
+		position: inherit;
+		//z-index: 20;
+		//top: 88px;
 		left: 0;
-		background: lighten($tool-menu-color, 15% );
+		background: $sites-nav-background;
 		width: 100%;
 		margin:  0 0 0 0;
 
@@ -50,6 +50,9 @@
 		li{
 			@include flex-basis( 50% );
 			border-right: 1px solid #999;
+			margin-left: 0px;
+			padding-left: 0px;
+			list-style: none;
 			
 			&:last-of-type
 			{

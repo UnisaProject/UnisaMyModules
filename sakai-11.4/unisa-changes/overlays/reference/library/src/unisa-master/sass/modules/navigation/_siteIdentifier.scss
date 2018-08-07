@@ -15,6 +15,9 @@
 			color: $sites-nav-background;
 		}
 	}
+	@media #{$phone}{
+		margin: 20px 0 !important;
+	}
 }
 .ci-yellow-bg {
 	background: $brand-yellow;
