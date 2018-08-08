@@ -37,7 +37,7 @@
   <properties>
   <etudes.util.version>1.0.17</etudes.util.version> 
   <melete.version>2.9.1</melete.version>
-  <sakai.jsf.version>10.5</sakai.jsf.version>
+  <sakai.jsf.version>11.4</sakai.jsf.version>
   </properties>
   
   <modules>
