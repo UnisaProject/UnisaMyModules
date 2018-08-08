@@ -6148,6 +6148,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			if (!"Y".equalsIgnoreCase(radioNDP)){
 				radioNDP = "N";
 			}
+			
+			//Johanet 2018July BRD - RPL for returning undergrad students
+			if (stuRegForm.getSelectHEMain()!=null && stuRegForm.getSelectHEMain().equalsIgnoreCase("RPL")) {
+				radioRPL = "Y";
+			}
+			
 			int saveResult1 = dao.saveSTUAPQ(
 										newQual1, 
 										newSpec1, 
