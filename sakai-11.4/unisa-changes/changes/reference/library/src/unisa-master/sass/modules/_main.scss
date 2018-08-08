@@ -1,0 +1,116 @@
+@import "base/compass";
+
+//.#{$namespace}
+.is-logged-out{
+	#content, .#{$namespace}container--footer{
+		margin: 0 0 0 0;
+		@media #{$phone}{
+			margin: 6.5em 0 0 0;
+		}
+	}
+	.#{$namespace}topHeader {
+		@media #{$phone}{
+			&.moving{
+	    		top: -12em;
+	    	}
+	    }
+    }
+}
+
+.#{$namespace}portalWrapper {
+	position: relative;
+	//max-width: 1170px;
+	//margin: 0 auto;
+	//padding: 0 15px;
+}
+
+#pageBody{
+	@include align-items(stretch);
+	@include display-flex(flex);
+	@include flex-direction(row);
+	> .#{$namespace}pagebody{
+		width: 100%;
+	}
+	@media #{$phone}{
+		//padding: 12px;
+	}
+}
+
+#content, .#{$namespace}container--footer{
+	margin: 0 0 0 0;
+	width: 100%;
+
+	@media #{$phone}{
+		margin: 0;
+	}
+	
+	#col1of2, #col2of2{
+		display: inline-block;
+		margin: 0 0 0 1%;
+		vertical-align: top;
+		width: 48%;
+		@media #{$phone}{
+			display: block;
+			width: 100%;
+		}
+	}
+}
+
+.site-identifier{
+	@media #{$phone}{
+		margin: 140px 0 0 0;
+	}
+}
+
+.#{$namespace}mainContent{
+  background: $main-content-background;
+}
+
+.#{$namespace}pageColumns--single, .#{$namespace}footer{
+	margin: 0 0 0 15px;
+	clear: both;
+	@media #{$phone}{
+		margin: 0 0 0 0;
+	}
+}
+
+.#{$namespace}container--footer{
+}
+
+.#{$namespace}footer{
+	color: $footer-color;
+	background: $footer-background;
+	padding: 20px;
+	font-size: 0.8em;
+	margin: 20px 0 0 0;
+	#footer-links{
+		list-style: none;
+		padding: 0 0 0 0;
+		li{
+			display: inline-block;
+		}
+	}
+	a {
+		color: #fff;
+		text-decoration: none;
+	}
+	a:hover {
+		color: #fff;
+	}
+}
+
+.#{$namespace}noJs.js-warn-no-js
+{
+	position: fixed;
+	bottom: 0;
+	left: 10%;
+	width: 80%;
+	padding: 1em;
+	z-index: 200;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+	background-color: #c00;
+	font-size: 1.143em;
+	text-align: center;
+	color: #fff;
+}
