@@ -9,7 +9,10 @@
 			margin: 0px;
 			position: relative;
 			//text-transform: uppercase;
-			width: calc(100% - 90px);
+			width: calc(100% - 180px);
+			@media #{$phone}{
+				width: calc(100% - 90px);
+			}
 			a{
 				//color: rgba(21,21,21,0.5);
 				//font-weight: 400;
@@ -22,7 +25,7 @@
 
 .#{$namespace}toolTitleNav{
 	margin: 1em 0 0 0;
-	padding: 0.5em;
+	padding: 0.5em 0;
 	position: relative;
 	.#{$namespace}toolTitleNav__title{
 		display: none;
@@ -65,8 +68,8 @@
 	.#{$namespace}toolTitleNav__button_container{
 		position: absolute;
 		float: right;
-		top: 5px;
-		right: 4px;
+		top: 12px;
+		right: 0px;
 		z-index: 1;
 		@media #{$tablet}{
 			font-size: 1.5em;
