@@ -21,7 +21,6 @@
 	<module>unisa-assmarkerreallocation</module>
 	<module>unisa-axis</module>
 	<!-- >module>unisa-biodetails</module-->
-	<!--module>unisa-broadbandrequest</module-->
 	<module>unisa-booklist</module>
 	<module>unisa-booklistadmin</module>
 	<module>unisa-browsertest</module>
@@ -48,7 +47,6 @@
 	<module>unisa-mdactivity</module>
 	<module>unisa-mdadmission</module>
 	<module>unisa-mdapplications</module>
-	<!-- module>unisa-mdrpmresults</module-->	
 	<module>unisa-monitor</module>
 	<module>unisa-mylife</module>
 	<module>unisa-mylifesupport</module>
@@ -79,7 +77,6 @@
 	<module>unisa-trackandtrace</module>
 	<!--module>unisa-tutorappointment</module-->
 	<!--module>unisa-tracking</module-->
-	<!--module>unisa-tsastudentnumber</module-->
 	<module>unisa-mdregistrations</module>
 	<module>unisa-studentnosearch</module>
 	<module>unisa-tpustudentplacement</module>
