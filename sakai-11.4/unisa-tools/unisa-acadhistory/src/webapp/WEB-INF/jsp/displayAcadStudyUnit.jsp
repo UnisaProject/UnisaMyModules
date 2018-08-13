@@ -6,6 +6,8 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ page import="za.ac.unisa.lms.tools.acadhistory.forms.Student"%>
 <fmt:setBundle basename="za.ac.unisa.lms.tools.acadhistory.ApplicationResources"/>
+
+<sakai:html>
 <script>
 	var linkWithMarksClick = false;
 	var linkWithoutMarksClick = false;
@@ -30,8 +32,6 @@
 		return true;
 	}
 </script>
-
-<sakai:html>
 <logic:equal name="acadHistoryDisplayForm" property="acadRecRequestButtonState" value="E">
 <sakai:tool_bar>
 		<html:link href="displayAcadHistory.do?action=emailwithmarks" onclick='<%="return checkWithMarksLink(this);"%>'>
