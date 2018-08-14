@@ -168,7 +168,7 @@ public class BrochureQueries {
 
 				    
 					//Adding SAQA ID
-					 sb.append("grd.approved_qual_id,");
+					 sb.append("grd.saqa_id,");
 					//foundation flag to choose which aps_score to extract
 				    sb.append("grd.foundation_flag,");
 				    //New APS Score Element 391
@@ -290,7 +290,7 @@ public class BrochureQueries {
 			    	//New APS Score Element
 					//queryBuilder.append("GRD.APS_SCORE aps_score,");
 			    	//Adding SAQA ID
-			    	queryBuilder.append("grd.approved_qual_id,");
+			    	queryBuilder.append("grd.saqa_id,");
 			    	queryBuilder.append(" nqf_exit_level nqflvl, grd.nqf_credits creds, qspsun.study_level lvl,");         
 			    	queryBuilder.append(" qspsun.group0 grp, mk_study_unit_code module,");             
 			    	queryBuilder.append(" replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(REPLACE(REPLACE (REPLACE (REPLACE (replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(NLS_INITCAP (sun.eng_long_descripti), ' Iii', ' III'), ' Ii',' II'),' Iv',' IV'),'Llb','LLB'),' For ',' for '),"); 	             

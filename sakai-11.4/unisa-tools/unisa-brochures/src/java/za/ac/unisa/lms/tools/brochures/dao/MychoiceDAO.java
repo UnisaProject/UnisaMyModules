@@ -91,7 +91,7 @@ public class MychoiceDAO extends StudentSystemDAO {
 				//Aps Score from Function 42
 				+ "grd.aps_score,"
 				//Adding SAQA ID
-				+ "grd.approved_qual_id,"
+				+ "grd.saqa_id,"
 				//foundation flag to choose which aps_score to extract
 				+ "grd.foundation_flag,"
 				+ " quaspc.admission_require,"
@@ -221,6 +221,37 @@ public class MychoiceDAO extends StudentSystemDAO {
 					collCode.appendChild(document.createTextNode(collcode));
 					college.appendChild(collName);
 					college.appendChild(collCode);
+					                                        
+					qualificationLevel = data.get("UNDER_POST").toString();
+					qualLevel = document.createElement("qualificationlevel");
+					college.appendChild(qualLevel);
+					Element level = document.createElement("name");
+					level.appendChild(document.createTextNode(data.get(
+									"UNDER_POST").toString()));
+					qualLevel.appendChild(level);
+
+					qualificationGroup = data.get("CATEGORY_GROUP").toString();
+					cat_code = data.get("CAT_GRP").toString();
+					qualificationgroup = document
+									.createElement("qualificationgroup");
+					qualLevel.appendChild(qualificationgroup);
+					Element qualGroup = document.createElement("name");
+					qualGroup.appendChild(document
+									.createTextNode(qualificationGroup));
+					Element catcode = document.createElement("code");
+					catcode.appendChild(document.createTextNode(cat_code));
+					qualificationgroup.appendChild(qualGroup);
+					qualificationgroup.appendChild(catcode);
+
+					qualificationCategory = data.get("CAT_NAME").toString();
+					qualificationcategory = document
+									.createElement("qualificationcategory");
+					qualificationgroup.appendChild(qualificationcategory);
+					Element qualCat = document.createElement("name");
+					qualCat.appendChild(document
+									.createTextNode(qualificationCategory));
+					qualificationcategory.appendChild(qualCat);
+ 
 
 				}
 				/*
@@ -383,7 +414,7 @@ public class MychoiceDAO extends StudentSystemDAO {
 				Element saqaId = document.createElement("saqa_id");
 				try {
 					saqaId.appendChild(document.createTextNode(data.get(
-							"approved_qual_id").toString()));
+							"saqa_id").toString()));
 				} catch (NullPointerException ne) {
 				}
 				qualification.appendChild(qualName);
@@ -572,7 +603,7 @@ public class MychoiceDAO extends StudentSystemDAO {
 				//Aps Score from Function 42
 				//+ " grd.aps_score,"
 				//Adding SAQA ID
-				+ "grd.approved_qual_id,"
+				+ "grd.saqa_id,"
 				+ " (select school.eng_description from school where code =grd.school_code and SCHOOL.COLLEGE_CODE=colleg.code) SCHOOLDESCR,"
 				+ " GRD.MK_ACAD_DEPT_CODE deptcode,"
 				+ " (select dpt.eng_description from dpt where code=grd.MK_ACAD_DEPT_CODE) DEPT,"
@@ -1266,7 +1297,7 @@ public class MychoiceDAO extends StudentSystemDAO {
 						Element saqaId = document.createElement("saqa_id");
 						try {
 							saqaId.appendChild(document.createTextNode(data.get(
-									"approved_qual_id").toString()));
+									"saqa_id").toString()));
 						} catch (NullPointerException ne) {
 						}
 						qualification.appendChild(qualCode);
@@ -1827,7 +1858,7 @@ public class MychoiceDAO extends StudentSystemDAO {
 							Element saqaId = document.createElement("saqa_id");
 							try {
 								saqaId.appendChild(document.createTextNode(data.get(
-										"approved_qual_id").toString()));
+										"saqa_id").toString()));
 							} catch (NullPointerException ne) {
 							}
 							qualification.appendChild(qualCode);
