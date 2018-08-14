@@ -46,12 +46,14 @@
                       memoryStoreEvictionPolicy="LFU"--> 
 
         <!-- SY  Adding the element <terracotta /> turns on Terracotta clustering for the cache  --> 
+         	<terracottaConfig url="localhost:9510" /> 
+         	
         	<terracotta> 
         		<nonstop immediateTimeout="false" timeoutMillis="30000"> 
         			<timeoutBehavior type="noop" /> 
         		</nonstop> 
         	</terracotta> 
-        	<terracottaConfig url="localhost:9510" /> 
+
         
     </defaultCache>
 
