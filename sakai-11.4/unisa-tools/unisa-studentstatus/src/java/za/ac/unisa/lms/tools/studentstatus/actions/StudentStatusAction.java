@@ -26,8 +26,11 @@ import org.apache.struts.action.ActionMessages;
 import org.apache.struts.actions.LookupDispatchAction;
 import org.apache.struts.util.LabelValueBean;
 
+import za.ac.unisa.lms.dao.Gencod;
+import za.ac.unisa.lms.dao.StudentSystemGeneralDAO;
 import za.ac.unisa.lms.tools.studentstatus.bo.Status;
 import za.ac.unisa.lms.tools.studentstatus.dao.StudentStatusDAO;
+import za.ac.unisa.lms.tools.studentstatus.forms.ScreeningVenue;
 import za.ac.unisa.lms.tools.studentstatus.forms.Student;
 import za.ac.unisa.lms.tools.studentstatus.forms.StudentStatusForm;
 
@@ -1244,6 +1247,38 @@ public class StudentStatusAction extends LookupDispatchAction {
 			    	//log.debug("StudentStatusAction - applyStatus - form PayFull="+stuStatForm.getStatus().isPayFull());
 			    	//log.debug("StudentStatusAction - applyStatus - form PayCom ="+stuStatForm.getStatus().getPayComment());
 			    	
+				}
+				
+				//Johanet change 20180813 2018 July BRD - Social work screening
+				stuStatForm.setScreeningSitting(false);
+				Gencod gencod = new Gencod();
+				String qual1=stuStatForm.getSelQualCode1().substring(0,5);
+				String qual2=stuStatForm.getSelQualCode2().substring(0,5);
+				StudentSystemGeneralDAO genDao = new StudentSystemGeneralDAO();
+				if (("90088".equalsIgnoreCase(qual1) || "90011".equalsIgnoreCase(qual1)) && 
+						("CG".equalsIgnoreCase(stuStatForm.getQualStatusCode1()) || "RO".equalsIgnoreCase(stuStatForm.getQualStatusCode1()) ||
+								"AP".equalsIgnoreCase(stuStatForm.getQualStatusCode1()) || "WA".equalsIgnoreCase(stuStatForm.getQualStatusCode1()))){
+							stuStatForm.setScreeningSitting(true);
+							gencod = new Gencod();						
+							gencod = genDao.getGenCode("311", qual1);
+							if (gencod.getEngDescription() != null)
+							stuStatForm.setScreeningSittingQual1(gencod.getEngDescription());
+				}
+			
+				if (("90088".equalsIgnoreCase(qual2) || "90011".equalsIgnoreCase(qual2)) && 
+						("CG".equalsIgnoreCase(stuStatForm.getQualStatusCode2()) || "RO".equalsIgnoreCase(stuStatForm.getQualStatusCode2()) ||
+								"AP".equalsIgnoreCase(stuStatForm.getQualStatusCode2()) || "WA".equalsIgnoreCase(stuStatForm.getQualStatusCode2()))){
+					stuStatForm.setScreeningSitting(true);
+					gencod = new Gencod();						
+					gencod = genDao.getGenCode("311", qual2);
+					if (gencod.getEngDescription() != null)
+					stuStatForm.setScreeningSittingQual2(gencod.getEngDescription());
+				}	
+				
+				if (stuStatForm.isScreeningSitting()) {
+					ScreeningVenue venue = new ScreeningVenue();
+					venue = dao.getScreeningVenue(stuStatForm.getStudent().getNumber());
+					stuStatForm.setScreeningVenue(venue);
 				}
 			}
 			

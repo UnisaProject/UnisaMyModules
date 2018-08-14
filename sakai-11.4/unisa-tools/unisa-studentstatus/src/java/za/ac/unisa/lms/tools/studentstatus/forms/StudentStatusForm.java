@@ -68,6 +68,43 @@ public class StudentStatusForm extends ValidatorActionForm {
 	private String qualStatus1Reason = "";
 	private String qualStatus2Reason = "";
 	
+	private boolean screeningSitting = false;
+	private String screeningSittingQual1 ="";
+	private String screeningSittingQual2 ="";
+	private ScreeningVenue screeningVenue = new ScreeningVenue();	
+	
+	public boolean isScreeningSitting() {
+		return screeningSitting;
+	}
+
+	public void setScreeningSitting(boolean screeningSitting) {
+		this.screeningSitting = screeningSitting;
+	}
+
+	public ScreeningVenue getScreeningVenue() {
+		return screeningVenue;
+	}
+
+	public void setScreeningVenue(ScreeningVenue screeningVenue) {
+		this.screeningVenue = screeningVenue;
+	}
+
+	public String getScreeningSittingQual1() {
+		return screeningSittingQual1;
+	}
+
+	public void setScreeningSittingQual1(String screeningSittingQual1) {
+		this.screeningSittingQual1 = screeningSittingQual1;
+	}
+
+	public String getScreeningSittingQual2() {
+		return screeningSittingQual2;
+	}
+
+	public void setScreeningSittingQual2(String screeningSittingQual2) {
+		this.screeningSittingQual2 = screeningSittingQual2;
+	}
+
 	public String getVersion() {
 		return version;
 	}
@@ -339,6 +376,7 @@ public class StudentStatusForm extends ValidatorActionForm {
 		applyType = "";
 		allowLogin = true;
 		student = new Student();
+		screeningVenue = new ScreeningVenue();
 		donesubmit = null;
 		String500back = null;
 
@@ -366,6 +404,9 @@ public class StudentStatusForm extends ValidatorActionForm {
 		qualStatusCode2 = "";
 		qualStatus1Reason = "";
 		qualStatus2Reason = "";
+		screeningSitting = false;
+		screeningSittingQual1 ="";
+		screeningSittingQual2 ="";
 	
 	}
 }

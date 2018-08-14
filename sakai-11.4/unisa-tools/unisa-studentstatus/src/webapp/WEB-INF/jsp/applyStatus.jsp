@@ -264,6 +264,48 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 							</logic:notEqual>
 						</sakai:group_table>
 					</logic:notEqual>
+					<logic:equal name="studentStatusForm" property="screeningSitting" value="true">
+					<hr/>
+						<sakai:group_table>
+							<tr>
+								<td colspan="2">
+									<strong>Exam sitting for Social work screening accessment: </strong><br/>
+								</td>
+							</tr>
+							<logic:notEqual name="studentStatusForm" property="screeningSittingQual1" value="">
+								<tr>
+									<td>
+										<strong><bean:write name="studentStatusForm" property="selQualCode1"/> : </strong>
+									</td><td>
+										<bean:write name="studentStatusForm" property="screeningSittingQual1"/>
+									</td>
+								</tr>
+							</logic:notEqual>
+							<logic:notEqual name="studentStatusForm" property="screeningSittingQual2" value="">
+								<tr>
+									<td>
+										<strong><bean:write name="studentStatusForm" property="selQualCode2"/> : </strong>
+									</td><td>
+										<bean:write name="studentStatusForm" property="screeningSittingQual2"/>
+									</td>
+								</tr>
+							</logic:notEqual>
+							<tr>
+								<td>
+									<strong>Venue: </strong><br/>
+								</td>
+								<td><bean:write name="studentStatusForm" property="screeningVenue.venueName"/></td>
+							</tr>
+							<td>
+									<strong>Venue address: </strong><br/>
+								</td>
+							<td>
+								<logic:iterate name="studentStatusForm" property="screeningVenue.addressList" id="record" indexId="index">
+										<bean:write name="record"/><br/>									
+								</logic:iterate>
+							</td>		
+						</sakai:group_table>	
+					</logic:equal>		
 				</div>	
 				<div class="panel-footer clearfix">
 					<sakai:actions>
