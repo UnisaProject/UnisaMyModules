@@ -269,7 +269,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 						<sakai:group_table>
 							<tr>
 								<td colspan="2">
-									<strong>Exam sitting for Social work screening accessment: </strong><br/>
+									<strong>Exam sitting for Social work screening assessment: </strong><br/>
 								</td>
 							</tr>
 							<logic:notEqual name="studentStatusForm" property="screeningSittingQual1" value="">
