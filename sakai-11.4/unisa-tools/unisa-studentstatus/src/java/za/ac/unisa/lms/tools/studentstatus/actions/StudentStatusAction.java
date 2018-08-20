@@ -1255,25 +1255,26 @@ public class StudentStatusAction extends LookupDispatchAction {
 				String qual1=stuStatForm.getSelQualCode1().substring(0,5);
 				String qual2=stuStatForm.getSelQualCode2().substring(0,5);
 				StudentSystemGeneralDAO genDao = new StudentSystemGeneralDAO();
-				if (("90088".equalsIgnoreCase(qual1) || "90011".equalsIgnoreCase(qual1)) && 
-						("CG".equalsIgnoreCase(stuStatForm.getQualStatusCode1()) || "RO".equalsIgnoreCase(stuStatForm.getQualStatusCode1()) ||
-								"AP".equalsIgnoreCase(stuStatForm.getQualStatusCode1()) || "WA".equalsIgnoreCase(stuStatForm.getQualStatusCode1()))){
-							stuStatForm.setScreeningSitting(true);
-							gencod = new Gencod();						
-							gencod = genDao.getGenCode("311", qual1);
-							if (gencod.getEngDescription() != null)
-							stuStatForm.setScreeningSittingQual1(gencod.getEngDescription());
+				
+				if ("90088".equalsIgnoreCase(qual1) || "90011".equalsIgnoreCase(qual1)) {
+					if (dao.includeSWScreeningSitting(stuStatForm.getStudent().getNumber(), stuStatForm.getStudent().getAcademicYear(),  stuStatForm.getStudent().getAcademicPeriod(), qual1)) {
+						stuStatForm.setScreeningSitting(true);
+						gencod = new Gencod();						
+						gencod = genDao.getGenCode("311", qual1);
+						if (gencod.getEngDescription() != null)
+						stuStatForm.setScreeningSittingQual1(gencod.getEngDescription());
+					}
 				}
-			
-				if (("90088".equalsIgnoreCase(qual2) || "90011".equalsIgnoreCase(qual2)) && 
-						("CG".equalsIgnoreCase(stuStatForm.getQualStatusCode2()) || "RO".equalsIgnoreCase(stuStatForm.getQualStatusCode2()) ||
-								"AP".equalsIgnoreCase(stuStatForm.getQualStatusCode2()) || "WA".equalsIgnoreCase(stuStatForm.getQualStatusCode2()))){
-					stuStatForm.setScreeningSitting(true);
-					gencod = new Gencod();						
-					gencod = genDao.getGenCode("311", qual2);
-					if (gencod.getEngDescription() != null)
-					stuStatForm.setScreeningSittingQual2(gencod.getEngDescription());
-				}	
+				
+				if ("90088".equalsIgnoreCase(qual2) || "90011".equalsIgnoreCase(qual2)) {
+					if (dao.includeSWScreeningSitting(stuStatForm.getStudent().getNumber(), stuStatForm.getStudent().getAcademicYear(),  stuStatForm.getStudent().getAcademicPeriod(), qual2)) {
+						stuStatForm.setScreeningSitting(true);
+						gencod = new Gencod();						
+						gencod = genDao.getGenCode("311", qual2);
+						if (gencod.getEngDescription() != null)
+						stuStatForm.setScreeningSittingQual2(gencod.getEngDescription());
+					}
+				}				
 				
 				if (stuStatForm.isScreeningSitting()) {
 					ScreeningVenue venue = new ScreeningVenue();

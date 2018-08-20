@@ -804,6 +804,39 @@ public class StudentStatusDAO extends StudentSystemDAO {
 	    	//log.debug("StudentStatusDAO - getStatusFee - PayCom ="+status.getPayComment());
 	    	
 	 	    return venue;
-	   }	  
+	   }	
+		  
+	  /**
+	 * Check if social work screening sitting must be included in status
+	 */
+	public boolean includeSWScreeningSitting(String studentNr, String acaYear, String acaPeriod, String qualCode) throws Exception {
+				
+				boolean includeSitting = false;
+				//Check if student record exists by using Surname, First Names, Date of Birth
+				
+				String query  = "select * from stuapq" + 
+						" where STUAPQ.ACADEMIC_YEAR=?" + 
+						" and STUAPQ.APPLICATION_PERIOD=?" + 
+						" and STUAPQ.MK_STUDENT_NR=?" + 
+						" and STUAPQ.NEW_QUAL=?" + 
+						" and (STUAPQ.STATUS_CODE in ('CG','RO') or (STUAPQ.STATUS_CODE='AP' and STUAPQ.ADMISSION_AUTO_CHK ='WA'))" + 
+						" and exists (select * from stuapl where STUAPL.ACADEMIC_YEAR=STUAPQ.ACADEMIC_YEAR and STUAPL.APPLICATION_PERIOD=STUAPQ.APPLICATION_PERIOD" + 
+						" and STUAPL.MK_STUDENT_NUMBER=STUAPQ.MK_STUDENT_NR and STUAPL.QUAL_CODE=STUAPQ.NEW_QUAL and STUAPL.ACTION_CODE_GC272='LETSOC')";			
+				
+				try {
+					JdbcTemplate jdt = new JdbcTemplate(getDataSource());
+					List queryList = jdt.queryForList(query, new Object []{acaYear, acaPeriod, studentNr, qualCode});
+					
+					Iterator i = queryList.iterator();
+					if (i.hasNext()) {
+						ListOrderedMap data = (ListOrderedMap) i.next();
+						includeSitting=true;
+					}
+				} catch (Exception ex) {
+					throw new Exception(
+							"StudentStatusDAO : Error check to include Social Work screening sitting / " + ex);
+				}			
+				return includeSitting;
+			}	  
 
 }
