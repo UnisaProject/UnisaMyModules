@@ -138,7 +138,7 @@
 
 	.breadCrumb .btn-group button.breadProp {
 			padding-left:25px;
-			@include border-radius( 3px );
+			@include border-radius( 4px );
 			-webkit-border-top-right-radius: 25px !important;
 			-webkit-border-bottom-right-radius: 25px !important;
 			-moz-border-radius-topright: 25px !important;
@@ -191,7 +191,7 @@
 
 	#navigate {
 		margin-right:10px !important;
-		@include border-radius( 3px );
+		@include border-radius( 4px );
 	}
 	.breadCrumb #navigatePanel + button {
 		padding-left:10px;

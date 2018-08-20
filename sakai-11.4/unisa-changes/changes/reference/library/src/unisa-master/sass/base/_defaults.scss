@@ -139,7 +139,7 @@ label.disabled{
 }
 
 input[type="checkbox"]{
-	@include border-radius(3px);
+	@include border-radius(4px);
 	&:checked{
 		background-image: url("images/check.png");
 		background-size: 16px;
@@ -206,6 +206,7 @@ button[class="disabled"]:hover,
 	box-shadow: none !important;
 	cursor: not-allowed;
 	text-decoration: none;
+	border-radius: 4px;
 }
 
 ul, ol {
