@@ -9418,7 +9418,10 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		
 		//file.add("Message                           = " + stuRegForm.getString500back()+"\r\n");
 		file.add(" ==========================================================================\r\n");
-		file.close(stuRegForm.getStudent().getNumber());
+		//Start Johanet - write returning student directly to application folder
+		//file.close(stuRegForm.getStudent().getNumber());
+		file.closeRet(stuRegForm.getStudent().getNumber());
+		//End Johanet - write returning student directly to application folder
 
 		//log.debug("ApplyForQualChange: Workflow for studnr="+stuRegForm.getStudent().getNumber() + " Completed");
 		
