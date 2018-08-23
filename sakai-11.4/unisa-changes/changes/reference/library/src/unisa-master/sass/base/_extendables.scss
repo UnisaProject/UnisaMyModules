@@ -321,3 +321,8 @@ label.panelGridLabel{
 	-webkit-flex-wrap: $p;
 	flex-wrap: $p;
 }
+
+/*** Images inside td elements ***/
+td img {
+	max-width: inherit;
+}
