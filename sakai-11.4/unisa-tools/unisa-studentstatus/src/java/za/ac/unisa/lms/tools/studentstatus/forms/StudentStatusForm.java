@@ -24,7 +24,7 @@ public class StudentStatusForm extends ValidatorActionForm {
 	// --------------------------------------------------------- Instance Variables
 
 	private static final long serialVersionUID = 1L;
-	private static final String version = "2018002a";
+	private static final String version = "2019001a";
 	public static Log log = LogFactory.getLog(StudentStatusAction.class);
 	
 	private String applyType = "";
