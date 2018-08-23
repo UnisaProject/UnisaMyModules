@@ -12352,7 +12352,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		
 		if (stuID == null && "".equals(stuID)){
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
-			new ActionMessage("message.generalmessage", "Enter your RSA identity number."));
+			new ActionMessage("message.generalmessage", "Please enter your RSA identity number."));
 			addErrors(request, messages);
 			return mapping.findForward("applyIDNumber");
 		}else if (!gen.isNumeric(stuID)){
