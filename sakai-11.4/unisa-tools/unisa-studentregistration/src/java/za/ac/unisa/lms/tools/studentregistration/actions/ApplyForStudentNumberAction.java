@@ -7822,13 +7822,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				setUpUniversityList(request);
 				return "applyNewInfo3";
 			}
-			if (stuRegForm.getStudentApplication().getPrevinstStudnr() == null || "".equals(stuRegForm.getStudentApplication().getPrevinstStudnr().trim())){
-				messages.add(ActionMessages.GLOBAL_MESSAGE,
-					new ActionMessage("message.generalmessage", "Enter Your student number at the previous tertiary institution."));
-				addErrors(request, messages);
-				setUpUniversityList(request);
-				return "applyNewInfo3";
-			}
+			//Johanet 20180828 SLP comment out mandatory check student number previous tertiary institiution
+//			if (stuRegForm.getStudentApplication().getPrevinstStudnr() == null || "".equals(stuRegForm.getStudentApplication().getPrevinstStudnr().trim())){
+//				messages.add(ActionMessages.GLOBAL_MESSAGE,
+//					new ActionMessage("message.generalmessage", "Enter Your student number at the previous tertiary institution."));
+//				addErrors(request, messages);
+//				setUpUniversityList(request);
+//				return "applyNewInfo3";
+//			}
 			
 			//log.debug("ApplyForStudentNumberAction - applyStep3 - N " + stuRegForm.getStudent().getNumber() + " PrevInstCode " + stuRegForm.getStudent().getPrevInstitution().getCode());
 		}else{
