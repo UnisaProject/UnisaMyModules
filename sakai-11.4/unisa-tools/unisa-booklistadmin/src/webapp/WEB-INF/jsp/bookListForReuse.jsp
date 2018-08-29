@@ -9,7 +9,7 @@
 
 <sakai:html>
 	<logic:notEqual name="booklistAdminForm" property="searchOption" value="publisher">
-<h3><fmt:message key="admin.heading"/></h3>
+<sakai:heading><fmt:message key="admin.heading"/></sakai:heading>
 	<hr/><br/>
 	<html:form action="booklistadmin">
 	<logic:notEmpty  name="booklistAdminForm" property="booklist">
@@ -194,7 +194,7 @@
 	
 	
 	<logic:equal name="booklistAdminForm" property="searchOption" value="publisher">
-	<h3><fmt:message key="admin.heading"/></h3>
+	<sakai:heading><fmt:message key="admin.heading"/></sakai:heading>
 	<hr/><br/>
 	<html:form action="booklistadmin">
 	<logic:notEmpty  name="booklistAdminForm" property="booklist">

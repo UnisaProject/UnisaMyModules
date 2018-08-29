@@ -11,9 +11,9 @@
 	<html:form action="welcomedisplay">
 		<sakai:heading><fmt:message key="function.headingEdit"/></sakai:heading>
 		<sakai:messages/>
-		<fmt:message key="function.editinstruction"/>
+		<sakai:instruction><fmt:message key="function.editinstruction"/></sakai:instruction>
 		<br>
-		<h3><fmt:message key="function.subheadingedit"/></h3>
+		<sakai:heading><fmt:message key="function.subheadingedit"/></sakai:heading>
 		<sakai:new_html_area property="content"></sakai:new_html_area>
 		<sakai:actions>
 			<html:submit property="action"><fmt:message key="button.submit"/></html:submit>
