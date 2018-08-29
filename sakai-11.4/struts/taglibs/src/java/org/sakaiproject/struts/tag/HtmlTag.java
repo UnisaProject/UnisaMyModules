@@ -108,48 +108,8 @@ public class HtmlTag extends org.apache.struts.taglib.html.HtmlTag {
             		  		  					  "white-space: -webkit-pre-wrap; "+ 
             		  		  					  "white-space: -ms-pre-wrap; "+
             		  		  					  "white-space: pre-wrap; } "+
-            		  		"} "+
-            		  		//Unisa Skin Changes: 2018/08/27: Use inline css to avoid tampering with tool.css
-            		  		//Styling for navIntraTool divs to have tabs on sub-navigation links
-            		  		".navIntraTool a { "+
-							    "background: #F8F8F8 !important; "+	  // override the default in 'defaults.scss'
-							    "border-top: 1px solid #B8B8B8; "+
-							    "border-left: 1px solid #B8B8B8; "+
-							    "border-right: 1px solid #B8B8B8; "+
-							    "color: #666 !important; "+	 		  // override the default in 'defaults.scss'
-							    "display: inline-block; "+
-							    "font-size: 0.8em; "+
-							    "margin: 2px 0.25em 0 0; "+
-							    "letter-spacing: 1.2px; "+
-							    "padding: 6px 10px; "+
-							    "text-decoration: none; "+
-							    "text-transform: uppercase; "+
-							    "border-radius: 4px 4px 0 0 "+
-							"} "+
-							//Remove underline from <a> tags The <html:link> jsp tag adds <u> to the text of <a>
-							".navIntraTool a u{ "+
-								"text-decoration: none "+
-							"} "+
-							//Keep same hover action as in  tool.css
-							".navIntraTool a:hover { "+ 
-								"background: transparent !important; "+
-							    "color: #414141; "+
-							    "text-decoration: none "+
-							"} "+  
-							//Just in case <li> is used in .navIntraTool class, remove padding for <li>, we already have padding for 
-							//<a> and the skin puts padding on <li> instead of <a> so we will end up with extra padding 
-							".navIntraTool li { " + 
-							"	padding: 0 "+
-							"} "+
-							//Any alert messages must be styled to remove the large margins caused by 'extendables.scss'. Alert messages 
-							//are from the struts tag <sakai:messages/>. They have either css class 'alertMessage' or 'success'
-							".alertMessage, .success { "+ 
-							" 	margin: 0 !important; "+	// override the default in 'extendables.scss'
-							"} "+
-							//End Unisa Skin Changes: 2018/08/28:
-							
-            		  	"</style>");
-            // End Unisa Changes:2018/04/20:
+            		  		"}</style>");
+            // End Unisa Changes
 
             out.write("</head>\n");
 
