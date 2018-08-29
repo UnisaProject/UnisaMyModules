@@ -22,7 +22,7 @@ setTimeout("disableBackButton()", 0);
 	<sakai:messages message="true"/>
 
 			<sakai:instruction>
-		<h3><fmt:message key="function.heading"/></h3><br></sakai:instruction>
+		<sakai:heading><fmt:message key="function.heading"/></sakai:heading><br></sakai:instruction>
 		
 		<sakai:group_table>
 			<tr>

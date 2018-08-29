@@ -10,7 +10,7 @@
 <sakai:html>
 	
 		<html:form action="booklistadmin">
-		<h3><fmt:message key="admin.heading"/></h3>
+		<sakai:heading><fmt:message key="admin.heading"/></sakai:heading>
 	<hr/><br/>
 	<logic:notEqual name="booklistAdminForm" property="typeOfBookList" value="E">
 	<sakai:heading><p/>

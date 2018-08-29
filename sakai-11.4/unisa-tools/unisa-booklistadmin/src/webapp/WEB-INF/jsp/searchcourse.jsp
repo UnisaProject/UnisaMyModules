@@ -9,7 +9,7 @@
 
 <sakai:html>
 <html:form action="booklistadmin">
-<h3><fmt:message key="admin.heading"/></h3>
+<sakai:heading><fmt:message key="admin.heading"/></sakai:heading>
 <sakai:messages/>
 	<hr/><br/>	
 			<sakai:instruction><b>

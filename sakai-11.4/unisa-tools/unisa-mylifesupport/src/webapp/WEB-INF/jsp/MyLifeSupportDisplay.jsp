@@ -20,7 +20,7 @@ setTimeout("disableBackButton()", 0);
 <sakai:messages/>
 	<sakai:messages message="true"/>
 	
-	<h3><fmt:message key="function.heading"/></h3> <br/>
+	<sakai:heading><fmt:message key="function.heading"/></sakai:heading> <br/>
 
 		<fmt:message key="function.studno"/>
 		<html:text property="studentNr" size="8"></html:text> <br/> <br/>
