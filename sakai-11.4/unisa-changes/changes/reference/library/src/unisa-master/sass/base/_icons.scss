@@ -93,9 +93,17 @@
   .icon-sakai--subsite {                                    @extend .fa-level-up; }
   .icon-sakai--subsites-list {                              @extend .fa-level-down; }
 
-  // unisa tools
-  .icon-unisa--acadhistory {                                @extend .fa-mortar-board; }
-  
+  // unisa tool icons
+  .icon-sakai--unisa-acadhistory {							@extend .fa-graduation-cap; }
+  .icon-sakai--unisa-adobedownload {						@extend .fa-file-pdf-o; }
+  .icon-sakai--unisa-auditview {							@extend .fa-clipboard; }
+  .icon-sakai--unisa-biodetails {							@extend .fa-user; }
+  .icon-sakai--unisa-bulkemail {							@extend .fa-envelope-o; } 
+  .icon-sakai--unisa-changepassword {						@extend .fa-key; }
+  .icon-sakai--unisa-creditcardpayment {					@extend .fa-credit-card; }
+  .icon-sakai--unisa-discussionforums {						@extend .fa-comments; } 
+  .icon-sakai--unisa-nosite {								@extend .fa-list; }
+
   // when we're showing the motd tool as "Welcome" on the gateway page, use a different icon.
   a.Mrphs-hierarchy-item.Mrphs-hierarchy--toolName[href*="!gateway"] .icon-sakai--sakai-motd,
   a.Mrphs-toolsNav__menuitem--link[href*="!gateway"] .icon-sakai--sakai-motd {
