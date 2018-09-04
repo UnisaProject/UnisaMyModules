@@ -171,11 +171,13 @@ public class GradebookSyncBean extends GradebookDependentBean implements Seriali
 		//Check webapp environment and alter server url to correct environment (DEV or QA)
 		if ( serverUrl.equals(LOCAL_URL_PORT80) || serverUrl.equals(LOCAL_URL_PORT82)
 			|| serverUrl.equals(localPortal80) || serverUrl.equals(localPortal82) ) {
-			serverUrl = "https://myqa.int.unisa.ac.za";		////////////CHANGE TO DEV (mydev) WHEN IMPLEMENTING!!!!!!!!!!
+			//serverUrl = "https://myqa.int.unisa.ac.za";		////////////CHANGE TO DEV (mydev) WHEN IMPLEMENTING!!!!!!!!!!
+			serverUrl="https://mydev.int.unisa.ac.za";
 		} 
 		
 		url = serverUrl;
 		url = url+WEBSERVICE_URL;
+		System.out.println("Gradebook SYNC URL = "+url);
 
 		GradebookSyncStudentSystemWebService_PortType events = null;
 		
