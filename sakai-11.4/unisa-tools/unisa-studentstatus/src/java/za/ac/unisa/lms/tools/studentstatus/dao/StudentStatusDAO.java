@@ -589,7 +589,7 @@ public class StudentStatusDAO extends StudentSystemDAO {
 	 	    return result;
 	   }
 	  
-	  public String getDeclineReason(String StudentNr, String qualCode, String acaYear, String acaPeriod) throws Exception{
+	  public String getDeclineReason(String StudentNr, String acaYear, String acaPeriod, String qualCode) throws Exception{
 	    	
 	    	//log.debug("StudentStatusDAO - getDeclineReason - StudentNr: "+StudentNr+", qualCode: "+qualCode);
 
@@ -819,7 +819,7 @@ public class StudentStatusDAO extends StudentSystemDAO {
 						" and STUAPQ.APPLICATION_PERIOD=?" + 
 						" and STUAPQ.MK_STUDENT_NR=?" + 
 						" and STUAPQ.NEW_QUAL=?" + 
-						" and (STUAPQ.STATUS_CODE in ('CG','RO') or (STUAPQ.STATUS_CODE='AP' and STUAPQ.ADMISSION_AUTO_CHK ='WA'))" + 
+						" and ((STUAPQ.STATUS_CODE in ('CG','RO')) or (STUAPQ.STATUS_CODE='AP' and STUAPQ.ADMISSION_AUTO_CHK ='WA'))" + 
 						" and exists (select * from stuapl where STUAPL.ACADEMIC_YEAR=STUAPQ.ACADEMIC_YEAR and STUAPL.APPLICATION_PERIOD=STUAPQ.APPLICATION_PERIOD" + 
 						" and STUAPL.MK_STUDENT_NUMBER=STUAPQ.MK_STUDENT_NR and STUAPL.QUAL_CODE=STUAPQ.NEW_QUAL and STUAPL.ACTION_CODE_GC272='LETSOC')";			
 				
