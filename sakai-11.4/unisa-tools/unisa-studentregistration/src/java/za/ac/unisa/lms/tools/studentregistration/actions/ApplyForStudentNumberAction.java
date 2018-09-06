@@ -852,12 +852,12 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				//log.debug("IN submitLoginSelect (Returning Student - SLP) - getLoginSelectMain = "+stuRegForm.getLoginSelectMain());
 				if (stuRegForm.getAdminStaff().isAdmin()){
 					stuRegForm.setWebLoginMsg("Administrator - Returning SLP Student applying for OR changing to a new qualification.");
-					stuRegForm.setWebLoginMsg2("Enter your student number for short learning programmes with 7 digits");
+					stuRegForm.setWebLoginMsg2("Enter your student number for short learning programmes with 8 digits");
 					setDropdownListsLogin(request,stuRegForm);
 					return mapping.findForward("applyLogin");
 				}else{
 					stuRegForm.setWebLoginMsg("Returning SLP Student applying for OR changing to a new qualification");
-					stuRegForm.setWebLoginMsg2("Enter your student number for short learning programmes with 7 digits");
+					stuRegForm.setWebLoginMsg2("Enter your student number for short learning programmes with 8 digits");
 					setDropdownListsLogin(request,stuRegForm);
 					return mapping.findForward("applyLogin");
 				}
@@ -1594,8 +1594,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				//Existing Student with Academic Year Record. Return to main page and either go to Existing Student or Quit application
 				stuRegForm.setWebLoginMsg("Student exists with Academic Year or Annual Record");
 				stuRegForm.setWebLoginMsg2("Should be Returning Student, Not New!");
-				messages.add(ActionMessages.GLOBAL_MESSAGE,
-						new ActionMessage("message.generalmessage", "Student exists - Should be Returning Student, Not New. Please re-select your login as a student with a student number. Use the link provided to search for a forgotten Student number."));
+				//Johanet - 20180905 - check SPL different message return student number found - search for a forgotten Student number - do not work for SPL
+				if (stuRegForm.getLoginSelectMain().equalsIgnoreCase("SLP")) {
+					messages.add(ActionMessages.GLOBAL_MESSAGE,
+							new ActionMessage("message.generalmessage", "Student exists - Should be Returning Student, Not New. Student with surname, first names and birthday already exists with number " + stuRegForm.getStudent().getNumber()));
+				}else {
+					messages.add(ActionMessages.GLOBAL_MESSAGE,
+							new ActionMessage("message.generalmessage", "Student exists - Should be Returning Student, Not New. Please re-select your login as a student with a student number. Use the link provided to search for a forgotten Student number."));
+				}				
 				addErrors(request, messages);
 				/** Flow Check: (8) **/
 				//log.debug("ApplyForStudentNumberAction - applyLoginNew (8) - Existing Student with Academic Year or Annual Record. Return to main page");

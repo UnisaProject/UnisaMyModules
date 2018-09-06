@@ -33,7 +33,7 @@ public class StudentRegistrationForm extends ValidatorActionForm {
 	// --------------------------------------------------------- Instance Variables
 
 	private static final long serialVersionUID = 1L;
-	private static final String version = "2019001a";
+	private static final String version = "2019001b";
 	public static Log log = LogFactory.getLog(ApplyForStudentNumberAction.class);
 	
 	private String applyType = "";
