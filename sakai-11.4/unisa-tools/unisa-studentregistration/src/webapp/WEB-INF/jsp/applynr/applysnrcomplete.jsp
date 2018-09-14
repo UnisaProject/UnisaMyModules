@@ -158,6 +158,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 	
 	<input type="hidden" id="tmpStuNr" name="tmpStuNr" value="<bean:write name="studentRegistrationForm" property="student.number"/>" />
 	<input type="hidden" name="webADM" id="webADM" value="<bean:write name='studentRegistrationForm' property='adminStaff.admin' />"/>
+	<input type="hidden" name="stuSLP" id="stuSLP" value="<bean:write name='studentRegistrationForm' property='student.stuSLP' />"/>
 	
 	<sakai:messages/>
 	<sakai:messages message="true"/>
@@ -218,7 +219,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 							<td colspan="2" style="height:30px"><fmt:message key="page.studentnr.complete.info6"/>&nbsp;
 							<bean:write name="studentRegistrationForm" property="student.cellNr"/></td>
 						</tr>
-						<logic:equal name="studentRegistrationForm" property="isSTUSLP" value="true" >
+						<logic:notEqual name="studentRegistrationForm" property="student.stuSLP" value="true" >
 							<tr>
 								<td colspan="2"><strong><font size="2"><fmt:message key="page.studentnr.complete.info8"/></font></strong>&nbsp;</td>
 							</tr><tr>
@@ -236,7 +237,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 									</div>
 								</td>
 							</tr>
-						</logic:equal>
+						</logic:notEqual>
 					</table>
 				</div>
 			</div>
