@@ -103,6 +103,52 @@
   .icon-sakai--unisa-creditcardpayment {					@extend .fa-credit-card; }
   .icon-sakai--unisa-discussionforums {						@extend .fa-comments; } 
   .icon-sakai--unisa-nosite {								@extend .fa-list; }
+  .icon-sakai--osp-glossary {								@extend .fa-bookmark; }  
+  .icon-sakai--sakai-blogwow {								@extend .fa-sliders; } 
+  .icon-sakai--sakai-clog {									@extend .fa-sliders; }
+  .icon-sakai--sakai-melete {								@extend .fa-leanpub; }
+  .icon-sakai--sakai-qna {									@extend .fa-quora; }
+  .icon-sakai--sakai-studymaterial {						@extend .fa-stack-overflow; } 
+  .icon-sakai--sakai-summary-calendar {						@extend .fa-calendar-plus-o; }
+  .icon-sakai--sakai-yaft {									@extend .fa-comments; }
+  .icon-sakai--unisa-assessmentcriteria {					@extend .fa-file-text-o; }
+  .icon-sakai--unisa-assessmentcriteriaauth {				@extend .fa-check-circle; }
+  .icon-sakai--unisa-assignments {							@extend .fa-file-text; }
+  .icon-sakai--unisa-assmarkerreallocation {				@extend .fa-users; }
+  .icon-sakai--unisa-booklist {								@extend .fa-book; }
+  .icon-sakai--unisa-exampapers {							@extend .fa-inbox; }
+  .icon-sakai--unisa-examscriptstats {						@extend .fa-line-chart; }
+  .icon-sakai--unisa-examtimetable {						@extend .fa-clock-o; }
+  .icon-sakai--unisa-faqs {									@extend .fa-lightbulb-o; }
+  .icon-sakai--unisa-filemanagerutil {						@extend .fa-compass; }
+  .icon-sakai--unisa-finalmarkconcession {					@extend .fa-handshake-o; }
+  .icon-sakai--unisa-join {									@extend .fa-compass; }
+  .icon-sakai--unisa-lmsmis {								@extend .fa-bar-chart; }
+  .icon-sakai--unisa-maintainstaff  {						@extend .fa-users; }
+  .icon-sakai--unisa-mdactivity {							@extend .fa-list-alt; }
+  .icon-sakai--unisa-mdadmission {							@extend .fa-ticket; }
+  .icon-sakai--unisa-mylife {								@extend .fa-compass; }
+  .icon-sakai--unisa-mylifesupport {						@extend .fa-envelope-open-o; }
+  .icon-sakai--unisa-password {								@extend .fa-compass; }
+  .icon-sakai--unisa-payments {								@extend .fa-money; }
+  .icon-sakai--unisa-pbooks{								@extend .fa-compass; }
+  .icon-sakai--unisa-prescribedbooks {						@extend .fa-bookmark; }
+  .icon-sakai--unisa-proxy {								@extend .fa-file-text; } 
+  .icon-sakai--unisa-regdetails {							@extend .fa-pencil-square; }
+  .icon-sakai--unisa-results {								@extend .fa-certificate; }
+  .icon-sakai--unisa-satbook {								@extend .fa-compass; }
+  .icon-sakai--unisa-studentemail {							@extend .fa-envelope; }
+  .icon-sakai--unisa-studentlist {							@extend .fa-list-ul; }
+  .icon-sakai--unisa-studyquotation {						@extend .fa-calculator; }
+  .icon-sakai--unisa-telecentre {							@extend .fa-feed; }
+  .icon-sakai--unisa-trackandtrace {						@extend .fa-cube; }
+  .icon-sakai--unisa-tutoringplan {							@extend .fa-university; }
+  .icon-sakai--unisa-tutoringplanAdministration {			@extend .fa-university; } 
+  .icon-sakai--unisa-tutorprebooks {						@extend .fa-bookmark; }
+  .icon-sakai--unisa-tutorstudentgrouping {					@extend .fa-users; }
+  .icon-sakai--unisa-unmarkassfollowup {					@extend .fa-clone; }
+  .icon-sakai--unisa-uploadmanager {						@extend .fa-upload; }    
+  .icon-sakai--unisa-welcome {								@extend .fa-home; }
 
   // when we're showing the motd tool as "Welcome" on the gateway page, use a different icon.
   a.Mrphs-hierarchy-item.Mrphs-hierarchy--toolName[href*="!gateway"] .icon-sakai--sakai-motd,
