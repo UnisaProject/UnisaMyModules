@@ -215,7 +215,9 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 				$("select[name='selQualCode1']").empty(); //Remove all previous options (Index cleanup for various browsers)
 				$("select[name='selQualCode1']").append('<option value="0">Loading....</option>'); //Temp option to show if database retrieval is slow
 				
-				var url = 'applyForStudentNumber.do?act=populateQualifications&selCategoryCode='+category;
+				//Johanet - 20180823 add student nr to prevent caching if students do not close browser
+				var stuNr = $("#stuNr").val();
+				var url = 'applyForStudentNumber.do?act=populateQualifications&selCategoryCode='+category+'&id='+stuNr;
 				$.ajaxSetup( { "async": false } );
 				$.getJSON(url, function(data) {
 					data.sort(SortByDesc);
@@ -269,7 +271,9 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 				$("select[name='selQualCode2']").empty(); //Remove all previous options (Index cleanup for various browsers)
 				$("select[name='selQualCode2']").append('<option value="0">Loading....</option>'); //Temp option to show if database retrieval is slow
 				
-				var url = 'applyForStudentNumber.do?act=populateQualifications&selCategoryCode='+category;
+				//Johanet - 20180823 add student nr to prevent caching if students do not close browser
+				var stuNr = $("#stuNr").val();
+				var url = 'applyForStudentNumber.do?act=populateQualifications&selCategoryCode='+category+'&id='+stuNr;
 				$.ajaxSetup( { "async": false } );
 				$.getJSON(url, function(data) {
 					data.sort(SortByDesc);
@@ -455,7 +459,8 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		function populateSelectedCategory1(){
 			$("select[name='selCategoryCode1']").empty(); //Remove all previous options (Index cleanup for various browsers)
 			$("select[name='selCategoryCode1']").append('<option value="0">Loading....</option>'); //Temp option to show if database retrieval is slow
-			var url = 'applyForStudentNumber.do?act=populateCategories';
+			var stuNr = $("#stuNr").val();
+			var url = 'applyForStudentNumber.do?act=populateCategories&id='+stuNr;
 			var savedCategory1 = $("#savedCategory1").val();
 			//alert("populateSelectedCategory1="+savedCategory1);
 			$.ajaxSetup( { "async": false } );
@@ -480,7 +485,8 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		function populateSelectedCategory2(){
 			$("select[name='selCategoryCode2']").empty(); //Remove all previous options (Index cleanup for various browsers)
 			$("select[name='selCategoryCode2']").append('<option value="0">Loading....</option>'); //Temp option to show if database retrieval is slow
-			var url = 'applyForStudentNumber.do?act=populateCategories';
+			var stuNr = $("#stuNr").val();
+			var url = 'applyForStudentNumber.do?act=populateCategories&id='+stuNr;
 			var savedCategory2 = $("#savedCategory2").val();
 			$.ajaxSetup( { "async": false } );
 			$.getJSON(url, function(data) {
@@ -506,7 +512,9 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 			$("select[name='selQualCode1']").append('<option value="0">Loading....</option>'); //Temp option to show if database retrieval is slow
 			var savedCategory1 = $("#savedCategory1").val();
 			var savedQual1 = $("#savedQual1").val();
-			var url = 'applyForStudentNumber.do?act=populateQualifications&selCategoryCode='+savedCategory1;
+			//Johanet - 20180823 add student nr to prevent caching if students do not close browser
+			var stuNr = $("#stuNr").val();
+			var url = 'applyForStudentNumber.do?act=populateQualifications&selCategoryCode='+savedCategory1+'&id='+stuNr;
 			//alert("populateSelectedQual1 - savedCategory1="+savedCategory1+", savedQual1="+savedQual1);
 			if ((savedQual1 == null || savedQual1 == "0" || savedQual1 == "" || savedQual1 == "undefined") && (savedCategory1 == null || savedCategory1 == "0" || savedCategory1 == "" || savedCategory1 == "undefined")){
 				$("select[name='selQualCode1']").empty(); //Remove all previous options (Index cleanup for various browsers)
@@ -545,7 +553,9 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 			$("select[name='selQualCode2']").empty(); //Remove all previous options (Index cleanup for various browsers)
 			$("select[name='selQualCode2']").append('<option value="0">Loading....</option>'); //Temp option to show if database retrieval is slow
 			var savedCategory2 = $("#savedCategory2").val();
-			var url = 'applyForStudentNumber.do?act=populateQualifications&selCategoryCode='+savedCategory2;
+			//Johanet - 20180823 add student nr to prevent caching if students do not close browser
+			var stuNr = $("#stuNr").val();
+			var url = 'applyForStudentNumber.do?act=populateQualifications&selCategoryCode='+savedCategory2+'&id='+stuNr;
 			var savedQual2 = $("#savedQual2").val();
 			if ((savedQual2 == null || savedQual2 == "0" || savedQual2 == "" || savedQual2 == "undefined") && (savedCategory2 == null || savedCategory2 == "0" || savedCategory2 == "" || savedCategory2 == "undefined")){
 				$("select[name='selQualCode2']").empty(); //Remove all previous options (Index cleanup for various browsers)
@@ -713,6 +723,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 	<input type="hidden" id="selectHEMain" name="selectHEMain" value="<bean:write name='studentRegistrationForm' property='selectHEMain' />" />
 	<input type="hidden" id="isSTUSLP" name="isSTUSLP" value="<bean:write name='studentRegistrationForm' property='student.stuSLP' />" />
 	<input type="hidden" id="isSTUAPQ" name="isSTUAPQ" value="<bean:write name='studentRegistrationForm' property='student.stuapq' />" />
+	<input type="hidden" id="stuNr" name="stuNr" value="<bean:write name='studentRegistrationForm' property='student.number' />" />
 		
 	<div style="display: none;" id="dialogHolder"><p id="dialogContent"></p></div>
 

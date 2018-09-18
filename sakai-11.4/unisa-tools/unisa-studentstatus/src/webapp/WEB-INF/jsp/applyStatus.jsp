@@ -149,7 +149,6 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 	<input type="hidden" name="isPayFee" id="isPayFee" value="<bean:write name='studentStatusForm' property='status.payFull'/>"/>
 	<input type="hidden" name="isPayCom" id="isPayCom" value="<bean:write name='studentStatusForm' property='status.payComment'/>"/>
 	<input type="hidden" name="statusCode1" id="statusCode1" value="<bean:write name='studentStatusForm' property='qualStatusCode1'/>"/>
-	
 
 	<sakai:messages/>
 	<sakai:messages message="true"/>

@@ -46,16 +46,14 @@
                       memoryStoreEvictionPolicy="LFU"--> 
 
         <!-- SY  Adding the element <terracotta /> turns on Terracotta clustering for the cache  --> 
-         	<terracottaConfig url="localhost:9510" /> 
-         	
         	<terracotta> 
         		<nonstop immediateTimeout="false" timeoutMillis="30000"> 
         			<timeoutBehavior type="noop" /> 
         		</nonstop> 
         	</terracotta> 
-
-        
     </defaultCache>
+
+    <terracottaConfig url="lflo-ter01dv.int.unisa.ac.za:9510, lflo-ter02dv.int.unisa.ac.za:9510" /> 
 
     <!--Predefined caches.  Add your cache configuration settings here.
         If you do not have a configuration for your cache a WARNING will be issued when the

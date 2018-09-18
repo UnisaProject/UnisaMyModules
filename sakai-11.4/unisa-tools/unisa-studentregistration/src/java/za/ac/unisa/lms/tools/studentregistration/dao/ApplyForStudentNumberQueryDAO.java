@@ -304,7 +304,6 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 					+ " and first_names = ? "
 					+ " and birth_date = (SELECT TO_DATE (?, 'DD/MM/YYYY') FROM DUAL) "
 					+ " and nr between 70000000 and 80000000 "
-					+ " and rownum = 1 "
 					+ " order by mk_last_academic_y desc ";
 		}else{ //Formal Student
 			query  = "select nr from stu "

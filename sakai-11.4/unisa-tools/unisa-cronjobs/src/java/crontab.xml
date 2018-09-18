@@ -18,7 +18,7 @@
         <cronjob schedule="0 0 4 * * ?" 			class="za.ac.unisa.lms.tools.cronjobs.jobs.MyUnisaStatsJob"/>
         <cronjob schedule="0 0 9 * * ?" 			class="za.ac.unisa.lms.tools.cronjobs.jobs.VCbookingJob"/>
        <!-- WEEKLY /-->
-        <cronjob schedule="0 0 15 ? * SUN" 			class="za.ac.unisa.lms.tools.cronjobs.jobs.GradebookIntegrationJob"/> 
+        <cronjob schedule="0 30 15 ? * MON" 			class="za.ac.unisa.lms.tools.cronjobs.jobs.GradebookIntegrationJob"/> 
 	<cronjob schedule="0 0 20 ? * FRI"                      class="za.ac.unisa.lms.tools.cronjobs.jobs.TpuSupervisorEmailsJob"/>
       <!-- MONTHLY /--> 
         <cronjob schedule="0 25 12 20 * ?" 			class="za.ac.unisa.lms.tools.cronjobs.jobs.BooklistImportJob"/>

@@ -16,7 +16,7 @@
 <fmt:setBundle basename="za.ac.unisa.lms.tools.booklistadmin.ApplicationResources"/>
 
 <sakai:html>
-<h3><fmt:message key="admin.heading"/></h3>
+<sakai:heading><fmt:message key="admin.heading"/></sakai:heading>
 	<hr/>
 	<sakai:group_heading>
 	       <fmt:message key="function.releasedateheading"/>

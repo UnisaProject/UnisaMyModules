@@ -52,7 +52,7 @@ public class GradebookSyncStudentSystemWebServiceServiceLocator extends org.apac
 
     public za.ac.unisa.unisa_axis.GradebookSyncStudentSystemWebService_jws.GradebookSyncStudentSystemWebService_PortType getGradebookSyncStudentSystemWebService(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
         try {
-            za.ac.unisa.unisa_axis.GradebookSyncStudentSystemWebService_jws.GradebookSyncStudentSystemWebServiceSoapBindingStub _stub = new za.ac.unisa.unisa_axis.GradebookSyncStudentSystemWebService_jws.GradebookSyncStudentSystemWebServiceSoapBindingStub(portAddress, this);
+        	za.ac.unisa.unisa_axis.GradebookSyncStudentSystemWebService_jws.GradebookSyncStudentSystemWebServiceSoapBindingStub _stub = new za.ac.unisa.unisa_axis.GradebookSyncStudentSystemWebService_jws.GradebookSyncStudentSystemWebServiceSoapBindingStub(portAddress, this);
             _stub.setPortName(getGradebookSyncStudentSystemWebServiceWSDDServiceName());
             return _stub;
         }
