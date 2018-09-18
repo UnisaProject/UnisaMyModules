@@ -10,6 +10,7 @@
 <sakai:html>
 	<html:form action="/displayExamTimetable">
 		<html:hidden property="currentPage" value="displayPrelim"/>
+	<!--place alert message beneath tool heading-->	
 	<sakai:heading><fmt:message key="page.heading"/></sakai:heading>
 	<sakai:messages/>
 	<sakai:messages message="true"/>	
