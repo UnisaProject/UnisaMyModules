@@ -15,9 +15,12 @@
 		setTimeout($.unblockUI, 4000);
 	}
 </script> -->
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> -->
 <sakai:html>
   <head>
+  <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--    include cascading style sheet here    
     <link rel="stylesheet" href="/cmsys/staff/stylesheets/staff.css">-->
 	<title><fmt:message key="page.heading"/></title>
