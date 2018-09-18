@@ -10,9 +10,9 @@
 <sakai:html>
 	<html:form action="/displayExamTimetable">
 		<html:hidden property="currentPage" value="input"/>
+		<sakai:heading><fmt:message key="page.heading"/></sakai:heading>
 		<sakai:messages/>
 		<sakai:messages message="true"/>	
-		<sakai:heading><fmt:message key="page.heading"/></sakai:heading>
 		<logic:equal name="examTimetableDisplayForm" property="databaseError" value="true">
                              <sakai:instruction><font color="red"><fmt:message key="page.nullstudenterror"/></font></sakai:instruction>
         </logic:equal>
