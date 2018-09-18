@@ -48,6 +48,13 @@ public class HtmlTag extends org.apache.struts.taglib.html.HtmlTag {
                 out.write(headInclude);
             }
             
+            // Unisa Changes:2018/09/18: Added meta tags inside head
+            out.write("<meta charset=\"utf-8\"> " +
+            		  "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> " +
+            		  "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1 \"> "
+            		  );
+            // End Unisa Changes:2018/09/18
+            
             // Unisa Changes:2018/04/20: Make Struts tools responsive on small devices for Sakai 11.x
             // styling applies to tables only - to fix text boxes not being responsive on struts tools
             // 2018/05/17: Morphues has added borders for 'table.listHier' in Sakai 11-remove these borders here
