@@ -33,15 +33,15 @@
 		</tr><tr>
 			<td colspan="2">
 				<logic:equal name="smsBatchForm" property="smsEnvironment" value="dev">
-					<a HREF='<%=application.getInitParameter("customsmspathdev")%>'>
+					<a href='<%=application.getInitParameter("customsmspathdev")%>'>
 						<fmt:message key="page.menu.option.customised"/></a>
 				</logic:equal>
 				<logic:equal name="smsBatchForm" property="smsEnvironment" value="qa">
-					<a HREF='<%=application.getInitParameter("customsmspathqa")%>'>
+					<a href='<%=application.getInitParameter("customsmspathqa")%>'>
 						<fmt:message key="page.menu.option.customised"/></a>
 				</logic:equal>
 				<logic:equal name="smsBatchForm" property="smsEnvironment" value="prod">
-					<a HREF='<%=application.getInitParameter("customsmspathprod")%>'>
+					<a href='<%=application.getInitParameter("customsmspathprod")%>'>
 						<fmt:message key="page.menu.option.customised"/></a>
 				</logic:equal>
 			</td>		
@@ -50,15 +50,15 @@
 		<tr>		
 			<td colspan="2">
 				<logic:equal name="smsBatchForm" property="smsEnvironment" value="dev">
-					<a HREF='<%=application.getInitParameter("smsenquirydev")%>'>
+					<a href='<%=application.getInitParameter("smsenquirydev")%>'>
 						<fmt:message key="page.menu.option.enquiry"/></a>
 				</logic:equal>
 				<logic:equal name="smsBatchForm" property="smsEnvironment" value="qa">
-					<a HREF='<%=application.getInitParameter("smsenquiryqa")%>'>
+					<a href='<%=application.getInitParameter("smsenquiryqa")%>'>
 						<fmt:message key="page.menu.option.enquiry"/></a>
 				</logic:equal>
 				<logic:equal name="smsBatchForm" property="smsEnvironment" value="prod">
-					<a HREF='<%=application.getInitParameter("smsenquiryprod")%>'>
+					<a href='<%=application.getInitParameter("smsenquiryprod")%>'>
 						<fmt:message key="page.menu.option.enquiry"/></a>
 				</logic:equal>
 			</td>
