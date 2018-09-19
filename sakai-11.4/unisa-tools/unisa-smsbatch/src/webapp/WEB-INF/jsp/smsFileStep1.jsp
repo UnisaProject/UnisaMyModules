@@ -45,11 +45,9 @@
 				}
 			}
 		</script>
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-  <br/>
-  <h1><fmt:message key="page.file.heading"/></h1>    
+  
   <html:form action="/smsFile" enctype="multipart/form-data">
+  <sakai:heading><fmt:message key="page.file.heading"/></sakai:heading>   
   	<html:hidden property="page" value="fileStep1"/>
 	<sakai:messages/>
 	<sakai:messages message="true"/>	
