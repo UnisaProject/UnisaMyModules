@@ -41,6 +41,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 
 	
 	<script type="text/javascript" src="<c:url value='/resources/js/jquery-3.3.1.min.js' />"></script>
+	<script type="text/javascript" src="<c:url value='/resources/js/jquery-migrate-3.0.1.min.js' />"></script>  
 	<script type="text/javascript" src="<c:url value='/resources/js/bootstrap.min.js' />"></script> 
 	<script type="text/javascript" src="<c:url value='/resources/js/jquery.blockUI.js' />"></script> 
 	<script type="text/javascript" src="<c:url value='/resources/js/jquery-ui.js' />"></script> 
