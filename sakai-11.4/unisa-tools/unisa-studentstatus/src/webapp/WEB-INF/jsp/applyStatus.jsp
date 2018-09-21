@@ -15,12 +15,7 @@ response.setDateHeader("Expires", 0); //Causes the proxy cache to see the page a
 response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 %>
 
-<sakai:html>
-<head>
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		
+<sakai:html>		
 	<!-- Sakai Themes -->
 	<link href="<c:url value='/resources/css/tool_base.css' />" rel="stylesheet"  type="text/css" />	
 	<link href="<c:url value='/resources/css/tool.css' />" rel="stylesheet"  type="text/css" />	
@@ -135,9 +130,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		}
 		
 	</script>
-					
-</head>
-<body>
+
 <!-- Form -->
 <html:form action="/studentStatus">
 
@@ -320,5 +313,4 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 	<div style="display: none;" align="center"><bean:write name="studentStatusForm" property="version"/></div>
 	
 </html:form>
-</body>
 </sakai:html>
