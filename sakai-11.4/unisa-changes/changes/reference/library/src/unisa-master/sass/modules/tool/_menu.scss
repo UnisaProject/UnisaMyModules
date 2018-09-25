@@ -2,7 +2,8 @@
 	//margin: -14px -14px 0 -14px;
 	background: $tool-background-color;
 	border-bottom: 1px solid $tool-border-color;
-	padding: 0 170px 0 1em;
+	padding: 0 70px 0 0;
+	margin-top: 5px;
 	//max-width: calc(100% - 170px);
 	@media #{$phone}{
 		padding: 0;
@@ -21,9 +22,9 @@
 		color: $tool-nav-link-color;
 		display: inline-block;
 		font-size: 0.8em;
-		margin: 2px 0.25em 0 0;
-		letter-spacing: 1.2px;
-		padding: 6px 10px;
+		//margin: 2px 0.25em 0 0;
+		//letter-spacing: 1.2px;
+		padding: 4px 6px;
 		text-decoration: none;
 		text-transform: uppercase;
 		border-radius: 4px 4px 0 0;
@@ -37,6 +38,7 @@
 	li{
 		display: inline-block;
 		margin: 0 0 0 0;
+		padding: 0 2px 0 0;
 		span{
 			display: inline;
 			a{
@@ -47,9 +49,9 @@
 				color: $tool-nav-link-color;
 				display: block;
 				font-size: 0.8em;
-				margin: 2px 0.25em 0 0;
-				letter-spacing: 1.2px;
-				padding: 6px 10px;
+				//margin: 2px 0.25em 0 0;
+				//letter-spacing: 1.2px;
+				padding: 4px 6px;
 				text-decoration: none;
 				text-transform: uppercase;
 				border-radius: 4px 4px 0 0;
@@ -70,9 +72,9 @@
 				border-right: 1px solid $tool-border-color;
 				display: block;
 				font-size: 0.8em;
-				letter-spacing: 1.2px;
-				margin: 2px 0.25em 0 0;
-				padding: 7px 10px 6px 10px;
+				//letter-spacing: 1.2px;
+				//margin: 2px 0.25em 0 0;
+				padding: 5px 6px 4px 6px;
 				position: relative;
 				text-transform: uppercase;
 				border-radius: 4px 4px 0 0;

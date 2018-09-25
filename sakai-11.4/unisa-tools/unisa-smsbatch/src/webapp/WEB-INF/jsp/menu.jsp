@@ -6,28 +6,9 @@
 <%@ taglib uri="http://sakaiproject.org/struts/sakai" prefix="sakai" %>
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.smsbatch.ApplicationResources"/>
-<!-- <script type="text/javascript" src="<c:url value="/resources/js/jquery.js" />"></script> 
-<script type="text/javascript" src="<c:url value="/resources/js/jquery.blockUI.js" />"></script> 
-<script type="text/javascript" language="javascript">
-	function testBlock() {		
-		
-		$.blockUI({ message: "<b><img src='<c:url value='/resources/images/ajax-loader.gif' />' alt=' * ' /><br/>Processing SMS Request... Do not close your browser</b>" });
-		setTimeout($.unblockUI, 4000);
-	}
-</script> -->
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<sakai:html>
-  <head>
-    <!--    include cascading style sheet here    
-    <link rel="stylesheet" href="/cmsys/staff/stylesheets/staff.css">-->
-	<title><fmt:message key="page.heading"/></title>
-
-  </head> 
-
-  <body>
-  <br/>
-  <h1><fmt:message key="page.menu.heading"/></h1>
-  <html:form action="/smsbatch.do?act=step1">
+<sakai:html>  
+  <html:form action="/smsbatch.do?act=step1">  
+   <sakai:heading><fmt:message key="page.menu.heading"/></sakai:heading>
   	<html:hidden property="page" value="menu"/>
 
   	<p><font color="red"><html:errors/></font></p>
@@ -52,15 +33,15 @@
 		</tr><tr>
 			<td colspan="2">
 				<logic:equal name="smsBatchForm" property="smsEnvironment" value="dev">
-					<a HREF='<%=application.getInitParameter("customsmspathdev")%>'>
+					<a href='<%=application.getInitParameter("customsmspathdev")%>'>
 						<fmt:message key="page.menu.option.customised"/></a>
 				</logic:equal>
 				<logic:equal name="smsBatchForm" property="smsEnvironment" value="qa">
-					<a HREF='<%=application.getInitParameter("customsmspathqa")%>'>
+					<a href='<%=application.getInitParameter("customsmspathqa")%>'>
 						<fmt:message key="page.menu.option.customised"/></a>
 				</logic:equal>
 				<logic:equal name="smsBatchForm" property="smsEnvironment" value="prod">
-					<a HREF='<%=application.getInitParameter("customsmspathprod")%>'>
+					<a href='<%=application.getInitParameter("customsmspathprod")%>'>
 						<fmt:message key="page.menu.option.customised"/></a>
 				</logic:equal>
 			</td>		
@@ -69,15 +50,15 @@
 		<tr>		
 			<td colspan="2">
 				<logic:equal name="smsBatchForm" property="smsEnvironment" value="dev">
-					<a HREF='<%=application.getInitParameter("smsenquirydev")%>'>
+					<a href='<%=application.getInitParameter("smsenquirydev")%>'>
 						<fmt:message key="page.menu.option.enquiry"/></a>
 				</logic:equal>
 				<logic:equal name="smsBatchForm" property="smsEnvironment" value="qa">
-					<a HREF='<%=application.getInitParameter("smsenquiryqa")%>'>
+					<a href='<%=application.getInitParameter("smsenquiryqa")%>'>
 						<fmt:message key="page.menu.option.enquiry"/></a>
 				</logic:equal>
 				<logic:equal name="smsBatchForm" property="smsEnvironment" value="prod">
-					<a HREF='<%=application.getInitParameter("smsenquiryprod")%>'>
+					<a href='<%=application.getInitParameter("smsenquiryprod")%>'>
 						<fmt:message key="page.menu.option.enquiry"/></a>
 				</logic:equal>
 			</td>

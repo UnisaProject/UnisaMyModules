@@ -17,9 +17,10 @@
 				urlString=(String)request.getAttribute("urlString");
 		%>		
 		<html:hidden property="currentPage" value="displayFinal"/>
+	<!--place alert message beneath tool heading-->
+	<sakai:heading><fmt:message key="page.heading"/></sakai:heading>
 	<sakai:messages/>
-	<sakai:messages message="true"/>	
-	<sakai:heading><fmt:message key="page.heading"/></sakai:heading>	
+	<sakai:messages message="true"/>		
 	<sakai:group_table>	
 	<tr>
 		<td><fmt:message key="page.examYear"/>&nbsp;</td>

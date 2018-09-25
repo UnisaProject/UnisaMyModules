@@ -1213,14 +1213,14 @@ public class StudentStatusAction extends LookupDispatchAction {
 				
 				//Offer Reason
 				if ("AX".equalsIgnoreCase(stuStatForm.getQualStatusCode1())){
-					String reason1 = dao.getDeclineReason(stuStatForm.getStudent().getAcademicYear(), stuStatForm.getStudent().getAcademicPeriod(), stuStatForm.getStudent().getNumber(), stuStatForm.getSelQualCode1());
+					String reason1 = dao.getDeclineReason(stuStatForm.getStudent().getNumber(),stuStatForm.getStudent().getAcademicYear(), stuStatForm.getStudent().getAcademicPeriod(), stuStatForm.getSelQualCode1());
 					stuStatForm.setQualStatus1Reason(reason1);
 					//log.debug("StudentStatusAction - applyStatus - Reason1="+reason1);
 				}	
 				
 				if (stuStatForm.getSelQualCode2() != null && !"Not Found".equalsIgnoreCase(stuStatForm.getSelQualCode2())){
 					if ("AX".equalsIgnoreCase(stuStatForm.getQualStatusCode2())){
-						String reason2 = dao.getDeclineReason(stuStatForm.getStudent().getAcademicYear(), stuStatForm.getStudent().getAcademicPeriod(), stuStatForm.getStudent().getNumber(), stuStatForm.getSelQualCode1());
+						String reason2 = dao.getDeclineReason(stuStatForm.getStudent().getNumber(),stuStatForm.getStudent().getAcademicYear(), stuStatForm.getStudent().getAcademicPeriod(), stuStatForm.getSelQualCode2());
 						stuStatForm.setQualStatus2Reason(reason2);
 						//log.debug("StudentStatusAction - applyStatus - Reason2="+reason2);
 					}
@@ -1284,7 +1284,8 @@ public class StudentStatusAction extends LookupDispatchAction {
 			}
 			
 		}catch(Exception e){
-			log.warn("StudentStatusAction - applyStatus - crashed / " + e);
+			throw new Exception("ApplyStatus error :  / " + e);
+			//log.warn("StudentStatusAction - applyStatus - crashed / " + e);
 		}
 	}
 	

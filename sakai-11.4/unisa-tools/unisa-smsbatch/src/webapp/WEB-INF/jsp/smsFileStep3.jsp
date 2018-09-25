@@ -16,11 +16,7 @@
 -->
 		</script>
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-
-  <body>
-  <br/>
-  <h1><fmt:message key="page.file.heading"/></h1>
+  <sakai:heading><fmt:message key="page.file.heading"/></sakai:heading>
   <html:form action="/smsFile">
   	<html:hidden property="page" value="fileStep3"/>
 	<sakai:messages/>
@@ -78,5 +74,4 @@
   	<br/>  	
 	<html:submit property="act"><fmt:message key="button.cancel"/></html:submit>
   </html:form>
-  </body>
 </sakai:html>

@@ -233,8 +233,8 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 
 	</script>	
 </head>
-<body onload="disableBackButton();" onpageshow="if (event.persisted) disableBackButton" onunload="">
-
+<!-- <body onload="disableBackButton();" onpageshow="if (event.persisted) disableBackButton" onunload=""> -->
+<body>
  	<noscript>
 	    	Your browser does not support JavaScript or it is disabled. Please enable JavaScript in your Browser to continue.<br/>
 	    	Here are the <a href="http://www.enable-javascript.com" target="_blank"> instructions how to enable JavaScript in your web browser</a>

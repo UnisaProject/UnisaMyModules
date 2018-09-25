@@ -334,7 +334,7 @@ public class StudentListDAO extends StudentSystemDAO {
 		if(!confineRegion.equalsIgnoreCase("notspecified")) {
 			from += ", regoff ";
 			//where += "and stuann.mk_regional_office(+) = regoff.code and stuann.mk_regional_office = " + confineRegion + " ";
-			where += "and stuann.mk_regional_office(+) = regoff.code and distype.code=stuann.MK_DISABILITY_TYPE and distype.code="+disabilityCode+" and stuann.mk_regional_office = " + confineRegion + " "+
+			where += "and stuann.mk_regional_office(+) = regoff.code and stuann.mk_regional_office = " + confineRegion + " "+
                      " and regoff.service_type in ('A','H','S')" ;
 			System.out.println("This where clause is :"+where);
 		}
