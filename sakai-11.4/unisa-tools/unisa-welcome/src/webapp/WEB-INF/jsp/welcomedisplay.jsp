@@ -15,6 +15,8 @@
 				</html:link>
 			</sakai:tool_bar>
 		</c:if>
-		<bean:write name="welcomedisplayform" property="content" filter="none"/>
+		<%-- Unisa Changes:2018/09/27:Rename content variable to eliminate conflict with ckeditor v4.5.7 --%>
+		<%-- <bean:write name="welcomedisplayform" property="content" filter="none"/> --%>
+		<bean:write name="welcomedisplayform" property="welcomeContent" filter="none"/>
 	</html:form>
 </sakai:html>

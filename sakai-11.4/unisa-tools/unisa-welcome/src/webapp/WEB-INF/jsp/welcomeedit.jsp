@@ -14,7 +14,9 @@
 		<sakai:instruction><fmt:message key="function.editinstruction"/></sakai:instruction>
 		<br>
 		<sakai:heading><fmt:message key="function.subheadingedit"/></sakai:heading>
-		<sakai:new_html_area property="content"></sakai:new_html_area>
+		<%-- Unisa Changes:2018/09/27:Rename content variable to eliminate conflict with ckeditor v4.5.7 --%>
+		<%-- <sakai:new_html_area property="content"></sakai:new_html_area> --%>
+		<sakai:new_html_area property="welcomeContent"></sakai:new_html_area>
 		<sakai:actions>
 			<html:submit property="action"><fmt:message key="button.submit"/></html:submit>
 			<html:submit property="action"><fmt:message key="button.cancel"/></html:submit>
