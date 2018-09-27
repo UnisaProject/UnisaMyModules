@@ -25,8 +25,9 @@ public class WelcomeDisplayForm extends ActionForm {
 	private String title;
 
 	/** content property */
-	private String content;
-
+	//private String content;		// Unisa Changes:2018/09/27:Rename variable to eliminate conflict with ckeditor v4.5.7
+	private String welcomeContent;	// Unisa Changes:2018/09/27:Rename variable to eliminate conflict with ckeditor v4.5.7
+	
 	/** siteid property */
 	private String siteid;
 
@@ -57,16 +58,20 @@ public class WelcomeDisplayForm extends ActionForm {
 	 * Returns the content.
 	 * @return String
 	 */
-	public String getContent() {
-		return content;
+	//public String getContent() {			// Unisa Changes:2018/09/27:Rename getter to eliminate conflict with ckeditor v4.5.7 on 'content' variable
+	public String getWelcomeContent() {
+		//return content;					// Unisa Changes:2018/09/27
+		return welcomeContent;				
 	}
 
 	/**
 	 * Set the content.
 	 * @param content The content to set
 	 */
-	public void setContent(String content) {
-		this.content = content;
+	//public void setContent(String content) {				// Unisa Changes:2018/09/27:Rename setter to eliminate conflict with ckeditor v4.5.7 on 'content' variable
+	public void setWelcomeContent(String welcomeContent) {	
+		//this.content = content;							// Unisa Changes:2018/09/27
+		this.welcomeContent = welcomeContent;
 	}
 
 	/**

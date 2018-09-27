@@ -119,7 +119,9 @@ public class WelcomeDisplayAction extends LookupDispatchAction {
 		WelcomeDisplayQueryDAO db = new WelcomeDisplayQueryDAO();
 		try {
 			/*log.info("Welcome getConent"+ user.getEid());*/
-			welcomeDisplayForm.setContent(db.getContent(welcomeDisplayForm.getSiteid()));
+			// Unisa Changes:2018/09/27:Rename setter to eliminate conflict with ckeditor v4.5.7 on 'content' variable
+			//welcomeDisplayForm.setContent(db.getContent(welcomeDisplayForm.getSiteid()));		
+			welcomeDisplayForm.setWelcomeContent(db.getContent(welcomeDisplayForm.getSiteid()));
 		} catch (Exception ex) {
             throw ex;
 		}
@@ -149,7 +151,9 @@ public class WelcomeDisplayAction extends LookupDispatchAction {
 
 		WelcomeDisplayQueryDAO db = new WelcomeDisplayQueryDAO();
 		try {
-			welcomeDisplayForm.setContent(db.getContent(welcomeDisplayForm.getSiteid()));
+			// Unisa Changes:2018/09/27:Rename setter to eliminate conflict with ckeditor v4.5.7 on 'content' variable
+			//welcomeDisplayForm.setContent(db.getContent(welcomeDisplayForm.getSiteid()));		
+			welcomeDisplayForm.setWelcomeContent(db.getContent(welcomeDisplayForm.getSiteid()));
 		} catch (Exception ex) {
             throw ex;
 		}
@@ -167,7 +171,8 @@ public class WelcomeDisplayAction extends LookupDispatchAction {
 		welcomeDisplayForm.setSiteid(toolManager.getCurrentPlacement().getContext());
 		/*welcomeDisplayForm.setSiteid("INF206D-06-Y1");*/
 		WelcomeDisplayQueryDAO db = new WelcomeDisplayQueryDAO();
-		String content = welcomeDisplayForm.getContent();
+		//String content = welcomeDisplayForm.getContent();		 // Unisa Changes:2018/09/27:Rename getter to eliminate conflict with ckeditor v4.5.7 on 'content' variable
+		String content = welcomeDisplayForm.getWelcomeContent();
 		String regex = "<[^>]*>";
 		Pattern p2 = Pattern.compile(regex);
 		Matcher m2 = p2.matcher(content);
@@ -184,7 +189,9 @@ public class WelcomeDisplayAction extends LookupDispatchAction {
 		}
 		log.info("charcount "+charcount);
 		if (charcount > 0){
-			db.writeContent(welcomeDisplayForm.getSiteid(),welcomeDisplayForm.getContent());
+			// Unisa Changes:2018/09/27:Rename getter to eliminate conflict with ckeditor v4.5.7 on 'content' variable
+			//db.writeContent(welcomeDisplayForm.getSiteid(),welcomeDisplayForm.getContent());
+			db.writeContent(welcomeDisplayForm.getSiteid(),welcomeDisplayForm.getWelcomeContent());
 			usageSessionService = (UsageSessionService) ComponentManager.get(UsageSessionService.class);
 			sessionManager = (SessionManager) ComponentManager.get(SessionManager.class);
 			UsageSession usageSession = usageSessionService.startSession(sessionManager.getCurrentSession().getUserEid(), request.getRemoteAddr(), request.getHeader("user-agent"));
