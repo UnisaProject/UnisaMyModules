@@ -76,7 +76,7 @@
 	<module>unisa-telecentre</module>
 	<module>unisa-trackandtrace</module>
 	<!--module>unisa-tutorappointment</module-->
-	<module>unisa-tracking</module>
+	<!--  module>unisa-tracking</module-->
 	<module>unisa-mdregistrations</module>
 	<module>unisa-studentnosearch</module>
 	<module>unisa-tpustudentplacement</module>
