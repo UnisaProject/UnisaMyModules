@@ -39,7 +39,7 @@
 // Buttons
 // --------------------------------------------------
 
-// Common styles
+/** / Common styles
 .btn-default,
 .btn-primary,
 .btn-success,
@@ -65,7 +65,7 @@
   .badge {
     text-shadow: none;
   }
-}
+} **/
 
 // Mixin for generating new styles
 @mixin btn-styles($btn-color: #555) {
@@ -111,7 +111,7 @@
 }
 
 // Apply the mixin to the buttons
-.btn-default { @include btn-styles($btn-default-bg); text-shadow: 0 1px 0 #fff; border-color: #ccc; }
+.btn-default { @include btn-styles($btn-default-bg); }
 .btn-primary { @include btn-styles($btn-primary-bg); }
 .btn-success { @include btn-styles($btn-success-bg); }
 .btn-info    { @include btn-styles($btn-info-bg); }
