@@ -15,6 +15,7 @@ import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
+import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import za.ac.unisa.lms.db.SakaiDAO;
@@ -30,9 +31,9 @@ public class SakaiQueryDAO extends SakaiDAO{
 	private ToolManager toolManager;
 	private UserDirectoryService userDirectoryService;
 	
-	public boolean checkEmail() throws Exception {
-		toolManager = (ToolManager) ComponentManager.get(ToolManager.class);
-		String sql = "Select 1 from SAKAI_SITE_PROPERTY where SITE_ID = '"+toolManager.getCurrentPlacement().getContext()+"'" +
+	public boolean checkEmail(String site) throws Exception {
+		//toolManager = (ToolManager) ComponentManager.get(ToolManager.class);
+		String sql = "Select VALUE from SAKAI_SITE_PROPERTY where SITE_ID = '"+site+"'" +
 				" and NAME = 'contact-email'";
 		boolean found = false;
 
@@ -41,16 +42,23 @@ public class SakaiQueryDAO extends SakaiDAO{
 			List<?> queryList = jdt.queryForList(sql);
 			Iterator<?> k = queryList.iterator();
 			if (k.hasNext()){
-				found = true;
+				ListOrderedMap data = (ListOrderedMap) k.next();
+				if((null != data.get("VALUE")) && ("" != data.get("VALUE"))) {
+					found = true;
+				} else {
+					clearNullContactRecord(site);
+					found = false;
+				}
 			}
 		}catch (Exception ex) {
 		       throw new Exception("SakaiQueryDAO : checkEmail : Error Occurred : / "+ ex,ex);
 		}
 		return found;
 	}
-	public String getEmail() throws Exception{
-		toolManager = (ToolManager) ComponentManager.get(ToolManager.class);
-		String sql = "Select VALUE from SAKAI_SITE_PROPERTY where SITE_ID = '"+toolManager.getCurrentPlacement().getContext()+"'" +
+	
+	public String getEmail(String site) throws Exception{
+		//toolManager = (ToolManager) ComponentManager.get(ToolManager.class);
+		String sql = "Select VALUE from SAKAI_SITE_PROPERTY where SITE_ID = '"+site+"'" +
 		" and NAME = 'contact-email'";
 		String email="";
 		try{
@@ -66,7 +74,14 @@ public class SakaiQueryDAO extends SakaiDAO{
 		}
 		return email;
 	}
-
+	
+	private void clearNullContactRecord(String site) {
+		String sql = "delete from SAKAI_SITE_PROPERTY where SITE_ID = '"+site+"'" +
+				" and NAME = 'contact-email' AND VALUE IS NULL";
+		JdbcTemplate jdt = new JdbcTemplate(getDataSource());
+		jdt.update(sql);
+	}
+	
 	public void setEmail(String choice, String emailaddres,String course, int year, short period) throws Exception {
 		toolManager = (ToolManager) ComponentManager.get(ToolManager.class);
 		sessionManager = (SessionManager) ComponentManager.get(SessionManager.class);
@@ -78,7 +93,7 @@ public class SakaiQueryDAO extends SakaiDAO{
 			sql = "delete from SAKAI_SITE_PROPERTY where SITE_ID = '"+toolManager.getCurrentPlacement().getContext()+"'" +
 			" and NAME = 'contact-email'";
 		} else if ("2".equals(choice)){
-			boolean found=checkEmail();
+			boolean found=checkEmail(toolManager.getCurrentPlacement().getContext());
 			if (found) {
 				sql = "Update SAKAI_SITE_PROPERTY set value = '"+toolManager.getCurrentPlacement().getContext()+"@unisa.ac.za' where SITE_ID = '"+toolManager.getCurrentPlacement().getContext()+"'" +
 				" and NAME = 'contact-email'";
@@ -125,7 +140,7 @@ public class SakaiQueryDAO extends SakaiDAO{
 
 			message+="\n\n Thank you";
 			String tmpEmailFrom = user.getEmail();
-			InternetAddress toEmail = new InternetAddress("ICT-Help@unisa.ac.za");
+			InternetAddress toEmail = new InternetAddress(ServerConfigurationService.getString("ict-helpdesk.email"));
 			InternetAddress iaTo[] = new InternetAddress[1];
 			iaTo[0] = toEmail;
 			InternetAddress iaHeaderTo[] = new InternetAddress[1];
@@ -134,7 +149,7 @@ public class SakaiQueryDAO extends SakaiDAO{
 			iaReplyTo[0] = new InternetAddress(tmpEmailFrom);
 			emailService.sendMail(iaReplyTo[0],iaTo,subject,message,iaHeaderTo,iaReplyTo,null);
 		} else if ("3".equals(choice)){
-			boolean found=checkEmail();
+			boolean found=checkEmail(toolManager.getCurrentPlacement().getContext());
 			if (found) {
 				sql = "Update SAKAI_SITE_PROPERTY set VALUE = '"+emailaddres+"' where SITE_ID = '"+toolManager.getCurrentPlacement().getContext()+"'" +
 					" and NAME = 'contact-email'";
