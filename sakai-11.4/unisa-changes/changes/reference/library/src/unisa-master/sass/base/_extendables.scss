@@ -109,6 +109,16 @@
 	}
 }
 
+select[multiple], select[size] {
+    height: auto !important;
+    background-color: #FFF !important;
+    background-image: none !important;
+}
+
+input[type="radio"]:disabled {
+	opacity: 0.3 !important;
+}
+
 .nav.nav-tabs, .sakai_tabs{
 	margin: 0 0.4em 0 0;
 	> li{
