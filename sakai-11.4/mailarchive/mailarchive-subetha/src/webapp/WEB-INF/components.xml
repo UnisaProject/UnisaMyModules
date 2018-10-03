@@ -3,7 +3,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean class="org.sakaiproject.mailarchive.SakaiMessageHandlerFactory" init-method="init" destroy-method="destroy">
+    <!--bean class="org.sakaiproject.mailarchive.SakaiMessageHandlerFactory" init-method="init" destroy-method="destroy"-->
+    <bean class="org.sakaiproject.mailarchive.UnisaMessageHandlerFactory" init-method="init" destroy-method="destroy">
         <property name="internationalizedMessages">
             <bean class="org.sakaiproject.util.ResourceLoader">
                 <constructor-arg index="0" value="sakaimailet"/>
@@ -19,6 +20,7 @@
         <property name="threadLocalManager" ref="org.sakaiproject.thread_local.api.ThreadLocalManager"/>
         <property name="contentHostingService" ref="org.sakaiproject.content.api.ContentHostingService"/>
         <property name="mailArchiveService" ref="org.sakaiproject.mailarchive.api.MailArchiveService"/>
+        <property name="authzGroupService" ref="org.sakaiproject.authz.api.AuthzGroupService"/>
     </bean>
 
 </beans>
