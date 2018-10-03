@@ -147,7 +147,7 @@ public class UnisaMessageHandlerFactory extends SakaiMessageHandlerFactory {
 
             server.setHostName(serverConfigurationService.getServerName());
             server.setPort(serverConfigurationService.getInt("smtp.port", 25));
-            server.setSoftwareName("SubEthaSMTP - Sakai (" + serverConfigurationService.getString("sakai.version", "unknown") +
+            server.setSoftwareName("SubEthaSMTP - Unisa Sakai (" + serverConfigurationService.getString("sakai.version", "unknown") +
                     ")");
             // We don't support smtp.dns.1 and smtp.dns.2
             server.setMaxConnections(100);
