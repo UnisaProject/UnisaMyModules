@@ -1737,7 +1737,6 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			throws Exception {
 
 		//log.debug("IN applyLoginReturn");
-	    
 		ActionMessages messages = new ActionMessages();
 		StudentRegistrationForm stuRegForm = (StudentRegistrationForm) form;
 		GeneralMethods gen = new GeneralMethods();
@@ -1795,7 +1794,18 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 			}
 		}
 		//log.debug("ApplyForStudentNumberAction - applyLoginReturn - After check if Student number = 8 characters and starts with 7 ");
-
+		//Johanet 20181004 - 2019 BRD SLP test returning number a slp number
+		if (stuRegForm.getStudent().isStuSLP()) {
+			if (!"7".equalsIgnoreCase(stuRegForm.getStudent().getNumber().substring(0,1))){
+				//not a SLP number do not start with a 7
+				messages.add(ActionMessages.GLOBAL_MESSAGE,
+						new ActionMessage("message.generalmessage", "You must apply for a SLP student number. The number you have entered is reserved for formal Unisa studies only."));
+				addErrors(request, messages);
+				setDropdownListsLogin(request,stuRegForm);
+				return mapping.findForward("applyLogin");
+			}
+		}
+		
 		//Check if Student Log Exists, if so, set Application Sequence Number
 		int currLogSeq = 0;
     	currLogSeq = dao.getSTULOGRef(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), stuRegForm.getStudent().getNumber());
