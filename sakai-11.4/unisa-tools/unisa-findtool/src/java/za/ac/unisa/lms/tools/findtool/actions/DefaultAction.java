@@ -82,7 +82,7 @@ public class DefaultAction extends DispatchAction {
 			return mapping.findForward("default");
 		}
 
-        Iterator<?> i = tools.iterator();
+        Iterator<?> i = tools.iterator(); 
         for (; i.hasNext();)
         {
             ToolConfiguration tr = (ToolConfiguration) i.next();
@@ -191,6 +191,22 @@ public class DefaultAction extends DispatchAction {
     			log.debug("ServerConfigurationService.getServerUrl()"+ServerConfigurationService.getServerUrl());
     			af.setPath(ServerConfigurationService.getServerUrl()+"/tool/"+tr.getId()+"/default.do?originatedFrom=" + request.getParameter("originatedFrom"));
     			return af;
+            }else if (request.getParameter("sharedTool").equalsIgnoreCase("unisa.studentstatus") &&
+          		  "unisa.studentoffer".equalsIgnoreCase(request.getParameter("originatedFrom"))) {
+	  			ActionForward af = new ActionForward("external",true);
+	  			//http://localhost:8080/unisa-findtool/default.do?shareTool=unisa.proxy&context=external&contentPath=Default.asp%3FCmd=ViewContent%26ContentID=17190
+	  			log.debug("returning external forward");
+	  			log.debug("ServerConfigurationService.getServerUrl()"+ServerConfigurationService.getServerUrl());
+	  			af.setPath(ServerConfigurationService.getServerUrl()+"/tool/"+tr.getId()+"/default.do?originatedFrom=" + request.getParameter("originatedFrom") + "&acaYear=" + request.getParameter("acaYear") + "&acaPeriod=" + request.getParameter("acaPeriod") + "&nr=" + request.getParameter("nr") + "&surname=" + request.getParameter("surname") + "&firstNames=" + request.getParameter("firstNames") + "&birthDay=" + request.getParameter("birthDay") + "&birthMonth="+request.getParameter("birthMonth")+"&birthYear="+request.getParameter("birthYear"));
+	  			return af;	
+            }else if (request.getParameter("sharedTool").equalsIgnoreCase("unisa.studentoffer") &&
+            		  "unisa.studentstatus".equalsIgnoreCase(request.getParameter("originatedFrom"))) {
+    			ActionForward af = new ActionForward("external",true);
+    			//http://localhost:8080/unisa-findtool/default.do?shareTool=unisa.proxy&context=external&contentPath=Default.asp%3FCmd=ViewContent%26ContentID=17190
+    			log.debug("returning external forward");
+    			log.debug("ServerConfigurationService.getServerUrl()"+ServerConfigurationService.getServerUrl());
+    			af.setPath(ServerConfigurationService.getServerUrl()+"/tool/"+tr.getId()+"/default.do?originatedFrom=" + request.getParameter("originatedFrom") + "&acaYear=" + request.getParameter("acaYear") + "&acaPeriod=" + request.getParameter("acaPeriod") + "&nr=" + request.getParameter("nr") + "&surname=" + request.getParameter("surname") + "&firstNames=" + request.getParameter("firstNames") + "&birthDay=" + request.getParameter("birthDay") + "&birthMonth="+request.getParameter("birthMonth")+"&birthYear="+request.getParameter("birthYear"));
+    			return af;	
             }else if (request.getParameter("sharedTool").equalsIgnoreCase("upmg") && 
             		!"".equalsIgnoreCase(request.getParameter("u"))&& !"".equalsIgnoreCase(request.getParameter("f"))){
                	    log.debug("entered uploadmanager ");
