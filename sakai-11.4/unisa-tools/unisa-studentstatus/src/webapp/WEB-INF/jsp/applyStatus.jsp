@@ -125,7 +125,11 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		});
 		
 		function doSubmit(button){
+			if (button === "backToOffer"){
+				document.studentStatusForm.action='studentStatus.do?act=backToOffer';
+			}else{
 			document.studentStatusForm.action='studentStatus.do?act=cancel';
+			}
 			document.studentStatusForm.submit();
 		}
 		
@@ -301,9 +305,12 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 					</logic:equal>		
 				</div>	
 				<div class="panel-footer clearfix">
-					<sakai:actions>
+					<logic:notEqual name="studentStatusForm" property="originatedFrom" value="unisa.studentoffer">
 						<button class="btn btn-default" type="button" onclick="doSubmit('Quit');">Quit</button>
-					</sakai:actions>
+				    </logic:notEqual>
+					<logic:equal name="studentStatusForm" property="originatedFrom" value="unisa.studentoffer">
+						<button class="btn btn-default" type="button" onclick="doSubmit('backToOffer');"><fmt:message key="button.backToOffer" /></button>
+					</logic:equal>
 				</div>
 			</div>
 		</div>

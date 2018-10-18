@@ -25,6 +25,7 @@ import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 import org.apache.struts.actions.LookupDispatchAction;
 import org.apache.struts.util.LabelValueBean;
+import org.sakaiproject.component.cover.ServerConfigurationService;
 
 import za.ac.unisa.lms.dao.Gencod;
 import za.ac.unisa.lms.dao.StudentSystemGeneralDAO;
@@ -65,6 +66,7 @@ public class StudentStatusAction extends LookupDispatchAction {
 	    
 	    map.put("applyLogin", "applyLogin");
 	    map.put("applyStatus", "applyStatus");
+	    map.put("backToOffer", "backToOffer");
 	    	    
     
 	    return map;
@@ -76,6 +78,25 @@ public class StudentStatusAction extends LookupDispatchAction {
 		StudentStatusForm stuStatForm =  new StudentStatusForm();
 		resetForm(stuStatForm, "StudentStatusAction - Reset");
 		
+	}
+	
+	public ActionForward backToOffer(
+			ActionMapping mapping,
+			ActionForm form,
+			HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		
+		StudentStatusForm stuStatForm = (StudentStatusForm) form;
+
+		String serverpath = ServerConfigurationService.getServerUrl();		
+		return new ActionForward(serverpath+"/unisa-findtool/default.do?sharedTool=unisa.studentoffer&originatedFrom=unisa.studentstatus&acaYear=" + stuStatForm.getStudent().getAcademicYear() +
+				  "&acaPeriod=" + stuStatForm.getStudent().getAcademicPeriod() +
+		  		  "&nr=" + stuStatForm.getStudent().getNumber() +
+				  "&surname=" +  stuStatForm.getStudent().getSurname() +
+				  "&firstNames=" + stuStatForm.getStudent().getFirstnames() +
+				  "&birthDay=" + stuStatForm.getStudent().getBirthDay() +
+				  "&birthMonth=" + stuStatForm.getStudent().getBirthMonth() +
+				  "&birthYear=" + stuStatForm.getStudent().getBirthYear(),true);
 	}
 	
 	public ActionForward walkthrough(ActionMapping mapping, ActionForm form,
@@ -92,6 +113,24 @@ public class StudentStatusAction extends LookupDispatchAction {
 		stuStatForm.setSelectReset("");
 		stuStatForm.setWebLoginMsg("");
 		
+		String originatedFrom =  request.getParameter("originatedFrom");
+		stuStatForm.setOriginatedFrom(originatedFrom);
+		if (originatedFrom != null)
+		{
+			stuStatForm.getStudent().setAcademicYear(request.getParameter("acaYear"));
+			stuStatForm.getStudent().setAcademicPeriod(request.getParameter("acaPeriod"));
+			stuStatForm.getStudent().setNumber(request.getParameter("nr"));
+			stuStatForm.getStudent().setSurname(request.getParameter("surname"));
+			stuStatForm.getStudent().setFirstnames(request.getParameter("firstNames"));
+			stuStatForm.getStudent().setBirthYear(request.getParameter("birthYear"));
+			stuStatForm.getStudent().setBirthMonth(request.getParameter("birthMonth"));
+			stuStatForm.getStudent().setBirthDay(request.getParameter("birthDay"));
+			stuStatForm.getStudent().setStuExist(true);
+			
+			applyStatus(request, stuStatForm);
+			return mapping.findForward("applyStatus");
+		}
+				
 		//Write version number to log to check all servers
 		//log.debug("StudentStatusAction - Applications Version="+stuStatForm.getVersion());
 		
@@ -127,7 +166,7 @@ public class StudentStatusAction extends LookupDispatchAction {
 			stuStatForm.setAllowLogin(false);
 		}
 		//log.debug("StudentStatusAction - walkthrough - AcademicYear="+stuStatForm.getStudent().getAcademicYear());
-		
+					
 		stuStatForm.getStudent().setNumber("");
 		stuStatForm.getStudent().setSurname("");
 		stuStatForm.getStudent().setFirstnames("");
@@ -979,6 +1018,7 @@ public class StudentStatusAction extends LookupDispatchAction {
 		stuStatForm.getStudent().setBirthYear("");
 		stuStatForm.getStudent().setBirthMonth("");
 		stuStatForm.getStudent().setBirthDay("");
+		stuStatForm.setOriginatedFrom("");
 		
 		ArrayList<String> dateCheck = dao.validateClosingDate(stuStatForm.getStudent().getAcademicYear());
 		if (!dateCheck.isEmpty()){ //Check Dates Array
