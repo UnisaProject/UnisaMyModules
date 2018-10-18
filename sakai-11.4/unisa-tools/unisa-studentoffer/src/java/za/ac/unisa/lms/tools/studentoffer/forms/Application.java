@@ -18,6 +18,7 @@ public class Application {
 	private String qualNDP;
 	private String radioOfferQual1;
 	private String radioOfferQual2;
+	private String radioOfferAccept;
 	private boolean ndpSub = false;
 	private String finaidEduloan;
 	private String finaidNsfas;
@@ -59,8 +60,13 @@ public class Application {
 	private String ndpRegSu8 = "";
 	private String ndpRegSu9 = "";
 	private String ndpRegSu10 = "";
-	
-	
+		
+	public String getRadioOfferAccept() {
+		return radioOfferAccept;
+	}
+	public void setRadioOfferAccept(String radioOfferAccept) {
+		this.radioOfferAccept = radioOfferAccept;
+	}
 	public String getAppnumber() {
 		return appnumber;
 	}

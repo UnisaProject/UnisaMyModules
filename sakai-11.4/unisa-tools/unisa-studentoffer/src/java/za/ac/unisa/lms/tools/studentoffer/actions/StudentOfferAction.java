@@ -32,6 +32,8 @@ import za.ac.unisa.lms.tools.studentoffer.dao.StudentOfferDAO;
 import za.ac.unisa.lms.tools.studentoffer.forms.Student;
 import za.ac.unisa.lms.tools.studentoffer.forms.StudentOfferForm;
 
+import org.sakaiproject.component.cover.ServerConfigurationService;
+
 public class StudentOfferAction extends LookupDispatchAction {
 	
     /** Our log (commons). */
@@ -79,9 +81,29 @@ public class StudentOfferAction extends LookupDispatchAction {
 	    map.put("applyLogin", "applyLogin");
 	    map.put("applyOffer", "applyOffer");
 	    map.put("applyOfferConfirm", "applyOfferConfirm");
+	    map.put("trackStatus", "trackStatus");
     
 	    return map;
 	 }
+	
+	public ActionForward trackStatus(
+			ActionMapping mapping,
+			ActionForm form,
+			HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		
+		StudentOfferForm stuStatForm = (StudentOfferForm) form;
+
+		String serverpath = ServerConfigurationService.getServerUrl();		
+		return new ActionForward(serverpath+"/unisa-findtool/default.do?sharedTool=unisa.studentstatus&originatedFrom=unisa.studentoffer&acaYear=" + stuStatForm.getStudent().getAcademicYear() +
+				  "&acaPeriod=" + stuStatForm.getStudent().getAcademicPeriod() +
+		  		  "&nr=" + stuStatForm.getStudent().getNumber() +
+				  "&surname=" +  stuStatForm.getStudent().getSurname() +
+				  "&firstNames=" + stuStatForm.getStudent().getFirstnames() +
+				  "&birthDay=" + stuStatForm.getStudent().getBirthDay() +
+				  "&birthMonth=" + stuStatForm.getStudent().getBirthMonth() +
+				  "&birthYear=" + stuStatForm.getStudent().getBirthYear(),true);
+	}
 	
 	public void reset(ActionMapping mapping, HttpServletRequest request) throws Exception {
 
@@ -104,6 +126,23 @@ public class StudentOfferAction extends LookupDispatchAction {
 		resetForm(stuStatForm, "StudentOfferAction - WalkThrough");
 		stuStatForm.setSelectReset("");
 		stuStatForm.setWebLoginMsg("");
+		
+		String originatedFrom =  request.getParameter("originatedFrom");
+		if (originatedFrom != null)
+		{
+			stuStatForm.getStudent().setAcademicYear(request.getParameter("acaYear"));
+			stuStatForm.getStudent().setAcademicPeriod(request.getParameter("acaPeriod"));
+			stuStatForm.getStudent().setNumber(request.getParameter("nr"));
+			stuStatForm.getStudent().setSurname(request.getParameter("surname"));
+			stuStatForm.getStudent().setFirstnames(request.getParameter("firstNames"));
+			stuStatForm.getStudent().setBirthYear(request.getParameter("birthYear"));
+			stuStatForm.getStudent().setBirthMonth(request.getParameter("birthMonth"));
+			stuStatForm.getStudent().setBirthDay(request.getParameter("birthDay"));
+			stuStatForm.getStudent().setStuExist(true);
+			
+			applyOfferStatus(request, stuStatForm);
+			return mapping.findForward("applyOffer");
+		}
 		
 		//Write version number to log to check all servers
 		//log.debug("StudentOfferAction - Applications Version="+stuStatForm.getVersion());
@@ -992,6 +1031,16 @@ public class StudentOfferAction extends LookupDispatchAction {
 		stuStatForm.getStudent().setBirthYear("");
 		stuStatForm.getStudent().setBirthMonth("");
 		stuStatForm.getStudent().setBirthDay("");
+		stuStatForm.getStudentApplication().setRadioOfferAccept(null);
+		stuStatForm.setOfferQual1("");
+		stuStatForm.setOfferSpec1("");
+		stuStatForm.setOfferQual2("");
+		stuStatForm.setOfferSpec2("");
+		stuStatForm.setPendingQual1("");
+		stuStatForm.setPendingSpec1("");
+		stuStatForm.setPendingQual2("");
+		stuStatForm.setPendingSpec2("");
+		stuStatForm.setPendingApp(false);
 		
 		ArrayList<String> dateCheck = dao.validateClosingDate(stuStatForm.getStudent().getAcademicYear());
 		if (!dateCheck.isEmpty()){ //Check Dates Array
@@ -1185,20 +1234,41 @@ public class StudentOfferAction extends LookupDispatchAction {
 		
 		try{
 			boolean isQualOffer1 = false;
-			boolean isQualOffer2 = false;
-			isQualOffer1 = dao.getOfferStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(), "1", "applyOfferStatus");
-			isQualOffer2 = dao.getOfferStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(), "2", "applyOfferStatus");
+			boolean isQualOffer2 = false;			
+			isQualOffer1 = dao.getOfferStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod(), "1", "applyOfferStatus");
+			isQualOffer2 = dao.getOfferStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod(), "2", "applyOfferStatus");
+			//Johanet 20181010 - 2019 BRD offer making change
+			boolean isQaulPending1 = false;
+			boolean isQualPending2 = false;
+			if (isQualOffer1) {
+				isQualPending2 = dao.getPendingStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod(), "2", "applyOfferStatus");
+			}
+			if (isQualOffer2) {
+				isQaulPending1 = dao.getPendingStatus(stuRegForm.getStudent().getNumber(),stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod(), "1", "applyOfferStatus");
+			}	
+			
+			stuRegForm.setPendingApp(false);
+			if (isQaulPending1) {			
+				stuRegForm.setPendingApp(true);
+				stuRegForm.setPendingQual1(dao.getStatusQual("Qual", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
+				stuRegForm.setPendingSpec1(dao.getStatusQual("Spec", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
+			}
+			if (isQualPending2) {	
+				stuRegForm.setPendingApp(true);
+				stuRegForm.setPendingQual2(dao.getStatusQual("Qual", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
+				stuRegForm.setPendingSpec2(dao.getStatusQual("Spec", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
+			}
 
 			//log.debug("StudentOfferAction - applyOfferStatus - isQualOffer1="+isQualOffer1);
 			//log.debug("StudentOfferAction - applyOfferStatus - isQualOffer2="+isQualOffer2);
 			
 			if (isQualOffer1){
-				stuRegForm.setOfferQual1(dao.getStatusQual("Qual", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear()));
-				stuRegForm.setOfferSpec1(dao.getStatusQual("Spec", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear()));
+				stuRegForm.setOfferQual1(dao.getStatusQual("Qual", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod()));
+				stuRegForm.setOfferSpec1(dao.getStatusQual("Spec", "1", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod()));
 			}
 			if (isQualOffer2){
-				stuRegForm.setOfferQual2(dao.getStatusQual("Qual", "2", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear()));
-				stuRegForm.setOfferSpec2(dao.getStatusQual("Spec", "2", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear()));
+				stuRegForm.setOfferQual2(dao.getStatusQual("Qual", "2", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod()));
+				stuRegForm.setOfferSpec2(dao.getStatusQual("Spec", "2", stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(),stuRegForm.getStudent().getAcademicPeriod()));
 			}
 			//log.debug("StudentOfferAction - applyOfferStatus - After - " + stuRegForm.getStudent().getNumber() +" - Qual1     = " + stuRegForm.getOfferQual1());
 			//log.debug("StudentOfferAction - applyOfferStatus - After - " + stuRegForm.getStudent().getNumber() +" - Spec1     = " + stuRegForm.getOfferSpec1());
@@ -1216,11 +1286,11 @@ public class StudentOfferAction extends LookupDispatchAction {
 			stuRegForm.setQualStatus1Reason("");
 			stuRegForm.setQualStatus2Reason("");
 			if (isQualOffer1 && (stuRegForm.getOfferQual1() != null && !"Not Found".equalsIgnoreCase(stuRegForm.getOfferQual1()))){
-				String qual1 = (stuRegForm.getOfferQual1().substring(0,5));
+				//String qual1 = (stuRegForm.getOfferQual1().substring(0,5));
 				//log.debug("StudentOfferAction - applyOffer - Qual1 Offer Input="+qual1);
-				String period1 = dao.getApplyPeriod(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(),qual1, "1");
+				//String period1 = dao.getApplyPeriod(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(),qual1, "1");
 				//log.debug("StudentOfferAction - applyOfferStatus - Period1="+period1);
-				String status1 = dao.getApplyStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), "1");
+				String status1 = dao.getApplyStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "1");
 				//log.debug("StudentOfferAction - applyOfferStatus - Status1="+status1);
 				stuRegForm.setQualStatusCode1(status1);
 				if (status1 != null && !"".equals(status1)){
@@ -1229,7 +1299,7 @@ public class StudentOfferAction extends LookupDispatchAction {
 				}
 				//Offer Reason
 				if ("AX".equalsIgnoreCase(stuRegForm.getQualStatusCode1()) || "EX".equalsIgnoreCase(stuRegForm.getQualStatusCode1()) || "TX".equalsIgnoreCase(stuRegForm.getQualStatusCode1())){
-					String reason1 = dao.getDeclineReason(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getNumber(), stuRegForm.getOfferQual1());
+					String reason1 = dao.getDeclineReason(stuRegForm.getStudent().getNumber(), stuRegForm.getOfferQual1(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod());
 					stuRegForm.setQualStatus1Reason(reason1);
 					//log.debug("StudentOfferAction - applyOfferStatus - Reason1="+reason1);
 				}	
@@ -1238,11 +1308,11 @@ public class StudentOfferAction extends LookupDispatchAction {
 			}
 			
 			if (isQualOffer2 && (stuRegForm.getOfferQual2() != null && !"Not Found".equalsIgnoreCase(stuRegForm.getOfferQual2()))){
-				String qual2 = (stuRegForm.getOfferQual2().substring(0,5));
+				//String qual2 = (stuRegForm.getOfferQual2().substring(0,5));
 				//log.debug("StudentOfferAction - applyOffer - Qual2 Offer Input="+qual2);
-				String period2 = dao.getApplyPeriod(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(),qual2, "2");
+				//String period2 = dao.getApplyPeriod(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(),qual2, "2");
 				//log.debug("StudentOfferAction - applyOfferStatus - Period2="+period2);
-				String status2 = dao.getApplyStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), "2");
+				String status2 = dao.getApplyStatus(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod(), "2");
 				stuRegForm.setQualStatusCode2(status2);
 				//log.debug("StudentOfferAction - applyOfferStatus - Status2="+status2);
 				if (status2 != null && !"".equals(status2)){
@@ -1251,7 +1321,7 @@ public class StudentOfferAction extends LookupDispatchAction {
 				}
 				//Offer Reason
 				if ("AX".equalsIgnoreCase(stuRegForm.getQualStatusCode2()) || "EX".equalsIgnoreCase(stuRegForm.getQualStatusCode2()) || "TX".equalsIgnoreCase(stuRegForm.getQualStatusCode2())){
-						String reason2 = dao.getDeclineReason(stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getNumber(), stuRegForm.getOfferQual2());
+						String reason2 = dao.getDeclineReason(stuRegForm.getStudent().getNumber(), stuRegForm.getOfferQual2(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod());
 						stuRegForm.setQualStatus2Reason(reason2);
 						//log.debug("StudentOfferAction - applyOfferStatus - Reason2="+reason2);
 				}
@@ -1274,51 +1344,50 @@ public class StudentOfferAction extends LookupDispatchAction {
 		
 		StudentOfferForm stuRegForm = (StudentOfferForm)form;
 		StudentOfferDAO dao = new StudentOfferDAO();
-		ActionMessages messages = new ActionMessages();
-
+		ActionMessages messages = new ActionMessages();		
+		
 		//log.debug("StudentOfferAction - applyOffer - Start");
 		
 		String qual1 = "";
 		String qual2 = "";
 		
-		stuRegForm.getStudent().setQual1(dao.vrfyNewQualShort("Qual","1",stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear()));
-		stuRegForm.getStudent().setQual2(dao.vrfyNewQualShort("Qual","2",stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear()));
+		stuRegForm.getStudent().setQual1(dao.vrfyNewQualShort("Qual","1",stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
+		stuRegForm.getStudent().setQual2(dao.vrfyNewQualShort("Qual","2",stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(), stuRegForm.getStudent().getAcademicPeriod()));
 		
 		//log.debug("StudentOfferAction - applyOffer check - Qual1="+stuRegForm.getStudent().getQual1());
 		//log.debug("StudentOfferAction - applyOffer check - Qual2="+stuRegForm.getStudent().getQual2());
 
 		try{
-			stuRegForm.getStudentApplication().setRadioOfferQual1(stripXSS(stuRegForm.getStudentApplication().getRadioOfferQual1()));
-			stuRegForm.getStudentApplication().setRadioOfferQual2(stripXSS(stuRegForm.getStudentApplication().getRadioOfferQual2()));
+//			stuRegForm.getStudentApplication().setRadioOfferQual1(stripXSS(stuRegForm.getStudentApplication().getRadioOfferQual1()));
+//			stuRegForm.getStudentApplication().setRadioOfferQual2(stripXSS(stuRegForm.getStudentApplication().getRadioOfferQual2()));
+			stuRegForm.getStudentApplication().setRadioOfferAccept(stripXSS(stuRegForm.getStudentApplication().getRadioOfferAccept()));
 			
 			//log.debug("StudentOfferAction - applyOffer check - Qual1 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual1());
 			//log.debug("StudentOfferAction - applyOffer check - Qual2 Radio="+stuRegForm.getStudentApplication().getRadioOfferQual2());
 
 			boolean isRadio1 = false;
-			boolean isRadio2 = false;
-			
-			if ("Y".equalsIgnoreCase(stuRegForm.getStudentApplication().getRadioOfferQual1()) || "N".equalsIgnoreCase(stuRegForm.getStudentApplication().getRadioOfferQual1())){
+			boolean isRadio2 = false;			
+				
+			if (null!=stuRegForm.getStudentApplication().getRadioOfferAccept() && stuRegForm.getStudentApplication().getRadioOfferAccept().equalsIgnoreCase("1")) {
 				isRadio1 = true;
 				qual1 = (stuRegForm.getOfferQual1().substring(0,5));
-				//log.debug("StudentOfferAction - applyOffer - Qual1 Offer Input="+qual1);
 				String period1 = dao.getApplyPeriod(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(),qual1, "1");
 				stuRegForm.setQualPeriodCode1(period1);
-				//log.debug("StudentOfferAction - applyOffer - Period1="+stuRegForm.getQualPeriodCode1());
 			}
-			if ("Y".equalsIgnoreCase(stuRegForm.getStudentApplication().getRadioOfferQual2()) || "N".equalsIgnoreCase(stuRegForm.getStudentApplication().getRadioOfferQual2())){
+			if (null!=stuRegForm.getStudentApplication().getRadioOfferAccept() && stuRegForm.getStudentApplication().getRadioOfferAccept().equalsIgnoreCase("2")) {
 				isRadio2 = true;
 				qual2 = (stuRegForm.getOfferQual2().substring(0,5));
-				//log.debug("StudentOfferAction - applyOffer - Qual2 Offer Input="+qual2);
 				String period2 = dao.getApplyPeriod(stuRegForm.getStudent().getNumber(), stuRegForm.getStudent().getAcademicYear(),qual2, "2");
 				stuRegForm.setQualPeriodCode2(period2);
-				//log.debug("StudentOfferAction - applyOffer - Period2="+stuRegForm.getQualPeriodCode2());
 			}
 			
 			if (!isRadio1 && !isRadio2){
 				//log.debug("StudentOfferAction - applyOffer check - Radio1 & Radio2 Not Selected?="+isRadio1+" & "+isRadio2);
-
+				//Johanet - 20181011 (adjust message - user can only accept)
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
-						new ActionMessage("message.generalmessage", "Please select an offer of enrolment to accept or decline or cancel to exit"));
+						new ActionMessage("message.generalmessage", "Please select an offer of enrolment to accept or cancel to exit"));
+//				messages.add(ActionMessages.GLOBAL_MESSAGE,
+//						new ActionMessage("message.generalmessage", "Please select an offer of enrolment to accept or decline or cancel to exit"));
 				addErrors(request, messages);
 				//return "applyOffer";
 				return mapping.findForward("applyOffer");
@@ -1357,7 +1426,7 @@ public class StudentOfferAction extends LookupDispatchAction {
 					op.setInWebStuApplicationQualApplicationPeriod((short) Integer.parseInt(stuRegForm.getQualPeriodCode1()));
 					op.setInWebStuApplicationQualNewQual(qual1);
 					op.setInWebStuApplicationQualChoiceNr((short) 1);
-					op.setInWebStuApplicationQualOfferAccepted(stuRegForm.getStudentApplication().getRadioOfferQual1());
+					op.setInWebStuApplicationQualOfferAccepted("Y");
 				
 					op.execute();
 		
@@ -1411,7 +1480,7 @@ public class StudentOfferAction extends LookupDispatchAction {
 					op.setInWebStuApplicationQualApplicationPeriod((short) Integer.parseInt(stuRegForm.getQualPeriodCode2()));
 					op.setInWebStuApplicationQualNewQual(qual2);
 					op.setInWebStuApplicationQualChoiceNr((short) 2);
-					op.setInWebStuApplicationQualOfferAccepted(stuRegForm.getStudentApplication().getRadioOfferQual2());
+					op.setInWebStuApplicationQualOfferAccepted("Y");
 														
 					op.execute();
 		
