@@ -73,7 +73,7 @@
                                                 <span class="Mrphs-toolTitleNav__text">${tool.toolRenderResult.getTitle()}</span>
                                             </a>
 					    <span class="Mrphs-toolTitleNav__addLeft"></span>
-                                        </h3>	<!-- Unisa Changes:2018/10/18:Replace h2 with h3 tags -->v
+                                        </h3>	<!-- Unisa Changes:2018/10/18:Replace h2 with h3 tags -->
 
                                     #end ## END of IF ($!{tool.toolInline})
 
