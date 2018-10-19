@@ -105,31 +105,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 			$('form,input,select,textarea').attr("autocomplete", "off");
 
 			/**Reset Radio Buttons**/
-			$('input:radio[name="studentApplication.radioOfferQual1"]').removeAttr('checked');
-			$('input:radio[name="studentApplication.radioOfferQual2"]').removeAttr('checked');
-
-			var isQual1Selected = false;
-			var isQual2Selected = false;
-			$('input[name="studentApplication.radioOfferQual1"]:radio').change(function(){
-				var radVal1 = $(this).attr("value");
-				if (radVal1 == 'Y') {
-					$("input[name='studentApplication.radioOfferQual1']").val(['Y']); //.prop('checked', true);
-			    	isQual1Selected = true;
-				}else if (radVal1 == 'N') {
-					$("input[name='studentApplication.radioOfferQual1']").val(['N']); //.prop('checked', true);
-					isQual1Selected = true;
-				}
-			});
-			$('input[name="studentApplication.radioOfferQual2"]:radio').change(function(){
-				var radVal2 = $(this).attr("value");
-				if (radVal2 == 'Y') {
-					$("input[name='studentApplication.radioOfferQual2']").val(['Y']); //.prop('checked', true);
-			    	isQual2Selected = true;
-				}else if (radVal2 == 'N') {
-					$("input[name='studentApplication.radioOfferQual2']").val(['N']); //.prop('checked', true);
-					isQual2Selected = true;
-				}
-			});
+			$('input:radio[name="studentApplication.radioOfferAccept"]').removeAttr('checked');	
 			
 			//Show correct parts of page depending on status of qualifications
 			var qualStatusCode1 = $('#qualStatusCode1').val();
@@ -151,45 +127,71 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		});
 
 
+// 	 	function validateSelectOld() {
+// 			//Check Radio selected value
+// 			var radioSelected1 = $("input:radio[name='studentApplication.radioOfferQual1']:checked").val();
+// 			var radioSelected2 = $("input:radio[name='studentApplication.radioOfferQual2']:checked").val();
+// 			var qualCode1 = $("#qualCode1").val();
+// 			var qualCode2 = $("#qualCode2").val();
+			
+// 			var isSet1 = false;
+// 			var isSet2 = false;
+// 			if (radioSelected1 == "Y" || radioSelected1 == "N"){
+// 				isSet1 = true;
+// 			}
+// 			if (radioSelected2 == "Y" || radioSelected2 == "N"){
+// 				isSet2 = true;
+// 			}
+// 			if (isSet1 === false && isSet2 === false){
+// 				showError("Error", "Please select an offer of admission to accept, or decline or Cancel to quit");
+// 				return false;
+// 			}else{
+// 				if (radioSelected1 == "Y"){
+// 					showModal("Confirmation", "You have accepted the offer for "+qualCode1+". Click 'OK' to confirm or on 'Cancel' to change your selection.")
+// 				}
+// 				if (radioSelected1 == "N"){
+// 					showModal("Confirmation", "You have declined the offer for "+qualCode1+". Click 'OK' to confirm or on 'Cancel' to change your selection.");
+// 				}
+// 				if (radioSelected2 == "Y"){
+// 					showModal("Confirmation", "You have accepted the offer for "+qualCode2+". Click 'OK' to confirm or on 'Cancel' to change your selection.");
+// 				}
+// 				if (radioSelected2 == "N"){
+// 					showModal("Confirmation", "You have declined the offer for "+qualCode2+". Click 'OK' to confirm or on 'Cancel' to change your selection.");
+// 				}
+// 			}
+// 		}	 	
+	 	
 	 	function validateSelect() {
 			//Check Radio selected value
-			var radioSelected1 = $("input:radio[name='studentApplication.radioOfferQual1']:checked").val();
-			var radioSelected2 = $("input:radio[name='studentApplication.radioOfferQual2']:checked").val();
+			var radioAccept = $("input:radio[name='studentApplication.radioOfferAccept']:checked").val();	
 			var qualCode1 = $("#qualCode1").val();
 			var qualCode2 = $("#qualCode2").val();
+			var pendingApp = $("#pendingApp").val();	
 			
-			var isSet1 = false;
-			var isSet2 = false;
-			if (radioSelected1 == "Y" || radioSelected1 == "N"){
-				isSet1 = true;
-			}
-			if (radioSelected2 == "Y" || radioSelected2 == "N"){
-				isSet2 = true;
-			}
-			if (isSet1 === false && isSet2 === false){
+			if (radioAccept == "1" || radioAccept =="2"){
+				if (pendingApp == "true"){
+					showPending("Confirmation", "One application is still being processed. Are you sure you want to accept the offer?");
+				}
+				if (radioAccept == "1"){
+					showModal("Confirmation", "You have accepted the offer for "+qualCode1+". Click 'OK' to confirm or on 'Cancel' to change your selection.");
+				}
+				if (radioAccept == "2"){
+					showModal("Confirmation", "You have accepted the offer for "+qualCode2+". Click 'OK' to confirm or on 'Cancel' to change your selection.");
+				}	
+			}else{
 				showError("Error", "Please select an offer of admission to accept, or decline or Cancel to quit");
 				return false;
-			}else{
-				if (radioSelected1 == "Y"){
-					showModal("Confirmation", "You have accepted the offer for "+qualCode1+". Click 'OK' to confirm or on 'Cancel' to change your selection.")
-				}
-				if (radioSelected1 == "N"){
-					showModal("Confirmation", "You have declined the offer for "+qualCode1+". Click 'OK' to confirm or on 'Cancel' to change your selection.");
-				}
-				if (radioSelected2 == "Y"){
-					showModal("Confirmation", "You have accepted the offer for "+qualCode2+". Click 'OK' to confirm or on 'Cancel' to change your selection.");
-				}
-				if (radioSelected2 == "N"){
-					showModal("Confirmation", "You have declined the offer for "+qualCode2+". Click 'OK' to confirm or on 'Cancel' to change your selection.");
-				}
 			}
 		}
+	 	
 	
 		function doSubmit(button){
 			if (button === "Continue"){
 				document.studentOfferForm.action='studentOffer.do?act=applyOffer';
 			}else if (button === "Back"){
 				document.studentOfferForm.action='studentOffer.do?act=back';
+			}else if (button === "TrackStatus"){
+				document.studentOfferForm.action='studentOffer.do?act=trackStatus';
 			}else if (button === "Cancel"){
 				window.top.location.href = "http://applications.unisa.ac.za/index.html";
 	  		  	return false;
@@ -212,6 +214,26 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 	   		   	  		doSubmit("Continue");
 	   		   	  	},
 	   		   	  	"Cancel": function(){
+	   		   	   		$(this).dialog("close");
+	   		    	}
+	   		  	}
+	   		});
+	   	}
+		
+		function showPending(errorTitle, errorText) {
+	   	    // show the actual error modal
+	   	    $.unblockUI();		    
+	   	    $('#dialogContent').html(errorText);
+	   		$('#dialogHolder').dialog({
+	   			autoOpen: true,
+	   		  	title: errorTitle,
+	   		  	modal: true,
+	   		 	width: "auto",
+	   		  	buttons: {
+	   		    	"Yes": function() {
+	   		   	  		doSubmit("Continue");
+	   		   	  	},
+	   		   	  	"No": function(){
 	   		   	   		$(this).dialog("close");
 	   		    	}
 	   		  	}
@@ -258,6 +280,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 	<input type="hidden" id="qualCode2" name="qualCode2" value="<bean:write name="studentOfferForm" property="offerQual2"/>" />
 	<input type="hidden" id="qualStatusCode1" name="qualStatusCode1" value="<bean:write name='studentOfferForm' property='qualStatusCode1' />" />
 	<input type="hidden" id="qualStatusCode2" name="qualStatusCode2" value="<bean:write name='studentOfferForm' property='qualStatusCode2' />" />
+	<input type="hidden" id="pendingApp" name="pendingApp" value="<bean:write name='studentOfferForm' property='pendingApp' />" />
 
 
 	<sakai:messages/>
@@ -275,8 +298,12 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 				</div>
 				<div class="panel-body">
 					<strong><fmt:message key="page.offer.info"/></strong><br/>
-					<i><fmt:message key="page.offer.info.note"/></i>
-					<br/><br/>
+					<i><fmt:message key="page.offer.info.note"/></i><br/>
+					<table style="width=90%">
+						<tr><td><i><fmt:message key="page.offer.info.note.a"/></i></td></tr>
+						<tr><td><i><fmt:message key="page.offer.info.note.b"/></i></td></tr>
+						<tr><td><i><fmt:message key="page.offer.info.note.c"/></i></td></tr>
+					</table>
 					<div class="noOfferQual" align="center" style="display: none;">
 						<h5><font color="red"><fmt:message key="page.offer.none"/></font></h5>
 					</div>
@@ -288,12 +315,12 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 								<td><b>Specializations&nbsp;</b></td>
 								<td><b>Status&nbsp;</b></td>
 								<td width="5%" align="center"><b><fmt:message key="page.accept"/></b></td>
-								<td width="5%" align="center"><b><fmt:message key="page.decline"/></b></td>
+								<!-- <td width="5%" align="center"><b><fmt:message key="page.decline"/></b></td> -->
 							</tr>
 							<logic:notEqual name="studentOfferForm" property="offerQual1" value="">
 								<logic:notEqual name="studentOfferForm" property="offerQual1" value="Not Found">
 									<tr>
-										<td colspan="4"><h5>Primary Qualification&nbsp;</h5></td>
+										<td colspan="3"><h5>Primary Qualification&nbsp;</h5></td>
 									</tr><tr>
 										<td><bean:write name="studentOfferForm" property="offerQual1"/></td>
 										<logic:notEqual name="studentOfferForm" property="offerSpec1" value="">
@@ -305,17 +332,17 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 										<td>
 											<bean:write name="studentOfferForm" property="qualStatus1"/>
 										</td>
-										<td align="center"><html:radio name="studentOfferForm" property="studentApplication.radioOfferQual1" value="Y"/></td>
-										<td align="center"><html:radio name="studentOfferForm" property="studentApplication.radioOfferQual1" value="N"/></td>
+										<td align="center"><html:radio name="studentOfferForm" property="studentApplication.radioOfferAccept" value="1"/></td>
+										<!-- <td align="center"><html:radio name="studentOfferForm" property="studentApplication.radioOfferQual1" value="N"/></td> -->
 									</tr>	
 								</logic:notEqual>
 							</logic:notEqual>
 							<logic:notEqual name="studentOfferForm" property="offerQual2" value="">
 								<logic:notEqual name="studentOfferForm" property="offerQual2" value="Not Found">
 									<tr>
-										<td colspan="4">&nbsp;</td>
+										<td colspan="3">&nbsp;</td>
 									</tr><tr>
-										<td colspan="4"><h5>Alternative Qualification&nbsp;</h5></td>
+										<td colspan="3"><h5>Alternative Qualification&nbsp;</h5></td>
 									</tr><tr>
 										<td><bean:write name="studentOfferForm" property="offerQual2"/>
 										<logic:notEqual name="studentOfferForm" property="offerSpec2" value="">
@@ -327,8 +354,8 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 										<td>
 											<bean:write name="studentOfferForm" property="qualStatus2"/>
 										</td>
-										<td align="center"><html:radio name="studentOfferForm" property="studentApplication.radioOfferQual2" value="Y"/></td>
-										<td align="center"><html:radio name="studentOfferForm" property="studentApplication.radioOfferQual2" value="N"/></td>
+										<td align="center"><html:radio name="studentOfferForm" property="studentApplication.radioOfferAccept" value="2"/></td>
+										<!-- <td align="center"><html:radio name="studentOfferForm" property="studentApplication.radioOfferQual2" value="N"/></td> -->
 									</tr>
 								</logic:notEqual>
 							</logic:notEqual>
@@ -344,6 +371,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 					<div class="doOfferButtons" style="display: none;">
 						<button class="btn btn-default" type="button" onclick="doSubmit('Cancel');"><fmt:message key="button.cancel" /></button>
 						<button class="btn btn-default" type="button" onclick="validateSelect();"><fmt:message key="button.next" /></button>
+						<button class="btn btn-default" type="button" onclick="doSubmit('TrackStatus');"><fmt:message key="button.trackStatus" /></button>												
 					</div>
 				</div>
 			</div>

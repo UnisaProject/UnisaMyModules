@@ -72,7 +72,16 @@ public class StudentStatusForm extends ValidatorActionForm {
 	private String screeningSittingQual1 ="";
 	private String screeningSittingQual2 ="";
 	private ScreeningVenue screeningVenue = new ScreeningVenue();	
+	private String originatedFrom = "";
 	
+	public String getOriginatedFrom() {
+		return originatedFrom;
+	}
+
+	public void setOriginatedFrom(String originatedFrom) {
+		this.originatedFrom = originatedFrom;
+	}
+
 	public boolean isScreeningSitting() {
 		return screeningSitting;
 	}
@@ -373,6 +382,7 @@ public class StudentStatusForm extends ValidatorActionForm {
 	}
 
 	public void resetFormFields(){
+		originatedFrom = "";
 		applyType = "";
 		allowLogin = true;
 		student = new Student();
