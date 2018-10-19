@@ -189,7 +189,7 @@ public class DefaultAction extends DispatchAction {
     			//http://localhost:8080/unisa-findtool/default.do?shareTool=unisa.proxy&context=external&contentPath=Default.asp%3FCmd=ViewContent%26ContentID=17190
     			log.debug("returning external forward");
     			log.debug("ServerConfigurationService.getServerUrl()"+ServerConfigurationService.getServerUrl());
-    			af.setPath(ServerConfigurationService.getServerUrl()+"/tool/"+tr.getId()+"/default.do?originatedFrom=" + request.getParameter("originatedFrom"));
+    			af.setPath(ServerConfigurationService.getServerUrl()+"/portal/site/myadmin/tool/"+tr.getId()+"/default.do?originatedFrom=" + request.getParameter("originatedFrom"));
     			return af;
             }else if (request.getParameter("sharedTool").equalsIgnoreCase("unisa.studentstatus") &&
           		  "unisa.studentoffer".equalsIgnoreCase(request.getParameter("originatedFrom"))) {
@@ -221,12 +221,12 @@ public class DefaultAction extends DispatchAction {
     			log.debug("returning external forward");
     			log.debug("ServerConfigurationService.getServerUrl()"+ServerConfigurationService.getServerUrl());
     			
-//    			if ("unisa.biodetails".equalsIgnoreCase(request.getParameter("returnedFrom")))  {  				
-//    				af.setPath(ServerConfigurationService.getServerUrl()+"/tool/"+tr.getId()+"/additions.do?action=displayContactDetails&returnedFrom=unisa.biodetails");
-//    			} else {
+    			if ("unisa.biodetails".equalsIgnoreCase(request.getParameter("returnedFrom")))  {  				
+    				af.setPath(ServerConfigurationService.getServerUrl()+"/portal/site/myadmin/tool/"+tr.getId()+"/additions.do?action=displayContactDetails&returnedFrom=unisa.biodetails");
+    			} else {
     			
     				af.setPath(ServerConfigurationService.getServerUrl()+"/tool/"+tr.getId());
-//    			}
+    			}
     			return af;    			
     		}
 	           else if (request.getParameter("sharedTool").equalsIgnoreCase("unisa.assmarkerreallocation")){
