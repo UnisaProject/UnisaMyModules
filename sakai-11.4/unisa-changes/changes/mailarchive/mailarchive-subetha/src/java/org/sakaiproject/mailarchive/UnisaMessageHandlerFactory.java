@@ -147,7 +147,7 @@ public class UnisaMessageHandlerFactory extends SakaiMessageHandlerFactory {
 
             server.setHostName(serverConfigurationService.getServerName());
             server.setPort(serverConfigurationService.getInt("smtp.port", 25));
-            server.setSoftwareName("SubEthaSMTP - Sakai (" + serverConfigurationService.getString("sakai.version", "unknown") +
+            server.setSoftwareName("SubEthaSMTP - Unisa Sakai (" + serverConfigurationService.getString("sakai.version", "unknown") +
                     ")");
             // We don't support smtp.dns.1 and smtp.dns.2
             server.setMaxConnections(100);
@@ -231,13 +231,18 @@ public class UnisaMessageHandlerFactory extends SakaiMessageHandlerFactory {
                         try {
                         	//siteService.getSite(getMailIdParts(address.getLocal(), SITE_NAME));
                         	// IF IT IS A STUDENT WITH AN EMAIL ADDRESS...
+                        	studentNumber = getMailIdParts(address.getLocal(), RECIPIENT);
                        		if(isStudent(studentNumber)) {
                         		// THE RECIPIENT IS A VALID STUDENT
                         		// CHECK THE VALIDITY OF THE SITE IF IT IS PART OF THE RECIPIENT ADDRESS
                         		courseSite = getMailIdParts(address.getLocal(), SITE_NAME);
                         		if(courseSite != "") {
                         			siteService.getSite(courseSite);
-                        			address = SplitEmailAddress.parse(studentNumber+"@mylife.unisa.ac.za");
+                        			try {
+                        				address = SplitEmailAddress.parse(userDirectoryService.getUserByEid(studentNumber).getEmail());
+                        			} catch(Exception e) {
+                        				address = SplitEmailAddress.parse(studentNumber+"@mylife.unisa.ac.za");
+                        			}
                         			recipient.address = address;
                         			log.debug("a student is the recipient with email: " + recipient.getAddress());
                         			recipients.add(recipient);
