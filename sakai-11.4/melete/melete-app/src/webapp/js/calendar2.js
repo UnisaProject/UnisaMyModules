@@ -19,7 +19,7 @@ var RE_NUM = /^\-?\d+$/;
 function calendar2(obj_target,hrs,mins,ampm) {
 
 	// assigning methods
-	this.gen_date = ambrosia_format_date; //cal_gen_date2;
+	this.gen_date = unisa_server_format_date; //ambrosia_format_date; //cal_gen_date2;
 	this.gen_time = ambrosia_format_time; // cal_gen_time2;
 	this.gen_tsmp = cal_gen_tsmp2;
 	this.prs_date = ambrosia_parse_date; // cal_prs_date2;
@@ -89,6 +89,18 @@ return(this.gen_date(dt_datetime) + ' ' + this.gen_time(dt_datetime));
 
 }
 
+function unisa_server_format_date(timeStamp)
+{
+        //10 Apr 2013 1:00 AM  //Oct 16, 2013 8:00 AM
+       
+        var rv = timeStamp.getDate();
+        rv += " ";
+        rv += this.month_names[timeStamp.getMonth()];
+        rv += " ";
+        rv += timeStamp.getFullYear();
+        return rv;
+}
+
 function ambrosia_format_date(timeStamp)
 {
 	var rv = this.month_names[timeStamp.getMonth()];
@@ -112,13 +124,14 @@ function ambrosia_parse_timeStamp(displayStr)
 {
 	if (displayStr == null) return this.gen_now();
 
-	var time = parseInt(displayStr, 10);
+	var time = Number(displayStr); //parseInt(displayStr, 10); // Changed the javascript function from parseInt To Number in order to check the entire date string! ETM
 	if (!isNaN(time) && (time >= 0)) return new Date(time);
 
 	var displayParts = displayStr.split(" ");
 	if (displayParts.length != 5) this.gen_now();
 
-	var datePart = displayParts[0] + " " + displayParts[1] + " " + displayParts[2];
+	//var datePart = displayParts[0] + " " + displayParts[1] + " " + displayParts[2];
+	var datePart = displayParts[1] + " " + displayParts[0] + " " + displayParts[2];
 	var timePart = displayParts[3] + " " + displayParts[4];
 	return this.prs_time(timePart, this.prs_date(datePart));
 }
@@ -129,7 +142,7 @@ function ambrosia_parse_am_pm(displayStr)
 
 	var time = parseInt(displayStr, 10);
 	if (!isNaN(time) && (time >= 0)) return new Date(time);
-	
+	datePart
 	var displayParts = displayStr.split(" ");
 	return displayParts[displayParts.length-1];
 }
