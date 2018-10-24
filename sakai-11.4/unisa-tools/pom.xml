@@ -20,7 +20,7 @@
 	<module>unisa-assessmentcriteriaauth</module>
 	<module>unisa-assmarkerreallocation</module>
 	<module>unisa-axis</module>
-	<!-- >module>unisa-biodetails</module-->
+	<module>unisa-biodetails</module>
 	<module>unisa-booklist</module>
 	<module>unisa-booklistadmin</module>
 	<module>unisa-browsertest</module>
@@ -29,7 +29,7 @@
 	<module>unisa-changepassword</module>
 	<!-- >module>unisa-contactus</module-->
 	<module>unisa-creditcardpayment</module>
-	<!--module>unisa-cronjobs</module --> <!-- this tool will only be deployed on node 10 on production -->
+	<module>unisa-cronjobs</module> <!-- this tool will only be deployed on node 10 on production -->
 	<module>unisa-discussionforums</module>
 	<module>unisa-ebookshop</module>
 	<module>unisa-exampapers</module>
@@ -59,24 +59,24 @@
 	<module>unisa-proxy</module>
 	<module>unisa-publicexamtimetable</module>
 	<module>unisa-regdetails</module>
-	<!-- module>unisa-registrationstatus</module-->
+	<module>unisa-registrationstatus</module>
 	<module>unisa-results</module>
 	<module>unisa-satbook</module>
 	<module>unisa-signoff</module>
 	<module>unisa-smsbatch</module>
 	<module>unisa-smsenquiry</module>
 	<module>unisa-sitestatsexport</module>
-	<!-- module>unisa-studentemail</module-->
+	<module>unisa-studentemail</module>
 	<module>unisa-studentlist</module>
 	<module>unisa-studentregistration</module>
 	<module>unisa-studyquotation</module>
     <module>unisa-studymaterial</module>
     <module>unisa-uploadmanager</module>
-    <!--module>unisa-brochures</module -->
+    <module>unisa-brochures</module>
 	<module>unisa-telecentre</module>
 	<module>unisa-trackandtrace</module>
 	<!--module>unisa-tutorappointment</module-->
-	<!--module>unisa-tracking</module-->
+	<!--  module>unisa-tracking</module-->
 	<module>unisa-mdregistrations</module>
 	<module>unisa-studentnosearch</module>
 	<module>unisa-tpustudentplacement</module>

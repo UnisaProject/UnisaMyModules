@@ -1,8 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <%--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/list_auth_modules.jsp $
- * $Id: list_auth_modules.jsp 80587 2012-07-02 17:53:22Z mallika@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/list_auth_modules.jsp $
+ * $Id: list_auth_modules.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008, 2009, 2010, 2012 Etudes, Inc.
@@ -113,13 +113,13 @@ if (msg != null)
 	<h:messages showDetail="true" showSummary="false" infoClass="BlueClass" errorClass="RedClass"/>
 	
 	<div class="right">
-	     <h:commandLink id="lastVisitedLink" actionListener="#{bookmarkPage.editSection}" action="#{bookmarkPage.redirectEditSection}" rendered="#{listModulesPage.bookmarkSectionId > 0}">
+	     <h:commandLink id="lastVisitedLink" actionListener="#{bookmarkPage.editSection}" action="#{bookmarkPage.redirectEditSection}" rendered="#{listModulesPage.bookmarkSectionId > 0}" styleClass="toolUiLink">
 	      <f:param name="sectionId" value="#{listModulesPage.bookmarkSectionId}" /> 
 	      <h:graphicImage id="lvisit_gif" value="/images/last-visited.png" alt="" styleClass="AuthImgClass"/>
 	      <h:outputText id="lastvisit" value="#{msgs.last_visited}" />									
 	     </h:commandLink>
 	     <h:outputText value="|" rendered="#{listModulesPage.bookmarkSectionId > 0}"/> 
-	     <h:commandLink id="myBookmarksLink" action="#{bookmarkPage.gotoMyBookmarks}">
+	     <h:commandLink id="myBookmarksLink" action="#{bookmarkPage.gotoMyBookmarks}" styleClass="toolUiLink">
 	     <f:param name="fromPage" value="list_auth_modules"/>	
 	     <h:graphicImage id="mybook_gif" value="/images/my-bookmarks.png" alt="" styleClass="AuthImgClass"/>
            <h:outputText id="mybks" value="#{msgs.my_bookmarks}" />				
@@ -189,7 +189,7 @@ if (msg != null)
         <h:graphicImage id="col_gif" alt="#{msgs.list_auth_modules_authoring_collapse}" value="/images/collapse.gif" rendered="#{(((mdbean.moduleId == listAuthModulesPage.showModuleId)&&(mdbean.sectionBeans != listAuthModulesPage.nullList))||((listAuthModulesPage.expandAllFlag == listAuthModulesPage.trueFlag)&&(mdbean.sectionBeans != listAuthModulesPage.nullList)))}" styleClass="ExpClass"/>
      </h:commandLink>         
       <h:outputText id="mod_seq" value="#{mdbean.cmod.seqNo}. " />      
-      <h:commandLink id="editMod" actionListener="#{listAuthModulesPage.editModule}">     
+      <h:commandLink id="editMod" actionListener="#{listAuthModulesPage.editModule}" styleClass="toolUiLink">     
          <f:param name="editmodid" value="#{mdbean.moduleId}" />
          <h:outputText id="title2" value="#{mdbean.module.title}" />
       </h:commandLink>
@@ -203,7 +203,7 @@ if (msg != null)
                
                <h:outputText id="disp_seq" value="#{sectionBean.displaySequence}. " />
                              
-              <h:commandLink id="editSec" actionListener="#{listAuthModulesPage.editSection}">
+              <h:commandLink id="editSec" actionListener="#{listAuthModulesPage.editSection}" styleClass="toolUiLink">
                <f:param name="editsecmodid" value="#{mdbean.moduleId}" />  
                <f:param name="sectionId" value="#{sectionBean.section.sectionId}" /> 
               <h:outputText id="sectitle" value="#{sectionBean.section.title}">
@@ -222,7 +222,7 @@ if (msg != null)
 	                           value="#{mdbean.moduleShdate.startDate}" onchange="showInvalid('listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':startDate','listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':err_gifst');">
 	            	<o:convertDateTime />
 	            </h:inputText>
-	            <h:outputLink id="viewsdateCal" onclick="showCal('listauthmodulesform:table:'+#{listAuthModulesPage.table.rowIndex}+':startDate','8','0','AM');return false;" value="#">
+	            <h:outputLink id="viewsdateCal" onclick="showCal('listauthmodulesform:table:'+#{listAuthModulesPage.table.rowIndex}+':startDate','8','0','AM');return false;" value="#" styleClass="toolUiLink">
 	            	<h:graphicImage id="sdateCal" value="/images/date.png" alt="#{msgs.list_auth_modules_alt_popup_cal}" title="#{msgs.list_auth_modules_alt_popup_cal}" styleClass="ListDatePickerClass"/>
 	           </h:outputLink> 	
 	           <h:graphicImage id="err_gifst" value="/images/warning.png" alt="#{msgs.list_auth_modules_invalid}" title="#{msgs.list_auth_modules_invalid}"  style="visibility:hidden;" onclick="showHideTable('listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':invalidMsgSt0','true')"  styleClass="ExpClass"/>
@@ -250,7 +250,7 @@ if (msg != null)
                            value="#{mdbean.moduleShdate.endDate}" onchange="showInvalid('listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':endDate','listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':err_gifen');">
                <o:convertDateTime />
             </h:inputText>
-             <h:outputLink id="viewedateCal" onclick="showCal('listauthmodulesform:table:'+#{listAuthModulesPage.table.rowIndex}+':endDate','11','59','PM');return false;" value="#">
+             <h:outputLink id="viewedateCal" onclick="showCal('listauthmodulesform:table:'+#{listAuthModulesPage.table.rowIndex}+':endDate','11','59','PM');return false;" value="#" styleClass="toolUiLink">
             <h:graphicImage id="edateCal" value="/images/date.png" alt="#{msgs.list_auth_modules_alt_popup_cal}" title="#{msgs.list_auth_modules_alt_popup_cal}" styleClass="ListDatePickerClass"/>
            </h:outputLink>
            <h:graphicImage id="err_gifen" value="/images/warning.png" alt="#{msgs.list_auth_modules_invalid}" title="#{msgs.list_auth_modules_invalid}" style="visibility:hidden;" onclick="showHideTable('listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':invalidMsgEn0','true')"  styleClass="ExpClass"/>
@@ -278,7 +278,7 @@ if (msg != null)
 	                       value="#{mdbean.moduleShdate.allowUntilDate}" onchange="showInvalid('listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':allowUntilDate','listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':err_gifal');">
 	           <o:convertDateTime />
 	        </h:inputText>
-             <h:outputLink id="viewadateCal" onclick="showCal('listauthmodulesform:table:'+#{listAuthModulesPage.table.rowIndex}+':allowUntilDate','11','59','PM');return false;" value="#">
+             <h:outputLink id="viewadateCal" onclick="showCal('listauthmodulesform:table:'+#{listAuthModulesPage.table.rowIndex}+':allowUntilDate','11','59','PM');return false;" value="#" styleClass="toolUiLink">
           		  <h:graphicImage id="adateCal" value="/images/date.png" alt="#{msgs.list_auth_modules_alt_popup_cal}" title="#{msgs.list_auth_modules_alt_popup_cal}" styleClass="ListDatePickerClass"/>
           	 </h:outputLink>
 	        <h:graphicImage id="err_gifal" value="/images/warning.png" alt="#{msgs.list_auth_modules_invalid}" title="#{msgs.list_auth_modules_invalid}" style="visibility:hidden;" onclick="showHideTable('listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':invalidMsgAl0','true')"  styleClass="ExpClass"/>
@@ -298,21 +298,21 @@ if (msg != null)
       </h:column>
       <h:column>
          	<h:panelGrid columns="4" styleClass="maintableCollapseWithNoBorder">         	
-           <h:commandLink id="viewNextsteps" actionListener="#{listAuthModulesPage.viewNextsteps}" >
+           <h:commandLink id="viewNextsteps" actionListener="#{listAuthModulesPage.viewNextsteps}" styleClass="toolUiLink">
 			   <h:graphicImage id="vns_gif" value="/images/add.gif" alt="#{msgs.list_auth_modules_alt_add_steps}" title="#{msgs.list_auth_modules_alt_add_steps}" styleClass="AddImgClass"  rendered="#{mdbean.module.whatsNext == listAuthModulesPage.isNull}"/>      
 			   <h:graphicImage id="vns1_gif" value="/images/view_next.gif" alt="#{msgs.list_auth_modules_alt_next_steps}" title="#{msgs.list_auth_modules_alt_next_steps}" styleClass="AddImgClass"  rendered="#{mdbean.module.whatsNext != listAuthModulesPage.isNull}"/>        		   
            </h:commandLink>
          
-           <h:commandLink id="specialAccess" actionListener="#{listAuthModulesPage.specialAccessAction}" >
+           <h:commandLink id="specialAccess" actionListener="#{listAuthModulesPage.specialAccessAction}" styleClass="toolUiLink">
 			   <h:graphicImage id="acc_gif" value="/images/access_add.png" alt="#{msgs.list_auth_modules_alt_add_access}" title="#{msgs.list_auth_modules_alt_add_access}" styleClass="AddImgClass" rendered="#{mdbean.saFlag == false}"/>
 			   <h:graphicImage id="acc_view_gif" value="images/access_view.png" alt="#{msgs.list_auth_modules_alt_view_access}" title="#{msgs.list_auth_modules_alt_view_access}" styleClass="AddImgClass" rendered="#{mdbean.saFlag == true}"/>            
 			 </h:commandLink>           
            
-		  <h:commandLink id="duplicateModule" action="#{listAuthModulesPage.duplicateAction}">
+		  <h:commandLink id="duplicateModule" action="#{listAuthModulesPage.duplicateAction}" styleClass="toolUiLink">
 		  	  <h:graphicImage id="duplicateImg" value="/images/page_copy.png" alt="#{msgs.list_auth_modules_alt_duplicate}" title="#{msgs.list_auth_modules_alt_duplicate}" styleClass="AuthImgClass"/>
 		  </h:commandLink>
 		  
-		     <h:outputLink id="printModuleLink" value="list_auth_modules" onclick="document.forms['listauthmodulesform'].elements['listauthmodulesform:saveChanges'].click();OpenPrintWindow(#{listAuthModulesPage.printModuleId},'Melete Print Window');">
+		     <h:outputLink id="printModuleLink" value="list_auth_modules" onclick="document.forms['listauthmodulesform'].elements['listauthmodulesform:saveChanges'].click();OpenPrintWindow(#{listAuthModulesPage.printModuleId},'Melete Print Window');" styleClass="toolUiLink">
 		       	<h:graphicImage id="printImgLink" value="/images/printer.png" alt="#{msgs.list_auth_modules_alt_print}" title="#{msgs.list_auth_modules_alt_print}" styleClass="AuthImgClass"/>
 		  </h:outputLink>  	  	   
 		  </h:panelGrid>

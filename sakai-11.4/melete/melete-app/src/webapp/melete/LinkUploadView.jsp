@@ -1,7 +1,7 @@
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/LinkUploadView.jsp $
- * $Id: LinkUploadView.jsp 77095 2011-10-25 17:35:21Z rashmi@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/LinkUploadView.jsp $
+ * $Id: LinkUploadView.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008, 2009, 2010, 2011 Etudes, Inc.
@@ -103,7 +103,7 @@ function fillTitle(idx, idx1)
 				 <h:message for="url" id="errurlmsg" showDetail="true" showSummary="false" infoClass="BlueClass" errorClass="RedClass"/>                
                 <h:inputText id="url" size="40" value="#{ut.url}" onchange="fillTitle('LinkUploadForm:utTable:' +#{addResourcesPage.table.rowIndex} + ':url', 'LinkUploadForm:utTable:' +#{addResourcesPage.table.rowIndex} + ':title' )" />
                 <h:outputText id="spc" escape="false" value="&nbsp;" />
-                 <h:commandLink id="removeLink"   actionListener="#{addResourcesPage.removeLink}" action="#{addResourcesPage.redirectToLinkUpload}" >  
+                 <h:commandLink id="removeLink"   actionListener="#{addResourcesPage.removeLink}" action="#{addResourcesPage.redirectToLinkUpload}" styleClass="toolUiLink">  
                    <h:graphicImage id="remove_gif" alt="" value="/images/remove_item.png" styleClass="ExpClass"/>
                     <h:outputText 	id="remove_text" value="#{msgs.link_upload_remove_item}"/>		
                   </h:commandLink>

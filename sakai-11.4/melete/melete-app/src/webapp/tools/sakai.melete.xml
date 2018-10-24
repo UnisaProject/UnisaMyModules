@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/tools/sakai.melete.xml $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.8.2/melete-app/src/webapp/tools/sakai.melete.xml $
  * $Id: sakai.melete.xml 64773 2009-11-18 18:45:27Z rashmi@etudes.org $  
  ***********************************************************************************
  *
@@ -36,6 +36,10 @@
 			
 			<category name="course" />
 			<category name="project" />
+			<category name="PostGraduate" />
+			<category name="onlcourse" />
+			<category name="onlgroup" />
+			<category name="group" />
 	</tool>
 
 </registration>

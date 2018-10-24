@@ -1,9 +1,9 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/etudes-util/tags/1.0.17/etudes-util/util/src/java/org/etudes/util/TranslationImpl.java $
- * $Id: TranslationImpl.java 60314 2009-05-09 19:16:12Z ggolden@etudes.org $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2009 Etudes, Inc.
+ * Copyright (c) 2009, 2013 Etudes, Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,8 @@ public class TranslationImpl implements Translation
 	public String reverseTranslate(String target)
 	{
 		if (target == null) return null;
+		if (this.from == null) return target;
+		if (this.to == null) return target;
 
 		String rv = Pattern.compile(this.to.toString(), Pattern.LITERAL | Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(target)
 				.replaceAll(Matcher.quoteReplacement(this.from.toString()));
@@ -102,6 +104,8 @@ public class TranslationImpl implements Translation
 	public String translate(String target)
 	{
 		if (target == null) return null;
+		if (this.from == null) return target;
+		if (this.to == null) return target;
 
 		String rv = Pattern.compile(this.from.toString(), Pattern.LITERAL | Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE).matcher(target)
 				.replaceAll(Matcher.quoteReplacement(this.to.toString()));

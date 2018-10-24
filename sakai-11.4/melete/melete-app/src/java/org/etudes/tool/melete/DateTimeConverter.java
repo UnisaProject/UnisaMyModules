@@ -1,10 +1,10 @@
 /*******************************************************************************
  *
- * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/melete-app/src/java/org/etudes/tool/melete/DateTimeConverter.java $
+ * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.9/melete-app/src/java/org/etudes/tool/melete/DateTimeConverter.java $
  *
  * **********************************************************************************
  *
- * Copyright (c) 2012 Etudes, Inc.
+ * Copyright (c) 2012, 2014 Etudes, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you
  * may not use this file except in compliance with the License. You may
@@ -22,8 +22,9 @@
 
 package org.etudes.tool.melete;
 
-import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
+
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import org.etudes.util.DateHelper;
@@ -57,13 +58,17 @@ public class DateTimeConverter extends javax.faces.convert.DateTimeConverter
 	{
 		Date date = (Date) o;
 		String dateZoneStr;
+
+		Map<String, Object> attributes = uic.getAttributes();
+		if (attributes.containsKey("multiLine")) multiLine = Boolean.parseBoolean((String) attributes.get("multiLine"));
+
 		if (this.multiLine)
 		{
 			dateZoneStr = DateHelper.formatDateTwoLine(date, null);
 		}
 		else
 		{
-			dateZoneStr = DateHelper.formatDate(date,null);
+			dateZoneStr = DateHelper.formatDate(date, null);
 		}
 		return dateZoneStr;
 	}

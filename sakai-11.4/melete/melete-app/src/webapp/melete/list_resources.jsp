@@ -1,10 +1,10 @@
 <!--
  ***********************************************************************************
- * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/melete-app/src/webapp/melete/list_resources.jsp $
- * $Id: list_resources.jsp 3647 2012-12-02 22:30:41Z ggolden $  
+ * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.9/melete-app/src/webapp/melete/list_resources.jsp $
+ * $Id: list_resources.jsp 8031 2014-05-29 19:46:25Z rashmim $  
  ***********************************************************************************
  *
- * Copyright (c) 2008, 2009, 2010, 2011 Etudes, Inc.
+ * Copyright (c) 2008, 2009, 2010, 2011,2014 Etudes, Inc.
  *
  * Portions completed before September 1, 2008 Copyright (c) 2004, 2005, 2006, 2007, 2008 Foothill College, ETUDES Project
  *
@@ -33,7 +33,7 @@
 
 <h:panelGrid styleClass="maintableCollapseWithNoBorder" >											
 <h:column>		                    	
-         <h:panelGrid id="selresPanel" columns="1" width="100%" rendered="#{listResourcesPage.callFromSection}" >	
+         <h:panelGrid id="selresPanel" columns="1" width="100%" rendered="#{listResourcesPage.callFromSection}" styleClass="maintabledata2">	
 	      	<h:column>
   				<h:outputText id="Stext3" value="#{msgs.edit_list_resources_select}" styleClass="bold"/> 
 			</h:column>	   									
@@ -54,7 +54,7 @@
                 <h:column/>
    	        <h:column>
    		  <h:graphicImage id="leftImg_disable" value="/images/nav_left_disable.jpg" alt="#{msgs.list_resources_previous}" style="border:0 none;vertical-align:middle;" rendered="#{!listResourcesPage.prevListingFlag}" />
-		  <h:commandLink id="prev_nav"  actionListener="#{listResourcesPage.goPrev}" rendered="#{listResourcesPage.prevListingFlag}">		
+		  <h:commandLink id="prev_nav"  actionListener="#{listResourcesPage.goPrev}" rendered="#{listResourcesPage.prevListingFlag}" styleClass="toolUiLink">		
 						 <h:graphicImage id="leftImg" value="/images/nav_left.jpg" alt="#{msgs.list_resources_previous2}" title="#{msgs.list_resources_previous2}" style="border:0 none;vertical-align:middle;"/>
 		   </h:commandLink>		 
 		   	 <h:outputText id="nav_spaces_left" value="" styleClass="ExtraPaddingClass" />
@@ -64,7 +64,7 @@
 								<f:selectItem itemValue="-1" itemLabel="#{msgs.list_resources_showall}"/>	
 			 </h:selectOneMenu>
 		 <h:outputText id="nav_spaces" value="" styleClass="ExtraPaddingClass" />
-				<h:commandLink id="next_nav" actionListener="#{listResourcesPage.goNext}" rendered="#{listResourcesPage.nextListingFlag}">
+				<h:commandLink id="next_nav" actionListener="#{listResourcesPage.goNext}" rendered="#{listResourcesPage.nextListingFlag}" styleClass="toolUiLink">
 							 <h:graphicImage id="rightImg" value="/images/nav_right.jpg" alt="#{msgs.list_resources_next}" title="#{msgs.list_resources_next}" style="border:0 none;vertical-align:middle;" />
 			   </h:commandLink>	 
 			   <h:graphicImage id="rightImg_disable" value="/images/nav_right_disable.jpg" alt="#{msgs.list_resources_next2}" title="#{msgs.list_resources_next2}" style="border:0 none;vertical-align:middle;" rendered="#{!listResourcesPage.nextListingFlag}"/> 
@@ -78,10 +78,10 @@
 				  <h:column>
 					   <f:facet name="header">
 							<h:panelGroup>
-								<h:commandLink id="ascType" actionListener="#{listResourcesPage.sortResourcesAsc}" immediate="true" rendered="#{listResourcesPage.sortAscFlag}">
+								<h:commandLink id="ascType" actionListener="#{listResourcesPage.sortResourcesAsc}" immediate="true" rendered="#{listResourcesPage.sortAscFlag}" styleClass="toolUiLink">
 								    <h:graphicImage id="asc_Type_img" alt="#{msgs.manage_res_list_alt_asc}" title="#{msgs.manage_res_list_alt_asc}" value="/images/sortascending.gif" styleClass="ExpClass"/>
 								 </h:commandLink>     
-								 <h:commandLink id="descType" actionListener="#{listResourcesPage.sortResourcesDesc}" immediate="true" rendered="#{!listResourcesPage.sortAscFlag}">
+								 <h:commandLink id="descType" actionListener="#{listResourcesPage.sortResourcesDesc}" immediate="true" rendered="#{!listResourcesPage.sortAscFlag}" styleClass="toolUiLink">
 								    <h:graphicImage id="des_Type_img" alt="#{msgs.manage_res_list_alt_desc}" title="#{msgs.manage_res_list_alt_desc}" value="/images/sortdescending.gif" styleClass="ExpClass"/>
 								 </h:commandLink>        
 					            
@@ -95,7 +95,7 @@
 					<h:graphicImage id="contenttype_gif1" alt="#{msgs.edit_list_resources_content_upload}" 
 						title="#{msgs.edit_list_resources_content_upload}" value="#{curr_resources.resource_gif}" styleClass="ExpClass" rendered="#{(!curr_resources.typeLink && !curr_resources.typeLTI)}"/>
 							<h:outputText id="emp_spacebefore" value="       "  styleClass="ExtraPaddingClass"/>
-							<h:outputLink id="showResourceLink" value="#{curr_resources.resource_url}" target="_blank" title="Section Resource" styleClass="a1">
+							<h:outputLink id="showResourceLink" value="#{curr_resources.resource_url}" target="_blank" title="Section Resource" styleClass="a1 toolUiLink">
 								  <h:outputText value="#{curr_resources.resource_title}" />
 						  </h:outputLink>
 				    </h:column>
@@ -103,7 +103,7 @@
 				    <f:facet name="header">
 							 <h:outputText id="t2" value="#{msgs.list_resources_actions2}" />
 					 </f:facet>
-					 <h:commandLink id="linkaction" action="#{listResourcesPage.link2meAction}" rendered="#{listResourcesPage.callFromSection}">
+					 <h:commandLink id="linkaction" action="#{listResourcesPage.link2meAction}" rendered="#{listResourcesPage.callFromSection}" styleClass="toolUiLink">
 				     	<f:param name="selResourceIdFromList" value="#{curr_resources.resource_id}" />
 				     	<f:param name="sectionId" value="#{listResourcesPage.sectionId}" />
 				     	<h:graphicImage id="linkgif" alt="" value="/images/link2me.png" styleClass="AuthImgClass"  />
@@ -112,7 +112,7 @@
 					 </h:commandLink>	
 					  <h:outputText id="emp_space-1" value="     "  styleClass="ExtraPaddingClass" />
 					 
-					 <h:commandLink id="deleteaction" action="#{listResourcesPage.selectedResourceDeleteAction}" immediate="true">
+					 <h:commandLink id="deleteaction" action="#{listResourcesPage.selectedResourceDeleteAction}" immediate="true" styleClass="toolUiLink">
 					 		<f:param name="selResourceIdFromList" value="#{curr_resources.resource_id}" />
 				     		<f:param name="sectionId" value="#{listResourcesPage.sectionId}" />
 				       		<h:graphicImage id="delgif" alt="" value="/images/delete.gif" styleClass="AuthImgClass" />

@@ -1,10 +1,10 @@
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/license_info.jsp $
- * $Id: license_info.jsp 61779 2009-07-14 17:29:43Z mallika@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/license_info.jsp $
+ * $Id: license_info.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
- * Copyright (c) 2008 Etudes, Inc.
+ * Copyright (c) 2008, 2013 Etudes, Inc.
  *
  * Portions completed before September 1, 2008 Copyright (c) 2004, 2005, 2006, 2007, 2008 Foothill College, ETUDES Project
  *
@@ -38,7 +38,7 @@ rendered="#{viewSectionsPage.section.sectionResource.resource.licenseCode == 1}"
    <h:outputText id="lic2_val1" value="#{msgs.license_info_dedicated_to}" 
 
 rendered="#{viewSectionsPage.section.sectionResource.resource.licenseCode == 2}"/> 
-   <h:outputLink value="#{viewSectionsPage.section.sectionResource.resource.ccLicenseUrl}" target="_blank" 
+   <h:outputLink styleClass="toolUiLinkU" value="#{viewSectionsPage.section.sectionResource.resource.ccLicenseUrl}" target="_blank" 
 
 rendered="#{viewSectionsPage.section.sectionResource.resource.licenseCode == 2}">
    <h:outputText id="lic2_val2" value="#{msgs.license_info_public_domain}" 
@@ -55,7 +55,7 @@ rendered="#{((viewSectionsPage.section.sectionResource.resource.licenseCode == 2
    <h:outputText id="lic3_val1" value="#{msgs.license_info_licensed_under}" 
 
 rendered="#{viewSectionsPage.section.sectionResource.resource.licenseCode == 3}"/> 
-   <h:outputLink value="#{viewSectionsPage.section.sectionResource.resource.ccLicenseUrl}" target="_blank" 
+   <h:outputLink styleClass="toolUiLinkU" value="#{viewSectionsPage.section.sectionResource.resource.ccLicenseUrl}" target="_blank" 
 
 rendered="#{viewSectionsPage.section.sectionResource.resource.licenseCode == 3}">
    <h:outputText id="lic3_val2" value="#{msgs.license_info_creative_commons}" 

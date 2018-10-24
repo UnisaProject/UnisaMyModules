@@ -1,8 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/edit_module.jsp $
- * $Id: edit_module.jsp 80314 2012-06-12 22:15:39Z rashmi@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/edit_module.jsp $
+ * $Id: edit_module.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008, 2009, 2010, 2011, 2012 Etudes, Inc.
@@ -60,14 +60,14 @@ function newWindow(newContent){
 		  	<table class="maintableCollapseWithNoBorder">
 		   	  <tr>
 		 		<td colspan="2" height="20" class="maintabledata2"> 
-					<h:commandLink id="TOCButton"  action="#{editModulePage.gotoTOC}">
+					<h:commandLink id="TOCButton"  action="#{editModulePage.gotoTOC}" styleClass="toolUiLink">
 						<h:outputText id="toc" value="#{msgs.edit_module_TOC}" />
 					</h:commandLink> &raquo;  <h:outputText value="#{editModulePage.module.title}" /> &raquo;
-					<h:commandLink id="editFirstSection" actionListener="#{editModulePage.editSection}" rendered="#{editModulePage.hasSections}">						
+					<h:commandLink id="editFirstSection" actionListener="#{editModulePage.editSection}" rendered="#{editModulePage.hasSections}" styleClass="toolUiLink">						
 					     <h:outputText id="editSectionText" value="#{msgs.edit_module_edit_sections}"/>				     
 					 </h:commandLink> 	
 					<h:outputText id="editSectionText_1" value=" / " rendered="#{editModulePage.hasSections}" />
-				  	<h:commandLink id="addSection" actionListener="#{editModulePage.addContentSections}">
+				  	<h:commandLink id="addSection" actionListener="#{editModulePage.addContentSections}" styleClass="toolUiLink">
 					   <h:outputText id="addSectionText" value="#{msgs.edit_module_add_content_sections}"/>
 				  </h:commandLink> 				  
 			 	</td>
@@ -124,7 +124,7 @@ function newWindow(newContent){
                            value="#{editModulePage.moduleShdates.endDate}"  size="22" styleClass="formtext" onchange="showInvalid('EditModuleForm:endDate','EditModuleForm:err_gifen');">
                <o:convertDateTime />
             </h:inputText>
-          <h:outputLink id="viewedateCal" onclick="showCal('EditModuleForm:endDate','11','59','PM');return false;" value="#endCalender">
+          <h:outputLink id="viewedateCal" onclick="showCal('EditModuleForm:endDate','11','59','PM');return false;" value="#endCalender" styleClass="toolUiLink">
             <h:graphicImage id="edateCal"  value="/images/date.png"  alt="#{msgs.list_auth_modules_alt_popup_cal}" title="#{msgs.list_auth_modules_alt_popup_cal}" styleClass="DatePickerClass"/>
            </h:outputLink>
            <h:graphicImage id="err_gifen" value="/images/warning.png" alt="#{msgs.list_auth_modules_invalid}" title="#{msgs.list_auth_modules_invalid}" style="visibility:hidden;" onclick="showHideTable('EditModuleForm:invalidMsgEn0','true')"  styleClass="ExpClass"/>
@@ -148,7 +148,7 @@ function newWindow(newContent){
                            value="#{editModulePage.moduleShdates.allowUntilDate}" size="22" styleClass="formtext" onchange="showInvalid('EditModuleForm:allowUntilDate','EditModuleForm:err_gifal');">
              			  <o:convertDateTime />
           		 </h:inputText>
-          		 <h:outputLink id="viewallowdateCal" onclick="showCal('EditModuleForm:allowUntilDate','11','59','PM');return false;" value="#allowUntilCalender">
+          		 <h:outputLink id="viewallowdateCal" onclick="showCal('EditModuleForm:allowUntilDate','11','59','PM');return false;" value="#allowUntilCalender" styleClass="toolUiLink">
            			 <h:graphicImage id="allowdateCal"  value="/images/date.png" alt="#{msgs.list_auth_modules_alt_popup_cal}" title="#{msgs.list_auth_modules_alt_popup_cal}" styleClass="DatePickerClass"/>
           		 </h:outputLink>
                  <h:graphicImage id="err_gifal" value="/images/warning.png" alt="#{msgs.list_auth_modules_invalid}" title="#{msgs.list_auth_modules_invalid}" style="visibility:hidden;" onclick="showHideTable('EditModuleForm:invalidMsgAllow0','true')"  styleClass="ExpClass"/>

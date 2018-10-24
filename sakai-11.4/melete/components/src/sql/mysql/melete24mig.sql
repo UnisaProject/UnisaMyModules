@@ -1,5 +1,5 @@
 -- *********************************************************************
--- $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/components/src/sql/mysql/melete24mig.sql $
+-- $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/components/src/sql/mysql/melete24mig.sql $
 -- $Id: melete24mig.sql 56413 2008-12-19 22:20:19Z rashmi@etudes.org $
 -- *********************************************************************
 --  Copyright (c) 2008 Etudes, Inc.  

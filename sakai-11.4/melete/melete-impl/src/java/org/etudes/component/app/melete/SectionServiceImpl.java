@@ -1,7 +1,7 @@
 /**********************************************************************************
  *
  * $Header:https://source.sakaiproject.org/contrib/etudes/melete/trunk/melete-impl/src/java/org/sakaiproject/component/app/melete/SectionServiceImpl.java,v 1.13 2007/06/25 17:03:13 rashmim Exp $
- * $Id: SectionServiceImpl.java 80446 2012-06-20 19:24:31Z rashmi@etudes.org $
+ * $Id: SectionServiceImpl.java 87125 2014-10-16 19:48:52Z mallika@etudes.org $
  ***********************************************************************************
  *
  * Copyright (c) 2008, 2009, 2010, 2011 Etudes, Inc.
@@ -803,5 +803,13 @@ public class SectionServiceImpl implements Serializable, SectionService
 			logger.debug("EditSectionPage --updateSectionResource failed");
 			throw new MeleteException(ex.toString());
 		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String fixXrefs(String contents, String courseId) 
+	{
+		return sectiondb.fixXrefs(contents, courseId);
 	}
 }

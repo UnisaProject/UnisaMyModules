@@ -105,15 +105,26 @@
 <div class="portletBody container-fluid">
 	#navBarOnClick( $allowAddAssignment $withGrade $allowGradeSubmission $allowAddAssignment $allowAllGroups $assignmentscheck $allowUpdateSite $enableViewOption $view "newAssignmentForm" "new" )
 
-	<div class="page-header">
-		<h1>
+	<!-- Unisa Changes:2018/10/18:Change page-header class to unisaToolHeading and H1 to H3 -->
+	<!-- <div class="page-header"> -->
+	<!-- 	<h1> -->
+	<!-- 	#if($validator.escapeHtml($!value_title) && $validator.escapeHtml($!value_title) !='') -->
+	<!-- 		$validator.escapeHtml($!value_title) <span class="highlight">	$tlang.getString("edit")</span> -->
+	<!-- 	#else -->
+	<!-- 		$tlang.getString("new.title") -->
+	<!-- 	#end -->
+	<!-- 	</h1> -->
+	<!-- </div> -->
+	<div class="unisaToolHeading">
+		<h3>
 		#if($validator.escapeHtml($!value_title) && $validator.escapeHtml($!value_title) !='')
 			$validator.escapeHtml($!value_title) <span class="highlight">	$tlang.getString("edit")</span>
 		#else
 			$tlang.getString("new.title")
 		#end
-		</h1>
-	</div>
+		</h3>
+	</div>	
+	<!-- Unisa Changes:2018/10/18 -->
 
 	#if ($alertMessage)
 		<div class="alertMessage">

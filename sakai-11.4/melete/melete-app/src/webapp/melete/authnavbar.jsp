@@ -1,7 +1,7 @@
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/authnavbar.jsp $
- * $Id: authnavbar.jsp 77082 2011-10-24 18:38:10Z rashmi@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/authnavbar.jsp $
+ * $Id: authnavbar.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008,2009,2010, 2011 Etudes, Inc.
@@ -27,61 +27,61 @@
 
 <h:panelGrid columns="10" border="0" columnClasses="authBarCol" cellspacing="5" width="75%">
 	<h:column>
-		<h:commandLink id="addAction" action="#{listAuthModulesPage.AddModuleAction}">
+		<h:commandLink id="addAction" action="#{listAuthModulesPage.AddModuleAction}" styleClass="toolUiLink">
 		    <h:graphicImage id="addModuleImg" value="/images/document_add.gif" styleClass="AuthImgClass"/>
 	  		<h:outputText  value="#{msgs.authnavbar_add_module}"/>
 		</h:commandLink>
 	</h:column>
 	<h:column>
-		<h:commandLink id="addContAction" actionListener="#{listAuthModulesPage.AddContentAction}">
+		<h:commandLink id="addContAction" actionListener="#{listAuthModulesPage.AddContentAction}" styleClass="toolUiLink">
 	  		<h:graphicImage id="addContentImg" value="/images/document_add.gif" styleClass="AuthImgClass"/>
 	  		<h:outputText  value="#{msgs.authnavbar_add_content}"/>
 		</h:commandLink>
 	</h:column>
 	<h:column>
-		<h:commandLink id="BringUpSubSectionAction" action="#{listAuthModulesPage.BringSubSectionLevelUpAction}">
+		<h:commandLink id="BringUpSubSectionAction" action="#{listAuthModulesPage.BringSubSectionLevelUpAction}" styleClass="toolUiLink">
 	  	  <h:graphicImage id="indentLeftImg" value="/images/indent_left.png" styleClass="AuthImgClass"/>
 	  	  <h:outputText  value="#{msgs.authnavbar_left}"/>
 	  	</h:commandLink>
 	</h:column>
 	<h:column>
-	  <h:commandLink id="CreateSubSectionAction" action="#{listAuthModulesPage.CreateSubSectionAction}">
+	  <h:commandLink id="CreateSubSectionAction" action="#{listAuthModulesPage.CreateSubSectionAction}" styleClass="toolUiLink">
 	  	<h:graphicImage id="indentRightImg" value="/images/indent_right.png" styleClass="AuthImgClass"/>
 	  	<h:outputText  value="#{msgs.authnavbar_right}"/>
 	  </h:commandLink>
 	</h:column>
 	<h:column>
-	  <h:commandLink id="sortgoto" action="#{listAuthModulesPage.goToSortModules}">
+	  <h:commandLink id="sortgoto" action="#{listAuthModulesPage.goToSortModules}" styleClass="toolUiLink">
 	    <h:graphicImage id="MoveUpImg" value="/images/document_exchange.gif" styleClass="AuthImgClass"/>   
 	   <h:outputText id="sort" value="#{msgs.modules_author_manage_sort}" />
   	</h:commandLink>
   	</h:column>
   	<h:column>
-	<h:commandLink id="moveAction" action="#{listAuthModulesPage.MoveSectionAction}">
+	<h:commandLink id="moveAction" action="#{listAuthModulesPage.MoveSectionAction}" styleClass="toolUiLink">
 	    <h:graphicImage id="moveImg" value="/images/page_go.png" styleClass="AuthImgClass"/>
 	  	<h:outputText  value="#{msgs.authnavbar_move_section}"/>
 	  </h:commandLink>
 	</h:column>
 	<h:column>
-		<h:commandLink id="delAction" action="#{listAuthModulesPage.deleteAction}">
+		<h:commandLink id="delAction" action="#{listAuthModulesPage.deleteAction}" styleClass="toolUiLink">
 	        <h:graphicImage id="deleteImg" value="/images/delete.gif" styleClass="AuthImgClass"/>
 	        <h:outputText  id="del" value="#{msgs.authnavbar_delete}"></h:outputText>
 	     </h:commandLink>
 	</h:column>
 	<h:column>
-		<h:commandLink id="inactiveAction" action="#{listAuthModulesPage.InactivateAction}">
+		<h:commandLink id="inactiveAction" action="#{listAuthModulesPage.InactivateAction}" styleClass="toolUiLink">
 	  	<h:graphicImage id="inactiveImg" value="/images/folder_out.gif" styleClass="AuthImgClass"/>
 	  	<h:outputText  value="#{msgs.authnavbar_make_inactive}"/>
 	  </h:commandLink>
 	</h:column>
 	<h:column>
-		<h:commandLink id="restoregoto" action="#{listAuthModulesPage.goToRestoreModules}">
+		<h:commandLink id="restoregoto" action="#{listAuthModulesPage.goToRestoreModules}" styleClass="toolUiLink">
 			<h:graphicImage id="image" alt="" url="/images/folder_into.gif" styleClass="AuthImgClass"/>
 			<h:outputText id="re" value="#{msgs.modules_author_manage_archive_title}" />
 		</h:commandLink>
 	</h:column>
 	<h:column>
-		<h:commandLink id="goto_impexp" action="#{listAuthModulesPage.importExportModules}">
+		<h:commandLink id="goto_impexp" action="#{listAuthModulesPage.importExportModules}" styleClass="toolUiLink">
 			<h:graphicImage id="image_impexp" alt="" url="/images/import1.gif" styleClass="AuthImgClass"/>
 			<h:outputText id="import" value="#{msgs.modules_author_manage_import_export}" />
 		</h:commandLink>

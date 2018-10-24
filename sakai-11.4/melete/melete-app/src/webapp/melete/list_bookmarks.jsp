@@ -3,8 +3,8 @@
 
 <!--
  ***********************************************************************************
- * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/melete-app/src/webapp/melete/list_bookmarks.jsp $
- * $Id: list_bookmarks.jsp 3647 2012-12-02 22:30:41Z ggolden $  
+ * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.9/melete-app/src/webapp/melete/list_bookmarks.jsp $
+ * $Id: list_bookmarks.jsp 5297 2013-06-28 19:20:29Z mallikamt $  
  ***********************************************************************************
  *
  * Copyright (c) 2010, 2011 Etudes, Inc.
@@ -54,7 +54,7 @@
 		
     	<div class="right">
     	      <h:inputHidden id="bmlistflag" value="#{bookmarkPage.nobmsFlag}"/>
-                 <h:commandLink id="exportNotesLink" actionListener="#{bookmarkPage.exportNotes}" action="#{bookmarkPage.redirectExportNotes}" rendered="#{bookmarkPage.nobmsFlag == false}">
+                 <h:commandLink id="exportNotesLink" actionListener="#{bookmarkPage.exportNotes}" action="#{bookmarkPage.redirectExportNotes}" rendered="#{bookmarkPage.nobmsFlag == false}" styleClass="toolUiLink">
                  	<h:graphicImage id="image0" alt="" url="/images/export.png" styleClass="AuthImgClass"/>
                    <h:outputText id="exportnotes" value="#{msgs.list_bookmarks_export_notes}" />									
                  </h:commandLink>
@@ -71,15 +71,15 @@
 							 </h:panelGroup> 
 						 </f:facet>
 					 <h:outputText id="emp_space" value="     "  styleClass="ExtraPaddingClass" />	
-					 <h:commandLink id="viewSection"  actionListener="#{bookmarkPage.viewSection}" rendered="#{((bookmarkPage.instRole == false)&&(bookmark.sectionVisibleFlag == bookmarkPage.trueFlag))}">
+					 <h:commandLink id="viewSection"  actionListener="#{bookmarkPage.viewSection}" rendered="#{((bookmarkPage.instRole == false)&&(bookmark.sectionVisibleFlag == bookmarkPage.trueFlag))}" styleClass="toolUiLink">
 					   <f:param name="sectionId" value="#{bookmark.sectionId}" />
 					   <h:outputText id="bmtitle" value="#{bookmark.title}"/>
 					 </h:commandLink>
-					  <h:commandLink id="editSection"  actionListener="#{bookmarkPage.editSection}" action="#{bookmarkPage.redirectEditSection}" rendered="#{((bookmarkPage.instRole == true)&&(bookmark.sectionVisibleFlag == bookmarkPage.trueFlag))}">
+					  <h:commandLink id="editSection"  actionListener="#{bookmarkPage.editSection}" action="#{bookmarkPage.redirectEditSection}" rendered="#{((bookmarkPage.instRole == true)&&(bookmark.sectionVisibleFlag == bookmarkPage.trueFlag))}" styleClass="toolUiLink">
 					   <f:param name="sectionId" value="#{bookmark.sectionId}" />
 					   <h:outputText id="editbmtitle" value="#{bookmark.title}"/>
 					 </h:commandLink>
-                     <h:commandLink id="editSectionItalics"  actionListener="#{bookmarkPage.editSection}" action="#{bookmarkPage.redirectEditSection}" rendered="#{((bookmarkPage.instRole == true)&&(bookmark.sectionVisibleFlag != bookmarkPage.trueFlag))}">
+                     <h:commandLink id="editSectionItalics"  actionListener="#{bookmarkPage.editSection}" action="#{bookmarkPage.redirectEditSection}" rendered="#{((bookmarkPage.instRole == true)&&(bookmark.sectionVisibleFlag != bookmarkPage.trueFlag))}" styleClass="toolUiLink">
 					   <f:param name="sectionId" value="#{bookmark.sectionId}" />
 					   <h:outputText id="editbmtitleitalics" value="#{bookmark.title}" styleClass="italics"/>
 					 </h:commandLink>					 
@@ -92,7 +92,7 @@
 					 <h:outputText id="bmnotes" value="#{bookmark.briefNotes}"/>					 
 					</h:column>
 					<h:column>
-					 <h:outputLink id="editBookmarkLink" value="list_bookmarks" onclick="OpenBookmarkWindow(#{bookmark.sectionId},'#{bookmark.title}','#{bookmarkPage.fromPage}','#{bookmarkPage.fromModuleId}','#{bookmarkPage.fromModuleSeqNo}','Melete Bookmark Window');">
+					 <h:outputLink id="editBookmarkLink" value="list_bookmarks" onclick="OpenBookmarkWindow(#{bookmark.sectionId},'#{bookmark.title}','#{bookmarkPage.fromPage}','#{bookmarkPage.fromModuleId}','#{bookmarkPage.fromModuleSeqNo}','Melete Bookmark Window');" styleClass="toolUiLink">
 		    	       <f:param id="sectionId" name="sectionId" value="#{bookmark.sectionId}" />
 		    	       <f:param id="sectionTitle" name="sectionTitle" value="#{bookmark.title}" />
 		    	       <f:param name="fromSectionId" value="#{bookmarkPage.fromSectionId}" />
@@ -105,7 +105,7 @@
 					 </h:outputLink>						
 					</h:column> 
 				    <h:column>
-					  <h:commandLink id="deleteaction" actionListener="#{bookmarkPage.deleteAction}"  action="#{bookmarkPage.redirectDeleteLink}" immediate="true" >
+					  <h:commandLink id="deleteaction" actionListener="#{bookmarkPage.deleteAction}"  action="#{bookmarkPage.redirectDeleteLink}" immediate="true" styleClass="toolUiLink">
 				    		<f:param name="bookmarkId" value="#{bookmark.bookmarkId}" />
 				    		<f:param name="bookmarkTitle" value="#{bookmark.title}" />
 				    		<f:param name="fromSectionId" value="#{bookmarkPage.fromSectionId}" />

@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-api/src/java/org/etudes/api/app/melete/ModuleObjService.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-api/src/java/org/etudes/api/app/melete/ModuleObjService.java $
  *
  ***********************************************************************************
  * Copyright (c) 2008, 2011 Etudes, Inc.

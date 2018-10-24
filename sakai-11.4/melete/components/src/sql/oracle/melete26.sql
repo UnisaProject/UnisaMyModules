@@ -1,5 +1,5 @@
 -- *********************************************************************
--- $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/components/src/sql/oracle/melete26.sql $
+-- $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.9/components/src/sql/oracle/melete26.sql $
 -- $Id: melete26.sql 3641 2012-12-02 21:43:44Z ggolden $
 -- *********************************************************************
 --  Copyright (c) 2008 Etudes, Inc.  

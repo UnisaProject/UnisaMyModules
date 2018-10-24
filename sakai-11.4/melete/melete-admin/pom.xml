@@ -2,7 +2,7 @@
 <!--
 /**********************************************************************************
  *
- * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/melete-admin/pom.xml $
+ * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.9/melete-admin/pom.xml $
  * $Id: pom.xml 4364 2013-02-12 00:30:15Z mallikamt $
  ***********************************************************************************
  *
@@ -27,6 +27,7 @@
     <artifactId>melete-base</artifactId>
     <groupId>org.etudes</groupId>
     <version>pom</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   <name>etudes-meleteAdmin-tool</name>
   <groupId>org.etudes</groupId>

@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <%--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/editmodulesections.jsp $
- * $Id: editmodulesections.jsp 83082 2013-03-15 20:30:37Z mallika@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/editmodulesections.jsp $
+ * $Id: editmodulesections.jsp 86862 2014-08-08 20:37:38Z mallika@etudes.org $  
  ***********************************************************************************
  *
- * Copyright (c) 2008,2009,2010,2011,2012 Etudes, Inc.
+ * Copyright (c) 2008,2009,2010,2011,2012, 2014 Etudes, Inc.
  *
  * Portions completed before September 1, 2008 Copyright (c) 2004, 2005, 2006, 2007, 2008 Foothill College, ETUDES Project
  *
@@ -126,7 +126,7 @@ function saveEditor()
 			  <h:inputHidden id="rId" value="#{editSectionPage.meleteResource.resourceId}" rendered="#{editSectionPage.meleteResource !=null}"/>
 			  <h:inputHidden id="uId" value="#{editSectionPage.currUserId}"/>	
 			  <h:inputHidden id="edited" value="#{editSectionPage.isComposeDataEdited}"/>	
-		  
+		  	  <h:inputHidden id="activeCheck" value="#{editSectionPage.activeCheckUrl}" />
 		<!-- top nav bar -->
 		<f:subview id="top">
 			<jsp:include page="topnavbar.jsp"/> 
@@ -136,10 +136,11 @@ function saveEditor()
 		<t:saveState id="workLicense" value="#{licensePage.licenseCodes}" />
 		<t:saveState id="workId" value="#{editSectionPage.editId}" />
 		<t:saveState id="workStartTime" value="#{editSectionPage.lastSavedAt}" />
-			
+				 
 		<div class="meletePortletToolBarMessage"><img src="/etudes-melete-tool/images/document_edit.gif" alt="" width="16" height="16" align="absbottom"><h:outputText id="captionText" value="#{msgs.editmodulesections_editing_section}" /> </div>
 		<h:messages id="editsectionerror"  layout="table" showDetail="true" showSummary="false" infoClass="BlueClass" errorClass="RedClass"/>
         <div id="errMsg1" style="color:red"><p> </p></div>
+        <h:outputText id="errMsg2" styleClass="alertMessage" value="#{msgs.url_alert}" rendered="#{editSectionPage.httpAddressAlert != null && editSectionPage.httpAddressAlert == true}" /> 
         <table class="maincktableCollapseWithBorder">
      	   <tr>
             <td class="maintabledata3" style="padding:3px">
@@ -229,21 +230,10 @@ function saveEditor()
 											<f:selectItems value="#{editSectionPage.allContentTypes}" />											
 										 </h:selectOneMenu>
 											 </td>
-											 </tr>
-									<tr><td colspan="2" style="padding:4px" >
-										 <f:subview id="ContentLinkView" rendered="#{editSectionPage.shouldRenderLink}">
-											<jsp:include page="editContentLinkView.jsp"/> 
-										</f:subview>
-										 <f:subview id="ContentLTIView" rendered="#{editSectionPage.shouldRenderLTI}">
-											<jsp:include page="editContentLTIView.jsp"/> 
-										</f:subview>
-										<f:subview id="ContentUploadView" rendered="#{editSectionPage.shouldRenderUpload}">
-											<jsp:include page="editContentUploadView.jsp"/> 
-										</f:subview>	
-									</td></tr>	
+								   </tr>
+								
 									<tr> 
-										 <td colspan="2" style="padding:4px">
-						 									
+										 <td colspan="2" style="padding:4px">						 									
 											 <f:subview id="contentEditorView" rendered="#{editSectionPage.shouldRenderEditor && authorPreferences.shouldRenderSferyx}">
 												<%if (authorPreferencePage.isShouldRenderSferyx() && eSectionPage.getShouldRenderEditor())
                                                		   { %> 
@@ -307,7 +297,11 @@ function saveEditor()
 	  
   </h:form>
 	 
-
+<script>
+updateTime=600000;	
+updateUrl= document.getElementById("EditSectionForm:activeCheck").value; 
+scheduleUpdate();
+</script>
   <!-- This Ends -->
 </sakai:view>
 </f:view>

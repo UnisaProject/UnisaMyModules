@@ -2,7 +2,7 @@
 <!--
 /**********************************************************************************
  *
- * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/melete-admin/src/webapp/WEB-INF/web.xml $
+ * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.9/melete-admin/src/webapp/WEB-INF/web.xml $
  * $Id: web.xml 3641 2012-12-02 21:43:44Z ggolden $
  ***********************************************************************************
  *
@@ -26,10 +26,6 @@
 	 xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 	<display-name>sakai-meleteAdmin</display-name>
 	<description>Etudes Melete Admin</description>
-	<context-param>
-		<param-name>javax.faces.STATE_SAVING_METHOD</param-name>
-		<param-value>server</param-value>
-	</context-param>
 	<context-param>
 		<param-name>com.sun.faces.validateXml</param-name>
 		<param-value>true</param-value>

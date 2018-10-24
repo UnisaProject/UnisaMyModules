@@ -1,8 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <!--
  ***********************************************************************************
- * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/melete-app/src/webapp/melete/add_special_access.jsp $
- * $Id: add_special_access.jsp 3647 2012-12-02 22:30:41Z ggolden $  
+ * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.9/melete-app/src/webapp/melete/add_special_access.jsp $
+ * $Id: add_special_access.jsp 5297 2013-06-28 19:20:29Z mallikamt $  
  ***********************************************************************************
  *
  * Copyright (c) 2010, 2011, 2012 Etudes, Inc.
@@ -100,7 +100,7 @@ function newWindow(newContent){
                            value="#{specialAccessPage.specialAccess.startDate}" size="22" styleClass="formtext" onchange="showInvalid('AddSpecialAccessForm:startDate','AddSpecialAccessForm:err_gifst');">
 		        	      <o:convertDateTime />
         		    </h:inputText>
-		            <h:outputLink id="viewsdateCal" onclick="showCal('AddSpecialAccessForm:startDate','8','0','AM');return false;" value="#startCalender" >
+		            <h:outputLink id="viewsdateCal" onclick="showCal('AddSpecialAccessForm:startDate','8','0','AM');return false;" value="#startCalender" styleClass="toolUiLink">
         	    		<h:graphicImage id="sdateCal"  value="/images/date.png" alt="#{msgs.list_auth_modules_alt_popup_cal}" title="#{msgs.list_auth_modules_alt_popup_cal}" styleClass="DatePickerClass"/>
            			</h:outputLink>
                     <h:graphicImage id="err_gifst" value="/images/warning.png" alt="#{msgs.list_auth_modules_invalid}" title="#{msgs.list_auth_modules_invalid}"  style="visibility:hidden;" onclick="showHideTable('AddSpecialAccessForm:invalidMsgSt0','true')"  styleClass="ExpClass"/>
@@ -120,11 +120,11 @@ function newWindow(newContent){
               <tr>
                 <td  class="col1" align="left" valign="top"><h:outputText value="#{msgs.add_special_access_end_date}" /></td>
                 <td>
-                <a name="endCalender"></a><h:inputText id="endDate" 
+                <a name="endCalender" class="toolUiLink"></a><h:inputText id="endDate" 
                            value="#{specialAccessPage.specialAccess.endDate}" size="22" styleClass="formtext" onchange="showInvalid('AddSpecialAccessForm:endDate','AddSpecialAccessForm:err_gifen');">
              			  <o:convertDateTime />
           		 </h:inputText>
-          <h:outputLink id="viewedateCal" onclick="showCal('AddSpecialAccessForm:endDate','11','59','PM');return false;" value="#endCalender">
+          <h:outputLink id="viewedateCal" onclick="showCal('AddSpecialAccessForm:endDate','11','59','PM');return false;" value="#endCalender" styleClass="toolUiLink">
             <h:graphicImage id="edateCal"  value="/images/date.png" alt="#{msgs.list_auth_modules_alt_popup_cal}" title="#{msgs.list_auth_modules_alt_popup_cal}" styleClass="DatePickerClass"/>
            </h:outputLink>
            <h:graphicImage id="err_gifen" value="/images/warning.png" alt="#{msgs.list_auth_modules_invalid}" title="#{msgs.list_auth_modules_invalid}" style="visibility:hidden;" onclick="showHideTable('AddSpecialAccessForm:invalidMsgEn0','true')"  styleClass="ExpClass"/>
@@ -148,7 +148,7 @@ function newWindow(newContent){
                            value="#{specialAccessPage.specialAccess.allowUntilDate}" size="22" styleClass="formtext" onchange="showInvalid('AddSpecialAccessForm:allowUntilDate','AddSpecialAccessForm:err_gifallowuntil');">
              			  <o:convertDateTime />
           		 </h:inputText>
-          <h:outputLink id="viewaudateCal" onclick="showCal('AddSpecialAccessForm:allowUntilDate','11','59','PM');return false;" value="#allowUntilCalender">
+          <h:outputLink id="viewaudateCal" onclick="showCal('AddSpecialAccessForm:allowUntilDate','11','59','PM');return false;" value="#allowUntilCalender" styleClass="toolUiLink">
             <h:graphicImage id="audateCal"  value="/images/date.png" alt="#{msgs.list_auth_modules_alt_popup_cal}" title="#{msgs.list_auth_modules_alt_popup_cal}" styleClass="DatePickerClass"/>
            </h:outputLink>
            <h:graphicImage id="err_gifallowuntil" value="/images/warning.png" alt="#{msgs.list_auth_modules_invalid}" title="#{msgs.list_auth_modules_invalid}" style="visibility:hidden;" onclick="showHideTable('AddSpecialAccessForm:invalidMsgEn0','true')"  styleClass="ExpClass"/>

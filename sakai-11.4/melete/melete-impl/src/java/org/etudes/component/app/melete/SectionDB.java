@@ -1,7 +1,7 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-impl/src/java/org/etudes/component/app/melete/SectionDB.java $
- * $Id: SectionDB.java 80446 2012-06-20 19:24:31Z rashmi@etudes.org $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-impl/src/java/org/etudes/component/app/melete/SectionDB.java $
+ * $Id: SectionDB.java 87125 2014-10-16 19:48:52Z mallika@etudes.org $
  ***********************************************************************************
  *
  * Copyright (c) 2008, 2009, 2010, 2011, 2012 Etudes, Inc.
@@ -24,6 +24,7 @@
 package org.etudes.component.app.melete;
 
 import java.io.Serializable;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.ListIterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
@@ -42,6 +46,7 @@ import org.hibernate.Session;
 import org.hibernate.StaleObjectStateException;
 import org.hibernate.Transaction;
 import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.type.StandardBasicTypes;
 import org.etudes.api.app.melete.MeleteCHService;
 import org.etudes.api.app.melete.MeleteSecurityService;
 import org.etudes.api.app.melete.ModuleObjService;
@@ -52,6 +57,9 @@ import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.cover.UserDirectoryService;
 import org.sakaiproject.entity.cover.EntityManager;
 import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.util.StringUtil;
+import org.sakaiproject.util.Validator;
+import org.sakaiproject.component.cover.ServerConfigurationService;
 
 public class SectionDB implements Serializable
 {
@@ -1957,6 +1965,91 @@ public class SectionDB implements Serializable
 			return null;
 		}
 	}
+	
+	/**
+	 * import from site failed to translate path for embedded files with (x) names.
+	 * Fix paths for such files. 
+	 * 
+	 * @param data
+	 * @param courseId
+	 * @return
+	 */
+	public String fixXrefs(String data, String courseId)
+	{
+		if (data == null) return data;
+
+		Pattern p = Pattern.compile("(src|href)[\\s]*=[\\s]*\"([^#\"]*)([#\"])", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+		Matcher m = p.matcher(data);
+		StringBuffer sb = new StringBuffer();
+
+		// process each "harvested" string (avoiding like strings that are not in src= or href= patterns)
+		while (m.find())
+		{
+			if (m.groupCount() == 3)
+			{
+				String ref = m.group(2);
+				String terminator = m.group(3);
+
+				if (ref != null) ref = ref.trim();
+				
+				// check if ref belongs to melete or resources tool			
+				boolean groupItem = ref.startsWith("/access/content/group/") ? true : false;
+				boolean meleteDocsItem = ref.startsWith("/access/meleteDocs/content/private/meleteDocs") ? true : false;
+				if (!groupItem && !meleteDocsItem) continue;
+						
+				// old site Id
+				String[] parts = StringUtil.split(ref, "/");				
+				String embedOldSiteId = null;
+				if (meleteDocsItem && parts.length > 7)	embedOldSiteId = parts[6];					
+				else if (groupItem && parts.length > 4) embedOldSiteId = parts[4];
+								
+				if (embedOldSiteId == null || courseId.equals(embedOldSiteId)) continue;
+				
+				// melete adds resource with escape names. ckeditor doesn't
+				String name = parts[parts.length - 1];
+				name = decodeName(name);
+				name = Validator.escapeResourceName(name);
+				String translatedRef = "/private/meleteDocs/" + courseId + "/uploads/" + name;
+				String translated = meleteCHService.getResourceUrl(translatedRef);
+				translated = translated.replace(ServerConfigurationService.getServerUrl(), "");
+				
+				m.appendReplacement(sb, Matcher.quoteReplacement(m.group(1) + "=\"" + translated + terminator));
+			}
+		}
+		m.appendTail(sb);
+		return sb.toString();
+	}
+	
+	/**
+	 * convert from url form to resource id format.
+	 * 
+	 * @param id
+	 * @return
+	 */
+	private String decodeName(String id)
+	{
+		try
+		{
+			String processed = id.replaceAll("&amp;", "&");
+			processed = processed.replaceAll("&lt;", "<");
+			processed = processed.replaceAll("&gt;", ">");
+			processed = processed.replaceAll("&quot;", "\"");
+
+			// if a browser sees a plus, it sends a plus (URLDecoder will change it to a space)
+			processed = processed.replaceAll("\\+", "%2b");
+
+			// and the rest of the works, including %20 and + handling
+			String decoded = URLDecoder.decode(processed, "UTF-8");
+
+			return decoded;
+		}
+		catch (Exception decodeEx)
+		{
+			logger.debug("get resource fails while decoding " + id);
+		}
+		return id;
+	}
+	
 
 	/**
 	 * From a list of resources, removes the resources shared by other sections.
@@ -2365,7 +2458,7 @@ public class SectionDB implements Serializable
 		Map<String, Date> all = new HashMap<String, Date>();
 		Session session = hibernateUtil.currentSession();
 		Query q = session.getNamedQuery("trackSectionItem");
-		q.setParameter("sectionId", sectionId, Hibernate.INTEGER);
+		q.setParameter("sectionId", sectionId, StandardBasicTypes.INTEGER);
 
 		List<SectionTrackView> sectionUsers = q.list();
 		if (sectionUsers == null || sectionUsers.size() <= 0) return all;
@@ -2392,7 +2485,7 @@ public class SectionDB implements Serializable
 		Map<String, Date> all = new HashMap<String, Date>();
 		Session session = hibernateUtil.currentSession();
 		Query q = session.getNamedQuery("trackSectionItem");
-		q.setParameter("sectionId", sectionId, Hibernate.INTEGER);
+		q.setParameter("sectionId", sectionId, StandardBasicTypes.INTEGER);
 
 		List<SectionTrackView> sectionUsers = q.list();
 		if (sectionUsers == null || sectionUsers.size() <= 0) return all;
@@ -2421,7 +2514,7 @@ public class SectionDB implements Serializable
 		{
 			Session session = hibernateUtil.currentSession();
 			Query q = session.getNamedQuery("trackSectionCount");
-			q.setParameter("sectionId", sectionId, Hibernate.INTEGER);
+			q.setParameter("sectionId", sectionId, StandardBasicTypes.INTEGER);
 			List results = q.list();
 			if (results != null) count = (Integer) results.get(0);
 

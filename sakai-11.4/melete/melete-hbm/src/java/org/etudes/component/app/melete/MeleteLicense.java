@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-hbm/src/java/org/etudes/component/app/melete/MeleteLicense.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-hbm/src/java/org/etudes/component/app/melete/MeleteLicense.java $
  * $Id: MeleteLicense.java 73546 2011-04-04 17:35:08Z rashmi@etudes.org $  
  ***********************************************************************************
  *

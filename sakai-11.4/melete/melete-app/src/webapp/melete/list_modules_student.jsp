@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/list_modules_student.jsp $
- * $Id: list_modules_student.jsp 80314 2012-06-12 22:15:39Z rashmi@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/list_modules_student.jsp $
+ * $Id: list_modules_student.jsp 86862 2014-08-08 20:37:38Z mallika@etudes.org $  
  ***********************************************************************************
  *
- * Copyright (c) 2008, 2009, 2010, 2011, 2012 Etudes, Inc.
+ * Copyright (c) 2008, 2009, 2010, 2011, 2012, 2014 Etudes, Inc.
  *
  * Portions completed before September 1, 2008 Copyright (c) 2004, 2005, 2006, 2007, 2008 Foothill College, ETUDES Project
  *
@@ -66,13 +66,13 @@ function showHideTable(index, show)
 <!--Page Content-->
 <br/>
 <div align="right">
-<h:commandLink id="lastVisitedLink" actionListener="#{bookmarkPage.viewSection}" rendered="#{listModulesPage.bookmarkSectionId > 0}">
+<h:commandLink id="lastVisitedLink" actionListener="#{bookmarkPage.viewSection}" rendered="#{listModulesPage.bookmarkSectionId > 0}" styleClass="toolUiLink">
  <f:param name="sectionId" value="#{listModulesPage.bookmarkSectionId}" /> 
  <h:graphicImage id="lvisit_gif" value="/images/last-visited.png" alt="" styleClass="BmImgClass"/>
  <h:outputText id="lastvisit" value="#{msgs.last_visited}" />									
 </h:commandLink>
 <h:outputText value="|" rendered="#{listModulesPage.bookmarkSectionId > 0}"/> 
-<h:commandLink id="myBookmarksLink" action="#{bookmarkPage.gotoMyBookmarks}">
+<h:commandLink id="myBookmarksLink" action="#{bookmarkPage.gotoMyBookmarks}" styleClass="toolUiLink">
 <f:param name="fromPage" value="list_modules_student" />
 <h:graphicImage id="mybook_gif" value="/images/my-bookmarks.png" alt="" styleClass="BmImgClass"/>
  <h:outputText id="mybks" value="#{msgs.my_bookmarks}" />									
@@ -90,7 +90,7 @@ function showHideTable(index, show)
       <h:column>   
       <f:facet name="header">
       <h:panelGroup>
-       <h:commandLink id="expandCollapseAction"  action="#{listModulesPage.expandCollapseAction}" >
+       <h:commandLink id="expandCollapseAction"  action="#{listModulesPage.expandCollapseAction}" styleClass="toolUiLink">
      	    <h:graphicImage id="exp_all_gif" alt="#{msgs.list_modules_stud_expand_all}" title="#{msgs.list_modules_stud_expand_all}" value="/images/expand-collapse.gif"   rendered="#{listModulesPage.expandAllFlag != listModulesPage.trueFlag}" styleClass="ExpClass"/>
              <h:graphicImage id="col_all_gif" alt="#{msgs.list_modules_stud_collapse_all}" title="#{msgs.list_modules_stud_collapse_all}" value="/images/collapse-expand.gif"   rendered="#{listModulesPage.expandAllFlag == listModulesPage.trueFlag}" styleClass="ExpClass"/>
           </h:commandLink>
@@ -98,14 +98,14 @@ function showHideTable(index, show)
       </h:panelGroup>
       </f:facet>                                  
     
-    <h:commandLink id="showHideSections" action="#{listModulesPage.showHideSections}" >
+    <h:commandLink id="showHideSections" action="#{listModulesPage.showHideSections}" styleClass="toolUiLink">
         <h:graphicImage id="exp_gif" alt="#{msgs.list_modules_stud_expand}" title="#{msgs.list_modules_stud_expand}" value="/images/expand.gif" rendered="#{((vmbean.moduleId != listModulesPage.showModuleId)&&(vmbean.vsBeans != listModulesPage.nullList)&&(listModulesPage.expandAllFlag != listModulesPage.trueFlag))}" styleClass="ExpClass"/>
           <h:graphicImage id="col_gif" alt="#{msgs.list_modules_stud_collapse}" title="#{msgs.list_modules_stud_collapse}" value="/images/collapse.gif" rendered="#{(((vmbean.moduleId == listModulesPage.showModuleId)&&(vmbean.vsBeans != listModulesPage.nullList))||((listModulesPage.expandAllFlag == listModulesPage.trueFlag)&&(vmbean.vsBeans != listModulesPage.nullList)))}" styleClass="ExpClass"/>
        </h:commandLink> 
        <h:graphicImage id="moduleFinishStatus" url="/images/status_away.png" alt="#{msgs.list_modules_alt_progress}" title="#{msgs.list_modules_alt_progress}" styleClass="AuthImgClass" rendered="#{vmbean.readDate != null && !vmbean.readComplete}" />
 	   <h:graphicImage id="moduleFinishStatus1" url="/images/finish.gif" alt="#{msgs.list_modules_alt_complete}" title="#{msgs.list_modules_alt_complete}" styleClass="AuthImgClass" rendered="#{vmbean.readComplete}" />  
       <h:outputText id="mod_seq" value="#{vmbean.seqNo}. " rendered="#{listModulesPage.autonumber}"/>
-         <h:commandLink id="viewModule"  actionListener="#{listModulesPage.viewModule}" rendered="#{vmbean.visibleFlag == listModulesPage.trueFlag}" immediate="true">
+         <h:commandLink id="viewModule"  actionListener="#{listModulesPage.viewModule}" rendered="#{vmbean.visibleFlag == listModulesPage.trueFlag}" immediate="true" styleClass="toolUiLink">
               <f:param name="viewmodid" value="#{vmbean.moduleId}" />
                <h:outputText id="title"
                            value="#{vmbean.title}" >
@@ -120,7 +120,7 @@ function showHideTable(index, show)
   		
               <h:graphicImage id="bul_gif" value="/images/bullet_black.gif" rendered="#{!listModulesPage.autonumber}"/>             
 	          <h:outputText id="sec_seq" value="#{vsbean.displaySequence}. " rendered="#{listModulesPage.autonumber}"/>    
-              <h:commandLink id="viewSectionEditor"   actionListener="#{listModulesPage.viewSection}"  rendered="#{((vsbean.contentType != listModulesPage.isNull && vsbean.contentType == listModulesPage.typeLink)&&(vmbean.visibleFlag == listModulesPage.trueFlag))}" immediate="true">
+              <h:commandLink id="viewSectionEditor"   actionListener="#{listModulesPage.viewSection}"  rendered="#{((vsbean.contentType != listModulesPage.isNull && vsbean.contentType == listModulesPage.typeLink)&&(vmbean.visibleFlag == listModulesPage.trueFlag))}" styleClass="toolUiLink" immediate="true">
                 <f:param name="viewmodid" value="#{vmbean.moduleId}" />  
                 <f:param name="viewsecid" value="#{vsbean.sectionId}" /> 
                         
@@ -128,7 +128,7 @@ function showHideTable(index, show)
                            value="#{vsbean.title}">
                </h:outputText>
              </h:commandLink>
-             <h:commandLink id="viewSectionLink"   actionListener="#{listModulesPage.viewSection}"   rendered="#{((vsbean.contentType != listModulesPage.isNull && vsbean.contentType != listModulesPage.typeLink)&&(vmbean.visibleFlag == listModulesPage.trueFlag))}" immediate="true">
+             <h:commandLink id="viewSectionLink"   actionListener="#{listModulesPage.viewSection}"   rendered="#{((vsbean.contentType != listModulesPage.isNull && vsbean.contentType != listModulesPage.typeLink)&&(vmbean.visibleFlag == listModulesPage.trueFlag))}" styleClass="toolUiLink" immediate="true">
                <f:param name="viewmodid" value="#{vmbean.moduleId}" />  
                 <f:param name="viewsecid" value="#{vsbean.sectionId}" /> 
                  
@@ -144,7 +144,7 @@ function showHideTable(index, show)
           <h:outputText id="next_seq" value="#{vmbean.nextStepsNumber}. " rendered="#{listModulesPage.autonumber && vmbean.whatsNext != listModulesPage.isNull && ((listModulesPage.expandAllFlag == listModulesPage.trueFlag)||(vmbean.moduleId == listModulesPage.showModuleId))}"/>
           <h:graphicImage id="bul_gif1" value="/images/bullet_black.gif" rendered="#{!listModulesPage.autonumber && vmbean.whatsNext != listModulesPage.isNull && ((listModulesPage.expandAllFlag == listModulesPage.trueFlag)||(vmbean.moduleId == listModulesPage.showModuleId))}" style="border:0"/>
           
-          <h:commandLink id="whatsNext" actionListener="#{listModulesPage.goWhatsNext}" immediate="true" rendered="#{((vmbean.visibleFlag == listModulesPage.trueFlag)&&(vmbean.whatsNext != listModulesPage.isNull)&&((listModulesPage.expandAllFlag == listModulesPage.trueFlag)||(vmbean.moduleId == listModulesPage.showModuleId)))}">
+          <h:commandLink id="whatsNext" actionListener="#{listModulesPage.goWhatsNext}" immediate="true" rendered="#{((vmbean.visibleFlag == listModulesPage.trueFlag)&&(vmbean.whatsNext != listModulesPage.isNull)&&((listModulesPage.expandAllFlag == listModulesPage.trueFlag)||(vmbean.moduleId == listModulesPage.showModuleId)))}" styleClass="toolUiLink">
 		    <h:outputText  id="whatsNextMsg" value="#{msgs.list_modules_stud_next_steps}" />
 		    <f:param name="viewmodid" value="#{vmbean.moduleId}" />  
             <f:param name="viewmodseqno" value="#{vmbean.seqNo}" />
@@ -160,7 +160,7 @@ function showHideTable(index, show)
           			<h:graphicImage id="pre-req" value="/images/lock.png" alt="#{msgs.list_modules_locked}" title="#{msgs.list_modules_locked}" rendered="#{vmbean.blockedBy != null}" onclick="showHideTable('#{listModulesPage.modTable.rowIndex}','true')" styleClass="ExpClass"/>
              	</h:column>
              	<h:column>
-             		  <h:outputLink value="#" onclick="showHideTable('#{listModulesPage.modTable.rowIndex}','true')">	
+             		  <h:outputLink value="#" onclick="showHideTable('#{listModulesPage.modTable.rowIndex}','true')" styleClass="toolUiLink">	
              			<h:outputText id="pre-req-text" value="#{msgs.list_modules_prereq}" styleClass="style3"/>   
        				</h:outputLink>	      				
    				  </h:column> 	
@@ -168,11 +168,11 @@ function showHideTable(index, show)
  				<h:panelGroup id="preReqMsg0" style="position:relative;z-index:1;visibility:hidden;display:none;" rendered="#{vmbean.blockedBy != null}" >   
 	   				<h:panelGrid id="preReqMsg" columns="1" border="1" rules="cols" bgcolor="#FFFFCC" cellpadding="5" width="390px" styleClass="prereqAlert" >   
 		               	<h:column>     	  
-		               			<h:outputText value="#{msgs.prerequisite_msg}" /> <h:outputText value="#{vmbean.blockedDetails}" />
+		               			<h:outputText value="#{vmbean.blockedDetails}" escape="false" />
 		               			<h:outputText value=":" />
 		             	</h:column>
 		             	<h:column>
-		             		  <h:graphicImage id="bul_gif" value="/images/bullet_black.gif" /><h:outputText value="#{vmbean.blockedBy}" />
+		             		  <h:graphicImage id="bul_gif" value="/images/bullet_black.gif" /><h:outputText value="#{vmbean.blockedBy}" escape="false" />
 		        	   </h:column> 	
 		        	   <h:column>
 	         			  	<h:outputLabel value="#{msgs.prerequisite_ok_msg}"  styleClass="BottomImgOK" onclick="showHideTable('#{listModulesPage.modTable.rowIndex}','false')" />
@@ -194,7 +194,8 @@ function showHideTable(index, show)
            </f:facet>  
 			  <h:outputText id="startDate0" value="-" rendered="#{vmbean.startDate == null}" />
               <h:outputText id="startDate" value="#{vmbean.startDate}" escape="false">
-              <o:convertDateTime multiLine="true"/>
+             	 <f:converter converterId="melete.DateTimeConverter" />
+  				 <f:attribute name="multiLine" value="true" /> 
               </h:outputText>
                
           </h:column>
@@ -206,7 +207,8 @@ function showHideTable(index, show)
         </f:facet>
 			 <h:outputText id="endDate0" value="-" rendered="#{vmbean.endDate == null}" />
               <h:outputText id="endDate" value="#{vmbean.endDate}" escape="false">
-              <o:convertDateTime multiLine="true"/>
+              	 <f:converter converterId="melete.DateTimeConverter" />
+  				 <f:attribute name="multiLine" value="true" /> 
               </h:outputText>            
          </h:column>
        <h:column>
@@ -217,7 +219,8 @@ function showHideTable(index, show)
         </f:facet>
 			 <h:outputText id="auDate0" value="-" rendered="#{vmbean.allowUntilDate == null}" />
               <h:outputText id="auDate" value="#{vmbean.allowUntilDate}" escape="false">
-              <o:convertDateTime  multiLine="true"/>
+              	 <f:converter converterId="melete.DateTimeConverter" />
+  				 <f:attribute name="multiLine" value="true" /> 
               </h:outputText>         
          </h:column>
  		 <h:column>
@@ -225,15 +228,16 @@ function showHideTable(index, show)
                 <h:outputText value="#{msgs.list_modules_stud_viewed_date}" />
               </f:facet>  
                <h:outputText id="viewDate0" value="-" rendered="#{vmbean.readDate == null}" />
-              <h:outputText id="viewDate" value="#{vmbean.readDate}"  escape="false">
-              <o:convertDateTime multiLine="true"/>
+               <h:outputText id="viewDate" value="#{vmbean.readDate}"  escape="false">
+             	  <f:converter converterId="melete.DateTimeConverter" />
+  				  <f:attribute name="multiLine" value="true" /> 
                </h:outputText>      
    	 	</h:column>   
 		 <h:column>  
 		 	<f:facet name="header">
                <h:outputText value="&nbsp;" escape="false"/>
              </f:facet>
-         <h:outputLink id="printModuleLink" value="list_modules_student" onclick="OpenPrintWindow(#{listModulesPage.printModuleId},'Melete Print Window');" rendered="#{listModulesPage.printable && vmbean.visibleFlag}">
+         <h:outputLink id="printModuleLink" value="list_modules_student" onclick="OpenPrintWindow(#{listModulesPage.printModuleId},'Melete Print Window');" rendered="#{listModulesPage.printable && vmbean.visibleFlag}" styleClass="toolUiLink">
 	 	    <h:graphicImage id="printImgLink" value="/images/printer.png"  alt="#{msgs.list_auth_modules_alt_print}" title="#{msgs.list_auth_modules_alt_print}" styleClass="AuthImgClass"/>
 	 	 </h:outputLink>
 	    

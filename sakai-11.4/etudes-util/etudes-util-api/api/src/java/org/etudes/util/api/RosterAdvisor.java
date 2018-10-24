@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/etudes-util/tags/1.0.17/etudes-util-api/api/src/java/org/etudes/util/api/RosterAdvisor.java $
- * $Id: RosterAdvisor.java 82812 2013-02-25 20:41:15Z ggolden@etudes.org $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2011, 2012 Etudes, Inc.

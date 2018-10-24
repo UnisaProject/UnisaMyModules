@@ -1,6 +1,6 @@
 <!--
  ***********************************************************************************
- * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/melete-app/src/webapp/melete/coursemap.jsp $
+ * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.9/melete-app/src/webapp/melete/coursemap.jsp $
  * $Id: coursemap.jsp 3647 2012-12-02 22:30:41Z ggolden $  
  ***********************************************************************************
  *

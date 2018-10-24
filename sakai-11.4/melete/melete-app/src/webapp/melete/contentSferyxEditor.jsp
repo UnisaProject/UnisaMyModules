@@ -1,6 +1,6 @@
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/contentSferyxEditor.jsp $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/contentSferyxEditor.jsp $
  * $Id: contentSferyxEditor.jsp 82794 2013-02-22 22:05:31Z rashmi@etudes.org $  
  ***********************************************************************************
  *

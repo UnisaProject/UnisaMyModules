@@ -124,6 +124,7 @@
 				<!-- module>qna</module-->
 				<module>clog</module> 
     			<!-- >module>etudes-util</module> 
+				module>ltiContact</module> 
 				<module>melete</module-->
 				<module>bbb-tool</module> 
 				<module>permission</module>

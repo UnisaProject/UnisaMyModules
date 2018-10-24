@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-api/src/java/org/etudes/api/app/melete/MeleteSecurityService.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-api/src/java/org/etudes/api/app/melete/MeleteSecurityService.java $
  * $Id: MeleteSecurityService.java 73943 2011-04-27 21:54:12Z rashmi@etudes.org $  
  ***********************************************************************************
  *

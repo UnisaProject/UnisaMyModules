@@ -1,7 +1,7 @@
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/editContentUploadView.jsp $
- * $Id: editContentUploadView.jsp 77082 2011-10-24 18:38:10Z rashmi@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/editContentUploadView.jsp $
+ * $Id: editContentUploadView.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008,2009,2010,2011 Etudes, Inc.
@@ -32,7 +32,7 @@
 		<h:outputText id="edituploadText1" value="#{msgs.editcontentuploadview_file_uploaded}" />
 	</h:column>
 	<h:column>			
-		<h:commandLink id="serverViewButton" actionListener="#{editSectionPage.setServerFileListener}" >
+		<h:commandLink id="serverViewButton" actionListener="#{editSectionPage.setServerFileListener}" styleClass="toolUiLink">
 			<f:param name="sectionId" value="#{editSectionPage.editId}" />
 			<h:graphicImage id="replaceImg2" value="/images/replace2.gif" styleClass="AuthImgClass"/>
 			<h:outputText value="#{msgs.editcontentuploadview_replace}"/>

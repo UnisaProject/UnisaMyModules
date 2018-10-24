@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-api/src/java/org/etudes/api/app/melete/MeleteAuthorPrefService.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-api/src/java/org/etudes/api/app/melete/MeleteAuthorPrefService.java $
  * $Id: MeleteAuthorPrefService.java 73420 2011-03-29 18:45:36Z rashmi@etudes.org $  
  ***********************************************************************************
  *

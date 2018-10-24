@@ -1,8 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/modules_sort.jsp $
- * $Id: modules_sort.jsp 77082 2011-10-24 18:38:10Z rashmi@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/modules_sort.jsp $
+ * $Id: modules_sort.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008, 2009, 2010,2011 Etudes, Inc.
@@ -84,16 +84,16 @@
 								 	 </td>                       
 									
 			                        <td width="3%" align="center">			
-				                        <h:commandLink id="all_up"  action="#{sortModuleSectionPage.MoveItemAllUpAction}">		
+				                        <h:commandLink id="all_up"  action="#{sortModuleSectionPage.MoveItemAllUpAction}" styleClass="toolUiLink">		
 										 <h:graphicImage id="allupImg" value="/images/up_end.gif" alt="#{msgs.sort_all_Up}" title="#{msgs.sort_all_Up}" width="20" height="20" style="border:0" />
 								   		</h:commandLink>	           
-										<h:commandLink id="up_one"  action="#{sortModuleSectionPage.MoveItemUpAction}">		
+										<h:commandLink id="up_one"  action="#{sortModuleSectionPage.MoveItemUpAction}" styleClass="toolUiLink">		
 											 <h:graphicImage id="upImg" value="/images/up.gif" alt="#{msgs.sort_Up}" title="#{msgs.sort_Up}" width="20" height="20" style="border:0" />
 									   </h:commandLink>		 
-										<h:commandLink id="down_one"  action="#{sortModuleSectionPage.MoveItemDownAction}">	 
+										<h:commandLink id="down_one"  action="#{sortModuleSectionPage.MoveItemDownAction}" styleClass="toolUiLink">	 
 											 <h:graphicImage id="downImg" value="/images/down.gif" alt="#{msgs.sort_Down}" title="#{msgs.sort_Down}" width="20" height="20" style="border:0" />
 										</h:commandLink>	
-									   <h:commandLink id="all_down"  action="#{sortModuleSectionPage.MoveItemAllDownAction}">		
+									   <h:commandLink id="all_down"  action="#{sortModuleSectionPage.MoveItemAllDownAction}" styleClass="toolUiLink">		
 										 <h:graphicImage id="downImg1" value="/images/down_end.gif" alt="#{msgs.sort_all_Down}" title="#{msgs.sort_all_Down}" width="20" height="20" style="border:0" />
 								   		</h:commandLink>	    					
 								  </td>

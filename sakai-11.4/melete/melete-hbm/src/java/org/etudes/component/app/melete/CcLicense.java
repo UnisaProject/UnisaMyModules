@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-hbm/src/java/org/etudes/component/app/melete/CcLicense.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-hbm/src/java/org/etudes/component/app/melete/CcLicense.java $
  * $Id: CcLicense.java 73420 2011-03-29 18:45:36Z rashmi@etudes.org $  
  ***********************************************************************************
  *

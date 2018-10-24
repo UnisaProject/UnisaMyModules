@@ -1,6 +1,6 @@
 /**********************************************************************************
  * 
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-impl/src/java/org/etudes/component/app/melete/HibernateUtil.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-impl/src/java/org/etudes/component/app/melete/HibernateUtil.java $
  * $Id: HibernateUtil.java 80314 2012-06-12 22:15:39Z rashmi@etudes.org $  
  ***********************************************************************************
  *

@@ -1,7 +1,7 @@
 <!--
  ***********************************************************************************
  *
- * Copyright (c) 2008 Etudes, Inc.
+ * Copyright (c) 2008, 2014 Etudes, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,12 @@
 </h:column>
 <h:column>
 	<h:inputText id="LTIPassword" value="#{editSectionPage.LTIPassword}" size="40" />
+</h:column>	
+<h:column>
+	<h:outputText id="editLTIBasic6" value="#{msgs.addmodulesections_lti_custom}" />
+</h:column>
+<h:column>
+	<h:inputTextarea id="LTICustomParameters" value="#{editSectionPage.customParameters}" rows="3" cols="40" />
 </h:column>	
 </h:panelGrid>
 				

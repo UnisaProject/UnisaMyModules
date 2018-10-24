@@ -65,14 +65,62 @@ public class StudentOfferForm extends ValidatorActionForm {
 	private String offerSpec1 = "";
 	private String offerSpec2 = "";
 	
-	private String offerRadio = "";
+	private String pendingQual1 = "";
+	private String pendingQual2 = "";
+	private String pendingSpec1 = "";
+	private String pendingSpec2 = "";
+	
+	private String offerRadio = "";	
 	
 	//FileUpload
 	//for showing optional docs
 
 	private List<String> desc = new ArrayList<String>();
 	private Map<String, List<String>> map = new HashMap<String, List<String>>();
-		
+	
+	//Johanet add variable pendingApp
+	boolean pendingApp = false;
+	
+	public boolean isPendingApp() {
+		return pendingApp;
+	}
+
+	public void setPendingApp(boolean pendingApp) {
+		this.pendingApp = pendingApp;
+	}
+
+	public String getPendingQual1() {
+		return pendingQual1;
+	}
+
+	public void setPendingQual1(String pendingQual1) {
+		this.pendingQual1 = pendingQual1;
+	}
+
+	public String getPendingQual2() {
+		return pendingQual2;
+	}
+
+	public void setPendingQual2(String pendingQual2) {
+		this.pendingQual2 = pendingQual2;
+	}
+
+	public String getPendingSpec1() {
+		return pendingSpec1;
+	}
+
+	public void setPendingSpec1(String pendingSpec1) {
+		this.pendingSpec1 = pendingSpec1;
+	}
+
+	public String getPendingSpec2() {
+		return pendingSpec2;
+	}
+
+	public void setPendingSpec2(String pendingSpec2) {
+		this.pendingSpec2 = pendingSpec2;
+	}
+
 	private String docMsg = "";
 
 	public String getVersion() {
@@ -459,6 +507,13 @@ public class StudentOfferForm extends ValidatorActionForm {
 		offerQual2 = "";
 		offerSpec1 = "";
 		offerSpec2 = "";
+		
+		pendingQual1 = "";
+		pendingQual2 = "";
+		pendingSpec1 = "";
+		pendingSpec2 = "";
+		
+		pendingApp = false;
 		
 		offerRadio = "";
 	

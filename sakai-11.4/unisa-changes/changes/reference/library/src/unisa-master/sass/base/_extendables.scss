@@ -33,8 +33,9 @@
 
 @mixin bs-callout($color, $bgcolor) {
   display: block;
-  margin: 20px 0;
-  padding: 15px 30px 15px 15px;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 4px;
   //border: 1px solid;
   //border-left-width: 5px;
   //border-color: lighten($color, 25%);
@@ -102,10 +103,20 @@
 	text-align: left;
 	max-width: 100%;
 	@include appearance(none);
-	@include border-radius(3px);
+	@include border-radius(4px);
 	&::-ms-expand {
 	    display: none;
 	}
+}
+
+select[multiple], select[size] {
+    height: auto !important;
+    background-color: #FFF !important;
+    background-image: none !important;
+}
+
+input[type="radio"]:disabled {
+	opacity: 0.3 !important;
 }
 
 .nav.nav-tabs, .sakai_tabs{
@@ -150,7 +161,7 @@
 	padding: 0.4em 0.8em 0.45em 0.8em;
 	text-decoration: none !important;
 	@include appearance(none);
-	@include border-radius(3px);
+	@include border-radius(4px);
 	&:focus {
 		outline-color: darken( $button-border-color, 50% ) !important;
 	}
@@ -320,4 +331,9 @@ label.panelGridLabel{
 	-moz-flex-wrap: $p;
 	-webkit-flex-wrap: $p;
 	flex-wrap: $p;
+}
+
+/*** Images inside td elements ***/
+td img {
+	max-width: inherit;
 }

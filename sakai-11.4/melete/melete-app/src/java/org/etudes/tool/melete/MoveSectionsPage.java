@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/java/org/etudes/tool/melete/MoveSectionsPage.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/java/org/etudes/tool/melete/MoveSectionsPage.java $
  *
  ***********************************************************************************
  * Copyright (c) 2008, 2009, 2010, 2011 Etudes, Inc.

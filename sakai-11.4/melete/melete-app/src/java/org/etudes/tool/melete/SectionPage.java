@@ -1,11 +1,11 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/java/org/etudes/tool/melete/SectionPage.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/java/org/etudes/tool/melete/SectionPage.java $
  * $$
- * $Id: SectionPage.java 83082 2013-03-15 20:30:37Z mallika@etudes.org $
+ * $Id: SectionPage.java 87125 2014-10-16 19:48:52Z mallika@etudes.org $
  ************************************************************************************
  *
- * Copyright (c) 2008, 2009, 2010, 2011, 2012 Etudes, Inc.
+ * Copyright (c) 2008, 2009, 2010, 2011, 2012, 2014 Etudes, Inc.
  *
  * Portions completed before September 1, 2008 Copyright (c) 2004, 2005, 2006, 2007, 2008 Foothill College, ETUDES Project
  *
@@ -24,9 +24,8 @@
  **********************************************************************************/
 package org.etudes.tool.melete;
 
-import java.io.File;
-import java.io.InputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,7 +33,6 @@ import java.util.Map;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
-import javax.faces.component.UIParameter;
 import javax.faces.context.FacesContext;
 import javax.faces.el.ValueBinding;
 import javax.faces.event.AbortProcessingException;
@@ -58,15 +56,18 @@ import org.etudes.component.app.melete.Module;
 import org.etudes.component.app.melete.SectionResource;
 import org.etudes.util.HtmlHelper;
 import org.imsglobal.basiclti.BasicLTIUtil;
+import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentResource;
+import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.entity.api.ResourcePropertiesEdit;
 import org.sakaiproject.tool.cover.SessionManager;
 import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.util.ResourceLoader;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * 
@@ -127,6 +128,7 @@ public abstract class SectionPage implements Serializable
 	protected String displayCurrLink;
 	protected String newURLTitle;
 	protected String newLTIDescriptor;
+	protected String customParameters;
 	protected ArrayList<SelectItem> allContentTypes;
 
 	protected String selectedResourceName;
@@ -282,7 +284,7 @@ public abstract class SectionPage implements Serializable
 	{
 		return contentWithHtml;
 	}
-
+	
 	/**
 	 * @return module if module is not set, get the module from session.
 	 * 
@@ -502,6 +504,31 @@ public abstract class SectionPage implements Serializable
 	}
 
 	/**
+	 * Get custom options
+	 * @return
+	 */
+	public String getCustomParameters() {
+		return customParameters;
+	}
+
+	/**
+	 * Set custom options provided by external provider
+	 * @param customParameters
+	 */
+	public void setCustomParameters(String customParameters)
+	{
+		try
+		{
+			this.customParameters = new String(customParameters.getBytes("UTF-8"));
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			this.customParameters = customParameters;
+		}
+		fixDescriptor();
+	}
+	
+	/**
 	 * Produce a basic descriptor from the URL and Password
 	 */
 	private void fixDescriptor()
@@ -520,6 +547,20 @@ public abstract class SectionPage implements Serializable
 			desc = desc + "    <launch_secret>" + currLTIPassword + "</launch_secret> \n";
 		}
 		desc = desc + "  </x-secure>\n";
+		if (customParameters != null && customParameters.trim().length() > 0)
+		{
+			String[] ltiParams = StringUtil.split(customParameters, "\r\n");
+			desc = desc + "<custom>";
+			for (String e : ltiParams)
+			{
+				if (e.trim().length() == 0 || e.indexOf("=") == -1) continue;
+				String k = e.substring(0, e.indexOf("=")).trim();
+				String v = e.substring(e.indexOf("=") + 1).trim();
+				if (k != null && v != null) desc = desc + "<parameter key='" + k +"'>" + v + "</parameter> \n";
+			}
+			desc = desc + "</custom> \n";
+		}
+		
 		desc = desc + "</basic_lti_link>\n";
 		setLTIDescriptor(desc);
 	}
@@ -580,7 +621,8 @@ public abstract class SectionPage implements Serializable
 			if (section.getContentType().equals("typeLink"))
 			{
 				res_mime_type = MeleteCHService.MIME_TYPE_LINK;
-				Util.validateLink(getLinkUrl());
+				if (getLinkUrl() == null) return null;
+				
 				if ((secResourceName == null) || (secResourceName.trim().length() == 0)) throw new MeleteException("URL_title_reqd");
 				if (secResourceName.trim().length() > SectionService.MAX_URL_LENGTH)
 					secResourceName = secResourceName.substring(0, SectionService.MAX_URL_LENGTH);
@@ -589,13 +631,12 @@ public abstract class SectionPage implements Serializable
 			}
 			if (section.getContentType().equals("typeLTI"))
 			{
-				if (getLTIUrl() != null) Util.validateLink(getLTIUrl());
-
+				if (getLTIUrl() == null) return null;
 				if (ltiDescriptor == null || ltiDescriptor.trim().length() == 0)
 				{
 					throw new MeleteException("add_section_empty_lti");
 				}
-				if (BasicLTIUtil.validateDescriptor(ltiDescriptor) != null)
+				if (BasicLTIUtil.validateDescriptor(ltiDescriptor) == null)
 				{
 					throw new MeleteException("add_section_bad_lti");
 				}
@@ -603,10 +644,14 @@ public abstract class SectionPage implements Serializable
 				secContentData = new byte[ltiDescriptor.length()];
 				secContentData = ltiDescriptor.getBytes();
 			}
+			if (secContentData != null)
+			{
 			ResourcePropertiesEdit res = getMeleteCHService().fillInSectionResourceProperties(encodingFlag, secResourceName, secResourceDescription);
 
 			String newResourceId = getMeleteCHService().addResourceItem(secResourceName, res_mime_type, addCollId, secContentData, res);
 			return newResourceId;
+			}
+			else return null;
 		}
 		catch (UserErrorException uex)
 		{
@@ -676,10 +721,14 @@ public abstract class SectionPage implements Serializable
 			}
 
 			if (resourceId != null
-					&& (section.getContentType().equals("typeLink") || section.getContentType().equals("typeUpload") || section.getContentType()
-							.equals("typeLTI")))
-			{				
-				modify = getMeleteCHService().editResourceProperties(resourceId, secResourceName, secResourceDescription);
+					&& ("typeLink".equals(section.getContentType()) || "typeUpload".equals(section.getContentType()) || "typeLTI".equals(section.getContentType())))
+			{	
+				if (("typeLTI").equals(section.getContentType()))
+					modify = getMeleteCHService().editResourceProperties(resourceId, secResourceName, secResourceDescription, ltiDescriptor.getBytes());
+				else if (("typeLink").equals(section.getContentType()))
+					modify = getMeleteCHService().editResourceProperties(resourceId, secResourceName, secResourceDescription, linkUrl.getBytes());
+				else 
+					modify = getMeleteCHService().editResourceProperties(resourceId, secResourceName, secResourceDescription, null);
 				logger.debug("modify :" + modify);
 			}
 		}
@@ -915,7 +964,6 @@ public abstract class SectionPage implements Serializable
 	 */
 	public String getLinkUrl()
 	{
-		if (linkUrl == null) linkUrl = "http://";
 		return linkUrl;
 	}
 
@@ -1101,7 +1149,7 @@ public abstract class SectionPage implements Serializable
 		contentWithHtml = false;
 		previewContentData = "";
 		
-		if (meleteResource != null && meleteResource.getResourceId() != null)
+		if (meleteResource != null && meleteResource.getResourceId() != null && meleteResource.getResourceId().trim().length() > 0)
 		   {
 			   if (this.section.getContentType().equals("typeEditor"))
 			   {
@@ -1171,7 +1219,7 @@ public abstract class SectionPage implements Serializable
 	public void setFCKCollectionAttrib()
 	{
 		FCK_CollId = getMeleteCHService().getUploadCollectionId(getCurrentCourseId());
-		String attrb = "fck.security.advisor." + FCK_CollId;
+		String attrb = "ck.security.advisor." + FCK_CollId;
 		
 		SessionManager.getCurrentSession().setAttribute("ck.collectionId",FCK_CollId);
 		SessionManager.getCurrentSession().setAttribute(attrb, new SecurityAdvisor()
@@ -1180,11 +1228,13 @@ public abstract class SectionPage implements Serializable
 			{
 				try
 				{
-					Collection<?> meleteGrpAllow = org.sakaiproject.authz.cover.AuthzGroupService.getAuthzGroupsIsAllowed(userId, "melete.author",
+					AuthzGroupService authzGroupService = ComponentManager.get(AuthzGroupService.class);
+                    Collection<?> meleteGrpAllow = authzGroupService.getAuthzGroupsIsAllowed(userId, "melete.author",
 							null);
 
 					String anotherRef = new String(reference);
 					anotherRef = anotherRef.replace("/content/private/meleteDocs", "/site");
+					anotherRef = anotherRef.replace("/content/attachment", "/site");
 					org.sakaiproject.entity.api.Reference ref1 = org.sakaiproject.entity.cover.EntityManager.newReference(anotherRef);
 
 					if (meleteGrpAllow.contains("/site/" + ref1.getContainer()))

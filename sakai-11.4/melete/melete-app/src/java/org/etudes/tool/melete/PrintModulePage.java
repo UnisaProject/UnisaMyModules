@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/java/org/etudes/tool/melete/PrintModulePage.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/java/org/etudes/tool/melete/PrintModulePage.java $
  * $Id: PrintModulePage.java 80446 2012-06-20 19:24:31Z rashmi@etudes.org $
  ***********************************************************************************
  * Copyright (c) 2008 Etudes, Inc.

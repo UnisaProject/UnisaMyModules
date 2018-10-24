@@ -25,6 +25,7 @@ import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 import org.apache.struts.actions.LookupDispatchAction;
 import org.apache.struts.util.LabelValueBean;
+import org.sakaiproject.component.cover.ServerConfigurationService;
 
 import za.ac.unisa.lms.dao.Gencod;
 import za.ac.unisa.lms.dao.StudentSystemGeneralDAO;
@@ -65,6 +66,7 @@ public class StudentStatusAction extends LookupDispatchAction {
 	    
 	    map.put("applyLogin", "applyLogin");
 	    map.put("applyStatus", "applyStatus");
+	    map.put("backToOffer", "backToOffer");
 	    	    
     
 	    return map;
@@ -76,6 +78,25 @@ public class StudentStatusAction extends LookupDispatchAction {
 		StudentStatusForm stuStatForm =  new StudentStatusForm();
 		resetForm(stuStatForm, "StudentStatusAction - Reset");
 		
+	}
+	
+	public ActionForward backToOffer(
+			ActionMapping mapping,
+			ActionForm form,
+			HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		
+		StudentStatusForm stuStatForm = (StudentStatusForm) form;
+
+		String serverpath = ServerConfigurationService.getServerUrl();		
+		return new ActionForward(serverpath+"/unisa-findtool/default.do?sharedTool=unisa.studentoffer&originatedFrom=unisa.studentstatus&acaYear=" + stuStatForm.getStudent().getAcademicYear() +
+				  "&acaPeriod=" + stuStatForm.getStudent().getAcademicPeriod() +
+		  		  "&nr=" + stuStatForm.getStudent().getNumber() +
+				  "&surname=" +  stuStatForm.getStudent().getSurname() +
+				  "&firstNames=" + stuStatForm.getStudent().getFirstnames() +
+				  "&birthDay=" + stuStatForm.getStudent().getBirthDay() +
+				  "&birthMonth=" + stuStatForm.getStudent().getBirthMonth() +
+				  "&birthYear=" + stuStatForm.getStudent().getBirthYear(),true);
 	}
 	
 	public ActionForward walkthrough(ActionMapping mapping, ActionForm form,
@@ -92,6 +113,24 @@ public class StudentStatusAction extends LookupDispatchAction {
 		stuStatForm.setSelectReset("");
 		stuStatForm.setWebLoginMsg("");
 		
+		String originatedFrom =  request.getParameter("originatedFrom");
+		stuStatForm.setOriginatedFrom(originatedFrom);
+		if (originatedFrom != null)
+		{
+			stuStatForm.getStudent().setAcademicYear(request.getParameter("acaYear"));
+			stuStatForm.getStudent().setAcademicPeriod(request.getParameter("acaPeriod"));
+			stuStatForm.getStudent().setNumber(request.getParameter("nr"));
+			stuStatForm.getStudent().setSurname(request.getParameter("surname"));
+			stuStatForm.getStudent().setFirstnames(request.getParameter("firstNames"));
+			stuStatForm.getStudent().setBirthYear(request.getParameter("birthYear"));
+			stuStatForm.getStudent().setBirthMonth(request.getParameter("birthMonth"));
+			stuStatForm.getStudent().setBirthDay(request.getParameter("birthDay"));
+			stuStatForm.getStudent().setStuExist(true);
+			
+			applyStatus(request, stuStatForm);
+			return mapping.findForward("applyStatus");
+		}
+				
 		//Write version number to log to check all servers
 		//log.debug("StudentStatusAction - Applications Version="+stuStatForm.getVersion());
 		
@@ -127,7 +166,7 @@ public class StudentStatusAction extends LookupDispatchAction {
 			stuStatForm.setAllowLogin(false);
 		}
 		//log.debug("StudentStatusAction - walkthrough - AcademicYear="+stuStatForm.getStudent().getAcademicYear());
-		
+					
 		stuStatForm.getStudent().setNumber("");
 		stuStatForm.getStudent().setSurname("");
 		stuStatForm.getStudent().setFirstnames("");
@@ -979,6 +1018,7 @@ public class StudentStatusAction extends LookupDispatchAction {
 		stuStatForm.getStudent().setBirthYear("");
 		stuStatForm.getStudent().setBirthMonth("");
 		stuStatForm.getStudent().setBirthDay("");
+		stuStatForm.setOriginatedFrom("");
 		
 		ArrayList<String> dateCheck = dao.validateClosingDate(stuStatForm.getStudent().getAcademicYear());
 		if (!dateCheck.isEmpty()){ //Check Dates Array
@@ -1213,14 +1253,14 @@ public class StudentStatusAction extends LookupDispatchAction {
 				
 				//Offer Reason
 				if ("AX".equalsIgnoreCase(stuStatForm.getQualStatusCode1())){
-					String reason1 = dao.getDeclineReason(stuStatForm.getStudent().getAcademicYear(), stuStatForm.getStudent().getAcademicPeriod(), stuStatForm.getStudent().getNumber(), stuStatForm.getSelQualCode1());
+					String reason1 = dao.getDeclineReason(stuStatForm.getStudent().getNumber(),stuStatForm.getStudent().getAcademicYear(), stuStatForm.getStudent().getAcademicPeriod(), stuStatForm.getSelQualCode1());
 					stuStatForm.setQualStatus1Reason(reason1);
 					//log.debug("StudentStatusAction - applyStatus - Reason1="+reason1);
 				}	
 				
 				if (stuStatForm.getSelQualCode2() != null && !"Not Found".equalsIgnoreCase(stuStatForm.getSelQualCode2())){
 					if ("AX".equalsIgnoreCase(stuStatForm.getQualStatusCode2())){
-						String reason2 = dao.getDeclineReason(stuStatForm.getStudent().getAcademicYear(), stuStatForm.getStudent().getAcademicPeriod(), stuStatForm.getStudent().getNumber(), stuStatForm.getSelQualCode1());
+						String reason2 = dao.getDeclineReason(stuStatForm.getStudent().getNumber(),stuStatForm.getStudent().getAcademicYear(), stuStatForm.getStudent().getAcademicPeriod(), stuStatForm.getSelQualCode2());
 						stuStatForm.setQualStatus2Reason(reason2);
 						//log.debug("StudentStatusAction - applyStatus - Reason2="+reason2);
 					}
@@ -1255,25 +1295,26 @@ public class StudentStatusAction extends LookupDispatchAction {
 				String qual1=stuStatForm.getSelQualCode1().substring(0,5);
 				String qual2=stuStatForm.getSelQualCode2().substring(0,5);
 				StudentSystemGeneralDAO genDao = new StudentSystemGeneralDAO();
-				if (("90088".equalsIgnoreCase(qual1) || "90011".equalsIgnoreCase(qual1)) && 
-						("CG".equalsIgnoreCase(stuStatForm.getQualStatusCode1()) || "RO".equalsIgnoreCase(stuStatForm.getQualStatusCode1()) ||
-								"AP".equalsIgnoreCase(stuStatForm.getQualStatusCode1()) || "WA".equalsIgnoreCase(stuStatForm.getQualStatusCode1()))){
-							stuStatForm.setScreeningSitting(true);
-							gencod = new Gencod();						
-							gencod = genDao.getGenCode("311", qual1);
-							if (gencod.getEngDescription() != null)
-							stuStatForm.setScreeningSittingQual1(gencod.getEngDescription());
+				
+				if ("90088".equalsIgnoreCase(qual1) || "90011".equalsIgnoreCase(qual1)) {
+					if (dao.includeSWScreeningSitting(stuStatForm.getStudent().getNumber(), stuStatForm.getStudent().getAcademicYear(),  stuStatForm.getStudent().getAcademicPeriod(), qual1)) {
+						stuStatForm.setScreeningSitting(true);
+						gencod = new Gencod();						
+						gencod = genDao.getGenCode("311", qual1);
+						if (gencod.getEngDescription() != null)
+						stuStatForm.setScreeningSittingQual1(gencod.getEngDescription());
+					}
 				}
-			
-				if (("90088".equalsIgnoreCase(qual2) || "90011".equalsIgnoreCase(qual2)) && 
-						("CG".equalsIgnoreCase(stuStatForm.getQualStatusCode2()) || "RO".equalsIgnoreCase(stuStatForm.getQualStatusCode2()) ||
-								"AP".equalsIgnoreCase(stuStatForm.getQualStatusCode2()) || "WA".equalsIgnoreCase(stuStatForm.getQualStatusCode2()))){
-					stuStatForm.setScreeningSitting(true);
-					gencod = new Gencod();						
-					gencod = genDao.getGenCode("311", qual2);
-					if (gencod.getEngDescription() != null)
-					stuStatForm.setScreeningSittingQual2(gencod.getEngDescription());
-				}	
+				
+				if ("90088".equalsIgnoreCase(qual2) || "90011".equalsIgnoreCase(qual2)) {
+					if (dao.includeSWScreeningSitting(stuStatForm.getStudent().getNumber(), stuStatForm.getStudent().getAcademicYear(),  stuStatForm.getStudent().getAcademicPeriod(), qual2)) {
+						stuStatForm.setScreeningSitting(true);
+						gencod = new Gencod();						
+						gencod = genDao.getGenCode("311", qual2);
+						if (gencod.getEngDescription() != null)
+						stuStatForm.setScreeningSittingQual2(gencod.getEngDescription());
+					}
+				}				
 				
 				if (stuStatForm.isScreeningSitting()) {
 					ScreeningVenue venue = new ScreeningVenue();
@@ -1283,7 +1324,8 @@ public class StudentStatusAction extends LookupDispatchAction {
 			}
 			
 		}catch(Exception e){
-			log.warn("StudentStatusAction - applyStatus - crashed / " + e);
+			throw new Exception("ApplyStatus error :  / " + e);
+			//log.warn("StudentStatusAction - applyStatus - crashed / " + e);
 		}
 	}
 	

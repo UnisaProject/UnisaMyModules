@@ -1975,7 +1975,7 @@ public class ModuleDB implements Serializable
 		{
 			if (meleteSecurityService.allowAuthor(courseId))
 			{
-				queryStr = "select cm.seqNo, count(s.moduleId) from CourseModule cm, Section s, ModuleShdates ms where cm.courseId =:courseId and cm.deleteFlag=0 and cm.archvFlag=0 and cm.seqNo > :currSeqNo and cm.moduleId = s.moduleId and cm.moduleId=ms.moduleId and (ms.startDate is null or ms.endDate is null or ms.startDate < ms.endDate) and (ms.startDate is null or ms.allowUntilDate is null or ms.startDate < ms.allowUntilDate) and (ms.endDate is null or ms.allowUntilDate is null or ms.endDate <= ms.allowUntilDate) group by cm order by cm.seqNo asc";
+				queryStr = "select cm.seqNo, count(s.moduleId) from CourseModule cm, Section s, ModuleShdates ms where cm.courseId =:courseId and cm.deleteFlag=0 and cm.archvFlag=0 and cm.seqNo > :currSeqNo and cm.moduleId = s.moduleId and cm.moduleId=ms.moduleId and (ms.startDate is null or ms.endDate is null or ms.startDate < ms.endDate) and (ms.startDate is null or ms.allowUntilDate is null or ms.startDate < ms.allowUntilDate) and (ms.endDate is null or ms.allowUntilDate is null or ms.endDate <= ms.allowUntilDate) group by cm.seqNo,s.moduleId order by cm.seqNo asc";
 			}
 			if (meleteSecurityService.allowStudent(courseId))
 			{
@@ -2180,7 +2180,7 @@ public class ModuleDB implements Serializable
 		{
 			if (meleteSecurityService.allowAuthor(courseId))
 			{
-				queryStr = "select cm.seqNo, count(s.moduleId) from CourseModule cm, ModuleShdates ms, Section s where cm.courseId =:courseId and cm.deleteFlag=0 and cm.archvFlag=0 and cm.seqNo < :currSeqNo and cm.moduleId = s.moduleId and cm.moduleId=ms.moduleId and (ms.startDate is null or ms.endDate is null or ms.startDate < ms.endDate) and (ms.startDate is null or ms.allowUntilDate is null or ms.startDate < ms.allowUntilDate) and (ms.endDate is null or ms.allowUntilDate is null or ms.endDate <= ms.allowUntilDate) group by cm order by cm.seqNo desc";
+				queryStr = "select cm.seqNo, count(s.moduleId) from CourseModule cm, ModuleShdates ms, Section s where cm.courseId =:courseId and cm.deleteFlag=0 and cm.archvFlag=0 and cm.seqNo < :currSeqNo and cm.moduleId = s.moduleId and cm.moduleId=ms.moduleId and (ms.startDate is null or ms.endDate is null or ms.startDate < ms.endDate) and (ms.startDate is null or ms.allowUntilDate is null or ms.startDate < ms.allowUntilDate) and (ms.endDate is null or ms.allowUntilDate is null or ms.endDate <= ms.allowUntilDate) group by cm.seqNo,s.moduleId order by cm.seqNo desc";
 			}
 			if (meleteSecurityService.allowStudent(courseId))
 			{
@@ -2408,12 +2408,12 @@ public class ModuleDB implements Serializable
 			if (filtered)
 			{
 				sql = "select m.module_id,c.seq_no,m.title as modTitle,m.description as modDesc,m.whats_next,m.seq_xml,d.start_date,d.end_date,d.allowuntil_date,s.section_id,s.content_type,s.title as secTitle from melete_module m inner join melete_module_shdates d on m.module_id=d.module_id inner join melete_course_module c on m.module_id=c.module_id left outer join melete_section s on m.module_id = s.module_id where c.course_id = ? and c.delete_flag=0 and c.archv_flag=0 and (d.start_date is NULL or d.end_date is NULL or d.start_date < d.end_date) and (d.start_date is NULL or d.allowuntil_date is NULL or d.start_date < d.allowuntil_date) and (d.end_date is NULL or d.allowuntil_date is NULL or d.end_date <= d.allowuntil_date) and (s.delete_flag=0 or s.delete_flag is NULL) order by c.seq_no";
-			    stvSql = "select straight_join mcm.module_id,mstv.section_id,mstv.view_date from melete_course_module mcm,melete_module_shdates msh,melete_section ms,melete_section_track_view mstv where  mcm.course_id = ? and mcm.delete_flag = 0 and mcm.archv_flag = 0 and mcm.module_id = msh.module_id and (msh.start_date is NULL or msh.end_date is NULL or msh.start_date < msh.end_date) and (msh.start_date is NULL or msh.allowuntil_date is NULL or msh.start_date < msh.allowuntil_date) and (msh.end_date is NULL or msh.allowuntil_date is NULL or msh.end_date <= msh.allowuntil_date) and mcm.module_id = ms.module_id and (ms.delete_flag=0 or ms.delete_flag is NULL) and mstv.user_id = ? and ms.section_id = mstv.section_id order by mcm.module_id";
+			    stvSql = "select mcm.module_id,mstv.section_id,mstv.view_date from melete_course_module mcm,melete_module_shdates msh,melete_section ms,melete_section_track_view mstv where  mcm.course_id = ? and mcm.delete_flag = 0 and mcm.archv_flag = 0 and mcm.module_id = msh.module_id and (msh.start_date is NULL or msh.end_date is NULL or msh.start_date < msh.end_date) and (msh.start_date is NULL or msh.allowuntil_date is NULL or msh.start_date < msh.allowuntil_date) and (msh.end_date is NULL or msh.allowuntil_date is NULL or msh.end_date <= msh.allowuntil_date) and mcm.module_id = ms.module_id and (ms.delete_flag=0 or ms.delete_flag is NULL) and mstv.user_id = ? and ms.section_id = mstv.section_id order by mcm.module_id";
 			}
 			else
 			{
 				sql = "select m.module_id,c.seq_no,m.title as modTitle,m.description as modDesc, m.whats_next,m.seq_xml,d.start_date,d.end_date,d.allowuntil_date,s.section_id,s.content_type,s.title as secTitle from melete_module m inner join melete_module_shdates d on m.module_id=d.module_id inner join melete_course_module c on m.module_id=c.module_id left outer join melete_section s on m.module_id = s.module_id where c.course_id = ? and c.delete_flag=0 and c.archv_flag=0 and (s.delete_flag=0 or s.delete_flag is NULL) order by c.seq_no";
-				stvSql = "select straight_join mcm.module_id,mstv.section_id,mstv.view_date from melete_course_module mcm,melete_section ms,melete_section_track_view mstv where  mcm.course_id = ? and mcm.delete_flag = 0 and mcm.archv_flag = 0 and mcm.module_id = ms.module_id  and (ms.delete_flag=0 or ms.delete_flag is NULL) and mstv.user_id = ? and ms.section_id = mstv.section_id order by mcm.module_id";
+				stvSql = "select mcm.module_id,mstv.section_id,mstv.view_date from melete_course_module mcm,melete_section ms,melete_section_track_view mstv where  mcm.course_id = ? and mcm.delete_flag = 0 and mcm.archv_flag = 0 and mcm.module_id = ms.module_id  and (ms.delete_flag=0 or ms.delete_flag is NULL) and mstv.user_id = ? and ms.section_id = mstv.section_id order by mcm.module_id";
 			}
 			PreparedStatement pstmt = dbConnection.prepareStatement(sql);
 			pstmt.setString(1, courseId);
@@ -4609,13 +4609,14 @@ else
 			dbConnection = SqlService.borrowConnection();
 			ResultSet rs, accRs = null;
 			// First get all sequence numbers after this one from course module table
+			// Corrected the sql statement to fix the group by statement to work on oracle - Thabo Mogaswa
 			if (prevFlag)
 			{
-				sql = "select cm.seq_no, cm.module_id, count(s.module_id) as secCount from melete_course_module cm,melete_module_shdates msh,melete_section s where cm.course_id = ? and cm.delete_flag = 0 and cm.archv_flag = 0 and cm.seq_no < ? and cm.module_id = s.module_id and cm.module_id = msh.module_id and ((msh.start_date is null or msh.start_date < ?) and (msh.end_date is null or msh.end_date > ?) and (msh.allowuntil_date is null or msh.allowuntil_date > ?) and (msh.end_date is null or msh.allowuntil_date is null or msh.end_date <= msh.allowuntil_date)) group by cm.seq_no order by cm.seq_no desc";
+				sql = "select cm.seq_no, cm.module_id, count(s.module_id) as secCount from melete_course_module cm,melete_module_shdates msh,melete_section s where cm.course_id = ? and cm.delete_flag = 0 and cm.archv_flag = 0 and cm.seq_no < ? and cm.module_id = s.module_id and cm.module_id = msh.module_id and ((msh.start_date is null or msh.start_date < ?) and (msh.end_date is null or msh.end_date > ?) and (msh.allowuntil_date is null or msh.allowuntil_date > ?) and (msh.end_date is null or msh.allowuntil_date is null or msh.end_date <= msh.allowuntil_date)) group by cm.seq_no,cm.module_id order by cm.seq_no desc";
 			}
 			else
 			{
-				sql = "select cm.seq_no, cm.module_id, count(s.module_id) as secCount from melete_course_module cm,melete_module_shdates msh,melete_section s where cm.course_id = ? and cm.delete_flag = 0 and cm.archv_flag = 0 and cm.seq_no > ? and cm.module_id = s.module_id and cm.module_id = msh.module_id and ((msh.start_date is null or msh.start_date < ?) and (msh.end_date is null or msh.end_date > ?) and (msh.allowuntil_date is null or msh.allowuntil_date > ?) and (msh.end_date is null or msh.allowuntil_date is null or msh.end_date <= msh.allowuntil_date)) group by cm.seq_no order by cm.seq_no";
+				sql = "select cm.seq_no, cm.module_id, count(s.module_id) as secCount from melete_course_module cm,melete_module_shdates msh,melete_section s where cm.course_id = ? and cm.delete_flag = 0 and cm.archv_flag = 0 and cm.seq_no > ? and cm.module_id = s.module_id and cm.module_id = msh.module_id and ((msh.start_date is null or msh.start_date < ?) and (msh.end_date is null or msh.end_date > ?) and (msh.allowuntil_date is null or msh.allowuntil_date > ?) and (msh.end_date is null or msh.allowuntil_date is null or msh.end_date <= msh.allowuntil_date)) group by cm.seq_no,cm.module_id order by cm.seq_no";
 			}
 			PreparedStatement pstmt = dbConnection.prepareStatement(sql);
 			pstmt.setString(1, courseId);

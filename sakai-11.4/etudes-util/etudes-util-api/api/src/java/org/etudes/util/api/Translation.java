@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/etudes-util/tags/1.0.17/etudes-util-api/api/src/java/org/etudes/util/api/Translation.java $
- * $Id: Translation.java 60312 2009-05-09 18:58:59Z ggolden@etudes.org $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2009 Etudes, Inc.

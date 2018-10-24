@@ -44,29 +44,37 @@ public class HtmlTag extends org.apache.struts.taglib.html.HtmlTag {
             out.write("<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">\n");
             out.write("<head>\n");
             
+            // Unisa Changes:2018/09/18: Added meta tags inside head-Should be as high as possible in head
+            out.write("<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n " +
+            		  "<meta charset=\"utf-8\">\n " +
+            		  "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1 \">\n "
+            		  );
+            // End Unisa Changes:2018/09/18
+            
             if (headInclude != null) {
                 out.write(headInclude);
             }
-            
+
             // Unisa Changes:2018/04/20: Make Struts tools responsive on small devices for Sakai 11.x
             // styling applies to tables only - to fix text boxes not being responsive on struts tools
             // 2018/05/17: Morphues has added borders for 'table.listHier' in Sakai 11-remove these borders here
-            out.write("<style> "+
-	            		 "/*table and cells for displaying a flat or hierarchical list of tabular data*/ "+
-	            		 "/*see an annoucement, assignment list*/ "+
-	            		 "table.listHier { "+						// 2018/05/17: All this because of unisa-discussionforums
-	            		 " border:none !important; /*keep ff from giving it a border*/ "+
-	            		 "} "+
+            // Unisa Changes:2018/09/20-Removed responsive struts tables because breaks new Unisa skin
+            // out.write("<style> "+
+	        //    		 "/*table and cells for displaying a flat or hierarchical list of tabular data*/ "+
+	        //    		 "/*see an annoucement, assignment list*/ "+
+	        //    		 "table.listHier { "+						// 2018/05/17: All this because of unisa-discussionforums
+	        //    		 " border:none !important; /*keep ff from giving it a border*/ "+
+	            		 /*"} "+
 	            		 "table.listHier tr td { "+ 				// 2018/05/17: All this because of unisa-discussionforums
 	            		 "	border-right: none !important; "+
         				 "} "+
-	            		 "table.listHier tr:nth-child(2n+1) td { "+ // 2018/05/17: All this because of unisa-discussionforums
+        				 "table.listHier tr:nth-child(2n+1) td { "+ // 2018/05/17: All this because of unisa-discussionforums
 	            		 "	border-right: none !important; "+
 	            		 "} "+
-            			 "@media only screen and (max-width: 800px) { "+
+	            		 "@media only screen and (max-width: 800px) { "+
             			 	 "table { display: inline-table !important; "+
             		  		          "table-layout: fixed; width: 100%; } "+ 
-             		  		 "table th> div { " +					
+            		        "table th> div { " +					
 					  		  				  "word-wrap: break-word; "+	  	   
 					  		  				  "white-space: -o-pre-wrap; "+ 	   
 					  		  				  "white-space: -moz-pre-wrap; "+ 
@@ -107,8 +115,9 @@ public class HtmlTag extends org.apache.struts.taglib.html.HtmlTag {
             		  		  					  "white-space: -moz-pre-wrap; "+
             		  		  					  "white-space: -webkit-pre-wrap; "+ 
             		  		  					  "white-space: -ms-pre-wrap; "+
-            		  		  					  "white-space: pre-wrap; } "+
-            		  		"}</style>");
+            		  		  					  "white-space: pre-wrap; } "+ 
+            		  		"}" + 
+            		  		"</style>"); */
             // End Unisa Changes
 
             out.write("</head>\n");

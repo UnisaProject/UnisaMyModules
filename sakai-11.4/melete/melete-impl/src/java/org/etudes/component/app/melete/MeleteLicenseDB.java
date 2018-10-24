@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-impl/src/java/org/etudes/component/app/melete/MeleteLicenseDB.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-impl/src/java/org/etudes/component/app/melete/MeleteLicenseDB.java $
  * $Id: MeleteLicenseDB.java 73855 2011-04-19 20:41:15Z rashmi@etudes.org $
  ***********************************************************************************
  *
@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.etudes.api.app.melete.MeleteLicenseService;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
+import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -142,9 +143,9 @@ public class MeleteLicenseDB implements Serializable
 
 			Session session = getHibernateUtil().currentSession();
 			CcLicense Cc = (CcLicense) session.createCriteria(CcLicense.class).add(
-					Restrictions.sqlRestriction("req_attr=?", reqAttr, Hibernate.BOOLEAN)).add(
-							Restrictions.sqlRestriction("allow_Cmrcl=?", allowCmrcl, Hibernate.BOOLEAN)).add(
-									Restrictions.sqlRestriction("allow_Mod=?", allowMod, Hibernate.INTEGER)).list().get(0);
+					Restrictions.sqlRestriction("req_attr=?", reqAttr, StandardBasicTypes.BOOLEAN)).add(
+							Restrictions.sqlRestriction("allow_Cmrcl=?", allowCmrcl, StandardBasicTypes.BOOLEAN)).add(
+									Restrictions.sqlRestriction("allow_Mod=?", allowMod, StandardBasicTypes.INTEGER)).list().get(0);
 			licenseInfo[0] = Cc.getUrl();
 			licenseInfo[1] = Cc.getName();
 			getHibernateUtil().closeSession();

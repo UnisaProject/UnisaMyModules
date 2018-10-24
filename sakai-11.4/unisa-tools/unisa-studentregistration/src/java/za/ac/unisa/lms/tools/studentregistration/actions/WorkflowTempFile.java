@@ -148,6 +148,68 @@ public class WorkflowTempFile {
 		}
 	}
 	
+	//START Johanet 2018July BRD - add new function to create and write wfl file of returning students in final application folder
+	@SuppressWarnings("unused")
+	public void closeRet(String studentNr) {
+
+		FileWriter workflowFile = null;
+
+		String stuGroupDir = studentNr.substring(0, 1);
+    	String stuDir = studentNr;
+    	String finalWFLFilePath = filePath; //Only used for delete (/data/sakai/applications)
+    	String tmpWFLFilePath = filePath + "/tmp/" + stuGroupDir + "/" + stuDir;
+    	
+		String finalWFLFile = finalWFLFilePath +"/"+ fileName;
+		String tmpWFLFile = tmpWFLFilePath +"/"+ fileName;
+		
+		// Create workflow file in workflow directory
+		try {
+			//2014 Edmund
+			//Create new folder with Student number as too many files in one folder (in excess of 20 000) slows down the system
+			//Create thus one subfolder for the first character in the number (ie for 12345678, create "1")
+			//Then create the actual student number folder under that folder (ie 12345678)
+			File newDir = new File(finalWFLFilePath);
+			if (!newDir.exists()) {
+				if (newDir.mkdirs()) {
+					//log.debug("WorkFlowTempFile - Directory is created: " + tmpWFLFilePath);
+				} else {
+					log.info("WorkFlowTempFile - Failed to create directory: " + finalWFLFilePath);
+				}
+			}
+			//2014 Edmund
+			//First check if file already exists and delete it if it does as otherwise it won't create a new file
+			//This caused a problem if a file could not be moved as the same file exits in the destination folder
+			//Should only apply for returning students as new student's files are created by Ina's proxy.
+
+			boolean remTmpWFLFile = removeOldFile(tmpWFLFile, "FutureUse");
+			/**2014 Edmund
+			 * for Future use if you wish to rename files instead of deleting, 
+			 * we however only worry about the latest version of the file
+			 * at this stage, so we delete the existing uniflow file.
+			 */
+			/**
+			if (!remTmpWFLFile){
+				//log.info(tmpWFLFile+": file did not exist or has been deleted, continue to write file");
+			}else{
+				//Could do rename here if you wanted
+			}
+			**/
+			//Added removal of uniflow file from /data/sakai/applications as well as the file exists during testing
+			//should not exist under normal circumstances, but could be if it is decided to allow more than one
+			//application or change of qualification per academic year in the future.
+			boolean remDestWFL = removeOldFile(finalWFLFile, "FutureUse");
+			
+			workflowFile = new FileWriter(finalWFLFile);
+			workflowFile.write(fileContent.toString());
+			workflowFile.close();
+			//log.debug(tmpWFLFile+": file written to filesystem");
+		} catch (Exception e) {
+			log.error("WorkflowFile : Error creating file " + finalWFLFile +": exception "+e+" "+e.getMessage());
+		}
+	}
+	//END Johanet 2018July BRD - add new function to create and write wfl file of returning students in final application folder
+	
+	
 	/**2014 Edmund
 	 * Add method to delete the workflow file if it already exists. 
 	 * This is only specific to returning students, who could go back to change a qualification

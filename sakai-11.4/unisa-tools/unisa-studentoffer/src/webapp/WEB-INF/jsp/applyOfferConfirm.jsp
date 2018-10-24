@@ -111,7 +111,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		
 	});
 			  
-	/**Quit button**/
+	/**Exit button**/
 		//Click button
 		function doSubmit(button){
 			if (button === "Quit"){
@@ -168,37 +168,57 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 								<tr>
 									<td width="60%"><bean:write name="studentOfferForm" property="offerQual1"/></td>
 									<td width="40%">
-										<logic:equal name="studentOfferForm" property="studentApplication.radioOfferQual1" value="Y">
+										<logic:equal name="studentOfferForm" property="studentApplication.radioOfferAccept" value="1">
 											<fmt:message key="page.accepted"/>
 										</logic:equal>
-										<logic:equal name="studentOfferForm" property="studentApplication.radioOfferQual1" value="N">
+										<logic:equal name="studentOfferForm" property="studentApplication.radioOfferAccept" value="2">
 											<fmt:message key="page.declined"/>
 										</logic:equal>
-										<logic:equal name="studentOfferForm" property="studentApplication.radioOfferQual1" value="">
+										<logic:equal name="studentOfferForm" property="studentApplication.radioOfferAccept" value="">
 											<fmt:message key="page.accpeted.none"/>
 										</logic:equal>
 									<td>
 								</tr>
 							</logic:notEqual>
 						</logic:notEqual>
+						<!--<logic:notEqual name="studentOfferForm" property="pendingQual1" value="">
+							<logic:notEqual name="studentOfferForm" property="pendingQual1" value="Not Found">
+								<tr>
+									<td width="60%"><bean:write name="studentOfferForm" property="pendingQual1"/></td>
+									<td width="40%">										
+											<fmt:message key="page.declined"/>										
+									<td>
+								</tr>
+							</logic:notEqual>
+						</logic:notEqual>-->
 						<logic:notEqual name="studentOfferForm" property="offerQual2" value="">
 							<logic:notEqual name="studentOfferForm" property="offerQual2" value="Not Found">
 								<tr>
 									<td width="60%"><bean:write name="studentOfferForm" property="offerQual2"/></td>
 									<td width="40%">
-										<logic:equal name="studentOfferForm" property="studentApplication.radioOfferQual2" value="Y">
+										<logic:equal name="studentOfferForm" property="studentApplication.radioOfferAccept" value="2">
 											<fmt:message key="page.accepted"/>
 										</logic:equal>
-										<logic:equal name="studentOfferForm" property="studentApplication.radioOfferQual2" value="N">
+										<logic:equal name="studentOfferForm" property="studentApplication.radioOfferAccept" value="1">
 											<fmt:message key="page.declined"/>
 										</logic:equal>
-										<logic:equal name="studentOfferForm" property="studentApplication.radioOfferQual2" value="">
+										<logic:equal name="studentOfferForm" property="studentApplication.radioOfferAccept" value="">
 											<fmt:message key="page.accpeted.none"/>
 										</logic:equal>
 									<td>
 								</tr>
 							</logic:notEqual>
-						</logic:notEqual>						
+						</logic:notEqual>	
+						<!--<logic:notEqual name="studentOfferForm" property="pendingQual2" value="">
+							<logic:notEqual name="studentOfferForm" property="pendingQual2" value="Not Found">
+								<tr>
+									<td width="60%"><bean:write name="studentOfferForm" property="pendingQual2"/></td>
+									<td width="40%">										
+											<fmt:message key="page.declined"/>										
+									<td>
+								</tr>
+							</logic:notEqual>
+						</logic:notEqual>-->					
 						<tr>
 							<td colspan="2"><hr/></td>
 						</tr><tr>
@@ -227,7 +247,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 			</div>
 			<div class="panel-footer clearfix">
 				<sakai:actions>
-					<button class="btn btn-default" type="button" onclick="doSubmit('Quit');"><fmt:message key="button.quit"/></button>
+					<button class="btn btn-default" type="button" onclick="doSubmit('Quit');"><fmt:message key="button.exit"/></button>
 				</sakai:actions>
 			</div>
 		</div>

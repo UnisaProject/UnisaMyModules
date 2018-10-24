@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/patch/MeleteCalendarServiceImpl.java $
+ * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.9/patch/MeleteCalendarServiceImpl.java $
  * $Id: MeleteCalendarServiceImpl.java 3647 2012-12-02 22:30:41Z ggolden $
  ***********************************************************************************
  *

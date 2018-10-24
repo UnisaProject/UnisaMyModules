@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/importexportmodules.jsp $
- * $Id: importexportmodules.jsp 77082 2011-10-24 18:38:10Z rashmi@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/importexportmodules.jsp $
+ * $Id: importexportmodules.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
- * Copyright (c) 2008,2009,2010,2011 Etudes, Inc.
+ * Copyright (c) 2008,2009,2010,2011, 2014 Etudes, Inc.
  *
  * Portions completed before September 1, 2008 Copyright (c) 2004, 2005, 2006, 2007, 2008 Foothill College, ETUDES Project
  *
@@ -47,8 +47,50 @@ function showprocessMsg()
 {
  document.getElementById("importexportform:processmsg").style.visibility="visible";
 }
-</script>
 
+function selectAll()
+{
+  var listSizeStr = "importexportform:listSize";
+  var listSizeVal = document.getElementById(listSizeStr).value;
+  if (document.getElementById("importexportform:table:allmodcheck") != null)
+  {	  
+  if (document.getElementById("importexportform:table:allmodcheck").checked == true)
+  {	  
+    for (i=0;i<parseInt(listSizeVal);i++)
+    {
+	  var modchStr = "importexportform:table:"+i+":modCheck";
+	  if (document.getElementById(modchStr).checked == false)
+	  {	  
+	    document.getElementById(modchStr).checked=true;
+	  }  	  
+    }
+  } 
+  else
+  {	  
+	  resetCheck();
+   } 	   	  
+  }
+}
+
+function resetCheck()
+{
+	 var inputs = document.getElementsByTagName("input");
+	  for (var i = 0; i < inputs.length; i++) {   
+		  if (inputs[i].type == "checkbox") {   
+		  inputs[i].checked = false;
+		  }
+	  }	  
+}
+
+function resetAllMod()
+{
+	if (document.getElementById("importexportform:table:allmodcheck") != null)
+	{	
+	  document.getElementById("importexportform:table:allmodcheck").checked=false;
+	}
+}
+
+</script>
 <h:form id="importexportform" enctype="multipart/form-data">
 <j4j:param name="upload.max" value="#{exportMeleteModules.uploadmax}" method="get" />
 	<f:subview id="top">
@@ -100,6 +142,7 @@ function showprocessMsg()
                   				</tr>
                   				<tr>
                   				<td>
+                  				 
                   				    <h:selectOneRadio id="select_export_format" value="#{exportMeleteModules.selectFormat}" layout="pageDirection" rendered="#{!exportMeleteModules.noFlag}">
                   				    	<f:selectItem itemValue="IMS" itemLabel="#{msgs.importexportmodules_exportims_modules}" />
                   				    	<f:selectItem itemValue="SCORM" itemLabel="#{msgs.importexportmodules_exportscorm_modules}" />
@@ -114,13 +157,32 @@ function showprocessMsg()
                     				 <h:outputText value="#{msgs.importexportmodules_export_one_more_msg}" />
                     			</td></tr>
                   				<tr><td>
-										<h:selectManyListbox id="oneormoremodules" value="#{exportMeleteModules.selectedModules}" disabled="#{exportMeleteModules.noFlag}" size="8" style="width:420px">
-											<f:selectItems value="#{exportMeleteModules.availableModules}" />
-										</h:selectManyListbox>
+                  				 <h:dataTable id="table"
+                                 value="#{exportMeleteModules.availableModules}"
+                                 var="mdbean"  headerClass="tableheader" rowClasses="row1,row2" columnClasses="ListModCheckClass,ListTitleClass" 
+                                 rendered="#{exportMeleteModules.noFlag != null && !exportMeleteModules.noFlag}" width="100%" 
+				                 binding="#{exportMeleteModules.table}" styleClass="mainListTableCollapseWithBorder0" summary="#{msgs.importexportmodules_summary}">
+                                  <h:column>
+                                    <f:facet name="header">
+                                    <h:panelGroup>
+                                      <h:outputText value="&nbsp;" escape="false"/>
+                                      <h:selectBooleanCheckbox id="allmodcheck" value="#{exportMeleteModules.selectAllFlag}" onclick="selectAll()" valueChangeListener="#{exportMeleteModules.selectAllModules}"  rendered="#{exportMeleteModules.noFlag == false}"/>   
+                                    </h:panelGroup> 
+                                    </f:facet> 
+     	                            <h:selectBooleanCheckbox title="#{mdbean.module.moduleIdStr}" id="modCheck" value="#{mdbean.selected}" onclick="resetAllMod()" valueChangeListener="#{exportMeleteModules.selectedModule}" />
+                                  </h:column>               
+                                  <h:column>
+ 	                                <f:facet name="header">
+ 	                                <h:panelGroup>
+ 	                                  <h:outputText id="t2" value="#{msgs.importexportmodules_modules_title}" />
+                                    </h:panelGroup>        
+                                    </f:facet>	
+                                    <h:outputText id="title2" value="#{mdbean.module.title}" />
+                                  </h:column>
+                                  </h:dataTable>
+								
 								</td></tr>
-                  				<tr><td>		
-										<h:outputText value="#{msgs.importexportmodules_export_one_more_select_msg}" />
-                      			</td></tr>
+                  				
                   			</table></td></tr>                  			
            				</table>
 						<div class="actionBar" align="left">
@@ -130,9 +192,12 @@ function showprocessMsg()
 		  			</td>
 		  		</tr>
 		  	</table> 
-	
+	 <h:inputHidden id="listSize" value="#{exportMeleteModules.listSize}"/>
 </h:form>
 <!-- This Ends the Main Text Area -->
 </sakai:view>
+<script type="text/javascript">
+ 		 resetCheck();	
+</script>
 </f:view>
   

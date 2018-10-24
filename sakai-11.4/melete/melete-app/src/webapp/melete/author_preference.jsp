@@ -1,8 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/author_preference.jsp $
- * $Id: author_preference.jsp 80436 2012-06-19 21:48:06Z mallika@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/author_preference.jsp $
+ * $Id: author_preference.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008,2009,2010,2011,2012 Etudes, Inc.
@@ -78,7 +78,7 @@
 							</h:selectOneRadio>	
 						</h:column>
 					 </h:panelGrid>
-					<h:panelGrid id="LTIPrefPanel" columns="1" styleClass="authorPrefTable">
+					<h:panelGrid id="LTIPrefPanel" columns="1" styleClass="authorPrefTable" style="margin-bottom:5px;">
 						<h:column>
 						 	<h:outputText id="LTI1" value="#{msgs.author_preference_LTI_select}"  styleClass="bold"/>      
 						 </h:column>
@@ -91,7 +91,7 @@
 					
 		                <h:column>
 						<jsp:include page="licenseform.jsp?formName=UserPreferenceForm"/>						 						 	
-						  <h:commandLink id="allLicenseButton"  action="#{authorPreferences.changeAllLicense}" >
+						  <h:commandLink id="allLicenseButton"  action="#{authorPreferences.changeAllLicense}" styleClass="toolUiLink">
 							<h:graphicImage id="replaceImg2" value="/images/replace2.gif" styleClass="AuthImgClass"/>
 							<h:outputText value="#{msgs.overwriteLicenseMsg}"/>
 				          </h:commandLink>

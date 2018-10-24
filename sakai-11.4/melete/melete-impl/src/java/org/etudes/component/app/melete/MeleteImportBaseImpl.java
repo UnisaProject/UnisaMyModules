@@ -1,7 +1,7 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-impl/src/java/org/etudes/component/app/melete/MeleteImportBaseImpl.java $
- * $Id: MeleteImportBaseImpl.java 73448 2011-03-30 18:24:49Z rashmi@etudes.org $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-impl/src/java/org/etudes/component/app/melete/MeleteImportBaseImpl.java $
+ * $Id: MeleteImportBaseImpl.java 87125 2014-10-16 19:48:52Z mallika@etudes.org $
  ***********************************************************************************
  *
  * Copyright (c) 2009,2010,2011 Etudes, Inc.
@@ -172,7 +172,7 @@ abstract public class MeleteImportBaseImpl
 		}
 
 		// Replace all occurrences of pattern in input
-		contentEditor = meleteUtil.replacePath(contentEditor, imgSrcPath, replacementStr);
+		contentEditor = meleteUtil.translateContent(contentEditor, imgSrcPath, replacementStr);
 
 		return contentEditor;
 	}

@@ -158,6 +158,7 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 	
 	<input type="hidden" id="tmpStuNr" name="tmpStuNr" value="<bean:write name="studentRegistrationForm" property="student.number"/>" />
 	<input type="hidden" name="webADM" id="webADM" value="<bean:write name='studentRegistrationForm' property='adminStaff.admin' />"/>
+	<input type="hidden" name="stuSLP" id="stuSLP" value="<bean:write name='studentRegistrationForm' property='student.stuSLP' />"/>
 	
 	<sakai:messages/>
 	<sakai:messages message="true"/>
@@ -217,23 +218,26 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 						</tr><tr>
 							<td colspan="2" style="height:30px"><fmt:message key="page.studentnr.complete.info6"/>&nbsp;
 							<bean:write name="studentRegistrationForm" property="student.cellNr"/></td>
-						</tr><tr>
-							<td colspan="2"><strong><font size="2"><fmt:message key="page.studentnr.complete.info8"/></font></strong>&nbsp;</td>
-						</tr><tr>
-							<td style="width:150px; height:30px"><fmt:message key="page.studentnr.complete.info9"/>&nbsp;</td>
-							<td style="width:150px; height:30px; text-align: center;"><div><strong><font size="3" color="red"><bean:write name="studentRegistrationForm" property="student.number"/></font></strong></div></td>
-						</tr><tr>
-							<td style="width:150px; height:30px; text-align: center;">
-								<div>
-									<input type="button" id="payNow" value="Pay online with your credit card" />
-								</div>
-							</td>
-							<td style="width:150px; height:30px; text-align: center;">
-								<div>
-									<input type="button" id="payLater" value="Pay Later" />
-								</div>
-							</td>
 						</tr>
+						<logic:notEqual name="studentRegistrationForm" property="student.stuSLP" value="true" >
+							<tr>
+								<td colspan="2"><strong><font size="2"><fmt:message key="page.studentnr.complete.info8"/></font></strong>&nbsp;</td>
+							</tr><tr>
+								<td style="width:150px; height:30px"><fmt:message key="page.studentnr.complete.info9"/>&nbsp;</td>
+								<td style="width:150px; height:30px; text-align: center;"><div><strong><font size="3" color="red"><bean:write name="studentRegistrationForm" property="student.number"/></font></strong></div></td>
+							</tr><tr>
+								<td style="width:150px; height:30px; text-align: center;">
+									<div>
+										<input type="button" id="payNow" value="Pay online with your credit card" />
+									</div>
+								</td>
+								<td style="width:150px; height:30px; text-align: center;">
+									<div>
+										<input type="button" id="payLater" value="Pay Later" />
+									</div>
+								</td>
+							</tr>
+						</logic:notEqual>
 					</table>
 				</div>
 			</div>

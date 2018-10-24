@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-impl/src/java/org/etudes/component/app/melete/MeleteUserPreferenceDB.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-impl/src/java/org/etudes/component/app/melete/MeleteUserPreferenceDB.java $
  * $Id: MeleteUserPreferenceDB.java 73420 2011-03-29 18:45:36Z rashmi@etudes.org $  
  ***********************************************************************************
  *

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
  ******************************************************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/components/src/webapp/WEB-INF/components.xml $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/components/src/webapp/WEB-INF/components.xml $
  * $Id: components.xml 73392 2011-03-28 19:47:40Z mallika@etudes.org $  
  ******************************************************************************************************************
  *
@@ -49,8 +49,7 @@
 	<bean id="org.etudes.api.app.melete.MeleteSecurityService"
 			class="org.etudes.component.app.melete.MeleteSecurityServiceImpl"
 			init-method="init"
-			destroy-method="destroy"
-			singleton="true">	
+			destroy-method="destroy">	
      <property name="moduleService">
             <ref local="org.etudes.api.app.melete.ModuleService" />
         </property>	
@@ -67,8 +66,7 @@
 	
 	<!-- common -->
 		<bean id="org.etudes.component.app.melete.HibernateUtil"
-			class="org.etudes.component.app.melete.HibernateUtil"
-			singleton="true">
+			class="org.etudes.component.app.melete.HibernateUtil">
 		<property name="sessionFactory">
             <ref bean="org.sakaiproject.springframework.orm.hibernate.GlobalSessionFactory"/>
         </property>
@@ -76,8 +74,7 @@
 
 <!--ModuleService-->
 	<bean id="org.etudes.api.app.melete.ModuleService"
-			class="org.etudes.component.app.melete.ModuleServiceImpl"
-			singleton="true">		
+			class="org.etudes.component.app.melete.ModuleServiceImpl">		
         	<property name="moduledb">
             <ref local="org.etudes.component.app.melete.ModuleDB" />
         </property>	
@@ -92,16 +89,14 @@
 	
 	
 		<bean id="org.etudes.component.app.melete.MeleteLicenseDB"
-			class="org.etudes.component.app.melete.MeleteLicenseDB"
-			singleton="true">
+			class="org.etudes.component.app.melete.MeleteLicenseDB">
 			<property name="hibernateUtil">
             <ref local="org.etudes.component.app.melete.HibernateUtil" />
         </property>
     </bean>
     
 	<bean id="org.etudes.component.app.melete.ModuleDB"
-			class="org.etudes.component.app.melete.ModuleDB"
-			singleton="true">
+			class="org.etudes.component.app.melete.ModuleDB">
 			<property name="hibernateUtil">
             <ref local="org.etudes.component.app.melete.HibernateUtil" />            
         </property>
@@ -126,8 +121,7 @@
 <bean id="org.etudes.api.app.melete.SectionService"
 			class="org.etudes.component.app.melete.SectionServiceImpl"
 			init-method="init"
-			destroy-method="destroy"			
-			singleton="true">
+			destroy-method="destroy">
 		<property name="sectiondb">
             <ref local="org.etudes.component.app.melete.SectionDB" />
         </property>
@@ -140,8 +134,7 @@
 	</bean>
 		
 	<bean id="org.etudes.component.app.melete.SectionDB"
-			class="org.etudes.component.app.melete.SectionDB"
-			singleton="true">
+			class="org.etudes.component.app.melete.SectionDB">
 			<property name="hibernateUtil">
             <ref local="org.etudes.component.app.melete.HibernateUtil" />
         </property>          
@@ -161,8 +154,7 @@
 	<bean id="org.etudes.api.app.melete.MeleteExportService"
 			class="org.etudes.component.app.melete.MeleteExportServiceImpl"
 			init-method="init"
-			destroy-method="destroy"
-			singleton="true">
+			destroy-method="destroy">
 	<property name="sectionDB">
             <ref local="org.etudes.component.app.melete.SectionDB" />
         </property>      
@@ -177,8 +169,7 @@
 	<bean id="MeleteExportScormService"
 			class="org.etudes.component.app.melete.MeleteScormExportServiceImpl"
 			init-method="init"
-			destroy-method="destroy"
-			singleton="true">
+			destroy-method="destroy">
 	<property name="sectionDB">
             <ref local="org.etudes.component.app.melete.SectionDB" />
         </property>      
@@ -194,8 +185,7 @@
 	<bean id="org.etudes.api.app.melete.MeleteImportService"
 			class="org.etudes.component.app.melete.MeleteImportServiceImpl"
 			init-method="init"
-			destroy-method="destroy"
-			singleton="true">
+			destroy-method="destroy">
 	<property name="sectionDB">
             <ref local="org.etudes.component.app.melete.SectionDB" />
         </property>
@@ -217,8 +207,7 @@
 	<bean id="org.etudes.api.app.melete.MeleteImportfromSiteService"
 			class="org.etudes.component.app.melete.MeleteImportfromSiteServiceImpl"
 			init-method="init"
-			destroy-method="destroy"
-			singleton="true">
+			destroy-method="destroy">
 	<property name="sectionDB">
             <ref local="org.etudes.component.app.melete.SectionDB" />
         </property>
@@ -238,8 +227,7 @@
         
 	</bean>
 	<bean id="org.etudes.api.app.melete.MeleteCHService"
-				class="org.etudes.component.app.melete.MeleteCHServiceImpl"
-				singleton="true">	
+				class="org.etudes.component.app.melete.MeleteCHServiceImpl">	
 		<property name="contentservice">
 			<ref bean="org.sakaiproject.content.api.ContentHostingService"/>
         </property>
@@ -252,48 +240,42 @@
 	</bean>
 	
 	<bean id="org.etudes.component.app.melete.MeleteUserPreferenceDB"
-			class="org.etudes.component.app.melete.MeleteUserPreferenceDB"
-			singleton="true">
+			class="org.etudes.component.app.melete.MeleteUserPreferenceDB">
 			<property name="hibernateUtil">
             <ref local="org.etudes.component.app.melete.HibernateUtil" />
         </property>        
 	</bean>
 	
 	<bean id="org.etudes.api.app.melete.MeleteAuthorPrefService"
-				class="org.etudes.component.app.melete.MeleteAuthorPrefServiceImpl"
-				singleton="true">	
+				class="org.etudes.component.app.melete.MeleteAuthorPrefServiceImpl">	
 		<property name="userPrefdb">
 			<ref local="org.etudes.component.app.melete.MeleteUserPreferenceDB"/>
         </property>
 	</bean>    
 	
 	<bean id="org.etudes.component.app.melete.BookmarkDB"
-			class="org.etudes.component.app.melete.BookmarkDB"
-			singleton="true">
+			class="org.etudes.component.app.melete.BookmarkDB">
 			<property name="hibernateUtil">
             <ref local="org.etudes.component.app.melete.HibernateUtil" />
         </property>        
 	</bean>
 	
 	<bean id="org.etudes.api.app.melete.BookmarkService"
-				class="org.etudes.component.app.melete.BookmarkServiceImpl"
-				singleton="true">	
+				class="org.etudes.component.app.melete.BookmarkServiceImpl">	
 		<property name="bookmarkDb">
 			<ref local="org.etudes.component.app.melete.BookmarkDB"/>
         </property>
 	</bean>    
 	
    <bean id="org.etudes.component.app.melete.SpecialAccessDB"
-			class="org.etudes.component.app.melete.SpecialAccessDB"
-			singleton="true">
+			class="org.etudes.component.app.melete.SpecialAccessDB">
 			<property name="hibernateUtil">
             <ref local="org.etudes.component.app.melete.HibernateUtil" />
         </property>        
 	</bean>
 	
 	<bean id="org.etudes.api.app.melete.SpecialAccessService"
-				class="org.etudes.component.app.melete.SpecialAccessServiceImpl"
-				singleton="true">	
+				class="org.etudes.component.app.melete.SpecialAccessServiceImpl">	
 		<property name="specialAccessDb">
 			<ref local="org.etudes.component.app.melete.SpecialAccessDB"/>
         </property>

@@ -1,5 +1,5 @@
 -- *********************************************************************
--- $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/components/src/sql/mysql/seqxml_script.sql $
+-- $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/components/src/sql/mysql/seqxml_script.sql $
 -- $Id: seqxml_script.sql 56413 2008-12-19 22:20:19Z rashmi@etudes.org $
 -- *********************************************************************
 --  Copyright (c) 2008 Etudes, Inc.  

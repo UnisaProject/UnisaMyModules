@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-impl/src/java/org/etudes/component/app/melete/ModuleServiceImpl.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-impl/src/java/org/etudes/component/app/melete/ModuleServiceImpl.java $
  * $Id: ModuleServiceImpl.java 81196 2012-08-31 21:21:07Z mallika@etudes.org $
  ***********************************************************************************
  *
@@ -231,7 +231,7 @@ public class ModuleServiceImpl implements ModuleService, Serializable
 	/**
 	 * {@inheritDoc}
 	 */
-	public int getCourseModuleSize(String courseId)
+	public long getCourseModuleSize(String courseId)
 	{
 		return moduledb.getCourseModuleSize(courseId);
 	}

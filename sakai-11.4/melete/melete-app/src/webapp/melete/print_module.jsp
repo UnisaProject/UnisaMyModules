@@ -2,8 +2,8 @@
 <%@ page import="org.etudes.tool.melete.PrintModulePage,org.etudes.tool.melete.ListAuthModulesPage,javax.faces.application.FacesMessage, java.util.ResourceBundle"%>
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/print_module.jsp $
- * $Id: print_module.jsp 80431 2012-06-19 18:38:55Z mallika@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/print_module.jsp $
+ * $Id: print_module.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008,2009,2010,2011 Etudes, Inc.
@@ -42,10 +42,10 @@
 				
 %>			
 				<div class="noprint">
-				 <a href="#" onclick="javascript:window.print()">
+				 <a href="#" onclick="javascript:window.print()" class="toolUiLink">
 				 <img src="/etudes-melete-tool/images/printer.png" alt="" width="16" height="16" border="0" align="absmiddle">
 				 <%=printMsg%></a>
-				 | <a value="" href="" onClick="window.close();" ><%=closeMsg%>	</a>				 
+				 | <a class="toolUiLink" value="" href="" onClick="window.close();" ><%=closeMsg%>	</a>				 
 				</div>
 		</td></tr>
 

@@ -1,7 +1,7 @@
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/license_results_edit.jsp $
- * $Id: license_results_edit.jsp 63702 2009-09-30 21:29:05Z mallika@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/license_results_edit.jsp $
+ * $Id: license_results_edit.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008 Etudes, Inc.
@@ -28,7 +28,7 @@
 <h:panelGrid id="cclicensetable" columns="1" rendered="#{!editModulePage.copyright}" >
 	<h:column>
 	 <h:outputText value="#{msgs.license_results_edit1}" /> 
-	  <h:outputLink value="#{editModulePage.agreeResultUrl}" target="_blank"> 
+	  <h:outputLink styleClass="toolUiLinkU" value="#{editModulePage.agreeResultUrl}" target="_blank"> 
 		 <f:verbatim></f:verbatim>
 		 <h:outputText value="#{editModulePage.agreeResult}" />
 	 </h:outputLink>

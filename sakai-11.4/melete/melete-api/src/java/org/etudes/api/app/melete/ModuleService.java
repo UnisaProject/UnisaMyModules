@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-api/src/java/org/etudes/api/app/melete/ModuleService.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-api/src/java/org/etudes/api/app/melete/ModuleService.java $
  * $Id: ModuleService.java 80314 2012-06-12 22:15:39Z rashmi@etudes.org $
  ***********************************************************************************
  *
@@ -191,7 +191,7 @@ public interface ModuleService
 	 *        The course Id
 	 * @return
 	 */
-	public int getCourseModuleSize(String courseId);
+	public long getCourseModuleSize(String courseId);
 
 	/**
 	 * Gets the earliest start date or end date(if defined) of all the modules. Returns null if dates don't exist 

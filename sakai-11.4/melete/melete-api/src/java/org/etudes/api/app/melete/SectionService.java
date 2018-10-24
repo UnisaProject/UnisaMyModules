@@ -1,7 +1,7 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-api/src/java/org/etudes/api/app/melete/SectionService.java $
- * $Id: SectionService.java 80446 2012-06-20 19:24:31Z rashmi@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-api/src/java/org/etudes/api/app/melete/SectionService.java $
+ * $Id: SectionService.java 87125 2014-10-16 19:48:52Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008, 2009, 2010, 2011 Etudes, Inc.
@@ -424,4 +424,12 @@ public interface SectionService
 	 */
 	public void updateSectionResource(SectionObjService section, SectionResourceService secResource) throws Exception;
 
+	/**
+	 * Fix xrefs to refer to current site resources. 
+	 * 
+	 * @param contents
+	 * @param courseId
+	 * @return
+	 */
+	public String fixXrefs(String contents, String courseId);
 }

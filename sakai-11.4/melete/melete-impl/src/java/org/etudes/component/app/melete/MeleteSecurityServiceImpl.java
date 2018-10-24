@@ -1,10 +1,10 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-impl/src/java/org/etudes/component/app/melete/MeleteSecurityServiceImpl.java $
- * $Id: MeleteSecurityServiceImpl.java 80314 2012-06-12 22:15:39Z rashmi@etudes.org $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-impl/src/java/org/etudes/component/app/melete/MeleteSecurityServiceImpl.java $
+ * $Id: MeleteSecurityServiceImpl.java 87124 2014-10-16 17:03:37Z mallika@etudes.org $
  ***********************************************************************************
  *
- * Copyright (c) 2008, 2009,2010, 2011, 2012 Etudes, Inc.
+ * Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Etudes, Inc.
  *
  * Portions completed before September 1, 2008 Copyright (c) 2004, 2005, 2006, 2007, 2008 Foothill College, ETUDES Project
  *
@@ -24,6 +24,7 @@
 package org.etudes.component.app.melete;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -49,9 +50,10 @@ import org.apache.commons.logging.LogFactory;
 import org.dom4j.DocumentHelper;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.cover.SecurityService;
-import org.sakaiproject.authz.cover.AuthzGroupService;
+import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentResource;
+import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityAccessOverloadException;
 import org.sakaiproject.entity.api.EntityCopyrightException;
@@ -73,7 +75,7 @@ import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.util.Xml;
 import org.imsglobal.basiclti.BasicLTIUtil;
-import org.etudes.basiclti.SakaiBLTIUtil;
+import org.etudes.basicltiContact.SakaiBLTIUtil;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.util.ResourceLoader;
 
@@ -326,9 +328,13 @@ public class MeleteSecurityServiceImpl implements MeleteSecurityService, EntityP
 								{
 									try
 									{
+										Properties info = new Properties();
+										Properties launch = new Properties();										
+										if (str != null) BasicLTIUtil.parseDescriptor(info, launch, str);									
 										popAdvisor();
+										
 										// Leave ResourceBundle off for now
-										String[] retval = SakaiBLTIUtil.postLaunchHTML(str, contextId, ref.getId(), resprops, rb);
+										String[] retval = SakaiBLTIUtil.postLaunchHTML(null, str, contextId, ref.getId(), info, launch, true, resprops, rb, null);
 										if (retval != null) postData = retval[0];
 									}
 									catch (Exception e)
@@ -352,7 +358,8 @@ public class MeleteSecurityServiceImpl implements MeleteSecurityService, EntityP
 								if (postData != null)
 								{
 									res.setContentType("text/html");
-									ServletOutputStream out = res.getOutputStream();
+									res.setCharacterEncoding("UTF-8");
+									PrintWriter out = res.getWriter();
 									out.println(postData);
 									handled = true;
 								}
@@ -612,7 +619,8 @@ public class MeleteSecurityServiceImpl implements MeleteSecurityService, EntityP
 		azGroups.add("!site.helper");
 
 		// get the user ids who can
-		Set userIds = AuthzGroupService.getUsersIsAllowed(SECURE_STUDENT, azGroups);
+        AuthzGroupService authzGroupService = ComponentManager.get(AuthzGroupService.class);
+		Set userIds = authzGroupService.getUsersIsAllowed(SECURE_STUDENT, azGroups);
 		return userIds;
 	}
 

@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/etudes-util/tags/1.0.17/etudes-util-api/api/src/java/org/etudes/util/api/MasteryAdvisor.java $
- * $Id: MasteryAdvisor.java 71786 2010-12-15 00:06:13Z ggolden@etudes.org $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2010 Etudes, Inc.

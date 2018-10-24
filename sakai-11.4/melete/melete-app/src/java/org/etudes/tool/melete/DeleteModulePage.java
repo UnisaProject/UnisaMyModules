@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/java/org/etudes/tool/melete/DeleteModulePage.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/java/org/etudes/tool/melete/DeleteModulePage.java $
  * $Id: DeleteModulePage.java 77528 2011-11-21 21:38:31Z mallika@etudes.org $
  ***********************************************************************************
  *

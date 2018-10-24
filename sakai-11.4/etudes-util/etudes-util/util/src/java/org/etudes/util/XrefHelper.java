@@ -1,9 +1,9 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/etudes-util/tags/1.0.17/etudes-util/util/src/java/org/etudes/util/XrefHelper.java $
- * $Id: XrefHelper.java 79704 2012-05-21 16:40:50Z ggolden@etudes.org $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2009, 2010, 2011, 2012 Etudes, Inc.
+ * Copyright (c) 2009, 2010, 2011, 2012, 2013, 2014, 2015 Etudes, Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.cover.SecurityService;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentCollection;
+import org.sakaiproject.content.api.ContentEntity;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.content.api.ContentResourceEdit;
 import org.sakaiproject.content.cover.ContentHostingService;
@@ -101,9 +102,6 @@ public class XrefHelper
 		StringBuffer sb = new StringBuffer();
 		String serverUrl = ServerConfigurationService.getServerUrl();
 
-		// for the relative access check: matches /access/
-		Pattern relAccessPattern = Pattern.compile("/access/.*");
-
 		// process each "harvested" string (avoiding like strings that are not in src= or href= patterns)
 		while (m.find())
 		{
@@ -112,9 +110,8 @@ public class XrefHelper
 				String ref = m.group(2);
 				String terminator = m.group(3);
 
-				// if this is an access to our own server, make it full URL (i.e. starting with "/access")
-				Matcher relAccessMatcher = relAccessPattern.matcher(ref);
-				if (relAccessMatcher.matches())
+				// if this is an access to our own server, make it full URL (i.e. starting with "/access" or /library or /docs)
+				if (ref.startsWith("/"))
 				{
 					m.appendReplacement(sb, Matcher.quoteReplacement(m.group(1) + "=\"" + serverUrl + ref + terminator));
 				}
@@ -296,6 +293,42 @@ public class XrefHelper
 	}
 
 	/**
+	 * Check if this URL is being hosted by us on this server. Consider the primary and also some alternate URL roots.
+	 * 
+	 * @param url
+	 *        The url to check.
+	 * @return -1 if not, or the index position in the url of the start of the relative portion (i.e. after the server URL root)
+	 */
+	public static int internallyHostedUrl(String url)
+	{
+		// ignore leading spaces
+		String trimmedUrl = url.trim();
+
+		// form the access root
+		String serverUrl = ServerConfigurationService.getServerUrl();
+
+		if (trimmedUrl.startsWith(serverUrl))
+		{
+			return url.indexOf(serverUrl) + serverUrl.length();
+		}
+
+		// and check for alternate ones
+		String[] alternateUrls = ServerConfigurationService.getStrings("alternateServerUrlRoots");
+		if (alternateUrls != null)
+		{
+			for (String alternateUrl : alternateUrls)
+			{
+				if (trimmedUrl.startsWith(alternateUrl))
+				{
+					return url.indexOf(alternateUrl) + alternateUrl.length();
+				}
+			}
+		}
+
+		return -1;
+	}
+
+	/**
 	 * Properly lower case a CHS reference.
 	 * 
 	 * @param ref
@@ -318,6 +351,28 @@ public class XrefHelper
 		}
 
 		return rv;
+	}
+
+	/**
+	 * If this is a full URL references that include the server DNS, port, etc, replace it with a root-relative one (i.e. starting with "/access" or "/library" or whatever)
+	 * 
+	 * @param url
+	 *        the url.
+	 * @return The shortened url.
+	 */
+	public static String shortenFullUrl(String url)
+	{
+		if (url == null) return url;
+
+		// if this is an access to our own server, shorten it to root relative (i.e. starting with "/access")
+		int pos = internallyHostedUrl(url);
+		if (pos != -1)
+		{
+			url = url.substring(pos);
+			if (url.length() == 0) url = "/";
+		}
+
+		return url;
 	}
 
 	/**
@@ -356,6 +411,7 @@ public class XrefHelper
 				if (pos != -1)
 				{
 					ref = ref.substring(pos);
+					if (ref.length() == 0) ref = "/";
 					m.appendReplacement(sb, Matcher.quoteReplacement(m.group(1) + "=\"" + ref + terminator));
 				}
 
@@ -967,7 +1023,7 @@ public class XrefHelper
 	 */
 	protected static Pattern getPattern()
 	{
-		return Pattern.compile("(src|href)[\\s]*=[\\s]*\"([^#\"]*)([#\"])", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+		return Pattern.compile("(src|href|value)[\\s]*=[\\s]*\"([^#\"]*)([#\"])", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 	}
 
 	/**
@@ -1312,8 +1368,8 @@ public class XrefHelper
 			try
 			{
 				targetCollection = ContentHostingService.getCollection("/group/" + context + relativePath);
-				List<Object> members = targetCollection.getMemberResources();
-				for (Object member : members)
+				List<ContentEntity> members = targetCollection.getMemberResources();
+				for (ContentEntity member : members)
 				{
 					// ignore collections
 					if (member instanceof ContentResource)
@@ -1591,31 +1647,6 @@ public class XrefHelper
 		}
 
 		return rv;
-	}
-
-	/**
-	 * Check if this URL is being hosted by us on this server. Consider the primary and also some alternate URL roots.
-	 * 
-	 * @param url
-	 *        The url to check.
-	 * @return -1 if not, or the index position in the url of the start of the relative portion (i.e. after the server URL root)
-	 */
-	protected static int internallyHostedUrl(String url)
-	{
-		// form the access root, and check for alternate ones
-		String serverUrl = ServerConfigurationService.getServerUrl();
-		String[] alternateUrls = ServerConfigurationService.getStrings("alternateServerUrlRoots");
-
-		if (url.startsWith(serverUrl)) return serverUrl.length();
-		if (alternateUrls != null)
-		{
-			for (String alternateUrl : alternateUrls)
-			{
-				if (url.startsWith(alternateUrl)) return alternateUrl.length();
-			}
-		}
-
-		return -1;
 	}
 
 	/**

@@ -27,6 +27,16 @@
 	</sakai:tool_bar>
 	<sakai:messages/>
 	<sakai:messages message="true"/>
+	
+	<!-- Unisa Changes:2018/10/10: Add styling for table border used in sakai:flat_list tag -->
+	<!-- Style can be added in body according to this: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style#A_scoped_stylesheet -->
+	<style type="text/css">
+		table.listHier, tr, th, td{
+			border: none !important
+		}
+	</style>
+	<!-- End Unisa Changes -->
+	
 	<logic:notEmpty name="forumTopicsForm" property="topicForumName">
 		<sakai:heading><bean:write name="forumTopicsForm" property="topicForumName"/></sakai:heading>
 	</logic:notEmpty>

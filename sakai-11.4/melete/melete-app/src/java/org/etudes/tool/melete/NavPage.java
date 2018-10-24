@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/java/org/etudes/tool/melete/NavPage.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/java/org/etudes/tool/melete/NavPage.java $
  * $Id: NavPage.java 80438 2012-06-20 06:21:16Z mallika@etudes.org $
  ***********************************************************************************
  *

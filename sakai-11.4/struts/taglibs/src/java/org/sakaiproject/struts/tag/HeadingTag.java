@@ -23,7 +23,8 @@ public class HeadingTag extends BodyTagSupport {
         JspWriter out = this.pageContext.getOut();
 
         try {
-            out.write("<h3>\n");
+           // out.write("<h3>\n"); //Sifiso Changes: 2018/08/29: Change the margins of the h3 heading to remove extra spacing from struts tools
+            out.write("<h3 class=\"unisaToolHeading\">\n");
         } catch (IOException e) {
             M_log.error("Exception writing starttag.", e);
         }

@@ -1,10 +1,10 @@
 /**********************************************************************************
  *
- * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/melete-app/src/java/org/etudes/tool/melete/LicensePage.java $
- * $Id: LicensePage.java 3647 2012-12-02 22:30:41Z ggolden $
+ * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.9/melete-app/src/java/org/etudes/tool/melete/LicensePage.java $
+ * $Id: LicensePage.java 8031 2014-05-29 19:46:25Z rashmim $
  ***********************************************************************************
  *
- * Copyright (c) 2008, 2009, 2012 Etudes, Inc.
+ * Copyright (c) 2008, 2009, 2012, 2014 Etudes, Inc.
  *
  * Portions completed before September 1, 2008 Copyright (c) 2004, 2005, 2006, 2007, 2008 Foothill College, ETUDES Project
  *
@@ -122,8 +122,7 @@ public class LicensePage
 			setCopyright_owner(melResource.getCopyrightOwner());
 			setCopyright_year(melResource.getCopyrightYear());
 		}
-		else
-			setLicenseCodes("4");
+
 		resetFlags();
 	}
 

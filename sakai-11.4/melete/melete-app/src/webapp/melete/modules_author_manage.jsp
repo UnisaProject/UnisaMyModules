@@ -1,8 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/modules_author_manage.jsp $
- * $Id: modules_author_manage.jsp 73300 2011-03-23 17:44:30Z rashmi@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/modules_author_manage.jsp $
+ * $Id: modules_author_manage.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008,2009, 2010,2011 Etudes, Inc.
@@ -52,7 +52,7 @@
 											<table class="maintableCollapseWithWhiteBorder" >
 											<tr rowspan="5" valign="top">
 							                    	<td class="menu left">
-								                    	<h:commandLink id="contentgoto" action="#{manageModulesPage.goToManageContent}">
+								                    	<h:commandLink id="contentgoto" action="#{manageModulesPage.goToManageContent}" styleClass="toolUiLink">
 															<h:graphicImage id="image0"
 									   							alt=""
 									   							url="/images/manage_content.png"
@@ -64,7 +64,7 @@
 							                  	</tr>
 							                  	<tr rowspan="5" valign="top">
 							                    	<td  class="menu left">
-								                    	<h:commandLink id="restoregoto" action="#{manageModulesPage.goToRestoreModules}">
+								                    	<h:commandLink id="restoregoto" action="#{manageModulesPage.goToRestoreModules}" styleClass="toolUiLink">
 															<h:graphicImage id="image"
 									   							alt=""
 									   							url="/images/folder_into.gif"
@@ -76,7 +76,7 @@
 							                  	</tr>
 							                   	<tr rowspan="5" valign="top">
 							                    	<td class="menu left">
-								                    	<h:commandLink id="goto_impexp" action="#{manageModulesPage.importExportModules}">
+								                    	<h:commandLink id="goto_impexp" action="#{manageModulesPage.importExportModules}" styleClass="toolUiLink">
 															<h:graphicImage id="image_impexp"
 									   							alt=""
 									   							url="/images/import1.gif"

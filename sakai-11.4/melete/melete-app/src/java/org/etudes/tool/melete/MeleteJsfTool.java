@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/java/org/etudes/tool/melete/MeleteJsfTool.java $
- * $Id: MeleteJsfTool.java 80438 2012-06-20 06:21:16Z mallika@etudes.org $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/java/org/etudes/tool/melete/MeleteJsfTool.java $
+ * $Id: MeleteJsfTool.java 87049 2014-09-26 00:45:31Z mallika@etudes.org $
  **********************************************************************************
  *
  * Copyright (c) 2011, 2012 Etudes, Inc.
@@ -281,6 +281,7 @@ public class MeleteJsfTool extends HttpServlet
 
 		// TODO: Should setting the HTTP headers be moved up to the portal level as well?
 		res.setContentType("text/html; charset=UTF-8");
+		res.setCharacterEncoding("UTF-8");
 		res.addDateHeader("Expires", System.currentTimeMillis() - (1000L * 60L * 60L * 24L * 365L));
 		res.addDateHeader("Last-Modified", System.currentTimeMillis());
 		res.addHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");

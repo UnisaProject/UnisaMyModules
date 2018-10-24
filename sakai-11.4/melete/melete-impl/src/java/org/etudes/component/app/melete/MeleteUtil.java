@@ -1,7 +1,7 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-impl/src/java/org/etudes/component/app/melete/MeleteUtil.java $
- * $Id: MeleteUtil.java 80314 2012-06-12 22:15:39Z rashmi@etudes.org $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-impl/src/java/org/etudes/component/app/melete/MeleteUtil.java $
+ * $Id: MeleteUtil.java 87125 2014-10-16 19:48:52Z mallika@etudes.org $
  ***********************************************************************************
  *
  * Copyright (c) 2008,2009, 2011 Etudes, Inc.
@@ -212,7 +212,7 @@ public class MeleteUtil
 		Pattern pd = Pattern.compile(">|\\s[dD][aA][tT][aA]\\s*=");
 		Pattern ps = Pattern.compile("\\S");
 		Pattern pe = Pattern.compile("\\s|>");
-
+		Pattern pEndTag = Pattern.compile("\\s/>");
 		int startSrc = 0;
 		int endSrc = 0;
 		String foundPattern = null;
@@ -259,6 +259,13 @@ public class MeleteUtil
 
 			startSrc = 0;
 			endSrc = 0;
+			
+			if (checkforimgs.startsWith("\"data:image") || checkforimgs.startsWith("\'data:image") || checkforimgs.startsWith("data:image"))
+			{
+				m = pEndTag.matcher(checkforimgs);
+				if (m.find()) checkforimgs = checkforimgs.substring(m.start());
+				continue;
+			}
 
 			// handle either quoted or nonquoted arg
 			if (checkforimgs.startsWith("\"") || checkforimgs.startsWith("\'"))
@@ -559,5 +566,42 @@ public class MeleteUtil
 		}
 
 		return s;
+	}
+	
+	/**
+	 * Alternate approach to replace old site resource url with new site's resource url at import from site.
+	 * @param data
+	 * 		section content
+	 * @param one
+	 * 		old site resource item url
+	 * @param another
+	 * 		new site resource item url
+	 * @return
+	 */
+	public String translateContent(String data, String one, String another)
+	{
+		if (data == null) return data;
+
+		Pattern p = Pattern.compile("(src|href)[\\s]*=[\\s]*\"([^#\"]*)([#\"])", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+		Matcher m = p.matcher(data);
+		StringBuffer sb = new StringBuffer();
+
+		// process each "harvested" string (avoiding like strings that are not in src= or href= patterns)
+		while (m.find())
+		{
+			if (m.groupCount() == 3)
+			{
+				String ref = m.group(2);
+				String terminator = m.group(3);
+
+				if (ref != null) ref = ref.trim();
+				if (ref.equalsIgnoreCase(one))
+				{
+					m.appendReplacement(sb, Matcher.quoteReplacement(m.group(1) + "=\"" + another + terminator));
+				}
+			}
+		}
+		m.appendTail(sb);
+		return sb.toString();
 	}
 }

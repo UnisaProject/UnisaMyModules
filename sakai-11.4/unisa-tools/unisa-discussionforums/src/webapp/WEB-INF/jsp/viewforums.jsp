@@ -20,6 +20,16 @@
 	<sakai:messages/>
 	<sakai:messages message="true"/>
 	<sakai:heading><fmt:message key="forum.index.heading"/>&nbsp;<bean:write name="forumDetailsForm" property="title"/></sakai:heading>
+	
+	<!-- Unisa Changes:2018/10/10: Add styling for table border used in sakai:flat_list tag -->
+	<!-- Style can be added in body according to this: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style#A_scoped_stylesheet -->
+	<style type="text/css">
+		table.listHier, tr, th, td{
+			border: none !important
+		}
+	</style>
+	<!-- End Unisa Changes -->
+	
 	<logic:empty name="forumDetailsForm" property="siteForums">
 		<sakai:flat_list>
 			<tr><td colspan="2"><fmt:message key="forum.forumsNotAvailable"/></td></tr>

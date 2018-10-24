@@ -24,7 +24,7 @@ public class StudentStatusForm extends ValidatorActionForm {
 	// --------------------------------------------------------- Instance Variables
 
 	private static final long serialVersionUID = 1L;
-	private static final String version = "2018002a";
+	private static final String version = "2019001a";
 	public static Log log = LogFactory.getLog(StudentStatusAction.class);
 	
 	private String applyType = "";
@@ -72,7 +72,16 @@ public class StudentStatusForm extends ValidatorActionForm {
 	private String screeningSittingQual1 ="";
 	private String screeningSittingQual2 ="";
 	private ScreeningVenue screeningVenue = new ScreeningVenue();	
+	private String originatedFrom = "";
 	
+	public String getOriginatedFrom() {
+		return originatedFrom;
+	}
+
+	public void setOriginatedFrom(String originatedFrom) {
+		this.originatedFrom = originatedFrom;
+	}
+
 	public boolean isScreeningSitting() {
 		return screeningSitting;
 	}
@@ -373,6 +382,7 @@ public class StudentStatusForm extends ValidatorActionForm {
 	}
 
 	public void resetFormFields(){
+		originatedFrom = "";
 		applyType = "";
 		allowLogin = true;
 		student = new Student();

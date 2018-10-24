@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-impl/src/java/org/etudes/component/app/melete/MeleteSecurityAdvisor.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-impl/src/java/org/etudes/component/app/melete/MeleteSecurityAdvisor.java $
  * $Id: MeleteSecurityAdvisor.java 56408 2008-12-19 21:16:52Z rashmi@etudes.org $  
  ***********************************************************************************
  *

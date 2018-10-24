@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-api/src/java/org/etudes/api/app/melete/CourseModuleService.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-api/src/java/org/etudes/api/app/melete/CourseModuleService.java $
  * $Id: CourseModuleService.java 77082 2011-10-24 18:38:10Z rashmi@etudes.org $  
  ***********************************************************************************
  *

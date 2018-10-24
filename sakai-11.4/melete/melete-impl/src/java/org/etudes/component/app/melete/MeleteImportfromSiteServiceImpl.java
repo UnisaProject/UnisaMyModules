@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-impl/src/java/org/etudes/component/app/melete/MeleteImportfromSiteServiceImpl.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-impl/src/java/org/etudes/component/app/melete/MeleteImportfromSiteServiceImpl.java $
  * $Id: MeleteImportfromSiteServiceImpl.java 80350 2012-06-15 21:00:14Z rashmi@etudes.org $
  ***********************************************************************************
  *

@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-admin/src/java/org/etudes/tool/meleteAdmin/MeleteAdminMain.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-admin/src/java/org/etudes/tool/meleteAdmin/MeleteAdminMain.java $
  * $Id: MeleteAdminMain.java 73977 2011-04-29 16:46:48Z rashmi@etudes.org $
  ***********************************************************************************
  *

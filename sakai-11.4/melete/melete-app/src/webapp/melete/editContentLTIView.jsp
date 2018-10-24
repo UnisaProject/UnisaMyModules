@@ -25,7 +25,7 @@
   		<h:outputText id="editlinkText1" value="#{msgs.editcontentltiview_link1}"/>
 	</h:column>
 	<h:column>					
-		<h:commandLink id="serverViewButton"  actionListener="#{editSectionPage.setServerLTIListener}">
+		<h:commandLink id="serverViewButton"  actionListener="#{editSectionPage.setServerLTIListener}" styleClass="toolUiLink">
 			<f:param name="sectionId" value="#{editSectionPage.editId}" />
 			<h:graphicImage id="replaceImg2" value="/images/replace2.gif" styleClass="AuthImgClass"/>
 			<h:outputText value="#{msgs.editcontentlinkview_replace}"/>
@@ -33,7 +33,7 @@
   </h:column>
   <h:column/>
    <h:column>
-   		<h:outputLink id="showResourceLTI" value="#{editSectionPage.currLTIUrl}" target="_blank" title="Section Resource" styleClass="a1" rendered="#{editSectionPage.displayCurrLTI != null}">	  
+   		<h:outputLink id="showResourceLTI" value="#{editSectionPage.currLTIUrl}" target="_blank" title="Section Resource" styleClass="toolUiLink" rendered="#{editSectionPage.displayCurrLTI != null}">	  
   			<h:outputText id="editltiText3" value="#{editSectionPage.displayCurrLTI}" />
   		</h:outputLink>	
 		<h:outputText id="editltiText4" value="#{msgs.editcontentltiview_noURL}" rendered="#{editSectionPage.displayCurrLTI == null}" styleClass="bold"/>

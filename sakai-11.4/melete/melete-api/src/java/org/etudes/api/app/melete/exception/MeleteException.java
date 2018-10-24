@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-api/src/java/org/etudes/api/app/melete/exception/MeleteException.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-api/src/java/org/etudes/api/app/melete/exception/MeleteException.java $
  * $Id: MeleteException.java 56408 2008-12-19 21:16:52Z rashmi@etudes.org $  
  ***********************************************************************************
  *

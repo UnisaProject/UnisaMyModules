@@ -32,6 +32,16 @@ function setAction() {
 		<fmt:message key="forum.message.information"/><br>
 		<fmt:message key="forum.messageview.prompt"/>
 	</sakai:instruction>
+	
+	<!-- Unisa Changes:2018/10/10: Add styling for table border used in sakai:flat_list tag -->
+	<!-- Style can be added in body according to this: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style#A_scoped_stylesheet -->
+	<style type="text/css">
+		table.listHier, tr, th, td{
+			border: none !important
+		}
+	</style>
+	<!-- End Unisa Changes -->
+		
 		<sakai:flat_list>
 			<html:form action="/topicmessage.do">
 			<sakai:actions>

@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/etudes-util/tags/1.0.17/etudes-util-api/api/src/java/org/etudes/util/api/AccessAdvisor.java $
- * $Id: AccessAdvisor.java 75291 2011-07-04 18:20:53Z ggolden@etudes.org $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2010 Etudes, Inc.

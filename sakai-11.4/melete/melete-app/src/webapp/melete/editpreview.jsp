@@ -1,11 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/editpreview.jsp $
- * $Id: editpreview.jsp 77647 2011-11-29 19:32:41Z mallika@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/editpreview.jsp $
+ * $Id: editpreview.jsp 86862 2014-08-08 20:37:38Z mallika@etudes.org $  
  ***********************************************************************************
  *
- * Copyright (c) 2008,2009,2010,2011 Etudes, Inc.
+ * Copyright (c) 2008,2009,2010,2011, 2014 Etudes, Inc.
  *
  * Portions completed before September 1, 2008 Copyright (c) 2004, 2005, 2006, 2007, 2008 Foothill College, ETUDES Project
  *
@@ -40,6 +40,7 @@
 
 	<t:saveState id="workId" value="#{editSectionPage.editId}" />	
 	<div class="meletePortletToolBarMessage"><img src="/etudes-melete-tool/images/note_view.gif" alt="" width="16" height="16" align="absmiddle"><h:outputText value="#{msgs.edit_preview_previewing_section}" /></div>
+       <h:outputText id="errMsg2" styleClass="alertMessage" value="#{msgs.url_alert}" rendered="#{editSectionPage.httpAddressAlert != null && editSectionPage.httpAddressAlert == true}" />
      <table class="maintableCollapseWithBorder">          
 		  <tr>
 		    <td colspan="2" height="20"> <div  class="maintabledata5">&nbsp;</div>
@@ -61,14 +62,42 @@
 						<h:outputText id="sec2" value="#{editSectionPage.section.instr}" rendered="#{editSectionPage.renderInstr}"></h:outputText>
 			  </td></tr>
 			  <tr><td>
-	            <h:outputLink id="viewSectionLink"  value="#{editSectionPage.previewContentData}" target="_blank" rendered="#{(editSectionPage.shouldRenderLink || editSectionPage.shouldRenderUpload || editSectionPage.shouldRenderLTI) && editSectionPage.section.openWindow}">
+	            <h:outputLink id="viewSectionLink"  title="#{editSectionPage.secResourceName}" value="#{editSectionPage.previewContentData}" target="_blank" rendered="#{(editSectionPage.shouldRenderLink || editSectionPage.shouldRenderLTI) && editSectionPage.section.openWindow}" styleClass="toolUiLink">
                 <h:outputText id="sectitleLink" 
                            value="#{editSectionPage.secResourceName}">
                 </h:outputText>
-                </h:outputLink>	
-                    <h:outputText id="contentFrame" value="<iframe id=\"iframe1\" src=\"#{editSectionPage.previewContentData}\" style=\"visibility:visible\" scrolling= \"auto\" width=\"100%\" height=\"700\"
-               	    border=\"0\" frameborder= \"0\"></iframe>" rendered="#{(editSectionPage.shouldRenderUpload || editSectionPage.shouldRenderLink|| editSectionPage.shouldRenderLTI) && !editSectionPage.section.openWindow}" escape="false" />			
-		      
+                </h:outputLink>
+                	
+                <!-- upload in new window -->
+                <h:outputLink id="viewSectionUploadWindow"  title="#{editSectionPage.secResourceDescription}" value="#{editSectionPage.previewContentData}" target="_blank" rendered="#{editSectionPage.shouldRenderUpload && editSectionPage.section.openWindow && editSectionPage.secResourceDescription != null}" styleClass="toolUiLink">
+              	  <h:outputText id="sectitleUpload" value="#{editSectionPage.secResourceDescription}"/>                              
+                </h:outputLink>
+               
+                <h:outputLink id="viewSectionUploadWindow2"  title="#{editSectionPage.secResourceName}" value="#{editSectionPage.previewContentData}" target="_blank" rendered="#{editSectionPage.shouldRenderUpload && editSectionPage.section.openWindow && (editSectionPage.secResourceDescription == null || editSectionPage.secResourceDescription == editSectionPage.emptyString)}" styleClass="toolUiLink">
+                     <h:outputText id="sectitleUpload2" value="#{editSectionPage.secResourceName}" />
+                 </h:outputLink>   
+                  
+                  <!-- add extra space for render new window -->
+               <h:outputText rendered="#{(editSectionPage.shouldRenderLink || editSectionPage.shouldRenderUpload) && editSectionPage.section.openWindow}">
+               		<f:verbatim>
+					<div style="height:150px"></div>
+					</f:verbatim>
+               </h:outputText>
+               <!-- show in same window -->
+		      <h:outputText id="contentFrame" rendered="#{editSectionPage.shouldRenderUpload && !editSectionPage.section.openWindow}" escape="false">
+					<f:verbatim>
+					<iframe id="iframe1" name="iframe1" src="${editSectionPage.previewContentData}" title="${editSectionPage.secResourceDescription}" width="100%" height="700px" style="visibility:visible" scrolling= "auto" border="0" frameborder= "0">
+					</iframe>
+					</f:verbatim>
+				</h:outputText>
+				
+				 <h:outputText id="contentFrame2" rendered="#{(editSectionPage.shouldRenderLink|| editSectionPage.shouldRenderLTI) && !editSectionPage.section.openWindow}" escape="false">
+					<f:verbatim>
+					<iframe id="iframe2" name="iframe2" src="${editSectionPage.previewContentData}" title="${editSectionPage.secResourceName}" width="100%" height="700px" style="visibility:visible" scrolling= "auto" border="0" frameborder= "0">
+					</iframe>
+					</f:verbatim>
+				</h:outputText>
+		      		      
 		      <h:outputText id="contentTextFrame" rendered="#{editSectionPage.shouldRenderEditor && editSectionPage.contentWithHtml}" >
 					<f:verbatim>
 					<iframe id="iframe3" name="iframe3" src="${editSectionPage.previewContentData}" width="100%" height="700px" style="visibility:visible" scrolling= "auto" border="0" frameborder= "0">
@@ -148,7 +177,7 @@ rendered="#{((editSectionPage.meleteResource.licenseCode == 4)&&(editSectionPage
 
 <script type="text/javascript">
     window.onload=function(){
-		 var oIframe = document.getElementById("iframe3");
+    	 var oIframe = document.getElementById("iframe3");
 		 if(oIframe)
 			 {
 		        var oDoc = oIframe.contentWindow || oIframe.contentDocument;
@@ -168,9 +197,18 @@ rendered="#{((editSectionPage.meleteResource.licenseCode == 4)&&(editSectionPage
 			    }
 			    						
 			  }
-		 setMainFrameHeight('<h:outputText value="#{meleteSiteAndUserInfo.winEncodeName}"/>'); 	
-		 }
-        </script>
+		 setMainFrameHeight('<h:outputText value="#{meleteSiteAndUserInfo.winEncodeName}"/>'); 
+		 var frametitle = $("#iframe1").attr('title');
+		 if (frametitle != undefined) {
+			 $("#iframe1").contents().find("body").prop('title', frametitle); 
+			 $("#iframe1").contents().find("img").prop('alt', frametitle);
+			 }
+		 var frametitle2 = $("#iframe2").attr('title');
+		 if (frametitle2 != undefined) {
+			 $("#iframe2").contents().find("body").prop('title', frametitle2); 		
+			 }
+		 }    
+   </script>
  </h:form>       
 </sakai:view>
 </f:view>

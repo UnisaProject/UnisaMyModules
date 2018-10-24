@@ -1,7 +1,7 @@
 <%--
  ***********************************************************************************
  *
- * Copyright (c) 2008,2009,2010,2011 Etudes, Inc.
+ * Copyright (c) 2008,2009,2010,2011,2014 Etudes, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,55 +42,20 @@
 	<h:messages showDetail="true" showSummary="false" infoClass="BlueClass" errorClass="RedClass"/>
 	<p><h:outputText id="Stext_2" value="#{msgs.editcontentlinkserverview_msg1}"/></p>
 	<table class="maintableCollapseWithBorder">
-			<tr><td height="20" colspan="2"> <h:outputText id="Stext_add" value="#{msgs.editcontentltiserverview_replace}" styleClass="bold"/> </td></tr>									 
-						  
-<!--replace with new link part Begin -->
-					<table class="maintableCollapseWithNoBorder"  >
-					<tr> <td class="col1"><h:outputText id="format_text" value="#{msgs.editcontentltiserverview_format}"/>
-					</td>
-                    <td class="col2">
-                               <h:selectOneMenu id="LTIDisplay" value="#{editSectionPage.LTIDisplay}" 
-                                    valueChangeListener="#{editSectionPage.toggleLTIDisplay}" 
-                                    onchange="this.form.submit();"
-                                    immediate="true" >
-                            <f:selectItem itemValue="Basic" itemLabel="#{msgs.addmodulesections_basic_lti}"/>
-                            <f:selectItem itemValue="Advanced" itemLabel="#{msgs.addmodulesections_advanced_lti}"/>
-                            </h:selectOneMenu>
-					</td></tr> 
-					<tr><td colspan="2"> 
-                                                <f:subview id="LTIBasic" rendered="#{editSectionPage.shouldLTIDisplayBasic}">
-                                                        <jsp:include page="lti_basic_edit.jsp"/>
-                                                </f:subview>
-                                                <f:subview id="LTIAdvanced" rendered="#{editSectionPage.shouldLTIDisplayAdvanced}">
-                                                        <jsp:include page="lti_advanced_edit.jsp"/>
-                                                </f:subview>
-                        </td></tr>          
-                        <t:saveState id="ltiurl1" value="#{editSectionPage.LTIUrl}" />
-						<t:saveState id="tltiurltitle" value="#{editSectionPage.newURLTitle}" />
-						<t:saveState id="ltikey1" value="#{editSectionPage.LTIKey}" />
-						<t:saveState id="ltipswd" value="#{editSectionPage.LTIPassword}" />              
-						<t:saveState id="tltidescriptor1" value="#{editSectionPage.LTIDescriptor}" />
-	
-					</table> </td></tr>       
-					<tr><td>
-						<div class="actionBar" align="left">
-							 <h:commandButton id="addButton_1" actionListener="#{editSectionPage.setServerLTI}" value="#{msgs.im_continue}" tabindex="" accesskey="#{msgs.continue_access}" title="#{msgs.im_continue_text}" styleClass="BottomImgContinue">
-								 <f:attribute name="sectionId" value="#{editSectionPage.editId}" />
-						 	</h:commandButton>
-					     	<h:commandButton id="cancelButton_1" immediate="true" actionListener="#{editSectionPage.cancelServerFile}" value="#{msgs.im_cancel}" tabindex="" accesskey="#{msgs.cancel_access}" title="#{msgs.im_cancel_text}" styleClass="BottomImgCancel">
-					     		<f:attribute name="sectionId" value="#{editSectionPage.editId}" />
-						 	</h:commandButton>		
-						</div></td></tr>
-	<!-- new link end -->				            		
-						<!-- start main -->
-				            <tr><td width="100%" valign="top">
-						
-									<f:subview id="ResourceListingForm" >
-										<jsp:include page="list_resources.jsp"/> 
-									</f:subview>	
+	    <tr><td width="100%" valign="top">
+			
+						<f:subview id="ResourceListingForm" >
+							<jsp:include page="list_resources.jsp"/> 
+						</f:subview>	
 
-					     </td></tr>
-					    </table>					
+		     </td></tr>
+		     <tr><td>
+			    <div class="actionBar" align="left">
+					<h:commandButton id="return" actionListener="#{editSectionPage.returnBack}"  value="#{msgs.im_return}" accesskey="#{msgs.return_access}" title="#{msgs.im_return_text}" styleClass="BottomImgReturn">
+					</h:commandButton>
+	   	        </div>	 	
+		     </td></tr>
+		    </table>					
 	<!--end  main -->	
 			
 	<!-- This Ends the Main Text Area -->

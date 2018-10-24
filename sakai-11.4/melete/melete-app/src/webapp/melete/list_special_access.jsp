@@ -1,8 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <%--
  ***********************************************************************************
- * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/melete-app/src/webapp/melete/list_special_access.jsp $
- * $Id: list_special_access.jsp 3647 2012-12-02 22:30:41Z ggolden $  
+ * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.9/melete-app/src/webapp/melete/list_special_access.jsp $
+ * $Id: list_special_access.jsp 5297 2013-06-28 19:20:29Z mallikamt $  
  ***********************************************************************************
  *
  * Copyright (c) 2010, 2011, 2012 Etudes, Inc.
@@ -96,13 +96,13 @@ function resetAllAcc()
 	
 	    <h:panelGrid columns="2" columnClasses="authBarCol" border="0" width="16%" >
 		<h:column>
-			<h:commandLink id="addAction" actionListener="#{specialAccessPage.addAccessAction}">
+			<h:commandLink id="addAction" actionListener="#{specialAccessPage.addAccessAction}" styleClass="toolUiLink">
 			    <h:graphicImage id="addAccessImg" value="/images/document_add.gif" styleClass="AuthImgClass"/>
 		  		<h:outputText  value="#{msgs.list_special_access_add}"/>
 			</h:commandLink>
 		</h:column>
 		<h:column>
-			<h:commandLink id="delAction" action="#{specialAccessPage.deleteAction}">
+			<h:commandLink id="delAction" action="#{specialAccessPage.deleteAction}" styleClass="toolUiLink">
 		        <h:graphicImage id="deleteImg" value="/images/delete.gif" styleClass="AuthImgClass"/>
 		        <h:outputText  id="del" value="#{msgs.list_special_access_delete}"></h:outputText>
 		     </h:commandLink>
@@ -147,7 +147,7 @@ function resetAllAcc()
       <h:outputText id="t2" value="#{msgs.list_special_access_name}" />
      </h:panelGroup>        
     </f:facet>	
-     <h:commandLink id="editAcc" actionListener="#{specialAccessPage.editSpecialAccess}"  action="#{specialAccessPage.redirectToEditSpecialAccess}">     				
+     <h:commandLink id="editAcc" actionListener="#{specialAccessPage.editSpecialAccess}"  action="#{specialAccessPage.redirectToEditSpecialAccess}" styleClass="toolUiLink">     				
      <f:param name="accid" value="#{saObj.accessId}" />
      <h:outputText id="title2" value="#{saObj.userNames}" escape="false"></h:outputText>
      </h:commandLink>

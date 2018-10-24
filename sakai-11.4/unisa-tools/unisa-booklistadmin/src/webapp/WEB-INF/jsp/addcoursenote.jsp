@@ -9,7 +9,7 @@
 
 <sakai:html>
 
-	<h3><fmt:message key="admin.heading"/></h3>
+	<sakai:heading><fmt:message key="admin.heading"/></sakai:heading>
 	<hr/><br/>
 	<sakai:instruction>
 		<fmt:message key="label.addcoursenotetitle"/>

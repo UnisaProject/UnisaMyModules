@@ -2,11 +2,11 @@
 <%@ page import="org.etudes.tool.melete.ViewModulesPage"%>
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/view_module.jsp $
- * $Id: view_module.jsp 83082 2013-03-15 20:30:37Z mallika@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/view_module.jsp $
+ * $Id: view_module.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
- * Copyright (c) 2008,2009,2010,2011,2012 Etudes, Inc.
+ * Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013 Etudes, Inc.
  *
  * Portions completed before September 1, 2008 Copyright (c) 2004, 2005, 2006, 2007, 2008 Foothill College, ETUDES Project
  *
@@ -75,7 +75,7 @@ if (moduleSeqNo != null)
 		</tr>      
 <tr>
 <td align="right">
-<h:commandLink id="myBookmarksLink" action="#{bookmarkPage.gotoMyBookmarks}">
+<h:commandLink id="myBookmarksLink" action="#{bookmarkPage.gotoMyBookmarks}" styleClass="toolUiLink">
  <h:graphicImage id="mybook_gif" value="/images/my-bookmarks.png" alt="" styleClass="AuthImgClass" />
  <h:outputText id="mybks" value="#{msgs.my_bookmarks}" />									
  <f:param name="fromPage" value="view_module" />
@@ -94,7 +94,7 @@ if (moduleSeqNo != null)
 			<h:outputText id="title" value="#{viewModulesPage.viewMbean.title}" styleClass="bold" ></h:outputText>
 		</h:column>
 		<h:column rendered="#{viewModulesPage.printable}">
-			<h:commandLink id="printModuleLink" actionListener="#{viewModulesPage.viewModule}" rendered="#{viewModulesPage.printable}">
+			<h:commandLink id="printModuleLink" actionListener="#{viewModulesPage.viewModule}" rendered="#{viewModulesPage.printable}" styleClass="toolUiLink">
 		    	<f:param id="modId" name="modId" value="#{viewModulesPage.viewMbean.moduleId}" />
 	  			<h:graphicImage id="printImgLink" value="/images/printer.png" onclick="OpenViewModulePrintWindow('#{viewModulesPage.printUrl}','Melete Print Window');" alt="#{msgs.list_auth_modules_alt_print}" title="#{msgs.list_auth_modules_alt_print}" styleClass="AuthImgClass"/>
 		 	</h:commandLink>
@@ -110,7 +110,7 @@ if (moduleSeqNo != null)
  			  <h:column> 			  		
  					<h:panelGroup style="width:100%;">
 	        		 
-			          <h:commandLink id="viewSectionEditor"  actionListener="#{viewModulesPage.viewSection}" styleClass="#{sectionBean.displayClass}" rendered="#{sectionBean.title != viewModulesPage.nullString}" immediate="true">
+			          <h:commandLink id="viewSectionEditor"  actionListener="#{viewModulesPage.viewSection}" styleClass="toolUiLink #{sectionBean.displayClass}" rendered="#{sectionBean.title != viewModulesPage.nullString}" immediate="true">
 					      <h:graphicImage id="bul_gif" value="/images/bullet_black.gif" rendered="#{!viewModulesPage.autonumber}" styleClass="AuthImgClass"/>
 					      <h:outputText id="sec_seq" value="#{sectionBean.displaySequence}. " rendered="#{viewModulesPage.autonumber}"/>
 						  <h:outputText id="sectitleEditor" value="#{sectionBean.title}" > </h:outputText>

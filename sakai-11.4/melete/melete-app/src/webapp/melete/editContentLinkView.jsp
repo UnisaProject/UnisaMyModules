@@ -1,7 +1,7 @@
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/editContentLinkView.jsp $
- * $Id: editContentLinkView.jsp 77082 2011-10-24 18:38:10Z rashmi@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/editContentLinkView.jsp $
+ * $Id: editContentLinkView.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008,2009,2010,2011 Etudes, Inc.
@@ -29,7 +29,7 @@
 	  	<h:outputText id="editlinkText1" value="#{msgs.editcontentlinkview_link1}"/>	
 	  </h:column>
 	  <h:column>	
-		<h:commandLink id="serverLinkButton"  actionListener="#{editSectionPage.setServerUrlListener}" >
+		<h:commandLink id="serverLinkButton"  actionListener="#{editSectionPage.setServerUrlListener}" styleClass="toolUiLink">
 			<f:param name="sectionId" value="#{editSectionPage.editId}" />
 			<h:graphicImage id="replaceLinkImg2" value="/images/replace2.gif" styleClass="AuthImgClass"/>
 			<h:outputText value="#{msgs.editcontentlinkview_replace}"/>
@@ -38,7 +38,7 @@
 	  <h:column/>
 	  <h:column>
 	  <h:outputText id="editlinkText4" value="#{msgs.editcontentlinkview_noURL}" rendered="#{editSectionPage.displayCurrLink == null}" styleClass="bold"/> 
-	  	<h:outputLink id="showResourceLink" value="#{editSectionPage.currLinkUrl}" target="_blank" title="Section Resource" styleClass="a1" rendered="#{editSectionPage.displayCurrLink != null}">	  
+	  	<h:outputLink id="showResourceLink" value="#{editSectionPage.currLinkUrl}" target="_blank" title="Section Resource" styleClass="toolUiLink" rendered="#{editSectionPage.displayCurrLink != null}">	  
 	  		<h:outputText id="editlinkText3" value="#{editSectionPage.displayCurrLink}" />
 	  	</h:outputLink>	
 	  </h:column> 	

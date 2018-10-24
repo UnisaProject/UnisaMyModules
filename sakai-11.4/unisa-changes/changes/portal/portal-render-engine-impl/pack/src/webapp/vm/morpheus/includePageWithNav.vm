@@ -91,12 +91,12 @@
      #end
        
         #parse("/vm/morpheus/includePageBody.vm")
+        
+        #parse("/vm/morpheus/includeFooter.vm")
 
     </div>
     
     </div>
-        
-        #parse("/vm/morpheus/includeFooter.vm")
     
 
 </div>

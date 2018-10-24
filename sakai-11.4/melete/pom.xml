@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/pom.xml $
- * $Id: pom.xml 83082 2013-03-15 20:30:37Z mallika@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/pom.xml $
+ * $Id: pom.xml 87124 2014-10-16 17:03:37Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008, 2009, 2010,2011 Etudes, Inc.
@@ -22,26 +22,36 @@
  * permissions and limitations under the License.
  *
  **********************************************************************************
---><project xmlns="http://maven.apache.org/POM/4.0.0">
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>base</artifactId>
-    <groupId>org.sakaiproject</groupId>
-    <version>2.9.1</version>
+	<artifactId>master</artifactId>
+	<groupId>org.sakaiproject</groupId>
+	<version>11.4</version>
+      <relativePath>../master/pom.xml</relativePath>
   </parent>
+
   <name>Etudes</name>
   <groupId>org.etudes</groupId>
   <artifactId>melete-base</artifactId>
-  <version>pom</version>
+  <version>pom</version>	
   <packaging>pom</packaging>
+
+  <properties>
+  	<etudes.util.version>1.0.26</etudes.util.version>
+  	<lticontact.version>1.3</lticontact.version>
+  	<melete.version>2.9.10</melete.version>
+  </properties>
+  
   <modules>
     <module>components</module>
-    <module>melete-util</module>
     <module>melete-api</module>
     <module>melete-app</module>
     <module>melete-hbm</module>
     <module>melete-impl</module>
   </modules>
+  
   <repositories>
     <repository>
       <id>sakai-maven</id>
@@ -53,4 +63,36 @@
       </snapshots>
     </repository>
   </repositories>
+  
+
+  <dependencyManagement>
+  	<dependencies>
+  		<dependency>
+  			<groupId>org.etudes</groupId>
+  			<artifactId>etudes-util-api</artifactId>
+  			<version>${etudes.util.version}</version>
+  			<scope>provided</scope>
+  		</dependency>
+
+  		<dependency>
+  			<groupId>org.etudes</groupId>
+  			<artifactId>etudes-util-util</artifactId>
+  			<version>${etudes.util.version}</version>
+  		</dependency>
+
+  		<dependency>
+  			<groupId>org.etudes</groupId>
+  			<artifactId>etudes-lticontact-util</artifactId>
+  			<version>${lticontact.version}</version>
+  		</dependency>
+
+  		<dependency>
+  			<groupId>org.etudes</groupId>
+  			<artifactId>etudes-melete-api</artifactId>
+  			<version>${melete.version}</version>
+  			<scope>provided</scope>
+  		</dependency>
+  	</dependencies>
+  </dependencyManagement>
+    
 </project>

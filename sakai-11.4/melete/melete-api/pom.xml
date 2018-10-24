@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-api/pom.xml $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-api/pom.xml $
  * $Id: pom.xml 72108 2011-01-18 22:50:41Z rashmi@etudes.org $  
  ***********************************************************************************
  *
@@ -27,7 +27,8 @@
   <parent>
     <artifactId>melete-base</artifactId>
     <groupId>org.etudes</groupId>
-    <version>pom</version>  
+    <version>pom</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Etudes Melete Service</name>
   <groupId>org.etudes</groupId>

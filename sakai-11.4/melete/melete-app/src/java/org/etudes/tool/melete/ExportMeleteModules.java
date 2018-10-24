@@ -1,9 +1,9 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/java/org/etudes/tool/melete/ExportMeleteModules.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/java/org/etudes/tool/melete/ExportMeleteModules.java $
  *
  ***********************************************************************************
- * Copyright (c) 2008, 2009,2010,2011 Etudes, Inc.
+ * Copyright (c) 2008, 2009,2010,2011, 2014 Etudes, Inc.
  *
  * Portions completed before September 1, 2008 Copyright (c) 2004, 2005, 2006, 2007, 2008 Foothill College, ETUDES Project
  *
@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.sakaiproject.user.cover.UserDirectoryService;
 import org.sakaiproject.util.ResourceLoader;
@@ -40,9 +41,13 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import javax.faces.application.FacesMessage;
+import javax.faces.component.UIData;
+import javax.faces.component.UIInput;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.el.ValueBinding;
+import javax.faces.event.AbortProcessingException;
+import javax.faces.event.ValueChangeEvent;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
@@ -53,6 +58,7 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.etudes.component.app.melete.CourseModule;
 import org.etudes.component.app.melete.Module;
+import org.etudes.component.app.melete.ModuleDateBean;
 import org.etudes.api.app.melete.MeleteExportService;
 import org.etudes.api.app.melete.MeleteImportService;
 import org.etudes.api.app.melete.ModuleObjService;
@@ -79,8 +85,7 @@ public class ExportMeleteModules
 	/** Dependency: The module service. */
 	ModuleService moduleService;
 
-	private List<ModuleObjService> modList;
-	private List<SelectItem> availableModules;
+	private List availableModules;
 	private List<String> selectedModules;
 	private boolean noFlag;
 	private String selectFormat;
@@ -88,19 +93,45 @@ public class ExportMeleteModules
 	final static int BUFFER = 2048;
 	final static String IMS_MANIFEST_FILENAME = "imsmanifest.xml";
 	final static String SCORM2004_BASE_FILENAME = "SCORM2004base.zip";
+	
+	private UIData table;
+	int listSize;
+	boolean selectAllFlag;
+	private List selectedModIds = null;
+	boolean moduleSelected;
+
+	
+	/**
+	 * @return value of datatable (in which modules are rendered)
+	 */
+	public UIData getTable()
+	{
+		return table;
+	}
+
+	/**
+	 * @param table module datatable to set
+	 */
+	public void setTable(UIData table)
+	{
+		this.table = table;
+	}
 
 	/**
 	 * constructor
 	 */
 	public ExportMeleteModules()
 	{
-		modList = null;
 		availableModules = null;
 		selectedModules = null;
 		noFlag = false;
 		selectFormat = "IMS";
 		selectedModules = new ArrayList<String>(0);
 		selectedModules.add("all");
+		listSize = 0;
+		selectAllFlag = false;
+		selectedModIds = null;
+		moduleSelected = false;
 	}
 
 	/**
@@ -108,47 +139,101 @@ public class ExportMeleteModules
 	 */
 	public void resetValues()
 	{
-		modList = null;
 		availableModules = null;
 		selectedModules = null;
 		noFlag = false;
 		selectFormat = "IMS";
 		selectedModules = new ArrayList<String>(0);
 		selectedModules.add("all");
+		listSize = 0;
+		selectAllFlag = false;
+		selectedModIds = null;
+		moduleSelected = false;
 	}
 
 	/**
-	 * Creates a list of all active modules to show in the dropdown list. If no active modules then gives out a message.
+	 * Creates a list of all active modules to show in the select list. If no active modules then gives out a message.
 	 *
 	 * @return
 	 */
-	public List<SelectItem> getAvailableModules()
+	public List getAvailableModules()
 	{
+		resetSelectedLists();
 		ResourceLoader bundle = new ResourceLoader("org.etudes.tool.melete.bundle.Messages");
 
 		if (availableModules == null)
 		{
+			String userId = getMeleteSiteAndUserInfo().getCurrentUser().getId();
 			String courseId = getMeleteSiteAndUserInfo().getCurrentSiteId();
-			modList = getModuleService().getModules(courseId);
-			availableModules = new ArrayList<SelectItem>(0);
-			if (modList == null || modList.size() == 0)
+			
+			availableModules = moduleService.getModuleDateBeans(userId, courseId);
+			
+			if (availableModules == null || availableModules.size() == 0)
 			{
 				String nomsg = bundle.getString("no_course_modules_available");
 				noFlag = true;
-				availableModules.add(new SelectItem("no", nomsg));
+				listSize = 0;
 				return availableModules;
 			}
-
-			String allmsg = bundle.getString("importexportmodules_export_one_more_select");
-			availableModules.add(new SelectItem("all", allmsg));
-
-			for (ModuleObjService mod : modList)
-				availableModules.add(new SelectItem(mod.getModuleId().toString(), mod.getTitle()));
-
+			listSize = availableModules.size();
 		}
 		return availableModules;
 	}
+	
+	/**Method that triggers when a module is selected
+	 * @param event ValueChangeEvent object
+	 * @throws AbortProcessingException
+	 */
+	public void selectedModule(ValueChangeEvent event) throws AbortProcessingException
+    {
+		if ((availableModules == null)||(availableModules.size() == 0)) return;
+		if (selectAllFlag == false) {
+			UIInput mod_Selected = (UIInput) event.getComponent();
+			/*if (((Boolean) mod_Selected.getValue()).booleanValue() == true)
+				count++;
+			else
+				count--;*/
 
+			String title = (String) mod_Selected.getAttributes().get("title");
+			if (title != null) {
+				int selectedModId = Integer.parseInt(title);
+
+				if (selectedModIds == null) {
+					selectedModIds = new ArrayList();
+				}
+				selectedModIds.add(new Integer(selectedModId));
+				moduleSelected = true;
+			}
+		}
+		return;
+	}
+	
+	/**Method that triggers when all modules are selected
+	 * @param event ValueChangeEvent object
+	 * @throws AbortProcessingException
+	 */
+	public void selectAllModules(ValueChangeEvent event)
+			throws AbortProcessingException {
+		ModuleDateBean mdbean = null;
+		selectAllFlag = true;
+		int k = 0;
+		if (selectedModIds == null) {
+			selectedModIds = new ArrayList();
+		}
+		if ((availableModules != null) && (availableModules.size() > 0)) {
+			for (ListIterator i = availableModules.listIterator(); i.hasNext();) {
+				mdbean = (ModuleDateBean) i.next();
+				mdbean.setSelected(true);
+				selectedModIds.add(new Integer(mdbean.getModuleId()));
+			}
+			/*count = availableModules.size();
+			if (count == 1)
+				selectedModId = mdbean.getModuleId();*/
+			moduleSelected = true;
+		}
+		return;
+	}
+	
 	/**
 	 * Creates a list of modules.
 	 *
@@ -156,24 +241,27 @@ public class ExportMeleteModules
 	 */
 	private List<ModuleObjService> createSelectedList()
 	{
-		if (selectedModules == null || selectedModules.size() == 0) return null;
-		if (selectedModules.size() == 1 && selectedModules.get(0).equals("all")) return modList;
+		if (availableModules == null || availableModules.size() == 0 || selectedModIds == null || selectedModIds.size() == 0) return null;
 
 		List<ModuleObjService> returnList = new ArrayList<ModuleObjService>(0);
-		for (String sel : selectedModules)
-		{
-			if (sel.equals("all")) continue;
 
-			for (ModuleObjService m : modList)
+		for (Object obj : availableModules)
+		{
+			ModuleDateBean m = (ModuleDateBean) obj;
+			if (selectedModIds.contains(m.getModule().getModuleId()))
 			{
-				if (m.getModuleId().toString().equals(sel))
-				{
-					returnList.add(m);
-					break;
-				}
+				returnList.add(m.getModule());
 			}
 		}
+
 		return returnList;
+	}
+
+	
+	public void resetSelectedLists()
+	{
+		selectedModIds = null;
+		selectAllFlag = false;
 	}
 
 	/**
@@ -193,7 +281,7 @@ public class ExportMeleteModules
 
 			if (selectList != null && selectList.size() > 0)
 			{
-				if (selectedModules.get(0).equals("all"))
+				if (selectList.size() == availableModules.size())
 				{
 					allFlag = true;
 					String courseId = getMeleteSiteAndUserInfo().getCurrentSiteId();
@@ -218,10 +306,21 @@ public class ExportMeleteModules
 			}
 			else
 			{
-				// add message for no modules
-				String moModMsg = bundle.getString("no_course_modules_available");
-				FacesMessage msg = new FacesMessage(null, moModMsg);
-				msg.setSeverity(FacesMessage.SEVERITY_INFO);
+				FacesMessage msg;
+				if (availableModules == null || availableModules.size() == 0)
+				{
+					// add message for no modules
+					String noModMsg = bundle.getString("no_course_modules_available");
+					msg = new FacesMessage(null, noModMsg);
+					msg.setSeverity(FacesMessage.SEVERITY_INFO);
+				}
+				else
+				{
+					// add message for no modules
+					String selModMsg = bundle.getString("importexportmodules_select");
+					msg = new FacesMessage(null, selModMsg);
+					msg.setSeverity(FacesMessage.SEVERITY_ERROR);
+				}
 				context.addMessage(null, msg);
 			}
 		}
@@ -1047,5 +1146,37 @@ public class ExportMeleteModules
 	public void setSelectFormat(String selectFormat)
 	{
 		this.selectFormat = selectFormat;
+	}
+	
+	/**
+	 * @return boolean value of selectAllFlag
+	 */
+	public boolean getSelectAllFlag()
+	{
+		return selectAllFlag;
+	}
+
+	/**
+	 * @param selectAllFlag boolean value
+	 */
+	public void setSelectAllFlag(boolean selectAllFlag)
+	{
+		this.selectAllFlag = selectAllFlag;
+	}	
+	
+	/**
+	 * @return integer value of listSize
+	 */
+	public int getListSize()
+	{
+		return listSize;
+	}
+	
+	/**
+	 * @param listSize integer value
+	 */
+	public void setListSize(int listSize)
+	{
+		this.listSize = listSize;
 	}
 }

@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-api/src/java/org/etudes/api/app/melete/SectionResourceService.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-api/src/java/org/etudes/api/app/melete/SectionResourceService.java $
  * $Id: SectionResourceService.java 73460 2011-03-30 21:29:45Z rashmi@etudes.org $  
  ***********************************************************************************
  *

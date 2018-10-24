@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-api/src/java/org/etudes/api/app/melete/ModuleShdatesService.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-api/src/java/org/etudes/api/app/melete/ModuleShdatesService.java $
  * $Id: ModuleShdatesService.java 80314 2012-06-12 22:15:39Z rashmi@etudes.org $  
  ***********************************************************************************
  *

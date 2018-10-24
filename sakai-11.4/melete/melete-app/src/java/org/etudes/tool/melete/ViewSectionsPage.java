@@ -1,10 +1,10 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/java/org/etudes/tool/melete/ViewSectionsPage.java $
- * $Id: ViewSectionsPage.java 83082 2013-03-15 20:30:37Z mallika@etudes.org $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/java/org/etudes/tool/melete/ViewSectionsPage.java $
+ * $Id: ViewSectionsPage.java 87125 2014-10-16 19:48:52Z mallika@etudes.org $
  ***********************************************************************************
  *
- * Copyright (c) 2008, 2009,2010,2011, 2012 Etudes, Inc.
+ * Copyright (c) 2008, 2009,2010,2011, 2012, 2014 Etudes, Inc.
  *
  * Portions completed before September 1, 2008 Copyright (c) 2004, 2005, 2006, 2007, 2008 Foothill College, ETUDES Project
  *
@@ -95,7 +95,9 @@ public class ViewSectionsPage implements Serializable
 	private String typeEditor;
 	private String typeLink;
 	private String typeUpload;
-
+	private String altText;
+	private Boolean httpAddressAlert;
+	
 	/** Dependency: The logging service. */
 	protected Log logger = LogFactory.getLog(ViewSectionsPage.class);
 	/** Dependency: The Melete Security service. */
@@ -109,6 +111,15 @@ public class ViewSectionsPage implements Serializable
 		userId = null;
 		contentLinkUrl = null;
 		contentWithHtml = null;
+	}
+	
+	/**
+	 * Return resource description as alt text
+	 * @return
+	 */
+	public String getAltText()
+	{
+		return altText;
 	}
 
 	/**
@@ -124,14 +135,7 @@ public class ViewSectionsPage implements Serializable
 		String str = null;
 		try
 		{
-			byte[] rsrcArray = resource.getContent();
-			str = new String(rsrcArray);
-
-			if (Util.FindNestedHTMLTags(str))
-			{
-				contentWithHtml = true;
-				return "";
-			}
+			altText = resource.getProperties().getProperty(ResourceProperties.PROP_DESCRIPTION);
 
 			// strip MS comments and bogus links
 			// strip bad link and meta tags
@@ -139,7 +143,17 @@ public class ViewSectionsPage implements Serializable
 			// only for html!
 			if (resource.getContentType().equalsIgnoreCase("text/html"))
 			{
+                byte[] rsrcArray = resource.getContent();
+                str = new String(rsrcArray);
+
+                if (Util.FindNestedHTMLTags(str))
+                {
+                    contentWithHtml = true;
+                    return "";
+                }
+
 				str = HtmlHelper.clean(str, false);
+				str = getSectionService().fixXrefs(str, getCourseId());
 			}
 		}
 		catch (Exception e)
@@ -175,8 +189,12 @@ public class ViewSectionsPage implements Serializable
 				try
 				{
 					resource = getMeleteCHService().getResource(resourceId);
-					setLinkName(resource.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME));
-
+					String res_display_name = resource.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME);
+					setLinkName(res_display_name);
+					// for uploads use alt text as anchor title
+					altText = resource.getProperties().getProperty(ResourceProperties.PROP_DESCRIPTION);					
+					if ("typeUpload".equals(this.section.getContentType()) && altText != null && altText.length() > 0) setLinkName(altText);
+					
 					url = getMeleteCHService().getResourceUrl(resourceId);
 					if (logger.isDebugEnabled()) logger.debug("Resource url is " + url);
 					contentLinkUrl = url;
@@ -525,6 +543,41 @@ public class ViewSectionsPage implements Serializable
 		return "typeUpload";
 	}
 
+	/**
+	 * Show the alert message if not in open window
+	 * @return
+	 */
+	public Boolean getHttpAddressAlert()
+	{
+		httpAddressAlert = null;
+		try
+		{
+			if(isUserStudent()) return httpAddressAlert;
+			if (section == null || section.getSectionResource() == null || section.getSectionResource().getResource() == null)
+				return httpAddressAlert;
+			String checkUrl = "";
+
+			if (section.getContentType() != null && (section.getContentType().equals("typeLink") || section.getContentType().equals("typeLTI")))
+			{
+				ContentResource cr = getMeleteCHService().getResource(section.getSectionResource().getResource().getResourceId());
+				checkUrl = new String(cr.getContent());
+
+				if (checkUrl == null || checkUrl.length() == 0) return httpAddressAlert;
+				if (!section.isOpenWindow())
+				{
+					if (checkUrl.startsWith("http://"))
+						httpAddressAlert = new Boolean(true);
+					else if (checkUrl.startsWith("https://")) httpAddressAlert = new Boolean(false);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			httpAddressAlert = null;
+		}
+		return httpAddressAlert;
+	}
+	
 	/**
 	 * Go to the current module(module that this section belongs to) page
 	 * 
@@ -924,7 +977,7 @@ public class ViewSectionsPage implements Serializable
 	public void setSectionId(int sectionId)
 	{
 		this.sectionId = sectionId;
-		logSectionReadEvent(sectionId);
+		logSectionReadEvent(sectionId);	
 	}
 	
 	/**

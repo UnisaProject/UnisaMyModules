@@ -2,8 +2,8 @@
 <%@ page import="org.etudes.tool.melete.ViewNextStepsPage"%>
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/view_whats_next.jsp $
- * $Id: view_whats_next.jsp 83082 2013-03-15 20:30:37Z mallika@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/view_whats_next.jsp $
+ * $Id: view_whats_next.jsp 85951 2014-03-14 16:53:27Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008, 2009, 2010,2011 Etudes, Inc.
@@ -81,7 +81,7 @@ if (prevModId != null)
 </tr> 
 <tr>
 <td align="right">
-<h:commandLink id="myBookmarksLink" action="#{bookmarkPage.gotoMyBookmarks}">
+<h:commandLink id="myBookmarksLink" action="#{bookmarkPage.gotoMyBookmarks}" styleClass="toolUiLink">
 <h:graphicImage id="mybook_gif" value="/images/my-bookmarks.png" alt="" styleClass="AuthImgClass"/>
  <h:outputText id="mybks" value="#{msgs.my_bookmarks}" />
  <f:param name="fromPage" value="view_whats_next" />

@@ -42,18 +42,7 @@
 	
 </script>
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-
-  <head>
-    <!--    include cascading style sheet here    
-	<link rel="stylesheet" href="/cmsys/staff/stylesheets/staff.css">-->
-
-	<title><fmt:message key="page.heading"/></title>
-  </head>
-
-  <body>
-  <br/>
-  <h1><fmt:message key="page.heading"/></h1>
+  <sakai:heading><fmt:message key="page.heading"/></sakai:heading>
   <html:form action="/smsbatch">
   	<html:hidden property="page" value="2"/>
 
@@ -191,5 +180,4 @@
 	<html:submit property="act"><fmt:message key="button.back"/></html:submit>
 	<html:submit property="act"><fmt:message key="button.cancel"/></html:submit>
   </html:form>
-  </body>
 </sakai:html>

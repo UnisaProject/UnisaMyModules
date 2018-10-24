@@ -1,10 +1,10 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-impl/src/java/org/etudes/component/app/melete/MeleteCHServiceImpl.java $
- * $Id: MeleteCHServiceImpl.java 83082 2013-03-15 20:30:37Z mallika@etudes.org $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-impl/src/java/org/etudes/component/app/melete/MeleteCHServiceImpl.java $
+ * $Id: MeleteCHServiceImpl.java 86862 2014-08-08 20:37:38Z mallika@etudes.org $
  ***********************************************************************************
  *
- * Copyright (c) 2008,2009,2010,2011 Etudes, Inc.
+ * Copyright (c) 2008,2009,2010,2011,2014 Etudes, Inc.
  *
  * Portions completed before September 1, 2008 Copyright (c) 2004, 2005, 2006, 2007, 2008 Foothill College, ETUDES Project
  *
@@ -27,6 +27,7 @@ package org.etudes.component.app.melete;
 import java.io.File;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -602,7 +603,7 @@ public class MeleteCHServiceImpl implements MeleteCHService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean editResourceProperties(String selResourceIdFromList, String secResourceName, String secResourceDescription)
+	public Boolean editResourceProperties(String selResourceIdFromList, String secResourceName, String secResourceDescription, byte[] data)
 	{
 		Boolean modify = false;
 		if (selResourceIdFromList == null || selResourceIdFromList.length() == 0) return modify;
@@ -625,16 +626,19 @@ public class MeleteCHServiceImpl implements MeleteCHService
 			{
 			}
 			edit = getContentservice().editResource(selResourceIdFromList);
+			byte[] editData = edit.getContent();
 			ResourcePropertiesEdit rp = edit.getPropertiesEdit();
 			if (rp.getProperty(ResourceProperties.PROP_DISPLAY_NAME) != null)
 				modify = (rp.getProperty(ResourceProperties.PROP_DISPLAY_NAME).compareTo(secResourceName) == 0) ? false : true;
 			if (rp.getProperty(ResourceProperties.PROP_DESCRIPTION) != null)
 				modify = modify ||( (rp.getProperty(ResourceProperties.PROP_DESCRIPTION).compareTo(secResourceDescription) == 0) ? false : true);
+			if (editData != null) modify = modify || ((Arrays.equals(editData, data)) ? false : true);
 			
 			rp.clear();
 			rp.addProperty(ResourceProperties.PROP_DISPLAY_NAME, secResourceName);
 			rp.addProperty(ResourceProperties.PROP_DESCRIPTION, secResourceDescription);
 			rp.addProperty(ContentHostingService.PROP_ALTERNATE_REFERENCE, REFERENCE_ROOT);
+			if (data != null) edit.setContent(data);
 			getContentservice().commitResource(edit);
 			edit = null;
 		}

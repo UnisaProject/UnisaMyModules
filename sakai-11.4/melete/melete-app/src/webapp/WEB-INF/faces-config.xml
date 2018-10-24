@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/WEB-INF/faces-config.xml $
- * $Id: faces-config.xml 80314 2012-06-12 22:15:39Z rashmi@etudes.org $  
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/WEB-INF/faces-config.xml $
+ * $Id: faces-config.xml 86862 2014-08-08 20:37:38Z mallika@etudes.org $  
  ***********************************************************************************
  *
  * Copyright (c) 2008,2009,2010,2011,2012 Etudes, Inc.
@@ -745,6 +745,11 @@
         <to-view-id>/melete/coursemap.jsp</to-view-id>
          <redirect/>
       </navigation-case>   
+       <navigation-case>
+		   <from-outcome>activeUserCheck</from-outcome>
+        <to-view-id>/melete/activeUserCheck.jsp</to-view-id>
+         <redirect/>
+      </navigation-case> 
   </navigation-rule>    
 
 <navigation-rule>

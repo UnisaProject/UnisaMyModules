@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-hbm/src/java/org/etudes/component/app/melete/SectionBean.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-hbm/src/java/org/etudes/component/app/melete/SectionBean.java $
  * $Id: SectionBean.java 73855 2011-04-19 20:41:15Z rashmi@etudes.org $  
  ***********************************************************************************
  *

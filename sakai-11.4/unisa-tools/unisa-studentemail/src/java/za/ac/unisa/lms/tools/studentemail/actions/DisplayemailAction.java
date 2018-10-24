@@ -144,7 +144,7 @@ public class DisplayemailAction extends LookupDispatchAction {
 			throws Exception {
 		DisplayemailForm displayemailform = (DisplayemailForm) form;
 		SakaiQueryDAO db = new SakaiQueryDAO();
-		displayemailform.setNoemail(db.checkEmail());
+		displayemailform.setNoemail(db.checkEmail(toolManager.getCurrentPlacement().getContext()));
 		return mapping.findForward("displayStudent");
 
 	}
@@ -155,9 +155,9 @@ public class DisplayemailAction extends LookupDispatchAction {
 		DisplayemailForm displayemailForm = (DisplayemailForm) form;
 		SakaiQueryDAO db1 = new SakaiQueryDAO();
 		try {
-			if (db1.checkEmail()){
+			if (db1.checkEmail(toolManager.getCurrentPlacement().getContext())){
 				try {
-					String tempemail = db1.getEmail();
+					String tempemail = db1.getEmail(toolManager.getCurrentPlacement().getContext());
 					if((toolManager.getCurrentPlacement().getContext()+"@unisa.ac.za").equals(tempemail)) {
 						displayemailForm.setChoice("2");
 					} else {

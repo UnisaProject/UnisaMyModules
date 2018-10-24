@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-hbm/pom.xml $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-hbm/pom.xml $
  * $Id: pom.xml 83082 2013-03-15 20:30:37Z mallika@etudes.org $  
  ***********************************************************************************
  *
@@ -28,6 +28,7 @@
     <artifactId>melete-base</artifactId>
     <groupId>org.etudes</groupId>
     <version>pom</version>
+    <relativePath>../pom.xml</relativePath>
     </parent>
   <name>etudes-melete-hbm</name>
   <groupId>org.etudes</groupId>

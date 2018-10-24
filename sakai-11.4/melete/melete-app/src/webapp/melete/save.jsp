@@ -5,7 +5,7 @@
 <%@ page import="javax.faces.context.FacesContext,  org.etudes.tool.melete.AddResourcesPage"%>
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/save.jsp $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/save.jsp $
  * $Id: save.jsp 80314 2012-06-12 22:15:39Z rashmi@etudes.org $  
  ***********************************************************************************
  *

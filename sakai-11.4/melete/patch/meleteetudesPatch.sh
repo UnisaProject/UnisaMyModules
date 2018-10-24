@@ -1,7 +1,7 @@
-# $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/patch/meleteetudesPatch.sh $
+# $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/patch/meleteetudesPatch.sh $
 # $Id: meleteetudesPatch.sh 56408 2008-12-19 21:16:52Z rashmi@etudes.org $
 #
-# $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/patch/meleteetudesPatch.sh $
+# $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/patch/meleteetudesPatch.sh $
 # $Id: meleteetudesPatch.sh 56408 2008-12-19 21:16:52Z rashmi@etudes.org $
 #
 # Copyright (c) 2008 Etudes, Inc.

@@ -10,8 +10,8 @@
 	<html:form action="/displaymdactivity">	
 	<html:hidden property="act" value="inputstep2"/>		
 
-		<sakai:messages/>
 		<sakai:heading><fmt:message key="page.heading"/></sakai:heading>
+		<sakai:messages/>
 
 		<sakai:instruction><fmt:message key="page.instruction1"/></sakai:instruction>
 

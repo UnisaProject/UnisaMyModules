@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/java/org/etudes/tool/melete/ViewModulesPage.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/java/org/etudes/tool/melete/ViewModulesPage.java $
  * $Id: ViewModulesPage.java 80430 2012-06-19 17:56:26Z rashmi@etudes.org $
  ***********************************************************************************
  *

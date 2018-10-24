@@ -1,6 +1,6 @@
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/fileNameCheck.jsp $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/fileNameCheck.jsp $
  * $Id: fileNameCheck.jsp 60201 2009-05-05 18:18:29Z mallika@etudes.org $  
  ***********************************************************************************
  *

@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/melete-api/src/java/org/etudes/api/app/melete/BookmarkService.java $
+ * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.9/melete-api/src/java/org/etudes/api/app/melete/BookmarkService.java $
  *
  ***********************************************************************************
  * Copyright (c) 2010, 2011 Etudes, Inc.

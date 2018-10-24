@@ -1,9 +1,9 @@
 /**********************************************************************************
  *
- * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/melete-app/src/java/org/etudes/tool/melete/SpecialAccessPage.java $
- * $Id: SpecialAccessPage.java 3647 2012-12-02 22:30:41Z ggolden $
+ * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.9/melete-app/src/java/org/etudes/tool/melete/SpecialAccessPage.java $
+ * $Id: SpecialAccessPage.java 7394 2014-02-12 20:06:02Z mallikamt $
  ***********************************************************************************
- * Copyright (c) 2010, 2011, 2012 Etudes, Inc.
+ * Copyright (c) 2010, 2011, 2012, 2014 Etudes, Inc.
  *
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you
@@ -532,7 +532,7 @@ public class SpecialAccessPage implements Serializable
 		{
 			public int compare(Object arg0, Object arg1)
 			{
-				int rv = ((User) arg0).getSortName().compareTo(((User) arg1).getSortName());
+				int rv = ((User) arg0).getSortName().compareToIgnoreCase(((User) arg1).getSortName());
 				return rv;
 			}
 		});

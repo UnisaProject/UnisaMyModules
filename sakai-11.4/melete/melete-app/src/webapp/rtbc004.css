@@ -209,7 +209,7 @@ a1:active 			{color : #000080;}
 
  .ListAuthorDateClass {
    vertical-align:top;
-	width:1%;
+	width:190px;
 	font-size:85%;
    }
      
@@ -236,7 +236,7 @@ a1:active 			{color : #000080;}
 
 .ListActionClass {
 	vertical-align: top;    
-    width:6%;
+    width:108px;
   	white-space: nowrap;
   } 
   
@@ -377,6 +377,7 @@ td.MainTableClass     { white-space: nowrap;}
 					color:#6066AC;
 					background-color: inherit;
 					background:url('images/folder_document.gif') .2em no-repeat;
+					cursor:pointer;
 					}
 										
 .TopImgPreference	{  
@@ -386,6 +387,7 @@ td.MainTableClass     { white-space: nowrap;}
 					color:#6066AC;
 					background-color: inherit;
 					background:url('images/user_preferences.png') .2em no-repeat;
+					cursor:pointer;
 					}	
 					
 .TopImgView			{  
@@ -395,6 +397,7 @@ td.MainTableClass     { white-space: nowrap;}
 					color:#6066AC;
 					background-color: inherit;
 					background:url('images/preview.png') .2em no-repeat;	
+					cursor:pointer;
 					}	
 								
 .TopImgAuthor		{  
@@ -404,6 +407,7 @@ td.MainTableClass     { white-space: nowrap;}
 					color:#6066AC;
 					background-color: inherit;
 					background:url('images/author.png') .2em no-repeat;	
+					cursor:pointer;
 					}
 					
 .TopImgView:disabled, .TopImgManage:disabled, .TopImgPreference:disabled,.TopImgAuthor:disabled	{  
@@ -564,6 +568,7 @@ vertical-align:top;
 	height:130px; 
 	z-index:2;		
     width:390px;	
+    background-color:#FFFFCC;
 }
 
 .invalidAlert {
@@ -576,6 +581,7 @@ vertical-align:top;
 	height:130px; 
 	z-index:2;		
     width:390px;	
+    background-color:#FFFFCC;
 }
 .invalidAlertSmall {
 	position:absolute;
@@ -587,6 +593,7 @@ vertical-align:top;
 	height:70px; 
 	z-index:2;		
     width:250px;	
+    background-color:#FFFFCC;
 }
 .alert1 {
 	position:relative;

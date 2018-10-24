@@ -1,6 +1,6 @@
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/title.jsp $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/title.jsp $
  * $Id: title.jsp 56408 2008-12-19 21:16:52Z rashmi@etudes.org $  
  ***********************************************************************************
  *

@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-hbm/src/java/org/etudes/component/app/melete/ModuleDateBean.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-hbm/src/java/org/etudes/component/app/melete/ModuleDateBean.java $
  * $Id: ModuleDateBean.java 77082 2011-10-24 18:38:10Z rashmi@etudes.org $  
  ***********************************************************************************
  *

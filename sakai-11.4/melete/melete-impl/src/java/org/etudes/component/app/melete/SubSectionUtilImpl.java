@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-impl/src/java/org/etudes/component/app/melete/SubSectionUtilImpl.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-impl/src/java/org/etudes/component/app/melete/SubSectionUtilImpl.java $
  * $Id: SubSectionUtilImpl.java 78872 2012-03-15 20:06:53Z mallika@etudes.org $  
  ***********************************************************************************
  *

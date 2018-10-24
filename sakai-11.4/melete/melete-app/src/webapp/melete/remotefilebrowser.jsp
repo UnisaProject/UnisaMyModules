@@ -1,6 +1,6 @@
 <!--
  ***********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/webapp/melete/remotefilebrowser.jsp $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/webapp/melete/remotefilebrowser.jsp $
  * $Id: remotefilebrowser.jsp 65998 2010-02-04 19:22:14Z rashmi@etudes.org $  
  ***********************************************************************************
  *

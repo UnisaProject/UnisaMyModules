@@ -77,6 +77,9 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		    border-radius: 5px; 
 		    box-shadow: 0 0 5px #555 inset;*/
 		}
+		.textareaMax {
+			width:90%
+		}
 		#stretch {
 		    width: 100%;
 		    padding: 0 5px;
@@ -84,6 +87,10 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		input[type="text"] {
 			width: 100%;
 			padding: 0 5px;
+		}
+		select	{
+	    width: 100%;
+	    text-overflow: ellipsis;
 		}
 	</style>
 </head>
@@ -138,31 +145,34 @@ response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 					</sakai:group_table>
 					<sakai:group_table>
 					<tr>
-						<td colspan="3"><fmt:message key="md.page4.q2"/>&nbsp;<sakai:required/></td>
+						<td><fmt:message key="md.page4.q2"/>&nbsp;<sakai:required/></td>
+					</tr><tr>									
+						<td><html:textarea name="mdApplicationsForm" styleClass="textareaMax" property="student.researchTopic" rows="4"/></td>	
 					</tr><tr>
-						<td colspan="3"><html:textarea name="mdApplicationsForm" property="student.researchTopic" rows="4" cols="110"/></td>
-					</tr><tr>
-						<td colspan="3"><fmt:message key="md.page4.q4"/>&nbsp;<sakai:required/></td>
-					</tr><tr>
-						<td colspan="3"><html:text name="mdApplicationsForm" property="student.lecturer" maxlength="80" size="70"/></td>
-					</tr><tr>
-						<td colspan="2"><fmt:message key="md.page4.q5"/>&nbsp;<sakai:required/></td>
+						<td><fmt:message key="md.page4.q4"/>&nbsp;<sakai:required/></td>
+					</tr><tr>						
+						<td><html:text name="mdApplicationsForm" property="student.lecturer" maxlength="80"/></td>
+					</tr>
+					</sakai:group_table>
+					<sakai:group_table>
+					<tr>
+						<td><fmt:message key="md.page4.q5"/>&nbsp;<sakai:required/></td>
 						<!-- <td><html:text name="mdApplicationsForm" property="student.passedndp" maxlength="1" size="1"/></td>  -->
-						<td>
+						<td style="white-space: nowrap">
 							<html:radio property="student.passedndp" value="Y"/><fmt:message key="page.yes"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 							<html:radio property="student.passedndp" value="N"/><fmt:message key="page.no"/>
 						</td>
 					</tr><tr>
-						<td colspan="2"><fmt:message key="md.page4.q6"/>&nbsp;<sakai:required/></td>
+						<td><fmt:message key="md.page4.q6"/>&nbsp;<sakai:required/></td>
 						<!-- <td><html:text name="mdApplicationsForm" property="student.appliedmd" maxlength="1" size="1"/></td>  -->
-						<td>
+						<td style="white-space: nowrap">
 							<html:radio property="student.appliedmd" value="Y"/><fmt:message key="page.yes"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 							<html:radio property="student.appliedmd" value="N"/><fmt:message key="page.no"/>
 						</td>
 					</tr><tr>
-						<td colspan="2"><fmt:message key="md.page4.q7"/>&nbsp;<sakai:required/></td>
+						<td><fmt:message key="md.page4.q7"/>&nbsp;<sakai:required/></td>
 						<!-- <td><html:text name="mdApplicationsForm" property="student.appliedqual" maxlength="1" size="1"/></td>  -->
-						<td>
+						<td style="white-space: nowrap">
 							<html:radio property="student.appliedqual" value="Y"/><fmt:message key="page.yes"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 							<html:radio property="student.appliedqual" value="N"/><fmt:message key="page.no"/>
 						</td>

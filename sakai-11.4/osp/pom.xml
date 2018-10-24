@@ -11,7 +11,7 @@
     <name>Sakai OSP Project</name>
     <groupId>org.sakaiproject.osp</groupId>
     <artifactId>osp-base</artifactId>
-    <version>11-SNAPSHOT</version>
+    <version>11.4</version>
     <packaging>pom</packaging>
     
     <modules>

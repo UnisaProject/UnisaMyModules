@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.1forSakai/melete-hbm/src/java/org/etudes/component/app/melete/SpecialAccess.java $
+ * $URL: https://source.etudes.org/svn/apps/melete/tags/2.9.9/melete-hbm/src/java/org/etudes/component/app/melete/SpecialAccess.java $
  * $Id: SpecialAccess.java 3641 2012-12-02 21:43:44Z ggolden $  
  ***********************************************************************************
  *

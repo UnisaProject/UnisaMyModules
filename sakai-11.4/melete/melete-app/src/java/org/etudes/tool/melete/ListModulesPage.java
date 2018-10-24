@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-app/src/java/org/etudes/tool/melete/ListModulesPage.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-app/src/java/org/etudes/tool/melete/ListModulesPage.java $
  * $Id: ListModulesPage.java 78052 2011-12-29 23:38:08Z mallika@etudes.org $
  ***********************************************************************************
  *
@@ -52,7 +52,7 @@ import java.sql.Timestamp;
 import org.etudes.api.app.melete.ModuleService;
 import org.etudes.api.app.melete.MeleteSecurityService;
 import org.etudes.api.app.melete.SectionBeanService;
-import org.sakaiproject.authz.cover.AuthzGroupService;
+import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.AuthzGroup;
 import javax.faces.event.*;
 import org.sakaiproject.tool.cover.ToolManager;

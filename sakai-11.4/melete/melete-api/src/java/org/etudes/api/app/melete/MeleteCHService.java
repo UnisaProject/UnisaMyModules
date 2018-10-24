@@ -1,10 +1,10 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-api/src/java/org/etudes/api/app/melete/MeleteCHService.java $
- * $Id: MeleteCHService.java 77532 2011-11-21 22:57:15Z rashmi@etudes.org $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-api/src/java/org/etudes/api/app/melete/MeleteCHService.java $
+ * $Id: MeleteCHService.java 86862 2014-08-08 20:37:38Z mallika@etudes.org $
  ***********************************************************************************
  *
- * Copyright (c) 2008,2009,2010,2011 Etudes, Inc.
+ * Copyright (c) 2008,2009,2010,2011, 2014 Etudes, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ public interface MeleteCHService
 	 *        resource description
 	 * @return boolean. null if resource is bad, true if contents have changed.       
 	 */
-	public Boolean editResourceProperties(String selResourceIdFromList, String secResourceName, String secResourceDescription);
+	public Boolean editResourceProperties(String selResourceIdFromList, String secResourceName, String secResourceDescription, byte[] data);
 
 	/**
 	 * Get ResourceProperties for a resource

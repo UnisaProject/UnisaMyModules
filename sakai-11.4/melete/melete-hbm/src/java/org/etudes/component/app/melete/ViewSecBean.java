@@ -1,6 +1,6 @@
 /**********************************************************************************
  *
- * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.1/melete-hbm/src/java/org/etudes/component/app/melete/ViewSecBean.java $
+ * $URL: https://source.sakaiproject.org/contrib/etudes/melete/tags/2.9.9/melete-hbm/src/java/org/etudes/component/app/melete/ViewSecBean.java $
  * $Id: ViewSecBean.java 75093 2011-06-22 20:58:10Z rashmi@etudes.org $  
  ***********************************************************************************
  *
