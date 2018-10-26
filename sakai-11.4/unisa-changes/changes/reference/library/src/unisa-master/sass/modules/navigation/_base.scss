@@ -216,6 +216,10 @@ body.is-logged-out{
 		@include display-flex( flex );
 		@include align-items( center );
 		@include justify-content( flex-end );
+
+		@media #{$phone}{
+			margin: 0 0 10px 0;
+		}
 	}
 
 	@media #{$phone}{
@@ -225,7 +229,7 @@ body.is-logged-out{
 		//top: 0;
 		font-size: 12px;
 		min-height: $header-size;
-		
+		display:block;
 		&.moving{
 			top: -4.2em;
 			#mastLogin #loginLinks ul.#{$namespace}userNav__subnav{
@@ -236,11 +240,18 @@ body.is-logged-out{
 
 }
 
+.Mrphs-mainHeader .Mrphs-headerLogo .Mrphs-headerLogo--institution {
+	@media #{$phone}{
+		margin: 10px 0;
+	}
+}
+
 #mastLogin{
 	
 	@media #{$phone}{
 		//width: 50%;
 		padding-right: 15px;
+		display: block;
 	}
 
 	ul{
@@ -267,6 +278,10 @@ body.is-logged-out{
 		@include display-flex( flex );
 		@include align-items( center );
 		@include justify-content( flex-end );
+						
+			@media #{$phone}{
+				display: block;
+			}
 
 		label{
 			margin: 0 0.5em 0 0;
@@ -285,6 +300,8 @@ body.is-logged-out{
 				width: 40%;
 				margin-right: 0.6em;
 				font-size: $default-font-size - 2px;
+				border: 1px solid grey;
+				border-radius: 4px;
 			}
 		}
 		#submit{

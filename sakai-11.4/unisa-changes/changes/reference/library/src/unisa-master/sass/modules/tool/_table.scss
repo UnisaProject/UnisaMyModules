@@ -8,7 +8,7 @@ table{
 		background-color: $tool-background-color;
     	margin: 1em 0;
 		@media #{$phone}{
-			display: block;
+			//display: block;
     		margin: 3em 0;
     		overflow: auto;
 		}
@@ -23,7 +23,7 @@ table{
 					font-size:   $default-font-size;
 					font-weight: 400;
 					@media #{$phone}{
-						display: block;
+						//display: block;
 					}
 				}
 			}
