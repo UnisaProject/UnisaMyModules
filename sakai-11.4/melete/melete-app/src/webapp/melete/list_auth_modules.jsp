@@ -220,7 +220,7 @@ if (msg != null)
 	       <h:column>
 	            <h:inputText id="startDate" size="24" style="font-size:95%;"
 	                           value="#{mdbean.moduleShdate.startDate}" onchange="showInvalid('listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':startDate','listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':err_gifst');">
-	            	<o:convertDateTime />
+	            	<f:convertDateTime pattern="dd MMM yyyy h:mm a" />
 	            </h:inputText>
 	            <h:outputLink id="viewsdateCal" onclick="showCal('listauthmodulesform:table:'+#{listAuthModulesPage.table.rowIndex}+':startDate','8','0','AM');return false;" value="#" styleClass="toolUiLink">
 	            	<h:graphicImage id="sdateCal" value="/images/date.png" alt="#{msgs.list_auth_modules_alt_popup_cal}" title="#{msgs.list_auth_modules_alt_popup_cal}" styleClass="ListDatePickerClass"/>
@@ -248,7 +248,7 @@ if (msg != null)
        <h:column>      
             <h:inputText id="endDate" size="24" style="font-size:95%;"
                            value="#{mdbean.moduleShdate.endDate}" onchange="showInvalid('listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':endDate','listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':err_gifen');">
-               <o:convertDateTime />
+               <f:convertDateTime pattern="dd MMM yyyy h:mm a" />
             </h:inputText>
              <h:outputLink id="viewedateCal" onclick="showCal('listauthmodulesform:table:'+#{listAuthModulesPage.table.rowIndex}+':endDate','11','59','PM');return false;" value="#" styleClass="toolUiLink">
             <h:graphicImage id="edateCal" value="/images/date.png" alt="#{msgs.list_auth_modules_alt_popup_cal}" title="#{msgs.list_auth_modules_alt_popup_cal}" styleClass="ListDatePickerClass"/>
@@ -276,7 +276,7 @@ if (msg != null)
        <h:column>
 	        <h:inputText id="allowUntilDate" size="24" style="font-size:95%;"
 	                       value="#{mdbean.moduleShdate.allowUntilDate}" onchange="showInvalid('listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':allowUntilDate','listauthmodulesform:table:' + #{listAuthModulesPage.table.rowIndex} +':err_gifal');">
-	           <o:convertDateTime />
+	           <f:convertDateTime pattern="dd MMM yyyy h:mm a" />
 	        </h:inputText>
              <h:outputLink id="viewadateCal" onclick="showCal('listauthmodulesform:table:'+#{listAuthModulesPage.table.rowIndex}+':allowUntilDate','11','59','PM');return false;" value="#" styleClass="toolUiLink">
           		  <h:graphicImage id="adateCal" value="/images/date.png" alt="#{msgs.list_auth_modules_alt_popup_cal}" title="#{msgs.list_auth_modules_alt_popup_cal}" styleClass="ListDatePickerClass"/>
