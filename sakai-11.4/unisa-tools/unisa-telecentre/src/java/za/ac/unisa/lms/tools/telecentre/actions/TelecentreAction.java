@@ -1850,12 +1850,20 @@ private boolean processActiveStudent(HttpServletRequest request,TelecentreForm t
 					response.addHeader("Content-Disposition", "attachment;filename=" + filename );
 					excelreport.saveToClient(in, out);
 			}
-		    if(telecentreForm.downloadExtendedHrs()==0){
+		    // Sifiso Changes:2018/18/30:Remove redirect to prevent JavaIllegalStateException since
+		    // redirect is not even required and user will remain in correct page, method just downloads file
+		    /*if(telecentreForm.downloadExtendedHrs()==0){
 		         telecentreForm.setCustomvisittracker(2);
 		         return mapping.findForward("exportvisitdetails");
 		    }else{
 		    	return mapping.findForward("extendedhoursdownload");
-		    }
+		    }*/
+		    
+		    // Sifiso Changes:2018/18/30:Keep above tracker setting but dont redirect
+		    if(telecentreForm.downloadExtendedHrs()==0)
+		         telecentreForm.setCustomvisittracker(2);
+		         
+		    return null;	// Sifiso Changes:2018/18/30: We are no longer redirecting so return null
 		  
     }
     public ActionForward handleDisplayListBoxAction(// to handle the onchange event of the period listbox in the displayVisitDetails.jsp
