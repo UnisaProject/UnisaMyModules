@@ -120,8 +120,14 @@ public class TelecentreDAO extends SakaiDAO {
 		
 		public List  getTelecentreDetails()
 		 {
-		 			  String sql= "SELECT CENTRE_NAME,PROVINCE,TELE_ID,TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:MI:SS'),TO_CHAR(END_TIMESTAMP, 'YYYY-MM-DD HH24:MI:SS')"+
-		 			  " FROM TELECENTRE WHERE ACTIVE='Y' ORDER BY CENTRE_NAME";
+					  // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
+		 			  /*String sql= "SELECT CENTRE_NAME,PROVINCE,TELE_ID,TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:MI:SS'),TO_CHAR(END_TIMESTAMP, 'YYYY-MM-DD HH24:MI:SS')"+
+		 			  " FROM TELECENTRE WHERE ACTIVE='Y' ORDER BY CENTRE_NAME";*/
+		 			  
+		 			  String sql= "SELECT CENTRE_NAME,PROVINCE,TELE_ID,DATE_FORMAT(START_TIMESTAMP, '%Y-%m-%d %H:%i:%s'),DATE_FORMAT(END_TIMESTAMP, '%Y-%m-%d %H:%i:%s')"+
+				 			  " FROM TELECENTRE WHERE ACTIVE='Y' ORDER BY CENTRE_NAME";
+		 			  // End Sifiso Changes:2018/11/01
+		 			  
 		 			  JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 					  List queryList= jdt.queryForList(sql);
 					  return queryList;
@@ -190,8 +196,13 @@ public class TelecentreDAO extends SakaiDAO {
 		}
 		public String getTeleId(String latestTime)
 		 {
-		 			  String sql= " select TELE_ID from STUDENT_TELECENTRE where " +
-		 			  		      " TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') ='"+latestTime.substring(0,19)+"'";
+					  // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
+					  /*String sql= " select TELE_ID from STUDENT_TELECENTRE where " +
+					  		      " TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') ='"+latestTime.substring(0,19)+"'";*/
+			
+					  String sql= " select TELE_ID from STUDENT_TELECENTRE where " +
+				  		      	  " DATE_FORMAT(START_TIMESTAMP, '%Y-%m-%d %H:%i:%s') ='"+latestTime.substring(0,19)+"'";
+					  // End Sifiso Changes:2018/11/01
 		 			  
 		 			  String teleId = this.querySingleValue(sql,"TELE_ID");
 					  				
@@ -200,9 +211,15 @@ public class TelecentreDAO extends SakaiDAO {
 		}
 		public String getTelecentreId(String latestTime, String studentNumber)
 		 {
-		 			  String sql= " select TELE_ID from STUDENT_TELECENTRE where " +
+					  // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
+		 			  /*String sql= " select TELE_ID from STUDENT_TELECENTRE where " +
 		 			  		      " TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') ='"+latestTime.substring(0,19)+"' "+
-		 			  		      " and student_number = "+studentNumber;
+		 			  		      " and student_number = "+studentNumber;*/
+		 			  
+		 			  String sql= " select TELE_ID from STUDENT_TELECENTRE where " +
+	 			  		      	  " DATE_FORMAT(START_TIMESTAMP, '%Y-%m-%d %H:%i:%s') ='"+latestTime.substring(0,19)+"' "+
+	 			  		          " and student_number = "+studentNumber;
+		 			  // End Sifiso Changes:2018/11/01
 		 			  
 			return this.querySingleValue(sql,"TELE_ID");
 		}
@@ -242,11 +259,19 @@ public class TelecentreDAO extends SakaiDAO {
 			    	   sessionTime=2;
 			  
 			       }
-			       String query1 = //" INSERT INTO STUDENT_TELECENTRE (STUDENT_NUMBER, TELE_ID,TOTAL_HRS, START_TIMESTAMP,"+			//Sifiso Changes:Changed:2016/07/11-Added TIME_UNIT column
+			       // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
+			       /*String query1 = //" INSERT INTO STUDENT_TELECENTRE (STUDENT_NUMBER, TELE_ID,TOTAL_HRS, START_TIMESTAMP,"+			//Sifiso Changes:Changed:2016/07/11-Added TIME_UNIT column
 			    		   		  " INSERT INTO STUDENT_TELECENTRE (STUDENT_NUMBER, TELE_ID,TOTAL_HRS,TIME_UNIT, START_TIMESTAMP,"+		//Sifiso Changes
 	                              //" END_TIMESTAMP) VALUES (?, ? ,? ,to_TIMESTAMP(?,'YYYY-MM-DD HH24:MI:SS.FF1'), " +					//Sifiso Changes:Changed:2016/07/11-Added TIME_UNIT column
 	                              " END_TIMESTAMP) VALUES (?, ? ,?, ?,to_TIMESTAMP(?,'YYYY-MM-DD HH24:MI:SS.FF1'), " +					//Sifiso Changes
-	                              " to_TIMESTAMP('"+startTimeStamp+"','YYYY-MM-DD HH24:MI:SS.FF1')+"+sessionTime+"/24)";
+	                              " to_TIMESTAMP('"+startTimeStamp+"','YYYY-MM-DD HH24:MI:SS.FF1')+"+sessionTime+"/24)";*/
+			       
+			       String query1 = //" INSERT INTO STUDENT_TELECENTRE (STUDENT_NUMBER, TELE_ID,TOTAL_HRS, START_TIMESTAMP,"+			//Sifiso Changes:Changed:2016/07/11-Added TIME_UNIT column
+		    		   		  	  " INSERT INTO STUDENT_TELECENTRE (STUDENT_NUMBER, TELE_ID,TOTAL_HRS,TIME_UNIT, START_TIMESTAMP,"+		//Sifiso Changes
+		    		   		  	  //" END_TIMESTAMP) VALUES (?, ? ,? ,to_TIMESTAMP(?,'YYYY-MM-DD HH24:MI:SS.FF1'), " +					//Sifiso Changes:Changed:2016/07/11-Added TIME_UNIT column
+		    		   		  	  " END_TIMESTAMP) VALUES (?, ? ,?, ?,STR_TO_DATE(?,'%Y-%m-%d %H:%i:%s.FF1'), " +						//Sifiso Changes
+		    		   		  	  " STR_TO_DATE('"+startTimeStamp+"','%Y-%m-%d %H:%i:%s.FF1')+"+sessionTime+"/24)";
+			       // End Sifiso Changes:2018/11/01
 	               try{
 	            	      JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 		      		      //jdt.update(query1,new Object[] {studentNumber,teleid,stuAvalHrs,startTimeStamp});		//Sifiso Cchanges:Changed:2016/07/11-Added fourth value for 'TIME_UNIT' as 'Second'
@@ -259,11 +284,17 @@ public class TelecentreDAO extends SakaiDAO {
 		public void updateTimeStamps(String teleid, String studentNumber, String startTimeStamp, String endTimeStamp) throws Exception
 		  
 	    {
-	   		
-	             String query = " UPDATE STUDENT_TELECENTRE SET END_TIMESTAMP = to_date('"+endTimeStamp.substring(0,19)+"','YYYY-MM-DD HH24:mi:SS')"+
+				 // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
+	             /*String query = " UPDATE STUDENT_TELECENTRE SET END_TIMESTAMP = to_date('"+endTimeStamp.substring(0,19)+"','YYYY-MM-DD HH24:mi:SS')"+
 	                            " WHERE STUDENT_NUMBER = "+studentNumber+
 	                            " AND TELE_ID = "+teleid+
-	                            " AND TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') = '"+startTimeStamp.substring(0,19)+"'"; 
+	                            " AND TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') = '"+startTimeStamp.substring(0,19)+"'"; */
+			
+				String query = " UPDATE STUDENT_TELECENTRE SET END_TIMESTAMP = str_to_date('"+endTimeStamp.substring(0,19)+"','%Y-%m-%d %H:%i:%s')"+
+	                    " WHERE STUDENT_NUMBER = "+studentNumber+
+	                    " AND TELE_ID = "+teleid+
+	                    " AND DATE_FORMAT(START_TIMESTAMP, '%Y-%m-%d %H:%i:%s') = '"+startTimeStamp.substring(0,19)+"'"; 
+	             // End Sifiso Changes:2018/11/01
 	        
 	             JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 	             try{     
@@ -282,10 +313,16 @@ public class TelecentreDAO extends SakaiDAO {
 		public void updateTimeStamps( String studentNumber, String startTimeStamp, String endTimeStamp) throws Exception
 		  
 	    {
-	   		        String query = " UPDATE STUDENT_TELECENTRE SET END_TIMESTAMP =to_date('"+endTimeStamp.substring(0,19)+"','YYYY-MM-DD HH24:mi:SS')"+
+					// Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
+	   		        /*String query = " UPDATE STUDENT_TELECENTRE SET END_TIMESTAMP =to_date('"+endTimeStamp.substring(0,19)+"','YYYY-MM-DD HH24:mi:SS')"+
 	                            " WHERE STUDENT_NUMBER ="+studentNumber+
-	                            " AND TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') ='"+startTimeStamp.substring(0,19)+"'"; 
-	            
+	                            " AND TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') ='"+startTimeStamp.substring(0,19)+"'";*/ 
+			
+					String query = " UPDATE STUDENT_TELECENTRE SET END_TIMESTAMP =str_to_date('"+endTimeStamp.substring(0,19)+"','%Y-%m-%d %H:%i:%s')"+
+		                    " WHERE STUDENT_NUMBER ="+studentNumber+
+		                    " AND DATE_FORMAT(START_TIMESTAMP, '%Y-%m-%d %H:%i:%s') ='"+startTimeStamp.substring(0,19)+"'";
+	   		        // Sifiso Changes:2018/11/01
+	   		        
 	                JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 	                try{     
 	            	    jdt.update(query);
@@ -349,13 +386,23 @@ public class TelecentreDAO extends SakaiDAO {
 		public String getTotalHrs(String teleid, String studentNumber, String startTimeStamp)throws Exception
 		  
 	    {
-			     String query1 = " select SUBSTR(TO_CHAR(END_TIMESTAMP-START_TIMESTAMP,'YYYYMMDD HH:MI:SS'),12,2) HOUR," +
+				 // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
+			     /*String query1 = " select SUBSTR(TO_CHAR(END_TIMESTAMP-START_TIMESTAMP,'YYYYMMDD HH:MI:SS'),12,2) HOUR," +
 			     		         " SUBSTR(TO_CHAR(END_TIMESTAMP-START_TIMESTAMP,'YYYYMMDD HH:MI:SS'),15,2) Minute," +
 			     		         " SUBSTR(TO_CHAR(END_TIMESTAMP-START_TIMESTAMP,'YYYYMMDD HH:MI:SS'),18,2) Seconds "+
 			                     " FROM STUDENT_TELECENTRE " +
 			                     " where STUDENT_NUMBER= "+studentNumber+
 			                     " AND TELE_ID= "+teleid+
-			                     " AND TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:MI:SS') ='"+startTimeStamp.substring(0,19)+"'"; 
+			                     " AND TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:MI:SS') ='"+startTimeStamp.substring(0,19)+"'"; */
+			
+				String query1 = " select SUBSTR(DATE_FORMAT(END_TIMESTAMP-START_TIMESTAMP,'%Y%m%d HH:%i:%s'),12,2) HOUR," +
+	    		         " SUBSTR(DATE_FORMAT(END_TIMESTAMP-START_TIMESTAMP,'%Y%m%d HH:%i:%s'),15,2) Minute," +
+	    		         " SUBSTR(DATE_FORMAT(END_TIMESTAMP-START_TIMESTAMP,'%Y%m%d HH:%i:%s'),18,2) Seconds "+
+	                    " FROM STUDENT_TELECENTRE " +
+	                    " where STUDENT_NUMBER= "+studentNumber+
+	                    " AND TELE_ID= "+teleid+
+	                    " AND DATE_FORMAT(START_TIMESTAMP, '%Y-%m-%d %H:%i:%s') ='"+startTimeStamp.substring(0,19)+"'"; 			
+			     // End Sifiso Changes:2018/11/01
 			  
 			     String hours = this.querySingleValue(query1,"HOUR");
 			     String minutes = this.querySingleValue(query1,"Minute");
@@ -427,10 +474,17 @@ public class TelecentreDAO extends SakaiDAO {
 		public String getDurationOfCurrentVisit(String teleid, String studentNumber, String startTimeStamp)throws Exception
 		  
 	    {		 
-			     String query =  " SELECT TOTAL_HRS FROM STUDENT_TELECENTRE "+
+				 // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
+			     /*String query =  " SELECT TOTAL_HRS FROM STUDENT_TELECENTRE "+
 			                     " WHERE STUDENT_NUMBER = "+studentNumber+
 			                     " AND TELE_ID = "+teleid+
-			                     " AND TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') ='"+startTimeStamp.substring(0,19)+"'";
+			                     " AND TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') ='"+startTimeStamp.substring(0,19)+"'";*/
+			
+				 String query =  " SELECT TOTAL_HRS FROM STUDENT_TELECENTRE "+
+	                     " WHERE STUDENT_NUMBER = "+studentNumber+
+	                     " AND TELE_ID = "+teleid+
+	                     " AND DATE_FORMAT(START_TIMESTAMP, '%Y-%m-%d %H:%i:%s') ='"+startTimeStamp.substring(0,19)+"'";			
+			     // End Sifiso Changes:2018/11/01
 
 	             String currentVisitDuration = this.querySingleValue(query,"TOTAL_HRS"); 
 			  
@@ -454,11 +508,18 @@ public class TelecentreDAO extends SakaiDAO {
 	   		
 				 //Sifiso Changes:Changed line below:2016/07/11-Added 'TIME_UNIT' column
 	             //String  query = " UPDATE STUDENT_TELECENTRE SET TOTAL_HRS ="+totalTime+
-				 String  query = " UPDATE STUDENT_TELECENTRE SET TOTAL_HRS ="+totalTime+", TIME_UNIT = "+timeUnit+	//Sifiso Changes
+				 // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
+				 /*String  query = " UPDATE STUDENT_TELECENTRE SET TOTAL_HRS ="+totalTime+", TIME_UNIT = "+timeUnit+	//Sifiso Changes
 	                             " WHERE STUDENT_NUMBER = "+studentNumber+
 	                             " AND TELE_ID = "+teleid+
-	            	             " AND TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') ='"+startTimeStamp.substring(0,19)+"'"; 
-
+	            	             " AND TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') ='"+startTimeStamp.substring(0,19)+"'"; */
+			
+				 String  query = " UPDATE STUDENT_TELECENTRE SET TOTAL_HRS ="+totalTime+", TIME_UNIT = "+timeUnit+	//Sifiso Changes
+		                    " WHERE STUDENT_NUMBER = "+studentNumber+
+		                    " AND TELE_ID = "+teleid+
+		   	             	" AND DATE_FORMAT(START_TIMESTAMP, '%Y-%m-%d %H:%i:%s') ='"+startTimeStamp.substring(0,19)+"'"; 
+				 // End Sifiso Changes:2018/11/01
+				  
 
 	             JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 	              try{     
@@ -492,11 +553,17 @@ public class TelecentreDAO extends SakaiDAO {
 		 {
 			
 		            boolean student;	
-		 			  String sql= " SELECT END_TIMESTAMP FROM STUDENT_TELECENTRE "+ 
+		              // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
+		 			  /*String sql= " SELECT END_TIMESTAMP FROM STUDENT_TELECENTRE "+ 
 		 			              " WHERE STUDENT_NUMBER = "+studentNumber+
 		 			              " AND TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') ='"+latestTime.substring(0,19)+"'"+
-		 			              " and to_char(sysdate,'YYYY-MM-DD HH24:MI:SS') between TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') and TO_CHAR(END_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS')";
+		 			              " and to_char(sysdate,'YYYY-MM-DD HH24:MI:SS') between TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') and TO_CHAR(END_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS')";*/
 		 			  
+		 			  String sql= " SELECT END_TIMESTAMP FROM STUDENT_TELECENTRE "+ 
+	 			              	  " WHERE STUDENT_NUMBER = "+studentNumber+
+	 			              	  " AND DATE_FORMAT(START_TIMESTAMP, '%Y-%m-%d %H:%i:%s') ='"+latestTime.substring(0,19)+"'"+
+	 			              	  " date_format(sysdate(),'%Y-%m-%d %H:%i:%s') between DATE_FORMAT(START_TIMESTAMP, '%Y-%m-%d %H:%i:%s') and DATE_FORMAT(END_TIMESTAMP, '%Y-%m-%d %H:%i:%s')";
+		 			  // End Sifiso Changes:2018/11/01
 		 			  
 		 			  String endTime = this.querySingleValue(sql,"END_TIMESTAMP");
 		 			  
@@ -539,11 +606,18 @@ public class TelecentreDAO extends SakaiDAO {
 		 {
 			String telecentreName ="";
 		 			  
-		 			 String query = " SELECT TELE_ID FROM STUDENT_TELECENTRE "+ 
+					 // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
+		 			 /*String query = " SELECT TELE_ID FROM STUDENT_TELECENTRE "+ 
 		                            " WHERE STUDENT_NUMBER = "+studentNumber+
 			                        " AND TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') ='"+latestTime.substring(0,19)+"'"+
-			                        " and to_char(sysdate,'YYYY-MM-DD HH24:MI:SS') between TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') and TO_CHAR(END_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS')";
-		 			
+			                        " and to_char(sysdate,'YYYY-MM-DD HH24:MI:SS') between TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS') and TO_CHAR(END_TIMESTAMP, 'YYYY-MM-DD HH24:mi:SS')";*/
+		 			 
+		 			 String query = " SELECT TELE_ID FROM STUDENT_TELECENTRE "+ 
+		 					 		" WHERE STUDENT_NUMBER = "+studentNumber+
+		 					 		" AND DATE_FORMAT(START_TIMESTAMP, '%Y-%m-%d %H:%i:%s') ='"+latestTime.substring(0,19)+"'"+
+		 					 		" and date_format(sysdate(),'%Y-%m-%d %H:%i:%s') between DATE_FORMAT(START_TIMESTAMP, '%Y-%m-%d %H:%i:%s') and DATE_FORMAT(END_TIMESTAMP, '%Y-%m-%d %H:%i:%s')";	 			 
+		 			  // End Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
+		 			 
 		 			 String teleId = this.querySingleValue(query,"TELE_ID");
 		 			 
 		 			 String query1 = " SELECT CENTRE_NAME FROM TELECENTRE "+ 
@@ -676,9 +750,15 @@ public class TelecentreDAO extends SakaiDAO {
 	   	     ArrayList results = new ArrayList();
 		     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	         dateUtil dateutil=new dateUtil();
-	         String sql = " SELECT TO_CHAR(START_TIMESTAMP,'HH24:MI') AS TIME_IN,TO_CHAR(END_TIMESTAMP, 'HH24:MI') AS TIME_OUT,STUDENT_NUMBER,TELE_ID,"+
+	         // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
+	         /*String sql = " SELECT TO_CHAR(START_TIMESTAMP,'HH24:MI') AS TIME_IN,TO_CHAR(END_TIMESTAMP, 'HH24:MI') AS TIME_OUT,STUDENT_NUMBER,TELE_ID,"+
 	        		 " TIME_UNIT AS UNIT,"+		//Sifiso Changes:Added:2016/07/11-Time unit in seconds,minutes,hours
-	                 " TOTAL_HRS AS DURATION  FROM STUDENT_TELECENTRE WHERE TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD')= "+"'"+dateutil.getPrevDate()+"'  ";
+	                 " TOTAL_HRS AS DURATION  FROM STUDENT_TELECENTRE WHERE TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD')= "+"'"+dateutil.getPrevDate()+"'  ";*/
+	         
+	         String sql = " SELECT DATE_FORMAT(START_TIMESTAMP,'%H:%i') AS TIME_IN,DATE_FORMAT(END_TIMESTAMP, '%H:%i') AS TIME_OUT,STUDENT_NUMBER,TELE_ID,"+
+	        		 " TIME_UNIT AS UNIT,"+		//Sifiso Changes:Added:2016/07/11-Time unit in seconds,minutes,hours
+	                 " TOTAL_HRS AS DURATION  FROM STUDENT_TELECENTRE WHERE DATE_FORMAT(START_TIMESTAMP, '%Y-%m-%d')= "+"'"+dateutil.getPrevDate()+"'  ";
+	         // End Sifiso Changes:2018/11/01
 	         
 	         JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 		     List queryList;
@@ -709,9 +789,15 @@ public class TelecentreDAO extends SakaiDAO {
 		     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	         Date date = new Date();
 	         String dateStr = dateFormat.format(date);
-	         String sql = " SELECT TO_CHAR(START_TIMESTAMP,'HH24:MI') AS TIME_IN,TO_CHAR(END_TIMESTAMP, 'HH24:MI') AS TIME_OUT,STUDENT_NUMBER,TELE_ID,"+
+	         // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
+	         /*String sql = " SELECT TO_CHAR(START_TIMESTAMP,'HH24:MI') AS TIME_IN,TO_CHAR(END_TIMESTAMP, 'HH24:MI') AS TIME_OUT,STUDENT_NUMBER,TELE_ID,"+
 	                 " TIME_UNIT AS UNIT,"+							//Sifiso Changes:Added:2016/07/11-Time unit in seconds,minutes,hours
-	                 " TOTAL_HRS AS DURATION  FROM STUDENT_TELECENTRE WHERE TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD')= "+"'"+dateStr+"'  ";
+	                 " TOTAL_HRS AS DURATION  FROM STUDENT_TELECENTRE WHERE TO_CHAR(START_TIMESTAMP, 'YYYY-MM-DD')= "+"'"+dateStr+"'  ";*/
+	         
+	         String sql = " SELECT DATE_FORMAT(START_TIMESTAMP,'%H:%i') AS TIME_IN,DATE_FORMAT(END_TIMESTAMP, '%H:%i') AS TIME_OUT,STUDENT_NUMBER,TELE_ID,"+
+	                 " TIME_UNIT AS UNIT,"+							//Sifiso Changes:Added:2016/07/11-Time unit in seconds,minutes,hours
+	                 " TOTAL_HRS AS DURATION  FROM STUDENT_TELECENTRE WHERE DATE_FORMAT(START_TIMESTAMP, '%Y-%m-%d')= "+"'"+dateStr+"'  ";
+	         // End Sifiso Changes:2018/11/01
 	         JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 		     List queryList;
 		     queryList = jdt.queryForList(sql);

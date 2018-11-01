@@ -85,7 +85,9 @@ public class MyUnisaStatsDAO extends SakaiDAO {
 		String select = "SELECT COUNT(*) AS A "+
 		             "FROM   SAKAI_EVENT "+
 		             "WHERE  EVENT = '"+event+"' "+
-		             "AND    TO_CHAR(EVENT_DATE,'YYYY-MM-DD') = '"+forDate+"'";
+		             // Sifiso Changes:2018/10/31:Convert from Oracle to mySQL 
+		             /*"AND    TO_CHAR(EVENT_DATE,'YYYY-MM-DD') = '"+forDate+"'";*/
+		             "AND    DATE_FORMAT(EVENT_DATE,'%Y-%m-%d') = '"+forDate+"'";
 
 		try{
 			eventStats = Integer.parseInt(this.querySingleValue(select,"A"));
@@ -142,7 +144,9 @@ public class MyUnisaStatsDAO extends SakaiDAO {
 		             "FROM   SAKAI_SESSION, SAKAI_EVENT "+
 		             "WHERE  SAKAI_SESSION.SESSION_ID = SAKAI_EVENT.SESSION_ID " +
 		             "AND    SAKAI_EVENT.EVENT = '"+event+"' "+
-		             "AND    TO_CHAR(SAKAI_EVENT.EVENT_DATE,'YYYY-MM-DD') = '"+forDate+"' "+
+		             // Sifiso Changes:2018/10/31:Convert from Oracle to mySQL 
+		             /*"AND    TO_CHAR(SAKAI_EVENT.EVENT_DATE,'YYYY-MM-DD') = '"+forDate+"' "+*/
+		             "AND    DATE_FORMAT(SAKAI_EVENT.EVENT_DATE,'%Y-%m-%d') = '"+forDate+"' "+
 		             "GROUP BY SAKAI_SESSION.SESSION_USER ";
 
 		try{
@@ -242,7 +246,9 @@ public class MyUnisaStatsDAO extends SakaiDAO {
 		             "FROM   SAKAI_SESSION, SAKAI_EVENT "+
 		             "WHERE  SAKAI_SESSION.SESSION_ID = SAKAI_EVENT.SESSION_ID " +
 		             "AND    SAKAI_EVENT.EVENT = '"+event+"' "+
-		             "AND    TO_CHAR(SAKAI_EVENT.EVENT_DATE,'YYYY') = '"+tmp[0]+"' ";
+		             // Sifiso Changes:2018/10/31:Convert from Oracle to mySQL
+		             /*"AND    TO_CHAR(SAKAI_EVENT.EVENT_DATE,'YYYY') = '"+tmp[0]+"' ";*/
+		             "AND    DATE_FORMAT(SAKAI_EVENT.EVENT_DATE,'%Y') = '"+tmp[0]+"' ";
 
 		try{
 	   		JdbcTemplate jdt = new JdbcTemplate(super.getDataSource());
@@ -323,7 +329,9 @@ public class MyUnisaStatsDAO extends SakaiDAO {
 		             "FROM   SAKAI_SESSION_HISTORY, SAKAI_EVENT_HISTORY "+
 		             "WHERE  SAKAI_SESSION_HISTORY.SESSION_ID = SAKAI_EVENT_HISTORY.SESSION_ID " +
 		             "AND    SAKAI_EVENT_HISTORY.EVENT = '"+event+"' "+
-		             "AND    TO_CHAR(SAKAI_EVENT_HISTORY.EVENT_DATE,'YYYY-MM') = '"+tmpDate+"' ";
+		             // Sifiso Changes:2018/10/31:Convert from Oracle to mySQL
+		             /*"AND    TO_CHAR(SAKAI_EVENT_HISTORY.EVENT_DATE,'YYYY-MM') = '"+tmpDate+"' ";*/
+		             "AND    DATE_FORMAT(SAKAI_EVENT_HISTORY.EVENT_DATE,'%Y-%m') = '"+tmpDate+"' ";
 		System.out.println("getUserLoginMonthlyHistory: "+select);
 
 		try{
@@ -414,7 +422,9 @@ public class MyUnisaStatsDAO extends SakaiDAO {
 
 		String select = "SELECT DISTINCT SAKAI_SESSION.SESSION_USER AS USR "+
 						"FROM   SAKAI_SESSION "+
-						"WHERE  TO_CHAR(SAKAI_SESSION.SESSION_START,'YYYY') = '"+forDate+"' "+
+						// Sifiso Changes:2018/10/31:Convert from Oracle to mySQL
+						/*"WHERE  TO_CHAR(SAKAI_SESSION.SESSION_START,'YYYY') = '"+forDate+"' "+*/
+						"WHERE  DATE_FORMAT(SAKAI_SESSION.SESSION_START,'%Y') = '"+forDate+"' "+
 						"GROUP BY SAKAI_SESSION.SESSION_USER ";
 
 		try{
@@ -506,7 +516,9 @@ public class MyUnisaStatsDAO extends SakaiDAO {
 		String select = "SELECT COUNT(*) AS A "+
 		             "FROM   SAKAI_EVENT "+
 		             "WHERE  EVENT = '"+event+"' "+
-		             "AND    TO_CHAR(EVENT_DATE,'YY-MM') = '"+forDate+"'";
+		             // Sifiso Changes:2018/10/31:Convert from Oracle to mySQL
+		             /*"AND    TO_CHAR(EVENT_DATE,'YY-MM') = '"+forDate+"'";*/
+		             "AND    DATE_FORMAT(EVENT_DATE,'YY-%m') = '"+forDate+"'";
 
 		try{
 			eventStats = Integer.parseInt(this.querySingleValue(select,"A"));
@@ -554,7 +566,9 @@ public class MyUnisaStatsDAO extends SakaiDAO {
 		String select = "SELECT REF,COUNT(*) AS A "+
 		             "FROM   SAKAI_EVENT "+
 		             "WHERE  EVENT = '"+event+"' "+
-		             "AND    TO_CHAR(EVENT_DATE,'YYYY-MM-DD') = '"+forDate+"'"+
+		             // Sifiso Changes:2018/10/31:Convert from Oracle to mySQL
+		             /*"AND    TO_CHAR(EVENT_DATE,'YYYY-MM-DD') = '"+forDate+"'"+*/
+		             "AND    DATE_FORMAT(EVENT_DATE,'%Y-%m-%d') = '"+forDate+"'"+
 		             "GROUP BY REF";
 
 		try{
@@ -639,7 +653,9 @@ public class MyUnisaStatsDAO extends SakaiDAO {
 		}
 
 		String sqlInsert = "INSERT INTO UNISA_MIS(DATE_COUNTED,USER_TYPE,CATEGORY, ACTION, MIS_VALUE) "+
-		                   "VALUES(TO_DATE('"+forDate+"','YYYY-MM-DD'),'"+userType+"','"+forSite+"','"+event+"',"+eventStatsStr+")";
+							// Sifiso Changes:2018/10/31:Convert from Oracle to mySQL
+		                   /*"VALUES(TO_DATE('"+forDate+"','YYYY-MM-DD'),'"+userType+"','"+forSite+"','"+event+"',"+eventStatsStr+")";*/
+		                   "VALUES(STR_TO_DATE('"+forDate+"','%Y-%m-%d'),'"+userType+"','"+forSite+"','"+event+"',"+eventStatsStr+")";
 
 		System.out.println("sqlInsert: "+sqlInsert);
 
@@ -685,7 +701,9 @@ public class MyUnisaStatsDAO extends SakaiDAO {
 		String select = "SELECT MIS_VALUE "+
         		"FROM   UNISA_MIS "+
         		"WHERE  ACTION = '"+event+"' "+
-        		"AND    TO_CHAR(DATE_COUNTED,'YYYY-MM-DD') = '"+newDate+"' ";
+        		// Sifiso Changes:2018/10/31:Convert from Oracle to mySQL
+        		/*"AND    TO_CHAR(DATE_COUNTED,'YYYY-MM-DD') = '"+newDate+"' ";*/
+        		"AND    DATE_FORMAT(DATE_COUNTED,'%Y-%m-%d') = '"+newDate+"' ";
 		if (forSite.length()>1) {
 			select = select +" AND    CATEGORY = '"+forSite+"' ";
 		}
@@ -715,7 +733,9 @@ public class MyUnisaStatsDAO extends SakaiDAO {
 
 			String sqlUpdate = "UPDATE UNISA_MIS "+
 							"SET    MIS_VALUE = "+eventStatsTmp+" "+
-							"WHERE  DATE_COUNTED = TO_DATE('"+newDate+"','YYYY-MM-DD') "+
+							// Sifiso Changes:2018/10/31:Convert from Oracle to mySQL
+							/*"WHERE  DATE_COUNTED = TO_DATE('"+newDate+"','YYYY-MM-DD') "+*/
+							"WHERE  DATE_COUNTED = STR_TO_DATE('"+newDate+"','%Y-%m-%d') "+
 							"AND    ACTION = '"+event+"' "+
 							"AND    USER_TYPE = '"+userType+"' "+
 							"AND    CATEGORY = '"+forSite+"' ";
@@ -759,7 +779,9 @@ public class MyUnisaStatsDAO extends SakaiDAO {
 
 		String sqlUpdate = "UPDATE UNISA_MIS "+
 		                   "SET    MIS_VALUE = "+eventStats+" "+
-		                   "WHERE  DATE_COUNTED = TO_DATE('"+forDate+"','YYYY-MM-DD') "+
+		                   // Sifiso Changes:2018/10/31:Convert from Oracle to mySQL
+		                   /*"WHERE  DATE_COUNTED = TO_DATE('"+forDate+"','YYYY-MM-DD') "+*/
+		                   "WHERE  DATE_COUNTED = STR_TO_DATE('"+forDate+"','%Y-%m-%d') "+
 		                   "AND    ACTION = '"+event+"' "+
 		                   "AND    USER_TYPE = '"+userType+"' "+
 		                   "AND    CATEGORY = '"+forSite+"' ";
@@ -826,7 +848,9 @@ public class MyUnisaStatsDAO extends SakaiDAO {
 		String select = "SELECT REF,COUNT(*) AS A "+
 		             "FROM   SAKAI_EVENT "+
 		             "WHERE  EVENT = '"+event+"' "+
-		             "AND    TO_CHAR(EVENT_DATE,'YYY-MM') = '"+forDate+"' "+
+		             // Sifiso Changes:2018/10/31:Convert from Oracle to mySQL
+		             /*"AND    TO_CHAR(EVENT_DATE,'YYY-MM') = '"+forDate+"' "+*/
+		             "AND    DATE_FORMAT(EVENT_DATE,'YYY-%m') = '"+forDate+"' "+
 		             "GROUP BY REF";
 		//System.out.println("getEventStatsPerSiteMonthly: "+select);
 
@@ -865,7 +889,9 @@ public class MyUnisaStatsDAO extends SakaiDAO {
 		String joinedActiveSQL = "SELECT count(*) as JA " +
         						 "FROM   JOIN_ACTIVATION " +
         						 "WHERE  ACT_STATUS = 'Y' " +
-        						 "AND    TO_CHAR(JOIN_DATE,'YYYY-MM-DD') = '"+forDate+"' ";
+        						 // Sifiso Changes:2018/10/31:Convert from Oracle to mySQL
+        						 /*"AND    TO_CHAR(JOIN_DATE,'YYYY-MM-DD') = '"+forDate+"' ";*/
+        						 "AND    DATE_FORMAT(JOIN_DATE,'%Y-%m-%d') = '"+forDate+"' ";
 
 		try{
 			eventStats = Integer.parseInt(this.querySingleValue(joinedActiveSQL,"JA"));
@@ -897,7 +923,9 @@ public class MyUnisaStatsDAO extends SakaiDAO {
 		String joinedActiveSQL = "SELECT count(*) as JA " +
         						 "FROM   JOIN_ACTIVATION " +
         						 "WHERE  ACT_STATUS = 'Y' " +
-        						 "AND    TO_CHAR(JOIN_DATE,'YYYY-MM-DD') = '"+forDate+"' ";
+        						 // Sifiso Changes:2018/10/31:Convert from Oracle to mySQL
+        						 /*"AND    TO_CHAR(JOIN_DATE,'YYYY-MM-DD') = '"+forDate+"' ";*/
+        						 "AND    DATE_FORMAT(JOIN_DATE,'%Y-%m-%d') = '"+forDate+"' ";
 
 		try{
 			eventStats = Integer.parseInt(this.querySingleValue(joinedActiveSQL,"JA"));
