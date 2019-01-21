@@ -617,7 +617,14 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 		op.setInCsfClientServerCommunicationsAction("LI");
 			     
 		op.setInWsUserNumber(Integer.parseInt(stuRegForm.getAdminStaff().getNumber().trim()));
-		op.setInWsUserPassword(stuRegForm.getAdminStaff().getPassword().toUpperCase().trim());
+		
+		//Johanet - change 20181213
+		if (stuRegForm.getAdminStaff().getPassword().toUpperCase().trim().length()>12) {
+			op.setInWsUserPassword(stuRegForm.getAdminStaff().getPassword().toUpperCase().trim().substring(0, 12));
+		}else {
+			op.setInWsUserPassword(stuRegForm.getAdminStaff().getPassword().toUpperCase().trim());
+		}
+		
 		op.setInWsUserPassword32cs(stuRegForm.getAdminStaff().getPassword().trim());
 
 
@@ -1620,7 +1627,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 
 				/** Flow Check: (11) **/
 				//log.debug("ApplyForStudentNumberAction - applyLoginNew (11) - Check STUAPQ Record");
-				boolean vSTUAPQCheck = dao.validateSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay, stuRegForm.getStudent().getAcademicYear());
+				boolean vSTUAPQCheck = dao.validateSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay, stuRegForm.getStudent().getAcademicYear(),stuRegForm.getLoginSelectMain());
 
 					if (vSTUAPQCheck){ 
 						/** Flow Check: (12) **/
@@ -2121,7 +2128,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				String bDay = stuRegForm.getStudent().getBirthDay() + "/" + stuRegForm.getStudent().getBirthMonth() + "/" + stuRegForm.getStudent().getBirthYear();
 				/** Flow Check: (4) **/
 				//log.debug("ApplyForStudentNumberAction - applyLoginReturn (4) - Check STUAPQ (F851)");
-				boolean checkSTUAPQ = dao.validateSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay,stuRegForm.getStudent().getAcademicYear());
+				boolean checkSTUAPQ = dao.validateSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay,stuRegForm.getStudent().getAcademicYear(),stuRegForm.getLoginSelectMain());
 				stuRegForm.getStudent().setStuapqExist(checkSTUAPQ);
 				
 				//log.debug("ApplyForStudentNumberAction - applyLoginReturn - (IF) vAcaCheck=True - checkSTUAPQ: " + checkSTUAPQ + " - setStuExist:curStu - goto - MenuReturnStu");
@@ -2339,7 +2346,7 @@ public class ApplyForStudentNumberAction extends LookupDispatchAction {
 				String bDay = stuRegForm.getStudent().getBirthDay() + "/" + stuRegForm.getStudent().getBirthMonth() + "/" + stuRegForm.getStudent().getBirthYear();
 				/** Flow Check: (20) **/
 				//log.debug("ApplyForStudentNumberAction - applyLoginReturn (20) - Check for STUAPQ (F851) record");
-				boolean checkSTUAPQ = dao.validateSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay,stuRegForm.getStudent().getAcademicYear());
+				boolean checkSTUAPQ = dao.validateSTUAPQ(stuRegForm.getStudent().getSurname(), stuRegForm.getStudent().getFirstnames(), bDay,stuRegForm.getStudent().getAcademicYear(),stuRegForm.getLoginSelectMain());
 				stuRegForm.getStudent().setStuapqExist(checkSTUAPQ);
 				
 				//log.debug("ApplyForStudentNumberAction - applyLoginReturn - (IF) vAcaCheck=True - checkSTUAPQ: " + checkSTUAPQ + " - setStuExist:curStu - goto - MenuReturnStu");

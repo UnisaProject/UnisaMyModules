@@ -24,9 +24,10 @@
 	<!-- >module>overlays/qna</module--> 
 	<module>overlays/reference</module>
     <module>overlays/rwiki</module>
-    <!-- >module>overlays/osp</module-->
+    <module>overlays/osp</module>
 	<module>overlays/sections</module>
 	<module>overlays/site-manage</module>
 	<module>overlays/syllabus</module>
+	<module>overlays/lessonbuilder</module>
   </modules>
 </project>

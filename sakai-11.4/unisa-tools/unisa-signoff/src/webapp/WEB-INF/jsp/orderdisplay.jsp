@@ -7,6 +7,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.signoff.ApplicationResources"/>
+<sakai:html>
 <script language="JavaScript">
 	function setAction() {
 		document.signoffForm.action='signoff.do?act=orderSignoffDisplay'
@@ -22,7 +23,7 @@
 		document.signoffForm.submit();
 	}
 </script>
-<sakai:html>
+
 	<html:form action="/signoff.do">	
 		<html:hidden property="atStep" value="3"/>
 	<sakai:messages/>

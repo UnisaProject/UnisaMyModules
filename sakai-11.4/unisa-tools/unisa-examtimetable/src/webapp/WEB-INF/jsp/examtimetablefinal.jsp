@@ -159,12 +159,13 @@
 					<bean:write name="examTimetableDisplayForm" property="venueDesc"/>&nbsp;
 					<logic:notEmpty name="examTimetableDisplayForm" property="latitude">
 						<logic:notEmpty name="examTimetableDisplayForm" property="longitude">
+							(latitude:&nbsp;<bean:write name="examTimetableDisplayForm" property="latitude"/>;&nbsp;&nbsp;&nbsp;longitude:&nbsp;<bean:write name="examTimetableDisplayForm" property="longitude"/>)
 							<!--<html:link href="displayExamTimetable.do?action=displayMap">
 								<fmt:message key="page.linkDisplayMapText"/>
-							</html:link>-->
+							</html:link>
 							<html:link href="<%=urlString%>">
 								<fmt:message key="page.linkDisplayMapText"/>
-							</html:link>
+							</html:link>-->
 						</logic:notEmpty>
 					</logic:notEmpty>
 				</td>

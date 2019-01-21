@@ -24,10 +24,10 @@
 		}	
 		@media Print
 		{	body {font-size:9pt;background: white}
-			h1 {font-size:14pt;width:100%;font-family:Verdana,Arial,Helvetica}
+			h1 {font-size:13pt;width:100%;font-family:Verdana,Arial,Helvetica}
 			h2 {font-size:12pt;font-weight:bold;font-family:Verdana,Arial,Helvetica}
 			h3 {font-size:10pt;width:100%;font-family:Verdana,Arial,Helvetica}
-			td {height:20pt}
+			td {height:16pt}
 			h1, h2, h3, h4, h5, h6 { page-break-after:avoid;page-break-inside:avoid }
 			table {page-break-inside:avoid;font-family:Verdana,Arial,Helvetica;font-size:9pt !important}
 			.act {{display:none}

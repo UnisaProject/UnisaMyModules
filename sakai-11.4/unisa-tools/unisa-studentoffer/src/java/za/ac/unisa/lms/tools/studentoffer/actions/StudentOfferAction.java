@@ -140,6 +140,15 @@ public class StudentOfferAction extends LookupDispatchAction {
 			stuStatForm.getStudent().setBirthDay(request.getParameter("birthDay"));
 			stuStatForm.getStudent().setStuExist(true);
 			
+			StudentOfferDAO dao = new StudentOfferDAO();
+			
+			String tmpEmail = dao.personalDetails(stuStatForm.getStudent().getNumber(),"email_address").trim();
+			if (!"error".equalsIgnoreCase(tmpEmail)){
+				stuStatForm.getStudent().setEmailAddress(tmpEmail);
+			}else{
+				stuStatForm.getStudent().setEmailAddress("");
+			}
+			
 			applyOfferStatus(request, stuStatForm);
 			return mapping.findForward("applyOffer");
 		}

@@ -29,6 +29,8 @@ import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 
 import za.ac.unisa.lms.constants.EventTrackingTypes;
+import za.ac.unisa.lms.dao.Gencod;
+import za.ac.unisa.lms.dao.StudentSystemGeneralDAO;
 import za.ac.unisa.lms.tools.regdetails.dao.AdditionQueryDAO;
 import za.ac.unisa.lms.tools.regdetails.dao.RegQueryDAO;
 import za.ac.unisa.lms.tools.regdetails.forms.RegDetailsForm;
@@ -184,6 +186,16 @@ public class DisplayRegDetailsAction extends DispatchAction {
 //		 check account type
 		if (db.isWrongAccountType(regDetailsForm.getStudentNr())){
 			request.setAttribute("showLinks", "false");
+		}
+		
+		//Change 20181112 - myUnisa unbundling remove links Semester Exchange, Study Unit Cancellations and Request registration letter depending on gencod flag
+		StudentSystemGeneralDAO dao = new StudentSystemGeneralDAO();
+		request.setAttribute("showAddLinks", "true");
+		Gencod gencod = new Gencod();
+		gencod = dao.getGenCode("315", "REGDETAILS");
+		if (gencod != null && gencod.getAfrDescription()!= null && !gencod.getAfrDescription().trim().equalsIgnoreCase("Y")){
+			/*Temporary disable additional links*/
+			request.setAttribute("showAddLinks", "false");
 		}
 
 		if (getStudentDetail) {

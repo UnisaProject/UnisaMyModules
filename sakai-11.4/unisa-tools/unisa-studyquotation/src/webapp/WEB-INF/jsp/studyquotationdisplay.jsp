@@ -6,10 +6,22 @@
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.studyquotation.ApplicationResources"/>
 <sakai:html>
+	<script type="text/javascript">
+		
+		window.onload = function() {
+		var flag = document.getElementById('showDisclaimer').value;	
+		if (flag=='true') alert(document.getElementById('disclaimerMessage').value);
+		}
+	
+	</script>	
+	
 	<sakai:heading><fmt:message key="studyquote.heading"/></sakai:heading>
 	<sakai:instruction>
 		<fmt:message key="studyquote.userinstruction4" />
 	</sakai:instruction>
+	<html:form action="studyquotation">
+	<input type="hidden" id="showDisclaimer" name="showDisclaimer" value="<bean:write name="studyquotationform" property="showDisclaimer"/>" />
+	<input type="hidden" id="disclaimerMessage" name="disclaimerMessage" value="<bean:write name="studyquotationform" property="disclaimerMessage"/>" />
 	<sakai:flat_list>
 		<tr>
 			<td width="25%">
@@ -61,10 +73,37 @@
 			</td>
 		</tr>
 		</logic:iterate>
-
 		<tr>
 			<td width="25%"><br></td><td width="60%"><br></td><td align="right" width="15%">-----------</td>
 		</tr>
+		<!-- Johanet Change 20181129 - Start -->
+		<logic:greaterThan name="studyquotationform" property="studyQuotation.foodAccommodationFee" value="0">
+			<tr>
+				<td width="25%">
+					<br>
+				</td>
+				<td width="60%">
+					<b><fmt:message key="studyquote.label.foodAccommodation"/></b>
+				</td>
+				<td align="right" width="15%">
+					<bean:write name="studyquotationform" property="studyQuotation.foodAccommodationFee" format="0.00"/>
+				</td>
+			</tr>	
+		</logic:greaterThan>
+		<logic:greaterThan name="studyquotationform" property="studyQuotation.nursingCouncilRegfee" value="0">
+			<tr>
+				<td width="25%">
+					<br>
+				</td>
+				<td width="60%">
+					<b><fmt:message key="studyquote.label.nursingCouncilReg"/></b>
+				</td>
+				<td align="right" width="15%">
+					<bean:write name="studyquotationform" property="studyQuotation.nursingCouncilRegfee" format="0.00"/>
+				</td>
+			</tr>	
+		</logic:greaterThan>
+		<!-- Johanet Change 20181129 - End -->
 		<tr>
 			<td width="25%">
 				<br>
@@ -172,9 +211,14 @@
 			<td colspan="3" width="100%"><br/><fmt:message key="studyquote.userinstruction1"/></td>
 		</tr><tr>
 			<td colspan="3" width="100%"><br/><fmt:message key="studyquote.userinstruction2"/></td>
-		</tr>
+		</tr>		
 	</sakai:flat_list>
-	<html:form action="studyquotation">
+	<logic:equal name="studyquotationform" property="showDisclaimer" value="true">
+		<sakai:instruction>
+			<bean:write name="studyquotationform" property="disclaimerMessage"/>
+		</sakai:instruction>
+	</logic:equal>
+	
 		<sakai:actions>
 			<html:submit property="action">
 				<fmt:message key="studyquote.button.back"/>

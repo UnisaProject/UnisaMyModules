@@ -9,23 +9,24 @@
 
 <%-- Toolbar --%>
 <logic:equal name="regDetailsForm" property="nonFormal" value="false">
-<logic:notEqual name="showLinks" value="false">
-	<sakai:tool_bar>
-		<html:link href="additions.do?action=displayContactDetails">
-			<fmt:message key="link.add"/>
-		</html:link>
-		<html:link href="exchange.do?action=step1">
-			<fmt:message key="link.exchange"/>
-		</html:link>
-		<html:link href="cancel.do?action=step1">
-			<fmt:message key="link.cancel"/>
-		</html:link>
-		<html:link href="croc.do?action=step1">
-			<fmt:message key="link.croc"/>
-		</html:link>
-		
-	</sakai:tool_bar>
-</logic:notEqual>
+	<logic:notEqual name="showLinks" value="false">
+		<sakai:tool_bar>
+			<html:link href="additions.do?action=displayContactDetails">
+				<fmt:message key="link.add"/>
+			</html:link>
+			<logic:equal name="showAddLinks" value="true">
+				<html:link href="exchange.do?action=step1">
+					<fmt:message key="link.exchange"/>
+				</html:link>
+				<html:link href="cancel.do?action=step1">
+					<fmt:message key="link.cancel"/>
+				</html:link>
+				<html:link href="croc.do?action=step1">
+					<fmt:message key="link.croc"/>
+				</html:link>
+		    </logic:equal>	
+		</sakai:tool_bar>
+	</logic:notEqual>
 </logic:equal>
 
 <br/>

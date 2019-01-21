@@ -133,10 +133,10 @@ import java.util.*;
                           		
                           		//Web-service list
                           		List examList= new ArrayList();
-                          		
+
                           		try {
                           			coursecode = dao.getMainCourse(this.getId().substring(0,7));
-                          			//courseList = dao.getCourseList(this.getId().substring(0,7));
+                          			courseList = dao.getCourseList(this.getId().substring(0,7));
                           			} catch (Exception e1) {
                           			// TODO Auto-generated catch block
                           			log.error("Official study material: Failed to get courseList from quey(getMainCourse or getCourseList) for "+siteId);
@@ -153,7 +153,7 @@ import java.util.*;
                           		String coursecodes;
                           		String periodDesc="";
                           		Boolean headerStatus = Boolean.FALSE;
-                          		//examList = examXmlConvert(this.getId().substring(0,7));
+                          		examList = examXmlConvert(this.getId().substring(0,7));
                           		int noExamPaperMsgCounter=0;
                           		//compare the two lists	
                           		if (courseList.size() > 0){ //courseList.size() > 0

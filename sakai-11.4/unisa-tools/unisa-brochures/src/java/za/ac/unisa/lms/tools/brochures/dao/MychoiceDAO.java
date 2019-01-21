@@ -935,7 +935,7 @@ public class MychoiceDAO extends StudentSystemDAO {
 		query = bquery.myRegQuery(schCode, dptCode, researchFlag, collCode,
 				catCode, qualificationCode, special, year, repeatYear, repeat,
 				heqfComp, reglevel);
-
+	
 		System.out.println("My Registration sql+++++++++++++--"+query);
 
 		try {
@@ -1342,6 +1342,7 @@ public class MychoiceDAO extends StudentSystemDAO {
 									.createElement("qualificationlevel");
 							qualification.appendChild(qualLevel);
 							qualificationLevel = data.get("LVL").toString();
+							System.out.println("qualification level ++++++++++"+qualificationLevel);
 
 							Element level = document.createElement("name");
 							level.appendChild(document.createTextNode(data.get(
@@ -2400,13 +2401,16 @@ public class MychoiceDAO extends StudentSystemDAO {
 					if (data.get("LANG") != null) {
 
 						StringTokenizer tokens = new StringTokenizer(data.get(
-								"LANG").toString(), ",");
+								"LANG").toString(), ",");	
 
+						String languageCode = null;
+						int endOfCode;
+						
 						while (tokens.hasMoreTokens()) {
 
 							String lang = tokens.nextToken();
 
-							if (lang.equalsIgnoreCase("E")) {
+							/*if (lang.equalsIgnoreCase("E")) {
 								english.appendChild(document
 										.createTextNode("Y"));
 							}
@@ -2423,7 +2427,7 @@ public class MychoiceDAO extends StudentSystemDAO {
 
 							if (lang.equalsIgnoreCase("OT")) {
 								o_languages.appendChild(document
-										.createTextNode("Y"));
+										//.createTextNode("Y"));
 							}
 							if (lang.equalsIgnoreCase("XH")) {
 								xhosa.appendChild(document
@@ -2437,6 +2441,57 @@ public class MychoiceDAO extends StudentSystemDAO {
 								a_languages.appendChild(document
 										.createTextNode("Y"));
 							}*/
+							
+							endOfCode = lang.indexOf(".");
+							if(endOfCode != -1){
+								languageCode = lang.substring(0, endOfCode);
+								System.out.println("language code -----"+languageCode);
+							}else{
+								languageCode = lang;
+							}
+							
+							
+							if (languageCode.equalsIgnoreCase("E")) {
+								english.appendChild(document
+										.createTextNode("Y"));
+							}
+
+							if (languageCode.equalsIgnoreCase("A")) {
+								afrikaans.appendChild(document
+										.createTextNode("Y"));
+							} 
+
+							if (languageCode.equalsIgnoreCase("NS")) {
+								n_sotho.appendChild(document
+										.createTextNode("Y"));
+							}
+
+							if (languageCode.equalsIgnoreCase("OT")) {
+								Element offered = document
+										.createElement("offered"); 
+										
+								offered.appendChild(document
+										.createTextNode("Y"));
+								
+								Element lang_desc = document
+										.createElement("language_description");
+								
+								System.out.println("language description -----"+lang.substring(endOfCode + 1));								
+								lang_desc.appendChild(document
+										.createTextNode(lang.substring(endOfCode + 1)));
+								
+								o_languages.appendChild(offered);
+								o_languages.appendChild(lang_desc);
+								
+							}
+							if (languageCode.equalsIgnoreCase("XH")) {
+								xhosa.appendChild(document
+										.createTextNode("Y"));
+							}
+							if (languageCode.equalsIgnoreCase("ZU")) {
+								zulu.appendChild(document
+										.createTextNode("Y"));
+							}
 						}
 
 					}

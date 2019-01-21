@@ -86,6 +86,31 @@ public class RegQueryDAO extends StudentSystemDAO {
 
 		return "";
 	}
+	
+	public String getStuAcaStatus(String studentNr, String qualCode) throws Exception{
+
+		/* check stuann only */
+		String sql = "select status_code from stuaca a" +
+		" where a.mk_student_nr =" +studentNr +
+		" and a.mk_qualification_c='" + qualCode + "'";
+		//log.debug(sql);
+
+		try {
+		JdbcTemplate jdt = new JdbcTemplate(getDataSource());
+		List queryList = jdt.queryForList(sql);
+
+		Iterator i = queryList.iterator();
+		while (i.hasNext()) {
+			ListOrderedMap data = (ListOrderedMap) i.next();
+			return data.get("STATUS_CODE").toString();
+		}
+
+		return "NOT FOUND";
+		
+		} catch (Exception ex) {
+			throw new Exception("RegQueryDao : Error reading stuaca status / "+ ex,ex);
+		}
+	}
 
 	public ArrayList getRegisteredStudyUnits(String studentNr) throws Exception{
 
@@ -705,6 +730,7 @@ public class RegQueryDAO extends StudentSystemDAO {
 		//log.debug("Returning "+currentYear+" as the current year for registration");
 
 		return currentYear;
+		//return 2018;
 
 	}
 

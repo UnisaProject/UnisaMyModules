@@ -30,14 +30,14 @@
                 <li class="Mrphs-footer--nav__project--copyright">${bottomNavCopyright}</li>
             </ul>
 
-            <details class="Mrphs-footer--details Mrphs-footer--details__build-info">
+            <div class="Mrphs-footer--details Mrphs-footer--details__build-info">	## unisa-changes:2018/11/21:Change details tags to div tags
                 <summary>${rloader.site_buildinfo_label}</summary>
                 <p class="Mrphs-footer--nav__build__panel">${bottomNavService} - ${bottomNavServiceVersion} - Sakai ${bottomNavSakaiVersion} - Server ${bottomNavServer}</p>
-            </details>
+            </div> 		## unisa-changes:2018/11/21:Change details tags to div tags
 
             #if ($showServerTime == "true")
 
-                <details class="Mrphs-footer--details Mrphs-footer--details__server-time" aria-live="off">
+                <div class="Mrphs-footer--details Mrphs-footer--details__server-time" aria-live="off">	## unisa-changes:2018/11/21:Change details tags to div tags
                 <summary>${rloader.site_servertime_label}</summary>
 
                     #if ($showPreferredTzTime == "true")
@@ -48,7 +48,7 @@
                     #end
 
                     <span id="serverTime" class="Mrphs-footer--server-time" data-servertzdisplay="${serverTzDisplay}" data-serverdateandgmtoffset="${serverTzGMTOffset}"></span>
-                </details>
+                </div>	## unisa-changes:2018/11/21:Change details tags to div tags
 
             #end ## END of IF ($showServerTime == "true")
 

@@ -539,7 +539,7 @@ clog.utils = {
             $('#clog-authors').html('');
         }
 
-        var url = '/direct/clog-author/authors.json?siteId=' + clog.siteId + '&page=' + clog.page;
+        var url = '/direct/clog-author/authors.json?siteId=' + clog.siteId;
 
         if (args && args.sort) {
             url += '&sort=' + args.sort;
@@ -551,17 +551,6 @@ clog.utils = {
             cache: false,
             timeout: clog.AJAX_TIMEOUT,
             success: function (data) {
-
-                if (data.status === 'END') {
-                    $(window).off('scroll.clog');
-                    loadImage.hide();
-                } else {
-                    $(window).off('scroll.clog').on('scroll.clog', clog.utils.getScrollFunction(args, clog.utils.renderPageOfMembers));
-                }
-
-                if (clog.page == 0) {
-                    $('#clog-authors-total').html(data.authorsTotal);
-                }
 
                 var authors = data.authors;
 
@@ -576,9 +565,16 @@ clog.utils = {
 
                     clog.utils.attachProfilePopup();
                     loadImage.hide();
+                    
+                    $("#clog_author_table")
+						.tablesorter({widthFixed: true, widgets: ['zebra']})
+						.tablesorterPager({ container: $("#clogAuthorPager"), positionFixed: false });
+					
+                    $('.pagedisplay').prop('disabled', true);                    
+                    $(".pagesize").append('<option value="' + authors.length  + '">All</option>');
+                    
                 });
 
-                clog.page += 1;
             },
             error : function (xmlHttpRequest, status, errorThrown) {
                 alert("Failed to get authors. Reason: " + errorThrown);

@@ -202,11 +202,11 @@ ArrayList<String> suSelectedList = (ArrayList<String>)stuRegForm.getSelectedAddi
 				<td colspan="5"><strong><fmt:message key="page.additions.closed2" /></strong></td>
 			</tr>
 		</logic:notEqual>
-		<logic:notEqual name="regDetailsForm" property="regPeriodOpen6" value="Y">
+		<!--<logic:notEqual name="regDetailsForm" property="regPeriodOpen6" value="Y">
 			<tr>
 				<td colspan="5"><strong><fmt:message key="page.additions.closed6" /></strong></td>
 			</tr>
-		</logic:notEqual>
+		</logic:notEqual>-->
 	<logic:notEqual name="regDetailsForm" property="listType" value="T">
  		<logic:present name="regDetailsForm" property="selectedAdditionalStudyUnits">
  			<tr><td colspan="5">
