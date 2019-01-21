@@ -149,6 +149,9 @@
   .icon-sakai--unisa-unmarkassfollowup {					@extend .fa-clone; }
   .icon-sakai--unisa-uploadmanager {						@extend .fa-upload; }    
   .icon-sakai--unisa-welcome {								@extend .fa-home; }
+  .icon-sakai--unisa-honsadmission {                        @extend .fa-ticket; }
+  .icon-sakai--unisa-signoff {                              @extend .fa-university; }
+  .icon-sakai--unisa-canceluser {                           @extend .fa-user-times; }
 
   // when we're showing the motd tool as "Welcome" on the gateway page, use a different icon.
   a.Mrphs-hierarchy-item.Mrphs-hierarchy--toolName[href*="!gateway"] .icon-sakai--sakai-motd,

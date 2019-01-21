@@ -2,8 +2,8 @@
 <registration>
 	<tool
 		id="unisa.prescribedbooks"
-		title="Prescribed Books"
-		description="Prescribed Books tool">
+		title="Prescribed Material"
+		description="For viewing information about Prescribed and Recommended Books, and eReserves">
        <category name="course" />
 		<category name="onlcourse" />
 	</tool>

@@ -29,7 +29,7 @@ clog.sortByComments = clog.SORT_COMMENTS_DOWN;
 // Sorting keys end
 //
 clog.LOCAL_STORAGE_KEY = 'clog';
-//clog.AJAX_TIMEOUT = 5000;
+//clog.AJAX_TIMEOUT = 5000; unisa change
 clog.AJAX_TIMEOUT = 60000;
 
 

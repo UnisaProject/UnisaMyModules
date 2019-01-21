@@ -68,6 +68,10 @@
 	<module>unisa-sitestatsexport</module>
 	<module>unisa-studentemail</module>
 	<module>unisa-studentlist</module>
+	<module>unisa-studentstatus</module>
+	<module>unisa-studentoffer</module>
+	<module>unisa-studentappeal</module>
+	<module>unisa-studentupload</module>
 	<module>unisa-studentregistration</module>
 	<module>unisa-studyquotation</module>
     <module>unisa-studymaterial</module>

@@ -3,6 +3,7 @@
 
 package za.ac.unisa.lms.tools.studyquotation.actions;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +26,8 @@ import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.component.cover.ComponentManager;
 
 import za.ac.unisa.lms.constants.EventTrackingTypes;
+import za.ac.unisa.lms.dao.Gencod;
+import za.ac.unisa.lms.dao.StudentSystemGeneralDAO;
 import za.ac.unisa.lms.studyquotation.StudyQuotation;
 import za.ac.unisa.lms.studyquotation.StudyQuotationService;
 import za.ac.unisa.lms.tools.studyquotation.dao.StudyQuoteQueryDAO;
@@ -55,10 +58,25 @@ public class StudyQuotationAction extends LookupDispatchAction {
 		StudyQuotationForm studyQuotationForm = (StudyQuotationForm)form;
 		// Check whether quotations dates are open
 		StudyQuoteQueryDAO dao = new StudyQuoteQueryDAO();
+		studyQuotationForm.setShowDisclaimer(false);
+		studyQuotationForm.setDisclaimerMessage("");
 		short validYear = dao.getValidQuotationYear();
 		if (validYear==0){
 			return mapping.findForward("closed");
 		}else{
+			//Change 20181114 - Study fees not yet available for the next year
+			StudentSystemGeneralDAO daoGen = new StudentSystemGeneralDAO();			
+			Gencod gencod = new Gencod();
+			gencod = daoGen.getGenCode("316", "QUOTEDISCL");
+			if (gencod != null && gencod.getAfrDescription()!= null && gencod.getAfrDescription().trim().equalsIgnoreCase("Y")){
+				/*Temporary disable additional links*/
+				studyQuotationForm.setShowDisclaimer(true);
+				int currentYear= Calendar.getInstance().get(Calendar.YEAR);
+				int  nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
+				String disclaimerMessage = "NB: This fee information is for the " + currentYear + " academic year only.  Unisa's student fee information for " + nextYear + " will only be available on 1 January " + nextYear + ".";
+				studyQuotationForm.setDisclaimerMessage(disclaimerMessage);
+			}
+			
 			StudyQuotation studyQuotation = new StudyQuotation();
 			studyQuotation.reset();
 			// Set year to valid year returned from db: regdat

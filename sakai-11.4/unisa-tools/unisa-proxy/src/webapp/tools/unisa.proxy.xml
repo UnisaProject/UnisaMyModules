@@ -4,7 +4,7 @@
 	<tool
 		id="unisa.proxy"
 		title="Assignments"
-		description="Tool to proxy external content into a portlet">
+		description="For submitting selected assessment(s) online and viewing results">
 		<category name="unisa.tools" />
 		<configuration name="base" value=""/>
 		<configuration name="url" value=""/>

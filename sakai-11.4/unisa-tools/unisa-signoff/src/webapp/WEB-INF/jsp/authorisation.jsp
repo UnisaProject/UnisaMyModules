@@ -6,14 +6,13 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <fmt:setBundle basename="za.ac.unisa.lms.tools.signoff.ApplicationResources"/>
+<sakai:html>
 <script language="JavaScript">
 	function setAction() {
 		document.signoffForm.action='signoff.do?act=authorisationPage'
 		document.signoffForm.submit();
 	}
-</script>
-<sakai:html>
-	
+</script>	
 	<html:form action="/signoff.do">	
 	<sakai:messages/>
 		<logic:equal name="signoffForm" property="userPermission" value="MAINTAIN">

@@ -67,7 +67,7 @@ public class ClogTool extends HttpServlet {
         }
 
         // If we're on the gateway show the authors view by default
-        String state = ("!gateway".equals(siteId)) ? "viewMembers" : "viewAllPosts";
+        String state = ("!gateway".equals(siteId)) ? "viewAllPosts" : "viewMembers";//unisa changes: original code was state = "viewAllPosts"
 
         String siteLanguage = sakaiProxy.getCurrentSiteLocale();
 

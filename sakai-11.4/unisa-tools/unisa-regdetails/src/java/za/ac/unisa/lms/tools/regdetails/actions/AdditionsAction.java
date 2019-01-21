@@ -704,6 +704,30 @@ public class AdditionsAction extends LookupDispatchAction {
 					addErrors(request, messages);
 					return "step1";
 			}
+			
+			//Johanet 20181113 - SR227874
+			if (!"00019".equalsIgnoreCase(regDetailsForm.getNewQual().getQualCode()) && 
+					!"00035".equalsIgnoreCase(regDetailsForm.getNewQual().getQualCode()) &&
+					!regDetailsForm.getQual().getQualCode().equalsIgnoreCase(regDetailsForm.getNewQual().getQualCode())) {
+				
+				//new qual different from current qual, check status of current qual
+				RegQueryDAO regDao = new RegQueryDAO();
+				String status="";
+				status = regDao.getStuAcaStatus(regDetailsForm.getStudentNr(), regDetailsForm.getQual().getQualCode());
+				if (status.equalsIgnoreCase("NOT FOUND") ||
+						status.equalsIgnoreCase("CO") ||
+						status.equalsIgnoreCase("PC") ||
+						status.equalsIgnoreCase("CA") ||
+						status.equalsIgnoreCase("AC")) {
+					//Ok student can proceed
+				}else {
+					messages.add(ActionMessages.GLOBAL_MESSAGE,
+							new ActionMessage("message.generalmessage", "You are already registered for a different qualification.  You may only change your qualification if you have completed your previous qualification or submitted a cancellation for the qualification."));
+							addErrors(request, messages);
+							return "step1";
+				}				
+			}	
+		
 				
 			//log.info("ADDITION - displaySpecList - qualCode="+qual.getQualCode());
 			//log.info("ADDITION - displaySpecList - qualDesc="+qual.getQualDesc());
@@ -1092,11 +1116,14 @@ public class AdditionsAction extends LookupDispatchAction {
 		}else{
 			form.setRegPeriodOpen2("");
 		}
-		if (db.isRegPeriodValid(type, "6")) {
-			form.setRegPeriodOpen6("Y");
-		}else{
-			form.setRegPeriodOpen6("");
-		}
+		//Change Johanet 20181115 remove test and text for registration period 6 SR227874
+//		if (db.isRegPeriodValid(type, "6")) {
+//			form.setRegPeriodOpen6("Y");
+//		}else{
+//			form.setRegPeriodOpen6("");
+//		}
+		//set RegPeriodOpen6 to "" to never include period 6 - remove period 6
+		form.setRegPeriodOpen6("");
 		//log.debug("AdditionsAction - setRegPeriodForScreenDisplay - Type="+type+", RegPeriodOpen0="+form.getRegPeriodOpen0());
 		//log.debug("AdditionsAction - setRegPeriodForScreenDisplay - Type="+type+", RegPeriodOpen1="+form.getRegPeriodOpen1());
 		//log.debug("AdditionsAction - setRegPeriodForScreenDisplay - Type="+type+", RegPeriodOpen2="+form.getRegPeriodOpen2());

@@ -11,7 +11,8 @@
 	<sakai:messages message="true"/>
 	<sakai:heading>
 		<fmt:message key="studyquote.heading"/>
-	</sakai:heading>		
+	</sakai:heading>
+	
 	<sakai:instruction>
 		<fmt:message key="studyquote.userinstruction"/>
 	</sakai:instruction>
@@ -108,6 +109,13 @@
 				</td>			
 			</tr>																		
 		</sakai:group_table>
+		
+		<logic:equal name="studyquotationform" property="showDisclaimer" value="true">	
+			<sakai:instruction>
+				<bean:write name="studyquotationform" property="disclaimerMessage"/>
+			</sakai:instruction>		
+		</logic:equal>
+		
 		<sakai:actions>			
 			<html:submit  property="action">
 				<fmt:message key="studyquote.button.display"/>

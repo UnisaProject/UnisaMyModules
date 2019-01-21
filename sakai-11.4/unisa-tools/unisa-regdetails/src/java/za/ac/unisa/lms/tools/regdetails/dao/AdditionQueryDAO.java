@@ -1251,10 +1251,11 @@ public class AdditionQueryDAO extends StudentSystemDAO {
 				form.setRegPeriodOpen2("Y");
 				result = true;
 			}
-			if (db.isRegPeriodValid("IA", "6")) {
-				form.setRegPeriodOpen6("Y");
-				result = true;
-			}
+			//Change Johanet 20181115 - Remove test and text for registration period 6 - Never set period to open
+//			if (db.isRegPeriodValid("IA", "6")) {
+//				form.setRegPeriodOpen6("Y");
+//				result = true;
+//			}
 		} else if ("H".equalsIgnoreCase(qual.getQualType())) {
 			if (db.isRegPeriodValid("HA", "0")) {
 				// Hons additions OPEN

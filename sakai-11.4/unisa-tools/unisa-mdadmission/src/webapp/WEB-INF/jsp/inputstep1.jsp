@@ -107,7 +107,7 @@
 			</html:submit>
 			<logic:equal name="mdAdmissionForm" property="oldUniflowInUse" value="true">
 				<sakai:instruction><fmt:message key="page.information.docExtraction"/></sakai:instruction>
-				<sakai:instruction><fmt:message key="page.information.UniflowDownTimes"/></sakai:instruction>
+				<!--<sakai:instruction><fmt:message key="page.information.UniflowDownTimes"/></sakai:instruction>-->
 			</logic:equal>
 		</sakai:actions>
 	</logic:notEmpty>

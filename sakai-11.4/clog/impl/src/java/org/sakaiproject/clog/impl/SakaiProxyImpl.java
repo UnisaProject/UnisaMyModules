@@ -126,6 +126,7 @@ public class SakaiProxyImpl implements SakaiProxy {
 
     public void init() {
 
+     	/*	 Unisa change: comment out 
         NotificationEdit ne = notificationService.addTransientNotification();
         ne.setResourceFilter(ClogManager.REFERENCE_ROOT);
         ne.setFunction(ClogManager.CLOG_POST_CREATED);
@@ -138,7 +139,7 @@ public class SakaiProxyImpl implements SakaiProxy {
         ne2.setFunction(ClogManager.CLOG_COMMENT_CREATED);
         NewCommentNotification cn = new NewCommentNotification();
         cn.setSakaiProxy(this);
-        ne2.setAction(cn);
+        ne2.setAction(cn);*/
     }
 
     public void destroy() {

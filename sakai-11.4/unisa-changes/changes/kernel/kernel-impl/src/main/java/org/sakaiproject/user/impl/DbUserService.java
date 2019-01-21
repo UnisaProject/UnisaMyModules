@@ -261,13 +261,16 @@ public abstract class DbUserService extends BaseUserDirectoryService
 
 		public UserEdit put(String id, String eid)
 		{
+			String userId = checkMapForId(eid);//unisa change: check userId already existing in sakai_user_id_map for EID
+			if(userId==null){	//insert into sakai_user_id_map only if the record is not exists		
 			// check for already exists
 			if (check(id)) return null;
 
 			// assure mapping
-			if (!putMap(id, eid)) return null;
+			if (!putMap(id, eid)) return null;//unisa change:insert into SAKAI_USER_ID_MAP (USER_ID, EID) values (?,?)
+			}
 
-			BaseUserEdit rv = (BaseUserEdit) super.putResource(id, fields(id, null, false));
+			BaseUserEdit rv = (BaseUserEdit) super.putResource(id, fields(id, null, false)); //inserts record into sakai_user
 			if (rv != null) rv.activate();
 			return rv;
 		}

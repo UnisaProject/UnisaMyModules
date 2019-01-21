@@ -6,15 +6,13 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <fmt:setBundle basename="za.ac.unisa.lms.tools.signoff.ApplicationResources"/>
-
+<sakai:html>
 <script language="JavaScript">
 	function setAction() {
 		document.signoffForm.action = 'signoff.do?act=editStandIn';
 		document.signoffForm.submit();
 	}
 </script>
-
-<sakai:html>
 <html:form action="/signoff.do"> 
 	<html:hidden property="atStep" value="2"/>
 	<html:hidden property="type" value="${signoffForm.edit}"/>
