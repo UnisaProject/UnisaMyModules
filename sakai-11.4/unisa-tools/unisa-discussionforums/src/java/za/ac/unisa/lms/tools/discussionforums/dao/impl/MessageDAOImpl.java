@@ -69,9 +69,10 @@ public class MessageDAOImpl extends SakaiDAO implements MessageDao {
 				
 					GeneratedKeyHolder MessageKeyHolder = new GeneratedKeyHolder();
 					jdbcTemplate.update(psCreatorMessageInsert,MessageKeyHolder);
-					PreparedStatementCreatorFactory updateTopic = new PreparedStatementCreatorFactory( "update UFORUM_TOPIC set Last_Post_Date = sysdate , Last_Post_user =? Where Topic_ID = ?",
+					//changed query for mysql sysdate to sysdate()
+					PreparedStatementCreatorFactory updateTopic = new PreparedStatementCreatorFactory( "update UFORUM_TOPIC set Last_Post_Date = sysdate() , Last_Post_user =? Where Topic_ID = ?",
 							new int[] {Types.VARCHAR,Types.INTEGER});
-					PreparedStatementCreatorFactory updateForum = new PreparedStatementCreatorFactory("update UFORUM_FORUM set Last_Post_Date = sysdate , Last_Post_user =? Where Forum_ID = ?",
+					PreparedStatementCreatorFactory updateForum = new PreparedStatementCreatorFactory("update UFORUM_FORUM set Last_Post_Date = sysdate() , Last_Post_user =? Where Forum_ID = ?",
 							new int[] {Types.VARCHAR,Types.INTEGER});
 					
 					PreparedStatementCreator psUpdateTopic = updateTopic.newPreparedStatementCreator(
@@ -118,7 +119,12 @@ public class MessageDAOImpl extends SakaiDAO implements MessageDao {
 		*/
 		
 		//Added by mphahsm on 2015/11 to return exact first topic message irrespective of sequence order
-		StringBuilder selectMessagesSQL = new StringBuilder("SELECT Message_Id,Topic_Id,Content,TO_CHAR(Creation_Date,'YYYY-MM-DD HH24:MI:SS') as Creation_Date,User_Id,User_Identifier,nvl(Msg_Url,'') as Msg_Url,nvl(File_Type,' ') as File_Type,first_topic_msg ");
+		//oracle
+	/*	StringBuilder selectMessagesSQL = new StringBuilder("SELECT Message_Id,Topic_Id,Content,TO_CHAR(Creation_Date,'YYYY-MM-DD HH24:MI:SS') as Creation_Date,User_Id,User_Identifier,nvl(Msg_Url,'') as Msg_Url,nvl(File_Type,' ') as File_Type,first_topic_msg ");
+		selectMessagesSQL.append(" FROM uforum_message WHERE Topic_Id = ? AND first_topic_msg = 'Y'");*/
+		
+		//mysql
+		StringBuilder selectMessagesSQL = new StringBuilder("SELECT Message_Id,Topic_Id,Content,DATE_FORMAT(Creation_Date,'%Y-%m-%d %H:%i:%s') as Creation_Date,User_Id,User_Identifier,ifnull(Msg_Url,'') as Msg_Url,ifnull(File_Type,' ') as File_Type,first_topic_msg ");
 		selectMessagesSQL.append(" FROM uforum_message WHERE Topic_Id = ? AND first_topic_msg = 'Y'");
 		//End of mphahsm Add
 		
@@ -289,7 +295,11 @@ public class MessageDAOImpl extends SakaiDAO implements MessageDao {
 	public ForumMessage getMessageDetail(Integer messageId) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource());
 		ForumMessage forumMessage = new ForumMessage();
-		StringBuilder selectMessageSQL = new StringBuilder("select Message_Id,Topic_Id,Content,TO_CHAR(Creation_Date,'YYYY-MM-DD HH24:MI:SS') as Creation_Date,User_Id,User_Identifier,nvl(Msg_Url,' ') as Msg_Url,nvl(File_Type,' ') as File_Type ");
+		//oracle
+		//StringBuilder selectMessageSQL = new StringBuilder("select Message_Id,Topic_Id,Content,TO_CHAR(Creation_Date,'YYYY-MM-DD HH24:MI:SS') as Creation_Date,User_Id,User_Identifier,nvl(Msg_Url,' ') as Msg_Url,nvl(File_Type,' ') as File_Type ");
+		
+		//mysql
+		StringBuilder selectMessageSQL = new StringBuilder("select Message_Id,Topic_Id,Content,DATE_FORMAT(Creation_Date,'%Y-%m-%d %H:%i:%s') as Creation_Date,User_Id,User_Identifier,ifnull(Msg_Url,' ') as Msg_Url,ifnull(File_Type,' ') as File_Type ");
 		selectMessageSQL.append(" from UFORUM_MESSAGE where Message_Id = ?");
 		long beforeTime = System.currentTimeMillis();
 		PreparedStatementCreatorFactory selectMessage = new PreparedStatementCreatorFactory(selectMessageSQL.toString(),
@@ -329,7 +339,10 @@ public class MessageDAOImpl extends SakaiDAO implements MessageDao {
 		*/
 		
 		//Added by mphahsm on 2015/11 To get all correct messages for a specific topic except initial message 
-		StringBuilder selectMessagesSQL = new StringBuilder("SELECT Message_Id,Topic_Id,Content,TO_CHAR(Creation_Date,'YYYY-MM-DD HH24:MI:SS') as Creation_Date,User_Id,User_Identifier,nvl(Msg_Url,'') as Msg_Url,nvl(File_Type,' ') as File_Type,first_topic_msg ");
+		//oracle
+		//StringBuilder selectMessagesSQL = new StringBuilder("SELECT Message_Id,Topic_Id,Content,TO_CHAR(Creation_Date,'YYYY-MM-DD HH24:MI:SS') as Creation_Date,User_Id,User_Identifier,nvl(Msg_Url,'') as Msg_Url,nvl(File_Type,' ') as File_Type,first_topic_msg ");
+		//mysql
+		StringBuilder selectMessagesSQL = new StringBuilder("SELECT Message_Id,Topic_Id,Content,DATE_FORMAT(Creation_Date,'%Y-%m-%d %H:%i:%s') as Creation_Date,User_Id,User_Identifier,ifnull(Msg_Url,'') as Msg_Url,ifnull(File_Type,' ') as File_Type,first_topic_msg  ");
 		selectMessagesSQL.append("FROM uforum_message WHERE Topic_Id = ? ");
 		selectMessagesSQL.append("AND first_topic_msg = 'N' ");
 		selectMessagesSQL.append("ORDER BY creation_date DESC");
