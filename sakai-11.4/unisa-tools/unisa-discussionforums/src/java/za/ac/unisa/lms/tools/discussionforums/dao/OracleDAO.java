@@ -48,13 +48,15 @@ public class OracleDAO  extends StudentSystemDAO{
 		    String name;
 		    userId = userId.toUpperCase();
 		    //oracle
-			/*String sql = "select SURNAME, INITIALS, TITLE from staff where NOVELL_USER_ID="+"'"+userId+"'"+
+		    // Sifiso Changes:2019-01-25: Uncommented: Revert back to this since OracleDao extends StudentSystemDAO so we are still on Oracle. Avoid DATEFORMAT syntax error
+			String sql = "select SURNAME, INITIALS, TITLE from staff where NOVELL_USER_ID="+"'"+userId+"'"+
 			             " AND (TO_CHAR(RESIGN_DATE, 'YYYY-MM-DD')>="+"'"+today+"'"+  
-					     " OR RESIGN_DATE IS NULL)";*/
+					     " OR RESIGN_DATE IS NULL)";
 		    //mysql
-		    String sql = "select SURNAME, INITIALS, TITLE from staff where NOVELL_USER_ID="+"'"+userId+"'"+
+			// Sifiso Changes:2019-01-25: Commented Out: Revert back to this since OracleDao extends StudentSystemDAO so we are still on Oracle. Avoid DATEFORMAT syntax error
+		    /*String sql = "select SURNAME, INITIALS, TITLE from staff where NOVELL_USER_ID="+"'"+userId+"'"+
 		             " AND (DATE_FORMAT(RESIGN_DATE, '%Y-%m-%d')>="+"'"+today+"'"+  
-				     " OR RESIGN_DATE IS NULL)";
+				     " OR RESIGN_DATE IS NULL)";*/
 			try{
 				String surname = querySingleValue(sql, "surname");
 				String intials = querySingleValue(sql, "INITIALS");

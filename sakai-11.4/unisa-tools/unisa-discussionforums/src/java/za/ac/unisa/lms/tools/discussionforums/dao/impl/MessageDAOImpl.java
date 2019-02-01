@@ -56,7 +56,8 @@ public class MessageDAOImpl extends SakaiDAO implements MessageDao {
 					String intialMessage="N";
 					lastPostUserName = oracleDAO.getUserNames(forumMessage.getAuthor());
 					StringBuilder insertMessage = new StringBuilder("insert into UFORUM_MESSAGE(Message_Id,Topic_Id,Content,Creation_Date,User_Id,User_Identifier,Msg_Url,File_Type, First_Topic_Msg)" );
-					insertMessage.append("values(UFORUM_MESSAGE_0.nextval,?,?,sysdate,?,?,?,?,?)");	
+					//insertMessage.append("values(UFORUM_MESSAGE_0.nextval,?,?,sysdate,?,?,?,?,?)"); //Sifisco Changes:2019/01/30:Removed: Change 'UFORUM_MESSAGE_0.nextval' to NULL for mySQL
+					insertMessage.append("values(NULL,?,?,sysdate(),?,?,?,?,?)");	  	//Sifisco Changes:2019/01/30:Added: Added NULL and removed 'UFORUM_MESSAGE_0.nextval'; Added sysdate() for mySQL
 					PreparedStatementCreatorFactory pstsmtCreatorFactoryMessage = new PreparedStatementCreatorFactory(insertMessage.toString(),
 							new int[] {Types.INTEGER,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.VARCHAR});
 
