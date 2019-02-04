@@ -166,7 +166,8 @@ public class ForumDAOImpl extends SakaiDAO implements ForumDao{
 		
 		//mysql
 		StringBuilder selectForumsForSite = new StringBuilder("select Forum_Id,Forum_Name,Description,User_Id,DATE_FORMAT(Creation_Date,'%Y-%m-%d %H:%i') as Creation_Date,");
-		selectForumsForSite.append(" Site_Id,DATE_FORMAT(Last_Post_Date,'%Y-%m-%d %H:%i') as Last_Post_Date,ifnull(Last_Post_User,'') as Last_Post_Use  ");
+		//selectForumsForSite.append(" Site_Id,DATE_FORMAT(Last_Post_Date,'%Y-%m-%d %H:%i') as Last_Post_Date,ifnull(Last_Post_User,'') as Last_Post_Use  "); // Sifiso Changes:2019-01-25: Removed
+		selectForumsForSite.append(" Site_Id,DATE_FORMAT(Last_Post_Date,'%Y-%m-%d %H:%i') as Last_Post_Date,ifnull(Last_Post_User,'') as Last_Post_User  ");  // Sifiso Changes:2019-01-25: Added-Changed Last_Post_Use to Last_Post_User
 		
 		selectForumsForSite.append(" from UFORUM_FORUM where Site_Id = ? ");
 		selectForumsForSite.append(" and Hide_Status = 'N' ");
