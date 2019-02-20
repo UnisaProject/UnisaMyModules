@@ -91,10 +91,11 @@ public class ForumDAOImpl extends SakaiDAO implements ForumDao{
 				
 				JdbcTemplate jdbcTemplate;
 				transactionSuccess=false;
+				
 				String transactionAction="DELETE";
 				String tableUforum_forum="UFORUM_FORUM";
 				String oldRecord = forum.getForumId()+", "+forum.getUserId();
-				String selectNextValLogId = "select uforum_log_s.nextval as logId from dual";
+				//String selectNextValLogId = "select uforum_log_s.nextval as logId from dual";
 				String logId="";
 				
 				try{

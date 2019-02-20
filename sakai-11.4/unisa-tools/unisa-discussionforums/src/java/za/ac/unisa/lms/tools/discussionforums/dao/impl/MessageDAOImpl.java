@@ -20,6 +20,10 @@ import za.ac.unisa.lms.tools.discussionforums.dao.MessageDao;
 import za.ac.unisa.lms.tools.discussionforums.dao.MessageRowMapper;
 import za.ac.unisa.lms.tools.discussionforums.dao.OracleDAO;
 
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.user.api.User;
+import org.sakaiproject.user.api.UserDirectoryService;
+
 /**
  * DAO class for all message related queries
  * 
@@ -31,6 +35,7 @@ public class MessageDAOImpl extends SakaiDAO implements MessageDao {
 	//private PreparedStatementCreatorFactory pstsmtCreatorFactoryMessage;
 	private boolean transactionSuccess=false;
 	protected static Logger logger = Logger.getLogger(MessageDAOImpl.class);
+	private UserDirectoryService userDirectoryService;
 	/**
 	 * @param forumMessage
 	 * @return
@@ -50,11 +55,17 @@ public class MessageDAOImpl extends SakaiDAO implements MessageDao {
 				String lastPostUserName = "";
 				transactionSuccess=false;
 				OracleDAO oracleDAO = null;
+				User user = null;
+				userDirectoryService = (UserDirectoryService) ComponentManager.get(UserDirectoryService.class);
 				try{
 					jdbcTemplate = new JdbcTemplate(getDataSource());
 					oracleDAO = new OracleDAO();
 					String intialMessage="N";
-					lastPostUserName = oracleDAO.getUserNames(forumMessage.getAuthor());
+					//Added by Stanford to read from Sakai
+					user = userDirectoryService.getUserByEid(forumMessage.getAuthor());
+					lastPostUserName = user.getDisplayName();
+					System.out.println("Stanford Message insert lastPostUserName: "+ lastPostUserName);
+					//lastPostUserName = oracleDAO.getUserNames(forumMessage.getAuthor()); //commented out by Stanford to avoid to read from student system.
 					StringBuilder insertMessage = new StringBuilder("insert into UFORUM_MESSAGE(Message_Id,Topic_Id,Content,Creation_Date,User_Id,User_Identifier,Msg_Url,File_Type, First_Topic_Msg)" );
 					//insertMessage.append("values(UFORUM_MESSAGE_0.nextval,?,?,sysdate,?,?,?,?,?)"); //Sifisco Changes:2019/01/30:Removed: Change 'UFORUM_MESSAGE_0.nextval' to NULL for mySQL
 					insertMessage.append("values(NULL,?,?,sysdate(),?,?,?,?,?)");	  	//Sifisco Changes:2019/01/30:Added: Added NULL and removed 'UFORUM_MESSAGE_0.nextval'; Added sysdate() for mySQL
