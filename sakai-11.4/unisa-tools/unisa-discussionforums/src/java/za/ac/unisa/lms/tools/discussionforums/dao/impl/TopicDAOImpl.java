@@ -90,7 +90,7 @@ public class TopicDAOImpl extends SakaiDAO implements TopicDao{
                                                         );
                                         GeneratedKeyHolder TopicKeyHolder = new GeneratedKeyHolder();
                                         jdbcTemplate.update(psCreatorTopicInsert,TopicKeyHolder);
-                                     topicId = new Integer(TopicKeyHolder.getKey().intValue());
+                                        topicId = new Integer(TopicKeyHolder.getKey().intValue());
                                        
                                         PreparedStatementCreatorFactory insertIntialMessage = new PreparedStatementCreatorFactory(insertMessageSql.toString(),
                                                         new int[] {Types.INTEGER,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.VARCHAR}
@@ -205,8 +205,9 @@ public class TopicDAOImpl extends SakaiDAO implements TopicDao{
                 PreparedStatementCreator psUpdateTopicSubject = updateTopicSubject.newPreparedStatementCreator(
                                 new Object[]{topicName, topicId}
                                 );
-                try {
-                        jdbcTemplate.update(psUpdateTopicSubject);
+                try {    
+                	jdbcTemplate.update(psUpdateTopicSubject);
+                        
                 } catch (Exception ex) {
                     
                 }finally {
