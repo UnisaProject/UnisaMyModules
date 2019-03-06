@@ -117,11 +117,11 @@ public class ONLImportJob extends SingleClusterInstanceJob implements StatefulJo
 			log.debug("Adding term and term_eid for " + newSite.getId() +"term="+year+" "+semesterLongAsString+" term_eid="+year+semester );
 			siteProperties.addProperty("term", year+" "+semesterLongAsString);
 			siteProperties.addProperty("term_eid", year+semester);
-		}
-		log.debug("ONLImportJob: createSiteFromonlGroupTemplate siteService.save: value"+newSite);
+		}		
 		siteService.save(courseSite);
+		log.info("ONLImportJob: createSiteFromonlGroupTemplate siteService.save: value"+newSite);
 		  }catch(Exception ex){
-				log.error("ONLImportJob: Adding term and term_eid failed "+ex);
+				log.error(this+" ONLImportJob: Adding term and term_eid failed "+ex);
 		}
 	}
 
@@ -145,7 +145,7 @@ public class ONLImportJob extends SingleClusterInstanceJob implements StatefulJo
 		}
 		newSite.setMaintainRole(siteTemplate1.getMaintainRole());
 		siteService.save(newSite);
-		
+		log.info("ONLImportJob: createSiteFromGroupTemplate siteService.save: value"+newSite)
 		//code to update the term and term_eid to the site
 		  try{
 		Site courseSite = siteService.getSite(newSite.getId());
@@ -170,7 +170,7 @@ public class ONLImportJob extends SingleClusterInstanceJob implements StatefulJo
 			siteProperties.addProperty("term", year+" "+semesterLongAsString);
 			siteProperties.addProperty("term_eid", year+semester);
 		}
-		log.debug("ONLImportJob:createSiteFromGroupTemplate siteService.save: value"+newSite);
+		log.info("ONLImportJob:createSiteFromGroupTemplate siteService.save: value"+newSite);
 		siteService.save(courseSite);
 		 }catch(Exception ex){
 				log.error("ONLImportJob:  Adding term and term_eid failed "+ex);
@@ -357,13 +357,13 @@ public class ONLImportJob extends SingleClusterInstanceJob implements StatefulJo
 				String toolId = (String) toolIds.get(i);
 				log.debug("importToolIntoSite toolId: "+toolId);
 				if (!toolId.equalsIgnoreCase("sakai.resources")) {
-					log.info("importToolIntoSite: Import other than resources");
+					log.info(this+"importToolIntoSite: Import other than resources");
 					transferCopyEntities(toolId, masterSiteId, toSiteId);
 
 				}
 			}
 		} catch (Exception ex) {
-			log.error("Auto populate failed: importToolIntoSite");
+			log.error(this+"Auto populate failed: importToolIntoSite");
 		}
 		
 		// Do the Unipoole mapping (SYZELLE)
