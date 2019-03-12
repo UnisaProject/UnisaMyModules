@@ -33,7 +33,7 @@ import org.datacontract.schemas._2004._07.UniflowFindAndGetService.RetrievalResu
 import za.ac.unisa.lms.constants.EventTrackingTypes;
 import za.ac.unisa.lms.tools.mdadmission.Constants;
 import za.ac.unisa.lms.tools.mdadmission.dao.MdAdmissionQueryDAO;
-import za.ac.unisa.lms.tools.mdadmission.exception.UniflowException;
+import za.ac.unisa.lms.tools.mdadmission.exception.*;
 import za.ac.unisa.lms.tools.mdadmission.forms.MdAdmissionApplication;
 import za.ac.unisa.lms.tools.mdadmission.forms.MdAdmissionForm;
 import za.ac.unisa.lms.tools.mdadmission.forms.Qualification;
@@ -132,7 +132,18 @@ public class DisplayMdAdmissionAction  extends LookupDispatchAction{
 		if (user.getType()!=null && !"Instructor".equalsIgnoreCase(user.getType())){
 			//Johanet added test not null
 			return mapping.findForward("invaliduser");
-		}		
+		}	
+		
+		StudentSystemGeneralDAO systemDao = new StudentSystemGeneralDAO();		
+		Gencod gencod = new Gencod();
+		gencod = systemDao.getGenCode("251", "OLD_IN_USE");
+			
+		if (gencod!=null && gencod.getEngDescription()!=null && gencod.getEngDescription().equalsIgnoreCase("Y")){
+			mdForm.setOldUniflowInUse(true);
+		}else{
+			mdForm.setOldUniflowInUse(false);
+		}
+		
 		//Staff loggedInUser = dao.getStaffFromNetworkCode(mdForm.getUserCode());
 		Staff loggedInUser = dao.getStaffRoutDet(mdForm.getUserCode());
 				
@@ -144,16 +155,7 @@ public class DisplayMdAdmissionAction  extends LookupDispatchAction{
 			return mapping.findForward("step1forward");
 		}
 		
-		mdForm.setLoggeInUser(loggedInUser);
-		StudentSystemGeneralDAO systemDao = new StudentSystemGeneralDAO();		
-		Gencod gencod = new Gencod();
-		gencod = systemDao.getGenCode("251", "OLD_IN_USE");
-			
-		if (gencod!=null && gencod.getEngDescription()!=null && gencod.getEngDescription().equalsIgnoreCase("Y")){
-			mdForm.setOldUniflowInUse(true);
-		}else{
-			mdForm.setOldUniflowInUse(false);
-		}
+		mdForm.setLoggeInUser(loggedInUser);	
 		
 		//Re-populate students linked to lecturer
 		reLoadStudentLookup(mdForm, dao, request); 
@@ -371,27 +373,28 @@ public class DisplayMdAdmissionAction  extends LookupDispatchAction{
 		if (mdForm.getStudent().getStudentNumber().length()==7){
 			//mdForm.setDocumentList(dao.getDocsList(mdForm.getStudent().getStudentNumber()));
 			
-			//Read old uniflow machine with 7 digits
-			if (mdForm.isOldUniflowInUse()){				
-				oldDoclist = dao.getDocsList(mdForm.getStudent().getStudentNumber()); 
-				mdForm.getDocumentList().addAll(oldDoclist); 
-			}
-			
 			//Read new uniflow machine with 7 digits			
 			newDoclist = dao.getNewDocsList(mdForm.getStudent().getStudentNumber());  		                           
 			mdForm.getDocumentList().addAll(newDoclist);  
 			String paddedStudentNumber = "";
 			paddedStudentNumber = "0"+ mdForm.getStudent().getStudentNumber();
 			
-			//Read old uniflow machine padded with a 0
-			if (mdForm.isOldUniflowInUse()){				
+			//Read new uniflow machine padded with a 0			
+			newDoclist = dao.getNewDocsList(paddedStudentNumber);  		                           
+			mdForm.getDocumentList().addAll(newDoclist); 
+			
+			
+			if (mdForm.isOldUniflowInUse()){	
+				//Read old uniflow machine with 7 digits
+				oldDoclist = dao.getDocsList(mdForm.getStudent().getStudentNumber()); 
+				mdForm.getDocumentList().addAll(oldDoclist); 
+				
+				//Read old uniflow machine padded with a 0
 				oldDoclist = dao.getDocsList(paddedStudentNumber); 
 				mdForm.getDocumentList().addAll(oldDoclist); 
 			}
 			
-			//Read new uniflow machine padded with a 0			
-			newDoclist = dao.getNewDocsList(paddedStudentNumber);  		                           
-			mdForm.getDocumentList().addAll(newDoclist); 
+			
 		}else{			
 			Boolean readOnlyNewUniflow = false;
 			
@@ -404,15 +407,16 @@ public class DisplayMdAdmissionAction  extends LookupDispatchAction{
 						Integer.parseInt(mdForm.getStudent().getStudentNumber()) < 70000000) {
 					readOnlyNewUniflow = true;
 				}
-			}
-			
-			if (!readOnlyNewUniflow) {				
-				oldDoclist = dao.getDocsList(mdForm.getStudent().getStudentNumber());    
-				mdForm.getDocumentList().addAll(oldDoclist);                            
-			}			
+			}					
 			
 			newDoclist = dao.getNewDocsList(mdForm.getStudent().getStudentNumber());  		                           
 			mdForm.getDocumentList().addAll(newDoclist); 
+			
+
+			if (!readOnlyNewUniflow) {				
+				oldDoclist = dao.getDocsList(mdForm.getStudent().getStudentNumber());    
+				mdForm.getDocumentList().addAll(oldDoclist);                            
+			}	
 			
 		}
 		//change end!
@@ -422,23 +426,29 @@ public class DisplayMdAdmissionAction  extends LookupDispatchAction{
 	    	if (mdForm.isOldUniflowInUse()){
 	    		messages.add(ActionMessages.GLOBAL_MESSAGE,
 						new ActionMessage("message.generalmessage",
-							"The system containing the student documents is currently unavailable. Please take note, the old Uniflow system will be restarted daily during the following times : 09H40-10H00 and 12H40-13H00. Student M&D documents will not be available during these times."));
-	    	}else{
-	    		messages.add(ActionMessages.GLOBAL_MESSAGE,
-						new ActionMessage("message.generalmessage",
-							"The system containing the student documents is currently unavailable."));				
-	    	}			
+							"The old Uniflow system that may contain some of the student's documents is currently unavailable. Documents that have not yet been moved to the new Uniflow system will not be visible."));	    		
+	    	}		
 			if (mdForm.getUserCode()!=null && mdForm.getUserCode().equalsIgnoreCase("PRETOJ")){
 				messages.add(ActionMessages.GLOBAL_MESSAGE,
 						new ActionMessage("message.generalmessage",
 							"Connection exception: " + uex));
 			}
-			addErrors(request, messages);
-			
+			addErrors(request, messages);			
 			log.debug(uex);
 			return mapping.findForward("displayforward");
-		}
-		catch (Exception e){
+		} catch (NewUniflowException nuex){
+			messages.add(ActionMessages.GLOBAL_MESSAGE,
+					new ActionMessage("message.generalmessage",
+						"The system containing the student's documents is currently unavailable."));	
+			if (mdForm.getUserCode()!=null && mdForm.getUserCode().equalsIgnoreCase("PRETOJ")){
+				messages.add(ActionMessages.GLOBAL_MESSAGE,
+						new ActionMessage("message.generalmessage",
+						"Connection exception: " + nuex));
+			}	
+			addErrors(request, messages);
+			log.debug(nuex);
+			return mapping.findForward("displayforward");
+		} catch (Exception e){
 			throw new Exception("DisplayMdAdmissionAction(display): / "+e.getMessage(), e);
 		}
 	}

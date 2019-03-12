@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Calendar;
 
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.struts.util.LabelValueBean;
@@ -69,7 +70,7 @@ public class MychoiceDAO extends StudentSystemDAO {
 				+ " ELSE ' '"
 				+ " END SPEC_CODE,"
 				+ " CASE"
-				+ " WHEN quaspc.speciality_code > ' '"
+				+ " WHEN quaspc.DESCRIPTION_ON_BROCHURE = 'Y' or quaspc.DESCRIPTION_ON_BROCHURE = ' '"
 				+ " THEN quaspc.english_descriptio"
 				//+ " THEN replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(NLS_INITCAP (quaspc.english_descriptio),' For ',' for '),"
 				//+ " ' And ',' and '),' Of ',' of '),' Or ',' or '),' In ',' in '),'With','with'),'From','from'),' As ',' as '),' To ',' to '),'Prior','prior'),'Hiv','HIV'),'Aids','AIDS'),"
@@ -472,7 +473,7 @@ public class MychoiceDAO extends StudentSystemDAO {
 				+ " ELSE ' '"
 				+ " END SPEC_CODE,"
 				+ " CASE"
-				+ " WHEN quaspc.speciality_code > ' '"
+				+ " WHEN quaspc.DESCRIPTION_ON_BROCHURE = 'Y' or quaspc.DESCRIPTION_ON_BROCHURE = ' '"
 				+ " THEN quaspc.english_descriptio"
 				//+ " THEN replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(NLS_INITCAP (quaspc.english_descriptio),' For ',' for '),"
 				//+ " ' And ',' and '),' Of ',' of '),' Or ',' or '),' In ',' in '),'With','with'),'From','from'),' As ',' as '),' To ',' to '),'Prior','prior')"
@@ -623,7 +624,7 @@ public class MychoiceDAO extends StudentSystemDAO {
 				+ " ELSE ' '"
 				+ " END SPEC_CODE,"
 				+ " CASE"
-				+ " WHEN quaspc.speciality_code > ' '"
+				+ " WHEN quaspc.DESCRIPTION_ON_BROCHURE = 'Y' or quaspc.DESCRIPTION_ON_BROCHURE = ' '"
 				+ " THEN quaspc.english_descriptio"
 				//+ " THEN replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(NLS_INITCAP (quaspc.english_descriptio),' For ',' for '),"
 				//+ " ' And ',' and '),' Of ',' of '),' Or ',' or '),' In ',' in '),'With','with'),'From','from'),' As ',' as '),' To ',' to '),'Prior','prior'),'Hiv','HIV'),'Aids','AIDS'),"
@@ -792,7 +793,7 @@ public class MychoiceDAO extends StudentSystemDAO {
 				+ " ELSE ' '"
 				+ " END SPEC_CODE,"
 				+ " CASE"
-				+ " WHEN quaspc.speciality_code > ' '"
+				+ " WHEN quaspc.DESCRIPTION_ON_BROCHURE = 'Y' or quaspc.DESCRIPTION_ON_BROCHURE = ' '"
 				+ " THEN quaspc.english_descriptio"
 				//+ " THEN replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(NLS_INITCAP (quaspc.english_descriptio),' For ',' for '),"
 				//+ " ' And ',' and '),' Of ',' of '),' Or ',' or '),' In ',' in '),'With','with'),'From','from'),' As ',' as '),' To ',' to '),'Prior','prior'),'Hiv','HIV'),'Aids','AIDS'),"
@@ -1091,8 +1092,9 @@ public class MychoiceDAO extends StudentSystemDAO {
 								"SPES").toString()));
 
 						Element spesDesc = document.createElement("spesdesc");
-						spesDesc.appendChild(document.createTextNode(data.get(
-								"SPESDESC").toString()));
+						
+						spesDesc.appendChild(document.createTextNode(data.get("SPESDESC").toString()));
+						
 						spesCode = data.get("SPES").toString();
 
 						Element nqfl = document.createElement("NQFel");
@@ -1342,7 +1344,6 @@ public class MychoiceDAO extends StudentSystemDAO {
 									.createElement("qualificationlevel");
 							qualification.appendChild(qualLevel);
 							qualificationLevel = data.get("LVL").toString();
-							System.out.println("qualification level ++++++++++"+qualificationLevel);
 
 							Element level = document.createElement("name");
 							level.appendChild(document.createTextNode(data.get(
@@ -1400,8 +1401,21 @@ public class MychoiceDAO extends StudentSystemDAO {
 					qualificationchoice.appendChild(module);
 
 					Element modName = document.createElement("name");
-					modName.appendChild(document.createTextNode(data.get(
+							
+					//remove offered from current year    
+					int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+					int modFromYear = Integer.parseInt(data.get("mod_from_year").toString());
+										
+					if(modFromYear > currentYear){
+						modName.appendChild(document.createTextNode(data.get(
+							"MODULE1").toString()+
+							" (Offered from "+data.get("mod_from_year").toString()+")"));
+							
+					}else{
+						modName.appendChild(document.createTextNode(data.get(
 							"MODULE1").toString()));
+													
+					}
 
 					Element modCode = document.createElement("code");
 					modCode.appendChild(document.createTextNode(data.get(

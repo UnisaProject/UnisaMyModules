@@ -88,7 +88,7 @@ public class CancelUserAction extends LookupDispatchAction {
 			ActionMapping mapping,
 			ActionForm form,
 			HttpServletRequest request,
-			HttpServletResponse response) {
+			HttpServletResponse response) throws Exception {
 			ActionMessages messages = new ActionMessages();
 			//create a instance of the form linked to the action (as in struts-config.)
 			eventTrackingService = (EventTrackingService) ComponentManager.get(EventTrackingService.class);
@@ -107,15 +107,13 @@ public class CancelUserAction extends LookupDispatchAction {
 			   
 			// use validator.xml to validate that stno must be a number and is mandatory
 			messages =(ActionMessages) cancelUserForm.validate(mapping,request);
-			
+			StudentInfo studentinfo = new StudentInfo();
+			studentinfo = db.getStudentDetails(studentNumber);
 			if (!messages.isEmpty()){
 				addErrors(request,messages);
 				return mapping.findForward("input");
-			} else {
-				
-				
-				StudentInfo studentinfo = new StudentInfo();
-				studentinfo = db.getStudentDetails(studentNumber);
+			} else {			
+
 	
 				//	validate student number
 				boolean validStudent= false;
@@ -203,6 +201,14 @@ public class CancelUserAction extends LookupDispatchAction {
 					return mapping.findForward("input");
 					
 				}
+				String cancellationOption = cancelUserForm.getCancellationOption();
+			System.out.println("cancellationOption "+cancellationOption);
+				if((null == cancellationOption) || cancellationOption.equals("")){		
+					messages.add(ActionMessages.GLOBAL_MESSAGE,
+							new ActionMessage("message.generalmessage", "Please choose cancellation option ."));
+					addErrors(request, messages);
+					return mapping.findForward("input");					
+				}
 				//initial and first letter of the name should be Upper and remaining lower case.
 				
 				String tempInitial = studentinfo.getStudentName().toUpperCase();
@@ -222,6 +228,8 @@ public class CancelUserAction extends LookupDispatchAction {
 			    }else{
 					cancelUserForm.setBlocked("No");
 				}
+		    	
+		    	
 				//setting the join date
 		    	if(!cancelUserForm.getCancellationOption().equals("myLife")){
 				     try{
@@ -249,15 +257,28 @@ public class CancelUserAction extends LookupDispatchAction {
 		          addErrors(request, messages);
 		          tracker=1;
 		    }
+        	String currentlyRegistered = studentinfo.getCurrentlyRegistered();
 			if(cancelUserForm.getCancellationOption().equals("myLife")&&blockedStatusStr.equalsIgnoreCase("nc")){
+				if(currentlyRegistered.equalsIgnoreCase("YES")) {
+					 messages.add(ActionMessages.GLOBAL_MESSAGE,
+								new ActionMessage("message.generalmessage", "Are you sure you want to cancel the following user myLife account ? "));
+								addErrors(request, messages);
+				}else {
 				    messages.add(ActionMessages.GLOBAL_MESSAGE,
-					new ActionMessage("message.generalmessage", "Are you sure you want to cancel the following user myLife account ? "));
-					addErrors(request, messages);
+					new ActionMessage("message.generalmessage", "The student is NOT registered for current academic year. Are you sure you want to cancel the following user myLife account? "));
+					addErrors(request, messages); 
+				}
 			}//if
 			if(!cancelUserForm.getCancellationOption().equals("myLife")){
+				if(currentlyRegistered.equalsIgnoreCase("YES")) {
 			       messages.add(ActionMessages.GLOBAL_MESSAGE,
 				   new ActionMessage("message.generalmessage", "Are you sure you want to cancel the following user account on myUnisa? "));
 			       addErrors(request, messages);
+			}else {
+				 messages.add(ActionMessages.GLOBAL_MESSAGE,
+						   new ActionMessage("message.generalmessage", "The student is NOT registered for current academic year. Are you sure you want to cancel the following user account on myUnisa? "));
+					       addErrors(request, messages);
+			}
 			}//if
 			if(tracker==1){
 			      return mapping.findForward("input");	

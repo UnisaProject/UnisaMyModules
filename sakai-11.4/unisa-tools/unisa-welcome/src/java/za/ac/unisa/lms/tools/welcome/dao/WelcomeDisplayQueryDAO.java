@@ -68,23 +68,17 @@ public class WelcomeDisplayQueryDAO implements EntityProducer, EntityTransferrer
 		String sql = "select count(*) from WELCOME_CONTENT where SITE_ID = '"+siteId+"'";
 		int count = (new Integer((String)sqlService.dbRead(sql).iterator().next())).intValue();
 		if (count == 0){
-			// Sifiso Changes:2018/10/31:Convert Oracle to mySQL
-			/*sql = "insert into WELCOME_CONTENT(SITE_ID, CONTENT, MODIFIED_ON) values(?,?,to_date('"+currentDate+"','YYYY-MM-DD'))";*/
-			sql = "insert into WELCOME_CONTENT(SITE_ID, CONTENT, MODIFIED_ON) values(?,?,str_to_date('"+currentDate+"','%Y-%m-%d'))";
+			sql = "insert into WELCOME_CONTENT(SITE_ID, CONTENT, MODIFIED_ON) values(?,?,to_date('"+currentDate+"','YYYY-MM-DD'))";
 			sqlService.dbWrite(sql,new Object[]{siteId,content});
 		} else {
 			sql = "update WELCOME_CONTENT" +
 				  " set CONTENT = ?, " +
-				  // Sifiso Changes:2018/10/31:Convert Oracle to mySQL
-				  /*"     MODIFIED_ON = to_date(?,'YYYY-MM-DD')" +*/
-				  "     MODIFIED_ON = str_to_date(?,'%Y-%m-%d')" +
+				  "     MODIFIED_ON = to_date(?,'YYYY-MM-DD')" +
 				  " where SITE_ID = ?";
 //			sqlService.dbWrite(sql,new Object[]{content, currentDate, siteId});
 			sql = "update WELCOME_CONTENT" +
 			  " set CONTENT = ?, " +
-			  // Sifiso Changes:2018/10/31:Convert Oracle to mySQL
-			  /*"     MODIFIED_ON = to_date('"+currentDate+"','YYYY-MM-DD')" +*/
-			  "     MODIFIED_ON = str_to_date('"+currentDate+"','%Y-%m-%d')" +
+			  "     MODIFIED_ON = to_date('"+currentDate+"','YYYY-MM-DD')" +
 			  " where SITE_ID = ?";
 		sqlService.dbWrite(sql,new Object[]{content,siteId});
 		}

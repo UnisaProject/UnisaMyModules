@@ -27,7 +27,7 @@ import za.ac.unisa.lms.dao.general.PersonnelDAO;
 import za.ac.unisa.lms.db.StudentSystemDAO;
 import za.ac.unisa.lms.domain.general.Person;
 import za.ac.unisa.lms.tools.mdadmission.Constants;
-import za.ac.unisa.lms.tools.mdadmission.exception.UniflowException;
+import za.ac.unisa.lms.tools.mdadmission.exception.*;
 import za.ac.unisa.lms.tools.mdadmission.forms.AddressPH;
 import za.ac.unisa.lms.tools.mdadmission.forms.MdAdmissionApplication;
 import za.ac.unisa.lms.tools.mdadmission.forms.MdAdmissionForm;
@@ -251,7 +251,7 @@ public class MdAdmissionQueryDAO extends StudentSystemDAO {
 	}
 	
 //New Uniflow webservice change 20160914
-public ArrayList<UniflowFile> getNewDocsList(String studentNo) throws MalformedURLException, ServiceException, UniflowException{
+public ArrayList<UniflowFile> getNewDocsList(String studentNo) throws MalformedURLException, ServiceException, NewUniflowException{
 		
 		log.debug("get doc list");
 
@@ -323,6 +323,7 @@ public ArrayList<UniflowFile> getNewDocsList(String studentNo) throws MalformedU
 		    	Record[] records = resultSet[i].getRecords();
 		    	String docType = "";
 		    	String docExt = "";
+		    	String itemType = "";
 		    	for (int k=0 ; k  < records.length ; k++)
 		    	{
 		    		// ---
@@ -335,6 +336,10 @@ public ArrayList<UniflowFile> getNewDocsList(String studentNo) throws MalformedU
 		    			}
 		    			if (fieldNames[l] != null && "FILE_EXT".equalsIgnoreCase(fieldNames[l].toString())){    //add code to eliminate txt files
 		    				docExt = recordField[l];                                                            //add code to eliminate txt files
+		    			}
+		    			//Johanet 20190207
+		    			if (fieldNames[l] != null && "ITEM_TYPE".equalsIgnoreCase(fieldNames[l].toString())){    //add code to eliminate txt files
+		    				itemType = recordField[l];                                                            //add code to eliminate txt files
 		    			}
 		    			log.debug("Field name:"+ fieldNames[l] + "== Record field:"+recordField[l]);
 		    		}
@@ -350,9 +355,11 @@ public ArrayList<UniflowFile> getNewDocsList(String studentNo) throws MalformedU
 		    		uFile.setUniqueId(records[k].getUniqueId().toString());
 		    		uFile.setDocumentLocation(resultSet[i].getLocation());
 		    		uFile.setUniflowVersion("new");
-		    		log.debug(uFile.toString());
-		    		if (!docExt.equalsIgnoreCase("TXT")){		    		
-		    		docList.add(uFile);
+		    		log.debug(uFile.toString());	
+		    		if (!docExt.equalsIgnoreCase("TXT") && !docExt.equalsIgnoreCase("EML") &&
+		    				!docExt.equalsIgnoreCase("E-mail") && 
+		    				!itemType.equalsIgnoreCase("EML") && !itemType.equalsIgnoreCase("TXT")){	
+		    		docList.add(uFile);		    		
 				    	if ("Worklist".equalsIgnoreCase(docLocation.getType().toString())){
 				    		// FOR WORKLISTS: add first doc and check for more via sibling count
 				    		DocumentID docId = new DocumentID(1,docLocation ,records[k].getUniqueId());
@@ -388,7 +395,7 @@ public ArrayList<UniflowFile> getNewDocsList(String studentNo) throws MalformedU
 		    }
 		}catch (RemoteException rex) {
 			
-			throw new UniflowException ("MdAdmissionQueryDAO: getNewDocList : /" + rex.getMessage(), rex);
+			throw new NewUniflowException ("MdAdmissionQueryDAO: getNewDocList : /" + rex.getMessage(), rex);
 		}
 	
 		log.debug("get doc list END");

@@ -262,9 +262,9 @@ public class MdApplicationsQueryDAO extends StudentSystemDAO {
 	public ArrayList getSpesList(String sQual, String sYear, boolean isAdmin) throws Exception {
 		ArrayList list = new ArrayList();
 
-		String wapString = "            and quaspc.app_open=regdat.type ";
+		String wapString = " and trunc(sysdate) between regdat.from_date and regdat.to_date ";
 		if (isAdmin){
-			wapString = "            and quaspc.app_open like 'WAP%' " ;
+			wapString = "    and quaspc.app_open like 'WAP%' " ;
 		}
 		
 		String query1 = "select substr(trim(speciality_code)||'NVT',1,3)||'-'||mk_qualification_c as speciality_code ," +
@@ -282,8 +282,8 @@ public class MdApplicationsQueryDAO extends StudentSystemDAO {
 						" and (from_year=0 or from_year<=" +sYear + ")" +
 						" and (to_year=0 or to_year>=" +sYear + ")" +
 						" and regdat.academic_year =" +sYear +
-						" " + wapString +
-						" and trunc(sysdate) between regdat.from_date and regdat.to_date " +
+						" and quaspc.app_open=regdat.type" +
+						 wapString +
 						" order by mk_qualification_c, english_descriptio";
 
 		String query="";

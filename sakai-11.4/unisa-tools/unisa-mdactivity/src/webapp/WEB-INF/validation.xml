@@ -7,7 +7,7 @@
    <formset>
 
 		<form name="mdActivityForm">
-			<field property="student.number" depends="required,integer,minlength,maxlength">
+			<field property="student.number" depends="integer,minlength,maxlength">
 			    <arg0 key="page.heading.studentnr"/>
 				<arg1 key="${var:minlength}" name="minlength" resource="false" />
 				<arg1 key="${var:maxlength}" name="maxlength" resource="false" />

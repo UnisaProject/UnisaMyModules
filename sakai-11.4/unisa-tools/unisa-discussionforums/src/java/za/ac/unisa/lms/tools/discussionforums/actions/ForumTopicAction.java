@@ -530,7 +530,7 @@ public class ForumTopicAction extends LookupDispatchAction {
 			UsageSession usageSession = usageSessionService.getSession();
 			TopicDao topicDAO = TopicDaoService.getTopicDao();
 			topicDAO.editTopicName(forumTopicForm.getTopicname(), forumTopicForm.getTopicId());
-						
+			
 			messages.add(ActionMessages.GLOBAL_MESSAGE,new ActionMessage("errors.message","You have successfully edited the topic title."));
 			addErrors(request, messages);
 			eventTrackingService.post(

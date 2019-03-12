@@ -40,8 +40,7 @@ public class ForumDAOImpl extends SakaiDAO implements ForumDao{
 	public void insertForum(Forum forum){
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource());
 		StringBuilder insertForumSql = new StringBuilder("insert into UFORUM_FORUM (Forum_Id,Forum_Name,Description,User_Id,Creation_Date,Site_Id,Hide_Status) ");
-		//insertForumSql.append("values(UFORUM_FORUM_0.nextval,?,?,?,sysdate,?,'N')");//oracle
-		insertForumSql.append("values(NULL,?,?,?,sysdate(),?,'N')");//mysql
+		insertForumSql.append("values(UFORUM_FORUM_0.nextval,?,?,?,sysdate,?,'N')");
 		PreparedStatementCreatorFactory psFactoryForumInsert = new PreparedStatementCreatorFactory(insertForumSql.toString(),
 				new int[] {Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR}
 				);	
@@ -91,11 +90,10 @@ public class ForumDAOImpl extends SakaiDAO implements ForumDao{
 				
 				JdbcTemplate jdbcTemplate;
 				transactionSuccess=false;
-				
 				String transactionAction="DELETE";
 				String tableUforum_forum="UFORUM_FORUM";
 				String oldRecord = forum.getForumId()+", "+forum.getUserId();
-				//String selectNextValLogId = "select uforum_log_s.nextval as logId from dual";
+				String selectNextValLogId = "select uforum_log_s.nextval as logId from dual";
 				String logId="";
 				
 				try{
@@ -161,15 +159,8 @@ public class ForumDAOImpl extends SakaiDAO implements ForumDao{
 	 */
 	public List<ForumRowMapper> getForumList(String siteId,String sortby,String sortorder) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource());
-		//oracle
-	/*	StringBuilder selectForumsForSite = new StringBuilder("select Forum_Id,Forum_Name,Description,User_Id,TO_CHAR(Creation_Date,'YYYY-MM-DD HH24:MI') as Creation_Date,");
-		selectForumsForSite.append(" Site_Id,TO_CHAR(Last_Post_Date,'YYYY-MM-DD HH24:MI') as Last_Post_Date,nvl(Last_Post_User,'') as Last_Post_User  ");*/
-		
-		//mysql
-		StringBuilder selectForumsForSite = new StringBuilder("select Forum_Id,Forum_Name,Description,User_Id,DATE_FORMAT(Creation_Date,'%Y-%m-%d %H:%i') as Creation_Date,");
-		//selectForumsForSite.append(" Site_Id,DATE_FORMAT(Last_Post_Date,'%Y-%m-%d %H:%i') as Last_Post_Date,ifnull(Last_Post_User,'') as Last_Post_Use  "); // Sifiso Changes:2019-01-25: Removed
-		selectForumsForSite.append(" Site_Id,DATE_FORMAT(Last_Post_Date,'%Y-%m-%d %H:%i') as Last_Post_Date,ifnull(Last_Post_User,'') as Last_Post_User  ");  // Sifiso Changes:2019-01-25: Added-Changed Last_Post_Use to Last_Post_User
-		
+		StringBuilder selectForumsForSite = new StringBuilder("select Forum_Id,Forum_Name,Description,User_Id,TO_CHAR(Creation_Date,'YYYY-MM-DD HH24:MI') as Creation_Date,");
+		selectForumsForSite.append(" Site_Id,TO_CHAR(Last_Post_Date,'YYYY-MM-DD HH24:MI') as Last_Post_Date,nvl(Last_Post_User,'') as Last_Post_User  ");
 		selectForumsForSite.append(" from UFORUM_FORUM where Site_Id = ? ");
 		selectForumsForSite.append(" and Hide_Status = 'N' ");
 		selectForumsForSite.append(" order by upper("+sortby+") "+sortorder);

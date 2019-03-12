@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,8 @@ import org.apache.struts.actions.LookupDispatchAction;
 import org.apache.struts.util.LabelValueBean;
 
 import za.ac.unisa.lms.constants.EventTrackingTypes;
+import za.ac.unisa.lms.dao.general.UserDAO;
+import za.ac.unisa.lms.domain.general.Person;
 
 import org.sakaiproject.event.api.UsageSession;
 import org.sakaiproject.event.api.EventTrackingService;
@@ -41,6 +44,7 @@ import za.ac.unisa.lms.tools.mdactivity.dao.MdActivityQueryDAO;
 import za.ac.unisa.lms.tools.mdactivity.forms.ActivityRecord;
 import za.ac.unisa.lms.tools.mdactivity.forms.MdActivityForm;
 import za.ac.unisa.lms.tools.mdactivity.forms.Promotor;
+import za.ac.unisa.lms.tools.mdactivity.forms.Qualification;
 import za.ac.unisa.lms.tools.mdactivity.forms.Student;
 import za.ac.unisa.lms.tools.mdactivity.forms.StudyUnit;
 import za.ac.unisa.lms.tools.mdactivity.forms.GeneralItem;
@@ -81,6 +85,7 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 	    map.put("button.edit", "editActivity");
 //	    map.put("button.save", "save");
 	    map.put("save", "save");
+	    map.put("button.changeMayReg", "changeMayReg");
 		map.put("inputstep2", "inputstep2");
 		map.put("button.display", "display");
 		map.put("display", "display");
@@ -88,11 +93,25 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 		map.put("inputstep1", "inputstep1");
 		return map;
 	}
+	
+	public ActionForward changeMayReg(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		
+		MdActivityForm activityForm = (MdActivityForm) form;
+		
+		activityForm.setInputPermission(activityForm.getRegPermission());
+		
+		return mapping.findForward("displayStudentMayReg");		
+	}
 
 
-	public ActionForward inputstep1(ActionMapping mapping, ActionForm form,HttpServletRequest request, HttpServletResponse response) throws UserNotDefinedException{
+	public ActionForward inputstep1(ActionMapping mapping, ActionForm form,HttpServletRequest request, HttpServletResponse response) throws Exception{
 
 		MdActivityForm activityForm = (MdActivityForm) form;
+		
+		try {
+		
 		sessionManager = (SessionManager) ComponentManager.get(SessionManager.class);
 		userDirectoryService = (UserDirectoryService) ComponentManager.get(UserDirectoryService.class);
 
@@ -110,11 +129,31 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 		if (!"Instructor".equalsIgnoreCase(user.getType())){
 			return mapping.findForward("invaliduser");
 		}
+		
+		Person person = new Person();
+		UserDAO userdao = new UserDAO();
+		person = userdao.getPerson(user.getEid());	
+		
+		if (person.getPersonnelNumber()==null){
+			return mapping.findForward("invaliduser");
+		}
 
+		activityForm.setUser(person);
+		
 		Student student = new Student();
 		activityForm.setStudent(student);
-
+		
+		//Populate students linked to lecturer	
+		ArrayList<LabelValueBean> studentLookupList = 
+			loadStudentLookup(activityForm);
+		activityForm.setStudentLookupList(studentLookupList);
+		//request.setAttribute("studentLookupList", studentLookupList);
+	
 		return mapping.findForward("step1forward");
+		
+		}catch (Exception e){
+			throw new Exception("MdActivityDisplayAction(inputstep1): / "+e.getMessage());
+		}
 	}
 
 	public ActionForward inputstep2(ActionMapping mapping, ActionForm form,HttpServletRequest request, HttpServletResponse response) throws Exception{
@@ -122,19 +161,43 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 		MdActivityForm activityForm = (MdActivityForm) form;
 		ActionMessages messages = new ActionMessages();
 
-		try{
-
+		try{			
 		// validate input
 			messages = (ActionMessages) activityForm.validate(mapping, request);
 			if (!messages.isEmpty()) {
 				addErrors(request, messages);
+				//Populate students linked to lecturer	
+//				ArrayList<LabelValueBean> studentLookupList	= 
+//						loadStudentLookup(activityForm);
+//				request.setAttribute("studentLookupList", studentLookupList);
 				return mapping.findForward("step1forward");
 			}
+		
+			
+		String selectedQual="";	
+		if (activityForm.getStudent().getNumber() == null || "".equals(activityForm.getStudent().getNumber())){
+			if (activityForm.getSelectedStudent() != null && 
+					!"".equalsIgnoreCase(activityForm.getSelectedStudent()) &&
+							!"-1".equalsIgnoreCase(activityForm.getSelectedStudent())){
+				activityForm.getStudent().setNumber(activityForm.getSelectedStudent());
+				for (int i=0;  i< activityForm.getStudentLookupList().size() ; i++) {
+					LabelValueBean lvBean = (LabelValueBean) activityForm.getStudentLookupList().get(i);
+					if (activityForm.getStudent().getNumber().equalsIgnoreCase(lvBean.getValue())) {
+						selectedQual = lvBean.getLabel().substring(0, 5);
+					}
+				}
+			}			
+		}
+		
 		if (activityForm.getStudent().getNumber() == null || "".equals(activityForm.getStudent().getNumber())){
 			messages.add(ActionMessages.GLOBAL_MESSAGE,
 					new ActionMessage("message.generalmessage",
-						"Please enter a student number."));
+						"Please enter a student number or select a student from the list"));
 			addErrors(request, messages);
+			//Populate students linked to lecturer	
+//			ArrayList<LabelValueBean> studentLookupList = 
+//				loadStudentLookup(activityForm);
+//			request.setAttribute("studentLookupList", studentLookupList);
 			return mapping.findForward("step1forward");
 		}
 
@@ -151,6 +214,7 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 	    op.setInCsfClientServerCommunicationsClientDevelopmentPhase("C");
 	    op.setInWsStudentNr(Integer.parseInt(activityForm.getStudent().getNumber()));
 	    op.setInCsfClientServerCommunicationsAction("L");
+	    op.setInSecurityWsUserNumber(99998);
 
 		op.execute();
 
@@ -168,9 +232,13 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
         			new ActionMessage("error.coolgenerror", Errormsg));
         	//}
         	addErrors(request, messages);
+        	//Populate students linked to lecturer	
+//    		ArrayList<LabelValueBean> studentLookupList = 
+//    			loadStudentLookup(activityForm);
+//    		request.setAttribute("studentLookupList", studentLookupList);
         	return mapping.findForward("step1forward");
         } else {
-        	// setup study unit list
+        	// setup study unit list        	
         	int count = op.getOutStudyUnitGroupCount();
         	ArrayList list = new ArrayList();
         	for (int i=0; i<count; i++) {
@@ -184,11 +252,16 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 				studyUnit.setEditable(op.getOutGEditableCsfStringsString1(i));
 				studyUnit.setErrorMessage(op.getOutGEditableCsfStringsString500(i));
 				studyUnit.setLastAcademicYear(Short.toString(op.getOutGWsStudentAnnualRecordMkAcademicYear(i)));
-				list.add(studyUnit);
+				if (null==selectedQual || selectedQual.trim().equalsIgnoreCase("")) {
+					list.add(studyUnit);				
+				} else if (selectedQual.equalsIgnoreCase(studyUnit.getQualCode())) {
+					list.add(studyUnit);
+				}				
 			}
 			activityForm.setStudyUnitRecords(list);
 			// set student name
 			activityForm.getStudent().setName(op.getOutStudentNameCsfStringsString100());
+			//
 		}
 
 		return mapping.findForward("step2forward");
@@ -214,6 +287,10 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 	   if(activityForm.getStudent().getNumber() == null || "".equals(activityForm.getStudent().getNumber().trim())){
 		   // student number cant be empty
 		    reset((MdActivityForm)form);
+		  //Populate students linked to lecturer	
+//			ArrayList<LabelValueBean> studentLookupList = 
+//				loadStudentLookup(activityForm);
+//			request.setAttribute("studentLookupList", studentLookupList);
 			return mapping.findForward("cancelforward");
 	   }
 
@@ -263,6 +340,7 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 	    op.setInWsStudentNr(Integer.parseInt(activityForm.getStudent().getNumber()));
 	    op.setInStudentDissertationMkStudyUnitCode(activityForm.getStudyUnitCode());
 	    op.setInCsfClientServerCommunicationsAction("D");
+	    op.setInSecurityWsUserNumber(99998);
 
 		op.execute();
 
@@ -305,13 +383,10 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 //				activity.setEntryTimestamp(op.getOutGrMdActivityEntryTimestamp(i));
 //				list.add(activity);
 //			}
-//			activityForm.setActivityRecords(list);
-			// set qualification
-			activityForm.setQualificationCode(op.getOutWsStudentAnnualRecordMkHighestQualCode());
-			activityForm.setQualificationDescr(op.getOutWsQualificationShortDescription());
+//			activityForm.setActivityRecords(list);			
 			// set dissertation info
-			activityForm.setDisType(op.getOutTypeDescriptionCsfStringsString30());
-			activityForm.setDisTitle(op.getOutStudentDissertationTitle());
+			activityForm.setDisType(op.getOutTypeDescriptionCsfStringsString30().trim());
+			activityForm.setDisTitle(op.getOutStudentDissertationTitle().trim());
 			// set staff number
 			activityForm.setStaffNumber(op.getOutWsStaffPersno());
 			// set promoters
@@ -320,7 +395,7 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
         	for (int i=0; i<count; i++) {
         		Promotor promotor = new Promotor();
         		promotor.setStaffNr(op.getOutGStudentDissertationPromoterMkPromotorNr(i));
-        		promotor.setName(op.getOutGCsfStringsString100(i));
+        		promotor.setName(op.getOutGCsfStringsString100(i).trim());
         		promotor.setSupervisor(op.getOutGStudentDissertationPromoterSupervisorFlag(i));
         		promotor.setDepartmentDesc(op.getOutGCsfStringsString28(i));
         		promList.add(promotor);
@@ -348,9 +423,32 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 
 			//Read activities with a direct sql in java instead of coolgen server - Johanet 20120827
 			ArrayList<ActivityRecord> list = new ArrayList<ActivityRecord>();
-			MdActivityQueryDAO dao = new MdActivityQueryDAO();
+			// set qualification
+        	MdActivityQueryDAO dao = new MdActivityQueryDAO();
+        	Qualification qual = new Qualification();
+        	qual = dao.getSTUANNQual(activityForm.getStudent().getNumber(), studyUnit.getLastAcademicYear());
+			activityForm.setQualification(qual);
 			list = dao.getMDActivities(Integer.parseInt(activityForm.getStudent().getNumber()), activityForm.getStudyUnitCode());
 			activityForm.setActivityRecords(list);
+			//Johanet 20190125 CR2579 If Post Graduate Studies Approved flag ='N' - get the latest reason if any
+			String reason = "";
+			if (activityForm.getRegPermission()!=null && activityForm.getRegPermission().equalsIgnoreCase("N")) {
+				reason = dao.getPostGraduateStudiesDeniedReason(Integer.parseInt(activityForm.getStudent().getNumber()));
+			}			
+			activityForm.setRegReason(reason);
+			//Johanet 20190125 CR2579 Get the first registration date for the qualification
+			String firstRegDate= "";
+			firstRegDate = dao.getFirstRegistrationDate(Integer.parseInt(activityForm.getStudent().getNumber()), activityForm.getQualification().getQualCode());
+			activityForm.setFirstRegistrationDate(firstRegDate);
+			//Johanet 20190125 CR2579 Get the number of years registered for the Research Proposal
+			//Johanet 20190125 CR2579 Get the number of years registered for the qualification
+			int yearsReg = 0;
+			yearsReg = dao.getYearsRegistered(Integer.parseInt(activityForm.getStudent().getNumber()), activityForm.getQualification().getQualCode());
+			activityForm.setYearsRegistered(yearsReg);
+			//Johanet 20190130 CR2579 Get the number of years registered for research proposal
+			yearsReg = 0;
+			yearsReg = dao.getYearsRegisteredForResearchProposal(Integer.parseInt(activityForm.getStudent().getNumber()), activityForm.getQualification().getQualCode());
+			activityForm.setYearsRegisteredForResearchProposal(yearsReg);
 			
 //			String pageDown = op.getOutCsfClientServerCommunicationsRgvScrollDownFlag();
 //			while ("Y".equalsIgnoreCase(pageDown)){
@@ -436,7 +534,7 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 		}
 	}
 	
-	public ActionForward save(ActionMapping mapping, ActionForm form,
+	public ActionForward xsave(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		
@@ -498,6 +596,40 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 		}
 	}
 
+	
+	public ActionForward save(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		
+		sessionManager = (SessionManager) ComponentManager.get(SessionManager.class);
+		usageSessionService = (UsageSessionService) ComponentManager.get(UsageSessionService.class);
+		toolManager = (ToolManager) ComponentManager.get(ToolManager.class);
+		eventTrackingService = (EventTrackingService) ComponentManager.get(EventTrackingService.class);
+
+		MdActivityForm activityForm = (MdActivityForm) form;
+		ActionMessages messages = new ActionMessages();		
+		
+		if (activityForm.getInputPermission()!=null && activityForm.getInputPermission().equalsIgnoreCase("N")) {
+			if (activityForm.getRegReason()==null || activityForm.getRegReason().trim().equalsIgnoreCase("") ) {
+				messages.add(ActionMessages.GLOBAL_MESSAGE,
+						new ActionMessage("message.generalmessage",
+							"Please provide a reason why the student may not re-register."));
+				addErrors(request, messages);
+				return mapping.findForward("displayStudentMayReg");
+			}			
+		}
+			
+			MdActivityQueryDAO dao = new MdActivityQueryDAO();
+			if (activityForm.getInputPermission().equalsIgnoreCase("Y")) {
+				activityForm.setRegReason("");
+			}
+			dao.updateStudentMayRegister(Integer.parseInt(activityForm.getStudent().getNumber()), activityForm.getInputPermission(), activityForm.getRegReason(), activityForm.getUser().getPersonnelNumber());
+			activityForm.setRegPermission(activityForm.getInputPermission());
+			
+			return mapping.findForward("displayforward");
+	
+	}
+	
 	public ActionForward updateActivity(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
@@ -554,10 +686,10 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 //			 check comment length max=150 chars plus two front slashes should be added every time
 			if ( !"".equals(activityForm.getNewActivity().getComments().trim())){
 				int commentLen = activityForm.getNewActivity().getComments().trim().length();
-				if(commentLen > 150){
+				if(commentLen + 10 > 600){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
 						new ActionMessage("message.generalmessage",
-						"Comments can not exceed 150 characters. It is currently "+(commentLen)+" characters."));
+						"Comments can not exceed 600 characters. It is currently "+(commentLen + 10)+" characters."));
 					addErrors(request, messages);
 					// Setup activity pick list
 					setUpActivityPickList(request);
@@ -605,10 +737,10 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 			// check comment length max=150 chars plus two front slashes shoud be added every time
 			if (activityForm.getUpdateActivity().getExtraComments()!=null && !"".equals(activityForm.getUpdateActivity().getExtraComments())){
 				int commentLen = activityForm.getUpdateActivity().getComments().trim().length() + activityForm.getUpdateActivity().getExtraComments().trim().length();
-				if(commentLen + 2 > 150){
+				if(commentLen + 10 > 600){
 					messages.add(ActionMessages.GLOBAL_MESSAGE,
 						new ActionMessage("message.generalmessage",
-						"Previous comments and new comments can not exceed 150 characters. It is currently "+(commentLen + 2 )+" characters."));
+						"Previous comments and new comments can not exceed 600 characters. It is currently "+(commentLen + 10 )+" characters."));
 					addErrors(request, messages);
 					// Setup activity pick list
 					setUpActivityPickList(request);
@@ -658,6 +790,7 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 	 	op.setInCsfClientServerCommunicationsClientRevisionNumber((short) 1);
 	    op.setInCsfClientServerCommunicationsClientDevelopmentPhase("C");
 	    op.setInSecurityWsUserNovellUserCode(activityForm.getUserCode());
+	    op.setInSecurityWsUserNumber(99998);
 
 	    op.setInWsStudentNr(Integer.parseInt(activityForm.getStudent().getNumber()));
 	    op.setInStudentDissertationMkStudyUnitCode(activityForm.getStudyUnitCode());
@@ -774,6 +907,13 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 			MdActivityQueryDAO dao = new MdActivityQueryDAO();
 			list = dao.getMDActivities(Integer.parseInt(activityForm.getStudent().getNumber()), activityForm.getStudyUnitCode());
 			activityForm.setActivityRecords(list);
+			//Johanet 20190125 CR2579 If Post Graduate Studies Approved flag ='N' - get the latest reason if any
+			activityForm.setRegPermission(op.getOutWsStudentPostGraduateStudiesApproved());			
+			String reason = "";
+			if (activityForm.getRegPermission()!=null && activityForm.getRegPermission().equalsIgnoreCase("N")) {
+				reason = dao.getPostGraduateStudiesDeniedReason(Integer.parseInt(activityForm.getStudent().getNumber()));
+			}			
+			activityForm.setRegReason(reason);
 		}
 
         if ("edit".equalsIgnoreCase(request.getParameter("frompage"))){
@@ -831,6 +971,12 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 		}
 		// Setup activity pick list
 		setUpActivityPickList(request);
+		
+		//Johanet 20190128 Change CR2579 - Default activity date to current date
+		String dateFormat = "yyyyMMdd";
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+		activityForm.getNewActivity().setActivityDate(sdf.format(cal.getTime()));
 
 		return mapping.findForward("addforward");
 
@@ -923,9 +1069,20 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 		if ("display".equalsIgnoreCase(request.getParameter("goto"))){
 			activityForm.setSelectedStudyUnit("");
 			activityForm.setSelectedActivityRecord("");
+			MdActivityQueryDAO dao = new MdActivityQueryDAO();
+			//Johanet 20190125 CR2579 If Post Graduate Studies Approved flag ='N' - get the latest reason if any
+			String reason = "";
+			if (activityForm.getRegPermission()!=null && activityForm.getRegPermission().equalsIgnoreCase("N")) {
+				reason = dao.getPostGraduateStudiesDeniedReason(Integer.parseInt(activityForm.getStudent().getNumber()));
+			}			
+			activityForm.setRegReason(reason);
 			return mapping.findForward("displayforward");
 		}else{
 			reset((MdActivityForm)form);
+			//Populate students linked to lecturer	
+//			ArrayList<LabelValueBean> studentLookupList = 
+//				loadStudentLookup(activityForm);
+//			request.setAttribute("studentLookupList", studentLookupList);
 			return mapping.findForward("cancelforward");
 		}
 	}
@@ -1024,6 +1181,20 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 
 		return result;
 	}
+	
+	private ArrayList<LabelValueBean> loadStudentLookup(
+			MdActivityForm mdForm) throws Exception{
+			
+			try {
+				MdActivityQueryDAO dao = new MdActivityQueryDAO();
+				ArrayList<LabelValueBean> list = 
+				dao.getStudentLookupList(mdForm.getUser().getPersonnelNumber());
+				list.add(0,new LabelValueBean("Select a student","-1"));
+				return list;
+			}catch (Exception e){
+				throw new Exception("loadStudentLookup: / "+e.getMessage());
+			}	
+	}      
 
 	private boolean isNumeric(String testString){
 
@@ -1045,6 +1216,8 @@ public class DisplayMdActivityAction  extends LookupDispatchAction{
 		form.setDisTitle("");
 		form.setSelectedStudyUnit("");
 		form.setSelectedActivityRecord("");
+		form.setSelectedStudent("");
+		form.setRegReason("");		
 
 	}
 
