@@ -1,7 +1,7 @@
 <%-- Generate a breadcrumb trail for all pages except Instructor View --%>
 <%-- NOTE: Hierarchical trail, not an activity trail --%>
 
-<div class="breadcrumb"><h3>
+<div class="breadcrumb"><p> <%-- Unisa Changes:2019/02/14:Replace h3 tag with p tag to correct heading margins --%>
 
 	<%--  The root of the breadcrumb rendered here --%>
 	<h:commandLink action="#{bean.navigateToOverview}" value="#{msgs.breadcrumb_overview}" immediate="true" rendered="#{bean.breadcrumbPage eq 'overview'}" />
@@ -35,4 +35,4 @@
 	<h:outputText value="#{msgs.breadcrumb_courseGrade}" rendered="#{bean.fromPage eq 'courseGrade'}" />
 	
 	<h:outputText value="#{msgs.breadcrumb_spreadsheet}" rendered="#{bean.fromPage eq 'spreadsheetListing'}" />
-</h3></div>
+</p></div> <%-- Unisa Changes:2019/02/14:Replace h3 tag with p tag to correct heading margins --%>

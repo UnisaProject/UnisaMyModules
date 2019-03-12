@@ -396,7 +396,7 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 			List queryList = jdt.queryForList(query, new Object []{surname.toUpperCase(), firstNames.toUpperCase(), bDay, acaYear});
 			
 			Iterator i = queryList.iterator();
-			if (i.hasNext()) {
+			while (i.hasNext()) {
 				ListOrderedMap data = (ListOrderedMap) i.next();
 				//log.debug("ApplyForStudentNumberQueryDAO - validateSTUAPQ - isNumber= " +  data.get("mk_student_nr").toString());
 				studentNr = Integer.parseInt(data.get("mk_student_nr").toString());
@@ -440,7 +440,9 @@ public class ApplyForStudentNumberQueryDAO extends StudentSystemDAO {
 				+ " and to_char(stu.birth_date, 'DD/MM/YYYY') = ? "
 				+ " and stuann.mk_academic_year= ? "
 				+ " and stuapq.academic_year= ? "
-				+ " and stuapq.application_period = ? ";
+				+ " and stuapq.application_period = ? " 
+				+ " and stuapq.mk_student_nr >= 70000000 "
+				+ " and stuapq.mk_student_nr < 80000000";
 
 		try {
 			dbParam = surname.toUpperCase()+","+firstNames.toUpperCase()+","+bDay+","+acaYear+","+acaYear+","+acaPeriod;

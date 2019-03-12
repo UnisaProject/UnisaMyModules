@@ -24,9 +24,10 @@
 		<sakai:group_table>
 			<tr>
 				<td><strong><fmt:message key="page.heading.activity"/></strong></td>
-				<td colspan="2"><html:select property="selectedActivity">
+				<td><html:select property="selectedActivity">
 				<html:options collection="list" property="value" labelProperty="label"/>
-			</html:select></td>
+				</html:select></td>
+				<td><fmt:message key="page.note.activity"/></td>
 			</tr><tr>
 				<td><strong><fmt:message key="page.heading.activitydate"/></strong></td>
 				<td><html:text name="mdActivityForm" property="newActivity.activityDate" size="10" maxlength="8"/></td>
@@ -35,7 +36,7 @@
 				<td colspan="3"><sakai:instruction><fmt:message key="page.instruction6"/></sakai:instruction></td>
 			</tr><tr>
 				<td><strong><fmt:message key="page.heading.comments"/></strong></td>
-				<td colspan="2"><html:textarea name="mdActivityForm" property="newActivity.comments" rows="2" cols="40" /></td>
+				<td colspan="2"><html:textarea name="mdActivityForm" property="newActivity.comments" rows="6" cols="100" /></td>
 			</tr>	
 		</sakai:group_table>
 <br/>

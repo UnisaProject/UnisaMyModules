@@ -27,11 +27,9 @@ clog.SORT_COMMENTS_UP = 'sortcommentsup';
 clog.SORT_COMMENTS_DOWN = 'sortcommentsdown';
 clog.sortByComments = clog.SORT_COMMENTS_DOWN;
 // Sorting keys end
-//
-clog.LOCAL_STORAGE_KEY = 'clog';
-//clog.AJAX_TIMEOUT = 5000; unisa change
-clog.AJAX_TIMEOUT = 60000;
 
+clog.LOCAL_STORAGE_KEY = 'clog';
+clog.AJAX_TIMEOUT = 100000; //unisa change
 
 clog.states = {
     GROUPS: 'groups',
@@ -115,7 +113,6 @@ clog.switchState = function (state,arg) {
             };
 
         clog.utils.renderTemplate('group_posts', templateData, 'clog_content');
-
         // renderPageOfPosts uses this. Set it to the start page
         clog.page = 0;
         clog.postsRendered = 0;
@@ -182,7 +179,6 @@ clog.switchState = function (state,arg) {
                 clog.utils.renderPageOfMembers({ sort: clog.sortByComments });
             });
         });
-
         // renderPageOfMembers uses this. Set it to the start page
         clog.page = 0;
         clog.postsRendered = 0;

@@ -194,7 +194,7 @@ public class CourseImportJob extends SingleClusterInstanceJob implements Statefu
 			log.debug("Adding term and term_eid for " + newSite.getId() +"term="+year+" "+semesterLongAsString+" term_eid="+year+semester );
 			siteProperties.addProperty("term", year+" "+semesterLongAsString);
 			siteProperties.addProperty("term_eid", year+semester);
-			log.info(this+" CourseImportJob Adding term and term_eid: success "+newSite.getId());				
+			log.debug("Adding term and term_eid: success "+newSite.getId());				
 		} else {
 			log.debug("Removing term and term_eid");
 			siteProperties.removeProperty("term");
@@ -202,12 +202,11 @@ public class CourseImportJob extends SingleClusterInstanceJob implements Statefu
 			log.debug("Adding term and term_eid for " + newSite.getId() +"term="+year+" "+semesterLongAsString+" term_eid="+year+semester );
 			siteProperties.addProperty("term", year+" "+semesterLongAsString);
 			siteProperties.addProperty("term_eid", year+semester);
-			log.info(this+"Adding term and term_eid: success"+newSite.getId());		
+			log.debug("Adding term and term_eid: success"+newSite.getId());		
 		}
 		siteService.save(courseSite);
-		log.info(this+"CourseImportJob Site creation success"+courseSite);	
 		}catch(Exception ex){
-			log.error(this+"CourseImportJob: Adding term and term_eid failed "+ex);
+			log.error("CourseImportJob: Adding term and term_eid failed "+ex);
 		}
 	}
 	

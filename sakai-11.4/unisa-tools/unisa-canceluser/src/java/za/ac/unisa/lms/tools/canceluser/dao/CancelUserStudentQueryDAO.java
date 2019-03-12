@@ -2,7 +2,9 @@ package za.ac.unisa.lms.tools.canceluser.dao;
 
 import java.net.InetAddress;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,8 +37,9 @@ public class CancelUserStudentQueryDAO extends StudentSystemDAO {
 	    }
 		return studentExist ;
 	}
-	public StudentInfo getStudentDetails(String stno){
+	public StudentInfo getStudentDetails(String stno) throws Exception{
 		StudentInfo studentInfo = new StudentInfo();
+		studentInfo.setCurrentlyRegistered("");
 		List studentList = null;
 		String sql = "select NR, INITIALS, SURNAME from stu where NR = "+stno;
 		JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -48,8 +51,38 @@ public class CancelUserStudentQueryDAO extends StudentSystemDAO {
 			studentInfo.setStudentName(data.get("INITIALS").toString());
 		    studentInfo.setSurname(data.get("SURNAME").toString());		
 		}
+		boolean currentlyRegistered =  getStudentCurrentRegistration(stno);
+		if(currentlyRegistered) {
+			studentInfo.setCurrentlyRegistered("YES");
+		}
 		return studentInfo;
 	}
+	
+	  public boolean getStudentCurrentRegistration(String studentNr) throws Exception { 
+			String records = "";
+			boolean currentlyRegistered = false;
+			Date d = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+			String stringYear = sdf.format(d);
+
+			Integer i = new Integer(stringYear);
+			int currentYear = i.intValue();			
+	        String query = "select nvl(max(FK_ACADEMIC_YEAR),'0') FK_ACADEMIC_YEAR from stusun where status_code in ('RG','FC') and fk_academic_year = "+currentYear+" and fk_student_nr = "+studentNr; 
+	        
+	        
+	        try{
+				records = this.querySingleValue(query,"FK_ACADEMIC_YEAR");
+				if ((null == records)||(records.length()==0)||(records.equals("0"))) {
+					currentlyRegistered = false;
+				} else {
+					currentlyRegistered = true;
+				}
+			} catch (Exception ex) {
+		      throw new Exception(this+ "getStudentCurrentRegistration: Error occurred for student number "+studentNr+" Error "+ex.getMessage());
+			}		
+	       return  currentlyRegistered;
+} 
+	  
 public void setUserInactiveSOLACT (String studentNr) throws Exception{
 
 		String sql = " UPDATE SOLACT" +

@@ -20,10 +20,6 @@ import za.ac.unisa.lms.tools.discussionforums.dao.MessageDao;
 import za.ac.unisa.lms.tools.discussionforums.dao.MessageRowMapper;
 import za.ac.unisa.lms.tools.discussionforums.dao.OracleDAO;
 
-import org.sakaiproject.component.cover.ComponentManager;
-import org.sakaiproject.user.api.User;
-import org.sakaiproject.user.api.UserDirectoryService;
-
 /**
  * DAO class for all message related queries
  * 
@@ -35,7 +31,6 @@ public class MessageDAOImpl extends SakaiDAO implements MessageDao {
 	//private PreparedStatementCreatorFactory pstsmtCreatorFactoryMessage;
 	private boolean transactionSuccess=false;
 	protected static Logger logger = Logger.getLogger(MessageDAOImpl.class);
-	private UserDirectoryService userDirectoryService;
 	/**
 	 * @param forumMessage
 	 * @return
@@ -55,20 +50,13 @@ public class MessageDAOImpl extends SakaiDAO implements MessageDao {
 				String lastPostUserName = "";
 				transactionSuccess=false;
 				OracleDAO oracleDAO = null;
-				User user = null;
-				userDirectoryService = (UserDirectoryService) ComponentManager.get(UserDirectoryService.class);
 				try{
 					jdbcTemplate = new JdbcTemplate(getDataSource());
 					oracleDAO = new OracleDAO();
 					String intialMessage="N";
-					//Added by Stanford to read from Sakai
-					user = userDirectoryService.getUserByEid(forumMessage.getAuthor());
-					lastPostUserName = user.getDisplayName();
-					System.out.println("Stanford Message insert lastPostUserName: "+ lastPostUserName);
-					//lastPostUserName = oracleDAO.getUserNames(forumMessage.getAuthor()); //commented out by Stanford to avoid to read from student system.
+					lastPostUserName = oracleDAO.getUserNames(forumMessage.getAuthor());
 					StringBuilder insertMessage = new StringBuilder("insert into UFORUM_MESSAGE(Message_Id,Topic_Id,Content,Creation_Date,User_Id,User_Identifier,Msg_Url,File_Type, First_Topic_Msg)" );
-					//insertMessage.append("values(UFORUM_MESSAGE_0.nextval,?,?,sysdate,?,?,?,?,?)"); //Sifisco Changes:2019/01/30:Removed: Change 'UFORUM_MESSAGE_0.nextval' to NULL for mySQL
-					insertMessage.append("values(NULL,?,?,sysdate(),?,?,?,?,?)");	  	//Sifisco Changes:2019/01/30:Added: Added NULL and removed 'UFORUM_MESSAGE_0.nextval'; Added sysdate() for mySQL
+					insertMessage.append("values(UFORUM_MESSAGE_0.nextval,?,?,sysdate,?,?,?,?,?)");	
 					PreparedStatementCreatorFactory pstsmtCreatorFactoryMessage = new PreparedStatementCreatorFactory(insertMessage.toString(),
 							new int[] {Types.INTEGER,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.VARCHAR});
 
@@ -81,10 +69,9 @@ public class MessageDAOImpl extends SakaiDAO implements MessageDao {
 				
 					GeneratedKeyHolder MessageKeyHolder = new GeneratedKeyHolder();
 					jdbcTemplate.update(psCreatorMessageInsert,MessageKeyHolder);
-					//changed query for mysql sysdate to sysdate()
-					PreparedStatementCreatorFactory updateTopic = new PreparedStatementCreatorFactory( "update UFORUM_TOPIC set Last_Post_Date = sysdate() , Last_Post_user =? Where Topic_ID = ?",
+					PreparedStatementCreatorFactory updateTopic = new PreparedStatementCreatorFactory( "update UFORUM_TOPIC set Last_Post_Date = sysdate , Last_Post_user =? Where Topic_ID = ?",
 							new int[] {Types.VARCHAR,Types.INTEGER});
-					PreparedStatementCreatorFactory updateForum = new PreparedStatementCreatorFactory("update UFORUM_FORUM set Last_Post_Date = sysdate() , Last_Post_user =? Where Forum_ID = ?",
+					PreparedStatementCreatorFactory updateForum = new PreparedStatementCreatorFactory("update UFORUM_FORUM set Last_Post_Date = sysdate , Last_Post_user =? Where Forum_ID = ?",
 							new int[] {Types.VARCHAR,Types.INTEGER});
 					
 					PreparedStatementCreator psUpdateTopic = updateTopic.newPreparedStatementCreator(
@@ -131,12 +118,7 @@ public class MessageDAOImpl extends SakaiDAO implements MessageDao {
 		*/
 		
 		//Added by mphahsm on 2015/11 to return exact first topic message irrespective of sequence order
-		//oracle
-	/*	StringBuilder selectMessagesSQL = new StringBuilder("SELECT Message_Id,Topic_Id,Content,TO_CHAR(Creation_Date,'YYYY-MM-DD HH24:MI:SS') as Creation_Date,User_Id,User_Identifier,nvl(Msg_Url,'') as Msg_Url,nvl(File_Type,' ') as File_Type,first_topic_msg ");
-		selectMessagesSQL.append(" FROM uforum_message WHERE Topic_Id = ? AND first_topic_msg = 'Y'");*/
-		
-		//mysql
-		StringBuilder selectMessagesSQL = new StringBuilder("SELECT Message_Id,Topic_Id,Content,DATE_FORMAT(Creation_Date,'%Y-%m-%d %H:%i:%s') as Creation_Date,User_Id,User_Identifier,ifnull(Msg_Url,'') as Msg_Url,ifnull(File_Type,' ') as File_Type,first_topic_msg ");
+		StringBuilder selectMessagesSQL = new StringBuilder("SELECT Message_Id,Topic_Id,Content,TO_CHAR(Creation_Date,'YYYY-MM-DD HH24:MI:SS') as Creation_Date,User_Id,User_Identifier,nvl(Msg_Url,'') as Msg_Url,nvl(File_Type,' ') as File_Type,first_topic_msg ");
 		selectMessagesSQL.append(" FROM uforum_message WHERE Topic_Id = ? AND first_topic_msg = 'Y'");
 		//End of mphahsm Add
 		
@@ -307,11 +289,7 @@ public class MessageDAOImpl extends SakaiDAO implements MessageDao {
 	public ForumMessage getMessageDetail(Integer messageId) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource());
 		ForumMessage forumMessage = new ForumMessage();
-		//oracle
-		//StringBuilder selectMessageSQL = new StringBuilder("select Message_Id,Topic_Id,Content,TO_CHAR(Creation_Date,'YYYY-MM-DD HH24:MI:SS') as Creation_Date,User_Id,User_Identifier,nvl(Msg_Url,' ') as Msg_Url,nvl(File_Type,' ') as File_Type ");
-		
-		//mysql
-		StringBuilder selectMessageSQL = new StringBuilder("select Message_Id,Topic_Id,Content,DATE_FORMAT(Creation_Date,'%Y-%m-%d %H:%i:%s') as Creation_Date,User_Id,User_Identifier,ifnull(Msg_Url,' ') as Msg_Url,ifnull(File_Type,' ') as File_Type ");
+		StringBuilder selectMessageSQL = new StringBuilder("select Message_Id,Topic_Id,Content,TO_CHAR(Creation_Date,'YYYY-MM-DD HH24:MI:SS') as Creation_Date,User_Id,User_Identifier,nvl(Msg_Url,' ') as Msg_Url,nvl(File_Type,' ') as File_Type ");
 		selectMessageSQL.append(" from UFORUM_MESSAGE where Message_Id = ?");
 		long beforeTime = System.currentTimeMillis();
 		PreparedStatementCreatorFactory selectMessage = new PreparedStatementCreatorFactory(selectMessageSQL.toString(),
@@ -351,10 +329,7 @@ public class MessageDAOImpl extends SakaiDAO implements MessageDao {
 		*/
 		
 		//Added by mphahsm on 2015/11 To get all correct messages for a specific topic except initial message 
-		//oracle
-		//StringBuilder selectMessagesSQL = new StringBuilder("SELECT Message_Id,Topic_Id,Content,TO_CHAR(Creation_Date,'YYYY-MM-DD HH24:MI:SS') as Creation_Date,User_Id,User_Identifier,nvl(Msg_Url,'') as Msg_Url,nvl(File_Type,' ') as File_Type,first_topic_msg ");
-		//mysql
-		StringBuilder selectMessagesSQL = new StringBuilder("SELECT Message_Id,Topic_Id,Content,DATE_FORMAT(Creation_Date,'%Y-%m-%d %H:%i:%s') as Creation_Date,User_Id,User_Identifier,ifnull(Msg_Url,'') as Msg_Url,ifnull(File_Type,' ') as File_Type,first_topic_msg  ");
+		StringBuilder selectMessagesSQL = new StringBuilder("SELECT Message_Id,Topic_Id,Content,TO_CHAR(Creation_Date,'YYYY-MM-DD HH24:MI:SS') as Creation_Date,User_Id,User_Identifier,nvl(Msg_Url,'') as Msg_Url,nvl(File_Type,' ') as File_Type,first_topic_msg ");
 		selectMessagesSQL.append("FROM uforum_message WHERE Topic_Id = ? ");
 		selectMessagesSQL.append("AND first_topic_msg = 'N' ");
 		selectMessagesSQL.append("ORDER BY creation_date DESC");

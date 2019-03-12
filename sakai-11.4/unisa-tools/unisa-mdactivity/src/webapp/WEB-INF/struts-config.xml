@@ -52,6 +52,10 @@
        		 path="/WEB-INF/jsp/editmdactivity.jsp"
        		 contextRelative="true" />
        	<forward
+       		 name="displayStudentMayReg"
+       		 path="/WEB-INF/jsp/editStudentMayRegister.jsp"
+       		 contextRelative="true" />
+       	<forward
        		 name="cancelforward"
        		 path="/WEB-INF/jsp/inputstep1.jsp"
        		 contextRelative="true" />

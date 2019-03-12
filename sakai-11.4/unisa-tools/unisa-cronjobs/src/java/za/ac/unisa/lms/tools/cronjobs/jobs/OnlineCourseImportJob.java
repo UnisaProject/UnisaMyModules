@@ -66,7 +66,7 @@ public class OnlineCourseImportJob extends SingleClusterInstanceJob implements S
 		}
 		newSite.setMaintainRole(siteTemplate.getMaintainRole());
 		siteService.save(newSite);
-		log.info(this+" OnlineCourseImportJob siteService.save: value "+newSite);
+		
 		//code to update the term and term_eid to the site
 		  try{
 		Site courseSite = siteService.getSite(newSite.getId());
@@ -93,11 +93,10 @@ public class OnlineCourseImportJob extends SingleClusterInstanceJob implements S
 			siteProperties.addProperty("term_eid", year+semester);
 			log.debug("Adding term and term_eid: success "+newSite.getId());	
 		}
-	
+		log.debug("siteService.save: value "+newSite);
 		siteService.save(courseSite);
-			log.info(this+" OnlineCourseImportJob siteService.save: value "+newSite);
 		}catch(Exception ex){
-				log.error(this+" OnlineCourseImportJob: Adding term and term_eid failed "+ex);
+				log.error("OnlineCourseImportJob: Adding term and term_eid failed "+ex);
 		}
 	}
 
@@ -144,12 +143,13 @@ public class OnlineCourseImportJob extends SingleClusterInstanceJob implements S
 					siteTemplate = siteService.getSite("!site.template.onlcourse."+year);
 					}catch(IdUnusedException ie){
 						siteTemplate = null;
-						log.info(runcount + ": site template not created for year : "+year);
+						log.debug(runcount + ": site template not created for year : "+year);
 					}
 				
 					//check the site template for the year. if the site template not created on myUnisa admin then Sites will not creates here
 					if(null == siteTemplate) {
-                		log.error(this+" siteTemplate !site.template.course."+year+" does NOT exist (null). Cannot import courses for "+year);
+                		log.error("siteTemplate !site.template.course."+year+" does NOT exist (null). Cannot import courses for "+year);
+                		output.println("siteTemplate !site.template.course."+year+" does NOT exist (null). Cannot import courses for "+year);
                 	} else {
 					//get the course list from the data base for the year
 					List<?> courseListfromdao = onlineCourseImportDAO.getOnlineCourses(Integer.parseInt(year));
@@ -165,7 +165,7 @@ public class OnlineCourseImportJob extends SingleClusterInstanceJob implements S
                         try {
                         	//check the newly creating site is already created, if the site not created before- in catch block the call the method to create the site
                             siteService.getSite(siteName);
-							log.info(this+" OnlineCourseImportJob: check sitename in siteservice "+siteName);
+							log.info("OnlineCourseImportJob: check sitename in siteservice "+siteName);
                             } catch (IdUnusedException iue) {
                             	
                         	if(null != siteTemplate) {

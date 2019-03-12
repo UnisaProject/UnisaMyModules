@@ -1,0 +1,26 @@
+<%-- For instructor view, generate the breadcrumb trail --%>
+
+<f:verbatim><div class="breadcrumb"><p></f:verbatim> <%-- Unisa Changes:2019/02/14:Replace h3 tag with p tag and span with div tag to correct heading margins --%>
+
+	<%--  The root of the breadcrumb rendered here --%>
+	<h:commandLink action="#{bean.navigateToOverview}" value="#{msgs.breadcrumb_overview}" immediate="true" rendered="#{bean.breadcrumbPage eq 'overview'}" />
+	<h:commandLink action="#{bean.navigateToRoster}"   value="#{msgs.breadcrumb_roster}"   immediate="true" rendered="#{bean.breadcrumbPage eq 'roster'}"   />
+		
+	<%-- if we are 2 levels down, render the middle location --%>
+	<h:panelGroup rendered="#{bean.middle}">
+		<h:outputText value="&nbsp; > &nbsp;" escape="false" />
+		<h:commandLink action="#{bean.navigateToAssignmentDetails}">
+			<h:outputText value="#{bean.returnToPageName}" />
+			<f:param name="assignmentId" value="#{bean.assignmentId}" />
+		</h:commandLink>
+	</h:panelGroup>
+
+	<h:outputText value="&nbsp; > &nbsp;" escape="false" />
+
+	<%-- if adding, will render as blank, if editing, will display assignment name
+		 since this is the behavior we want, no rendering tag needed --%>
+	<h:outputFormat value="#{msgs.inst_view_page_title}">
+		<f:param value="#{bean.userDisplayName}" />
+	</h:outputFormat>
+
+<f:verbatim></p></div></f:verbatim> <%-- Unisa Changes:2019/02/14:Replace h3 tag with p tag and span with div tag to correct heading margins --%>

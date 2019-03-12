@@ -236,7 +236,7 @@ public class MyUnisaMylifeAction extends LookupDispatchAction {
 		int lastAcadYear = dao.getStudentLastAcadYear(myUnisaMylifeForm.getStudentNr());
 		if(lastAcadYear==0){
 			 messages.add(ActionMessages.GLOBAL_MESSAGE,
-				        new ActionMessage("message.generalmessage", "Unisa accounts for <b>new Unisa students</b> will only become available after your application for registration for this academic year was successfully processed and you have received confirmation thereof."));
+				        new ActionMessage("message.generalmessage", "Please note newly registered Unisa students will only be able to claim their myUnisa and myLife accounts once the registration for the current academic year was successfully processed. Ensure that the minimum payment was received by UNISA, and confirmation thereof has been sent to you."));
 				addErrors(request, messages);	
 				eventTrackingService.post(
 						eventTrackingService.newEvent(EventTrackingTypes.EVENT_UNISALOGIN_ERROR, "Last academic year is Zero", false), usageSession);
@@ -245,7 +245,7 @@ public class MyUnisaMylifeAction extends LookupDispatchAction {
 		}
 		else if (lastAcadYear < 2009) {
 			 messages.add(ActionMessages.GLOBAL_MESSAGE,
-				        new ActionMessage("message.generalmessage", "Unisa accounts for <b>2008 or earlier/previously registered  students </b>will only become available after you re-register successfully for courses in this academic year."));
+				        new ActionMessage("message.generalmessage", "UNISA logins for students registered prior to 2008 will only become available once your registration for the current academic year has been successfully processed and you received confirmation of registered modules."));
 				addErrors(request, messages);	
 				eventTrackingService.post(
 						eventTrackingService.newEvent(EventTrackingTypes.EVENT_UNISALOGIN_ERROR, "Last academic year is less than 2009", false), usageSession);
@@ -295,7 +295,7 @@ public class MyUnisaMylifeAction extends LookupDispatchAction {
 							new ActionMessage("message.generalmessage",
 									"You are not currently registered for any courses. You will not be able to Claim UNISA Login"));
 			addErrors(request, messages);
-			log.debug(this+": "+myUnisaMylifeForm.getStudentNr()+" has no active courses.");
+			log.info(this+": "+myUnisaMylifeForm.getStudentNr()+" has no active courses.");
 			eventTrackingService.post(eventTrackingService.newEvent(
 					EventTrackingTypes.EVENT_UNISALOGIN_ERROR,
 					"Not registered for any courses", false), usageSession);
@@ -310,7 +310,7 @@ public class MyUnisaMylifeAction extends LookupDispatchAction {
 	    /* Sonette MyUnisaJoinDAO db1 = new MyUnisaJoinDAO();
 	    String studentStatus = db1.studentStatusFlag(myUnisaMylifeForm.getStudentNr());*/
 	    if (joinActRecord.getStatus_flag().equals("BL")) {
-	    	log.debug(this+": "+myUnisaMylifeForm.getStudentNr()+" is blocked.");
+	    	log.info(this+": "+myUnisaMylifeForm.getStudentNr()+" is blocked.");
 	    	messages.add(ActionMessages.GLOBAL_MESSAGE,
 			        new ActionMessage("message.generalmessage","Claiming UNISA Login is not allowed for this student number."));
 			addErrors(request, messages);
@@ -359,7 +359,7 @@ public class MyUnisaMylifeAction extends LookupDispatchAction {
 	    	
 	    	if (myLifeClaimed == true) {
 		    	messages.add(ActionMessages.GLOBAL_MESSAGE,
-				        new ActionMessage("message.generalmessage", "The initial UNISA login for this student number was previously accessed. If you cannot remember your password, please use the Forgotten UNISA Password feature for assistance. "));
+				        new ActionMessage("message.generalmessage", "The initial UNISA login for this student number has already been claimed. If you cannot remember your password, please use the Forgotten UNISA Password feature to obtain a new password. "));
 		    	   	eventTrackingService.post(
 		    	   			eventTrackingService.newEvent(EventTrackingTypes.EVENT_UNISALOGIN_ERROR, "Already claimed Unisa Login", false), usageSession);
 				addErrors(request, messages);
@@ -604,18 +604,7 @@ public class MyUnisaMylifeAction extends LookupDispatchAction {
 			}
 			 dao.updateADRPH(myUnisaMylifeForm.getStudentNr(), myUnisaMylifeForm.getEmail());
 			 dao.updateIdvalt(myUnisaMylifeForm.getStudentNr(), myUnisaMylifeForm.getEmail(),myUnisaMylifeForm.getMyLifePwd());
-			// update idvalt record if it exists
-	       /*  idvaltExists=dao.updateIdvalt(myUnisaMylifeForm.getStudentNr(), myUnisaMylifeForm.getEmail(),myUnisaMylifeForm.getMyLifePwd(),idvaltExists);
-	         if(idvaltExists==false){
-	        	 log.error("action: MyUnisaMylifeAction method=stepUnisaAcknowledge: (update Idvalt) student="+myUnisaMylifeForm.getStudentNr());
-					messages.add(ActionMessages.GLOBAL_MESSAGE,
-					        new ActionMessage("message.generalmessage", "Unfortunately your claiming UNISA Login was unsuccessful, please contact the <A HREF=\"mailto:"+helpdeskEmail+"\">myUnisaHelp@unisa.ac.za</A>"));
-					addErrors(request, messages);
-					eventTrackingService.post(
-							eventTrackingService.newEvent(EventTrackingTypes.EVENT_JOIN_ERROR, "IDVALT record not existing", false), usageSession);
-					return ("studnostep");
-	         }*/
-	        
+		 
 	         
 	         // store password on idVault - This password save will also updates the myLife email account 				
 				//IdVaultProvisioner idVaultProvisioner = (IdVaultProvisioner) ComponentManager.get("org.sakaiproject.user.api.UserDirectoryProvider");
@@ -631,16 +620,7 @@ public class MyUnisaMylifeAction extends LookupDispatchAction {
 				idVaultuser.setType("student");
 				idVaultuser.setPassword(myUnisaMylifeForm.getMyLifePwd());
 				
-			/*	try {
-					if(!idVaultProvisioner.saveUser(idVaultuser)) {
-						log.error("action: MyUnisaMylifeAction method=stepUnisaAcknowledge: student="+myUnisaMylifeForm.getStudentNr()+" was not saved");
-						messages.add(ActionMessages.GLOBAL_MESSAGE,
-						        new ActionMessage("message.generalmessage", "Unfortunately your claiming UNISA Login was unsuccessful, please try again."));
-						addErrors(request, messages);
-						eventTrackingService.post(
-								eventTrackingService.newEvent(EventTrackingTypes.EVENT_JOIN_ERROR, "Save to provider failed", false), usageSession);
-						return ("studnostep");
-					}*/
+ 
 				try {
 					SaveStudentToAD saveStudentToAD = new SaveStudentToAD();
 					if(!saveStudentToAD.saveUser(idVaultuser)) {
@@ -648,6 +628,7 @@ public class MyUnisaMylifeAction extends LookupDispatchAction {
 						messages.add(ActionMessages.GLOBAL_MESSAGE,
 						        new ActionMessage("message.generalmessage", "Unfortunately your claiming UNISA Login was unsuccessful, please try again."));
 						addErrors(request, messages);
+						log.info(this+": "+myUnisaMylifeForm.getStudentNr()+" save to AD failed during claim");
 						eventTrackingService.post(
 								eventTrackingService.newEvent(EventTrackingTypes.EVENT_JOIN_ERROR, "Save to provider failed", false), usageSession);
 						return ("studnostep");
@@ -671,6 +652,7 @@ public class MyUnisaMylifeAction extends LookupDispatchAction {
 					return ("studnostep");
 				}
 				
+				
 	         // update stuann (set sol_user_flag = 'Y')
 	         dao.updateSTUANN(myUnisaMylifeForm.getStudentNr());
 	         
@@ -680,37 +662,7 @@ public class MyUnisaMylifeAction extends LookupDispatchAction {
 	         //insert default email options into EMLOPT 
 	         dao.insertEMLOPT(myUnisaMylifeForm.getStudentNr(),"Y","N","N");
 	         
-	 		
-	         /* remove e-mail.  Francette says it takes 5 minutes for e-mail account
-	          * to be created on mylife and then this email bounces
-	          */
-			// send welcome email to student.
-	         /*
-	         String subject = "Welcome to the UNISA online environment";
-				String body = "<html> "+
-							  "<body> "+
-							  "NB: This is an automated response - do not reply to this e-mail. <br> <br>"+
-							  "Dear student, <br> <br>" +
-							  "Welcome to Unisa! May you find great benefit from participating in this online community. " +
-							  "Your initial UNISA password gives you access to the myUnisa Learning Management System, the myLife Email," +
-							  " as well as the Unisa Library system.<br> <br>" +
-							  "Your initial account details are: <br>" +
-							  "<b>Student number: </b>" +myUnisaMylifeForm.getStudentNr()+
-							  "<br><b>Initial Password: </b>"+myUnisaMylifeForm.getMyLifePwd()+"<br><br>" +
-							  "Please note: <br>" +
-							  " The password is case sensitive. <br>When logging on to myUnisa " +
-							  " and the Library System you must login without adding a "+0+" before your student number! <br><br>" +
-							  "If you have more questions about Unisa send email to <a href='mailTo:study-info@unisa.ac.za'>study-info@unisa.ac.za</a>  . " +
-							  "Technical enquiries about myUnisa can be sent to <a href='mailTo:study-info@unisa.ac.za'> myunisahelp@unisa.ac.za</a>. <br><br>" +
-							  "Good luck with your studies, <br> myUnisa Support Team "+ 
-				              "</body>"+
-				              "</html>";
-				sendEmail(subject,body,myUnisaMylifeForm.getEmail());*/
-			
-			
-			//insert or update JOIN_ACTIVATION MYLIFE_ACT_STATUS flag to 'Y'
-			
-			//db_sakai.updateJoinActivation(myUnisaMylifeForm.getStudentNr(),"Y");	
+	 	
 			joinDetails = joinActDAO.getStudentDetails(myUnisaMylifeForm.getStudentNr());
 			if (joinDetails.getStudentNr().equals("")) {
 				joinActivationExist=false;
