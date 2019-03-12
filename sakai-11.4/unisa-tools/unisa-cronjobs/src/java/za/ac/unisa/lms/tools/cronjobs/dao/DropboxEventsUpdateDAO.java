@@ -27,15 +27,10 @@ public class DropboxEventsUpdateDAO extends SakaiDAO{
 		// String statsDB = ServerConfigurationService.getString("sitestatsDB");
 		 String statsDB="@SAKH_PROD.UNISA.AC.ZA";
 		 boolean count= false;
-		 // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
-		 /*String select = "select COUNT(*) as COUNT from SST_events"+statsDB+"  where " +
-         " event_id like '%drop%' and " +
-         " to_DATE(event_date,'DD/MON/YYYY') = to_date(SYSDATE,'DD/MON/YYYY')-1";*/
 		 
 		 String select = "select COUNT(*) as COUNT from SST_events"+statsDB+"  where " +
-		         " event_id like '%drop%' and " +
-		         " STR_TO_DATE(event_date,'%d/MON/%Y') = str_to_date(SYSDATE(),'%d/MON/%Y')-1";
-		 // End Sifiso Changes:2018/11/01
+         " event_id like '%drop%' and " +
+         " to_DATE(event_date,'DD/MON/YYYY') = to_date(SYSDATE,'DD/MON/YYYY')-1";
 
              try {
                     String recCount = this.querySingleValue(select,"COUNT");
@@ -60,19 +55,11 @@ public class DropboxEventsUpdateDAO extends SakaiDAO{
 		 String year    = new SimpleDateFormat ("yyyy").format (d);
 		 
 		 String date=day+"/"+month.toUpperCase()+"/"+year; */
-		 // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
-		 /*String query = " select ss.session_user userId,context,event,to_char(event_date,'DD/MON/YYYY') as eventdate from sakai_event se,sakai_session ss " +
+		 String query = " select ss.session_user userId,context,event,to_char(event_date,'DD/MON/YYYY') as eventdate from sakai_event se,sakai_session ss " +
 		 		"where  ss.session_id=se.session_id and   LENGTH(REGEXP_REPLACE(REF,'[^/]'))>4" +
 		 		" and substr(ref,regexp_instr( ref, '/', instr(ref, '/', -1))+1) is not null and " +
 		 		"ref like '%group-user%'  and event='"+content+"' and to_DATE(event_date,'DD/MON/YYYY') = to_date(SYSDATE,'DD/MON/YYYY')-1" +
-		 	    " and context is not null ";*/
-		 
-		 String query = " select ss.session_user userId,context,event,date_format(event_date,'%d/%b/%Y') as eventdate from sakai_event se,sakai_session ss " +
-			 		"where  ss.session_id=se.session_id and   CHAR_LENGTH(REGEXP_REPLACE(REF,'[^/]'))>4" +
-			 		" and substr(ref,regexp_instr( ref, '/', instr(ref, '/', -1))+1) is not null and " +
-			 		"ref like '%group-user%'  and event='"+content+"' and STR_TO_DATE(event_date,'%d/MON/%Y') = str_to_date(SYSDATE(),'%d/MON/%Y')-1" +
-			 	    " and context is not null ";
-		 // End Sifiso Changes:2018/11/01
+		 	    " and context is not null ";
 
 		try {
 		JdbcTemplate jdt = new JdbcTemplate(getDataSource());
@@ -109,16 +96,10 @@ public class DropboxEventsUpdateDAO extends SakaiDAO{
 		if(eventId.equals("content.delete")){
 			dropboxEvent="dropbox.delete";
 		}
-		//count the events for content.new in sst_events table  SAKH_PROD.UNISA.AC.ZA
-		// Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
-		/*String select = "select COUNT(*) as COUNT from sst_siteactivity"+statsDB+"  where " +
-				           "site_id='"+coursecode+"' and event_id='"+eventId+"'" +
-				           " and to_char(activity_date,'DD/MON/YYYY') ='"+activityDate+"'";*/
-		
+		//count the events for content.new in sst_events table  SAKH_PROD.UNISA.AC.ZA 
 		String select = "select COUNT(*) as COUNT from sst_siteactivity"+statsDB+"  where " +
-		           "site_id='"+coursecode+"' and event_id='"+eventId+"'" +
-		           " date_format(activity_date,'%d/%b/%Y') ='"+activityDate+"'";
-		// End Sifiso Changes:2018/11/01
+				           "site_id='"+coursecode+"' and event_id='"+eventId+"'" +
+				           " and to_char(activity_date,'DD/MON/YYYY') ='"+activityDate+"'";
 		
 		 try {
              String recCount = this.querySingleValue(select,"COUNT");
@@ -136,15 +117,9 @@ public class DropboxEventsUpdateDAO extends SakaiDAO{
         if(count==true){
         	//check for the dropbox events which already there for the course,date and for the year
         	
-        	// Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
-        	/*String selectDropboxActivity = "select COUNT(*) as COUNT from sst_siteactivity"+statsDB+" where  " +
-	           " site_id='"+coursecode+"' and event_id='"+dropboxEvent+"'" +
-	           " and to_char(activity_date,'DD/MON/YYYY') ='"+activityDate+"'";*/
-        	
         	String selectDropboxActivity = "select COUNT(*) as COUNT from sst_siteactivity"+statsDB+" where  " +
-     	           " site_id='"+coursecode+"' and event_id='"+dropboxEvent+"'" +
-     	           " and date_format(activity_date,'%d/%b/%Y') ='"+activityDate+"'";
-        	// End Sifiso Changes:2018/11/01
+	           " site_id='"+coursecode+"' and event_id='"+dropboxEvent+"'" +
+	           " and to_char(activity_date,'DD/MON/YYYY') ='"+activityDate+"'";
         	try {
                 String recCount = this.querySingleValue(selectDropboxActivity,"COUNT");
                 int dropboxCounter =  Integer.parseInt(recCount); 
@@ -157,24 +132,14 @@ public class DropboxEventsUpdateDAO extends SakaiDAO{
    	           throw new Exception("in DropboxEventsUpdateDAO selectDropboxEvents "+ ex,ex);
    	       
                    }
-        	if(dropboxCount==true){      
-        	  // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
-		      /*String sstUpdate = "update  sst_siteactivity"+statsDB+"  set activity_count=activity_count+1 where " +
+        	if(dropboxCount==true){          	
+		      String sstUpdate = "update  sst_siteactivity"+statsDB+"  set activity_count=activity_count+1 where " +
 				           " site_id='"+coursecode+"' and event_id='"+dropboxEvent+"'" +
-				           " and to_char(activity_date,'DD/MON/YYYY') ='"+activityDate+"'";*/
-        		
-        	  String sstUpdate = "update  sst_siteactivity"+statsDB+"  set activity_count=activity_count+1 where " +
-        			  		" site_id='"+coursecode+"' and event_id='"+dropboxEvent+"'" +
-        			  		" and date_format(activity_date,'%d/%b/%Y') ='"+activityDate+"'";
+				           " and to_char(activity_date,'DD/MON/YYYY') ='"+activityDate+"'";
 		      
-		      /*String sstUpdate1 = "update  sst_siteactivity"+statsDB+"  set activity_count=activity_count-1 where " +
+		      String sstUpdate1 = "update  sst_siteactivity"+statsDB+"  set activity_count=activity_count-1 where " +
 	           " site_id='"+coursecode+"' and event_id='"+eventId+"'" +
-	           " and to_char(activity_date,'DD/MON/YYYY') ='"+activityDate+"'";*/
-        	  
-        	  String sstUpdate1 = "update  sst_siteactivity"+statsDB+"  set activity_count=activity_count-1 where " +
-       	           " site_id='"+coursecode+"' and event_id='"+eventId+"'" +
-       	           " and date_format(activity_date,'%d/%b/%Y') ='"+activityDate+"'";
-        	  // End Sifiso Changes:2018/11/01
+	           " and to_char(activity_date,'DD/MON/YYYY') ='"+activityDate+"'";
 				
 	    	try{
 			
@@ -187,15 +152,9 @@ public class DropboxEventsUpdateDAO extends SakaiDAO{
 			}
         }else{
         	//update SST_events to decrease the count -1 and insert new record into SST_events
-        	// Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
-            /*String sstUpdate = "update  sst_siteactivity"+statsDB+"  set activity_count=activity_count-1 where " +
+            String sstUpdate = "update  sst_siteactivity"+statsDB+"  set activity_count=activity_count-1 where " +
 	           " site_id='"+coursecode+"' and event_id='"+eventId+"'" +
-	           " and to_char(activity_date,'DD/MON/YYYY') ='"+activityDate+"'";*/
-        	
-        	String sstUpdate = "update  sst_siteactivity"+statsDB+"  set activity_count=activity_count-1 where " +
-     	           " site_id='"+coursecode+"' and event_id='"+eventId+"'" +
-     	           " and date_format(activity_date,'%d/%b/%Y') ='"+activityDate+"'";
-            // End Sifiso Changes:2018/11/01
+	           " and to_char(activity_date,'DD/MON/YYYY') ='"+activityDate+"'";
 	
            try{
          JdbcTemplate jdt1 = new JdbcTemplate(super.getDataSource());
@@ -237,17 +196,10 @@ public class DropboxEventsUpdateDAO extends SakaiDAO{
 			dropboxEvent="dropbox.delete";
 		}
 		//count the events for content.new in sst_events table
-		// Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
-		/*String select = "select COUNT(*) as COUNT from SST_events"+statsDB+"   where " +
+		String select = "select COUNT(*) as COUNT from SST_events"+statsDB+"   where " +
 				           "user_id='"+userId+"'" +
 				           " and site_id='"+coursecode+"' and event_id='"+eventId+"'" +
-				           " and to_char(event_date,'DD/MON/YYYY') ='"+eventDate+"'";*/
-		
-		String select = "select COUNT(*) as COUNT from SST_events"+statsDB+"   where " +
-		           "user_id='"+userId+"'" +
-		           " and site_id='"+coursecode+"' and event_id='"+eventId+"'" +
-		           " and date_format(event_date,'%d/%b/%Y') ='"+eventDate+"'";
-		// End Sifiso Changes:2018/11/01
+				           " and to_char(event_date,'DD/MON/YYYY') ='"+eventDate+"'";
 		
 		 try {
              String recCount = this.querySingleValue(select,"COUNT");
@@ -265,17 +217,10 @@ public class DropboxEventsUpdateDAO extends SakaiDAO{
         if(count==true){
         	//check for the dropbox events which already there for the course,date and for the year
         	
-        	// Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
-        	/*String selectDropboxEvents = "select COUNT(*) as COUNT from SST_EVENTS"+statsDB+"  where  " +
+        	String selectDropboxEvents = "select COUNT(*) as COUNT from SST_EVENTS"+statsDB+"  where  " +
 	           "user_id='"+userId+"'" +
 	           " and site_id='"+coursecode+"' and event_id='"+dropboxEvent+"'" +
-	           " and to_char(event_date,'DD/MON/YYYY') ='"+eventDate+"'";*/
-        	
-        	String selectDropboxEvents = "select COUNT(*) as COUNT from SST_EVENTS"+statsDB+"  where  " +
-     	           "user_id='"+userId+"'" +
-     	           " and site_id='"+coursecode+"' and event_id='"+dropboxEvent+"'" +
-     	           " and date_format(event_date,'%d/%b/%Y') ='"+eventDate+"'";
-        	// End Sifiso Changes:2018/11/01
+	           " and to_char(event_date,'DD/MON/YYYY') ='"+eventDate+"'";
         	try {
                 String recCount = this.querySingleValue(selectDropboxEvents,"COUNT");
                 int dropboxCounter =  Integer.parseInt(recCount); 
@@ -287,28 +232,16 @@ public class DropboxEventsUpdateDAO extends SakaiDAO{
    	             sendEmail("unisa-cronjobs:error occured","DropboxEventsUpdateDAO: updateSitestatsSstEvents select(2) SST_events count Error occurred on "+eventDate+"","udcsweb@unisa.ac.za");
    	           throw new Exception("in checkBookNrAndBibNumMatch selectDropboxEvents "+ ex,ex);   	       
                    }
-        	if(dropboxCount==true){    
-        	  // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
-		      /*String sstUpdate = "update  sst_events"+statsDB+"  set event_count=event_count+1 where " +
+        	if(dropboxCount==true){          	
+		      String sstUpdate = "update  sst_events"+statsDB+"  set event_count=event_count+1 where " +
 				           "user_id='"+userId+"'" +
 				           " and site_id='"+coursecode+"' and event_id='"+dropboxEvent+"'" +
-				           " and to_char(event_date,'DD/MON/YYYY') ='"+eventDate+"'";*/
-        		
-        	  String sstUpdate = "update  sst_events"+statsDB+"  set event_count=event_count+1 where " +
-				           "user_id='"+userId+"'" +
-				           " and site_id='"+coursecode+"' and event_id='"+dropboxEvent+"'" +
-				           " and date_format(event_date,'%d/%b/%Y') ='"+eventDate+"'";
+				           " and to_char(event_date,'DD/MON/YYYY') ='"+eventDate+"'";
 		      
-		      /*String sstUpdate1 = "update  sst_events"+statsDB+"  set event_count=event_count-1 where " +
+		      String sstUpdate1 = "update  sst_events"+statsDB+"  set event_count=event_count-1 where " +
 	           "user_id='"+userId+"'" +
 	           " and site_id='"+coursecode+"' and event_id='"+eventId+"'" +
-	           " and to_char(event_date,'DD/MON/YYYY') ='"+eventDate+"'";*/
-        	  
-        	  String sstUpdate1 = "update  sst_events"+statsDB+"  set event_count=event_count-1 where " +
-       	           "user_id='"+userId+"'" +
-       	           " and site_id='"+coursecode+"' and event_id='"+eventId+"'" +
-       	           " and date_format(event_date,'%d/%b/%Y') ='"+eventDate+"'";
-		      // End Sifiso Changes:2018/11/01
+	           " and to_char(event_date,'DD/MON/YYYY') ='"+eventDate+"'";
 			
 		try{
 			
@@ -321,17 +254,10 @@ public class DropboxEventsUpdateDAO extends SakaiDAO{
 			}
         }else{
         	//update SST_events to decrease the count -1 and insert new record into SST_events
-        	// Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
-            /*String sstUpdate = "update  sst_events"+statsDB+"  set event_count=event_count-1 where " +
+            String sstUpdate = "update  sst_events"+statsDB+"  set event_count=event_count-1 where " +
 	           "user_id='"+userId+"'" +
 	           " and site_id='"+coursecode+"' and event_id='"+eventId+"'" +
-	           " and to_char(event_date,'DD/MON/YYYY') ='"+eventDate+"'";*/
-        	
-        	String sstUpdate = "update  sst_events"+statsDB+"  set event_count=event_count-1 where " +
-     	           "user_id='"+userId+"'" +
-     	           " and site_id='"+coursecode+"' and event_id='"+eventId+"'" +
-     	           " and date_format(event_date,'%d/%b/%Y') ='"+eventDate+"'";
-        	// End Sifiso Changes:2018/11/01            
+	           " and to_char(event_date,'DD/MON/YYYY') ='"+eventDate+"'";
 	
          try{
          JdbcTemplate jdt1 = new JdbcTemplate(super.getDataSource());

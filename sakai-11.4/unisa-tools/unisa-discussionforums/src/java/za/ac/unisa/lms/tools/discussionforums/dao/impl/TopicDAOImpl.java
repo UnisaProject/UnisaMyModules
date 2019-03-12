@@ -77,11 +77,9 @@ public class TopicDAOImpl extends SakaiDAO implements TopicDao{
                                                 authorUserType = "L";
                                         }
                                         StringBuilder insertTopicSql = new StringBuilder("insert into UFORUM_TOPIC(Topic_Id,Forum_Id,Topic_Subject,Creation_Date,Modification_Date,View_Count,Hide_Status) ");
-                                      //  insertTopicSql.append(" values(UFORUM_TOPIC_0.nextval,?,?,sysdate,sysdate,1,'N')");  //oracle
-                                        insertTopicSql.append(" values(NULL,?,?,sysdate(),sysdate(),1,'N')");//mysql
+                                        insertTopicSql.append(" values(UFORUM_TOPIC_0.nextval,?,?,sysdate,sysdate,1,'N')");
                                         StringBuilder insertMessageSql = new StringBuilder("insert into UFORUM_MESSAGE(Message_Id,Topic_Id,Content,Creation_Date,User_Id,User_Identifier,Msg_Url,File_Type,");
-                                        //insertMessageSql.append(" First_topic_MSG) values(UFORUM_MESSAGE_0.nextval,?,?,sysdate,?,?,?,?,?)"); //oracle
-                                        insertMessageSql.append(" First_topic_MSG) values(NULL,?,?,sysdate(),?,?,?,?,?)"); //mysql
+                                        insertMessageSql.append(" First_topic_MSG) values(UFORUM_MESSAGE_0.nextval,?,?,sysdate,?,?,?,?,?)");
                                         PreparedStatementCreatorFactory pstsmtCreatorFactoryTopic = new PreparedStatementCreatorFactory(insertTopicSql.toString(), new int[] {Types.INTEGER,Types.VARCHAR});
                                         pstsmtCreatorFactoryTopic.setGeneratedKeysColumnNames(new String[]{"Topic_Id"});
                                         pstsmtCreatorFactoryTopic.setReturnGeneratedKeys(true);
@@ -90,7 +88,7 @@ public class TopicDAOImpl extends SakaiDAO implements TopicDao{
                                                         );
                                         GeneratedKeyHolder TopicKeyHolder = new GeneratedKeyHolder();
                                         jdbcTemplate.update(psCreatorTopicInsert,TopicKeyHolder);
-                                        topicId = new Integer(TopicKeyHolder.getKey().intValue());
+                                     topicId = new Integer(TopicKeyHolder.getKey().intValue());
                                        
                                         PreparedStatementCreatorFactory insertIntialMessage = new PreparedStatementCreatorFactory(insertMessageSql.toString(),
                                                         new int[] {Types.INTEGER,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR, Types.VARCHAR}
@@ -205,9 +203,8 @@ public class TopicDAOImpl extends SakaiDAO implements TopicDao{
                 PreparedStatementCreator psUpdateTopicSubject = updateTopicSubject.newPreparedStatementCreator(
                                 new Object[]{topicName, topicId}
                                 );
-                try {    
-                	jdbcTemplate.update(psUpdateTopicSubject);
-                        
+                try {
+                        jdbcTemplate.update(psUpdateTopicSubject);
                 } catch (Exception ex) {
                     
                 }finally {
@@ -322,8 +319,8 @@ public class TopicDAOImpl extends SakaiDAO implements TopicDao{
          */
         public List getTopics(Integer forumId, String sortby, String sortorder) {
                 JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource());
-//oracle
-              /*  StringBuilder selectListOfTopicsSQL = new StringBuilder("select ft.Topic_Id, ft.Forum_Id, ft.Topic_Subject, ft.Creation_Date, ft.Modification_Date,nvl(ft.View_Count,0) as View_Count,");
+
+                StringBuilder selectListOfTopicsSQL = new StringBuilder("select ft.Topic_Id, ft.Forum_Id, ft.Topic_Subject, ft.Creation_Date, ft.Modification_Date,nvl(ft.View_Count,0) as View_Count,");
                 selectListOfTopicsSQL.append(" ft.Hide_Status, TO_CHAR(ft.Last_Post_Date,'YYYY-MM-DD HH24:MI') as Last_Post_Date, ft.Last_Post_User,");
                 selectListOfTopicsSQL.append(" count(fm.Topic_Id) as messagesCount,");
                 selectListOfTopicsSQL.append(" (count(fm.Message_Id)-1) replycount from UFORUM_TOPIC ft, UFORUM_MESSAGE fm");
@@ -332,20 +329,7 @@ public class TopicDAOImpl extends SakaiDAO implements TopicDao{
                 selectListOfTopicsSQL.append(" group by  ft.Topic_Id, ft.Forum_Id, ft.Topic_Subject, ft.Creation_Date, ");
                 selectListOfTopicsSQL.append(" ft.Modification_Date,nvl(ft.View_Count,0),");
                 selectListOfTopicsSQL.append(" ft.Hide_Status, TO_CHAR(ft.Last_Post_Date,'YYYY-MM-DD HH24:MI'), ft.Last_Post_User");
-                selectListOfTopicsSQL.append(" order by ft.Topic_Id, upper(" + sortby + ") " + sortorder);*/
-                
-                //mysql
-                StringBuilder selectListOfTopicsSQL = new StringBuilder("select ft.Topic_Id, ft.Forum_Id, ft.Topic_Subject, ft.Creation_Date, ft.Modification_Date,ifnull(ft.View_Count,0) as View_Count,");
-                selectListOfTopicsSQL.append(" ft.Hide_Status, DATE_FORMAT(ft.Last_Post_Date,'%Y-%m-%d %H:%i') as Last_Post_Date, ft.Last_Post_User,");
-                selectListOfTopicsSQL.append(" count(fm.Topic_Id) as messagesCount,");
-                selectListOfTopicsSQL.append(" (count(fm.Message_Id)-1) replycount from UFORUM_TOPIC ft, UFORUM_MESSAGE fm");
-                selectListOfTopicsSQL.append(" where ft.Forum_Id =? and ft.Topic_Id = fm.Topic_Id");
-                selectListOfTopicsSQL.append(" and ft.Hide_Status = 'N'");
-                selectListOfTopicsSQL.append(" group by  ft.Topic_Id, ft.Forum_Id, ft.Topic_Subject, ft.Creation_Date, ");
-                selectListOfTopicsSQL.append(" ft.Modification_Date,ifnull(ft.View_Count,0),");
-                selectListOfTopicsSQL.append(" ft.Hide_Status, DATE_FORMAT(ft.Last_Post_Date,'%Y-%m-%d %H:%i'), ft.Last_Post_User");
                 selectListOfTopicsSQL.append(" order by ft.Topic_Id, upper(" + sortby + ") " + sortorder);
-                
                 long beforeTime = System.currentTimeMillis();
                 PreparedStatementCreatorFactory selectTopicList = new PreparedStatementCreatorFactory(selectListOfTopicsSQL.toString(),
                                 new int[] {Types.INTEGER});

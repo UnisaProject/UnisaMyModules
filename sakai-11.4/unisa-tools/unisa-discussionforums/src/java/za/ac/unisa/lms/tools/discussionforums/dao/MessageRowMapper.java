@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 public class MessageRowMapper implements RowMapper{
 	private UserDirectoryService userDirectoryService;
 	public Object mapRow(ResultSet rs,int arg1) throws SQLException {
-		userDirectoryService = (UserDirectoryService) ComponentManager.get(UserDirectoryService.class);
+		//userDirectoryService = (UserDirectoryService) ComponentManager.get(UserDirectoryService.class);
 		ForumMessage forumMessage = new ForumMessage();
 		OracleDAO dao = new OracleDAO();
 		User user = null;
@@ -21,7 +21,8 @@ public class MessageRowMapper implements RowMapper{
 		forumMessage.setMessage(rs.getString("Content"));
 		forumMessage.setMessageDate(rs.getString("Creation_Date"));
 		userId =rs.getString("User_Id");
-			
+		
+	
 		forumMessage.setUserId(userId);
 		forumMessage.setUserType(rs.getString("User_Identifier"));
 		forumMessage.setAttachment(rs.getString("Msg_Url"));
@@ -34,10 +35,9 @@ public class MessageRowMapper implements RowMapper{
 				userId = "myUnisa Administrator";
 			} else if (!(userId.equalsIgnoreCase("NotAvailable")) && !(userId.equalsIgnoreCase("admin"))){
 				if (userId != null) {
-					//Added by Stanford to read from Sakai
-					user = userDirectoryService.getUserByEid(userId);
-					userId = user.getDisplayName();
-					//userId = dao.getUserNames(userId); //commented out by Stanford to avoid to read from student system.
+					//user = userDirectoryService.getUserByEid(userId);
+					//userId = user.getDisplayName();
+					userId = dao.getUserNames(userId);
 				} else {
 					userId = "NotAvailable";
 				}

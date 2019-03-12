@@ -12,9 +12,9 @@ import za.ac.unisa.lms.tools.discussionforums.dao.impl.ForumDAOImpl;
 import za.ac.unisa.lms.tools.discussionforums.service.TopicDaoService;
 
 public class ForumRowMapper implements RowMapper {
-    private UserDirectoryService userDirectoryService; 
+  //  private UserDirectoryService userDirectoryService; 
 	public Object mapRow(ResultSet rs,int arg1) throws SQLException {
-		userDirectoryService = (UserDirectoryService) ComponentManager.get(UserDirectoryService.class);
+		//userDirectoryService = (UserDirectoryService) ComponentManager.get(UserDirectoryService.class);
 		Forum forum = new Forum();
 		ForumDAOImpl forumdao = new ForumDAOImpl();
 		TopicDao topicDAO = TopicDaoService.getTopicDao();
@@ -42,12 +42,10 @@ public class ForumRowMapper implements RowMapper {
 				lastPostUser = "No Posting";
 			}else {
 				if (lastPostUser != null) {
-					//Added by Stanford to read from Sakai
-					user = userDirectoryService.getUserByEid(lastPostUser);
-					lastPostUser = user.getDisplayName();
-					
-					//OracleDAO dao = new OracleDAO(); //commented out by Stanford to avoid to read from student system.
-					//lastPostUser = dao.getUserNames(lastPostUser);
+					//user = userDirectoryService.getUserByEid(lastPostUser);
+					//lastPostUser = user.getDisplayName();
+					OracleDAO dao = new OracleDAO();
+					lastPostUser = dao.getUserNames(lastPostUser);
 					
 				} else {
 					lastPostUser = "No Posting";

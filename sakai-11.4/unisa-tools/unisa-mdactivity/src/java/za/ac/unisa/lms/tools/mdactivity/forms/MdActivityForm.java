@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.util.LabelValueBean;
 import org.apache.struts.validator.ValidatorForm;
+import za.ac.unisa.lms.domain.general.Person;
 
 /**
  * MyEclipse Struts
@@ -23,13 +25,19 @@ public class MdActivityForm extends ValidatorForm {
 
 	private Student student;
 	private String studyUnitCode;
-	private String qualificationCode;
-	private String qualificationDescr;
+	private Qualification qualification;
+	private String firstRegistrationDate;
+	private int yearsRegistered;
+	private int yearsRegisteredForResearchProposal;
+	//	private String qualificationCode;
+//	private String qualificationDescr;
 	private String disType;
 	private String disTitle;
 	private String promoter;
 	private String supervisor;
 	private String regPermission;
+	private String inputPermission;
+	private String regReason;
 	private boolean readOnly;
 	private String errorMessage;
 	// This arraylist used to store the activity records for the specific student
@@ -37,6 +45,7 @@ public class MdActivityForm extends ValidatorForm {
 	private ArrayList studyUnitRecords;
 	private String selectedStudyUnit;
 	private String selectedActivityRecord;
+	private String selectedStudent = "";
 	private ActivityRecord newActivity;
 	private ActivityRecord updateActivity;
 	// This string is used to store the value of the selected activity code on the add page
@@ -44,12 +53,91 @@ public class MdActivityForm extends ValidatorForm {
 	private String userCode;
 	private int staffNumber;
 	private String studentAnnualStatus;
+	private Person user;
 	// use to determine wether the feedback date of a record can be updated
 	private boolean updateFeedbackDate;
 	private ArrayList<Promotor> promotorList = new ArrayList<Promotor>();
+	private ArrayList<LabelValueBean> studentLookupList = new ArrayList<LabelValueBean>();
 
-	// --------------------------------------------------------- Methods
+	// --------------------------------------------------------- Methods	
+	
 
+
+	public String getInputPermission() {
+		return inputPermission;
+	}
+
+	public void setInputPermission(String inputPermission) {
+		this.inputPermission = inputPermission;
+	}
+	
+	public ArrayList<LabelValueBean> getStudentLookupList() {
+		return studentLookupList;
+	}
+
+
+	public void setStudentLookupList(ArrayList<LabelValueBean> studentLookupList) {
+		this.studentLookupList = studentLookupList;
+	}
+
+	
+	public String getFirstRegistrationDate() {
+		return firstRegistrationDate;
+	}
+	
+
+	
+	public void setFirstRegistrationDate(String firstRegistrationDate) {
+		this.firstRegistrationDate = firstRegistrationDate;
+	}
+	
+	public int getYearsRegistered() {
+		return yearsRegistered;
+	}
+
+	public void setYearsRegistered(int yearsRegistered) {
+		this.yearsRegistered = yearsRegistered;
+	}
+
+	public int getYearsRegisteredForResearchProposal() {
+		return yearsRegisteredForResearchProposal;
+	}
+
+	public void setYearsRegisteredForResearchProposal(int yearsRegisteredForResearchProposal) {
+		this.yearsRegisteredForResearchProposal = yearsRegisteredForResearchProposal;
+	}
+
+	public Person getUser() {
+		return user;
+	}
+
+	public String getRegReason() {
+		return regReason;
+	}
+
+	public void setRegReason(String regReason) {
+		this.regReason = regReason;
+	}
+
+	public Qualification getQualification() {
+		return qualification;
+	}
+
+	public void setQualification(Qualification qualification) {
+		this.qualification = qualification;
+	}
+
+	public void setUser(Person user) {
+		this.user = user;
+	}
+
+	public String getSelectedStudent() {
+		return selectedStudent;
+	}
+
+	public void setSelectedStudent(String selectedStudent) {
+		this.selectedStudent = selectedStudent;
+	}
 	public ArrayList<Promotor> getPromotorList() {
 		return promotorList;
 	}
@@ -106,13 +194,13 @@ public class MdActivityForm extends ValidatorForm {
 		this.disType = disType;
 	}
 
-	public String getQualificationCode() {
-		return qualificationCode;
-	}
-
-	public void setQualificationCode(String qualificationCode) {
-		this.qualificationCode = qualificationCode;
-	}
+//	public String getQualificationCode() {
+//		return qualificationCode;
+//	}
+//
+//	public void setQualificationCode(String qualificationCode) {
+//		this.qualificationCode = qualificationCode;
+//	}
 
 	public String getStudyUnitCode() {
 		return studyUnitCode;
@@ -212,13 +300,13 @@ public class MdActivityForm extends ValidatorForm {
 		this.supervisor = supervisor;
 	}
 
-	public String getQualificationDescr() {
-		return qualificationDescr;
-	}
-
-	public void setQualificationDescr(String qualificationDescr) {
-		this.qualificationDescr = qualificationDescr;
-	}
+//	public String getQualificationDescr() {
+//		return qualificationDescr;
+//	}
+//
+//	public void setQualificationDescr(String qualificationDescr) {
+//		this.qualificationDescr = qualificationDescr;
+//	}
 
 	public String getRegPermission() {
 		return regPermission;

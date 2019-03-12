@@ -20,12 +20,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-
-
-
-
-
-
 //import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -204,8 +198,14 @@ public class MdApplicationsAction extends LookupDispatchAction {
 		op.setInCsfClientServerCommunicationsAction("LI");
 			     
 		op.setInWsUserNumber(Integer.parseInt(mdForm.getAdminStaff().getNumber().trim()));
-		op.setInWsUserPassword(mdForm.getAdminStaff().getPassword().toUpperCase().trim());
+		if (mdForm.getAdminStaff().getPassword().toUpperCase().trim().length()>12) {
+			op.setInWsUserPassword(mdForm.getAdminStaff().getPassword().toUpperCase().trim().substring(0, 12));
+		} else {
+			op.setInWsUserPassword(mdForm.getAdminStaff().getPassword().toUpperCase().trim());
+		}
+		
 		op.setInWsUserPassword32cs(mdForm.getAdminStaff().getPassword().trim());
+		
 
 		//log.debug("MDApplicationsAction - loginStaff - START MENU95 EXECUTE");
 		op.execute();

@@ -5,6 +5,7 @@ public class StudentInfo {
 	private String studentName;
 	private String joinDate;
 	private String surname;
+	private String currentlyRegistered;
 
 	public String getStudentName() {
 		return studentName;
@@ -30,5 +31,12 @@ public class StudentInfo {
 	public void setSurname(String surname) {
 		this.surname = surname;
 	}
+	public String getCurrentlyRegistered() {
+		return currentlyRegistered;
+	}
+	public void setCurrentlyRegistered(String currentlyRegistered) {
+		this.currentlyRegistered = currentlyRegistered;
+	}
 
+	
 }

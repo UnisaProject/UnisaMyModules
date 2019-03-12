@@ -13,10 +13,10 @@ public class TopicRowMapper implements RowMapper{
 	
 	private UserDirectoryService userDirectoryService;
 	public Object mapRow(ResultSet rs,int arg1) throws SQLException {
-		userDirectoryService = (UserDirectoryService) ComponentManager.get(UserDirectoryService.class);
+		//userDirectoryService = (UserDirectoryService) ComponentManager.get(UserDirectoryService.class);
 		ForumTopicDetails forumTopicDetails = new ForumTopicDetails();
 		OracleDAO dao = new OracleDAO();
-		TopicDao topicDAO = TopicDaoService.getTopicDao();
+		 TopicDao topicDAO = TopicDaoService.getTopicDao();
 		StaffMssqlDao staffMsssqldao = new StaffMssqlDao("PERSDB");
 		PosterDetails posterDetails = new PosterDetails();
 		User user = null;
@@ -39,21 +39,14 @@ public class TopicRowMapper implements RowMapper{
 				authorId = "Not Available";
 			} else {
 				if (userId != null){
+						//user = userDirectoryService.getUserByEid(userId);
 					
-					//Added by Stanford to read from Sakai
-					user = userDirectoryService.getUserByEid(userId);
-					authorId = user.getDisplayName();
-					if (authorId == null || authorId.equals("")){
-						authorId = "Unknown";
-					}
-					
-					/* commented out by Stanford to avoid to read from student system.
-					authorId = dao.getUserNames(userId);
+						authorId = dao.getUserNames(userId);
 					if (authorId != null){
 						//authorId = user.getDisplayName();
 					} else {
 						authorId = "Unknown";
-					}*/
+					}
 				} else {
 					authorId = "Not Available";
 				}
@@ -70,22 +63,13 @@ public class TopicRowMapper implements RowMapper{
 				authorId = "Not Available";
 			} else {
 				if (posterId != null){
-					
-					//Added by Stanford to read from Sakai
-					user = userDirectoryService.getUserByEid(posterId);
-					posterId = user.getDisplayName();
-					if (posterId == null || posterId.equals("")){
-						posterId = "NotAvailable";
-					}
-					
-					/* commented out by Stanford to avoid to read from student system.
-					posterId = dao.getUserNames(posterId);
+					    posterId = dao.getUserNames(posterId);
+					//	user = userDirectoryService.getUserByEid(posterId);
 					if (posterId != null){
 						//posterId = user.getDisplayName();
 					} else {
 						posterId = "NotAvailable";
-					} */
-					
+					}
 				} else {
 					posterId = "Not Available";
 				}

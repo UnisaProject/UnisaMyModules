@@ -8,11 +8,16 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.collections.map.ListOrderedMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import za.ac.unisa.lms.db.SakaiDAO;
+import za.ac.unisa.lms.tools.mylife.actions.MyUnisaMylifeAction;
 
 public class MyLifesakaiDAO extends SakaiDAO {
+	
+	Logger log = LoggerFactory.getLogger(MyLifesakaiDAO.class);
 	
 	public void updateJoinActivation(String studentNr, String statusFlag, String actCode,String actStatus, String type ,String mylifeStatus,boolean joinActivationExist) throws Exception{
 
@@ -21,29 +26,7 @@ public class MyLifesakaiDAO extends SakaiDAO {
 
 		String joinExist;
 
-		// does record already exist for student in JOIN_ACTIVATION
-		/*
-		try{
-			JdbcTemplate jdt = new JdbcTemplate(getDataSource());
-            try{
-            	joinExist=(String) jdt.queryForObject("SELECT USER_ID "+
-		             "FROM   JOIN_ACTIVATION "+
-		             "WHERE  USER_ID = ?", 
-                      new Object[] {studentNr},String.class);          
-                   
-	             if (joinExist.equals(null) || joinExist.equals("")|| joinExist.equals(" ")) {
-	            	 joinExist="";
-	             }
-	        } catch (Exception ex) {
-	           throw new Exception("MyLifesakaiDAO: updateJoinActivation: (SELECT USER_ID "+
-			             "FROM   JOIN_ACTIVATION "+
-			             "WHERE  USER_ID =: "+studentNr+") Error occurred / "+ ex,ex);
-	        }
-
-		} catch (Exception ex) {
-            throw new Exception("MyLifesakaiDAO: insertJoinActivation (Select): Error occurred / "+ ex,ex);
-		}*/
-
+		
 		if (joinActivationExist==true) { // UPDATE
 			// update JOIN_ACTIVATION
 			GregorianCalendar calCurrent = new GregorianCalendar();
@@ -86,8 +69,10 @@ public class MyLifesakaiDAO extends SakaiDAO {
 			try{
 				JdbcTemplate jdt = new JdbcTemplate(super.getDataSource());
 				jdt.update(sql,new Object[] {currentDate,statusFlag,actCode,actStatus,type,mylifeStatus,studentNr});
+				log.info(this+": "+studentNr+" Updated join_activation record");	
 
 			} catch (Exception ex) {
+				log.error(this+": "+studentNr+" Error on join_activation record update "+ex.getMessage());	
 				throw new Exception("MyLifesakaiDAO: insertJoinActivation (update): Error occurred / "+ ex,ex);
 			}
 		} else { //if (joinExist.length() > 0) { insert
@@ -98,9 +83,12 @@ public class MyLifesakaiDAO extends SakaiDAO {
 			try{
 				JdbcTemplate jdt = new JdbcTemplate(super.getDataSource());
 				jdt.update(sql,new Object[] {studentNr,new Timestamp(cal.getTimeInMillis()),statusFlag, actCode, actStatus, type,mylifeStatus});
+				log.info(this+": "+studentNr+" Inserted join_activation record");	
 
 			} catch (Exception ex) {
+				log.error(this+": "+studentNr+" Error on join_activation record insert "+ex.getMessage());	
 				throw new Exception("MyLifesakaiDAO: insertJoinActivation (insert): Error occurred / "+ ex,ex);
+				
 			}
 		}
 	}

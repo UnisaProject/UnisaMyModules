@@ -75,8 +75,7 @@ public class SatbookDAO extends SakaiDAO{
 		/** select all bookings that will take place in 8 days. */
 
 		//select * from SATBOOK_BKNG_MAIN WHERE DATE_FORMAT(BKNG_START,'%Y-%m-%d') = DATE_ADD(CURDATE(), INTERVAL 8 DAY)
-        // Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL		
-		/*String select = "SELECT BKNG_ID, BKNG_HEADING, BKNG_LECT_NOVELLID," +
+		String select = "SELECT BKNG_ID, BKNG_HEADING, BKNG_LECT_NOVELLID," +
 				        "BKNG_LECT_TEL," +
 				        "TO_CHAR(BKNG_START,'DD-MON-YYYY') AS STARTTIME, "+
 				        "TO_CHAR(BKNG_START, 'HH24') AS STARTTIMEHH," +
@@ -88,23 +87,7 @@ public class SatbookDAO extends SakaiDAO{
 		                "FROM SATBOOK_BKNG_MAIN "+
 		                "WHERE TO_CHAR(BKNG_START,'YYYY-MM-DD') = TO_CHAR(sysdate+7,'YYYY-MM-DD') "+
 		                "AND   BKNG_CONFIRMED = 'Y'"+
-		                " AND   SYSTEM_ID = 1";		                */
-		                
-		String select = "SELECT BKNG_ID, BKNG_HEADING, BKNG_LECT_NOVELLID," +
-		        		"BKNG_LECT_TEL," +		                
-		                "DATE_FORMAT(BKNG_START,'%d-%b-%Y') AS STARTTIME, "+
-				        "DATE_FORMAT(BKNG_START, '%H') AS STARTTIMEHH," +
-				        "DATE_FORMAT(BKNG_START, '%i') AS STARTTIMEMM," +
-				        "DATE_FORMAT(BKNG_END,'%d-%b') AS ENDTIME, "+
-				        "DATE_FORMAT(BKNG_END, '%H') AS ENDTIMEHH," +
-				        "DATE_FORMAT(BKNG_END, '%i') AS ENDTIMEMM," +
-				        "BKNG_DESC,  ifnull(BKNG_REBROADCAST,'N') AS REBROADCAST "+
-		                "FROM SATBOOK_BKNG_MAIN "+
-		                "WHERE DATE_FORMAT(BKNG_START,'%Y-%m-%d') = DATE_FORMAT(sysdate()+7,'%Y-%m-%d') "+	
-		                "AND   BKNG_CONFIRMED = 'Y'"+
 		                " AND   SYSTEM_ID = 1";
-		// End Sifiso Changes:2018/11/01
-		
 		// QA: "WHERE TO_CHAR(BKNG_START,'YYYY-MM-DD') = '2007-09-10' "+
 		//"WHERE TO_CHAR(BKNG_START,'YYYY-MM-DD') = TO_CHAR(sysdate+7,'YYYY-MM-DD') "+
 
@@ -380,15 +363,10 @@ public class SatbookDAO extends SakaiDAO{
 
 		ArrayList<LabelValueBean> subjectList = new ArrayList<LabelValueBean>();
 
-		// Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
-		/*String select = "SELECT SUBJ_CODE||'#'||SUBJ_PERIOD||'#'||SUBJ_YEAR AS SUBJECT " +
-		                "FROM   SATBOOK_BKNG_SUBJECT "+
-		                "WHERE  BKNG_ID = "+bkngId+" ";		 */
-		
-		String select = "SELECT CONCAT(IFNULL(SUBJ_CODE, ''),'#',IFNULL(SUBJ_PERIOD, ''),'#',IFNULL(SUBJ_YEAR, '')) AS SUBJECT" + 
+
+		String select = "SELECT SUBJ_CODE||'#'||SUBJ_PERIOD||'#'||SUBJ_YEAR AS SUBJECT " +
 		                "FROM   SATBOOK_BKNG_SUBJECT "+
 		                "WHERE  BKNG_ID = "+bkngId+" ";
-		// End Sifiso Changes:2018/11/01
 
 		try{
     		JdbcTemplate jdt = new JdbcTemplate(super.getDataSource());
@@ -557,8 +535,7 @@ public class SatbookDAO extends SakaiDAO{
 		String emailHeading="";
 		String emailBody = "";
 		
-		// Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
-		/*String query = "SELECT BKNG_ID, BKNG_HEADING, BKNG_LECT_NOVELLID," +
+		String query = "SELECT BKNG_ID, BKNG_HEADING, BKNG_LECT_NOVELLID," +
         "BKNG_LECT_TEL," +
         "TO_CHAR(BKNG_START,'DD-MON-YYYY') AS STARTTIME, "+
         "TO_CHAR(BKNG_START, 'HH24') AS STARTTIMEHH," +
@@ -571,23 +548,7 @@ public class SatbookDAO extends SakaiDAO{
         "FROM SATBOOK_BKNG_MAIN "+
         "WHERE TO_CHAR(BKNG_START,'YYYY-MM-DD') = TO_CHAR(sysdate+7,'YYYY-MM-DD') "+
         "AND BKNG_CONFIRMED = 'Y' "+
-        "AND SYSTEM_ID = 2";        */
-        
-        String query = "SELECT BKNG_ID, BKNG_HEADING, BKNG_LECT_NOVELLID," +
-				       "BKNG_LECT_TEL," +
-				       "DATE_FORMAT(BKNG_START,'%d-%b-%Y') AS STARTTIME, "+
-				       "DATE_FORMAT(BKNG_START, '%H') AS STARTTIMEHH," +
-				       "DATE_FORMAT(BKNG_START, '%i') AS STARTTIMEMM," +
-				       "DATE_FORMAT(BKNG_END,'%d-%b') AS ENDTIME, "+
-				       "DATE_FORMAT(BKNG_END, '%H') AS ENDTIMEHH," +
-				       "DATE_FORMAT(BKNG_END, '%i') AS ENDTIMEMM," +
-				       //,  nvl(BKNGTYPE_ID,' ') AS TYPEID
-				       "BKNG_DESC, BKNGTYPE_ID AS TYPEID "+
-				       "FROM SATBOOK_BKNG_MAIN "+
-				       "WHERE DATE_FORMAT(BKNG_START,'%Y-%m-%d') = DATE_FORMAT(sysdate()+7,'%Y-%m-%d') "+	
-				       "AND BKNG_CONFIRMED = 'Y' "+
-				       "AND SYSTEM_ID = 2";
-		// End Sifiso Changes:2018/11/01
+        "AND SYSTEM_ID = 2";
 		
 		try{
 			JdbcTemplate jdt = new JdbcTemplate(super.getDataSource());
@@ -743,8 +704,7 @@ public class SatbookDAO extends SakaiDAO{
 				bookingId = data.get("BKNG_ID").toString();
 				venueNames = this.getVenueNames(bookingId);
 				materials = this.getMaterials(bookingId);
-				// Sifiso Changes:2018/11/01:Conversion from Oracle to mySQL
-				/*String queryString2 = 	"SELECT BKNG_ID,BKNG_HEADING, BKNG_LECT_NOVELLID, BKNG_LECT_TEL, "+
+				String queryString2 = 	"SELECT BKNG_ID,BKNG_HEADING, BKNG_LECT_NOVELLID, BKNG_LECT_TEL, "+
 										"TO_CHAR(BKNG_START,'DD-MON-YYYY') AS STARTTIME, "+
 										"TO_CHAR(BKNG_START, 'HH24') AS STARTTIMEHH, "+
 										"TO_CHAR(BKNG_START, 'MI') AS STARTTIMEMM, "+
@@ -754,21 +714,7 @@ public class SatbookDAO extends SakaiDAO{
 										"BKNG_DESC,BKNGTYPE_ID AS TYPEID "+
 										"FROM SATBOOK_BKNG_MAIN "+ 
 										"WHERE BKNG_ID = "+bookingId+" AND TO_CHAR(BKNG_START,'YYYY-MM-DD') = TO_CHAR(sysdate+7,'YYYY-MM-DD') "+
-										"AND BKNG_CONFIRMED = 'Y' AND SYSTEM_ID = 2";*/
-				
-				String queryString2 = "SELECT BKNG_ID,BKNG_HEADING, BKNG_LECT_NOVELLID, BKNG_LECT_TEL, "+
-									  "DATE_FORMAT(BKNG_START,'%d-%b-%Y') AS STARTTIME, "+
-									  "DATE_FORMAT(BKNG_START, '%H') AS STARTTIMEHH, "+
-									  "DATE_FORMAT(BKNG_START, '%i') AS STARTTIMEMM, "+
-									  "DATE_FORMAT(BKNG_END, '%d-%b') AS ENDTIME, "+
-									  "DATE_FORMAT(BKNG_END, '%H') AS ENDTIMEHH, "+
-									  "DATE_FORMAT(BKNG_END, '%i') AS ENDTIMEMM, "+
-									  "BKNG_DESC,BKNGTYPE_ID AS TYPEID "+
-									  "FROM SATBOOK_BKNG_MAIN "+ 
-									  "WHERE BKNG_ID = "+bookingId+" AND DATE_FORMAT(BKNG_START,'%Y-%m-%d') = DATE_FORMAT(sysdate()+7,'%Y-%m-%d') "+
-									  "AND BKNG_CONFIRMED = 'Y' AND SYSTEM_ID = 2";
-				// End Sifiso Changes:2018/11/01
-				
+										"AND BKNG_CONFIRMED = 'Y' AND SYSTEM_ID = 2";
 				//check if record found
 				if (this.querySingleValue(queryString2,"TYPEID").toString() == null || this.querySingleValue(queryString2,"TYPEID").toString() == ""){
 					continue;
