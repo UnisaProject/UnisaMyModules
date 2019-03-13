@@ -28,32 +28,34 @@
                     #parse("/vm/morpheus/snippets/header-snippet.vm")
                     ## <!-- Unisa Changes:2019/03/12: myModules, myAdmin (For Students) or Course Admin (For Staff) buttons -->
                     #if( ${loggedIn} ) 
-						<div style="display: inline-block; padding-top: 8px;" class="col-lg-8 col-md-8 col-sm-8 col-xs-8 noRowPaddingLeft noRowPaddingRight">
-	                    		<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
-					        		<a target="_top" href="https://mymodulesqa.int.unisa.ac.za/">
-					        			<button class="btn btn-ci-yellow-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 
-					        				1px solid #AAA !important">myModules</button>
-					        		</a>
-	                    		</div>
-	                    		## <!-- If user is Student -->
-	                    		#if (${isStudentLoginUserDispId})
-									<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
-		                        		<a target="_top" href="https://myadminqa.int.unisa.ac.za/student/portal/">
-		                        			<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 1px solid 
-		                        				#333 !important"><strong>myAdmin</strong></button>
-		                        		</a>
-		                    		</div>
-	                    		#end
-	                    		## <!-- If user is Staff -->
-	                    		#if (${isStaffLoginUserDispId})
+	                    <div class="clearfix col-lg-8 col-md-8 col-sm-8 col-xs-12 noRowPaddingLeft noRowPaddingRight loginAssistanceLinks defaultBottomMargin">
+							<div style="display: inline-block; padding-top: 8px;" class="col-lg-8 col-md-8 col-sm-8 col-xs-8 noRowPaddingLeft noRowPaddingRight">
 		                    		<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
-		                        		<a target="_top" href="https://myadminqa.int.unisa.ac.za/staff/portal/">
-		                        			<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 1px solid 
-		                        				#333 !important"><strong>Course Admin</strong></button>
-		                        		</a>
+						        		<a target="_top" href="/">
+						        			<button class="btn btn-ci-yellow-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 
+						        				1px solid #333 !important">myModules</button>
+						        		</a>
 		                    		</div>
-	                    		#end
-				    	</div>
+		                    		## <!-- If user is Student -->
+		                    		#if (${isStudentLoginUserDispId})
+										<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
+			                        		<a target="_top" href="myAdminBaseUrl">
+			                        			<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 1px solid 
+			                        				#AAA !important"><strong>myAdmin</strong></button>
+			                        		</a>
+			                    		</div>
+		                    		#end
+		                    		## <!-- If user is Staff -->
+		                    		#if (${isStaffLoginUserDispId})
+			                    		<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
+			                        		<a target="_top" href="courseAdminBaseUrl">
+			                        			<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 1px solid 
+			                        				#333 !important"><strong>Course Admin</strong></button>
+			                        		</a>
+			                    		</div>
+		                    		#end
+					    	</div>
+					    </div>
 				    #end
                     ## <!-- End Unisa Changes:2019/03/12-->
                     #parse("/vm/morpheus/includeLoginNav.vm")

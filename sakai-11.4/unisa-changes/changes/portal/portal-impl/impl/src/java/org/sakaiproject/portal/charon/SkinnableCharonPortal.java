@@ -1935,9 +1935,15 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 				isStaffLoginUserDispId = true;
 			else
 				isStudentLoginUserDispId = true;
+			
+			// get server url base of myAdmin and Course Admin
+			String myAdminBaseUrl = ServerConfigurationService.getString("serverUrlStudentAdmin");
+			String courseAdminBaseUrl = ServerConfigurationService.getString("serverUrlStaffAdmin");
 
 			rcontext.put("isStaffLoginUserDispId", isStaffLoginUserDispId);			// put staff EID in velocity context		
 			rcontext.put("isStudentLoginUserDispId", isStudentLoginUserDispId);		// put student EID in velocity context
+			rcontext.put("myAdminBaseUrl", myAdminBaseUrl);
+			rcontext.put("courseAdminBaseUrl", courseAdminBaseUrl);
 			// End Unisa Changes:2019/03/12
 		}
 	}
