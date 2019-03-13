@@ -39,7 +39,7 @@
 		                    		## <!-- If user is Student -->
 		                    		#if (${isStudentLoginUserDispId})
 										<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
-			                        		<a target="_top" href="myAdminBaseUrl">
+			                        		<a target="_top" href="${myAdminBaseUrl}">
 			                        			<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 1px solid 
 			                        				#AAA !important"><strong>myAdmin</strong></button>
 			                        		</a>
@@ -48,7 +48,7 @@
 		                    		## <!-- If user is Staff -->
 		                    		#if (${isStaffLoginUserDispId})
 			                    		<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
-			                        		<a target="_top" href="courseAdminBaseUrl">
+			                        		<a target="_top" href="${courseAdminBaseUrl}">
 			                        			<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 1px solid 
 			                        				#333 !important"><strong>Course Admin</strong></button>
 			                        		</a>
