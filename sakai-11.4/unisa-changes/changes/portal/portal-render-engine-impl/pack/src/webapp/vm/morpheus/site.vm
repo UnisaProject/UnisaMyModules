@@ -26,10 +26,10 @@
                 ## Header
                 <div class="Mrphs-topHeader">
                     #parse("/vm/morpheus/snippets/header-snippet.vm")
-                    ## <!-- Unisa Changes:2019/03/12: myModules, myAdmin (For Students) or Course Admin (For Staff) buttons -->
+                    ## <!-- Unisa Changes:2019/03/14: myModules, myAdmin (For Students & Students) buttons -->
                     #if( ${loggedIn} ) 
 	                    <div class="clearfix col-lg-8 col-md-8 col-sm-8 col-xs-12 noRowPaddingLeft noRowPaddingRight loginAssistanceLinks defaultBottomMargin">
-							<div style="display: inline-block; padding-top: 8px;" class="col-lg-8 col-md-8 col-sm-8 col-xs-8 noRowPaddingLeft noRowPaddingRight">
+							<div style="display: inline-block; padding-top: 8px;" class="col-lg-8 col-md-8 col-sm-12 col-xs-12 noRowPaddingLeft noRowPaddingRight">
 		                    		<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
 						        		<a target="_top" href="/">
 						        			<button class="btn btn-ci-yellow-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 
@@ -39,25 +39,57 @@
 		                    		## <!-- If user is Student -->
 		                    		#if (${isStudentLoginUserDispId})
 										<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
-			                        		<a target="_top" href="${myAdminBaseUrl}">
+											<script type="text/javascript">
+	                                         	var allcookies = document.cookie;
+	                                            var cookiearray = allcookies.split(';');
+	                                            var ticket = "";
+	                                            for(var i=0; i<cookiearray.length; i++){
+	                                            	var name = cookiearray[i].split('=')[0];
+	                                                var value = cookiearray[i].split('=')[1];
+	                                                if(value.startsWith("TGT-")) {
+	                                                	ticket = value;
+	                                                }
+	                                            }
+	                                            document.write(
+	                                            	'<a target="_top" href="${studentAdminBaseUrl}/#!/home?'+ticket+'">
+	                                            		<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 
+	                                            			1px solid #AAA !important">myAdmin</button></a>');
+	                                      	</script>
+=			                        		#*<a target="_top" href="${studentAdminBaseUrl}">
 			                        			<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 1px solid 
 			                        				#AAA !important"><strong>myAdmin</strong></button>
-			                        		</a>
+			                        		</a>*#
 			                    		</div>
 		                    		#end
 		                    		## <!-- If user is Staff -->
 		                    		#if (${isStaffLoginUserDispId})
 			                    		<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
-			                        		<a target="_top" href="${courseAdminBaseUrl}">
+			                    			<script type="text/javascript">
+	                                         	var allcookies = document.cookie;
+	                                            var cookiearray = allcookies.split(';');
+	                                            var ticket = "";
+	                                            for(var i=0; i<cookiearray.length; i++){
+	                                            	var name = cookiearray[i].split('=')[0];
+	                                                var value = cookiearray[i].split('=')[1];
+	                                                if(value.startsWith("TGT-")) {
+	                                                	ticket = value;
+	                                                }
+	                                            }
+	                                            document.write(
+	                                            	'<a target="_top" href="${staffAdminBaseUrl}/#!/home?'+ticket+'">
+	                                            		<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 
+	                                            			1px solid #AAA !important">myAdmin</button></a>');
+	                                      	</script>
+			                        		#*<a target="_top" href="${staffAdminBaseUrl}">
 			                        			<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 1px solid 
-			                        				#333 !important"><strong>Course Admin</strong></button>
-			                        		</a>
+			                        				#AAA !important"><strong>myAdmin</strong></button>
+			                        		</a>*#
 			                    		</div>
 		                    		#end
 					    	</div>
 					    </div>
 				    #end
-                    ## <!-- End Unisa Changes:2019/03/12-->
+                    ## <!-- End Unisa Changes:2019/03/14-->
                     #parse("/vm/morpheus/includeLoginNav.vm")
                 </div>
                     #if (${tabsSites})
