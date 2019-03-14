@@ -50,10 +50,7 @@
 	                                                	ticket = value;
 	                                                }
 	                                            }
-	                                            document.write(
-	                                            	'<a target="_top" href="${studentAdminBaseUrl}/#!/home?'+ticket+'">
-	                                            		<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 
-	                                            			1px solid #AAA !important">myAdmin</button></a>');
+	                                            document.write('<a target="_top" href="${studentAdminBaseUrl}#!/home?'+ticket+'"><button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border:1px solid #AAA !important">myAdmin</button></a>');
 	                                      	</script>
 =			                        		#*<a target="_top" href="${studentAdminBaseUrl}">
 			                        			<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 1px solid 
@@ -75,10 +72,7 @@
 	                                                	ticket = value;
 	                                                }
 	                                            }
-	                                            document.write(
-	                                            	'<a target="_top" href="${staffAdminBaseUrl}/#!/home?'+ticket+'">
-	                                            		<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 
-	                                            			1px solid #AAA !important">myAdmin</button></a>');
+	                                            document.write('<a target="_top" href="${staffAdminBaseUrl}#!/home?'+ticket+'"><button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border:1px solid #AAA !important">myAdmin</button></a>');
 	                                      	</script>
 			                        		#*<a target="_top" href="${staffAdminBaseUrl}">
 			                        			<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 1px solid 
