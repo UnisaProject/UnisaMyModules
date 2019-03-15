@@ -350,6 +350,15 @@
 
   <dependencyManagement>
     <dependencies>
+      <!--  Unisa-change Sonette - 15 March 2019 - add Application insight for Azure monitoring -->
+      <dependency>
+        <groupId>com.microsoft.azure</groupId>
+        <artifactId>applicationinsights-web</artifactId>
+        <!-- or applicationinsights-core for bare API -->
+        <version>2.3.1</version>
+      </dependency>
+      <!--  END Sonette - 15 March 2019 - add Application insight for Azure monitoring -->
+      
       <!-- provided by the JDK, here to ensure its not packaged in child poms child poms may still override if necessary -->
       <dependency>
         <groupId>xalan</groupId>
