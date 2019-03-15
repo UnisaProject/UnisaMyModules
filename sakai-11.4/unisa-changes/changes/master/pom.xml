@@ -350,6 +350,14 @@
 
   <dependencyManagement>
     <dependencies>
+   	 <!-- Sonette add 14 March 2019 - add for Azure Monitoring of applciation -->
+   	 <dependency>
+        <groupId>com.microsoft.azure</groupId>
+        <artifactId>applicationinsights-web</artifactId>
+        <!-- or applicationinsights-core for bare API -->
+        <version>2.3.1</version>
+      </dependency>
+      <!-- END Sonette add 14 March 2019 - add for Azure Monitoring of applciation -->
       <!-- provided by the JDK, here to ensure its not packaged in child poms child poms may still override if necessary -->
       <dependency>
         <groupId>xalan</groupId>
