@@ -17,18 +17,7 @@
         <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
 	
-	<!--  Sonette - 15 March 2019 - add Application insight for Azure monitoring -->
-	<filter>
-      <filter-name>ApplicationInsightsWebFilter</filter-name>
-      <filter-class>
-        com.microsoft.applicationinsights.web.internal.WebRequestTrackingFilter
-      </filter-class>
-    </filter>
-    <filter-mapping>
-       <filter-name>ApplicationInsightsWebFilter</filter-name>
-       <url-pattern>/*</url-pattern>
-    </filter-mapping>
-	<!--  END Sonette - 15 March 2019 - add Application insight for Azure monitoring -->
+	
 	
 	<!-- Sakai Struts Tool Servlet, for the options helper tool -->
     <servlet>
@@ -76,10 +65,5 @@
 	<listener>
         <listener-class>za.ac.unisa.lms.tools.welcome.SetupListener</listener-class>
     </listener>
-    <!--  Sonette - 15 March 2019 - add Application insight for Azure monitoring -->
-   <!-- This listener handles shutting down the TelemetryClient when an application/servlet is undeployed. -->
-    <listener>
-      <listener-class>com.microsoft.applicationinsights.web.internal.ApplicationInsightsServletContextListener</listener-class>
-    </listener>   
-    <!--  END Sonette - 15 March 2019 - add Application insight for Azure monitoring -->
+  
 </web-app>
