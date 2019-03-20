@@ -13,7 +13,6 @@
   <packaging>pom</packaging>
   <modules>
 	<module>overlays/assignment</module>
-	<!-- module>overlays/bbb-tool</module-->
 	<module>overlays/calendar</module>
 	<module>overlays/chat</module>
 	<module>overlays/content</module>
