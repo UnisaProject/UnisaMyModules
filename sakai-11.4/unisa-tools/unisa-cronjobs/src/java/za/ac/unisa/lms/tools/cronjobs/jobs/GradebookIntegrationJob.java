@@ -78,7 +78,8 @@ A crontab file has five fields for specifying day , date and time  followed by t
 		// registration periods to be considered 
         // 24 Nov - Sonette add 2017 periods: "2017#0","2017#6","2017#1","2017#2"
 		// 27 March 2018 - Sonette add 2018 periods
-		String[] periods = {"2017#0","2017#6","2017#1","2017#2","2018#0","2018#6","2018#1","2018#2"};
+		// 20 March 2019 - Sonette 2019 periods
+		String[] periods = {"2018#0","2018#6","2018#1","2018#2","2019#0","2019#6","2019#1","2019#2"};
 		
 		/** Retrieve modules with online assessments */
 		/*String module = "EUP1501";
