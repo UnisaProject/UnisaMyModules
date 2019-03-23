@@ -46,7 +46,7 @@
 	                                            for(var i=0; i<cookiearray.length; i++){
 	                                            	var name = cookiearray[i].split('=')[0];
 	                                                var value = cookiearray[i].split('=')[1];
-	                                                if(value.startsWith("TGT-")) {
+	                                                if(value.substring(0,4)=="TGT-") {
 	                                                	ticket = value;
 	                                                }
 	                                            }
@@ -64,7 +64,7 @@
 	                                            for(var i=0; i<cookiearray.length; i++){
 	                                            	var name = cookiearray[i].split('=')[0];
 	                                                var value = cookiearray[i].split('=')[1];
-	                                                if(value.startsWith("TGT-")) {
+	                                                if(value.substring(0,4)=="TGT-") {
 	                                                	ticket = value;
 	                                                }
 	                                            }
