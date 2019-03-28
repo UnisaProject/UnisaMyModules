@@ -59,6 +59,8 @@ import org.sakaiproject.util.ResourceLoader;
 
 import org.sakaiproject.event.cover.EventTrackingService;
 
+import java.nio.file.Files; 
+import java.nio.file.Paths;
 
 public class EditSectionPage extends SectionPage implements Serializable
 {
@@ -98,6 +100,7 @@ public class EditSectionPage extends SectionPage implements Serializable
 	private String activeCheckUrl = "";
 	
 	private String resourceSectionFile = "";
+
 	
 	/**
 	 * Default constructor
@@ -293,8 +296,40 @@ public class EditSectionPage extends SectionPage implements Serializable
 
 				if (cr.getContentType().equals(MeleteCHService.MIME_TYPE_EDITOR))
 				{
-					this.contentEditor = HtmlHelper.clean(new String(cr.getContent()), false);
-					this.contentEditor = getSectionService().fixXrefs(contentEditor, getCurrentCourseId());
+					try
+					{
+						this.contentEditor = HtmlHelper.clean(new String(cr.getContent()), false);
+						this.contentEditor = getSectionService().fixXrefs(contentEditor, getCurrentCourseId());
+						//mphahsm added this line to fix the failing of html rendering
+						if (contentEditor.indexOf("<body>") >= 0)
+                        {
+							this.contentEditor = contentEditor.substring(contentEditor.indexOf("<body>") + 6, contentEditor.indexOf("</body>"));
+                            System.out.println("setContentResourceData: With BODY elements but after removing them");
+                        }
+						System.out.println("setContentResourceData: Without BODY elements");
+					}
+					catch (Exception ex)
+					{
+						String failResourceSectionFile = sectionService.getSectionContentFile(resourceId);
+						/*
+						This is for local host
+						failResourceSectionFile = "C:\\data\\sakai\\content" + failResourceSectionFile;
+						failResourceSectionFile = failResourceSectionFile.replace("/", "\\");
+						*/
+						
+						//This is for the server
+						failResourceSectionFile = "/data/sakai/content" + failResourceSectionFile;
+						
+						String contents = new String(Files.readAllBytes(Paths.get(failResourceSectionFile)));
+						if (contents.indexOf("<body>") >= 0)
+						{
+							String contentsCleaup = contents.substring(contents.indexOf("<body>") + 6, contents.indexOf("</body>"));
+							this.contentEditor = HtmlHelper.clean(contentsCleaup, false);
+							this.contentEditor = getSectionService().fixXrefs(contentEditor, getCurrentCourseId());
+							System.out.println("setContentResourceData: EditSectionPage: After content exception: Completed successfully");
+						}
+					}
+					
 				}
 				else if (rTypeLink)
 				{
@@ -1550,4 +1585,5 @@ public class EditSectionPage extends SectionPage implements Serializable
 		}
 		return modifiedByAuthor;
 	}
+	
 }

@@ -41,7 +41,8 @@
 				<value>org/etudes/component/app/melete/MeleteSitePreference.hbm.xml</value>
 				<value>org/etudes/component/app/melete/Bookmark.hbm.xml</value>
                 <value>org/etudes/component/app/melete/SpecialAccess.hbm.xml</value>
-                <value>org/etudes/component/app/melete/SectionTrackView.hbm.xml</value>		
+                <value>org/etudes/component/app/melete/SectionTrackView.hbm.xml</value>
+                <value>org/etudes/component/app/melete/ContentResource.hbm.xml</value>		
 	        </list>
 		</property>
 	</bean>
