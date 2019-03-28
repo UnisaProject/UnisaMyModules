@@ -59,6 +59,9 @@ import org.sakaiproject.util.ResourceLoader;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import java.nio.file.Files; 
+import java.nio.file.Paths;
+
 public class ViewSectionsPage implements Serializable
 {
 
@@ -143,17 +146,57 @@ public class ViewSectionsPage implements Serializable
 			// only for html!
 			if (resource.getContentType().equalsIgnoreCase("text/html"))
 			{
-                byte[] rsrcArray = resource.getContent();
-                str = new String(rsrcArray);
+				try
+				{
+					byte[] rsrcArray = resource.getContent();
+	                str = new String(rsrcArray);
+	                if (Util.FindNestedHTMLTags(str))
+	                {
+	                    contentWithHtml = true;
+	                    return "";
+	                }
 
-                if (Util.FindNestedHTMLTags(str))
-                {
-                    contentWithHtml = true;
-                    return "";
-                }
+					str = HtmlHelper.clean(str, false);
+					str = getSectionService().fixXrefs(str, getCourseId());
+					if (str.indexOf("<body>") >= 0)
+					{
+						str = str.substring(str.indexOf("<body>") + 6, str.indexOf("</body>"));
+					}
+				}
+				catch (Exception ex)
+				{
+					SectionResourceService secRes = this.section.getSectionResource();
+					String resourceId = secRes.getResource().getResourceId();
+					String failResourceSectionFile = sectionService.getSectionContentFile(resourceId);
+					/*
+					This is for local host
+					failResourceSectionFile = "C:\\data\\sakai\\content" + failResourceSectionFile;
+					failResourceSectionFile = failResourceSectionFile.replace("/", "\\");
+					*/
+					
+					//This is for the server
+					failResourceSectionFile = "/data/sakai/content" + failResourceSectionFile;
+					
+					String contents = new String(Files.readAllBytes(Paths.get(failResourceSectionFile)));
+					if (contents.indexOf("<body>") >= 0)
+                    {
+						str = contents.substring(contents.indexOf("<body>") + 6, contents.indexOf("</body>"));
+                    }
+                    else
+                    {
+						str = contents;
+                    }
 
-				str = HtmlHelper.clean(str, false);
-				str = getSectionService().fixXrefs(str, getCourseId());
+	                if (Util.FindNestedHTMLTags(str))
+	                {
+	                    contentWithHtml = true;
+	                    return "";
+	                }
+
+					str = HtmlHelper.clean(str, false);
+					str = getSectionService().fixXrefs(str, getCourseId());
+				}
+				
 			}
 		}
 		catch (Exception e)

@@ -812,4 +812,13 @@ public class SectionServiceImpl implements Serializable, SectionService
 	{
 		return sectiondb.fixXrefs(contents, courseId);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getSectionContentFile(String resourceId) 
+	{
+		return sectiondb.getSectionContentFile(resourceId);
+	}
+	
 }

@@ -432,4 +432,13 @@ public interface SectionService
 	 * @return
 	 */
 	public String fixXrefs(String contents, String courseId);
+	
+	/**
+	 * getSectionContentFile to get section content file of typeEditor. 
+	 * 
+	 * @param resourceId
+	 * @return
+	 */
+	public String getSectionContentFile(String resourceId);
+	
 }
