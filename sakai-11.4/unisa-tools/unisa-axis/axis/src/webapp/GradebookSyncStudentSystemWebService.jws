@@ -68,8 +68,8 @@ public class GradebookSyncStudentSystemWebService {
                    " GBGOT.name "+ 
                    " FROM GB_GRADABLE_OBJECT_T GBGOT, GB_GRADEBOOK_T GBGT "+
                    " WHERE GBGOT.GRADEBOOK_ID = GBGT.ID"+ 
-                   " AND   substr(GBGT.GRADEBOOK_UID,0,13) = upper(?)"+ // coursesite example EUP1501-12-Y1
-                   " AND   upper(substr(gbgot.name,1,?)) = ?"+ // unqass.assignment_nr
+                   " AND   SUBSTRING(GBGT.GRADEBOOK_UID,1,13)=  = upper(?)"+ // coursesite example EUP1501-12-Y1
+                   " AND   upper(SUBSTRING(gbgot.name,1,?)) = ?"+ // unqass.assignment_nr
                    " AND   GBGOT.removed != 1";
 
 	/* ----------------------------------------------------------------------------------------------------------------- */                     
@@ -187,10 +187,10 @@ public class GradebookSyncStudentSystemWebService {
                " GB_GRADABLE_OBJECT_T GBT,  "+ /* POINTS_POSSIBLE */
                " GB_GRADE_RECORD_T GBR, "+  /* student_id, points_earned, GRADER_ID */	
                " sakai_user_id_map ST  "+ /* mapping student number to sakai userid */
-               " where  substr(GB.gradebook_uid,1,13) = '"+moduleSite+"'"+
+               " where  SUBSTRING(GB.gradebook_uid,1,13) = ?"+
                " AND GBT.GRADEBOOK_ID = GB.ID "+
                " AND GBT.removed <> 1 "+
-               " -- AND substr(GBT.name,1,length("+assignmentNr+")+1) = '1 '"+
+               " AND SUBSTRING(GBT.name,1,length("+assignmentNr+")+1) = ?"+
                " AND GBR.GRADABLE_OBJECT_ID = GBT.ID "+
                " AND GBR.POINTS_EARNED is not null "+
                " AND (GBR.POINTS_EARNED / GBT.POINTS_POSSIBLE * 100) BETWEEN -1 AND 101 "+
@@ -248,6 +248,7 @@ public class GradebookSyncStudentSystemWebService {
                 
                 List recordsGI = jdt2.queryForList(RETRIEVE_GRADEBOOKITEM,
                         new Object[] {moduleSite, assignmentNrLength,tmpAssignmentNr});
+                        
         
                 if (recordsGI.size() == 0) {
                     gradebookItemFound = false;
@@ -289,10 +290,14 @@ public class GradebookSyncStudentSystemWebService {
 					
 					
 					try {
-				       
-						       
-						List studentList = jdt3.queryForList(RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM);
+
+                        					       
+						List studentList = jdt3.queryForList(RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM,
+						new Object[] {acadYear, module,semPeriod,assignmentNr});
 						                        
+						debug.println("** GRADEBOOKSYNC: RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM "+RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM);
+						debug.println("** GRADEBOOKSYNC: params "+acadYear+"#"+module+"#"+semPeriod+"#"+assignmentNr);
+                       
 						Iterator studentList_it = recordsGrades.iterator();
 						
 						/* ************ For each mark retrieved update the student system                         *********/
@@ -303,7 +308,7 @@ public class GradebookSyncStudentSystemWebService {
 							studentListAL.add(record_StudentResult.get("STUDENTNR").toString());
 							
 						} // end while (studentList)
-					} catch (Exception e) { // jdt4.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK,
+					} catch (Exception e) { // jdt3.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK,
 						e.printStackTrace();
 						log.error(e);
 	
@@ -316,9 +321,13 @@ public class GradebookSyncStudentSystemWebService {
 					
 					                                                                
 					try {
-				       
 						       
-						List recordsGrades = jdt4.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2);
+						List recordsGrades = jdt4.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2,
+						new Object[] {moduleSite, assignmentNr});
+
+						debug.println("** GRADEBOOKSYNC: RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2 "+RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2);
+						debug.println("** GRADEBOOKSYNC: params "+moduleSite+"#"+assignmentNr);
+
 						                        
 						Iterator recordsGrades_it = recordsGrades.iterator();
 						
@@ -356,6 +365,7 @@ public class GradebookSyncStudentSystemWebService {
 								} else {
 									syncSuccess++;
 								}
+								Debug.println("syncSuccess="+syncSuccess);
 							} // end of if (studentNrIsNumber == true)
 	                                                                        
 						} // end of while (recordsGrades_it.hasNext()) {                                                                        
