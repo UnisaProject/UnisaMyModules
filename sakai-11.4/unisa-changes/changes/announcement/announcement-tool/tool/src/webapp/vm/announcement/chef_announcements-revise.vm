@@ -272,14 +272,12 @@ function resizeFrame(){
 						  </label>
 						</div>
 
-						<!-- Unisa Changes:2019/03/15:Hide the option to schedule future announcements -->
-						<!-- <div class="checkbox"> -->
-						<!--  <label for="hidden_specify"> -->
-						<!--		<input type="radio" name="hidden" id="hidden_specify" value="specify" #if($specify)checked="checked" #end/> -->
-						<!--		$tlang.getString("avail.specify.withtips") -->
-						<!--  </label> -->
-						<!-- </div> -->
-						<!-- End Unisa Changes:2019/03/15 -->
+						<div class="checkbox">
+						  <label for="hidden_specify">
+								<input type="radio" name="hidden" id="hidden_specify" value="specify" #if($specify)checked="checked" #end/>
+								$tlang.getString("avail.specify.withtips")
+						  </label>
+						</div>
 		                
 		                #set($release_year = $releaseDate.breakdownLocal().year)
 		                #set($release_month = $releaseDate.breakdownLocal().month)
