@@ -54,7 +54,7 @@ import za.ac.unisa.lms.db.SakaiDAO;
 /**
 This webservice is used to sync the assignment marks from the myUnisa Gradebook to the Student assignment system
 */
-public class GradebookSyncStudentSystemWebService {
+public class GradebookSyncStudentSystemWebserviceAzure {
 
 	/* ----------------------------------------------------------------------------------------------------------------- */
 	private EmailService emailService;
