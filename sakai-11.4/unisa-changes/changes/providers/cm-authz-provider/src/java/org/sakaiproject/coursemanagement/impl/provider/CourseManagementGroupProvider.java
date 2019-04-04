@@ -168,7 +168,9 @@ public class CourseManagementGroupProvider implements GroupProvider {
 		//unisa change for displaying mystudents provider id
 		  if (userEid.matches("[a-zA-Z].*")) {			  
 			  groupRoleMap.put("mystudents", "access");
-		  }
+		  }else{
+            groupRoleMap.put("myadmin", "access");
+          }
 		
 		
 		return groupRoleMap;
@@ -267,12 +269,101 @@ public class CourseManagementGroupProvider implements GroupProvider {
 		this.configuration = configuration;
 	}
 
-	public boolean groupExists(String groupId) {
+		/*Unisa change: comment out the following method and add unisa specific method to validate the courses As unisa does not uses course section info*/
+/*	public boolean groupExists(String groupId) {
 		
 		if (cmService.isSectionDefined(groupId)) 
 			return true;
 		
 				
 		return false;
+	}*/
+	
+	public boolean groupExists(String arg0) {
+
+		//String providerIds = ServerConfigurationService.getString("providerIds");
+		String providerIds = "myadmin,mystudents";
+		StringTokenizer st = new StringTokenizer(providerIds, ",");
+		int tokenCount = st.countTokens();
+		String[] array = new String[tokenCount];
+		boolean test = false;
+		for (int i = 0; i < tokenCount; i++) {
+			String testRealm = st.nextToken();
+		    if(testRealm.equals(arg0)) {
+		    	test = true;
+		    	i = tokenCount;
+		    }
+		}
+		
+		if (!test){
+			//System.out.println("Group Exists is not equal to mystudents and myadmin checking for course site or postgraduate site");
+			boolean isValidSiteOrGroup = false;
+			if (arg0.length() == 8) {
+				//System.out.println("Check for a Postgraduate site");
+				String col = arg0.substring(0,3);
+				String num = arg0.substring(3,4);
+				String cat = arg0.substring(4,7);
+				String let = arg0.substring(7);
+				List<String> numarray = Arrays.asList("1","2","3","4","5","6","7","8","9");
+				List<String> letarray = Arrays.asList("U", "H", "M","D");
+				
+				if (col.equalsIgnoreCase("COL")&&cat.equalsIgnoreCase("CAT")&&numarray.contains(num)&&letarray.contains(let) ) {
+					//System.out.println("Found valid posgraduate site");
+					isValidSiteOrGroup = true;
+				}
+			} else if (arg0.length() >= 13) {
+				//System.out.println("Group Exist arg has right lenght 13");
+				String delimiter = "-";
+				String [] temp;
+				temp = arg0.split(delimiter);
+				for (int i = 0; i < temp.length;i++){
+					if ( i == 0){
+						if (temp[i].length() == 7){
+							//System.out.println("Subject found right length (7) "+ temp[i]);
+							isValidSiteOrGroup = true;
+						} else {
+							isValidSiteOrGroup = false;
+						} 
+					} else if (i == 1){
+						if (temp[i].length() == 2){
+							//System.out.println("Year found now check if it is a int");
+							try
+							{
+								Integer.parseInt(temp[i]);
+								//System.out.println(temp[i] + " is valid integer number");
+								isValidSiteOrGroup = true;
+							}
+							catch(NumberFormatException nme)
+							{
+								isValidSiteOrGroup = false;
+								//System.out.println(temp[i] + " is not a valid integer number");
+							}
+						}
+					} else if (i == 2){
+						if (temp[i].length() == 2){
+							//System.out.println("Period found check if valid");
+							List<String> periods = Arrays.asList("S1","S2","Y1","Y2");
+							if (periods.contains(temp[i])){
+								//System.out.println("Found a valid period :"+arg0);
+								isValidSiteOrGroup = true;
+							} else {
+								isValidSiteOrGroup = false;
+							}
+							
+						}
+					}
+				}
+			} else	{
+				isValidSiteOrGroup = false;
+				//System.out.println("Not a Course Site/Postgraduate returing false");
+			}
+			if (isValidSiteOrGroup){
+				test = true;
+			}
+		}
+		
+		
+		// TODO Auto-generated method stub
+		return test;
 	}
 }
