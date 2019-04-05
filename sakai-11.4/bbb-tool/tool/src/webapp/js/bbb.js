@@ -277,17 +277,20 @@ meetings.switchState = function (state, arg) {
         }
 
         $("#selectFile").change(function () {
+
             meetings.utils.hideMessage();
             if(!this.files[0])  return;
 
             var acceptedTypes = ['ppt', 'pptx', 'pdf', 'jpeg', 'png', 'gif', 'jpg'];
             var extension = $(this).val().split('.').pop();
             if (acceptedTypes.indexOf(extension) == -1) {
-                meetings.utils.showMessage('File must be an image, presentation, or pdf', 'warning');
+                meetings.utils.showMessage(bbb_warning_bad_filetype, 'warning');
                 $(this).val('');
                 return;
-            } else if (this.files[0].size > 2097152) {
-                meetings.utils.showMessage('File size must be below 2 MB', 'warning');
+            }
+            var maxFileSize = meetings.startupArgs.maxFileSizeInBytes;
+            if (this.files[0].size > maxFileSize * 1024 * 1024) {
+                meetings.utils.showMessage(bbb_warning_max_filesize(maxFileSize), 'warning');
                 $(this).val('');
                 return;
             }
@@ -317,8 +320,11 @@ meetings.switchState = function (state, arg) {
         // Focus on meeting name/title
         $('#bbb_meeting_name_field').focus();
 
-        // Setup description/welcome msg editor. Test for CKEditor or FCKeditorAPI.
-        meetings.utils.makeInlineCKEditor('bbb_welcome_message_textarea', 'BBB', '480', '200');
+        // Setup description/welcome msg editor. Test for CKEditor.
+        var descriptionType = meetings.settings.config.addUpdateFormParameters.descriptionType;
+        if(descriptionType == 'ckeditor' ) {
+            meetings.utils.makeInlineCKEditor('bbb_welcome_message_textarea', 'BBB', '480', '200');
+        }
 
         // Setup dates
         var now = new Date();
@@ -868,8 +874,6 @@ meetings.updateMeetingInfo = function (meeting) {
 meetings.setMeetingList = function () {
 
     meetings.currentMeetings = meetings.utils.getMeetingList(meetings.startupArgs.siteId);
-    if ( meetings.currentMeetings.length == null )
-        meetings.currentMeetings = Array();
 
     // watch for permissions changes, check meeting dates
     for(var i=0; i<meetings.currentMeetings.length; i++) {
@@ -886,20 +890,20 @@ meetings.refreshMeetingList = function () {
 };
 
 meetings.refreshRecordingList = function (meetingId, groupId) {
-	var getRecordingResponse = (meetingId == null)? meetings.utils.getSiteRecordingList(meetings.startupArgs.siteId): meetings.utils.getMeetingRecordingList(meetingId, groupId);
+    var getRecordingResponse = (meetingId == null)? meetings.utils.getSiteRecordingList(meetings.startupArgs.siteId): meetings.utils.getMeetingRecordingList(meetingId, groupId);
 
-	if ( getRecordingResponse.returncode == 'SUCCESS' ){
-		meetings.currentRecordings = getRecordingResponse.recordings;
-	} else {
-		//Something went wrong
-		meetings.currentRecordings = new Array();
+    if (getRecordingResponse.returncode == 'SUCCESS') {
+        meetings.currentRecordings = getRecordingResponse.recordings;
+    } else {
+        //Something went wrong
+        meetings.currentRecordings = new Array();
 
-		if ( getRecordingResponse.messageKey != null ){
-	    	meetings.utils.showMessage(getRecordingResponse.messageKey + ":" + getRecordingResponse.message, 'warning');
-		} else {
-	    	meetings.utils.showMessage("Unable to get response from the BigBlueButton server", 'warning');
-		}
-	}
+        if (getRecordingResponse.messageKey != null) {
+            meetings.utils.showMessage(getRecordingResponse.messageKey + ":" + getRecordingResponse.message, 'warning');
+        } else {
+            meetings.utils.showMessage(bbb_warning_no_server_response, 'warning');
+        }
+    }
 };
 
 meetings.sortDropDown = function (dropDownId) {
