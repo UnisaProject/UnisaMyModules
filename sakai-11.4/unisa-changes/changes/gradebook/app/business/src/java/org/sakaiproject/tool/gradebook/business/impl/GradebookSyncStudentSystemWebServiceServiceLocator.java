@@ -22,7 +22,7 @@ public class GradebookSyncStudentSystemWebServiceServiceLocator extends org.apac
     }
 
     // Use to get a proxy class for GradebookSyncStudentSystemWebService
-    private java.lang.String GradebookSyncStudentSystemWebService_address = "https://mydev.int.unisa.ac.za/unisa-axis/GradebookSyncStudentSystemWebService.jws";
+    private java.lang.String GradebookSyncStudentSystemWebService_address = "http://lazu-mctc01sv.int.unisa.ac.za:8020/sakai-axis/GradebookSyncStudentSystemWebService.jws";
 
     public java.lang.String getGradebookSyncStudentSystemWebServiceAddress() {
         return GradebookSyncStudentSystemWebService_address;
@@ -52,7 +52,7 @@ public class GradebookSyncStudentSystemWebServiceServiceLocator extends org.apac
 
     public org.sakaiproject.tool.gradebook.business.impl.GradebookSyncStudentSystemWebService_PortType getGradebookSyncStudentSystemWebService(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
         try {
-        	org.sakaiproject.tool.gradebook.business.impl.GradebookSyncStudentSystemWebServiceSoapBindingStub _stub = new org.sakaiproject.tool.gradebook.business.impl.GradebookSyncStudentSystemWebServiceSoapBindingStub(portAddress, this);
+            org.sakaiproject.tool.gradebook.business.impl.GradebookSyncStudentSystemWebServiceSoapBindingStub _stub = new org.sakaiproject.tool.gradebook.business.impl.GradebookSyncStudentSystemWebServiceSoapBindingStub(portAddress, this);
             _stub.setPortName(getGradebookSyncStudentSystemWebServiceWSDDServiceName());
             return _stub;
         }
@@ -73,7 +73,7 @@ public class GradebookSyncStudentSystemWebServiceServiceLocator extends org.apac
     public java.rmi.Remote getPort(Class serviceEndpointInterface) throws javax.xml.rpc.ServiceException {
         try {
             if (org.sakaiproject.tool.gradebook.business.impl.GradebookSyncStudentSystemWebService_PortType.class.isAssignableFrom(serviceEndpointInterface)) {
-            	org.sakaiproject.tool.gradebook.business.impl.GradebookSyncStudentSystemWebServiceSoapBindingStub _stub = new org.sakaiproject.tool.gradebook.business.impl.GradebookSyncStudentSystemWebServiceSoapBindingStub(new java.net.URL(GradebookSyncStudentSystemWebService_address), this);
+                org.sakaiproject.tool.gradebook.business.impl.GradebookSyncStudentSystemWebServiceSoapBindingStub _stub = new org.sakaiproject.tool.gradebook.business.impl.GradebookSyncStudentSystemWebServiceSoapBindingStub(new java.net.URL(GradebookSyncStudentSystemWebService_address), this);
                 _stub.setPortName(getGradebookSyncStudentSystemWebServiceWSDDServiceName());
                 return _stub;
             }
@@ -105,7 +105,7 @@ public class GradebookSyncStudentSystemWebServiceServiceLocator extends org.apac
     }
 
     public javax.xml.namespace.QName getServiceName() {
-        return new javax.xml.namespace.QName("https://mydev.int.unisa.ac.za/unisa-axis/GradebookSyncStudentSystemWebService.jws", "GradebookSyncStudentSystemWebServiceService");
+        return new javax.xml.namespace.QName("http://lazu-mctc01sv.int.unisa.ac.za:8020/sakai-axis/GradebookSyncStudentSystemWebService.jws", "GradebookSyncStudentSystemWebServiceService");
     }
 
     private java.util.HashSet ports = null;
@@ -113,7 +113,7 @@ public class GradebookSyncStudentSystemWebServiceServiceLocator extends org.apac
     public java.util.Iterator getPorts() {
         if (ports == null) {
             ports = new java.util.HashSet();
-            ports.add(new javax.xml.namespace.QName("https://mydev.int.unisa.ac.za/unisa-axis/GradebookSyncStudentSystemWebService.jws", "GradebookSyncStudentSystemWebService"));
+            ports.add(new javax.xml.namespace.QName("http://lazu-mctc01sv.int.unisa.ac.za:8020/sakai-axis/GradebookSyncStudentSystemWebService.jws", "GradebookSyncStudentSystemWebService"));
         }
         return ports.iterator();
     }
