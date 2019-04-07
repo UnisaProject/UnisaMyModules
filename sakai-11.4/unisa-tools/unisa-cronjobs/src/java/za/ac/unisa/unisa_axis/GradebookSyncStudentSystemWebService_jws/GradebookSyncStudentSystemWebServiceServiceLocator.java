@@ -22,7 +22,7 @@ public class GradebookSyncStudentSystemWebServiceServiceLocator extends org.apac
     }
 
     // Use to get a proxy class for GradebookSyncStudentSystemWebService
-    private java.lang.String GradebookSyncStudentSystemWebService_address = "https://mydev.int.unisa.ac.za/unisa-axis/GradebookSyncStudentSystemWebService.jws";
+    private java.lang.String GradebookSyncStudentSystemWebService_address = "http://lazu-mctc01sv.int.unisa.ac.za:8020/sakai-axis/GradebookSyncStudentSystemWebService.jws";
 
     public java.lang.String getGradebookSyncStudentSystemWebServiceAddress() {
         return GradebookSyncStudentSystemWebService_address;
@@ -52,7 +52,7 @@ public class GradebookSyncStudentSystemWebServiceServiceLocator extends org.apac
 
     public za.ac.unisa.unisa_axis.GradebookSyncStudentSystemWebService_jws.GradebookSyncStudentSystemWebService_PortType getGradebookSyncStudentSystemWebService(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
         try {
-        	za.ac.unisa.unisa_axis.GradebookSyncStudentSystemWebService_jws.GradebookSyncStudentSystemWebServiceSoapBindingStub _stub = new za.ac.unisa.unisa_axis.GradebookSyncStudentSystemWebService_jws.GradebookSyncStudentSystemWebServiceSoapBindingStub(portAddress, this);
+            za.ac.unisa.unisa_axis.GradebookSyncStudentSystemWebService_jws.GradebookSyncStudentSystemWebServiceSoapBindingStub _stub = new za.ac.unisa.unisa_axis.GradebookSyncStudentSystemWebService_jws.GradebookSyncStudentSystemWebServiceSoapBindingStub(portAddress, this);
             _stub.setPortName(getGradebookSyncStudentSystemWebServiceWSDDServiceName());
             return _stub;
         }
@@ -105,7 +105,7 @@ public class GradebookSyncStudentSystemWebServiceServiceLocator extends org.apac
     }
 
     public javax.xml.namespace.QName getServiceName() {
-        return new javax.xml.namespace.QName("https://mydev.int.unisa.ac.za/unisa-axis/GradebookSyncStudentSystemWebService.jws", "GradebookSyncStudentSystemWebServiceService");
+        return new javax.xml.namespace.QName("http://lazu-mctc01sv.int.unisa.ac.za:8020/sakai-axis/GradebookSyncStudentSystemWebService.jws", "GradebookSyncStudentSystemWebServiceService");
     }
 
     private java.util.HashSet ports = null;
@@ -113,7 +113,7 @@ public class GradebookSyncStudentSystemWebServiceServiceLocator extends org.apac
     public java.util.Iterator getPorts() {
         if (ports == null) {
             ports = new java.util.HashSet();
-            ports.add(new javax.xml.namespace.QName("https://mydev.int.unisa.ac.za/unisa-axis/GradebookSyncStudentSystemWebService.jws", "GradebookSyncStudentSystemWebService"));
+            ports.add(new javax.xml.namespace.QName("http://lazu-mctc01sv.int.unisa.ac.za:8020/sakai-axis/GradebookSyncStudentSystemWebService.jws", "GradebookSyncStudentSystemWebService"));
         }
         return ports.iterator();
     }
