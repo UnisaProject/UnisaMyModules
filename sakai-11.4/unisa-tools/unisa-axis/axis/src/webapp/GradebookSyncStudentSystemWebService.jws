@@ -54,7 +54,7 @@ import za.ac.unisa.lms.db.SakaiDAO;
 /**
 This webservice is used to sync the assignment marks from the myUnisa Gradebook to the Student assignment system
 */
-public class GradebookSyncStudentSystemWebserviceAzure {
+public class GradebookSyncStudentSystemWebService {
 
 	/* ----------------------------------------------------------------------------------------------------------------- */
 	private EmailService emailService;
@@ -64,12 +64,12 @@ public class GradebookSyncStudentSystemWebserviceAzure {
 
 	/* ----------------------------------------------------------------------------------------------------------------- */
 	// query to see if gradebook item exist for specific module,semester period and assignment
-	private static final String RETRIEVE_GRADEBOOKITEM = "select GBGOT.id as ID, GBGT.gradebook_uid as GUID, GBGOT.gradebook_id,"+ 
+	private static final String RETRIEVE_GRADEBOOKITEM = "select GBGOT.id as GRADEBOOKID, GBGT.gradebook_uid as GUID, GBGOT.gradebook_id,"+ 
                    " GBGOT.name "+ 
                    " FROM GB_GRADABLE_OBJECT_T GBGOT, GB_GRADEBOOK_T GBGT "+
                    " WHERE GBGOT.GRADEBOOK_ID = GBGT.ID"+ 
-                   " AND   substr(GBGT.GRADEBOOK_UID,0,13) = upper(?)"+ // coursesite example EUP1501-12-Y1
-                   " AND   upper(substr(gbgot.name,1,?)) = ?"+ // unqass.assignment_nr
+                   " AND   SUBSTRING(GBGT.GRADEBOOK_UID,1,13) = upper(?)"+ // coursesite example EUP1501-12-Y1
+                   " AND   upper(SUBSTRING(gbgot.name,1,?)) = ?"+ // unqass.assignment_nr
                    " AND   GBGOT.removed != 1";
 
 	/* ----------------------------------------------------------------------------------------------------------------- */                     
@@ -177,36 +177,7 @@ public class GradebookSyncStudentSystemWebserviceAzure {
 			
 			
 	/* ----------------------------------------------------------------------------------------------------------------- */
-	// select marks from gradebook
-	private static final String RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2 ="SELECT "+  
-               " (select sakai_user_id_map.eid from sakai_user_id_map where sakai_user_id_map.user_id = GBR.STUDENT_ID) AS STNUMBER, "+
-               " GBR.POINTS_EARNED, GBT.POINTS_POSSIBLE, "+
-               " (GBR.POINTS_EARNED/GBT.POINTS_POSSIBLE*100) AS PERCENTAGE, "+
-               " (select sakai_user_id_map.eid from sakai_user_id_map where sakai_user_id_map.user_id = GBR.GRADER_ID) AS GRADER "+ 
-               " from GB_GRADEBOOK_T GB, "+ /* gradebook_uid, id */
-               " GB_GRADABLE_OBJECT_T GBT,  "+ /* POINTS_POSSIBLE */
-               " GB_GRADE_RECORD_T GBR, "+  /* student_id, points_earned, GRADER_ID */	
-               " sakai_user_id_map ST  "+ /* mapping student number to sakai userid */
-               " where  substr(GB.gradebook_uid,1,13) = '"+moduleSite+"'"+
-               " AND GBT.GRADEBOOK_ID = GB.ID "+
-               " AND GBT.removed <> 1 "+
-               " -- AND substr(GBT.name,1,length("+assignmentNr+")+1) = '1 '"+
-               " AND GBR.GRADABLE_OBJECT_ID = GBT.ID "+
-               " AND GBR.POINTS_EARNED is not null "+
-               " AND (GBR.POINTS_EARNED / GBT.POINTS_POSSIBLE * 100) BETWEEN -1 AND 101 "+
-               " and ST.user_id = GBR.STUDENT_ID ";
 	
-	
-	/* ----------------------------------------------------------------------------------------------------------------- */
-	// select students from student system
-	private static final String RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM = "select fk_student_nr AS STUDENTNR from stuass "+
-               " where stuass.fk_academic_year = "+acadYear+
-               " and stuass.fk_academic_period = 1 "+
-               " and stuass.fk_study_unit_code = '"+module+"' "+
-               " and stuass.fk_semester_period = "+semPeriod+
-               " and stuass.mk_assignment_nr = "+assignmentNr+
-               " and stuass.cancellation_code = 'NC' "+
-               " and nvl(to_char(stuass.date_returned,'YYYYMMDD'),'0') > '20010101'";
 	
 	/* ----------------------------------------------------------------------------------------------------------------- */
 	/** Retrieve all marks from Sakai Gradebook that must be updated to the Student System
@@ -228,8 +199,19 @@ public class GradebookSyncStudentSystemWebserviceAzure {
 		serverUrl.append(ServerConfigurationService.getString("serverUrl"));
 		int syncSuccess = 0;
 		int syncFail = 0;
-		ArrayList studentListAL = new ArrayList();
-      
+                List<String> studentListAL = new ArrayList<String>();
+		String gradebookId = "";
+		
+		StringBuffer dbEnvironment = new StringBuffer();
+        
+        if (serverUrl.toString().equals("https://my.unisa.ac.za")) {
+                dbEnvironment.append("SAKAIPRD");
+        } else if (serverUrl.toString().equals("https://myqa.int.unisa.ac.za")) {
+                dbEnvironment.append("SAKAIQA");
+        } else {
+                dbEnvironment.append("SAKAIDEV");
+        }
+        
 		/* =========== end variables =========== */
     
 		Log log = LogFactory.getLog(this.getClass());
@@ -249,6 +231,17 @@ public class GradebookSyncStudentSystemWebserviceAzure {
                 List recordsGI = jdt2.queryForList(RETRIEVE_GRADEBOOKITEM,
                         new Object[] {moduleSite, assignmentNrLength,tmpAssignmentNr});
         
+                if (recordsGI.size() > 0) {
+                        gradebookItemFound = true;
+                        Iterator recordsGI_it = recordsGI.iterator();
+                        while (recordsGI_it.hasNext()) {
+
+                               ListOrderedMap record_GradebookID = (ListOrderedMap) recordsGI_it.next();
+                               gradebookId = record_GradebookID.get("GRADEBOOKID").toString();
+
+                       } // end while (recordsGI_it.hasNext())
+
+                }
                 if (recordsGI.size() == 0) {
                     gradebookItemFound = false;
                     
@@ -274,36 +267,40 @@ public class GradebookSyncStudentSystemWebserviceAzure {
                             sendEmail(subject.toString(), body.toString(), "magagjs@unisa.ac.za");	//Sifiso Changes:Added:2017/05/10:Gradebook Push
                     }
                         
-                } else {
-                        gradebookItemFound = true;
                 }
 
-				System.out.println(">>>>>>>>>> GradebookItemFound = "+gradebookItemFound);
-
 				if (gradebookItemFound == true) {                
-	                Iterator recordsGI_it = recordsGI.iterator();
+			                Iterator recordsGI_it = recordsGI.iterator();
 	
 					/* ************ if GradebookItem was found Retrieve marks for gradebook assessment ****************/
-					JdbcTemplate jdt4 = new JdbcTemplate(new SakaiDAO().getDataSource());
-					JdbcTemplate jdt3 = new JdbcTemplate(new StudentSystemDAO().getDataSource());
-					
-					
+					JdbcTemplate jdt4 = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+					JdbcTemplate jdt3 = new JdbcTemplate(new SakaiDAO().getDataSource());
+					                                                                
 					try {
-				       
-						       
-						List studentList = jdt3.queryForList(RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM);
+                        					       
+						StringBuffer RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM = new StringBuffer();
+						RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM.append(" SELECT fk_student_nr AS STUDENTNR FROM STUASS ");
+						RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM.append(" where stuass.fk_academic_year = "+acadYear);
+						RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM.append(" and stuass.fk_academic_period = 1 ");
+						RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM.append(" and stuass.fk_study_unit_code = '"+module+"' ");
+						RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM.append(" and stuass.fk_semester_period = "+semPeriod);
+						RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM.append(" and stuass.mk_assignment_nr = "+assignmentNr);
+						RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM.append(" and stuass.cancellation_code = 'NC' ");
+						RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM.append(" and nvl(to_char(stuass.date_returned,'YYYYMMDD'),'0') > '20010101' ");
+						List studentList = jdt4.queryForList(RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM.toString());
 						                        
-						Iterator studentList_it = recordsGrades.iterator();
-						
+						System.out.println("** GRADEBOOKSYNC: RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM "+RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM);
+						Iterator studentList_it = studentList.iterator();
 						/* ************ For each mark retrieved update the student system                         *********/
 						while (studentList_it.hasNext()) {
-							//if (studentListAL.contains(conta1)) {
 							
 							ListOrderedMap record_StudentResult = (ListOrderedMap) studentList_it.next();
 							studentListAL.add(record_StudentResult.get("STUDENTNR").toString());
+
 							
 						} // end while (studentList)
-					} catch (Exception e) { // jdt4.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK,
+                       
+					} catch (Exception e) { // jdt4.queryForList(RETRIEVE_STUDENTWITH_MARKON_STUDENTSYSTEM
 						e.printStackTrace();
 						log.error(e);
 	
@@ -312,31 +309,51 @@ public class GradebookSyncStudentSystemWebserviceAzure {
 						String errorMessage = "GRADEBOOK INTEGRATION ERROR: "+ e.getMessage();
 						sendEmail("GRADEBOOK INTEGRATION ERROR", errorMessage, "syzelle@unisa.ac.za");	
 						sendEmail("GRADEBOOK INTEGRATION ERROR", errorMessage, "magagjs@unisa.ac.za");		  //Sifiso Changes:Added:2017/05/10:Gradebook Push
-					} // jdt3.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK,
-					
-					                                                                
+					} // jdt4.queryForList(RETRIEVE_STUDENTWITH_MARKONtudentsystem
+
 					try {
-				       
+	
+						/* ************ Query to retrieve students from gradebook where marks has not been synced *********/
+						/* 22 Nov Sonette Yzelle: add RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" and unqass.ASSESS_GROUP_GC230 = 'F' "); 
+						 *              to exclude online exams.
+						*/
+						StringBuffer RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2 = new StringBuffer();
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append(" SELECT "); 
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("  (SELECT SAKAI_USER_ID_MAP.EID FROM SAKAI_USER_ID_MAP WHERE SAKAI_USER_ID_MAP.USER_ID = GBR.STUDENT_ID) AS STNUMBER, ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("  GBR.POINTS_EARNED, GBT.POINTS_POSSIBLE, ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("  (GBR.POINTS_EARNED/GBT.POINTS_POSSIBLE*100) AS PERCENTAGE,");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("  (SELECT SAKAI_USER_ID_MAP.EID FROM SAKAI_USER_ID_MAP WHERE SAKAI_USER_ID_MAP.USER_ID = GBR.GRADER_ID) AS GRADER ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("  FROM GB_GRADEBOOK_T GB,");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("  GB_GRADABLE_OBJECT_T GBT,");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("  GB_GRADE_RECORD_T GBR  ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("  WHERE  SUBSTRING(GB.GRADEBOOK_UID,1,13) =  '"+moduleSite+"'");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("  AND GBT.GRADEBOOK_ID = GB.ID ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("  AND GBT.removed <> 1 ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("  AND GBR.GRADABLE_OBJECT_ID = GBT.ID ");
+                                                RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("  AND GBR.GRADABLE_OBJECT_ID = "+gradebookId);
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("  AND GBR.POINTS_EARNED is not null ");
+						RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.append("  AND (GBR.POINTS_EARNED / GBT.POINTS_POSSIBLE * 100) BETWEEN -1 AND 101 ");
+
 						       
-						List recordsGrades = jdt4.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2);
+						List recordsGrades = jdt3.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2.toString());
 						                        
 						Iterator recordsGrades_it = recordsGrades.iterator();
 						
 						/* ************ For each mark retrieved update the student system                         *********/
 						while (recordsGrades_it.hasNext()) {
-							ListOrderedMap record_StudentResult = (ListOrderedMap) recordsGrades_it.next();
+							ListOrderedMap record_GradebookResult = (ListOrderedMap) recordsGrades_it.next();
 							
 							StringBuffer studentNr = new StringBuffer();
 							StringBuffer percentage = new StringBuffer();
 							StringBuffer lecturer = new StringBuffer();
 							StringBuffer studentTmp = new StringBuffer();
 							                                                                                
-							studentNr.append(record_StudentResult.get("STNUMBER").toString());
-							percentage.append(record_StudentResult.get("PERCENTAGE").toString());
-							lecturer.append(record_StudentResult.get("GRADER").toString()); // grader
+							studentNr.append(record_GradebookResult.get("STNUMBER").toString());
+							percentage.append(record_GradebookResult.get("PERCENTAGE").toString());
+							lecturer.append(record_GradebookResult.get("GRADER").toString()); // grader
 							studentTmp.append(studentNr+"#"+percentage+"#"+lecturer);
 							
-							System.out.println(">>>>>>>>>> Gradebook studentNr = "+studentNr);			
+							
 	
 							boolean studentNrIsNumber = true;
 						                                                                        
@@ -346,10 +363,12 @@ public class GradebookSyncStudentSystemWebserviceAzure {
 								studentNrIsNumber = false;
 							}
 							
-							studentNrIsNumber = false;
-
-							if ((studentNrIsNumber == true)&&(studentListAL.contains(studentNr.toString() == false) {
-								boolean syncWasSuccess = updateStudentSystem(module,acadYear,semPeriod,assignmentNr,studentNr.toString(), percentage.toString(), 
+//							if (studentListAL.isEmpty() == false) {
+//                                                        System.out.println("student list ="+studentListAL.contains(studentNr.toString());
+//							if ((studentNrIsNumber == true)&&(studentListAL.contains(studentNr.toString() == false)) {
+					                  if (studentNrIsNumber ==true) {
+								boolean syncWasSuccess = updateStudentSystem(module,acadYear,semPeriod,assignmentNr,studentNr.toString(), 
+										percentage.toString(), 
 										lecturer.toString(), onlineType.toString());
 								if (syncWasSuccess == false) {
 									syncFail++;
@@ -357,12 +376,13 @@ public class GradebookSyncStudentSystemWebserviceAzure {
 									syncSuccess++;
 								}
 							} // end of if (studentNrIsNumber == true)
+//                            				} // end ofif (studentListAL.isEmpty() == false)
 	                                                                        
 						} // end of while (recordsGrades_it.hasNext()) {                                                                        
 						
 						
 						
-					} catch (Exception e) { // jdt4.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK,
+					} catch (Exception e) { // jdt3.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK,
 						e.printStackTrace();
 						log.error(e);
 	
@@ -401,7 +421,7 @@ public class GradebookSyncStudentSystemWebserviceAzure {
 	            bodyFeedback.append("<br>\n number of records synced that failed (not registered): "+syncFail);
 	            sendEmail(subjectFeedback.toString(), bodyFeedback.toString(), "syzelle@unisa.ac.za");	
 	            sendEmail(subjectFeedback.toString(), bodyFeedback.toString(), primaryLecturerEmail);	 	//Sifiso Changes:Added:2017/05/10:Gradebook Push
-			} //     if (gradebookItemFound == true) {
+        	} //     if (gradebookItemFound == true) {
 			                                                                
         } catch (Exception e) {
                 e.printStackTrace();
@@ -423,32 +443,28 @@ public class GradebookSyncStudentSystemWebserviceAzure {
 		boolean markExist = false;
 		StringBuffer assignmentRecordMark = new StringBuffer(); // the mark that exist for the student on the assignment student system
 		StringBuffer assignmentSequence = new StringBuffer();
-		
-
-
 		/* =========== end variables =========== */
-		
-		
+
 		/* ============================================================= */
 		/* Does a STUASS record exist */
 	
 		JdbcTemplate jdt_a = new JdbcTemplate(new StudentSystemDAO().getDataSource());
 		try {
-            List recordsAssignments = jdt_a.queryForList(ASSIGNMENT_RECORD_DETAIL,
+	            List recordsAssignments = jdt_a.queryForList(ASSIGNMENT_RECORD_DETAIL,
                     new Object[] {acadYear,studentNr,module,semPeriod,assignmentNr});
     
-            if (recordsAssignments.size() == 0) {
-                assignmentRecordExist = false;
+	            if (recordsAssignments.size() == 0) {
+       		         assignmentRecordExist = false;
                     
-            } else {
-                assignmentRecordExist = true;
+       		     } else {
+       		         assignmentRecordExist = true;
                 
-                Iterator recordsAssignments_it = recordsAssignments.iterator();
+       		         Iterator recordsAssignments_it = recordsAssignments.iterator();
                 
-                ListOrderedMap record_StudentResult = (ListOrderedMap) recordsAssignments_it.next();
+       		         ListOrderedMap record_StudentResult = (ListOrderedMap) recordsAssignments_it.next();
 						                                                                                
 				assignmentRecordMark.append(record_StudentResult.get("PPERC").toString());
-            }	
+       		     }	
 
 			if (assignmentRecordExist == true) {
 				
@@ -466,7 +482,7 @@ public class GradebookSyncStudentSystemWebserviceAzure {
 
 				} // end of  if (assignmentRecordMark <> gradebookPercentage)
 			} // end of if (assignmentRecordExist == true)
-			
+
 			if (assignmentRecordExist == false) {
 				/* ============================================================= */
 				/* ************ check if STUSUN (student linked to module) record exist for the student */
@@ -481,47 +497,38 @@ public class GradebookSyncStudentSystemWebserviceAzure {
 					/* ************ get assignment sequence number */
 					JdbcTemplate jdt_seq = new JdbcTemplate(new StudentSystemDAO().getDataSource());
 					try {
-			            List recordAssignmentSequence = jdt_seq.queryForList(SELECT_ASSIGNMENT_SEQUENCE_NR,
+				            List recordAssignmentSequence = jdt_seq.queryForList(SELECT_ASSIGNMENT_SEQUENCE_NR,
 			                    new Object[] {acadYear,studentNr,module,semPeriod,assignmentNr});
 			                    
 			                    
-			            Iterator recordAssignmentSequence_it = recordAssignmentSequence.iterator();
-			            if (recordAssignmentSequence.size() == 0) {
-			            	assignmentSequence.append("1");
-			            } else {
-			                ListOrderedMap record_AssignmentSequence = (ListOrderedMap) recordAssignmentSequence_it.next();                         
+				            Iterator recordAssignmentSequence_it = recordAssignmentSequence.iterator();
+				            if (recordAssignmentSequence.size() == 0) {
+				            	assignmentSequence.append("1");
+			        	    } else {
+			                	ListOrderedMap record_AssignmentSequence = (ListOrderedMap) recordAssignmentSequence_it.next();                         
 							assignmentSequence.append(record_AssignmentSequence.get("ASS_SEQUENCE").toString());
-						}
-						
-						
+				        	}
 						
 					} catch (Exception e) { //List recordAssignmentSequence
-			            //e.printStackTrace();
-			            System.out.println("***** SY GRADEBOOK: Does a STUASS record exist error "+e);
-			            //String errorMessage = "GRADEBOOK INTEGRATION ERROR: "+ e.getMessage();
-			            //sendEmail("GRADEBOOK INTEGRATION ERROR Does a STUASS record exist", errorMessage, "magagjs@unisa.ac.za"); 	//UNISA REMOVE
-			           // throw new AxisFault(e.getMessage());
-			        } //List recordAssignmentSequence	
-					
-					
+				            System.out.println("***** SY GRADEBOOK: Does a STUASS record exist error "+e);
+				        } //List recordAssignmentSequence	
+
 					/* ============================================================= */
 					/* ************ insert assignment record */
 					insertAssignment(module,acadYear,semPeriod,assignmentNr,studentNr, gradebookPercentage, assignmentSequence.toString());
 			        
-			        assignmentRecordExist = true;
-			        
-					
-				} else { // end of if (studentModuleRecordFound == true)
+				        assignmentRecordExist = true;
+
+                        	} else { // end of if (studentModuleRecordFound == true)
 					String comment = "GDB Assign returned error -  "+studentNr+" not registered";
 					
 					insertLogStuast(module,acadYear,semPeriod,assignmentNr, studentNr,gradebookPercentage,comment, lecturer);
 					
 					syncWasSuccess = false;
 					return syncWasSuccess;
-				}
-				
-			}  // end of if (assignmentRecordExist == false)
-			
+                                } // end of if (studentModuleRecordFound == true)
+			 } // end of if (assignmentRecordExist == false) 
+
 			if ((assignmentRecordExist == true)&&(markExist == false)) {
 				// assigment record does exist but there is no mark
 				/* ============================================================= */
@@ -537,8 +544,9 @@ public class GradebookSyncStudentSystemWebserviceAzure {
 				StringBuffer log1Comment = new StringBuffer();
 							
 				JdbcTemplate jdt_retrieve = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+
 				try {
-		            List recordsAssignments1 = jdt_retrieve.queryForList(ASSIGNMENT_RECORD_DETAIL,
+			            List recordsAssignments1 = jdt_retrieve.queryForList(ASSIGNMENT_RECORD_DETAIL,
 		                    new Object[] {acadYear,studentNr,module,semPeriod,assignmentNr});
 					
 					Iterator recordsAssignments1_it = recordsAssignments1.iterator();
@@ -554,60 +562,20 @@ public class GradebookSyncStudentSystemWebserviceAzure {
 						
 					} // end of while (recordsAssignments1_it.hasNext())
 				} catch (Exception e) { //List recordsAssignments
-		            //e.printStackTrace();
-		            System.out.println("***** SY GRADEBOOK: Does a STUASS record exist error "+e);
-		            //String errorMessage = "GRADEBOOK INTEGRATION ERROR: "+ e.getMessage();
-		            //sendEmail("GRADEBOOK INTEGRATION ERROR Does a STUASS record exist", errorMessage, "magagjs@unisa.ac.za"); 	//UNISA REMOVE
-		           // throw new AxisFault(e.getMessage());
-		        } //List recordsAssignments1	
+			            System.out.println("***** SY GRADEBOOK: Does a STUASS record exist error "+e);
+			        } //List recordsAssignments1	
 
-				/* ============================================================= */
-				/* ************ Insert SXPLOG (LOG 1) */
 
-				log1Comment.append("FGBK myUnisa MarkL 000->");
-				log1Comment.append(tmpPperc.toString());
-				log1Comment.append(" Ccode: -> MC RecD: 00000000->");
-				log1Comment.append(tmpDateIn.toString());
-				log1Comment.append("RetD: 00000000-> ");
-				log1Comment.append(tmpDateOut.toString());
-				log1Comment.append(" SolF:->");
-				log1Comment.append(onlineType.substring(0,1));
-				log1Comment.append(" SqNr:>");
-				log1Comment.append(tmpAssignmentSequence.toString());
-				
-				insertSXPLOG(acadYear,semPeriod, module, assignmentNr, studentNr, log1Comment.toString(), lecturer);
-				
-				/* ============================================================= */
-				/* ************ Create assignment Log files */
-				StringBuffer processGC139 = new StringBuffer();
-				StringBuffer fromProgram = new StringBuffer();
-				StringBuffer statusGC140 = new StringBuffer();
-				StringBuffer subStatusGC140 = new StringBuffer();
-				StringBuffer logMessage = new StringBuffer();
-				
-				processGC139.append("GDB"); // gradebook
-				fromProgram.append("MYUNISA");
-				statusGC140.append("RETURN");
-				subStatusGC140.append("4");
-				logMessage.append("GDB Assign returned to student");
-				createAssignmentLogFiles(acadYear, semPeriod, studentNr, module, assignmentNr, gradebookPercentage, lecturer, 
-					processGC139.toString(), fromProgram.toString(), statusGC140.toString(), subStatusGC140.toString(), logMessage.toString());
-					syncWasSuccess = true;
-
-			} else {
+				syncWasSuccess = true;
+			} else { //end of if ((assignmentRecordExist == true)&&(markExist == false))
 				System.out.println("SY GRADEBOOK student: "+studentNr+" - "+gradebookPercentage+" DONT updateAssignment");
-			}
-			
-			
-			
+			} //end of if ((assignmentRecordExist == true)&&(markExist == false))
+
 		} catch (Exception e) { //List recordsAssignments
-            //e.printStackTrace();
-            System.out.println("***** SY GRADEBOOK: Does a STUASS record exist error "+e);
-            //String errorMessage = "GRADEBOOK INTEGRATION ERROR: "+ e.getMessage();
-            //sendEmail("GRADEBOOK INTEGRATION ERROR Does a STUASS record exist", errorMessage, "magagjs@unisa.ac.za"); 	//UNISA REMOVE
-           // throw new AxisFault(e.getMessage());
-        } //List recordsAssignments				
+	            System.out.println("***** SY GRADEBOOK: Does a STUASS record exist error "+e);
+        	} //List recordsAssignments				
 	
+		
 		return syncWasSuccess;
 	} // end of updateStudentSystem
 
