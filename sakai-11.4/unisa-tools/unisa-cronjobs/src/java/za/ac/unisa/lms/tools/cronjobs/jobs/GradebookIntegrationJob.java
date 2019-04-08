@@ -71,7 +71,7 @@ A crontab file has five fields for specifying day , date and time  followed by t
 		
 		//url = "http://localhost:8082";
 		url = serverUrl;
-		url = url+"/unisa-axis/GradebookSyncStudentSystemWebService.jws";
+		url = url+"/sakai-axis/GradebookSyncStudentSystemWebService.jws";
 		//FreedomToasterWebService_PortType events = null;
 		GradebookSyncStudentSystemWebService_PortType events = null;
 		
