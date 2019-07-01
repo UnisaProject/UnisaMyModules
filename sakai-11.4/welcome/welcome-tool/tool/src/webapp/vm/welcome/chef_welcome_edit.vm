@@ -1,0 +1,38 @@
+##<!-- $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_memory.vm,v 1.2 2005/04/27 16:43:52 gsilver.umich.edu Exp $ -->
+<div class="portletBody">
+
+#if($maintainUser)
+#if($menu)
+	#toolbar($menu)
+#end
+#end
+	<form action="#toolForm("$action")" method="post">
+    <h3>
+	$tlang.getString("welcome.editcontent")
+	</h3>
+	
+	#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("welcome.alert.message", $alertMessage)</div>#end
+	<div class="instruction">
+	$tlang.getString("welcome.editconent.intruction")
+	</div>
+
+    <h3>
+	$tlang.getString("welcome.subheadingedit")
+	</h3>
+
+<div>
+  <textarea name="content" id="contenttext" rows="30" wrap="virtual" cols="80"> $welcomeContent</textarea>
+	</div>	
+	
+		<p class="act">
+			<input type="submit" class="active" name="eventSubmit_doSubmit" value=" $tlang.getString("welcome.submit") " />
+			<input type="submit" class="active" name="eventSubmit_doCancel" value=" $tlang.getString("welcome.cancel") " />
+			<input type="submit" name="eventSubmit_doRevert" value=" $tlang.getString("welcome.revert") " />
+		</p>
+		<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+	</form>	
+	
+	
+	
+	</div>
+	
