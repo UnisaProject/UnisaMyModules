@@ -1298,6 +1298,15 @@
         <version>${sakai.version}</version>
         <scope>provided</scope>
       </dependency>
+	  <!-- unisa change: add template dependency -->
+	   <dependency>
+        <groupId>org.sakaiproject.template</groupId>
+        <artifactId>sakai-template-api</artifactId>
+        <version>${sakai.version}</version>
+        <scope>provided</scope>
+      </dependency>
+	  <!-- End of unisa change: add template dependency -->
+	  
       <dependency>
         <groupId>org.sakaiproject.emailtemplateservice</groupId>
         <artifactId>emailtemplateservice-api</artifactId>
@@ -1684,7 +1693,7 @@
 			<groupId>org.etudes</groupId> 
 			<artifactId>etudes-melete-api</artifactId> 
 			<version>${melete.version}</version> 
-			<scope>provided</scope> 
+			<scope>provided</scope> 	
 		</dependency> 
 	
 		<!-- END unisa-changes MELETE -->
