@@ -1305,6 +1305,19 @@
         <version>${sakai.version}</version>
         <scope>provided</scope>
       </dependency>
+	  
+	  <dependency>
+        <groupId>org.sakaiproject.template</groupId>
+        <artifactId>sakai-template-util</artifactId>
+        <version>${sakai.version}</version>
+      </dependency>
+      
+       <dependency>
+        <groupId>org.sakaiproject.welcome</groupId>
+        <artifactId>sakai-welcome-api</artifactId>
+        <version>${sakai.version}</version>
+        <scope>provided</scope>
+      </dependency>
 	  <!-- End of unisa change: add template dependency -->
 	  
       <dependency>
