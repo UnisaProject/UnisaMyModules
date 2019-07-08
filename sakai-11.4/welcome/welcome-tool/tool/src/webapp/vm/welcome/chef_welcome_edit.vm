@@ -20,10 +20,13 @@
 	$tlang.getString("welcome.subheadingedit")
 	</h3>
 
-<div>
-  <textarea name="content" id="contenttext" rows="30" wrap="virtual" cols="80"> $welcomeContent</textarea>
-	</div>	
-	
+	<table border="0">
+				<tr><td>				
+						<textarea name="content" id="contenttext" rows="30" cols="80" wrap="virtual">$validator.escapeHtmlTextarea("$welcomeContent")</textarea>
+						#chef_setupformattedtextarea("contenttext")
+				</td> </tr>
+	 </table>
+
 		<p class="act">
 			<input type="submit" class="active" name="eventSubmit_doSubmit" value=" $tlang.getString("welcome.submit") " />
 			<input type="submit" class="active" name="eventSubmit_doCancel" value=" $tlang.getString("welcome.cancel") " />
@@ -31,8 +34,7 @@
 		</p>
 		<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
 	</form>	
-	
-	
-	
 	</div>
+	
+	
 	
