@@ -119,8 +119,7 @@ public class WelcomeAction extends VelocityPortletPaneledAction {
 	}
 
 	public void editContent(RunData data, Context context) {
-		// name the html form for alias edit fields
-		// context.put("form-name", "welcome-form");
+
 		String peid = ((JetspeedRunData) data).getJs_peid();
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
 		state.setAttribute(STATE_DISPLAY_MODE, MODE_EDIT);
@@ -131,8 +130,7 @@ public class WelcomeAction extends VelocityPortletPaneledAction {
 		siteId = ToolManager.getCurrentPlacement().getContext();
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
 		String content = data.getParameters().getString("content");
-		//String id = data.getParameters().getString("id");
-				
+		
 		int charcount = checkWelcomeContent(content);
 		if (charcount > 0) {
 			insertContent = WelcomeService.saveWelcomeContent(siteId, content);
@@ -144,7 +142,7 @@ public class WelcomeAction extends VelocityPortletPaneledAction {
 		}
 		if(insertContent==null) {
 			addAlert(state, rb.getString("welcome.alert.insertfail"));
-    
+			M_log.error(this + " Welcome message save: failed for the site  " + siteId);
 			state.setAttribute(STATE_DISPLAY_MODE, MODE_EDIT);
 			return;
 		}
@@ -164,10 +162,8 @@ public class WelcomeAction extends VelocityPortletPaneledAction {
 		state.setAttribute(STATE_DISPLAY_MODE, null);
 	}
 
-	public static final String getSiteReference(String siteId) throws IdUnusedException {
-	    //returns /site/site_id
-		return SiteService.getSite(siteId).getReference();
-
+	public static final String getSiteReference(String siteId) throws IdUnusedException {	   
+		return SiteService.getSite(siteId).getReference(); //returns /site/site_id
 	}
 	
 	public int checkWelcomeContent(String welcomeContent) {
@@ -175,9 +171,9 @@ public class WelcomeAction extends VelocityPortletPaneledAction {
 	String regex = "<[^>]*>";
 	Pattern p2 = Pattern.compile(regex);
 	Matcher m2 = p2.matcher(welcomeContent);
-	M_log.info(this + " String before sub :*" + welcomeContent + "*");
+	//M_log.info(this + " String before sub :*" + welcomeContent + "*");
 	welcomeContent = m2.replaceAll("");
-	M_log.info(this + " String after sub :*" + welcomeContent + "*");
+	//M_log.info(this + " String after sub :*" + welcomeContent + "*");
 	regex = "([A-Za-z])";
 	Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 	Matcher m = p.matcher(welcomeContent);
