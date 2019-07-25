@@ -71,79 +71,60 @@ public class DbFaqsService extends BaseFaqsService {
 
 	protected class DbStorage implements Storage {
 
+ 
 
-
-	/*	public List getFaqCategories(String siteId) {
-
-			// send in the siteId
-			Object[] fields = new Object[1];
-			fields[0] = siteId;
-
-			String statement = "select SITE_ID, Category_ID, Description, Modified_On from FAQ_CATEGORY "
-					+ "where SITE_ID = ? order by Modified_On desc";
-			List<String> categories = m_sqlService.dbRead(statement, fields, null);
-
-			return categories;
-
-		}*/
-		
 		public List getFaqCategories(String siteId) {
-		    List results=new ArrayList();
-			Connection dbConnection = null;		
+			List results = new ArrayList();
+			Connection dbConnection = null;
 			ResultSet rs = null;
 			try {
-				dbConnection= 	m_sqlService.borrowConnection();
-				
+				dbConnection = m_sqlService.borrowConnection();
+
 				String statement = "select SITE_ID, Category_ID, Description, Modified_On from FAQ_CATEGORY "
 						+ "where SITE_ID = ? order by Modified_On desc";
 				PreparedStatement pstmt = dbConnection.prepareStatement(statement);
 				pstmt.setString(1, siteId);
 				rs = pstmt.executeQuery();
+				pstmt.close();
 				if (rs != null) {
-					while (rs.next())
-					{
-					FaqCategory faqCategory = new FaqCategory();
-					faqCategory.setSiteId(rs.getString("SITE_ID"));
-					faqCategory.setCategoryId(new Integer(rs.getInt("Category_ID")));
-					faqCategory.setDescription(rs.getString("Description"));
-					faqCategory.setModifiedOn(rs.getTimestamp("Modified_On"));
-					faqCategory.setRemove(false);
-					faqCategory.setExpanded(false);
-					
-					//List contents = getFaqContents(new Integer(rs.getInt("Category_ID")));
-					
-					results.add(faqCategory);
+					while (rs.next()) {
+						FaqCategory faqCategory = new FaqCategory();
+						faqCategory.setSiteId(rs.getString("SITE_ID"));
+						faqCategory.setCategoryId(new Integer(rs.getInt("Category_ID")));
+						faqCategory.setDescription(rs.getString("Description"));
+						faqCategory.setModifiedOn(rs.getTimestamp("Modified_On"));
+						faqCategory.setRemove(false);
+						faqCategory.setExpanded(false);
+						results.add(faqCategory);
 					}
 				}
-				
+
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				M_log.error(this+" Error on getFaqCategories for the site "+siteId+" error is "+e.getMessage());
 				e.printStackTrace();
-			}finally {
+			} finally {
 				m_sqlService.returnConnection(dbConnection);
 			}
-			return results;			
+			return results;
 
 		}
 
-	
-		
 		public List getFaqContents(Integer categoryId) {
 
-			List results=new ArrayList();
-			Connection dbConnection = null;		
+			List results = new ArrayList();
+			Connection dbConnection = null;
 			ResultSet rs = null;
 			try {
-				dbConnection= 	m_sqlService.borrowConnection();
-				
+				dbConnection = m_sqlService.borrowConnection();
+
 				String statement = "select * from FAQ_CONTENT where Category_Id = ? order by Question";
 				PreparedStatement pstmt = dbConnection.prepareStatement(statement);
 				pstmt.setInt(1, categoryId);
 				rs = pstmt.executeQuery();
+
 				if (rs != null) {
-					while (rs.next())
-					{
-						FaqContent faqContent = new FaqContent();						
+					while (rs.next()) {
+						FaqContent faqContent = new FaqContent();
 						faqContent.setContentId(new Integer(rs.getInt("Content_ID")));
 						faqContent.setCategoryId(new Integer(rs.getInt("Category_ID")));
 						faqContent.setQuestion(rs.getString("Question"));
@@ -152,24 +133,35 @@ public class DbFaqsService extends BaseFaqsService {
 						results.add(faqContent);
 					}
 				}
+				pstmt.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				M_log.error(this+" Error on getFaqContents for the FAQ categoryId "+categoryId+" error is "+e.getMessage());
 				e.printStackTrace();
-			}finally {
+			} finally {
 				m_sqlService.returnConnection(dbConnection);
 			}
-		
+
 			return results;
 		}
 
-
-
-		@Override
-		public FaqCategory getFaqCategories1(String siteId) {
-			// TODO Auto-generated method stub
-			return null;
-		}	
-		
+		public void insertFaqCategory(String siteId, String categoryDesc) {
+			Connection dbConnection = null;
+			ResultSet rs = null;
+			try {
+				dbConnection = m_sqlService.borrowConnection();
+				String statement = "insert into FAQ_CATEGORY (Category_ID,SITE_ID,Description,Modified_On) values (NULL,?, ?, sysdate())";
+				PreparedStatement pstmt = dbConnection.prepareStatement(statement);
+				pstmt.setString(1, siteId);
+				pstmt.setString(2, categoryDesc);
+				pstmt.executeUpdate();
+				pstmt.close();
+			} catch (SQLException e) {
+				M_log.error(this+" Error on insertFaqCategory for the FAQ siteId "+siteId+" categoryDesc "+categoryDesc+ " and error "+e.getMessage());
+				e.printStackTrace();
+			} finally {
+				m_sqlService.returnConnection(dbConnection);
+			}
+		}
 
 	}
 

@@ -6,7 +6,7 @@
 
  <form name="listForm" action="#toolForm("FaqsToolAction")" method="post">
 <div class="instruction">
- $tlang.getString("faq.required") <span class="reqStar">*</span>
+ $tlang.getString("faq.required")
 </div>
 <div>
 <p class="shorttext">

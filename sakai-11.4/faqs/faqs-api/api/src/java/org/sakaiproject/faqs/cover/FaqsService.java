@@ -65,13 +65,6 @@ private static org.sakaiproject.faqs.api.FaqsService m_instance = null;
 
 		return service.getFaqCategories(siteId);
 	}
-	public static FaqCategory getFaqCategories1(String siteId) {
-		org.sakaiproject.faqs.api.FaqsService service = getInstance();
-		if (service == null)
-			return null;
-
-		return service.getFaqCategories1(siteId);
-	}
 
 	public static List getFaqContents(Integer categoryId) {
 		org.sakaiproject.faqs.api.FaqsService service = getInstance();
@@ -79,5 +72,10 @@ private static org.sakaiproject.faqs.api.FaqsService m_instance = null;
 			return null;
 
 		return service.getFaqContents(categoryId);
+	}
+	
+	public static void insertFaqCategory(String siteId, String categoryDesc) {
+		org.sakaiproject.faqs.api.FaqsService service = getInstance();
+		 service.insertFaqCategory(siteId, categoryDesc);
 	}
 }
