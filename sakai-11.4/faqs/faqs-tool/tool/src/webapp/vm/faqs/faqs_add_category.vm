@@ -1,0 +1,28 @@
+## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
+<div class="portletBody">
+#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("faq.alert.nocategorydesc", $alertMessage)</div>#end
+<h3>$tlang.getString("faq.category.create")	</h3>
+	
+<form action="#toolForm("$action")" method="post">
+<div class="instruction">
+ $tlang.getString("faq.required")
+</div>
+
+<p class="shorttext">
+	<label for="addCategory">$tlang.getString("faq.field.category")</label> <span class="reqStar">*</span>	
+	<input type="text" id="categoryDesc" name="categoryDesc" size="50" maxlength="150">
+</p>
+	
+<p class="shorttext">
+<label>$tlang.getString("faq.field.datefield")</label> 	
+<label>$systemDate</label> 
+</p>
+
+	<p class="act">
+			<input type="submit" class="active" name="eventSubmit_saveCategory" value=" $tlang.getString("button.save") " />
+			<input type="submit" class="active" name="eventSubmit_doCancel" value=" $tlang.getString("button.cancel") " />
+		</p>
+		<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+
+</form>		
+</div>

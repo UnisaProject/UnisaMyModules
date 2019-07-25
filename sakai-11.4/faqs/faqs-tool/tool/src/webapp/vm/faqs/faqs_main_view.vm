@@ -1,0 +1,81 @@
+## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
+<div class="port letBody">
+
+#if($addFaqContent)
+#if($menu)
+	#toolbar($menu)
+#end
+#end
+
+#if ($userType == "Instructor")
+ <h3>
+ $tlang.getString("faq.faqview.heading") $siteTitle
+</h3>
+#end
+
+#if ($userType == "")
+ <h3>
+ $tlang.getString("faq.faqstudentview.heading") $siteTitle
+</h3>
+#end
+
+<div class="instruction">
+ $tlang.getString("faq.faqview.instruction") $siteTitle
+</div>
+
+<form name="listForm" action="#toolForm("FaqsToolAction")" method="post">
+ <table class ="listHier lines nolines" cellspacing="0" summary="$tlang.getString('gen.tablecaptionsite')">
+			<tr>
+				<th id="Id">$tlang.getString("faq.viewfaq.heading")</th>
+				<th id="Count">$tlang.getString("faq.viewfaq1.heading")</th>				
+				#if(($deleteFaqCategory == true) || ($deleteFaqContent == true && $faqExist == true))	
+				<th id="Count">$tlang.getString("faq.viewfaq2.heading")</th>
+				#end				
+			</tr>
+
+   #foreach ($category in $categories)
+      <tr>	
+		<td>		
+		#if ($category.expanded == 'false')
+		<a href="#toolLinkParam("FaqsToolAction" "expandCategory" "itemReference=$category.categoryId")">  $category.description</a>
+		#end
+
+	     #if ($category.expanded == 'true')
+	     <a href="#toolLinkParam("FaqsToolAction" "collapseCategory" "itemReference=$category.categoryId")">  $category.description</a>
+			#end
+	       </td>
+	       
+	       <td> $category.modifiedOn 
+	       <td> 
+	       #if($deleteFaqCategory == 'true') 
+	       <input  type="checkbox" id="remove_cat" name="remove" value="$category.categoryId" />
+	       #end
+		</td>
+	</tr>
+	
+	#if ($category.expanded == 'true')
+	#foreach ($content in $contents)
+	<tr>
+	  <td>&nbsp;&nbsp;
+	   <a href="#toolLinkParam("FaqsToolAction" "edit" "itemReference=$content.contentId")">  $content.question</a>	
+	</td>
+	<td>
+	$content.modifiedOn 
+	</td>
+	 #if($content.deleteFAQContent == 'true') 
+	 	<td>
+	 	 <input  type="checkbox" id="remove_content" name="remove" value="$content.categoryId" />
+	 	</td>
+    #end
+	
+	</tr>
+	#end
+	#end
+	
+   #end
+					
+</table>
+
+</form>
+													
+</div>
