@@ -37,11 +37,15 @@
       <tr>	
 		<td>		
 		#if ($category.expanded == 'false')
-		<a href="#toolLinkParam("FaqsToolAction" "expandCategory" "itemReference=$category.categoryId")">  $category.description</a>
+		<a href="#toolLinkParam("FaqsToolAction" "expandCategory" "itemReference=$category.categoryId")"> <img src="/library/image/sakai/expand.gif"/>  $category.description</a>
 		#end
 
 	     #if ($category.expanded == 'true')
-	     <a href="#toolLinkParam("FaqsToolAction" "collapseCategory" "itemReference=$category.categoryId")">  $category.description</a>
+	     <a href="#toolLinkParam("FaqsToolAction" "collapseCategory" "itemReference=$category.categoryId")"> <img src="/library/image/sakai/collapse.gif"/>  $category.description</a>
+			#end
+			
+			#if($editFaqCategory)
+			 <a href="#toolLinkParam("FaqsToolAction" "editcategory" "itemReference=$category.categoryId")"> $tlang.getString("faq.view") </a>
 			#end
 	       </td>
 	       
@@ -58,6 +62,9 @@
 	<tr>
 	  <td>&nbsp;&nbsp;
 	   <a href="#toolLinkParam("FaqsToolAction" "edit" "itemReference=$content.contentId")">  $content.question</a>	
+	   #if($editFaqContent)
+			 <a href="#toolLinkParam("FaqsToolAction" "editFaqContent" "itemReference=$content.contentId")"> $tlang.getString("faq.view") </a>
+			#end
 	</td>
 	<td>
 	$content.modifiedOn 
