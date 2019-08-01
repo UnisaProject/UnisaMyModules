@@ -21,7 +21,7 @@
 </div>
 
 	   <p class="act">
-			<input type="submit" class="active" name="eventSubmit_saveCategory" value=" $tlang.getString("button.save")"  accesskey="s"/>
+			<input type="submit" class="active" name="eventSubmit_updateEditedCategory" value=" $tlang.getString("button.save")"  accesskey="s"/>
 			<input type="submit" name="eventSubmit_doCancel" value=" $tlang.getString("button.cancel") " accesskey="x"  />
 		</p>
 	

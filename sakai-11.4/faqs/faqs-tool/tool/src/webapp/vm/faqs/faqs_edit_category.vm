@@ -10,10 +10,14 @@
 </div>
 <div>
 <p class="shorttext">
+	 #foreach ($category in $categoryList)
 	<label for="addCategory">$tlang.getString("faq.field.category")</label> <span class="reqStar">*</span>	
-	<input type="text" id="categoryDesc" name="categoryDesc" value = "$category.description" size="50" maxlength="100">
-</p>
+	<input type="text" id="categoryDesc" name="categoryDesc" value = "$category.Description" size="50" maxlength="100">
+	<input type="hidden" id="categoryId" name="categoryId" value="$category.categoryId" />
+	#end
+	</p>
 	
+
 <p class="shorttext">
 <label>$tlang.getString("faq.field.datefield")</label> 	
 <label>$systemDate</label> 

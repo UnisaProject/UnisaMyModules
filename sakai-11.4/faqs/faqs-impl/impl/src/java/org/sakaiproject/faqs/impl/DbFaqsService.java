@@ -177,6 +177,41 @@ public class DbFaqsService extends BaseFaqsService {
 
 			return results;
 		}
+		
+		public List getFaqContent(int contentId) {
+
+			List results = new ArrayList();
+			Connection dbConnection = null;
+			ResultSet rs = null;
+			try {
+				dbConnection = m_sqlService.borrowConnection();
+
+				String statement = "select * from FAQ_CONTENT where Content_ID = ?";
+				PreparedStatement pstmt = dbConnection.prepareStatement(statement);
+				pstmt.setInt(1, contentId);
+				rs = pstmt.executeQuery();
+
+				if (rs != null) {
+					while (rs.next()) {
+						FaqContent faqContent = new FaqContent();
+						faqContent.setContentId(new Integer(rs.getInt("Content_ID")));
+						faqContent.setCategoryId(new Integer(rs.getInt("Category_ID")));
+						faqContent.setQuestion(rs.getString("Question"));
+						faqContent.setAnswer(rs.getString("Answer"));
+						faqContent.setModifiedOn(rs.getTimestamp("Modified_On"));
+						results.add(faqContent);
+					}
+				}
+				pstmt.close();
+			} catch (SQLException e) {
+				M_log.error(this+" Error on getFaqContent for the FAQ content_id "+contentId+" error is "+e.getMessage());
+				e.printStackTrace();
+			} finally {
+				m_sqlService.returnConnection(dbConnection);
+			}
+
+			return results;
+		}
 
 		public void insertFaqCategory(String siteId, String categoryDesc) {
 			Connection dbConnection = null;
@@ -196,6 +231,28 @@ public class DbFaqsService extends BaseFaqsService {
 				m_sqlService.returnConnection(dbConnection);
 			}
 		}
+		
+		
+	
+		public void updateFaqCategory(String categoryDesc, int categoryId) {
+				Connection dbConnection = null;
+				ResultSet rs = null;
+				try {
+					dbConnection = m_sqlService.borrowConnection();
+					String statement = "update FAQ_CATEGORY set Description = ?, Modified_On = sysdate() where Category_Id = ? ";
+
+					PreparedStatement pstmt = dbConnection.prepareStatement(statement);
+					pstmt.setString(1, categoryDesc);
+					pstmt.setInt(2, categoryId);
+					pstmt.executeUpdate();
+					pstmt.close();
+				} catch (SQLException e) {
+					M_log.error(this+" Error on updateFaqCategory for the FAQ categoryDesc "+categoryDesc+" categoryId "+categoryId+ " and error "+e.getMessage());
+					e.printStackTrace();
+				} finally {
+					m_sqlService.returnConnection(dbConnection);
+				}
+			}
 
 	}
 

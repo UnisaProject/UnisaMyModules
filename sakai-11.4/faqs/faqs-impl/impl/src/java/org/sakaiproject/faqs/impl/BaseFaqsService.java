@@ -125,6 +125,7 @@ public abstract class BaseFaqsService implements FaqsService {
 
 	} 
 	
+
 	public List getFaqContents(Integer categoryId)
 	{
 		
@@ -134,9 +135,22 @@ public abstract class BaseFaqsService implements FaqsService {
 
 	} 
 	
+	public  List getFaqContent(int contentId) {
+		
+		List faqContent = m_storage.getFaqContent(contentId);
+
+		return faqContent;
+	}
+	
+	
 	public void insertFaqCategory(String siteId, String categoryDesc)
 	{
 		 m_storage.insertFaqCategory(siteId,categoryDesc);
+	}
+	
+	public  void updateFaqCategory(String categoryDesc, int categoryId) {
+		
+		m_storage.updateFaqCategory(categoryDesc, categoryId);
 	}
 
 	/**********************************************************************************************************************************************************************************************************************************************************
@@ -171,11 +185,13 @@ public abstract class BaseFaqsService implements FaqsService {
 	 *********************************************************************************************************************************************************************************************************************************************************/
 
 	protected interface Storage {
+		
 		List getFaqCategories(String siteId);
 		List getFaqContents(Integer categoryId);
 		void insertFaqCategory(String siteId, String categoryDesc);
 		List getFaqCategory(int categoryId);
-		
+		List getFaqContent(int contentId);
+	    void updateFaqCategory(String categoryDesc, int categoryId);
 	}
 
 }
