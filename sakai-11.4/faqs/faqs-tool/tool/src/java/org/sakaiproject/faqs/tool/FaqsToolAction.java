@@ -44,6 +44,7 @@ import org.sakaiproject.cheftool.menu.MenuDivider;
 import org.sakaiproject.cheftool.menu.MenuEntry;
 import org.sakaiproject.cheftool.menu.MenuImpl;
 import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.event.api.SessionState;
 import org.sakaiproject.event.api.UsageSession;
 import org.sakaiproject.event.cover.UsageSessionService;
@@ -89,15 +90,16 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 	private boolean deleteFaqCategory;
 	protected static final String expandedCatogories = "";
 	protected static final String STATE_DISPLAY_MODE = "display_mode";
+	private EventTrackingService eventTrackingService = null;
 
 	/**
 	 * Populate the state object, if needed.
 	 */
-	protected void initState(SessionState state, VelocityPortlet portlet, JetspeedRunData rundata) {
+	/*protected void initState(SessionState state, VelocityPortlet portlet, JetspeedRunData rundata) {
 
 	}
-
-	@SuppressWarnings({ "unchecked", "deprecation" })
+*/
+	@SuppressWarnings("deprecation")
 	public String buildMainPanelContext(VelocityPortlet portlet, Context context, RunData rundata, SessionState state) {
 		context.put("tlang", rb);
 		context.put(Menu.CONTEXT_ACTION, state.getAttribute(STATE_ACTION));
@@ -119,6 +121,10 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		if ("ADD_CATEGORY".equals(state.getAttribute(STATE_DISPLAY_MODE))) {
 			context.put("systemDate", new Timestamp(new Date().getTime()));
 			return template + "_add_category";
+		}
+		if ("ADD_FAQ".equals(state.getAttribute(STATE_DISPLAY_MODE))) {
+			context.put("systemDate", new Timestamp(new Date().getTime()));
+			return template + "_add_faq";
 		}
 
 		context.put("addFaqContent", SecurityService.unlock("faqs.add", siteReference));
@@ -258,15 +264,28 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
 	}
 	
+	public void doCancel(RunData data, Context context) {
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
+		state.setAttribute(STATE_DISPLAY_MODE, null);
+	}
+	
 	public void saveCategory(RunData data, Context context) { 
 		String peid = ((JetspeedRunData) data).getJs_peid();
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
 		state.setAttribute(STATE_DISPLAY_MODE, null);
        String categoryDesc = data.getParameters().getString("categoryDesc");
-       System.out.println("in descscsc");
+     
        if(categoryDesc.length()==0) {
 		addAlert(state, rb.getString("faq.alert.nocategorydesc"));
-		
+		state.setAttribute(STATE_DISPLAY_MODE, "ADD_CATEGORY");		
        }
+       //save category to db
+       FaqsService.insertFaqCategory(ToolManager.getCurrentPlacement().getContext(), categoryDesc);
+       
+       if (eventTrackingService == null)
+		{
+			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
+		}
+       eventTrackingService.post(eventTrackingService.newEvent("faqs.categoryadd",ToolManager.getCurrentPlacement().getContext(), false));
 	}
 }

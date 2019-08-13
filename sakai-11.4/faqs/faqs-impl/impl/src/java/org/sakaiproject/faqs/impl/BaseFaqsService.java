@@ -116,14 +116,6 @@ public abstract class BaseFaqsService implements FaqsService {
 
 	} 
 	
-	public FaqCategory getFaqCategories1(String siteId)
-	{
-		
-		FaqCategory categories = m_storage.getFaqCategories1(siteId);
-
-		return categories;
-
-	} 
 	
 	public List getFaqContents(Integer categoryId)
 	{
@@ -133,6 +125,11 @@ public abstract class BaseFaqsService implements FaqsService {
 		return content;
 
 	} 
+	
+	public void insertFaqCategory(String siteId, String categoryDesc)
+	{
+		 m_storage.insertFaqCategory(siteId,categoryDesc);
+	}
 
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Init and Destroy
@@ -168,8 +165,7 @@ public abstract class BaseFaqsService implements FaqsService {
 	protected interface Storage {
 		List getFaqCategories(String siteId);
 		List getFaqContents(Integer categoryId);
-		FaqCategory getFaqCategories1(String siteId);
-		
+		void insertFaqCategory(String siteId, String categoryDesc);
 		
 	}
 
