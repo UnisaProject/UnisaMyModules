@@ -253,6 +253,28 @@ public class DbFaqsService extends BaseFaqsService {
 					m_sqlService.returnConnection(dbConnection);
 				}
 			}
+		
+		public void updateFaqContent(FaqContent faqContent) {
+			Connection dbConnection = null;
+			ResultSet rs = null;
+			try {
+				dbConnection = m_sqlService.borrowConnection();
+				String statement = "update FAQ_CONTENT set Question = ?, Answer = ?, Category_Id = ?, Modified_On = sysdate() where Content_Id = ? ";
+
+				PreparedStatement pstmt = dbConnection.prepareStatement(statement);
+				pstmt.setString(1, faqContent.getQuestion());
+				pstmt.setString(2, faqContent.getAnswer());
+				pstmt.setInt(3, faqContent.getCategoryId());
+				pstmt.setInt(4, faqContent.getContentId());
+				pstmt.executeUpdate();
+				pstmt.close();
+			} catch (SQLException e) {
+				M_log.error(this+" Error on updateFaqContent for the FAQ Content_Id "+faqContent.getContentId()+" categoryId "+faqContent.getCategoryId()+ " and error "+e.getMessage());
+				e.printStackTrace();
+			} finally {
+				m_sqlService.returnConnection(dbConnection);
+			}
+		}
 
 	}
 
