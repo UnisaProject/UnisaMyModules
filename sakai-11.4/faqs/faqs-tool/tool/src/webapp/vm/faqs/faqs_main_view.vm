@@ -61,9 +61,11 @@
 	#foreach ($content in $contents)
 	<tr>
 	  <td>&nbsp;&nbsp;
-	   <a href="#toolLinkParam("FaqsToolAction" "edit" "itemReference=$content.contentId")">  $content.question</a>	
+	   <a href="#toolLinkParam("FaqsToolAction" "editFaq" "itemReference=$content.contentId")">  $content.question</a>	
 	   #if($editFaqContent)
-			 <a href="#toolLinkParam("FaqsToolAction" "editFaqContent" "itemReference=$content.contentId")"> $tlang.getString("faq.view") </a>
+	   #set($concat ="-")
+	   #set( $ref = "$content.contentId$concat$content.categoryId")
+			 <a href="#toolLinkParam("FaqsToolAction" "editFaqContent" "itemReference=$ref")"> $tlang.getString("faq.view") </a>
 			#end
 	</td>
 	<td>

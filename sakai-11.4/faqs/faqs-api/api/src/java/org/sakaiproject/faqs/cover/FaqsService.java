@@ -71,6 +71,15 @@ public class FaqsService {
 
 		return service.getFaqCategory(categoryId);
 	}
+	
+	
+	public static List getFaqContent(int contentId) {
+		org.sakaiproject.faqs.api.FaqsService service = getInstance();
+		if (service == null)
+			return null;
+
+		return service.getFaqContent(contentId);
+	}
 
 	public static List getFaqContents(Integer categoryId) {
 		org.sakaiproject.faqs.api.FaqsService service = getInstance();
@@ -84,4 +93,10 @@ public class FaqsService {
 		org.sakaiproject.faqs.api.FaqsService service = getInstance();
 		service.insertFaqCategory(siteId, categoryDesc);
 	}
+	
+	public static void updateFaqCategory(String categoryDesc, int categoryId) {
+		org.sakaiproject.faqs.api.FaqsService service = getInstance();
+		service.updateFaqCategory(categoryDesc, categoryId);
+	}
+	
 }
