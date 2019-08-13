@@ -31,14 +31,13 @@ import org.sakaiproject.user.api.User;
 /**
  * <p>
  * FaqsService is a static Cover for the
- * {@link org.sakaiproject.faqs.api.FaqsService FaqsService}; see
- * that interface for usage details.
+ * {@link org.sakaiproject.faqs.api.FaqsService FaqsService}; see that interface
+ * for usage details.
  * </p>
  */
-public class FaqsService{
+public class FaqsService {
 
-private static org.sakaiproject.faqs.api.FaqsService m_instance = null;
-
+	private static org.sakaiproject.faqs.api.FaqsService m_instance = null;
 
 	/**
 	 * Access the component instance: special cover only method.
@@ -57,13 +56,20 @@ private static org.sakaiproject.faqs.api.FaqsService m_instance = null;
 		}
 	}
 
-
 	public static List getFaqCategories(String siteId) {
 		org.sakaiproject.faqs.api.FaqsService service = getInstance();
 		if (service == null)
 			return null;
 
 		return service.getFaqCategories(siteId);
+	}
+
+	public static List getFaqCategory(int categoryId) {
+		org.sakaiproject.faqs.api.FaqsService service = getInstance();
+		if (service == null)
+			return null;
+
+		return service.getFaqCategory(categoryId);
 	}
 
 	public static List getFaqContents(Integer categoryId) {
@@ -73,9 +79,9 @@ private static org.sakaiproject.faqs.api.FaqsService m_instance = null;
 
 		return service.getFaqContents(categoryId);
 	}
-	
+
 	public static void insertFaqCategory(String siteId, String categoryDesc) {
 		org.sakaiproject.faqs.api.FaqsService service = getInstance();
-		 service.insertFaqCategory(siteId, categoryDesc);
+		service.insertFaqCategory(siteId, categoryDesc);
 	}
 }

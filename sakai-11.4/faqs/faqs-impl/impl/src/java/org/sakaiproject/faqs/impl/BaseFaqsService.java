@@ -116,6 +116,14 @@ public abstract class BaseFaqsService implements FaqsService {
 
 	} 
 	
+	public List getFaqCategory(int categoryId)
+	{
+		
+		List category = m_storage.getFaqCategory(categoryId);
+
+		return category;
+
+	} 
 	
 	public List getFaqContents(Integer categoryId)
 	{
@@ -166,6 +174,7 @@ public abstract class BaseFaqsService implements FaqsService {
 		List getFaqCategories(String siteId);
 		List getFaqContents(Integer categoryId);
 		void insertFaqCategory(String siteId, String categoryDesc);
+		List getFaqCategory(int categoryId);
 		
 	}
 

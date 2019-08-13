@@ -109,6 +109,40 @@ public class DbFaqsService extends BaseFaqsService {
 
 		}
 
+		public List getFaqCategory(int categoryId) {
+			List results = new ArrayList();
+			Connection dbConnection = null;
+			ResultSet rs = null;
+			try {
+				dbConnection = m_sqlService.borrowConnection();
+
+				String statement = "select * from FAQ_CATEGORY where Category_Id = ? ";
+				PreparedStatement pstmt = dbConnection.prepareStatement(statement);
+				pstmt.setInt(1, categoryId);
+				rs = pstmt.executeQuery();
+				pstmt.close();
+				if (rs != null) {
+					while (rs.next()) {
+						FaqCategory faqCategory = new FaqCategory();
+						faqCategory.setSiteId(rs.getString("SITE_ID"));
+						faqCategory.setCategoryId(new Integer(rs.getInt("Category_ID")));
+						faqCategory.setDescription(rs.getString("Description"));
+						faqCategory.setModifiedOn(rs.getTimestamp("Modified_On"));
+						faqCategory.setRemove(false);
+						faqCategory.setExpanded(false);
+						results.add(faqCategory);
+					}
+				}
+
+			} catch (SQLException e) {
+				M_log.error(this+" Error on getFaqCategory for the categoryId "+categoryId+" error is "+e.getMessage());
+				e.printStackTrace();
+			} finally {
+				m_sqlService.returnConnection(dbConnection);
+			}
+			return results;
+		}
+		
 		public List getFaqContents(Integer categoryId) {
 
 			List results = new ArrayList();

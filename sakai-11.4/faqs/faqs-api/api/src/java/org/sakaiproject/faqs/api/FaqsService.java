@@ -33,4 +33,5 @@ public interface FaqsService
 	List getFaqCategories(String siteId);	
 	List getFaqContents(Integer categoryId);
 	void insertFaqCategory(String siteId, String categoryDesc);
+	List getFaqCategory(int categoryId);
 }
