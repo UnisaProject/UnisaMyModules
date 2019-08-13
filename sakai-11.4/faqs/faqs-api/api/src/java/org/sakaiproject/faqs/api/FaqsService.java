@@ -24,6 +24,7 @@ package org.sakaiproject.faqs.api;
 import java.util.List;
 
 import org.sakaiproject.faqs.dataModel.FaqCategory;
+import org.sakaiproject.faqs.dataModel.FaqContent;
 
 public interface FaqsService
 {
@@ -36,4 +37,5 @@ public interface FaqsService
 	List getFaqCategory(int categoryId);
 	List getFaqContent(int contentId);
 	void updateFaqCategory(String categoryDesc, int categoryId);	
+	void updateFaqContent(FaqContent faqContent);
 }

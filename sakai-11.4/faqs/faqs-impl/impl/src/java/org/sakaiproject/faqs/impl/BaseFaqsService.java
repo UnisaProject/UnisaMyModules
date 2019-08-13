@@ -37,6 +37,7 @@ import org.sakaiproject.event.api.UsageSession;
 import org.sakaiproject.event.api.UsageSessionService;
 import org.sakaiproject.faqs.api.FaqsService;
 import org.sakaiproject.faqs.dataModel.FaqCategory;
+import org.sakaiproject.faqs.dataModel.FaqContent;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.user.api.UserDirectoryService;
@@ -153,6 +154,11 @@ public abstract class BaseFaqsService implements FaqsService {
 		m_storage.updateFaqCategory(categoryDesc, categoryId);
 	}
 
+	public  void updateFaqContent(FaqContent faqContent) {
+		m_storage.updateFaqContent(faqContent);
+	}
+
+	
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Init and Destroy
 	 *********************************************************************************************************************************************************************************************************************************************************/
@@ -192,6 +198,7 @@ public abstract class BaseFaqsService implements FaqsService {
 		List getFaqCategory(int categoryId);
 		List getFaqContent(int contentId);
 	    void updateFaqCategory(String categoryDesc, int categoryId);
+	    void updateFaqContent(FaqContent faqContent);
 	}
 
 }

@@ -26,6 +26,7 @@ import java.util.List;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.event.api.UsageSession;
 import org.sakaiproject.faqs.dataModel.FaqCategory;
+import org.sakaiproject.faqs.dataModel.FaqContent;
 import org.sakaiproject.user.api.User;
 
 /**
@@ -98,5 +99,9 @@ public class FaqsService {
 		org.sakaiproject.faqs.api.FaqsService service = getInstance();
 		service.updateFaqCategory(categoryDesc, categoryId);
 	}
-	
+	public static void updateFaqContent(FaqContent faqContent) {
+		org.sakaiproject.faqs.api.FaqsService service = getInstance();
+		service.updateFaqContent(faqContent);
+	}
+
 }

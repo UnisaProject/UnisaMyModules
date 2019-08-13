@@ -97,10 +97,12 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 	/**
 	 * Populate the state object, if needed.
 	 */
-	/*protected void initState(SessionState state, VelocityPortlet portlet, JetspeedRunData rundata) {
-
-	}
-*/
+	/*
+	 * protected void initState(SessionState state, VelocityPortlet portlet,
+	 * JetspeedRunData rundata) {
+	 * 
+	 * }
+	 */
 	@SuppressWarnings("deprecation")
 	public String buildMainPanelContext(VelocityPortlet portlet, Context context, RunData rundata, SessionState state) {
 		context.put("tlang", rb);
@@ -117,9 +119,8 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 			context.put("nopermission", rb.getString("faqs.permissionerror"));
 			return template + "_noaccess";
 		}
-	 
-		M_log.info(this + "faqs name " + template);
 
+		M_log.info(this + "faqs name " + template);
 
 		context.put("addFaqContent", SecurityService.unlock("faqs.add", siteReference));
 		context.put("editFaqContent", SecurityService.unlock("faqs.contentedit", siteReference));
@@ -127,8 +128,6 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		context.put("addFaqCategory", SecurityService.unlock("faqs.createcategory", siteReference));
 		context.put("editFaqCategory", SecurityService.unlock("faqs.editcatergory", siteReference));
 		context.put("deleteFaqCategory", SecurityService.unlock("faqs.categorydelete", siteReference));
-
-	
 
 		try {
 			if (userId != null) {
@@ -154,8 +153,8 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		}
 
 		if ("EDIT_CATEGORY".equals(state.getAttribute(STATE_DISPLAY_MODE))) {
-        	context.put("category", state.getAttribute("categoryList"));
-        	context.put("systemDate", new Timestamp(new Date().getTime()));
+			context.put("category", state.getAttribute("categoryList"));
+			context.put("systemDate", new Timestamp(new Date().getTime()));
 			return template + "_edit_category";
 		}
 		
@@ -163,11 +162,20 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 			Menu createCategory = new MenuImpl();
 			createCategory.add(new MenuEntry(rb.getString("link.createcategory"), "createCategory"));
 			context.put(Menu.CONTEXT_MENU, createCategory);
-        	context.put("content", state.getAttribute("contentList"));
+			context.put("content", state.getAttribute("contentList"));
 			context.put("faqCotegory", state.getAttribute("categoryListForFaq"));
 			return template + "_edit_faq_content";
 		}
 		
+		if ("EDIT_SPECIFIC_FAQ".equals(state.getAttribute(STATE_DISPLAY_MODE))) {
+			Menu createCategory = new MenuImpl();
+			createCategory.add(new MenuEntry(rb.getString("link.createcategory"), "createCategory"));
+			context.put(Menu.CONTEXT_MENU, createCategory);
+			context.put("content", state.getAttribute("contentList"));
+			context.put("faqCotegory", state.getAttribute("categoryListForFaq"));
+			return template + "_edit_faq_content";
+		}
+
 		FaqsListForm listForm = new FaqsListForm();
 		List categories = FaqsService.getFaqCategories(siteId);
 
@@ -219,19 +227,19 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		context.put("faqExist", faqExist);
 		listForm.setCategories(categories);
 		context.put("categories", categories);
-		
+
 		Menu bar = new MenuImpl();
 		bar.add(new MenuEntry(rb.getString("link.addfaq"), "addFaq"));
 		bar.add(new MenuEntry(rb.getString("link.createcategory"), "createCategory"));
 		context.put(Menu.CONTEXT_MENU, bar);
-		
+
 		if ("ADD_CATEGORY".equals(state.getAttribute(STATE_DISPLAY_MODE))) {
 			context.put("systemDate", new Timestamp(new Date().getTime()));
 			return template + "_add_category";
 		}
 		if ("ADD_FAQ".equals(state.getAttribute(STATE_DISPLAY_MODE))) {
 			context.put("systemDate", new Timestamp(new Date().getTime()));
-			
+
 			return template + "_add_faq";
 		}
 		context.put("service", FaqsService.getInstance());
@@ -271,6 +279,7 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 
 		return ids;
 	}
+
 	public Vector collapseCategory(RunData rundata, Context context) {
 		Vector ids = null;
 		FaqsListForm listForm = new FaqsListForm();
@@ -285,12 +294,12 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		if (listForm.getExpandedCategories() == null) {
 			listForm.setExpandedCategories(new Vector());
 		}
-		
+
 		ids = (Vector) state.getAttribute("expandedCatogories");
-	     if(ids == null) {
-	    	 ids = new Vector();
-	     }
-		//ids = listForm.getExpandedCategories();
+		if (ids == null) {
+			ids = new Vector();
+		}
+		// ids = listForm.getExpandedCategories();
 		Iterator i = ids.iterator();
 
 		while (i.hasNext()) {
@@ -298,15 +307,13 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 			if (id.equals(itemReference)) {
 				ids.remove(id);
 			}
-		}		
+		}
 		listForm.setExpandedCategories(ids);
 		state.setAttribute(expandedCatogories, ids);
 
 		return ids;
 	}
 
-
-	
 	public void createCategory(RunData data, Context context) {
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
 		state.setAttribute(STATE_DISPLAY_MODE, "ADD_CATEGORY");
@@ -316,164 +323,148 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
 		state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
 	}
-	
+
 	public void doCancel(RunData data, Context context) {
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
 		state.setAttribute(STATE_DISPLAY_MODE, null);
 	}
-	
-	public void saveCategory(RunData data, Context context) { 
+
+	public void saveCategory(RunData data, Context context) {
 		String peid = ((JetspeedRunData) data).getJs_peid();
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
 		state.setAttribute(STATE_DISPLAY_MODE, null);
-       String categoryDesc = data.getParameters().getString("categoryDesc").trim();
-     
-       if(categoryDesc==null || categoryDesc.length() < 1) {
-		addAlert(state, rb.getString("faq.alert.nocategorydesc"));
-		state.setAttribute(STATE_DISPLAY_MODE, "ADD_CATEGORY");		
-       }
-       //save category to db
-       FaqsService.insertFaqCategory(ToolManager.getCurrentPlacement().getContext(), categoryDesc);
-       
-       if (eventTrackingService == null)
-		{
-			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
-		}
-       eventTrackingService.post(eventTrackingService.newEvent("faqs.categoryadd",ToolManager.getCurrentPlacement().getContext(), false));
-	}
-	
- 
-	
+		String categoryDesc = data.getParameters().getString("categoryDesc").trim();
 
-	
-	public void editcategory(RunData rundata, Context context) { 
+		if (categoryDesc == null || categoryDesc.length() < 1) {
+			addAlert(state, rb.getString("faq.alert.nocategorydesc"));
+			state.setAttribute(STATE_DISPLAY_MODE, "ADD_CATEGORY");
+		}
+		// save category to db
+		FaqsService.insertFaqCategory(ToolManager.getCurrentPlacement().getContext(), categoryDesc);
+
+		if (eventTrackingService == null) {
+			eventTrackingService = (EventTrackingService) ComponentManager
+					.get("org.sakaiproject.event.api.EventTrackingService");
+		}
+		eventTrackingService.post(eventTrackingService.newEvent("faqs.categoryadd",
+				ToolManager.getCurrentPlacement().getContext(), false));
+	}
+
+	public void editcategory(RunData rundata, Context context) {
 		String peid = ((JetspeedRunData) rundata).getJs_peid();
 		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
 		int itemReference = Integer.parseInt(rundata.getParameters().getString("itemReference").trim());
-		state.setAttribute("categoryList", FaqsService.getFaqCategory(itemReference));	
-		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_CATEGORY");		
+		state.setAttribute("categoryList", FaqsService.getFaqCategory(itemReference));
+		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_CATEGORY");
 	}
-	
-	public void updateEditedCategory(RunData data, Context context) { 
+
+	public void updateEditedCategory(RunData data, Context context) {
 		String peid = ((JetspeedRunData) data).getJs_peid();
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
 		state.setAttribute(STATE_DISPLAY_MODE, null);
-       String categoryDesc = data.getParameters().getString("categoryDesc").trim();
-       String categoryId = data.getParameters().getString("categoryId").trim();
-     
-       if(categoryDesc==null || categoryDesc.length() < 1) {
-		addAlert(state, rb.getString("faq.alert.nocategorydesc"));
-		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_CATEGORY");	 
-       }
-       //save edited category to db
-       FaqsService.updateFaqCategory(categoryDesc,Integer.parseInt(categoryId));
-       
-       if (eventTrackingService == null)
-		{
-			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
+		String categoryDesc = data.getParameters().getString("categoryDesc").trim();
+		String categoryId = data.getParameters().getString("categoryId").trim();
+
+		if (categoryDesc == null || categoryDesc.length() < 1) {
+			addAlert(state, rb.getString("faq.alert.nocategorydesc"));
+			state.setAttribute(STATE_DISPLAY_MODE, "EDIT_CATEGORY");
 		}
-       eventTrackingService.post(eventTrackingService.newEvent("faqs.categoryedit",ToolManager.getCurrentPlacement().getContext(), false));
+		// save edited category to db
+		FaqsService.updateFaqCategory(categoryDesc, Integer.parseInt(categoryId));
+
+		if (eventTrackingService == null) {
+			eventTrackingService = (EventTrackingService) ComponentManager
+					.get("org.sakaiproject.event.api.EventTrackingService");
+		}
+		eventTrackingService.post(eventTrackingService.newEvent("faqs.categoryedit",
+				ToolManager.getCurrentPlacement().getContext(), false));
 	}
-	
-	
-	public void editFaqContent(RunData rundata, Context context) { 
+
+	public void editFaqContent(RunData rundata, Context context) {
 		String peid = ((JetspeedRunData) rundata).getJs_peid();
 		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
-        //String contentCategoryId = rundata.getParameters().getString("contentCategoryId").trim();
-		System.out.println("11>>>> "+rundata.getParameters().getString("itemReference").trim());
-		
-	    state.setAttribute("contentList", FaqsService.getFaqContent(Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[0])));		
+		// String contentCategoryId =
+		// rundata.getParameters().getString("contentCategoryId").trim();
+		System.out.println("11>>>> " + rundata.getParameters().getString("itemReference").trim());
 
-	    System.out.println("tetetetet "+ FaqsService.getFaqCategory(Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[1])));	
-	    state.setAttribute("categoryListForFaq", FaqsService.getFaqCategory(Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[1])));
-		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_FAQ_CONTENT");		
+		state.setAttribute("contentList", FaqsService.getFaqContent(
+				Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[0])));
+
+		System.out.println("tetetetet " + FaqsService.getFaqCategory(
+				Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[1])));
+		state.setAttribute("categoryListForFaq", FaqsService.getFaqCategory(
+				Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[1])));
+		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_FAQ_CONTENT");
 	}
-	
-	
-	
-	public void editFaq(RunData rundata, Context context) { 
+
+	public void editFaq(RunData rundata, Context context) {
 		String peid = ((JetspeedRunData) rundata).getJs_peid();
 		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
 		int faqContentId = Integer.parseInt(rundata.getParameters().getString("itemReference").trim());
-		//get category for category id
-		 List faqContent = FaqsService.getFaqContent(faqContentId);
-	     context.put("content", faqContent);
+		// get category for category id
+		List faqContent = FaqsService.getFaqContent(faqContentId);
+		context.put("content", faqContent);
 
-		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_FAQ_CONTENT");		
+		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_FAQ_CONTENT");
 	}
-	
-	public void viewFaq(RunData rundata, Context context) { 
+
+	public void viewFaq(RunData rundata, Context context) {
 		String peid = ((JetspeedRunData) rundata).getJs_peid();
 		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
 		int faqContentId = Integer.parseInt(rundata.getParameters().getString("itemReference").trim());
-		//get category for category id
-		 List faqContent = FaqsService.getFaqContent(faqContentId);
-	     context.put("content", faqContent);
+		// get category for category id
+		List faqContent = FaqsService.getFaqContent(faqContentId);
+		context.put("content", faqContent);
 
-		state.setAttribute(STATE_DISPLAY_MODE, "VIEW_FAQ_CONTENT");		
 	}
-	
-	public void saveContent(RunData data, Context context) { 
+
+	public void saveContent(RunData data, Context context) {
 		String peid = ((JetspeedRunData) data).getJs_peid();
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
 
 		state.setAttribute(STATE_DISPLAY_MODE, null);
-	   FaqContent  faqContent = new FaqContent();
-       String selectedCategory = data.getParameters().getString("selectedCategory").trim();
-       String newCategoryDesc = data.getParameters().getString("newCategoryDesc").trim();
-       String question = data.getParameters().getString("question").trim();
-       String answer = data.getParameters().getString("answer").trim();
-       context.put("selectedCategory", selectedCategory);
-       context.put("newCategoryDesc",newCategoryDesc);
-       context.put("question", question);
-       context.put("answer",answer);
+		FaqContent faqContent = new FaqContent();
+		String selectedCategory = data.getParameters().getString("selectedCategory").trim();
+		String newCategoryDesc = data.getParameters().getString("newCategoryDesc").trim();
+		String question = data.getParameters().getString("question").trim();
+		String answer = data.getParameters().getString("answer").trim();
+		context.put("selectedCategory", selectedCategory);
+		context.put("newCategoryDesc", newCategoryDesc);
+		context.put("question", question);
+		context.put("answer", answer);
 
-          
-       if((selectedCategory.equals("-1")) && (newCategoryDesc.length() < 1)) {
-    	addAlert(state, rb.getString("faq.content.alert.nocategorydesc"));
-    	state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
-       }
-       
-       if((selectedCategory != "-1") && (newCategoryDesc.length() > 0)) {
-       	addAlert(state, rb.getString("faq.content.alert.selectedboth"));
-       	state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
-       }
-       
-       if(question==null || question.length() < 1) {
-   		addAlert(state, rb.getString("faq.alert.noquestiontitle"));
-   		state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");		
-      }
+		if ((selectedCategory.equals("-1")) && (newCategoryDesc.length() < 1)) {
+			addAlert(state, rb.getString("faq.content.alert.nocategorydesc"));
+			state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
+		}
+
+		if ((selectedCategory != "-1") && (newCategoryDesc.length() > 0)) {
+			addAlert(state, rb.getString("faq.content.alert.selectedboth"));
+			state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
+		}
+
+		if (question == null || question.length() < 1) {
+			addAlert(state, rb.getString("faq.alert.noquestiontitle"));
+			state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
+		}
 	}
-       
-   	public void saveEditedFaqContent(RunData data, Context context) { 
-   		String peid = ((JetspeedRunData) data).getJs_peid();
-   		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
-   		state.setAttribute(STATE_DISPLAY_MODE, null);
 
-          String selectedCategory = data.getParameters().getString("selectedCategory").trim();
-          String newCategoryDesc = data.getParameters().getString("newCategoryDesc").trim();
-          String question = data.getParameters().getString("question").trim();
-          String answer = data.getParameters().getString("answer").trim();
-          context.put("selectedCategory", selectedCategory);
-          context.put("newCategoryDesc",newCategoryDesc);
-          context.put("question", question);
-          context.put("answer",answer);
+	public void saveEditedFaqContent(RunData data, Context context) {
+		String peid = ((JetspeedRunData) data).getJs_peid();
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
+		state.setAttribute(STATE_DISPLAY_MODE, null);
+		String question = data.getParameters().getString("question").trim();
+		FaqContent faqContent = new FaqContent();
+		faqContent.setAnswer(data.getParameters().getString("answer").trim());
+		faqContent.setContentId(Integer.parseInt(data.getParameters().getString("contentId").trim()));
+		faqContent.setCategoryId(Integer.parseInt(data.getParameters().getString("categoryId").trim()));
+		faqContent.setQuestion(question);
+		
+		if (question == null || question.length() < 1) {
+			addAlert(state, rb.getString("faq.alert.noquestiontitle"));
+			state.setAttribute(STATE_DISPLAY_MODE, "EDIT_FAQ_CONTENT");
+		}		
+		FaqsService.updateFaqContent(faqContent);
+	}
 
-             
-          if((selectedCategory.equals("-1")) && (newCategoryDesc.length() < 1)) {
-       	addAlert(state, rb.getString("faq.content.alert.nocategorydesc"));
-       	state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
-          }
-          
-          if((selectedCategory != "-1") && (newCategoryDesc.length() > 0)) {
-          	addAlert(state, rb.getString("faq.content.alert.selectedboth"));
-          	state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
-          }
-          
-          if(question==null || question.length() < 1) {
-      		addAlert(state, rb.getString("faq.alert.noquestiontitle"));
-      		state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");		
-         }
-   	}
-	
 }
