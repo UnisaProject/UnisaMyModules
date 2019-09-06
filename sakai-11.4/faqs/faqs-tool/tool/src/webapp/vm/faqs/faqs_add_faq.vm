@@ -1,6 +1,8 @@
 ## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
 <div class="portletBody">
-#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("faq.alert.nocategorydesc", $alertMessage)</div>#end
+#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("faq.content.alert.nocategorydesc", $alertMessage)</div>#end
+#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("faq.content.alert.nocategorydesc", $alertMessage)</div>#end
+#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("faq.content.alert.nocategorydesc", $alertMessage)</div>#end
 
 <h3>$tlang.getString("faq.add")	</h3>
 
@@ -15,10 +17,11 @@
    <select name="selectedCategory" id="selectedCategory" >
      <option selected="selected" value="-1"></option>      	
      #foreach ($category in $categories)
-     <option  value="$category.description">$category.description</option>
+      #set($concat ="-")
+        #set( $ref = "$category.description$concat$category.categoryId")
+     <option  value="$ref">$category.description</option>
      #end
-    
-     </select>
+     </select> 
 </p>
 
 
