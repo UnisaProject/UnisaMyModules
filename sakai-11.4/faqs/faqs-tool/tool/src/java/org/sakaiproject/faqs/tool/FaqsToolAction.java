@@ -167,6 +167,22 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 			return template + "_edit_faq_content";
 		}
 		
+		if ("EDIT_FAQ".equals(state.getAttribute(STATE_DISPLAY_MODE))) {
+			Menu editfaqcontent = new MenuImpl();
+			editfaqcontent.add(new MenuEntry(rb.getString("link.editfaq"), "editFaq"));
+			context.put(Menu.CONTEXT_MENU, editfaqcontent);
+			Menu addfaqcontent = new MenuImpl();
+			addfaqcontent.add(new MenuEntry(rb.getString("link.addfaq"), "addFaq"));	
+			context.put(Menu.CONTEXT_MENU, addfaqcontent);
+			Menu removefaqcontent = new MenuImpl();
+			removefaqcontent.add(new MenuEntry(rb.getString("link.remove"), "removefaq"));					
+			context.put(Menu.CONTEXT_MENU, removefaqcontent);
+			
+			context.put("content", state.getAttribute("contentList"));
+			context.put("faqCotegory", state.getAttribute("categoryListForFaq"));
+			return template + "_edit_faq";
+		}
+		
 		if ("EDIT_SPECIFIC_FAQ".equals(state.getAttribute(STATE_DISPLAY_MODE))) {
 			Menu createCategory = new MenuImpl();
 			createCategory.add(new MenuEntry(rb.getString("link.createcategory"), "createCategory"));
@@ -386,6 +402,7 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		return "";
 	}
 
+	//edit faq FAQ under catogery 
 	public void editFaqContent(RunData rundata, Context context) {
 		String peid = ((JetspeedRunData) rundata).getJs_peid();
 		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
@@ -403,15 +420,26 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_FAQ_CONTENT");
 	}
 
+	//vijay: on click faq
 	public void editFaq(RunData rundata, Context context) {
 		String peid = ((JetspeedRunData) rundata).getJs_peid();
 		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
-		int faqContentId = Integer.parseInt(rundata.getParameters().getString("itemReference").trim());
+		//int faqContentId = Integer.parseInt(rundata.getParameters().getString("itemReference").trim());
 		// get category for category id
-		List faqContent = FaqsService.getFaqContent(faqContentId);
-		context.put("content", faqContent);
+		//List faqContent = FaqsService.getFaqContent(faqContentId);
+		System.out.println("editFaq 0>>>> " +Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[0]));
+		System.out.println("editFaq 1>>>> " +Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[1]));
+		int categoryId = Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[1]);
+		state.setAttribute("contentList", FaqsService.getFaqContent(
+				Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[0])));
 
-		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_FAQ_CONTENT");
+		state.setAttribute("categoryListForFaq", FaqsService.getFaqCategory(categoryId));
+		
+		FaqsService.getFaqContentIds(categoryId);
+		
+		
+		
+		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_FAQ");
 	}
 
 	public void viewFaq(RunData rundata, Context context) {
@@ -446,7 +474,7 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 			return (String) state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
 		}
 
-		if ((selectedCategory != "-1") & (newCategoryDesc.length() > 0)) {
+		if ((!selectedCategory.equals("-1")) & (newCategoryDesc.length() > 0)) {
 			addAlert(state, rb.getString("faq.content.alert.selectedboth"));
 			state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
 			return (String) state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
@@ -457,6 +485,13 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 			state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
 			return (String) state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
 		}
+		
+		if (answer == null || answer.length() < 1) {
+			addAlert(state, rb.getString("faq.alert.noanswer"));
+			state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
+			return (String) state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
+		}
+		
 		FaqsService.insertFaqContent(question, answer, categoryId);
 		
 		return (String) state.setAttribute(STATE_DISPLAY_MODE, null); 

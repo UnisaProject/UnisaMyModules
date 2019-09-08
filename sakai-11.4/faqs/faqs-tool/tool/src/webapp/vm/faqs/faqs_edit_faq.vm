@@ -1,0 +1,46 @@
+## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
+<div class="portletBody">
+
+#if($editFaqContent)
+	#toolbar($editfaqcontent)
+#end
+#if($addFaqContent)
+	#toolbar($addfaqcontent)
+#end
+#if($deleteFaqContent)
+	#toolbar($removefaqcontent)
+#end
+
+
+<h3>$tlang.getString("faq.add.heading")</h3>
+
+
+
+ <form name="listForm" action="#toolForm("FaqsToolAction")" method="post">
+
+
+<div>
+#foreach ($faqcontent in $content)
+
+#foreach ($category in $faqCotegory)
+<p class="shorttext">
+	<label for="editFaq">$tlang.getString("faq.field.category")</label> $category.description
+</p>
+#end
+	
+<p class="shorttext">
+<label>$tlang.getString("faq.questiontitle")</label> $faqcontent.question
+
+<p class="shorttext">
+<label>$tlang.getString("faq.answer")</label> 	$validator.escapeHtmlFormattedTextarea($faqcontent.answer)
+</p>
+
+<p class="shorttext">
+<label>$tlang.getString("faq.lastmodified")</label>  $faqcontent.modifiedOn 
+</p>
+#end
+
+</div>
+
+</form>		
+</div>
