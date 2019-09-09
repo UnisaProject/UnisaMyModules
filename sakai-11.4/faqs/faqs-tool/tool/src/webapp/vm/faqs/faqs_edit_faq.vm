@@ -16,8 +16,30 @@
 
 
 
- <form name="listForm" action="#toolForm("FaqsToolAction")" method="post">
+ <form>
 
+<input type="hidden" id="previousId" name="previousId" value = "$previousId" >
+<input type="hidden" id="nextId" name="nextId" value = "$nextId" >
+
+
+   <div align="right">
+  	   <p class="act">
+ 	    #if($previousId)	
+			<input type="submit" class="active" name="eventSubmit_previousFaq" value=" $tlang.getString("button.previous")"  accesskey="s"/>
+		#end	
+
+		 #if(!$previousId)
+			<input type="submit" class="active" name="eventSubmit_previousFaq" value=" $tlang.getString("button.previous")" disabled  accesskey="s"/>
+		#end
+		
+		<input type="submit" class="active" name="eventSubmit_returnToList" value=" $tlang.getString("button.return")"  accesskey="s"/>
+		
+		 #if($nextId)
+			<input type="submit" class="active" name="eventSubmit_nextFaq" value=" $tlang.getString("button.next")"  accesskey="s"/>
+		#end
+		</p>
+     <input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+ </div>
 
 <div>
 #foreach ($faqcontent in $content)
@@ -38,6 +60,10 @@
 <p class="shorttext">
 <label>$tlang.getString("faq.lastmodified")</label>  $faqcontent.modifiedOn 
 </p>
+
+<input type="hidden" id="contentId" name="contentId" value = "$faqcontent.contentId" >
+<input type="hidden" id="categoryId" name="categoryId" value = "$faqcontent.categoryId" >
+
 #end
 
 </div>

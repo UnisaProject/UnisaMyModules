@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import lombok.Getter;
 import lombok.Setter;
-
+ 
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.authz.cover.SecurityService;
 import org.sakaiproject.cheftool.Context;
@@ -178,6 +178,10 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 			removefaqcontent.add(new MenuEntry(rb.getString("link.remove"), "removefaq"));					
 			context.put(Menu.CONTEXT_MENU, removefaqcontent);
 			
+			context.put("nextId", state.getAttribute("nextId"));
+			context.put("previousId", state.getAttribute("previousId"));
+			
+   
 			context.put("content", state.getAttribute("contentList"));
 			context.put("faqCotegory", state.getAttribute("categoryListForFaq"));
 			return template + "_edit_faq";
@@ -424,24 +428,82 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 	public void editFaq(RunData rundata, Context context) {
 		String peid = ((JetspeedRunData) rundata).getJs_peid();
 		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
+		Integer  contentId = 0;
+		Integer categoryId=0;
+ 
+		String prevNext = null;
+ System.out.println("state contentId "+state.getAttribute("contentId"));
 		//int faqContentId = Integer.parseInt(rundata.getParameters().getString("itemReference").trim());
 		// get category for category id
 		//List faqContent = FaqsService.getFaqContent(faqContentId);
-		System.out.println("editFaq 0>>>> " +Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[0]));
-		System.out.println("editFaq 1>>>> " +Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[1]));
-		int categoryId = Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[1]);
-		state.setAttribute("contentList", FaqsService.getFaqContent(
-				Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[0])));
+		  prevNext =   (String) state.getAttribute("prevNext");
+				
+		if(prevNext == null ) {
+			contentId = Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[0]);
+			categoryId = Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[1]);
+		}else {
+			contentId =    (Integer) state.getAttribute("contentId") ;
+			categoryId =    (Integer) state.getAttribute("categoryId");
+		}
+		
 
+		state.setAttribute("contentList", FaqsService.getFaqContent(contentId));
 		state.setAttribute("categoryListForFaq", FaqsService.getFaqCategory(categoryId));
+
+		List contents = FaqsService.getFaqContents(categoryId);
 		
-		FaqsService.getFaqContentIds(categoryId);
+		Iterator i = contents.iterator();
+		Integer previousId = null;
+		Integer nextId = null;
+		while (i.hasNext()) {
+			FaqContent q = (FaqContent) i.next();
+			if (q.getContentId().equals(contentId)) {
+				if (i.hasNext()) {
+					q = (FaqContent) i.next();
+					System.out.println("nextId "+nextId);
+					nextId = q.getContentId();
+				}
+				continue;
+			}
+			previousId = q.getContentId();
+			System.out.println("previousId "+previousId);
+		}
 		
-		
+		state.setAttribute("nextId", nextId);
+		state.setAttribute("previousId", previousId);
 		
 		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_FAQ");
 	}
-
+	
+	public void previousFaq(RunData rundata, Context context) {
+		String peid = ((JetspeedRunData) rundata).getJs_peid();
+		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
+		int contentId = Integer.parseInt(rundata.getParameters().getString("contentId").trim());
+		int categoryId = Integer.parseInt(rundata.getParameters().getString("categoryId").trim());
+		state.setAttribute("prevNext", "prevNext");
+		state.setAttribute("contentId", contentId);
+		state.setAttribute("categoryId", categoryId);
+		editFaq(rundata,context);
+	}
+	
+	public void nextFaq(RunData rundata, Context context) {
+		String peid = ((JetspeedRunData) rundata).getJs_peid();
+		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
+		int contentId = Integer.parseInt(rundata.getParameters().getString("contentId").trim());
+		int categoryId = Integer.parseInt(rundata.getParameters().getString("categoryId").trim());
+		state.setAttribute("prevNext", "prevNext");
+		state.setAttribute("contentId", contentId);
+		state.setAttribute("categoryId", categoryId);
+		editFaq(rundata,context);
+	}
+	
+	public void returnToList(RunData rundata, Context context) {
+		String peid = ((JetspeedRunData) rundata).getJs_peid();
+		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
+		state.setAttribute(STATE_DISPLAY_MODE, null); 
+	}
+	
+	
 	public void viewFaq(RunData rundata, Context context) {
 		String peid = ((JetspeedRunData) rundata).getJs_peid();
 		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);

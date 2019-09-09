@@ -76,11 +76,19 @@
 	 	 <input  type="checkbox" id="remove_content" name="remove" value="$content.categoryId" />
 	 	</td>
     #end
-	
 	</tr>
 	#end
 	#end
 	
+	
+	 <p class="act">
+	 #if($addFaqContent)
+			<input type="submit" class="active" name="eventSubmit_saveEditedFaqContent" value=" $tlang.getString("button.save")"  accesskey="s"/>
+			<input type="submit" name="eventSubmit_doCancel" value=" $tlang.getString("button.cancel") " accesskey="x"  />
+		</p>
+	
+   <input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+   
    #end
 					
 </table>
