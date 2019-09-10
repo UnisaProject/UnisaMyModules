@@ -89,12 +89,15 @@ public class FaqsService {
 
 		return service.getFaqContents(categoryId);
 	}
-
+	 
 	public static void insertFaqCategory(String siteId, String categoryDesc) {
 		org.sakaiproject.faqs.api.FaqsService service = getInstance();
 		service.insertFaqCategory(siteId, categoryDesc);
 	}
-	
+	public static void insertFaqContent(String question,String answer, String categoryId) {
+		org.sakaiproject.faqs.api.FaqsService service = getInstance();
+		service.insertFaqContent(question, answer,categoryId);
+	}
 	public static void updateFaqCategory(String categoryDesc, int categoryId) {
 		org.sakaiproject.faqs.api.FaqsService service = getInstance();
 		service.updateFaqCategory(categoryDesc, categoryId);

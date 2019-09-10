@@ -149,6 +149,10 @@ public abstract class BaseFaqsService implements FaqsService {
 		 m_storage.insertFaqCategory(siteId,categoryDesc);
 	}
 	
+	public  void insertFaqContent(String question,String answer, String categoryId) {
+		
+		m_storage.insertFaqContent(question, answer,categoryId);
+	}
 	public  void updateFaqCategory(String categoryDesc, int categoryId) {
 		
 		m_storage.updateFaqCategory(categoryDesc, categoryId);
@@ -199,6 +203,8 @@ public abstract class BaseFaqsService implements FaqsService {
 		List getFaqContent(int contentId);
 	    void updateFaqCategory(String categoryDesc, int categoryId);
 	    void updateFaqContent(FaqContent faqContent);
+	    void insertFaqContent(String question,String answer, String categoryId);
+		
 	}
 
 }

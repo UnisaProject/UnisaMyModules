@@ -232,7 +232,26 @@ public class DbFaqsService extends BaseFaqsService {
 			}
 		}
 		
-		
+		public void insertFaqContent(String question,String answer, String categoryId) {
+			Connection dbConnection = null;
+			ResultSet rs = null;
+			try {
+				dbConnection = m_sqlService.borrowConnection();
+				String statement = "insert into FAQ_CONTENT (Content_ID,Question, Answer, Category_ID, Modified_On) values (NULL,?, ?, ?,sysdate())";
+				PreparedStatement pstmt = dbConnection.prepareStatement(statement);
+				pstmt.setString(1, question);
+				pstmt.setString(2, answer);
+				pstmt.setString(3, categoryId);
+				pstmt.executeUpdate();
+				pstmt.close();
+			} catch (SQLException e) {
+				M_log.error(this+" Error on insertFaqContent for the FAQ Answer "+answer+" Category_ID "+categoryId+ " and error "+e.getMessage());
+				e.printStackTrace();
+			} finally {
+				m_sqlService.returnConnection(dbConnection);
+			}
+		}
+ 
 	
 		public void updateFaqCategory(String categoryDesc, int categoryId) {
 				Connection dbConnection = null;

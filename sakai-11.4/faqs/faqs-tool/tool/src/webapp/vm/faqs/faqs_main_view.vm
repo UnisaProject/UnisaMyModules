@@ -61,10 +61,10 @@
 	#foreach ($content in $contents)
 	<tr>
 	  <td>&nbsp;&nbsp;
-	   <a href="#toolLinkParam("FaqsToolAction" "editFaq" "itemReference=$content.contentId")">  $content.question</a>	
-	   #if($editFaqContent)
 	   #set($concat ="-")
 	   #set( $ref = "$content.contentId$concat$content.categoryId")
+	   <a href="#toolLinkParam("FaqsToolAction" "editFaq" "itemReference=$ref")">  $content.question</a>	
+	   #if($editFaqContent)	  
 			 <a href="#toolLinkParam("FaqsToolAction" "editFaqContent" "itemReference=$ref")"> $tlang.getString("faq.view") </a>
 			#end
 	</td>
@@ -76,11 +76,19 @@
 	 	 <input  type="checkbox" id="remove_content" name="remove" value="$content.categoryId" />
 	 	</td>
     #end
-	
 	</tr>
 	#end
 	#end
 	
+	
+	 <p class="act">
+	 #if($addFaqContent)
+			<input type="submit" class="active" name="eventSubmit_saveEditedFaqContent" value=" $tlang.getString("button.save")"  accesskey="s"/>
+			<input type="submit" name="eventSubmit_doCancel" value=" $tlang.getString("button.cancel") " accesskey="x"  />
+		</p>
+	
+   <input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+   
    #end
 					
 </table>
