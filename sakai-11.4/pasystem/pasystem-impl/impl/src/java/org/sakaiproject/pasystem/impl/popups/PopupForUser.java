@@ -27,6 +27,9 @@ package org.sakaiproject.pasystem.impl.popups;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.pasystem.api.Popup;
 import org.sakaiproject.pasystem.impl.common.DB;
@@ -34,24 +37,21 @@ import org.sakaiproject.pasystem.impl.common.DBAction;
 import org.sakaiproject.pasystem.impl.common.DBConnection;
 import org.sakaiproject.pasystem.impl.common.DBResults;
 import org.sakaiproject.user.api.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Determine which popup (if any) should be shown to a given user.
  */
+@Slf4j
 public class PopupForUser {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PopupForUser.class);
-
     private User user;
-    private String eid;
+    private String userId;
 
     public PopupForUser(User currentUser) {
         user = currentUser;
 
-        if (user != null && user.getEid() != null) {
-            eid = user.getEid().toLowerCase();
+        if (user != null && user.getId() != null) {
+            userId = user.getId();
         } else {
             user = null;
         }
@@ -76,11 +76,11 @@ public class PopupForUser {
 
                 // That is either assigned to the current user
                 " LEFT OUTER join pasystem_popup_assign assign " +
-                " on assign.uuid = popup.uuid AND assign.user_eid = ?" +
+                " on assign.uuid = popup.uuid AND assign.user_id = ?" +
 
                 // Which the current user hasn't yet dismissed
                 " LEFT OUTER JOIN pasystem_popup_dismissed dismissed " +
-                " on dismissed.uuid = popup.uuid AND dismissed.user_eid = ?" +
+                " on dismissed.uuid = popup.uuid AND dismissed.user_id = ?" +
 
                 " WHERE " +
 
@@ -107,7 +107,7 @@ public class PopupForUser {
                                 @Override
                                 public Popup call(DBConnection db) throws SQLException {
                                     try (DBResults results = db.run(sql)
-                                            .param(eid).param(eid)
+                                            .param(userId).param(userId)
                                             .param(now).param(now).param(now)
                                             .param(getTemporaryTimeoutMilliseconds())
                                             .executeQuery()) {
@@ -131,7 +131,7 @@ public class PopupForUser {
                             }
                     );
         } catch (Exception e) {
-            LOG.error("Error determining active popup", e);
+            log.error("Error determining active popup", e);
             return Popup.createNullPopup();
         }
     }

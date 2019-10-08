@@ -4,7 +4,7 @@
     <parent>
         <artifactId>edu-services</artifactId>
         <groupId>org.sakaiproject.edu-services</groupId>
-        <version>11.4</version><!-- ProjectVersion -->
+        <version>12.6</version><!-- ProjectVersion -->
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <groupId>org.sakaiproject.edu-services.gradebook</groupId>
@@ -22,6 +22,10 @@
         <dependency>
           <groupId>org.sakaiproject.kernel</groupId>
           <artifactId>sakai-component-manager</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.sakaiproject.kernel</groupId>
+            <artifactId>sakai-kernel-private</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -50,9 +54,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
          <dependency>
             <groupId>org.sakaiproject.common</groupId>
             <artifactId>archive-api</artifactId>
@@ -72,31 +76,6 @@
             <artifactId>sections-api</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!--
-            TODO Come up with a way to make the dependencies
-            deployment-sensitive.
-        -->
-        <!-- Needed for standalone user directory -->
-        <dependency>
-            <groupId>org.sakaiproject.edu-services.sections</groupId>
-            <artifactId>sections-integrationsupport</artifactId>
-        </dependency>
-        <!-- JSF needed for standalone authn -->
-        <dependency>
-            <groupId>org.apache.myfaces.core</groupId>
-            <artifactId>myfaces-api</artifactId>
-            <version>1.1.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.myfaces.core</groupId>
-            <artifactId>myfaces-impl</artifactId>
-            <version>1.1.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.myfaces.tomahawk</groupId>
-            <artifactId>tomahawk</artifactId>
-            <version>1.1.6</version>
-        </dependency>
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
@@ -107,9 +86,8 @@
             <version>1.0</version>
         </dependency>
         <dependency>
-            <groupId>jta</groupId>
+            <groupId>javax.transaction</groupId>
             <artifactId>jta</artifactId>
-            <version>h2.1.8</version>
         </dependency>
         <dependency>
             <groupId>cglib</groupId>

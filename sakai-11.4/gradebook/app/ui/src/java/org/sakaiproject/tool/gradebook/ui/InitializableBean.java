@@ -1,35 +1,28 @@
-/**********************************************************************************
-*
-* $Id$
-*
-***********************************************************************************
-*
- * Copyright (c) 2005, 2006, 2008 The Sakai Foundation, The MIT Corporation
+/**
+ * Copyright (c) 2003-2016 The Apereo Foundation
  *
  * Licensed under the Educational Community License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.opensource.org/licenses/ECL-2.0
+ *             http://opensource.org/licenses/ecl2
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*
-**********************************************************************************/
+ */
 
 package org.sakaiproject.tool.gradebook.ui;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sakaiproject.jsf.model.PhaseAware;
 
-public abstract class InitializableBean implements PhaseAware {
-	private static final Logger logger = LoggerFactory.getLogger(InitializableBean.class);
+import lombok.extern.slf4j.Slf4j;
 
-	private transient boolean notValidated;
+@Slf4j
+public abstract class InitializableBean implements PhaseAware {
+	private boolean notValidated;
 
 	/**
 	 * JSF doesn't provide a way to configure an initialization method which will
@@ -49,14 +42,20 @@ public abstract class InitializableBean implements PhaseAware {
 	 * be of interest to the backing bean. For example, the backing bean
 	 * may choose not to requery and reload data on a validation error.
 	 */
+	@Override
 	public void endProcessValidators() {
 		setNotValidated(true);
-		if (logger.isDebugEnabled()) logger.debug("endProcessValidators");
+		if (log.isDebugEnabled()) {
+			log.debug("endProcessValidators");
+		}
 	}
 
+	@Override
 	public void endProcessUpdates() {
 		setNotValidated(false);
-		if (logger.isDebugEnabled()) logger.debug("endProcessUpdates");
+		if (log.isDebugEnabled()) {
+			log.debug("endProcessUpdates");
+		}
 	}
 
 	/**
@@ -64,29 +63,30 @@ public abstract class InitializableBean implements PhaseAware {
 	 * (This should also work to refresh session-scoped beans, but it's
 	 * only been tested with request scope.)
 	 */
+	@Override
 	public void startRenderResponse() {
-		if (logger.isDebugEnabled()) logger.debug("startRenderResponse notValidated=" + isNotValidated());
+		if (log.isDebugEnabled()) {
+			log.debug("startRenderResponse notValidated=" + isNotValidated());
+		}
 		init();
 	}
 
 	public boolean isNotValidated() {
-		return notValidated;
+		return this.notValidated;
 	}
-	public void setNotValidated(boolean notValidated) {
+	public void setNotValidated(final boolean notValidated) {
 		this.notValidated = notValidated;
 	}
 
 	/**
 	 * Signals that configuration is finished.
 	 */
-	public void setConfigured(boolean isConfigured) {
-		if (logger.isDebugEnabled()) logger.debug("setConfigured " + isConfigured);
+	public void setConfigured(final boolean isConfigured) {
+		if (log.isDebugEnabled()) {
+			log.debug("setConfigured " + isConfigured);
+		}
 		if (isConfigured) {
 			init();
 		}
 	}
-
 }
-
-
-

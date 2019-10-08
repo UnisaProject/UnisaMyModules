@@ -19,31 +19,29 @@
  *
  **********************************************************************************/
 
-
 package org.sakaiproject.tool.assessment.ui.listener.util;
 
 import java.io.Serializable;
+import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 
-import org.sakaiproject.util.ResourceLoader;
-import java.util.Locale;
-
-import java.text.NumberFormat;
-
-import javax.faces.context.FacesContextFactory;
-import javax.faces.lifecycle.Lifecycle;
-import javax.faces.lifecycle.LifecycleFactory;
-import javax.faces.FactoryFinder;
 import javax.faces.application.Application;
 import javax.faces.application.ApplicationFactory; 
 import javax.faces.context.FacesContext;
-import java.util.ArrayList;
+import javax.faces.context.FacesContextFactory;
+import javax.faces.FactoryFinder;
+import javax.faces.lifecycle.Lifecycle;
+import javax.faces.lifecycle.LifecycleFactory;
 import javax.servlet.*;
 import javax.servlet.http.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sakaiproject.component.cover.ServerConfigurationService; 
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.util.ResourceLoader;
 
 /**
  * <p>Description: Action Listener helper utility</p>
@@ -52,11 +50,9 @@ import org.sakaiproject.component.cover.ServerConfigurationService;
  * @author Ed Smiley
  * @version $Id$
  */
-
+@Slf4j
 public class ContextUtil
 {
-
-  private static Logger log = LoggerFactory.getLogger(ContextUtil.class);
 
   private static ServletContext M_servletContext = null;
   /**
@@ -287,14 +283,12 @@ public static ArrayList paramArrayValueLike(String paramPart)
   * @param key The key to look up the localized string
   */
   public static String getLocalizedString(String bundleName, String key) {
-	  //Locale locale = FacesContext.getCurrentInstance().getViewRoot().getLocale();
 	  ResourceLoader rb = new ResourceLoader(bundleName);
     return rb.getString(key);
   }
 
   public static String getLocalizedString(HttpServletRequest request,
                                           String bundleName, String key) {
-	  //Locale locale = request.getLocale();
 	  ResourceLoader rb = new ResourceLoader(bundleName);
     return rb.getString(key);
   }
@@ -336,11 +330,13 @@ public static ArrayList paramArrayValueLike(String paramPart)
   }
 
   public static String getRoundedValue(String orig, int maxdigit) {
-    Double origdouble = new Double(orig); 
+    Double origdouble = new Double(orig);
     return getRoundedValue(origdouble, maxdigit);
   }
   public static String getRoundedValue(Double orig, int maxdigit) {
-      NumberFormat nf = NumberFormat.getInstance();
+      Locale loc = new ResourceLoader().getLocale();
+      NumberFormat nf = NumberFormat.getInstance(loc);
+      nf.setGroupingUsed(false);
       nf.setMaximumFractionDigits(maxdigit);
       String newscore = nf.format(orig);
       return newscore;
@@ -359,14 +355,6 @@ public static ArrayList paramArrayValueLike(String paramPart)
     return ServerConfigurationService.getServerUrl();
   }
  
-  public static String stringWYSIWYG(String s){// this is to detect an empty in WYSIWYG FF1.5
-    
-    if((s!=null) && ("&nbsp;".equals(s.trim())))
-        s="";
-    return s;
-  }
-
-
   public static String getRelativePath(String url){
     // replace whitespace with %20
     String protocol = getProtocol();

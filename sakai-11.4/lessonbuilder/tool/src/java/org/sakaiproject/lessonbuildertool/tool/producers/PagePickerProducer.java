@@ -24,51 +24,30 @@
 package org.sakaiproject.lessonbuildertool.tool.producers;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Collection;
-import java.util.Set;
-import java.util.Map;
-import java.util.HashSet;
-import java.util.HashMap;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
-import org.sakaiproject.lessonbuildertool.service.LessonEntity;
-import org.sakaiproject.tool.cover.SessionManager;
+import lombok.extern.slf4j.Slf4j;
 
-import org.sakaiproject.lessonbuildertool.SimplePage;
-import org.sakaiproject.lessonbuildertool.SimplePageItem;
-import org.sakaiproject.lessonbuildertool.SimplePageLogEntry;
-import org.sakaiproject.lessonbuildertool.tool.beans.SimplePageBean;
-import org.sakaiproject.lessonbuildertool.tool.view.GeneralViewParameters;
-import org.sakaiproject.lessonbuildertool.model.SimplePageToolDao;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sakaiproject.component.cover.ServerConfigurationService;
-import org.sakaiproject.content.cover.ContentTypeImageService;
-import org.sakaiproject.tool.api.ToolManager;
-import org.sakaiproject.site.api.Site;
-import org.sakaiproject.site.api.ToolConfiguration;
-import org.sakaiproject.site.api.SitePage;
-import org.sakaiproject.exception.IdUnusedException;
-import org.sakaiproject.lessonbuildertool.service.LessonsAccess;
-
-import uk.org.ponder.messageutil.MessageLocator;
-import uk.org.ponder.localeutil.LocaleGetter;                                                                                          
+import uk.org.ponder.localeutil.LocaleGetter;      
+import uk.org.ponder.messageutil.MessageLocator;                                                                                    
 import uk.org.ponder.rsf.components.UIBoundBoolean;
 import uk.org.ponder.rsf.components.UIBranchContainer;
 import uk.org.ponder.rsf.components.UICommand;
 import uk.org.ponder.rsf.components.UIContainer;
 import uk.org.ponder.rsf.components.UIForm;
-import uk.org.ponder.rsf.components.UILink;
 import uk.org.ponder.rsf.components.UIInternalLink;
 import uk.org.ponder.rsf.components.UIOutput;
 import uk.org.ponder.rsf.components.UIInput;
 import uk.org.ponder.rsf.components.UISelect;
 import uk.org.ponder.rsf.components.UISelectChoice;
 import uk.org.ponder.rsf.components.decorators.UIFreeAttributeDecorator;
-import uk.org.ponder.rsf.components.decorators.UITooltipDecorator;
 import uk.org.ponder.rsf.components.decorators.UIStyleDecorator;
 import uk.org.ponder.rsf.flow.jsfnav.NavigationCase;
 import uk.org.ponder.rsf.flow.jsfnav.NavigationCaseReporter;
@@ -77,7 +56,21 @@ import uk.org.ponder.rsf.view.ViewComponentProducer;
 import uk.org.ponder.rsf.viewstate.SimpleViewParameters;
 import uk.org.ponder.rsf.viewstate.ViewParameters;
 import uk.org.ponder.rsf.viewstate.ViewParamsReporter;
-import uk.org.ponder.rsf.util.RSFUtil;
+
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.lessonbuildertool.SimplePage;
+import org.sakaiproject.lessonbuildertool.SimplePageItem;
+import org.sakaiproject.lessonbuildertool.SimplePageLogEntry;
+import org.sakaiproject.lessonbuildertool.model.SimplePageToolDao;
+import org.sakaiproject.lessonbuildertool.service.LessonsAccess;
+import org.sakaiproject.lessonbuildertool.tool.beans.SimplePageBean;
+import org.sakaiproject.lessonbuildertool.tool.view.GeneralViewParameters;
+import org.sakaiproject.site.api.Site;
+import org.sakaiproject.site.api.ToolConfiguration;
+import org.sakaiproject.site.api.SitePage;
+import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.tool.cover.SessionManager;
 
 /**
  * Creates a window for the user to choose which page to add
@@ -85,8 +78,8 @@ import uk.org.ponder.rsf.util.RSFUtil;
  * @author Charles Hedrick <hedrick@rutgers.edu>
  * 
  */
+@Slf4j
 public class PagePickerProducer implements ViewComponentProducer, NavigationCaseReporter, ViewParamsReporter {
-	private static final Logger log = LoggerFactory.getLogger(PagePickerProducer.class);
 	public static final String VIEW_ID = "PagePicker";
 	private static String SITE_UPD = "site.upd";
 
@@ -114,6 +107,8 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
 		String title;
 		int level;
 		boolean toplevel;
+		boolean hidden;
+		Date releaseDate;
 	}
 
 	public void setSimplePageBean(SimplePageBean simplePageBean) {
@@ -159,9 +154,9 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
 		return;
 	    }
 
+	    SimplePage page = simplePageToolDao.getPage(pageId);
 	    // implement hidden. 
 	    if (! canEditPage) {
-	    	SimplePage page = simplePageToolDao.getPage(pageId);
 	    	if (page.isHidden())
 		    return;
 		if (page.getReleaseDate() != null && page.getReleaseDate().after(new Date()))
@@ -204,6 +199,8 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
 	    entry.title = pageItem.getName();
 	    entry.level = level;
 	    entry.toplevel = toplevel;
+	    entry.hidden = page.isHidden();
+	    entry.releaseDate = page.getReleaseDate();
 
 	    // add entry
 	    entries.add(entry);
@@ -281,7 +278,7 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
 		}
 
 		UIOutput.make(tofill, "html").decorate(new UIFreeAttributeDecorator("lang", localeGetter.get().getLanguage()))
-		    .decorate(new UIFreeAttributeDecorator("xml:lang", localeGetter.get().getLanguage()));        
+		    .decorate(new UIFreeAttributeDecorator("xml:lang", localeGetter.get().getLanguage()));
 
 		boolean canEditPage = (simplePageBean.getEditPrivs() == 0);
 
@@ -365,7 +362,7 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
 			marker.level = -1;
 			entries.add(marker);
 			for (SimplePage p: pageMap.values()) {
-				if(p.getOwner() == null) {
+				if(!simplePageBean.isStudentPage(p)) {
 					PageEntry entry = new PageEntry();
 					entry.pageId = p.getPageId();
 					entry.itemId = null;
@@ -425,7 +422,7 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
 		    	if (level > 5)
 		    		level = 5;
 		    	String imagePath = "/lessonbuilder-tool/images/";
-		    	SimplePageItem item = simplePageBean.findItem(entry.itemId);
+
 		    	SimplePageLogEntry logEntry = simplePageBean.getLogEntry(entry.itemId);
 		    	String note = null;
 		    	if (logEntry != null && logEntry.isComplete()) {
@@ -505,9 +502,10 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
                         UIOutput.make(itemListItem,"item-icon")
                             .decorate(getImageSourceDecorator(pageItem));
 
-                        if (pageItem.isPrerequisite()) {
-                            itemListItem.decorate(new UIFreeAttributeDecorator("class", "disabled-text-item"));
-                        }
+			// interesting idea, but makes it invisible
+                        //if (pageItem.isPrerequisite()) {
+			    //  itemListItem.decorate(new UIFreeAttributeDecorator("class", "disabled-text-item"));
+                        //}
 
                         if(SimplePageItem.TEXT == pageItem.getType()) {
                             UIOutput.make(itemListItem, "name",  messageLocator.getMessage("simplepage.chooser.textitemplaceholder"))
@@ -559,8 +557,21 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
 
 		    }
 
-		    if (canEditPage && entry != null && entry.pageId != null && sharedPages.contains(entry.pageId)) {
-			UIOutput.make(row, "shared");
+		    
+		    if (canEditPage && entry != null && entry.pageId != null && entry.itemId != null) {
+			String text = null;
+			if (sharedPages.contains(entry.pageId))
+			    text = messageLocator.getMessage("simplepage.sharedpage");
+		    	SimplePageItem item = simplePageBean.findItem(entry.itemId);
+			String released = simplePageBean.getReleaseString(item, localeGetter.get());
+			if (released != null) {
+			    if (text != null)
+				text = text + released;
+			    else
+				text = released;
+			}
+			if (text != null) 
+			    UIOutput.make(row, "shared", text);
 		    }
 
 		    // debug code for development. this will be removed at some point
@@ -642,23 +653,13 @@ public class PagePickerProducer implements ViewComponentProducer, NavigationCase
 
     private UIStyleDecorator getImageSourceDecoratorFromMimeType(SimplePageItem pageItem) {
 
-        String mimeType = pageItem.getHtml();
+        String mimeType;
 
         if(SimplePageItem.TEXT == pageItem.getType()) {
             mimeType = "text/html";
-        } else if("application/octet-stream".equals(mimeType)) {
-            // OS X reports octet stream for things like MS Excel documents.
-            // Force a mimeType lookup so we get a decent icon.
-            mimeType = null;
-        }
-
-        if (mimeType == null || mimeType.equals("")) {
-            String s = pageItem.getSakaiId();
-            int j = s.lastIndexOf(".");
-            if (j >= 0)
-            s = s.substring(j+1);
-            mimeType = ContentTypeImageService.getContentType(s);
-        }
+        } else {
+	    mimeType = simplePageBean.getContentType(pageItem);
+	}
 
         String src = null;
 

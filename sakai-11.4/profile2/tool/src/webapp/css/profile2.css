@@ -27,10 +27,6 @@
 #rightPanel {
 }
 
-div#footer {
-}
-
-
 #fullWidth {
 }
 
@@ -1370,6 +1366,14 @@ div.wicket-aa ul li.selected {
 /* center the datepicker icon */
 img.ui-datepicker-trigger {
 	vertical-align: middle;
+}
+
+button.ui-datepicker-trigger {
+	margin: 0 0;
+}
+
+button.ui-datepicker-trigger .fa.fa-calendar{
+	color: #212121 !important;
 }
 
 .no-pictures {

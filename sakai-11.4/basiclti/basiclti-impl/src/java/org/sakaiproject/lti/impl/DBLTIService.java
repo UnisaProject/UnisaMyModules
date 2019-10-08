@@ -1,42 +1,21 @@
-
-/**********************************************************************************
- * $URL$
- * $Id$
- ***********************************************************************************
- *
- * Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 The Sakai Foundation
+/**
+ * Copyright (c) 2009-2017 The Apereo Foundation
  *
  * Licensed under the Educational Community License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.opensource.org/licenses/ECL-2.0
+ *             http://opensource.org/licenses/ecl2
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- **********************************************************************************/
+ */
+
 
 package org.sakaiproject.lti.impl;
-
-import org.apache.commons.configuration.PropertiesConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sakaiproject.component.cover.ComponentManager;
-import org.sakaiproject.db.api.SqlService;
-import org.sakaiproject.lti.api.LTIService;
-import org.springframework.jdbc.core.ColumnMapRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -47,6 +26,18 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.db.api.SqlService;
+import org.sakaiproject.lti.api.LTISearchData;
+import org.sakaiproject.lti.api.LTIService;
 import org.sakaiproject.lti.impl.FoormMapRowMapper;
 
 /**
@@ -54,10 +45,8 @@ import org.sakaiproject.lti.impl.FoormMapRowMapper;
  * DBLTIService extends the BaseLTIService.
  * </p>
  */
+@Slf4j
 public class DBLTIService extends BaseLTIService implements LTIService {
-	/** Our log (commons). */
-	private static Logger M_log = LoggerFactory.getLogger(DBLTIService.class);
-
 	/**
 	 * 
 	 */
@@ -115,16 +104,16 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 
 		try {
 			boolean doReset = false;
-			if (doReset) M_log.error("DO NOT RUN IN PRODUCTION WITH doReset TRUE");
+			if (doReset) log.error("DO NOT RUN IN PRODUCTION WITH doReset TRUE");
 
-			foorm.autoDDL("lti_content", LTIService.CONTENT_MODEL, m_sql, m_autoDdl, doReset, M_log);
-			foorm.autoDDL("lti_tools", LTIService.TOOL_MODEL, m_sql, m_autoDdl, doReset, M_log);
-			foorm.autoDDL("lti_deploy", LTIService.DEPLOY_MODEL, m_sql, m_autoDdl, doReset, M_log);
-			foorm.autoDDL("lti_binding", LTIService.BINDING_MODEL, m_sql, m_autoDdl, doReset, M_log);
-			foorm.autoDDL("lti_memberships_jobs", LTIService.MEMBERSHIPS_JOBS_MODEL, m_sql, m_autoDdl, doReset, M_log);
+			foorm.autoDDL("lti_content", LTIService.CONTENT_MODEL, m_sql, m_autoDdl, doReset);
+			foorm.autoDDL("lti_tools", LTIService.TOOL_MODEL, m_sql, m_autoDdl, doReset);
+			foorm.autoDDL("lti_deploy", LTIService.DEPLOY_MODEL, m_sql, m_autoDdl, doReset);
+			foorm.autoDDL("lti_binding", LTIService.BINDING_MODEL, m_sql, m_autoDdl, doReset);
+			foorm.autoDDL("lti_memberships_jobs", LTIService.MEMBERSHIPS_JOBS_MODEL, m_sql, m_autoDdl, doReset);
 			super.init();
 		} catch (Exception t) {
-			M_log.warn("init(): ", t);
+			log.warn("init(): ", t);
 		}
 	}
 
@@ -133,8 +122,8 @@ public class DBLTIService extends BaseLTIService implements LTIService {
      */
     public Object insertMembershipsJobDao(String siteId, String membershipsId, String membershipsUrl, String consumerKey, String ltiVersion) {
 
-	if (M_log.isDebugEnabled()) {
-	    M_log.debug("insertMembershipsJobDao(" + siteId + "," + membershipsId + "," + membershipsUrl + "," + consumerKey + "," + ltiVersion + ")");
+	if (log.isDebugEnabled()) {
+	    log.debug("insertMembershipsJobDao({},{},{},{},{})", siteId, membershipsId, membershipsUrl, consumerKey, ltiVersion);
 	}
 
 	// First, check if there is already a job for this site.
@@ -153,15 +142,15 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 
 	public  List<Map<String, Object>> getMembershipsJobsDao() {
 
-	M_log.debug("getMembershipsJobDao()");
+	log.debug("getMembershipsJobDao()");
 
 	return getThingsDao("lti_memberships_jobs", LTIService.MEMBERSHIPS_JOBS_MODEL, null, null, null, null, null, 0, 0, null, true);
     }
 
 	public Map<String, Object> getMembershipsJobDao(String siteId) {
 
-	if (M_log.isDebugEnabled()) {
-	    M_log.debug("getMembershipsJobDao(" + siteId + ")");
+	if (log.isDebugEnabled()) {
+	    log.debug("getMembershipsJobDao({})", siteId);
 	}
 
 	List<Map<String, Object>> rows
@@ -172,7 +161,7 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 	if (size == 1) {
 	    return rows.get(0);
 	} else if (size > 1) {
-	    M_log.warn("Mutiple memberships jobs found for site '" + siteId + "'. Returning first ...");
+	    log.warn("Mutiple memberships jobs found for site '{}'. Returning first ...", siteId);
 	    return rows.get(0);
 	} else {
 	    return null;
@@ -186,45 +175,19 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 		return insertThingDao("lti_tools", LTIService.TOOL_MODEL, null, newProps, siteId, isAdminRole, isMaintainRole);
 	}
 
-	/**
-	 * 
-	 * {@inheritDoc}
-	 * 
-	 * @see org.sakaiproject.lti.api.LTIService#getToolDao(java.lang.Long, java.lang.String, boolean)
-	 */
-	public Map<String, Object> getToolDao(Long key, String siteId, boolean isAdminRole) 
+	public Map<String, Object> getToolDao(Long key, String siteId, boolean isAdminRole)
 	{
 		return getThingDao("lti_tools", LTIService.TOOL_MODEL, key, siteId, isAdminRole);
 	}
 
-	/**
-	 * 
-	 * {@inheritDoc}
-	 * 
-	 * @see org.sakaiproject.lti.api.LTIService#deleteToolDao(java.lang.Long, java.lang.String, boolean)
-	 */
 	public boolean deleteToolDao(Long key, String siteId, boolean isAdminRole, boolean isMaintainRole) {
 		return deleteThingDao("lti_tools", LTIService.TOOL_MODEL, key, siteId, isAdminRole, isMaintainRole);
 	}
 
-	/**
-	 * 
-	 * {@inheritDoc}
-	 * 
-	 * @see org.sakaiproject.lti.impl.BaseLTIService#updateToolDao(java.lang.Long,
-	 *      java.lang.Object, java.lang.String, boolean)
-	 */
 	public Object updateToolDao(Long key, Object newProps, String siteId, boolean isAdminRole, boolean isMaintainRole) {
 		return updateThingDao("lti_tools", LTIService.TOOL_MODEL, null, key, (Object) newProps, siteId, isAdminRole, isMaintainRole);
 	}
 
-	/**
-	 * 
-	 * {@inheritDoc}
-	 * 
-	 * @see org.sakaiproject.lti.api.LTIService#getToolsDao(java.lang.String, java.lang.String,
-	 *      int, int, java.lang.String, boolean)
-	 */
 	public List<Map<String, Object>> getToolsDao(String search, String order, int first,
 			int last, String siteId, boolean isAdminRole) {
 
@@ -378,26 +341,13 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 		return retval;
 	}
 
-	/**
-	 * 
-	 * {@inheritDoc}
-	 * 
-	 * @see org.sakaiproject.lti.api.LTIService#deleteContent(java.lang.Long, java.lang.String, boolean)
-	 */
 	public boolean deleteContentDao(Long key, String siteId, boolean isAdminRole, boolean isMaintainRole) {
 		deleteContentLinkDao(key, siteId, isAdminRole, isMaintainRole);
 		return deleteThingDao("lti_content", LTIService.CONTENT_MODEL, key, siteId, isAdminRole, isMaintainRole);
 	}
 
-	/**
-	 * 
-	 * {@inheritDoc}
-	 * 
-	 * @see org.sakaiproject.lti.impl.BaseLTIService#updateContentDao(java.lang.Long, 
-	 *      java.lang.Object, java.lang.String, boolean)
-	 */
-	public Object updateContentDao(Long key, Object newProps, String siteId, 
-		boolean isAdminRole, boolean isMaintainRole) 
+	public Object updateContentDao(Long key, Object newProps, String siteId,
+		boolean isAdminRole, boolean isMaintainRole)
 	{
 		if ( key == null || newProps == null ) {
 			throw new IllegalArgumentException(
@@ -452,29 +402,68 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 	}
 
 	/**
-	 * 
-	 * {@inheritDoc}
-	 * 
-	 * @see org.sakaiproject.lti.api.LTIService#getContentsDao(java.lang.String,
-	 *      java.lang.String, int, int)
+	 * Get the contents for a search, add some data from site properties, and the launch
+	 * from lti_tools - the dependency means that this will not find content items that do
+	 * not have an associated tool.
 	 */
 	public List<Map<String, Object>> getContentsDao(String search, String order, int first,
 			int last, String siteId, boolean isAdminRole) {
 
-		if ( order != null ) {
-			order = foorm.orderCheck(order, "lti_content", LTIService.CONTENT_MODEL);
-			if ( order == null ) {
-				throw new IllegalArgumentException("order must be [table.]field [asc|desc]");
-			}
-		}
+		// It is important that any tables/columns added for the purposes of display or searching be
+		// LEFT JOIN - *any* INNER JOIN will function as a WHERE clause and will hide content
+        String concatSearch = ("mysql".equals(m_sql.getVendor())) ?  "CONCAT_WS('', lti_content.launch, lti_tools.launch)" : "(lti_content.launch || lti_tools.launch)";
+        String extraSelect = "SAKAI_SITE.TITLE AS SITE_TITLE, ssp1.VALUE AS SITE_CONTACT_NAME, ssp2.VALUE AS SITE_CONTACT_EMAIL, lti_tools.launch as URL, "+concatSearch+" AS searchURL";
+        String joinClause = "LEFT JOIN SAKAI_SITE ON lti_content.SITE_ID = SAKAI_SITE.SITE_ID"
+        		+ " LEFT JOIN SAKAI_SITE_PROPERTY ssp1 ON (lti_content.SITE_ID = ssp1.SITE_ID AND ssp1.name = 'contact-name')"
+        		+ " LEFT JOIN SAKAI_SITE_PROPERTY ssp2 ON (lti_content.SITE_ID = ssp2.SITE_ID AND ssp2.name = 'contact-email')"
+			+ " LEFT JOIN lti_tools ON (lti_content.tool_id = lti_tools.id)";
 
-		List<Map<String, Object>> contents = getThingsDao("lti_content",
-				LTIService.CONTENT_MODEL, null, null, search, null, order, first, last, siteId, isAdminRole);
-		for (Map<String, Object> content : contents) {
-			content.put("launch_url", getContentLaunch(content));
-		}
-		return contents;
+        String propertyKey = serverConfigurationService.getString(LTI_SITE_ATTRIBUTION_PROPERTY_KEY, LTI_SITE_ATTRIBUTION_PROPERTY_KEY_DEFAULT);
+        if (StringUtils.isNotEmpty(propertyKey)) {
+            extraSelect += ", ssp3.VALUE as ATTRIBUTION";
+            joinClause = joinClause + " LEFT JOIN SAKAI_SITE_PROPERTY ssp3 ON (lti_content.SITE_ID = ssp3.SITE_ID AND ssp3.name = '" + propertyKey + "')";
+        }
+
+        final String[] fields = (String[])ArrayUtils.addAll(LTIService.CONTENT_MODEL, LTIService.CONTENT_EXTRA_FIELDS);
+        if (order != null) {
+            order = foorm.orderCheck(order, "lti_content", fields);
+            if (order == null) {
+                throw new IllegalArgumentException("order must be [table.]field [asc|desc]");
+            }
+        }
+	// TODO: SAK-32704 - Resolve the different ways to do search
+        search = foorm.searchCheck(search, "lti_content", fields);
+
+        List<Map<String, Object>> contents = getThingsDao("lti_content", LTIService.CONTENT_MODEL, extraSelect, joinClause, search, null, order, first, last, siteId, isAdminRole);
+        for (Map<String, Object> content : contents) {
+            content.put("launch_url", getContentLaunch(content));
+        }
+        return contents;
 	}
+
+	/**
+	 *
+	 * {@inheritDoc}
+	 * 
+	 * @see org.sakaiproject.lti.api.LTIService#countContentsDao(java.lang.String,
+	 *      java.lang.String, boolean)
+	 */
+	public int countContentsDao(String search, String siteId, boolean isAdminRole) {
+		// It is important that any tables/columns added for the purposes of display or searching be
+		// LEFT JOIN - *any* INNER JOIN will function as a WHERE clause and will hide content
+		// items from the admin UI - so they will not be seen and cannot be repaired
+        String joinClause = "LEFT JOIN SAKAI_SITE ON lti_content.SITE_ID = SAKAI_SITE.SITE_ID"
+        		+ " LEFT JOIN SAKAI_SITE_PROPERTY ssp1 ON (lti_content.SITE_ID = ssp1.SITE_ID AND ssp1.name = 'contact-name')"
+        		+ " LEFT JOIN SAKAI_SITE_PROPERTY ssp2 ON (lti_content.SITE_ID = ssp2.SITE_ID AND ssp2.name = 'contact-email')"
+			+ " LEFT JOIN lti_tools ON (lti_content.tool_id = lti_tools.id)";
+        final String propertyKey = serverConfigurationService.getString(LTI_SITE_ATTRIBUTION_PROPERTY_KEY, LTI_SITE_ATTRIBUTION_PROPERTY_KEY_DEFAULT);
+        if (StringUtils.isNotEmpty(propertyKey)) {
+            joinClause = joinClause + " LEFT JOIN SAKAI_SITE_PROPERTY ssp3 ON (lti_content.SITE_ID = ssp3.SITE_ID AND ssp3.name = '" + propertyKey + "')";
+        }
+        String[] fields = (String[])ArrayUtils.addAll(LTIService.CONTENT_MODEL, LTIService.CONTENT_EXTRA_FIELDS);
+        search = foorm.searchCheck(search, "lti_content", fields);
+        return countThingsDao("lti_content", LTIService.CONTENT_MODEL, joinClause, search, null, siteId, isAdminRole);
+    }
 
 	/**
 	 * 
@@ -484,24 +473,11 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 		return insertThingDao("lti_deploy", LTIService.DEPLOY_MODEL, null, newProps, siteId, isAdminRole, isMaintainRole);
 	}
 
-	/**
-	 * 
-	 * {@inheritDoc}
-	 * 
-	 * @see org.sakaiproject.lti.api.LTIService#deleteDeployDao(java.lang.Long, java.lang.String, boolean)
-	 */
 	public boolean deleteDeployDao(Long key, String siteId, boolean isAdminRole, boolean isMaintainRole) {
 		if ( ! isAdminRole ) throw new IllegalArgumentException("Currently we support admins/Dao access");
 		return deleteThingDao("lti_deploy", LTIService.DEPLOY_MODEL, key, siteId, isAdminRole, isMaintainRole);
 	}
 
-	/**
-	 * 
-	 * {@inheritDoc}
-	 * 
-	 * @see org.sakaiproject.lti.impl.BaseLTIService#updateDeployDao(java.lang.Long,
-	 *      java.lang.Object, java.lang.String, boolean)
-	 */
 	public Object updateDeployDao(Long key, Object newProps, String siteId, boolean isAdminRole, boolean isMaintainRole) {
 		if ( ! isAdminRole ) throw new IllegalArgumentException("Currently we support admins/Dao access");
 		return updateThingDao("lti_deploy", LTIService.DEPLOY_MODEL, null, key, newProps, siteId, isAdminRole, isMaintainRole);
@@ -607,12 +583,12 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 		fields[0] = siteId;
 		fields[1] = tool_id;
 
-		M_log.debug(statement);
+		log.debug(statement);
 		List rv = getResultSet(statement, fields, columns);
 
 		if ((rv != null) && (rv.size() > 0)) {
 			if ( rv.size() > 1 ) {
-				M_log.warn("Warning more than one row returned: "+statement);
+				log.warn("Warning more than one row returned: {}", statement);
 			}
 			return (Map<String, Object>) rv.get(0);
 		}
@@ -657,7 +633,7 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 
 		// TODO: Remove this as a parameter
 		if (!isMaintainRole) {
-	    M_log.debug("Not in maintain role. Nothing will be inserted. Returning null ...");
+	    log.debug("Not in maintain role. Nothing will be inserted. Returning null ...");
 	    return null;
 	}
 
@@ -700,24 +676,15 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 
 		final String sql = makeSql;
 
-		// System.out.println("Insert SQL="+sql);
+		log.debug("Insert SQL={}", sql);
 		final Object[] fields = foorm.getInsertObjects(newMapping);
 
 		Long retval = m_sql.dbInsert(null, sql, fields, LTI_ID);
 
-		M_log.debug("Count="+retval+" Insert="+sql);
+		log.debug("Count={} Insert={}", retval, sql);
 		return retval;
 	}
 
-	/**
-	 * 
-	 * @param table
-	 * @param model
-	 * @param key
-	 * @param siteId - This is allowed to be null
-	 * @param isMaintainRole
-	 * @return
-	 */
 	private Map<String, Object> getThingDao(String table, String[] model, Long key,
 			String siteId, boolean isAdminRole)
 	{
@@ -743,31 +710,19 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 			fields[0] = key;
 		}
 
-		M_log.debug(statement);
+		log.debug(statement);
 		List rv = getResultSet(statement, fields, columns);
 
 		if ((rv != null) && (rv.size() > 0)) {
 			if ( rv.size() > 1 ) {
-				M_log.warn("Warning more than one row returned: "+statement);
+				log.warn("Warning more than one row returned: {}", statement);
 			}
 			return (Map<String, Object>) rv.get(0);
 		}
 		return null;
 	}
 
-	/**
-	 * 
-	 * @param table
-	 * @param model
-	 * @param search
-	 * @param order
-	 * @param first
-	 * @param last
-	 * @param siteId
-	 * @param isMaintainRole
-	 * @return
-	 */
-	public List<Map<String, Object>> getThingsDao(String table, String[] model, 
+	public List<Map<String, Object>> getThingsDao(String table, String[] model,
 		String extraSelect, String joinClause, String search, String groupBy, String order, 
 		int first, int last, String siteId, boolean isAdminRole) 
 	{
@@ -790,26 +745,29 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 		String whereClause = "";
 
 		// Only admins can see invisible items and items from any site
-		Object fields[] = null;
+		final List<Object> fields = new ArrayList<Object>();
 		if ( ! isAdminRole ) {
 			if (Arrays.asList(columns).indexOf(LTI_VISIBLE) >= 0 && 
 				Arrays.asList(columns).indexOf(LTI_SITE_ID) >= 0 ) {
 				whereClause = " ("+table+'.'+LTI_SITE_ID+" = ? OR "+
 					"("+table+'.'+LTI_SITE_ID+" IS NULL AND "+table+'.'+LTI_VISIBLE+" != 1 ) ) ";
-				fields = new Object[1];
-				fields[0] = siteId;
+				fields.add(siteId);
 			} else if (Arrays.asList(columns).indexOf(LTI_SITE_ID) >= 0) {
 				whereClause = " ("+table+'.'+LTI_SITE_ID+" = ? OR "+table+'.'+LTI_SITE_ID+" IS NULL)";
-				fields = new Object[1];
-				fields[0] = siteId;
+				fields.add(siteId);
 			}
 		}
 
-		if ( search != null && search.length() > 0 ) {
-			if ( whereClause.length() > 0 ) {
-				whereClause += " AND (" + search + ") ";
-			} else { 
-				whereClause += " (" + search + ") ";
+		if (search != null && search.length() > 0) {
+			LTISearchData searchData = foorm.secureSearch(search, m_sql.getVendor());
+			if (searchData.hasValue()) {
+				if (whereClause.length() > 0) {
+					whereClause = whereClause + " AND (" + searchData.getSearch() + ") ";
+				}
+				else {
+					whereClause = whereClause + " (" + searchData.getSearch() + ") ";
+				}
+				fields.addAll(searchData.getValues());
 			}
 		}
 
@@ -834,8 +792,67 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 			if (pagedStatement != null)
 				statement = pagedStatement;
 		}
-		M_log.debug(statement);
-		return getResultSet(statement, fields, columns);
+		log.debug(statement);
+		return getResultSet(statement, ((fields.size() > 0) ? fields.toArray() : null), columns);
+	}
+
+	public int countThingsDao(String table, String[] model, String joinClause, String search, String groupBy, String siteId, boolean isAdminRole)
+	{
+		if (table == null || model == null ) {
+			throw new IllegalArgumentException("table and model must be non-null");
+		}
+		if (siteId == null && !isAdminRole ) {
+			throw new IllegalArgumentException("siteId must be non-null for non-admins");
+		}
+
+		String statement = "SELECT count(*)";
+		statement += " FROM " + table;
+		if ( joinClause != null ) {
+			statement += " " + joinClause;
+		}
+		String[] columns = foorm.getFields(model);
+		String whereClause = "";
+
+		// Only admins can see invisible items and items from any site
+		final List<Object> fields = new ArrayList<Object>();
+		if ( ! isAdminRole ) {
+			if (Arrays.asList(columns).indexOf(LTI_VISIBLE) >= 0 && 
+				Arrays.asList(columns).indexOf(LTI_SITE_ID) >= 0 ) {
+				whereClause = " ("+table+'.'+LTI_SITE_ID+" = ? OR "+
+					"("+table+'.'+LTI_SITE_ID+" IS NULL AND "+table+'.'+LTI_VISIBLE+" != 1 ) ) ";
+				fields.add(siteId);
+			} else if (Arrays.asList(columns).indexOf(LTI_SITE_ID) >= 0) {
+				whereClause = " ("+table+'.'+LTI_SITE_ID+" = ? OR "+table+'.'+LTI_SITE_ID+" IS NULL)";
+				fields.add(siteId);
+			}
+		}
+
+		if (search != null && search.length() > 0) {
+			LTISearchData searchData = foorm.secureSearch(search, m_sql.getVendor());
+			if (searchData.hasValue()) {
+				if (whereClause.length() > 0) {
+					whereClause = whereClause + " AND (" + searchData.getSearch() + ") ";
+				}
+				else {
+					whereClause = whereClause + " (" + searchData.getSearch() + ") ";
+				}
+				fields.addAll(searchData.getValues());
+			}
+		}
+
+		if ( whereClause.length() > 0 ) statement += " WHERE " + whereClause;
+
+		if ( groupBy != null ) {
+			statement += " GROUP BY ";
+			if ("oracle".equals(m_sql.getVendor()) ) {
+				statement += foorm.formSelect(table, model, false);
+			} else {
+				statement += groupBy;
+			}
+		}
+		log.debug(statement);
+		int ret = jdbcTemplate.queryForObject(statement, ((fields.size() > 0) ? fields.toArray() : null), Integer.class);
+		return ret;
 	}
 
 	/**
@@ -875,7 +892,7 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 		}
 
 		int count = m_sql.dbWriteCount(statement, fields, null, null, false);
-		M_log.debug("Count="+count+" Delete="+statement);
+		log.debug("Count={} Delete={}", count, statement);
 		return count == 1;
 	}
 
@@ -947,13 +964,13 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 			foorm.setField(newMapping, LTI_SITE_ID, siteId);
 		}
 
-		// System.out.println("Upate="+sql);
+		log.debug("Upate={}", sql);
 		Object[] fields = foorm.getUpdateObjects(newMapping);
-		// System.out.println("Fields="+Arrays.toString(fields));
+		log.debug("Fields={}", Arrays.toString(fields));
 
 		int count = m_sql.dbWriteCount(sql, fields, null, null, false);
 
-		M_log.debug("Count="+count+" Update="+sql);
+		log.debug("Count={} Update={}", count, sql);
 		return count == 1;
 	}
 
@@ -973,12 +990,12 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 		Object [] fields = new Object[1];
 		fields[0] = resourceType;
 
-		M_log.debug(statement);
+		log.debug(statement);
 		List rv = getResultSet(statement, fields, columns);
 
 		if ((rv != null) && (rv.size() > 0)) {
 			if ( rv.size() > 1 ) {
-				M_log.warn("Warning more than one row returned: "+statement);
+				log.warn("Warning more than one row returned: {}", statement);
 			}
 			return (Map<String, Object>) rv.get(0);
 		}
@@ -999,12 +1016,12 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 		Object [] fields = new Object[1];
 		fields[0] = consumerKey;
 
-		M_log.debug(statement);
+		log.debug(statement);
 		List rv = getResultSet(statement, fields, columns);
 
 		if ((rv != null) && (rv.size() > 0)) {
 			if ( rv.size() > 1 ) {
-				M_log.warn("Warning more than one row returned: "+statement);
+				log.warn("Warning more than one row returned: {}", statement);
 			}
 			return (Map<String, Object>) rv.get(0);
 		}
@@ -1015,9 +1032,9 @@ public class DBLTIService extends BaseLTIService implements LTIService {
 	// Utility to return a resultset
 	public List<Map<String, Object>> getResultSet(String statement, Object[] fields,
 			final String[] columns) {
-		// System.out.println("getResultSet sql="+statement+" fields="+fields);
+		log.debug("getResultSet sql={} fields={}", statement, fields);
 		List rv = jdbcTemplate.query(statement, fields, new FoormMapRowMapper(columns));
-		// System.out.println("getResultSet size="+rv.size()+" sql="+statement);
+		log.debug("getResultSet size={} sql={}", rv.size(), statement);
 
 		return (List<Map<String, Object>>) rv;
 	}

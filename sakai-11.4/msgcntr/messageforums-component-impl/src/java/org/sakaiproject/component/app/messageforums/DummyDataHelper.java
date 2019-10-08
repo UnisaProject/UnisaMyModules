@@ -25,8 +25,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 import org.sakaiproject.api.app.messageforums.ActorPermissions;
 import org.sakaiproject.api.app.messageforums.Area;
 import org.sakaiproject.api.app.messageforums.Attachment;
@@ -59,16 +59,14 @@ import org.sakaiproject.component.app.messageforums.dao.hibernate.PrivateMessage
  * hibernate object wrappers, which are used so that hibernate does not play dirty and try to save
  * objects on the interface. They also uses List rather than Set, which play nice in JSF tags.
  */
-
+@Slf4j
 public class DummyDataHelper implements DummyDataHelperApi
 {
   private MessageForumsTypeManager typeMgr;
-  
-  private static final Logger LOG = LoggerFactory.getLogger(DummyDataHelper.class);
 
   public void init()
   {
-     LOG.info("init()");
+     log.info("init()");
     ;
   }
 

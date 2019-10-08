@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) 2003-2017 The Apereo Foundation
+ *
+ * Licensed under the Educational Community License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *             http://opensource.org/licenses/ecl2
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.sakaiproject.gradebookng.tool.panels;
 
 import java.util.ArrayList;
@@ -5,35 +20,32 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.sakaiproject.gradebookng.business.GbCategoryType;
-import org.sakaiproject.gradebookng.business.GbGradingType;
 import org.sakaiproject.gradebookng.business.GbRole;
-import org.sakaiproject.gradebookng.business.GradebookNgBusinessService;
 import org.sakaiproject.gradebookng.business.model.GbGradeInfo;
 import org.sakaiproject.gradebookng.business.util.CourseGradeFormatter;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.service.gradebook.shared.Assignment;
+import org.sakaiproject.service.gradebook.shared.CategoryDefinition;
+import org.sakaiproject.service.gradebook.shared.CategoryScoreData;
 import org.sakaiproject.service.gradebook.shared.CourseGrade;
+import org.sakaiproject.service.gradebook.shared.GradingType;
 import org.sakaiproject.tool.gradebook.Gradebook;
 
 /**
  * The panel that is rendered for students for both their own grades view, and also when viewing it from the instructor review tab
  */
-public class StudentGradeSummaryGradesPanel extends Panel {
+public class StudentGradeSummaryGradesPanel extends BasePanel {
 
 	private static final long serialVersionUID = 1L;
-
-	@SpringBean(name = "org.sakaiproject.gradebookng.business.GradebookNgBusinessService")
-	protected GradebookNgBusinessService businessService;
 
 	GbCategoryType configuredCategoryType;
 
@@ -70,9 +82,9 @@ public class StudentGradeSummaryGradesPanel extends Panel {
 
 		// unpack model
 		final Map<String, Object> modelData = (Map<String, Object>) getDefaultModelObject();
-		final String userId = (String) modelData.get("userId");
+		final String userId = (String) modelData.get("studentUuid");
 
-		final Gradebook gradebook = this.businessService.getGradebook();
+		final Gradebook gradebook = getGradebook();
 		final CourseGradeFormatter courseGradeFormatter = new CourseGradeFormatter(
 				gradebook,
 				GbRole.STUDENT,
@@ -84,9 +96,10 @@ public class StudentGradeSummaryGradesPanel extends Panel {
 		final Map<Long, GbGradeInfo> grades = this.businessService.getGradesForStudent(userId);
 		final List<Assignment> assignments = this.businessService.getGradebookAssignmentsForStudent(userId);
 
-		final List<String> categoryNames = new ArrayList<String>();
-		final Map<String, List<Assignment>> categoryNamesToAssignments = new HashMap<String, List<Assignment>>();
+		final List<String> categoryNames = new ArrayList<>();
+		final Map<String, List<Assignment>> categoryNamesToAssignments = new HashMap<>();
 		final Map<Long, Double> categoryAverages = new HashMap<>();
+		Map<String, CategoryDefinition> categoriesMap = Collections.emptyMap();
 
 		// if gradebook release setting disabled, no work to do
 		if (this.isAssignmentsDisplayed) {
@@ -100,20 +113,29 @@ public class StudentGradeSummaryGradesPanel extends Panel {
 
 					if (!categoryNamesToAssignments.containsKey(categoryName)) {
 						categoryNames.add(categoryName);
-						categoryNamesToAssignments.put(categoryName, new ArrayList<Assignment>());
-
-						if (assignment.getCategoryId() != null) {
-							final Double categoryAverage = this.businessService.getCategoryScoreForStudent(assignment.getCategoryId(),
-									userId);
-							if (categoryAverage != null) {
-								categoryAverages.put(assignment.getCategoryId(), categoryAverage);
-							}
-						}
+						categoryNamesToAssignments.put(categoryName, new ArrayList<>());
 					}
 
 					categoryNamesToAssignments.get(categoryName).add(assignment);
 				}
 			}
+			// get the category scores and mark any dropped items
+			for (String catName : categoryNamesToAssignments.keySet()) {
+				if (catName.equals(getString(GradebookPage.UNCATEGORISED))) {
+					continue;
+				}
+
+				List<Assignment> catItems = categoryNamesToAssignments.get(catName);
+				if (!catItems.isEmpty()) {
+					Long catId = catItems.get(0).getCategoryId();
+					if (catId != null) {
+						businessService.getCategoryScoreForStudent(catId, userId, false) // Dont include non-released items in the category calc
+							.ifPresent(avg -> storeAvgAndMarkIfDropped(avg, catId, categoryAverages, grades));
+					}
+				}
+			}
+			categoriesMap = businessService.getGradebookCategoriesForStudent(userId).stream()
+				.collect(Collectors.toMap(cat -> cat.getName(), cat -> cat));
 			Collections.sort(categoryNames);
 		}
 
@@ -127,7 +149,8 @@ public class StudentGradeSummaryGradesPanel extends Panel {
 		tableModel.put("isCategoryWeightEnabled", isCategoryWeightEnabled());
 		tableModel.put("isGroupedByCategory", this.isGroupedByCategory);
 		tableModel.put("showingStudentView", true);
-		tableModel.put("gradingType", GbGradingType.valueOf(gradebook.getGrade_type()));
+		tableModel.put("gradingType", GradingType.valueOf(gradebook.getGrade_type()));
+		tableModel.put("categoriesMap", categoriesMap);
 
 		addOrReplace(new GradeSummaryTablePanel("gradeSummaryTable", new LoadableDetachableModel<Map<String, Object>>() {
 			@Override
@@ -174,6 +197,15 @@ public class StudentGradeSummaryGradesPanel extends Panel {
 	 * @return
 	 */
 	private boolean isCategoryWeightEnabled() {
-		return (this.configuredCategoryType == GbCategoryType.WEIGHTED_CATEGORY) ? true : false;
+		return configuredCategoryType == GbCategoryType.WEIGHTED_CATEGORY;
+	}
+
+	private void storeAvgAndMarkIfDropped(CategoryScoreData avg, Long catId, Map<Long, Double> categoryAverages,
+		Map<Long, GbGradeInfo> grades) {
+
+		categoryAverages.put(catId, avg.score);
+
+		grades.entrySet().stream().filter(e -> avg.droppedItems.contains(e.getKey()))
+			.forEach(entry -> entry.getValue().setDroppedFromCategoryScore(true));
 	}
 }

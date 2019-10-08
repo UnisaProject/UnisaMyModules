@@ -22,6 +22,7 @@
 package org.sakaiproject.access.tool;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
 
 import javax.servlet.ServletConfig;
@@ -29,10 +30,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUpload;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.content.api.ContentCollection;
 import org.sakaiproject.content.api.ContentHostingService;
@@ -59,16 +60,13 @@ import org.sakaiproject.tool.api.Session;
  * 
  * @author Sakai Software Development Team
  */
+@Slf4j
 public class WebServlet extends AccessServlet
 {
-	/** Our log (commons). */
-	private static Logger M_log = LoggerFactory.getLogger(WebServlet.class);
 	protected ContentHostingService contentHostingService;
 	protected UserDirectoryService userDirectoryService;
 	protected TimeService timeService;
 
-	
-	
 	/* (non-Javadoc)
 	 * @see org.sakaiproject.access.tool.AccessServlet#init(javax.servlet.ServletConfig)
 	 */
@@ -180,7 +178,7 @@ public class WebServlet extends AccessServlet
 	protected void postUpload(HttpServletRequest req, HttpServletResponse res)
 	{
 		String path = req.getPathInfo();
-		// System.out.println("path " + path);
+		log.debug("path {}", path);
 		if (path == null) path = "";
 		// assume caller has verified that it is a request for content and that it's multipart
 		// loop over attributes in request, picking out the ones
@@ -188,7 +186,7 @@ public class WebServlet extends AccessServlet
 		for (Enumeration e = req.getAttributeNames(); e.hasMoreElements();)
 		{
 			String iname = (String) e.nextElement();
-			// System.out.println("Item " + iname);
+			log.debug("Item {}", iname);
 			Object o = req.getAttribute(iname);
 			// NOTE: Fileitem is from
 			// org.apache.commons.fileupload.FileItem, not
@@ -196,14 +194,18 @@ public class WebServlet extends AccessServlet
 			if (o != null && o instanceof FileItem)
 			{
 				FileItem fi = (FileItem) o;
-				// System.out.println("found file " + fi.getName());
-				if (!writeFile(fi.getName(), fi.getContentType(), fi.get(), path, req, res, true)) return;
+				try (InputStream inputStream = fi.getInputStream())
+				{
+					if (!writeFile(fi.getName(), fi.getContentType(), inputStream, path, req, res, true)) return;
+				} catch (IOException ioe) {
+					log.warn("Problem getting InputStream", ioe);
+				}
 			}
 		}
 	}
 
-	protected boolean writeFile(String name, String type, byte[] data, String dir, HttpServletRequest req,
-			HttpServletResponse resp, boolean mkdir)
+	protected boolean writeFile(String name, String type, InputStream inputStream, String dir, HttpServletRequest req,
+								HttpServletResponse resp, boolean mkdir)
 	{
 		try
 		{
@@ -212,7 +214,7 @@ public class WebServlet extends AccessServlet
 			if (i >= 0) name = name.substring(i + 1);
 			if (name.length() < 1)
 			{
-				// System.out.println("no name left / removal");
+				log.debug("no name left / removal");
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return false;
 			}
@@ -236,14 +238,14 @@ public class WebServlet extends AccessServlet
 			// Try to delete the resource
 			try
 			{
-				// System.out.println("Trying Del " + path);
+				log.debug("Trying Del {}", path);
 				// The existing document may be a collection or a file.
 				boolean isCollection = contentHostingService.getProperties(path).getBooleanProperty(
 						ResourceProperties.PROP_IS_COLLECTION);
 
 				if (isCollection)
 				{
-					// System.out.println("Can't del, iscoll");
+					log.debug("Can't del, iscoll");
 					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 					return false;
 				}
@@ -253,7 +255,7 @@ public class WebServlet extends AccessServlet
 					// work for my workspace
 					ContentResourceEdit edit = contentHostingService.editResource(path);
 					// if (edit != null)
-					// System.out.println("Got edit");
+					log.debug("Got edit");
 					contentHostingService.removeResource(edit);
 				}
 			}
@@ -263,7 +265,7 @@ public class WebServlet extends AccessServlet
 			}
 			catch (Exception e)
 			{
-				// System.out.println("Can't del, exception " + e.getClass() + ": " + e.getMessage());
+				log.debug("Can't del, exception {}: {}", e.getClass(), e.getMessage());
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return false;
 			}
@@ -282,8 +284,8 @@ public class WebServlet extends AccessServlet
 
 				resourceProperties.addProperty(ResourceProperties.PROP_DISPLAY_NAME, name);
 
-				// System.out.println("Trying Add " + path);
-				ContentResource resource = contentHostingService.addResource(path, type, data, resourceProperties,
+				log.debug("Trying Add {}", path);
+				ContentResource resource = contentHostingService.addResource(path, type, inputStream, resourceProperties,
 						NotificationService.NOTI_NONE);
 
 			}
@@ -295,35 +297,35 @@ public class WebServlet extends AccessServlet
 					try
 					{
 						ContentCollection collection = contentHostingService.addCollection(dir, resourceProperties);
-						return writeFile(name, type, data, dir, req, resp, false);
+						return writeFile(name, type, inputStream, dir, req, resp, false);
 					}
 					catch (Throwable ee)
 					{
 					}
 				}
-				// System.out.println("Add fail, inconsistent");
+				log.debug("Add fail, inconsistent");
 				resp.sendError(HttpServletResponse.SC_CONFLICT);
 				return false;
 			}
 			catch (IdUsedException e)
 			{
 				// Should not happen because we deleted above (unless tawo requests at same time)
-				// System.out.println("Add fail, in use");
-				M_log.warn("access post IdUsedException:" + e.getMessage());
+				log.debug("Add fail, in use");
+				log.warn("access post IdUsedException:" + e.getMessage());
 
 				resp.sendError(HttpServletResponse.SC_CONFLICT);
 				return false;
 			}
 			catch (Exception e)
 			{
-				// System.out.println("Add failed, exception " + e.getClass() + ": " + e.getMessage());
+				log.debug("Add failed, exception {}: {}", e.getClass(), e.getMessage());
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				return false;
 			}
 		}
 		catch (IOException e)
 		{
-			// System.out.println("overall fail IOException " + e);
+			log.debug("overall fail IOException {}", e);
 		}
 		return true;
 	}

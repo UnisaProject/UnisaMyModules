@@ -110,8 +110,20 @@
 				utils.resizeFrame();
 			}
 		});
+		//catch enter key press for search box
+		$('#$form_search').keyup(function(event){
+			if(event.keyCode === 13){
+				$("#searchUser").click();
+			}
+		});
 	  });
 	  
+	//method called to do search for the participant
+	function doSearch(url){
+		var searchText = $('#$form_search' ).val();
+		location = url + "&search=" + searchText;
+		return true;
+	}
 	
 </script>
 
@@ -371,7 +383,7 @@
                 $tlang.getString("sinfo.mathjax.name")
                 </th>
                 <td>
-                #if ($isMathJaxAllowedInSite)
+                #if ($isMathJaxEnabledForSite)
                     $tlang.getString("sinfo.mathjax.allowed")
                 #else
                     $tlang.getString("sinfo.mathjax.notAllowed")
@@ -379,6 +391,18 @@
                 </td>
             </tr>
             #end			
+
+		#if ($isLessonsSubNavEnabledForSite)
+			<tr class="summary-lessons-subnav-enabled">
+				<th>
+					$tlang.getString("sinfo.lessonbuildersubnav.name")
+				</th>
+				<td>
+					$tlang.getString("sinfo.lessonbuildersubnav.enabled")
+				</td>
+			</tr>
+		#end
+
 		</table>
 
 		#set ($desc = $siteDescription) 
@@ -538,7 +562,7 @@
 			#pagingPanel($pagesizeFormName)
 		#end
 		## download link for print out participant list
-		<a href="$printParticipantUrl" title="$!tlang.getString('print')">$!tlang.getString('print')</a><i class="icon-sakai--pdf"></i>
+		<a href="$printParticipantUrl" title="$!tlang.getString('print')" target="_blank" rel="noreferrer"><span class="icon-sakai--pdf" aria-hidden="true"></span> $!tlang.getString('print')</a>
 		<hr />
 		<form name="participantForm" id="participantForm" action="#toolForm("SiteAction")" method="post">
 			<div class="table-responsive">
@@ -555,6 +579,14 @@
 								#end 
 							#end 
 						</a>
+						<span class="site-searchbox">
+							<label for="$form_search" class="skip">$tlang.getString('list.search')</label>
+							<input size="10"  value="$validator.escapeHtml($!userSearch)" name="$form_search" id="$form_search" type="text" class="searchField"  />
+							<input type="button" id="searchUser" value="$tlang.getString('sitegen.siteinfolist.searchUser')" onclick="doSearch('#toolLink($action "doUser_search")');" />
+							#if (($!userSearch) && (!$userSearch.equals("")))
+								<input type="button" class="button" value="$tlang.getString("list.cls")" onclick="location = '#toolLink($action "doUser_search_clear")';return false;" />
+							#end
+						</span>
 					</th>
 					#if ($hasProviderSet)
 						<th id="coursename" scope="col">

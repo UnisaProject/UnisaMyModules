@@ -112,6 +112,7 @@ function clickSubmitForGrade(){
   <samigo:timerBar height="15" width="300"
     wait="#{delivery.timeLimit}"
     elapsed="#{delivery.timeElapse}"
+    timeUpMessage="#{deliveryMessages.time_up}"
     expireScript="document.forms[0].elements['tableOfContentsForm:elapsed'].value=loaded; document.forms[0].elements['tableOfContentsForm:outoftime'].value='true';" />
 <f:verbatim>  </span></f:verbatim>
 
@@ -181,7 +182,7 @@ function clickSubmitForGrade(){
                 <h:outputText escape="false" value="#{question.sequence}#{deliveryMessages.dot} #{question.strippedText}">
                 	<f:convertNumber maxFractionDigits="2"/>
                 </h:outputText>
-                <h:outputText escape="false" value=" (#{question.pointsDisplayString}#{question.roundedMaxPoints} #{deliveryMessages.pt})" rendered="#{(delivery.settings.displayScoreDuringAssessments != '2' && question.itemData.scoreDisplayFlag) || question.pointsDisplayString!=''}">
+                <h:outputText escape="false" value=" (#{question.pointsDisplayString}#{question.roundedMaxPointsToDisplay} #{deliveryMessages.pt})" rendered="#{(delivery.settings.displayScoreDuringAssessments != '2' && question.itemData.scoreDisplayFlag) || question.pointsDisplayString!=''}">
                 	<f:convertNumber maxFractionDigits="2"/>
                 </h:outputText>
                 <f:param name="partnumber" value="#{part.number}" />

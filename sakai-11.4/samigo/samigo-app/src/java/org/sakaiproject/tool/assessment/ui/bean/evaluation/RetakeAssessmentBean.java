@@ -22,16 +22,16 @@
 package org.sakaiproject.tool.assessment.ui.bean.evaluation;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.tool.assessment.data.dao.grading.StudentGradingSummaryData;
 
 /**
  * <p>Description: class form for evaluating total scores</p>
  *
  */
+@Slf4j
 public class RetakeAssessmentBean implements Serializable {
 
 	private Long publishedAssessmentId;
@@ -39,9 +39,7 @@ public class RetakeAssessmentBean implements Serializable {
 	private int numberRetake;
 	private StudentGradingSummaryData studentGradingSummaryData;
 	private String studentName;
-	private HashMap studentGradingSummaryDataMap;
-	
-	private static Logger log = LoggerFactory.getLogger(TotalScoresBean.class);
+	private Map studentGradingSummaryDataMap;
 
 	public RetakeAssessmentBean() {
 		log.debug("Creating a new RetakeAssessmentBean");
@@ -87,11 +85,11 @@ public class RetakeAssessmentBean implements Serializable {
 		this.studentName = studentName;
 	}
 		
-	public HashMap getStudentGradingSummaryDataMap() {
+	public Map getStudentGradingSummaryDataMap() {
 		return this.studentGradingSummaryDataMap;
 	}
 
-	public void setStudentGradingSummaryDataMap(HashMap studentGradingSummaryDataMap) {
+	public void setStudentGradingSummaryDataMap(Map studentGradingSummaryDataMap) {
 		this.studentGradingSummaryDataMap = studentGradingSummaryDataMap;
 	}
 }

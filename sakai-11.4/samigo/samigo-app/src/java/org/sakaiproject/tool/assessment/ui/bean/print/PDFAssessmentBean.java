@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) 2005-2017 The Apereo Foundation
+ *
+ * Licensed under the Educational Community License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *             http://opensource.org/licenses/ecl2
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.sakaiproject.tool.assessment.ui.bean.print;
 
 import java.awt.Color;
@@ -22,9 +37,8 @@ import javax.faces.context.FacesContext;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAnswer;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAssessmentAttachment;
@@ -58,6 +72,7 @@ import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+import org.sakaiproject.tool.assessment.jsf.convert.AnswerSurveyConverter;
 
 /**
  * 
@@ -67,11 +82,10 @@ import com.lowagie.text.pdf.PdfWriter;
  * PDF's from assessments
  * 
  */
+@Slf4j
 public class PDFAssessmentBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
-	private static Logger log = LoggerFactory.getLogger(PDFAssessmentBean.class);
 
 	private static org.sakaiproject.util.api.FormattedText formattedText = (org.sakaiproject.util.api.FormattedText)ComponentManager.get(org.sakaiproject.util.api.FormattedText.class);
 	
@@ -87,9 +101,9 @@ public class PDFAssessmentBean implements Serializable {
 
 	private String title = "";
 
-	private ArrayList parts = null;
+	private List parts = null;
 
-	private ArrayList deliveryParts = null;
+	private List<SectionContentsBean> deliveryParts = null;
 
 	private int baseFontSize = 5;
 
@@ -122,7 +136,7 @@ public class PDFAssessmentBean implements Serializable {
 	 * gets the delivery bean parts of the assessment
 	 * @return
 	 */
-	public ArrayList getDeliveryParts() {  
+	public List<SectionContentsBean> getDeliveryParts() {
 		return deliveryParts;
 	}
 
@@ -130,7 +144,7 @@ public class PDFAssessmentBean implements Serializable {
 	 * gets the parts of the assessment
 	 * @return
 	 */
-	public ArrayList getParts() {  
+	public List getParts() {
 		return parts;
 	}
 
@@ -138,7 +152,7 @@ public class PDFAssessmentBean implements Serializable {
 	 * gets what should be the full set of html chunks for an assessment
 	 * @return
 	 */
-	public ArrayList getHtmlChunks() {
+	public List getHtmlChunks() {
 		return parts;
 	}
 
@@ -146,26 +160,22 @@ public class PDFAssessmentBean implements Serializable {
 	 * sets the delivery parts
 	 * @param deliveryParts
 	 */
-	public void setDeliveryParts(ArrayList deliveryParts) {
-		ArrayList parts = new ArrayList();
+	public void setDeliveryParts(List<org.sakaiproject.tool.assessment.ui.bean.delivery.SectionContentsBean> deliveryParts) {
+		List<SectionContentsBean> parts = new ArrayList<>();
 		int numberQuestion = 1;
-		for (int i=0; i<deliveryParts.size(); i++) {
-			SectionContentsBean section = new SectionContentsBean((org.sakaiproject.tool.assessment.ui.bean.delivery.SectionContentsBean)deliveryParts.get(i));
-			ArrayList items = section.getItemContents();
+		for (org.sakaiproject.tool.assessment.ui.bean.delivery.SectionContentsBean part : deliveryParts) {
+			SectionContentsBean section = new SectionContentsBean(part);
+			List<ItemContentsBean> items = section.getItemContents();
 
 			// Renumbering
-			for (int j=0; items != null && j<items.size(); j++) {
-				ItemContentsBean itemContents = (ItemContentsBean)items.get(j);
-
+			for (ItemContentsBean itemContents : items) {
 				itemContents.setNumber(numberQuestion++);
 
 				// Order answers in order (A, B, C, D)
-				List question = itemContents.getItemData().getItemTextArraySorted();
-				for (int k=0; k<question.size(); k++) {
-					PublishedItemText itemtext = (PublishedItemText)question.get(k);
-					ArrayList answers = itemtext.getAnswerArray();
-					for (int t=0; t<answers.size(); t++) {
-						PublishedAnswer answer = (PublishedAnswer)answers.get(t);
+				List<ItemTextIfc> question = itemContents.getItemData().getItemTextArraySorted();
+				for (ItemTextIfc itemtext : question) {
+					List<AnswerIfc> answers = itemtext.getAnswerArray();
+					for (AnswerIfc answer : answers) {
 						if (answer.getLabel() != null && !answer.getLabel().equals(""))
 							answer.setSequence(Long.valueOf(answer.getLabel().charAt(0) - 64));
 					}
@@ -181,7 +191,7 @@ public class PDFAssessmentBean implements Serializable {
 	 * sets the parts
 	 * @param parts
 	 */
-	public void setParts(ArrayList parts) {
+	public void setParts(List parts) {
 		this.parts = parts;
 	}
 
@@ -230,7 +240,6 @@ public class PDFAssessmentBean implements Serializable {
 		
 		if (log.isWarnEnabled())
 			log.warn(name.toString());
-			//log.warn(fTitle.substring(0, end) + year + month + day + hour + min + sec + ".pdf");
 
 		return formattedText.escapeUrl(name.toString().replace(" ", "_"));
 	}
@@ -300,14 +309,14 @@ public class PDFAssessmentBean implements Serializable {
 			setIntro("");
 		}
 
-		ArrayList pdfParts = new ArrayList();
+		List pdfParts = new ArrayList();
 
 		//for each part in an assessment we add a pdfPart to the pdfBean
 		for (int i = 0; i < deliveryParts.size(); i++) {
 			//get the current item
 			SectionContentsBean section = (SectionContentsBean) deliveryParts.get(i);
-			ArrayList items = section.getItemContents();
-			ArrayList resources = new ArrayList();
+			List<ItemContentsBean> items = section.getItemContents();
+			List resources = new ArrayList();
 
 			//create a new part and empty list to fill with items
 			PDFPartBean pdfPart = new PDFPartBean();
@@ -363,14 +372,11 @@ public class PDFAssessmentBean implements Serializable {
 			}
 			pdfPart.setIntro(partIntros.toString());
 
-			ArrayList pdfItems = new ArrayList();
+			List pdfItems = new ArrayList();
 
 			//for each item in a section we add a blank pdfItem to the pdfPart
-			for (int j = 0; j < items.size(); j++) {
+			for (ItemContentsBean item : items) {
 				PDFItemBean pdfItem = new PDFItemBean();
-
-				ItemContentsBean item = (ItemContentsBean) items.get(j);
-				
 				StringBuffer legacy = new StringBuffer("<h3>");
 				if (printSetting.getShowSequence().booleanValue()) {
 					legacy.append(item.getSequence());
@@ -459,7 +465,7 @@ public class PDFAssessmentBean implements Serializable {
 					List question = item.getItemData().getItemTextArraySorted();
 					for (int k=0; k<question.size(); k++) {
 						PublishedItemText itemtext = (PublishedItemText)question.get(k);
-						ArrayList answers = itemtext.getAnswerArraySorted();
+						List answers = itemtext.getAnswerArraySorted();
 
 						contentBuffer.append("<table cols='20' width='100%'>");
 						for (int t=0; t<answers.size(); t++) {
@@ -605,7 +611,8 @@ public class PDFAssessmentBean implements Serializable {
 					contentBuffer.append(". ");
 				}
 				
-				contentBuffer.append(convertFormattedText(answer.getText()));
+				AnswerSurveyConverter conv = new AnswerSurveyConverter();
+				contentBuffer.append(convertFormattedText(conv.getAsString(null, null, answer.getText())));
 				contentBuffer.append("</td>");
 			}
 			contentBuffer.append("</td>");
@@ -687,10 +694,10 @@ public class PDFAssessmentBean implements Serializable {
 					g.setFont(font);
 					g.drawImage(img_in, 0, 0, null);
 					
-					ArrayList question = (ArrayList) item.getItemData().getItemTextArraySorted();
+					List question = item.getItemData().getItemTextArraySorted();
 					for (int k=0; k<question.size(); k++) {
 						PublishedItemText itemtext = (PublishedItemText)question.get(k);
-						ArrayList answers=itemtext.getAnswerArray();
+						List answers=itemtext.getAnswerArray();
 						PublishedAnswer answer = (PublishedAnswer)answers.get(0);
 						
 						String area = answer.getText();
@@ -941,7 +948,7 @@ public class PDFAssessmentBean implements Serializable {
 			//head = head.replaceAll("[ \t\n\f\r]+", " ");
 
 			//parse out the elements from the html
-			ArrayList elementBuffer = HTMLWorker.parseToList(safeReader(head.toString()), style, props);
+			List elementBuffer = HTMLWorker.parseToList(safeReader(head.toString()), style, props);
 			float[] singleWidth = {1f};
 			PdfPTable single = new PdfPTable(singleWidth);
 			single.setWidthPercentage(100f);
@@ -959,7 +966,7 @@ public class PDFAssessmentBean implements Serializable {
 			document.add(Chunk.NEWLINE);
 
 			//extract the html and parse it into pdf
-			ArrayList parts = getHtmlChunks();
+			List parts = getHtmlChunks();
 			for (int i = 0; i < parts.size(); i++) {
 				//add new page to start each new part
 				if (i > 0) {
@@ -982,7 +989,7 @@ public class PDFAssessmentBean implements Serializable {
 					document.add(single);
 				}  
 
-				ArrayList items = pBean.getQuestions();
+				List items = pBean.getQuestions();
 
 				for (int j = 0; j < items.size(); j++) {
 					PDFItemBean iBean = (PDFItemBean) items.get(j);
@@ -1040,7 +1047,6 @@ public class PDFAssessmentBean implements Serializable {
 		}
 		catch(Exception e) {
 			log.error(e.getMessage(), e);
-			System.err.println("document: " + e.getMessage());
 		}
 
 		return output;
@@ -1078,12 +1084,11 @@ public class PDFAssessmentBean implements Serializable {
 	public String getTotalQuestions() {
 
 		int items = 0;
-		for (int i=0; i<deliveryParts.size(); i++) {
-			SectionContentsBean section = (SectionContentsBean) deliveryParts.get(i);
+		for (SectionContentsBean section : deliveryParts) {
 			items += section.getItemContents().size();
 
 		}
-		return "" + items;
+		return String.valueOf(items);
 	}
 
 	/**

@@ -21,58 +21,37 @@
 
 package org.sakaiproject.portlets;
 
-import java.lang.Integer;
-
 import java.io.PrintWriter;
 import java.io.IOException;
-import java.io.InputStream;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.ResourceBundle;
-import java.util.List;
 import java.util.Enumeration;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.portlet.GenericPortlet;
 import javax.portlet.RenderRequest;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.RenderResponse;
-import javax.portlet.PortletRequest;
 import javax.portlet.PortletException;
 import javax.portlet.PortletURL;
-import javax.portlet.PortletPreferences;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletConfig;
-import javax.portlet.WindowState;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletSession;
-import javax.portlet.ReadOnlyException;
 
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import org.sakaiproject.portlet.util.VelocityHelper;
 import org.sakaiproject.portlet.util.JSPHelper;
 import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.ResourceLoader;
 
-import org.sakaiproject.tool.api.Session;
-import org.sakaiproject.tool.cover.SessionManager;
-
-import org.sakaiproject.site.api.Site;
-import org.sakaiproject.site.api.SitePage;
 import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.tool.api.Placement;
 import org.sakaiproject.tool.cover.ToolManager;
-import org.sakaiproject.tool.api.ToolSession;
 
 import javax.servlet.ServletRequest;
 import org.sakaiproject.thread_local.cover.ThreadLocalManager;
@@ -91,9 +70,8 @@ import org.sakaiproject.lti.api.LTIService;
 /**
  * a simple SakaiIFrame Portlet
  */
+@Slf4j
 public class SakaiIFrame extends GenericPortlet {
-
-	private static final Logger M_log = LoggerFactory.getLogger(SakaiIFrame.class);
 	
 	private LTIService m_ltiService = (LTIService) ComponentManager.get("org.sakaiproject.lti.api.LTIService");
 
@@ -128,8 +106,6 @@ public class SakaiIFrame extends GenericPortlet {
 	protected final String POPUP = "popup";
 	protected final String MAXIMIZE = "sakai:maximize";
 
-	protected final static String TITLE = "title";
-
 	private static final String FORM_PAGE_TITLE = "title-of-page";
 
 	private static final String FORM_TOOL_TITLE = "title-of-tool";
@@ -159,7 +135,7 @@ public class SakaiIFrame extends GenericPortlet {
 		{
 			throw new PortletException("Cannot initialize Velocity ", e);
 		}
-		M_log.info("iFrame Portlet vengine="+vengine+" rb="+rb);
+		log.info("iFrame Portlet vengine={} rb={}", vengine, rb);
 
 	}
 
@@ -183,7 +159,7 @@ public class SakaiIFrame extends GenericPortlet {
 		throws PortletException, IOException {
 			response.setContentType("text/html");
 
-			// System.out.println("==== doView called ====");
+			log.debug("==== doView called ====");
 
 			// Grab that underlying request to get a GET parameter
 			ServletRequest req = (ServletRequest) ThreadLocalManager.get(CURRENT_HTTP_REQUEST);
@@ -207,16 +183,26 @@ public class SakaiIFrame extends GenericPortlet {
 			Long key = getContentIdFromSource(source);
 			if ( key == null ) {
 				out.println(rb.getString("get.info.notconfig"));
-				M_log.warn("Cannot find content id placement="+placement.getId()+" source="+source);
+				log.warn("Cannot find content id placement={} source={}", placement.getId(), source);
 				return;
 			}
 			try {
-				content = m_ltiService.getContent(key);
+				content = m_ltiService.getContent(key, placement.getContext());
+				// SAK-32665 - We get null when an LTI tool is added to a template
+				// like !user because the content item points at !user and not the
+				// current site.
+				if ( content == null ) {
+					content = patchContentItem(key, placement);
+					source = placement.getPlacementConfig().getProperty(SOURCE);
+					key = getContentIdFromSource(source);
+				}
+
+				// If content is still null after patching, let the NPE happen
 				Long tool_id = getLongNull(content.get("tool_id"));
 				// If we are supposed to popup (per the content), do so and optionally
 				// copy the calue into the placement to communicate with the portal
 				if (tool_id != null) {
-					tool = m_ltiService.getTool(tool_id);
+					tool = m_ltiService.getTool(tool_id, placement.getContext());
 					m_ltiService.filterContent(content, tool);
 				}
 				Object popupValue = content.get("newpage");
@@ -233,7 +219,7 @@ public class SakaiIFrame extends GenericPortlet {
 				}
 			} catch (Exception e) {
 				out.println(rb.getString("get.info.notconfig"));
-				e.printStackTrace();
+				log.error(e.getMessage(), e);
 				return;
 			}
 
@@ -253,9 +239,68 @@ public class SakaiIFrame extends GenericPortlet {
 			} else {
 				out.println(rb.getString("get.info.notconfig"));
 			}
-
-			// System.out.println("==== doView complete ====");
 		}
+
+
+	/**
+	 * Patch the content item if it was copied from the !user template.
+	 *
+	 * We only do this once is there is a source, and we cannot get it,
+	 * we either make a new content item from the tool or we empty the
+	 * source property.
+	 */
+	private Map<String, Object> patchContentItem(Long key, Placement placement)
+	{
+		// Get out tool configuration so we can fix things up...
+		ToolConfiguration toolConfig = SiteService.findTool(placement.getId());
+
+		// Look up the content item, bypassing authz checks
+		Map<String, Object> content = m_ltiService.getContentDao(key);
+		if ( content == null ) return null;
+		Long tool_id = getLongNull(content.get("tool_id"));
+
+		// Look up the tool associated with the Content Item
+		// checking Authz to see is we can touch this tool
+		Map<String, Object> tool = m_ltiService.getTool(tool_id, placement.getContext());
+		if ( tool == null ) return null;
+
+		// Now make a content item from this tool inheriting from the other content item
+		Properties props = new Properties();
+		for (Map.Entry<String, Object> entry : content.entrySet()) {
+			String k = entry.getKey();
+			Object value = entry.getValue();
+			if ( value == null ) continue;
+			if ( k.endsWith("_at") ) continue;
+			props.put(k, value.toString());
+		}
+		props.put(LTIService.LTI_TOOL_ID, tool_id.toString());
+		props.put(LTIService.LTI_SITE_ID, placement.getContext());
+		props.put(LTIService.LTI_PLACEMENT, placement.getId());
+
+		Object retval = m_ltiService.insertContent(props, placement.getContext());
+		if ( retval instanceof String ) {
+			log.error("Unable to insert LTILinkItem tool={} placement={}",tool_id,placement.getId());
+			placement.getPlacementConfig().setProperty(SOURCE,"");
+			placement.save();
+			return null;
+		}
+
+		Long contentKey = (Long) retval;
+		Map<String,Object> newContent = m_ltiService.getContent(contentKey, placement.getContext());
+		String contentUrl = m_ltiService.getContentLaunch(newContent);
+		if ( newContent == null || contentUrl == null ) {
+			log.error("Unable to set contentUrl tool={} placement={}",tool_id,placement.getId());
+			placement.getPlacementConfig().setProperty(SOURCE,"");
+			placement.save();
+			return null;
+		}
+		placement.getPlacementConfig().setProperty(SOURCE,contentUrl);
+		placement.save();
+
+		log.debug("Patched contentUrl tool={} placement={} url={}",tool_id,placement.getId(),contentUrl);
+
+		return newContent;
+	}
 
 	public void doEdit(RenderRequest request, RenderResponse response)
 		throws PortletException, IOException {
@@ -284,27 +329,27 @@ public class SakaiIFrame extends GenericPortlet {
 			Long key = getContentIdFromSource(source);
 			if ( key == null ) {
 				out.println(rb.getString("get.info.notconfig"));
-				M_log.warn("Cannot find content id placement="+placement.getId()+" source="+source);
+				log.warn("Cannot find content id placement={} source={}", placement.getId(), source);
 				return;
 			}
 
-			Map<String, Object> content = m_ltiService.getContent(key);
+			Map<String, Object> content = m_ltiService.getContent(key, placement.getContext());
 			if ( content == null ) {
 				out.println(rb.getString("get.info.notconfig"));
-				M_log.warn("Cannot find content item placement="+placement.getId()+" key="+key);
+				log.warn("Cannot find content item placement={} key={}", placement.getId(), key);
 				return;
 			}
 
 			// attach the ltiToolId to each model attribute, so that we could have the tool configuration page for multiple tools
 			String foundLtiToolId = content.get(m_ltiService.LTI_TOOL_ID).toString();
-			Map<String, Object> tool = m_ltiService.getTool(Long.valueOf(foundLtiToolId));
+			Map<String, Object> tool = m_ltiService.getTool(Long.valueOf(foundLtiToolId), placement.getContext());
 			if ( tool == null ) {
 				out.println(rb.getString("get.info.notconfig"));
-				M_log.warn("Cannot find tool placement="+placement.getId()+" key="+foundLtiToolId);
+				log.warn("Cannot find tool placement={} key={}", placement.getId(), foundLtiToolId);
 				return;
 			}
 
-			String[] contentToolModel=m_ltiService.getContentModel(Long.valueOf(foundLtiToolId));
+			String[] contentToolModel=m_ltiService.getContentModel(Long.valueOf(foundLtiToolId), placement.getContext());
 			String formInput=m_ltiService.formInput(content, contentToolModel);
 			context.put("formInput", formInput);
 			
@@ -313,10 +358,10 @@ public class SakaiIFrame extends GenericPortlet {
 
 	public void doHelp(RenderRequest request, RenderResponse response)
 		throws PortletException, IOException {
-			// System.out.println("==== doHelp called ====");
+			log.debug("==== doHelp called ====");
 			// sendToJSP(request, response, "/help.jsp");
 			JSPHelper.sendToJSP(pContext, request, response, "/help.jsp");
-			// System.out.println("==== doHelp done ====");
+			log.debug("==== doHelp done ====");
 		}
 
 	// Process action is called for action URLs / form posts, etc
@@ -326,7 +371,7 @@ public class SakaiIFrame extends GenericPortlet {
 	public void processAction(ActionRequest request, ActionResponse response)
 		throws PortletException, IOException {
 
-			// System.out.println("==== processAction called ====");
+			log.debug("==== processAction called ====");
 
 			PortletSession pSession = request.getPortletSession(true);
 
@@ -349,37 +394,46 @@ public class SakaiIFrame extends GenericPortlet {
 			} else if ( doUpdate != null ) {
 				processActionEdit(request, response);
 			} else {
-				// System.out.println("Unknown action");
+				log.debug("Unknown action");
 				response.setPortletMode(PortletMode.VIEW);
 			}
 
-			// System.out.println("==== End of ProcessAction  ====");
+			log.debug("==== End of ProcessAction  ====");
 		}
 
 	public void processActionEdit(ActionRequest request, ActionResponse response)
-		throws PortletException, IOException 
-		{
+		throws PortletException, IOException {
+
 			// TODO: Check Role
 
 			// Stay in EDIT mode unless we are successful
 			response.setPortletMode(PortletMode.EDIT);
 
-			Placement placement = ToolManager.getCurrentPlacement();
-			// get the site toolConfiguration, if this is part of a site.
-			ToolConfiguration toolConfig = SiteService.findTool(placement.getId());
 			String id = request.getParameter(LTIService.LTI_ID);
 			String toolId = request.getParameter(LTIService.LTI_TOOL_ID);
 			Properties reqProps = new Properties();
 			Enumeration names = request.getParameterNames();
-			while (names.hasMoreElements())
-			{
+			while (names.hasMoreElements()) {
 				String name = (String) names.nextElement();
 				reqProps.setProperty(name, request.getParameter(name));
 			}
-			Object retval = m_ltiService.updateContent(Long.parseLong(id), reqProps);
-			String fa_icon = (String)request.getParameter(LTIService.LTI_FA_ICON);
+			Placement placement = ToolManager.getCurrentPlacement();
+			m_ltiService.updateContent(Long.parseLong(id), reqProps, placement.getContext());
+			String fa_icon = (String) request.getParameter(LTIService.LTI_FA_ICON);
 			if ( fa_icon != null && fa_icon.length() > 0 ) {
 				placement.getPlacementConfig().setProperty("imsti.fa_icon",fa_icon);
+			}
+
+			// get the site toolConfiguration, if this is part of a site.
+			ToolConfiguration toolConfig = SiteService.findTool(placement.getId());
+
+			// Set the title for the page
+			toolConfig.getContainingPage().setTitle(reqProps.getProperty("title"));
+
+			try {
+				SiteService.save(SiteService.getSite(toolConfig.getSiteId()));
+			} catch(Exception e) {
+				log.error("Failed to save site", e);
 			}
 
 			placement.save();

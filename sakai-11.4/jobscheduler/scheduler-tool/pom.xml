@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.sakaiproject.scheduler</groupId>
         <artifactId>scheduler</artifactId>
-        <version>11.4</version>
+        <version>12.6</version>
     </parent>
 
     <name>Sakai Job Scheduler Tool (scheduler-tool)</name>
@@ -89,7 +89,6 @@
         <dependency>
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
-            <version>2.0.2</version>
         </dependency>
     </dependencies>
 

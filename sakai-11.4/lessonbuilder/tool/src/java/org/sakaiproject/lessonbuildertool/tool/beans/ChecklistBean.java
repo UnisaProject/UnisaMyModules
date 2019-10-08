@@ -52,6 +52,7 @@ public class ChecklistBean {
 	if(!checkCsrf()) {
 	    return new String[]{"error"};
 	}
+
         handleAjaxCall();
         return results;
     }

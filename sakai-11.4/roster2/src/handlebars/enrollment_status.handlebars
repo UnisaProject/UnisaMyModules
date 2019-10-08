@@ -8,6 +8,9 @@
 			{{#if viewEmail}}
 				<th width="20%"><a href="#">{{translate 'facet_email'}}</a></th>
 			{{/if}}
+			{{#if viewUserProperty}}
+				<th width="20%"><a href="#">{{translate 'facet_userProperties'}}</a></th>
+			{{/if}}
             <th width="12.5%"><a href="#">{{translate 'facet_status'}}</a></th>
             <th width="12.5%"><a href="#">{{translate 'facet_credits'}}</a></th>
 		</tr>
@@ -22,6 +25,9 @@
 			{{#if viewEmail}}
 				<td></td>
 			{{/if}}
+			{{#if viewUserProperty}}
+				<td></td>
+			{{/if}}
 			<td></td>
 			<td></td>
 		</tr>
@@ -31,7 +37,7 @@
 			    <tr onMouseOver="this.className='rosterTableRowHighlight'" onMouseOut="this.className='rosterTableRow'">
 					<td>
                     {{#if ../../viewProfile}}
-                        <a href="javascript:;" class="profile" rel="{{formattedProfileUrl}}">
+                        <a href="javascript:;" class="profile" data-user-id="{{userId}}">
                     {{/if}}
                     {{#if ../../firstNameLastName}}
                         {{displayName}}
@@ -48,6 +54,11 @@
 					{{#if ../../viewEmail}}
                     <td><a href="mailto:{{email}}">{{email}}</a></td>
 					{{/if}}
+					{{#if ../../viewUserProperty}}
+                        {{#each userProperties}}
+                            <li>{{@key}}: {{this}}</li>
+                        {{/each}}
+                    {{/if}}
 					<td>{{enrollmentStatus}}</td>
 					<td>{{credits}}</td>
 				</tr>

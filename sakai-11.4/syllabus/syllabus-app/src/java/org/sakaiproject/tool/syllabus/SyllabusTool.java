@@ -20,6 +20,7 @@
  **********************************************************************************/
 package org.sakaiproject.tool.syllabus;
 
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
@@ -30,28 +31,26 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.faces.application.FacesMessage;
-import javax.faces.component.UIComponent;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
 
+import com.sun.faces.util.MessageFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.fileupload.FileItem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.io.FilenameUtils;
+
+import org.sakaiproject.content.api.ContentResourceEdit;
 import org.sakaiproject.api.app.syllabus.SyllabusAttachment;
 import org.sakaiproject.api.app.syllabus.SyllabusData;
 import org.sakaiproject.api.app.syllabus.SyllabusItem;
 import org.sakaiproject.api.app.syllabus.SyllabusManager;
 import org.sakaiproject.api.app.syllabus.SyllabusService;
-import org.sakaiproject.authz.api.SecurityService;
-import org.sakaiproject.calendar.api.Calendar;
-import org.sakaiproject.calendar.api.CalendarEventEdit;
 import org.sakaiproject.calendar.api.CalendarService;
-import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentResource;
@@ -72,10 +71,9 @@ import org.sakaiproject.tool.cover.SessionManager;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.user.cover.UserDirectoryService;
+import org.sakaiproject.util.DateFormatterUtil;
 import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.ResourceLoader;
-
-import com.sun.faces.util.MessageFactory;
 
 //sakai2 - no need to import org.sakaiproject.jsf.ToolBean here as sakai does.
 
@@ -84,6 +82,7 @@ import com.sun.faces.util.MessageFactory;
  *         Java - Code Style - Code Templates
  */
 //sakai2 - doesn't implement ToolBean as sakai does.
+@Slf4j
 public class SyllabusTool
 {
   private static final int MAX_REDIRECT_LENGTH = 512; // according to HBM file
@@ -92,6 +91,10 @@ public class SyllabusTool
   private static final String SESSION_ATTACHMENT_DATA_ID = "syllabysAttachDataId";
   //used for the UI to know which data ID to have opened by default (i.e. if you added/removed an attachment on the main page)
   private String openDataId;
+  private static final String HIDDEN_START_ISO_DATE = "dataStartDateISO8601";
+  private static final String HIDDEN_END_ISO_DATE = "dataEndDateISO8601";
+  private static final String DATEPICKER_DATE_FORMAT = "yyyy-MM-dd";
+  private static final String DATEPICKER_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
   
   public class DecoratedSyllabusEntry
   {
@@ -108,6 +111,8 @@ public class SyllabusTool
     protected boolean justCreated = false;
     
     protected ArrayList attachmentList = null;
+    private String startDateString;
+    private String endDateString;
     
     public DecoratedSyllabusEntry(SyllabusData en)
     {
@@ -119,6 +124,8 @@ public class SyllabusTool
       this.orig_endDate = en.getEndDate() == null ? null : (Date) en.getEndDate().clone();
       this.orig_isLinkCalendar= en.isLinkCalendar();
       this.orig_status = en.getStatus();
+      this.startDateString = en.getStartDate() == null ? "" : DateFormatterUtil.format(en.getStartDate(), DATEPICKER_DATETIME_FORMAT, rb.getLocale());
+      this.endDateString = en.getEndDate() == null ? "" : DateFormatterUtil.format(en.getEndDate(), DATEPICKER_DATETIME_FORMAT, rb.getLocale());
     }
 
     public SyllabusData getEntry()
@@ -158,7 +165,7 @@ public class SyllabusTool
 
     public String processListRead()
     {
-      //logger.info(this + ".processListRead() in SyllabusTool.");
+      //log.info(this + ".processListRead() in SyllabusTool.");
       
       attachments.clear();
 
@@ -225,71 +232,47 @@ public class SyllabusTool
 		return in_entry.getStatus();
 	}
     public boolean getTitleChanged(){
-    	//Title Changed?
-    	if((in_entry.getTitle() == null && orig_title != null)
-    		|| (in_entry.getTitle() != null && orig_title == null)
-    		|| (in_entry.getTitle() != null && orig_title != null
-    			&& (!in_entry.getTitle().equals(orig_title)))){
-    		return true;
-    	}else{
-    		return false;
-    	}
+		//Title Changed?
+		return (in_entry.getTitle() == null && orig_title != null)
+			   || (in_entry.getTitle() != null && orig_title == null)
+			   || (in_entry.getTitle() != null && orig_title != null
+				&& (!in_entry.getTitle().equals(orig_title)));
     }
     
     public boolean getStartTimeChanged(){
-    	//Start Time
-    	if((in_entry.getStartDate() == null && orig_startDate != null)
-        		|| (in_entry.getStartDate() != null && orig_startDate == null)
-        		|| (in_entry.getStartDate() != null && orig_startDate != null
-        			&& (!in_entry.getStartDate().equals(orig_startDate)))){
-    		return true;
-    	}else{
-    		return false;
-    	}
+		//Start Time
+		return (in_entry.getStartDate() == null && orig_startDate != null)
+			   || (in_entry.getStartDate() != null && orig_startDate == null)
+			   || (in_entry.getStartDate() != null && orig_startDate != null
+					&& (!in_entry.getStartDate().equals(orig_startDate)));
     }
     
     public boolean getEndTimeChanged(){
-    	//End Time
-    	if((in_entry.getEndDate() == null && orig_endDate != null)
-        		|| (in_entry.getEndDate() != null && orig_endDate == null)
-        		|| (in_entry.getEndDate() != null && orig_endDate != null
-        			&& (!in_entry.getEndDate().equals(orig_endDate)))){
-    		return true;
-    	}else{
-    		return false;
-    	}
+		//End Time
+		return (in_entry.getEndDate() == null && orig_endDate != null)
+			   || (in_entry.getEndDate() != null && orig_endDate == null)
+			   || (in_entry.getEndDate() != null && orig_endDate != null
+					&& (!in_entry.getEndDate().equals(orig_endDate)));
     }
     
     public boolean getPostToCalendarChanged(){
-    	//posted to cal:
-    	if(in_entry.isLinkCalendar() != orig_isLinkCalendar){
-    		return true;
-    	}else{
-    		return false;
-    	}
+		//posted to cal:
+		return !Objects.equals(in_entry.isLinkCalendar(), orig_isLinkCalendar);
     }
     
     public boolean getStatusChanged(){
-    	//draft status:
-    	if((in_entry.getStatus() == null && orig_status != null)
-        		|| (in_entry.getStatus() != null && orig_status == null)
-        		|| (in_entry.getStatus() != null && orig_status != null
-        			&& (!in_entry.getStatus().equals(orig_status)))){
-    		return true;
-    	}else{
-    		return false;
-    	}
+		//draft status:
+		return (in_entry.getStatus() == null && orig_status != null)
+			   || (in_entry.getStatus() != null && orig_status == null)
+			   || (in_entry.getStatus() != null && orig_status != null
+					&& (!in_entry.getStatus().equals(orig_status)));
     }
     
     
     public boolean hasChanged(){
-    	if(getTitleChanged() || getStartTimeChanged()
-    			|| getEndTimeChanged() || getPostToCalendarChanged()
-    			|| getStatusChanged()){
-    		return true;
-    	}else{
-    		return false;
-    	}
+		return getTitleChanged() || getStartTimeChanged()
+			   || getEndTimeChanged() || getPostToCalendarChanged()
+			   || getStatusChanged();
     }
     
     public String validateInput(){
@@ -297,12 +280,12 @@ public class SyllabusTool
     	if(in_entry.getTitle() == null || in_entry.getTitle().trim().equals(""))
         {
     		return MessageFactory.getMessage(FacesContext.getCurrentInstance(),
-					"empty_title_validate", null).getSummary();
+					"empty_title_validate", (Object) null).getSummary();
         }else  if(in_entry.getStartDate() != null 
         		&& in_entry.getEndDate() != null 
         		&& in_entry.getStartDate().after(in_entry.getEndDate())){
         	return MessageFactory.getMessage(FacesContext.getCurrentInstance(),
-					"invalid_dates", null).getSummary();
+					"invalid_dates", (Object) null).getSummary();
         }
     	return "";
     }
@@ -323,6 +306,37 @@ public class SyllabusTool
 	public String getDraftStatus() {
 		return draftStatus;
 	}
+
+	public String getStartDateString() {
+		return this.startDateString;
+	}
+
+	public void setStartDateString(String startDateString) {
+		Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+		String startISODate = params.get((getEntry().getPosition() - 1) + HIDDEN_START_ISO_DATE);
+		if(DateFormatterUtil.isValidISODate(startISODate)){
+			getEntry().setStartDate(DateFormatterUtil.parseISODate(startISODate));
+		} else {
+			getEntry().setStartDate(null);
+		}
+		this.startDateString = DateFormatterUtil.format(getEntry().getStartDate(), DATEPICKER_DATETIME_FORMAT, rb.getLocale());
+	}
+
+	public String getEndDateString() {
+		return this.endDateString;
+	}
+
+	public void setEndDateString(String endDateString) {
+		Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+		String endISODate = params.get((getEntry().getPosition() - 1) + HIDDEN_END_ISO_DATE);
+		if(DateFormatterUtil.isValidISODate(endISODate)){
+			getEntry().setEndDate(DateFormatterUtil.parseISODate(endISODate));
+		} else {
+			getEntry().setEndDate(null);
+		}
+		
+		this.endDateString = DateFormatterUtil.format(getEntry().getEndDate(), DATEPICKER_DATETIME_FORMAT, rb.getLocale());
+	}
   }
 
   protected SyllabusManager syllabusManager;
@@ -336,8 +350,6 @@ public class SyllabusTool
   protected DecoratedSyllabusEntry entry = null;
   
   protected BulkSyllabusEntry bulkEntry = null;
-
-  protected Logger logger = LoggerFactory.getLogger(SyllabusTool.class);
 
   protected String filename = null;
 
@@ -383,15 +395,13 @@ public class SyllabusTool
   
   private final String httpsPrefix = "https://";
 
-  private boolean openInNewWindow = false;
-
   private ContentHostingService contentHostingService;
   
   private ResourceLoader rb = new ResourceLoader("org.sakaiproject.tool.syllabus.bundle.Messages");
   
   private CalendarService calendarService;
   private Boolean calendarExistsForSite = null;
-  private Map<String, Boolean> calendarExistCache = new HashMap<String, Boolean>();
+  private Map<String, Boolean> calendarExistCache = new HashMap<>();
   
   private String alertMessage = null;
   
@@ -413,7 +423,7 @@ public class SyllabusTool
   public SyllabusTool()
   {
 	  Session session = SessionManager.getCurrentSession();
-	  mobileSession = session.getAttribute("is_wireless_device") != null && ((Boolean) session.getAttribute("is_wireless_device")).booleanValue()?"true":"false";
+	  mobileSession = session.getAttribute("is_wireless_device") != null && ((Boolean) session.getAttribute("is_wireless_device"))?"true":"false";
   }
 
   public boolean getdisplayNoEntryMsg()
@@ -432,7 +442,7 @@ public class SyllabusTool
     if ((entries == null) || (entries.isEmpty())
         || ((currentSiteId != null) && (!currentSiteId.equals(siteId))))
     {
-      //logger.info(this + ".getEntries() in SyllabusTool");
+      //log.info(this + ".getEntries() in SyllabusTool");
 
       siteId = currentSiteId;
       try
@@ -474,7 +484,7 @@ public class SyllabusTool
       }
       catch (Exception e)
       {
-        logger.info(this + ".getEntries() in SyllabusTool " + e);
+        log.info(this + ".getEntries() in SyllabusTool " + e);
         FacesContext.getCurrentInstance().addMessage(
             null,
             MessageFactory.getMessage(FacesContext.getCurrentInstance(),
@@ -539,21 +549,14 @@ public class SyllabusTool
       }
       catch (Exception e)
       {
-        logger.info(this + ".getEntries() in SyllabusTool for redirection" + e);
+        log.info(this + ".getEntries() in SyllabusTool for redirection" + e);
         FacesContext.getCurrentInstance().addMessage(
             null,
             MessageFactory.getMessage(FacesContext.getCurrentInstance(),
                 "error_general", (new Object[] { e.toString() })));
       }
     }
-    if (entries == null || entries.isEmpty())
-    {
-      this.displayNoEntryMsg = true;
-    }
-    else
-    {
-      this.displayNoEntryMsg = false;
-    }
+	this.displayNoEntryMsg = entries == null || entries.isEmpty();
 
     //Check if the instructor added an attachment to an item:
     //Clear out list first, then call get attachment(), which will check the 
@@ -592,7 +595,7 @@ public class SyllabusTool
     				}
     			}
     		}catch(Exception e){
-    			logger.error(e.getMessage(), e);
+    			log.error(e.getMessage(), e);
     		}
     	}
     	session.removeAttribute(SESSION_ATTACHMENT_DATA_ID);
@@ -670,14 +673,6 @@ public class SyllabusTool
     return syllabusItem;
   }
 
-  public String getOpenInNewWindowAsString () throws PermissionException {
-	  SyllabusItem syItem = getSyllabusItem();
-	  if (syItem != null) {
-		return (syItem.isOpenInNewWindow()) ? "true" : null;
-	  }
-	  return null;
-  }
-
   public void setSyllabusItem(SyllabusItem syllabusItem)
   {
     this.syllabusItem = syllabusItem;
@@ -685,13 +680,13 @@ public class SyllabusTool
 
   public String getFilename()
   {
-    //logger.info(this + ".getFilename() in SyllabusTool");
+    //log.info(this + ".getFilename() in SyllabusTool");
     return filename;
   }
 
   public void setFilename(String filename)
   {
-    //logger.info(this + ".setFilename() in SyllabusTool");
+    //log.info(this + ".setFilename() in SyllabusTool");
     this.filename = filename;
   }
 
@@ -740,7 +735,7 @@ public class SyllabusTool
 		  siteTitle = site.getTitle();
 	  } 
 	  catch (IdUnusedException e) {
-		  logger.info(this + "IdUnusedException getting site title for syllabus: " + e);
+		  log.info(this + "IdUnusedException getting site title for syllabus: " + e);
 	}
 	  
 	  return siteTitle;
@@ -832,7 +827,7 @@ public class SyllabusTool
   
   public String processDeleteCancel()
   {
-    //logger.info(this + ".processDeleteCancel() in SyllabusTool.");
+    //log.info(this + ".processDeleteCancel() in SyllabusTool.");
 
 	  //we want to keep the changes, so set this flag 
 	  dontUpdateEntries = true;
@@ -843,7 +838,7 @@ public class SyllabusTool
   public String processDelete()
       throws org.sakaiproject.exception.PermissionException
   {
-    //logger.info(this + ".processDelete() in SyllabusTool");
+    //log.info(this + ".processDelete() in SyllabusTool");
 
     ArrayList selected = getSelectedEntries();
     try
@@ -911,11 +906,11 @@ public class SyllabusTool
       entries.clear();
       entry = null;
 
-      return "main_edit";
+      return "main";
     }
     catch (Exception e)
     {
-      logger.info(this + ".processDelete: " + e);
+      log.info(this + ".processDelete: " + e);
       FacesContext.getCurrentInstance().addMessage(
           null,
           MessageFactory.getMessage(FacesContext.getCurrentInstance(),
@@ -930,7 +925,7 @@ public class SyllabusTool
 
   public String processEditCancel()
   {
-    //logger.info(this + ".processEditCancel() in SyllabusTool ");
+    //log.info(this + ".processEditCancel() in SyllabusTool ");
 
     try
     {
@@ -949,8 +944,7 @@ public class SyllabusTool
     }
     catch(Exception e)
     {
-      logger.error(this + ".processEditCancel - " + e);
-      e.printStackTrace();
+      log.error(this + ".processEditCancel - " + e);
     }
     displayTitleErroMsg = false;
     displayEvilTagMsg=false;
@@ -966,7 +960,7 @@ public class SyllabusTool
 
   public String processEditSave() throws PermissionException
   {
-    //logger.info(this + ".processEditSave() in SyllabusTool");
+    //log.info(this + ".processEditSave() in SyllabusTool");
 
     try
     {
@@ -1011,7 +1005,7 @@ public class SyllabusTool
     		 }
     		catch (Exception e)
     		{
-    			logger.warn(this + " " + cleanedText, e);
+    			log.warn(this + " " + cleanedText, e);
     		}
         }
         if(entry.getEntry().getStartDate() != null 
@@ -1043,7 +1037,7 @@ public class SyllabusTool
     }
     catch (Exception e)
     {
-      logger.info(this + ".processEditSave in SyllabusTool: " + e);
+      log.info(this + ".processEditSave in SyllabusTool: " + e);
       FacesContext.getCurrentInstance().addMessage(
           null,
           MessageFactory.getMessage(FacesContext.getCurrentInstance(),
@@ -1121,7 +1115,7 @@ public class SyllabusTool
 					return "edit_bulk";
 				}else{
 					int initPosition = syllabusManager.findLargestSyllabusPosition(
-							syllabusItem).intValue() + 1;
+							syllabusItem) + 1;
 					if(addByDate){
 						//ok let's loop through the date span
 						//break out if past 1 year (don't want to have a DOS attack)
@@ -1162,8 +1156,7 @@ public class SyllabusTool
 									cal.set(java.util.Calendar.MINUTE, calStartTime.get(java.util.Calendar.MINUTE));
 									cal.set(java.util.Calendar.SECOND, calStartTime.get(java.util.Calendar.SECOND));
 								}
-								SyllabusData syllabusDataObj = syllabusManager.createSyllabusDataObject(bulkEntry.getTitle() + " - " + i,
-										new Integer(initPosition), null, "no", status, "none", startDate, endDate, bulkEntry.isLinkCalendar(), null, null, syllabusItem);
+								SyllabusData syllabusDataObj = syllabusManager.createSyllabusDataObject(bulkEntry.getTitle() + " - " + i, initPosition, null, "no", status, "none", startDate, endDate, bulkEntry.isLinkCalendar(), null, null, syllabusItem);
 								syllabusManager.addSyllabusToSyllabusItem(syllabusItem, syllabusDataObj, false);
 								i++;
 								initPosition++;
@@ -1173,8 +1166,7 @@ public class SyllabusTool
 					}else if(bulkItems > 0 && bulkItems <= 100){
 						//add by bulk items
 						for(int i = 1; i <= bulkItems; i++){
-							syllabusManager.addSyllabusToSyllabusItem(syllabusItem, syllabusManager.createSyllabusDataObject(bulkEntry.getTitle() + " - " + i,
-									new Integer(initPosition), null, "no", status, "none", null, null, false, null, null, syllabusItem), false);
+							syllabusManager.addSyllabusToSyllabusItem(syllabusItem, syllabusManager.createSyllabusDataObject(bulkEntry.getTitle() + " - " + i, initPosition, null, "no", status, "none", null, null, false, null, null, syllabusItem), false);
 							initPosition++;
 						}
 					}
@@ -1187,7 +1179,7 @@ public class SyllabusTool
 			  }
 		}catch (Exception e)
 		{
-			logger.info(this + ".processEditBulkPost in SyllabusTool: " + e);
+			log.info(this + ".processEditBulkPost in SyllabusTool: " + e);
 			FacesContext.getCurrentInstance().addMessage(
 					null,
 					MessageFactory.getMessage(FacesContext.getCurrentInstance(),
@@ -1198,7 +1190,7 @@ public class SyllabusTool
   
   public String processEditPost() throws PermissionException
   {
-    //logger.info(this + ".processEditPost() in SyllabusTool");
+    //log.info(this + ".processEditPost() in SyllabusTool");
 
     try
     { 
@@ -1242,7 +1234,7 @@ public class SyllabusTool
     		 }
     		catch (Exception e)
     		{
-    			logger.warn(this + " " + cleanedText, e);
+    			log.warn(this + " " + cleanedText, e);
     		}
         }
         if(entry.getEntry().getStartDate() != null 
@@ -1288,8 +1280,7 @@ public class SyllabusTool
     }
     catch (Exception e)
     {
-      logger.info(this + ".processEditPost in SyllabusTool: " + e);
-      e.printStackTrace();
+      log.info(this + ".processEditPost in SyllabusTool: " + e);
       FacesContext.getCurrentInstance().addMessage(
           null,
           MessageFactory.getMessage(FacesContext.getCurrentInstance(),
@@ -1301,7 +1292,7 @@ public class SyllabusTool
 
   public String processListDelete() throws PermissionException
   {
-    //logger.info(this + ".processListDelete() in SyllabusTool");
+    //log.info(this + ".processListDelete() in SyllabusTool");
 
     try
     {
@@ -1317,7 +1308,7 @@ public class SyllabusTool
           FacesContext.getCurrentInstance().addMessage(
               null,
               MessageFactory.getMessage(FacesContext.getCurrentInstance(),
-                  "error_delete_select", null));
+                  "error_delete_select", (Object) null));
 
           return null;
         }else{
@@ -1329,13 +1320,13 @@ public class SyllabusTool
         			if(itemTitle == null || "".equals(itemTitle.trim())){
         				//title is null, so just point to the item #
         				itemTitle = MessageFactory.getMessage(FacesContext.getCurrentInstance(),
-    							"error_invalid_entry_item", new String[]{Integer.toString(entry.getEntry().getPosition())}).getSummary();
+    							"error_invalid_entry_item", Integer.toString(entry.getEntry().getPosition())).getSummary();
         			}
         			//invalid entry:
         			FacesContext.getCurrentInstance().addMessage(
         					null,
         					MessageFactory.getMessage(FacesContext.getCurrentInstance(),
-        							"error_invalid_entry", new String[]{itemTitle, validate}));
+        							"error_invalid_entry", itemTitle, validate));
         			return null;
         		}
         	}
@@ -1346,7 +1337,7 @@ public class SyllabusTool
     }
     catch (Exception e)
     {
-      logger.info(this + ".processListDelete in SyllabusTool: " + e);
+      log.info(this + ".processListDelete in SyllabusTool: " + e);
       FacesContext.getCurrentInstance().addMessage(
           null,
           MessageFactory.getMessage(FacesContext.getCurrentInstance(),
@@ -1358,7 +1349,7 @@ public class SyllabusTool
 
   public String processListNew() throws PermissionException
   {
-    //logger.info(this + ".processListNew() in SyllabusTool");
+    //log.info(this + ".processListNew() in SyllabusTool");
 
     try
     {
@@ -1368,10 +1359,8 @@ public class SyllabusTool
       }
       else
       {
-        int initPosition = syllabusManager.findLargestSyllabusPosition(
-            syllabusItem).intValue() + 1;
-        SyllabusData en = syllabusManager.createSyllabusDataObject(null,
-            new Integer(initPosition), null, null, SyllabusData.ITEM_DRAFT, "none", null, null, Boolean.FALSE, null, null);
+        int initPosition = syllabusManager.findLargestSyllabusPosition(syllabusItem) + 1;
+        SyllabusData en = syllabusManager.createSyllabusDataObject(null, initPosition, null, null, SyllabusData.ITEM_DRAFT, "none", null, null, Boolean.FALSE, null, null);
         en.setView("no");
 
         entry = new DecoratedSyllabusEntry(en);
@@ -1384,7 +1373,7 @@ public class SyllabusTool
     }
     catch (Exception e)
     {
-      logger.info(this + ".processListNew in SyllabusTool: " + e);
+      log.info(this + ".processListNew in SyllabusTool: " + e);
       FacesContext.getCurrentInstance().addMessage(
           null,
           MessageFactory.getMessage(FacesContext.getCurrentInstance(),
@@ -1423,7 +1412,7 @@ public class SyllabusTool
     }
     catch (Exception e)
     {
-      logger.info(this + ".processListNewBulk in SyllabusTool: " + e);
+      log.info(this + ".processListNewBulk in SyllabusTool: " + e);
       FacesContext.getCurrentInstance().addMessage(
           null,
           MessageFactory.getMessage(FacesContext.getCurrentInstance(),
@@ -1450,7 +1439,7 @@ public class SyllabusTool
 	    }
 	    catch (Exception e)
 	    {
-	      logger.info(this + ".processListEditBulk in SyllabusTool: " + e);
+	      log.info(this + ".processListEditBulk in SyllabusTool: " + e);
 	      FacesContext.getCurrentInstance().addMessage(
 	          null,
 	          MessageFactory.getMessage(FacesContext.getCurrentInstance(),
@@ -1462,7 +1451,7 @@ public class SyllabusTool
 
   public String processReadCancel()
   {
-    //logger.info(this + ".processReadCancel() in SyllabusTool");
+    //log.info(this + ".processReadCancel() in SyllabusTool");
 
     try
     {
@@ -1477,8 +1466,7 @@ public class SyllabusTool
     }
     catch(Exception e)
     {
-      logger.error(this + ".processReadCancel - " + e);
-      e.printStackTrace();
+      log.error(this + ".processReadCancel - " + e);
     }
     
     displayTitleErroMsg = false;
@@ -1495,7 +1483,7 @@ public class SyllabusTool
 
   public String processReadSave() throws PermissionException
   {
-    //logger.info(this + ".processReadSave() in SyllabusTool");
+    //log.info(this + ".processReadSave() in SyllabusTool");
 
     try
     {
@@ -1539,7 +1527,7 @@ public class SyllabusTool
     		 }
     		catch (Exception e)
     		{
-    			logger.warn(this + " " + cleanedText, e);
+    			log.warn(this + " " + cleanedText, e);
     		}
         }
         if(entry.getEntry().getStartDate() != null 
@@ -1581,7 +1569,7 @@ public class SyllabusTool
     }
     catch (Exception e)
     {
-      logger.info(this + ".processReadSave in SyllabusTool: " + e);
+      log.info(this + ".processReadSave in SyllabusTool: " + e);
       FacesContext.getCurrentInstance().addMessage(
           null,
           MessageFactory.getMessage(FacesContext.getCurrentInstance(),
@@ -1593,7 +1581,7 @@ public class SyllabusTool
 
   public String processReadPost() throws PermissionException
   {
-    //logger.info(this + ".processReadPost() in SyllabusTool");
+    //log.info(this + ".processReadPost() in SyllabusTool");
 
     try
     {
@@ -1637,7 +1625,7 @@ public class SyllabusTool
     		 }
     		catch (Exception e)
     		{
-    			logger.warn(this + " " + cleanedText, e);
+    			log.warn(this + " " + cleanedText, e);
     		}
         }
         if(entry.getEntry().getStartDate() != null 
@@ -1681,7 +1669,7 @@ public class SyllabusTool
     }
     catch (Exception e)
     {
-      logger.info(this + ".processReadPost in SyllabusTool: " + e);
+      log.info(this + ".processReadPost in SyllabusTool: " + e);
       FacesContext.getCurrentInstance().addMessage(
           null,
           MessageFactory.getMessage(FacesContext.getCurrentInstance(),
@@ -1693,7 +1681,7 @@ public class SyllabusTool
 
   public void downOnePlace(SyllabusData en)
   {
-    //logger.info(this + ".downOnePlace() in SyllabusTool");
+    //log.info(this + ".downOnePlace() in SyllabusTool");
 
     SyllabusData swapData = null;
     Iterator iter = syllabusManager.getSyllabiForSyllabusItem(syllabusItem)
@@ -1732,7 +1720,7 @@ public class SyllabusTool
 
   public void upOnePlace(SyllabusData en)
   {
-    //logger.info(this + ".upOnePlace() in SyllabusTool");
+    //log.info(this + ".upOnePlace() in SyllabusTool");
 
     SyllabusData swapData = null;
     Iterator iter = syllabusManager.getSyllabiForSyllabusItem(syllabusItem)
@@ -1808,7 +1796,7 @@ public class SyllabusTool
 		 }
 		catch (Exception e)
 		{
-			logger.warn(this + " " + cleanedText, e);
+			log.warn(this + " " + cleanedText, e);
 		}
     } 
     if(entry.getEntry().getStartDate() != null 
@@ -1866,7 +1854,7 @@ public class SyllabusTool
 		 }
 		catch (Exception e)
 		{
-			logger.warn(this + " " + cleanedText, e);
+			log.warn(this + " " + cleanedText, e);
 		}
     }    
     if(entry.getEntry().getStartDate() != null 
@@ -1897,7 +1885,7 @@ public class SyllabusTool
      * exFc.getRequest(); String[] fileNames ={filename}; org.apache.commons.fileupload.FileUploadBase
      * fu = new org.apache.commons.fileupload.DiskFileUpload(); HttpServletRequest req =
      * HttpServletRequestFactory.createValidHttpServletRequest(fileNames); java.util.List itemList =
-     * fu.parseRequest(req); } catch(Exception e) { e.printStackTrace(); }
+     * fu.parseRequest(req); } catch(Exception e) { log.error(e.getMessage(), e); }
      */
 
     filename = null;
@@ -1921,14 +1909,13 @@ public class SyllabusTool
       }
       else
       {
-    	currentRediredUrl = syllabusItem.getRedirectURL();
-    	openInNewWindow = syllabusItem.isOpenInNewWindow();
+        currentRediredUrl = syllabusItem.getRedirectURL();
         return "edit_redirect";
       }
     }
     catch (Exception e)
     {
-      logger.info(this + ".processRedirect in SyllabusTool: " + e);
+      log.info(this + ".processRedirect in SyllabusTool: " + e);
       FacesContext.getCurrentInstance().addMessage(
           null,
           MessageFactory.getMessage(FacesContext.getCurrentInstance(),
@@ -1939,7 +1926,7 @@ public class SyllabusTool
 
   public String processEditCancelRedirect()
   {
-    //logger.info(this + ".processEditCancelRedirect() in SyllabusTool ");
+    //log.info(this + ".processEditCancelRedirect() in SyllabusTool ");
     
 	entries.clear();
     entry = null;
@@ -1949,7 +1936,7 @@ public class SyllabusTool
 
   public String processEditSaveRedirect() throws PermissionException
   {
-    //logger.info(this + ".processEditSaveRedirect() in SyllabusTool");
+    //log.info(this + ".processEditSaveRedirect() in SyllabusTool");
 
     try
     {
@@ -1974,7 +1961,6 @@ public class SyllabusTool
       			}
       			String origURL = syllabusItem.getRedirectURL();
     	    	syllabusItem.setRedirectURL(currentRediredUrl.trim());
-                syllabusItem.setOpenInNewWindow(openInNewWindow);
     	        syllabusManager.saveSyllabusItem(syllabusItem);
     	        if(((origURL == null || origURL.isEmpty())
     	    			&& !currentRediredUrl.trim().isEmpty())
@@ -2002,7 +1988,7 @@ public class SyllabusTool
     }
     catch (Exception e)
     {
-      logger.info(this + ".processEditSaveRedirect in SyllabusTool: " + e);
+      log.info(this + ".processEditSaveRedirect in SyllabusTool: " + e);
       FacesContext.getCurrentInstance().addMessage(
           null,
           MessageFactory.getMessage(FacesContext.getCurrentInstance(),
@@ -2014,7 +2000,7 @@ public class SyllabusTool
 
   public String processCreateAndEdit()
   {
-    //logger.info(this + ".processCreateAndEdit() in SyllabusTool");
+    //log.info(this + ".processCreateAndEdit() in SyllabusTool");
 
     try
     {
@@ -2036,7 +2022,7 @@ public class SyllabusTool
     }
     catch (Exception e)
     {
-      logger.info(this + ".processCreateAndEdit() in SyllabusTool: " + e);
+      log.info(this + ".processCreateAndEdit() in SyllabusTool: " + e);
       FacesContext.getCurrentInstance().addMessage(
           null,
           MessageFactory.getMessage(FacesContext.getCurrentInstance(),
@@ -2094,8 +2080,7 @@ public class SyllabusTool
     }
     catch(Exception e)
     {
-      logger.info(this + ".sendNotification() in SyllabusTool.");
-      e.printStackTrace();
+      log.info(this + ".sendNotification() in SyllabusTool.");
     }
 //for test    EmailService.send("cwen@iupui.edu", "cwen@iupui.edu", entry.getEntry().getTitle(), 
 //for test        entry.getEntry().getAsset(), null, null, null);
@@ -2138,41 +2123,31 @@ public class SyllabusTool
   {
     if(attachCaneled == false)
     {
-      UIComponent component = event.getComponent();
       Object newValue = event.getNewValue();
-      Object oldValue = event.getOldValue();
-      PhaseId phaseId = event.getPhaseId();
-      Object source = event.getSource();
-      
+
       if (newValue instanceof String) return "";
       if (newValue == null) return "";
-      
-      try
+
+      FileItem item = (FileItem) event.getNewValue();
+      try (InputStream inputStream = item.getInputStream())
       {
-        FileItem item = (FileItem) event.getNewValue();
         String fileName = item.getName();
-        byte[] fileContents = item.get();
-        
+
         ResourcePropertiesEdit props = contentHostingService.newResourceProperties();
-        
-        String tempS = fileName;
-        //logger.info(tempS);
-        int lastSlash = tempS.lastIndexOf("/") > tempS.lastIndexOf("\\") ? 
-            tempS.lastIndexOf("/") : tempS.lastIndexOf("\\");
-        if(lastSlash > 0)
-          fileName = tempS.substring(lastSlash+1);
-            
-        ContentResource thisAttach = contentHostingService.addAttachmentResource(fileName, item.getContentType(), fileContents, props);
+
+        if (fileName != null) {
+            filename = FilenameUtils.getName(filename);
+        }
+
+        ContentResourceEdit thisAttach = contentHostingService.addAttachmentResource(fileName);
+        thisAttach.setContent(inputStream);
+        thisAttach.setContentType(item.getContentType());
+        thisAttach.getPropertiesEdit().addAll(props);
+        contentHostingService.commitResource(thisAttach);
         
         SyllabusAttachment attachObj = syllabusManager.createSyllabusAttachmentObject(thisAttach.getId(), fileName);
-        ////////revise        syllabusManager.addSyllabusAttachToSyllabusData(getEntry().getEntry(), attachObj);
         attachments.add(attachObj);
-        
-        String ss = thisAttach.getUrl();
-        String fileWithWholePath = thisAttach.getUrl();
-        
-        String s = ss;
-        
+
         if(entry.justCreated != true)
         {
           allAttachments.add(attachObj);
@@ -2180,8 +2155,7 @@ public class SyllabusTool
       }
       catch (Exception e)
       {
-        logger.error(this + ".processUpload() in SyllabusTool " + e);
-        e.printStackTrace();
+        log.error(this + ".processUpload() in SyllabusTool", e);
       }
       if(entry.justCreated == true)
       {
@@ -2222,7 +2196,7 @@ public class SyllabusTool
         session.getAttribute(FilePickerHelper.FILE_PICKER_ATTACHMENTS) != null) 
     {
       List refs = (List)session.getAttribute(FilePickerHelper.FILE_PICKER_ATTACHMENTS);
-      Reference ref = null;
+      Reference ref;
       
       for(int i=0; i<refs.size(); i++)
       {
@@ -2308,7 +2282,7 @@ public class SyllabusTool
         for(int i=0; i<attachments.size(); i++)
         {
           SyllabusAttachment thisAttach = (SyllabusAttachment)attachments.get(i);
-          if(((Long)thisAttach.getSyllabusAttachId()).toString().equals(removeAttachId))
+          if((thisAttach.getSyllabusAttachId()).toString().equals(removeAttachId))
           {
             attachments.remove(i);
             break;
@@ -2322,8 +2296,7 @@ public class SyllabusTool
       }
       catch(Exception e)
       {
-        logger.error(this + ".processRemoveAttach() - " + e);
-        e.printStackTrace();
+        log.error(this + ".processRemoveAttach() - " + e);
       }
       
       removeAttachId = null;
@@ -2341,7 +2314,7 @@ public class SyllabusTool
         for(int i=0; i<attachments.size(); i++)
         {
           SyllabusAttachment thisAttach = (SyllabusAttachment)attachments.get(i);
-          if(((Long)thisAttach.getSyllabusAttachId()).toString().equals(removeAttachId))
+          if((thisAttach.getSyllabusAttachId()).toString().equals(removeAttachId))
           {
             attachments.remove(i);
             deleted = true;
@@ -2353,7 +2326,7 @@ public class SyllabusTool
           for(int i=0; i<oldAttachments.size(); i++)
           {
             SyllabusAttachment thisAttach = (SyllabusAttachment)oldAttachments.get(i);
-            if(((Long)thisAttach.getSyllabusAttachId()).toString().equals(removeAttachId))
+            if((thisAttach.getSyllabusAttachId()).toString().equals(removeAttachId))
             {
               oldAttachments.remove(i);
               break;
@@ -2381,8 +2354,7 @@ public class SyllabusTool
       }
       catch(Exception e)
       {
-        logger.error(this + ".processRemoveAttach() - " + e);
-        e.printStackTrace();
+        log.error(this + ".processRemoveAttach() - " + e);
       }
 
       removeAttachId = null;
@@ -2451,7 +2423,7 @@ public class SyllabusTool
         session.getAttribute(FilePickerHelper.FILE_PICKER_ATTACHMENTS) != null) 
     {
       List refs = (List)session.getAttribute(FilePickerHelper.FILE_PICKER_ATTACHMENTS);
-      Reference ref = null;
+      Reference ref;
       
       for(int i=0; i<refs.size(); i++)
       {
@@ -2511,8 +2483,7 @@ public class SyllabusTool
     }
     catch(Exception e)
     {
-      logger.error(this + ".processAddAttachRedirect - " + e);
-      e.printStackTrace();
+      log.error(this + ".processAddAttachRedirect - " + e);
       return null;
     }
   }
@@ -2529,47 +2500,12 @@ public class SyllabusTool
 
   /**
    * @return
-   * 	String url if using an external url 
-   * 	If not included, also add http:// or https:// prefix.
+   * 	Return the print JSP and do not just send the user to another URL without warning the user
    */
   public String getPrintFriendlyUrl()
   {
-	  try {
-		  SyllabusItem syItem = getSyllabusItem();
-		  
-		  if (syItem != null) {
-			  currentRediredUrl = syItem.getRedirectURL();
-		  }
-		  else {
-			  currentRediredUrl = "";
-		  }
-		  if (currentRediredUrl != null && !"".equals(currentRediredUrl)) {
-			  if (currentRediredUrl.indexOf(httpPrefix) == -1 && currentRediredUrl.indexOf(httpsPrefix) == -1 ) {
-				  if (ServerConfigurationService.getToolUrl().indexOf(httpsPrefix) != -1) {
-					  return httpsPrefix + currentRediredUrl; 
-				  }
-				  else
-					  return httpPrefix + currentRediredUrl;
-			  }
-			  return currentRediredUrl;
-		  }
-		  else {
-			  return ServerConfigurationService.getToolUrl() + Entity.SEPARATOR
-					+ ToolManager.getCurrentPlacement().getId() + Entity.SEPARATOR + "printFriendly";
-		  }
-	  }
-	  catch (PermissionException e) {
-	        logger.info(this + ".getRediredUrl() in SyllabusTool " + e);
-	        FacesContext.getCurrentInstance().addMessage(
-	            null,
-	            MessageFactory.getMessage(FacesContext.getCurrentInstance(),
-	                "error_permission", (new Object[] { e.toString() })));		  
-	  }
-	  // If here, we have a permission error getting redirected syllabus,
-	  // so just return printFriendly url
-	  return ServerConfigurationService.getToolUrl() + Entity.SEPARATOR
-		+ ToolManager.getCurrentPlacement().getId() + Entity.SEPARATOR + "printFriendly";
-
+    return ServerConfigurationService.getToolUrl() + Entity.SEPARATOR
+      + ToolManager.getCurrentPlacement().getId() + Entity.SEPARATOR + "printFriendly";
   }
   
   /**
@@ -2768,7 +2704,7 @@ public class SyllabusTool
 		  {
 			  Date rvDate = syllabusData.getStartDate();
 			  if(rvDate != null){
-				  rv = SyllabusData.dateFormat.format(rvDate);
+				  rv = DateFormatterUtil.format(rvDate, DATEPICKER_DATETIME_FORMAT, rb.getLocale());
 			  }
 			  alert = false;
 		  }
@@ -2784,7 +2720,7 @@ public class SyllabusTool
   
   /**
    * set the asset for saving
-   * @param asset
+   * @param date
    */
   public void setSyllabusDataStartDate(String date)
   {
@@ -2797,11 +2733,14 @@ public class SyllabusTool
 			  if(date == null || "".equals(date)){
 				  syllabusData.setStartDate(null);
 			  }else{
-				  try {
-					  syllabusData.setStartDate(SyllabusData.dateFormat.parse(date));
-				  } catch (ParseException e) {
-					  //date won't be changed
-				  }
+					Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+					String startISODate = params.get(HIDDEN_START_ISO_DATE);
+					if(DateFormatterUtil.isValidISODate(startISODate)){
+					    syllabusData.setStartDate(DateFormatterUtil.parseISODate(startISODate));
+					} else {
+						syllabusData.setStartDate(null);
+					}
+					
 			  }
 		  }
 	  }
@@ -2824,7 +2763,7 @@ public class SyllabusTool
 		  {
 			  Date rvDate = syllabusData.getEndDate();
 			  if(rvDate != null){
-				  rv = SyllabusData.dateFormat.format(rvDate);
+				  rv = DateFormatterUtil.format(rvDate, DATEPICKER_DATETIME_FORMAT, rb.getLocale());
 			  }
 			  alert = false;
 		  }
@@ -2840,7 +2779,7 @@ public class SyllabusTool
   
   /**
    * set the asset for saving
-   * @param asset
+   * @param date
    */
   public void setSyllabusDataEndDate(String date)
   {
@@ -2853,11 +2792,13 @@ public class SyllabusTool
 			  if(date == null || "".equals(date)){
 				  syllabusData.setEndDate(null);
 			  }else{
-				  try {
-					  syllabusData.setEndDate(SyllabusData.dateFormat.parse(date));
-				  } catch (ParseException e) {
-					  //date won't be changed
-				  }
+					Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+					String endISODate = params.get(HIDDEN_END_ISO_DATE);
+					if(DateFormatterUtil.isValidISODate(endISODate)){
+					    syllabusData.setEndDate(DateFormatterUtil.parseISODate(endISODate));
+					} else {
+						syllabusData.setEndDate(null);
+					}
 			  }
 		  }
 	  }
@@ -2911,7 +2852,7 @@ public class SyllabusTool
 		  return calendarExistCache.get(siteContext);
 	  }else{
 
-		  Site site = null;
+		  Site site;
 		  try
 		  {
 			  site = SiteService.getSite(siteContext);
@@ -2925,7 +2866,7 @@ public class SyllabusTool
 			  }
 		  }
 		  catch (Exception e) {
-			  logger.warn("Exception thrown while getting site", e);
+			  log.warn("Exception thrown while getting site", e);
 		  }
 		  return false;
 	  }
@@ -2952,7 +2893,6 @@ public class SyllabusTool
   }
   
   public class BulkSyllabusEntry{
-	  public final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 	  public final SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a");
 	  private String title = "";
 	  private Date startDate = null;
@@ -3049,7 +2989,7 @@ public class SyllabusTool
 	  {
 		String rv = "";
 		if(getStartDate() != null){
-			rv = dateFormat.format(getStartDate());
+			rv = DateFormatterUtil.format(getStartDate(), DATEPICKER_DATE_FORMAT, rb.getLocale());
 		}
 		return rv;
 	  }
@@ -3059,10 +2999,12 @@ public class SyllabusTool
 		if(date == null || "".equals(date)){
 			setStartDate(null);
 		}else{
-			try {
-				setStartDate(dateFormat.parse(date));
-			} catch (ParseException e) {
-				//date won't be changed
+			Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+			String startISODate = params.get(HIDDEN_START_ISO_DATE);
+			if(DateFormatterUtil.isValidISODate(startISODate)){
+				setStartDate(DateFormatterUtil.parseISODate(startISODate));
+			} else {
+				setStartDate(null);
 			}
 		}
 	}
@@ -3071,7 +3013,7 @@ public class SyllabusTool
 	  {
 		String rv = "";
 		if(getEndDate() != null){
-			rv = dateFormat.format(getEndDate());
+			rv = DateFormatterUtil.format(getEndDate(), DATEPICKER_DATE_FORMAT, rb.getLocale());
 		}
 		return rv;
 	  }
@@ -3081,11 +3023,14 @@ public class SyllabusTool
 		if(date == null || "".equals(date)){
 			setEndDate(null);
 		}else{
-			try {
-				setEndDate(dateFormat.parse(date));
-			} catch (ParseException e) {
-				//date won't be changed
+			Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+			String endISODate = params.get(HIDDEN_END_ISO_DATE);
+			if(DateFormatterUtil.isValidISODate(endISODate)){
+				setEndDate(DateFormatterUtil.parseISODate(endISODate));
+			} else {
+				setEndDate(null);
 			}
+			
 		}
 	}
 	
@@ -3172,14 +3117,6 @@ public String getOpenDataId() {
 public void setOpenDataId(String openDataId) {
 	this.openDataId = openDataId;
 }
-
-    public boolean isOpenInNewWindow() {
-        return openInNewWindow;
-    }
-
-    public void setOpenInNewWindow(boolean openInNewWindow) {
-        this.openInNewWindow = openInNewWindow;
-    }
 
 	public boolean isDisplayCalendarError() {
 		return displayCalendarError;

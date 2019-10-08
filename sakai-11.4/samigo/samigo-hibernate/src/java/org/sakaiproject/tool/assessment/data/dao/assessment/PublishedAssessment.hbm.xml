@@ -1,9 +1,8 @@
-<?xml version="1.0"?>
-<!DOCTYPE hibernate-mapping PUBLIC
-  "-//Hibernate/Hibernate Mapping DTD//EN"
-  "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.sakaiproject.tool.assessment.data.dao.assessment"
+                   default-lazy="false">
 
-<hibernate-mapping default-lazy="false">
   <class name="org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAssessmentData"
     table="SAM_PUBLISHEDASSESSMENT_T">
     <id name="publishedAssessmentId" column="ID" type="java.lang.Long" unsaved-value="0">
@@ -201,7 +200,7 @@
     table="SAM_PUBLISHEDSECTIONMETADATA_T">
     <id name="id" column="PUBLISHEDSECTIONMETADATAID" type="java.lang.Long" unsaved-value="0">
       <generator class="native">
-        <param name="sequence">SAM_PUBLISHEDASSESSMENT_ID_S</param>
+        <param name="sequence">SAM_PUBSECTIONMETADATA_ID_S</param>
       </generator>
     </id>
     <many-to-one name="section" class="org.sakaiproject.tool.assessment.data.dao.assessment.PublishedSectionData"
@@ -240,5 +239,6 @@
     <property name="endDate" type="timestamp" column="ENDDATE" not-null="false" />
     <property name="eclipseTime" type="integer" column="ECLIPSETIME" not-null="false" />
     <property name="errorMsg" type="string" length="255" column="ERRORMSG" not-null="false" />
+    <property name="ipAddress" type="string" length="99" column="IPADDRESS" not-null="false" />
  </class>
 </hibernate-mapping>

@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) 2003-2017 The Apereo Foundation
+ *
+ * Licensed under the Educational Community License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *             http://opensource.org/licenses/ecl2
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.sakaiproject.gradebookng.tool.panels;
 
 import java.util.ArrayList;
@@ -13,10 +28,8 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.StringResourceModel;
-import org.sakaiproject.gradebookng.business.GbGradingType;
 import org.sakaiproject.gradebookng.business.model.GbGradeInfo;
 import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxLink;
@@ -24,8 +37,10 @@ import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
 import org.sakaiproject.gradebookng.tool.pages.BasePage;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.service.gradebook.shared.Assignment;
+import org.sakaiproject.service.gradebook.shared.CategoryDefinition;
+import org.sakaiproject.service.gradebook.shared.GradingType;
 
-public class GradeSummaryTablePanel extends Panel {
+public class GradeSummaryTablePanel extends BasePanel {
 
 	private static final long serialVersionUID = 1L;
 	boolean isGroupedByCategory;
@@ -47,15 +62,17 @@ public class GradeSummaryTablePanel extends Panel {
 
 		final Map<String, Object> data = (Map<String, Object>) getDefaultModelObject();
 
-		final Map<Long, GbGradeInfo> grades  = (Map<Long, GbGradeInfo>) data.get("grades");
-		final Map<String, List<Assignment>> categoryNamesToAssignments = (Map<String, List<Assignment>>) data.get("categoryNamesToAssignments");
+		final Map<Long, GbGradeInfo> grades = (Map<Long, GbGradeInfo>) data.get("grades");
+		final Map<String, List<Assignment>> categoryNamesToAssignments = (Map<String, List<Assignment>>) data
+				.get("categoryNamesToAssignments");
 		final List<String> categoryNames = (List<String>) data.get("categoryNames");
 		final Map<Long, Double> categoryAverages = (Map<Long, Double>) data.get("categoryAverages");
 		final boolean categoriesEnabled = (boolean) data.get("categoriesEnabled");
 		final boolean isCategoryWeightEnabled = (boolean) data.get("isCategoryWeightEnabled");
 		final boolean showingStudentView = (boolean) data.get("showingStudentView");
-		final GbGradingType gradingType = (GbGradingType) data.get("gradingType");
+		final GradingType gradingType = (GradingType) data.get("gradingType");
 		this.isGroupedByCategory = (boolean) data.get("isGroupedByCategory");
+		final Map<String, CategoryDefinition> categoriesMap = (Map<String, CategoryDefinition>) data.get("categoriesMap");
 
 		if (getPage() instanceof GradebookPage) {
 			final GradebookPage page = (GradebookPage) getPage();
@@ -89,9 +106,9 @@ public class GradeSummaryTablePanel extends Panel {
 
 				target.add(GradeSummaryTablePanel.this);
 				target.appendJavaScript(
-					String.format("new GradebookGradeSummary($(\"#%s\"), %s);",
-						GradeSummaryTablePanel.this.getParent().getMarkupId(),
-						showingStudentView));
+						String.format("new GradebookGradeSummary($(\"#%s\"), %s);",
+								GradeSummaryTablePanel.this.getParent().getMarkupId(),
+								showingStudentView));
 			}
 		};
 		toggleActions.add(toggleCategoriesLink);
@@ -99,16 +116,20 @@ public class GradeSummaryTablePanel extends Panel {
 		toggleActions.addOrReplace(new WebMarkupContainer("collapseCategoriesLink").setVisible(this.isGroupedByCategory));
 		addOrReplace(toggleActions);
 
-		addOrReplace(new WebMarkupContainer("weightColumnHeader").
-			setVisible(categoriesEnabled && isCategoryWeightEnabled && this.isGroupedByCategory));
+		addOrReplace(new WebMarkupContainer("weightColumnHeader")
+				.setVisible(categoriesEnabled && isCategoryWeightEnabled && this.isGroupedByCategory));
 
-		addOrReplace(new WebMarkupContainer("categoryColumnHeader").
-			setVisible(categoriesEnabled && !this.isGroupedByCategory));
+		boolean catColVisible = categoriesEnabled && !isGroupedByCategory;
+		addOrReplace(new WebMarkupContainer("categoryColumnHeader").setVisible(catColVisible));
+
+		addOrReplace(new WebMarkupContainer("dateColumnHeader")
+				.add(AttributeAppender.append("class", catColVisible ? "col-md-1" : "col-md-2"))); // steal width from date column to give to category column
 
 		// output all of the categories
 		// within each we then add the assignments in each category
 		// if not grouped by category, render all assignments in one go!
-		addOrReplace(new ListView<String>("categoriesList", this.isGroupedByCategory ? categoryNames : Arrays.asList(getString(GradebookPage.UNCATEGORISED))) {
+		addOrReplace(new ListView<String>("categoriesList",
+				this.isGroupedByCategory ? categoryNames : Arrays.asList(getString(GradebookPage.UNCATEGORISED))) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -120,10 +141,10 @@ public class GradeSummaryTablePanel extends Panel {
 					if (categoryNamesToAssignments.containsKey(categoryName)) {
 						categoryAssignments = categoryNamesToAssignments.get(categoryName);
 					} else {
-						categoryAssignments = new ArrayList<Assignment>();
+						categoryAssignments = new ArrayList<>();
 					}
 				} else {
-					categoryAssignments = new ArrayList<Assignment>();
+					categoryAssignments = new ArrayList<>();
 					categoryNamesToAssignments.values().forEach(categoryAssignments::addAll);
 				}
 
@@ -131,6 +152,16 @@ public class GradeSummaryTablePanel extends Panel {
 				categoryRow.setVisible(categoriesEnabled && GradeSummaryTablePanel.this.isGroupedByCategory && !categoryAssignments.isEmpty());
 				categoryItem.add(categoryRow);
 				categoryRow.add(new Label("category", categoryName));
+
+				DropInfoPair pair = getDropInfo(categoryName, categoriesMap);
+				if (!pair.second.isEmpty()) {
+					pair.first += " " + getString("label.category.dropSeparator") + " ";
+				}
+				WebMarkupContainer dropInfo = new WebMarkupContainer("categoryDropInfo");
+				dropInfo.setVisible(!pair.first.isEmpty());
+				dropInfo.add(new Label("categoryDropInfo1", pair.first));
+				dropInfo.add(new Label("categoryDropInfo2", pair.second).setVisible(!pair.second.isEmpty()));
+				categoryRow.add(dropInfo);
 
 				if (!categoryAssignments.isEmpty()) {
 					final Double categoryAverage = categoryAverages.get(categoryAssignments.get(0).getCategoryId());
@@ -150,8 +181,8 @@ public class GradeSummaryTablePanel extends Panel {
 						categoryWeight = FormatHelper.formatDoubleAsPercentage(weight * 100);
 					}
 				}
-				categoryRow.add(new Label("categoryWeight", categoryWeight).
-					setVisible(isCategoryWeightEnabled && GradeSummaryTablePanel.this.isGroupedByCategory));
+				categoryRow.add(new Label("categoryWeight", categoryWeight)
+						.setVisible(isCategoryWeightEnabled && GradeSummaryTablePanel.this.isGroupedByCategory));
 
 				categoryItem.add(new ListView<Assignment>("assignmentsForCategory", categoryAssignments) {
 					private static final long serialVersionUID = 1L;
@@ -180,59 +211,97 @@ public class GradeSummaryTablePanel extends Panel {
 						assignmentItem.add(title);
 
 						final BasePage page = (BasePage) getPage();
+
+						// popover flags
 						final WebMarkupContainer flags = new WebMarkupContainer("flags");
 						flags.add(page.buildFlagWithPopover("isExtraCredit", getString("label.gradeitem.extracredit"))
-							.add(new AttributeModifier("data-trigger", "focus"))
-							.add(new AttributeModifier("data-container", "#gradeSummaryTable"))
-							.setVisible(assignment.getExtraCredit()));
+								.add(new AttributeModifier("data-trigger", "focus"))
+								.add(new AttributeModifier("data-container", "#gradeSummaryTable"))
+								.setVisible(assignment.isExtraCredit()));
 						flags.add(page.buildFlagWithPopover("isNotCounted", getString("label.gradeitem.notcounted"))
-							.add(new AttributeModifier("data-trigger", "focus"))
-							.add(new AttributeModifier("data-container", "#gradeSummaryTable"))
-							.setVisible(!assignment.isCounted()));
+								.add(new AttributeModifier("data-trigger", "focus"))
+								.add(new AttributeModifier("data-container", "#gradeSummaryTable"))
+								.setVisible(!assignment.isCounted()));
 						flags.add(page.buildFlagWithPopover("isNotReleased", getString("label.gradeitem.notreleased"))
-							.add(new AttributeModifier("data-trigger", "focus"))
-							.add(new AttributeModifier("data-container", "#gradeSummaryTable"))
-							.setVisible(!assignment.isReleased()));
+								.add(new AttributeModifier("data-trigger", "focus"))
+								.add(new AttributeModifier("data-container", "#gradeSummaryTable"))
+								.setVisible(!assignment.isReleased()));
+						flags.add(page
+								.buildFlagWithPopover("isExternal",
+										new StringResourceModel("label.gradeitem.externalapplabel", null,
+												new Object[] { assignment.getExternalAppName() }).getString())
+								.add(new AttributeModifier("data-trigger", "focus"))
+								.add(new AttributeModifier("data-container", "#gradeSummaryTable"))
+								.add(new AttributeModifier("class",
+										"gb-external-app-flag " + GradeSummaryTablePanel.this.businessService.getIconClass(assignment)))
+								.setVisible(assignment.isExternallyMaintained()));
+
 						assignmentItem.add(flags);
 
-						assignmentItem.add(new WebMarkupContainer("weight").
-							setVisible(isCategoryWeightEnabled && GradeSummaryTablePanel.this.isGroupedByCategory));
+						assignmentItem.add(new WebMarkupContainer("weight")
+								.setVisible(isCategoryWeightEnabled && GradeSummaryTablePanel.this.isGroupedByCategory));
 
 						final Label dueDate = new Label("dueDate",
-							FormatHelper.formatDate(assignment.getDueDate(), getString("label.studentsummary.noduedate")));
+								FormatHelper.formatDate(assignment.getDueDate(), getString("label.studentsummary.noduedate")));
 						dueDate.add(new AttributeModifier("data-sort-key",
-							assignment.getDueDate() == null ? 0 : assignment.getDueDate().getTime()));
+								assignment.getDueDate() == null ? 0 : assignment.getDueDate().getTime()));
 						assignmentItem.add(dueDate);
 
-						if (GbGradingType.PERCENTAGE.equals(gradingType)) {
-							assignmentItem.add(new Label("grade",
-								new StringResourceModel("label.percentage.valued", null,
-									new Object[]{FormatHelper.formatGrade(rawGrade)})) {
+						final WebMarkupContainer gradeScore = new WebMarkupContainer("gradeScore");
+						if (GradingType.PERCENTAGE.equals(gradingType)) {
+							gradeScore.add(new Label("grade",
+									new StringResourceModel("label.percentage.valued", null,
+											new Object[] { FormatHelper.formatGrade(rawGrade) })) {
 								@Override
 								public boolean isVisible() {
 									return StringUtils.isNotBlank(rawGrade);
 								}
 							});
-							assignmentItem.add(new Label("outOf").setVisible(false));
+							gradeScore.add(new Label("outOf").setVisible(false));
 						} else {
-							assignmentItem.add(new Label("grade", FormatHelper.formatGrade(rawGrade)));
-							assignmentItem.add(new Label("outOf",
-								new StringResourceModel("label.studentsummary.outof", null, new Object[]{assignment.getPoints()})) {
-								@Override
-								public boolean isVisible() {
-									return StringUtils.isNotBlank(rawGrade);
-								}
-							});
+							gradeScore.add(
+									new Label("grade", FormatHelper.convertEmptyGradeToDash(FormatHelper.formatGradeForDisplay(rawGrade))));
+							gradeScore.add(new Label("outOf",
+									new StringResourceModel("label.studentsummary.outof", null, assignment.getPoints())));
 						}
+						if (gradeInfo != null && gradeInfo.isDroppedFromCategoryScore()) {
+							gradeScore.add(AttributeAppender.append("class", "gb-summary-grade-score-dropped"));
+						}
+						assignmentItem.add(gradeScore);
 
 						assignmentItem.add(new Label("comments", comment));
-						assignmentItem.add(
-							new Label("category", assignment.getCategoryName()).
-								setVisible(categoriesEnabled && !GradeSummaryTablePanel.this.isGroupedByCategory));
+
+						WebMarkupContainer catCon = new WebMarkupContainer("category");
+						catCon.setVisible(categoriesEnabled && !isGroupedByCategory);
+						catCon.add(new Label("categoryName", assignment.getCategoryName()));
+						DropInfoPair pair = getDropInfo(assignment.getCategoryName(), categoriesMap);
+						catCon.add(new Label("categoryDropInfo", pair.first).setVisible(!pair.first.isEmpty()));
+						catCon.add(new Label("categoryDropInfo2", pair.second).setVisible(!pair.second.isEmpty()));
+						assignmentItem.add(catCon);
 					}
 				});
 			}
 		});
 
+	}
+
+	private final class DropInfoPair {
+		public String first = "";
+		public String second = "";
+	}
+
+	private DropInfoPair getDropInfo(String categoryName, Map<String, CategoryDefinition> categoriesMap) {
+		DropInfoPair pair = new DropInfoPair();
+		if (categoryName != null && !categoryName.equals(getString(GradebookPage.UNCATEGORISED))) {
+			List<String> info = FormatHelper.formatCategoryDropInfo(categoriesMap.get(categoryName));
+			if (info.size() > 0) {
+				pair.first = info.get(0);
+			}
+			if (info.size() > 1) {
+				pair.second = info.get(1);
+			}
+		}
+
+		return pair;
 	}
 }

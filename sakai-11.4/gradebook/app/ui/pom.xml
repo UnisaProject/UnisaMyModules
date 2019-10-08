@@ -4,7 +4,7 @@
    <parent>
     <artifactId>sakai-gradebook-app</artifactId>
     <groupId>org.sakaiproject</groupId>
-    <version>11.4</version>
+    <version>12.6</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <groupId>org.sakaiproject</groupId>
@@ -84,17 +84,6 @@
       <groupId>org.sakaiproject.edu-services.sections</groupId>
       <artifactId>sections-api</artifactId>
     </dependency>
-<!-- Standalone component -->
-<!-- why?
-    <dependency>
-      <groupId>org.sakaiproject.edu-services.sections</groupId>
-      <artifactId>sections-impl-standalone</artifactId>
-    </dependency>  -->
-<!-- Used only for test data. -->
-    <dependency>
-      <groupId>org.sakaiproject.edu-services.sections</groupId>
-      <artifactId>sections-integrationsupport</artifactId>
-    </dependency>
 <!-- this is required for any Sakai JSF tool -->
     <dependency>
       <groupId>org.sakaiproject.jsf</groupId>
@@ -160,9 +149,8 @@
       <version>1.0</version>
     </dependency>
     <dependency>
-      <groupId>jta</groupId>
+      <groupId>javax.transaction</groupId>
       <artifactId>jta</artifactId>
-      <version>h2.1.8</version>
     </dependency>
 <!--${sakai.hibernate.groupId}${sakai.hibernate.artifactId}${sakai.hibernate.version}-->
 <!--${sakai.ehcache.groupId}${sakai.ehcache.artifactId}${sakai.ehcache.version}-->
@@ -214,7 +202,7 @@
     <dependency>
       <groupId>org.apache.myfaces.tomahawk</groupId>
       <artifactId>tomahawk</artifactId>
-      <version>1.1.11</version>
+      <version>1.1.14</version>
       <exclusions>
         <exclusion>
 <!-- shared -->

@@ -84,8 +84,21 @@ public interface LearningResourceStoreService {
      * @param event a Sakai Event with userID or sessionId set (so we can try to determine the user)
      * @return the actor for the user related to the event OR null if no user can be determined from the event
      */
-    public LRS_Actor getEventActor(Event event);
+    public LRS_Actor getActor(Event event);
 
+    /**
+     * Converts the Sakai User Id string data into an Actor
+     * 
+     * @param valid sakai userId (so we can try to determine the user)
+     * @return the actor for the user related to the event OR null if no user can be determined from the event
+     */
+    public LRS_Actor getActor(String userId);
+
+    /* (non-Javadoc)
+     * @deprecated
+     * @see org.sakaiproject.event.api.LearningResourceStoreService#getActor(org.sakaiproject.event.api.Event)
+     */
+    public LRS_Actor getEventActor(Event event);
 
     // Service CLASSes
 
@@ -162,19 +175,16 @@ public interface LearningResourceStoreService {
          */
         public LRS_Statement(LRS_Actor actor, LRS_Verb verb, LRS_Object object) {
             this();
-            if (actor == null) {
-                throw new IllegalArgumentException("LRS_Actor cannot be null");
+            //This isn't fully populated
+            if (actor == null || verb == null || object == null) {
+            	this.populated = false;
             }
-            if (verb == null) {
-                throw new IllegalArgumentException("LRS_Verb cannot be null");
-            }
-            if (object == null) {
-                throw new IllegalArgumentException("LRS_Object cannot be null");
+            else {
+            	this.populated = true;
             }
             this.actor = actor;
             this.verb = verb;
             this.object = object;
-            this.populated = true;
         }
         /**
          * FULL objects constructor
@@ -414,6 +424,7 @@ public interface LearningResourceStoreService {
         }
         /**
          * Construct an actor using an email address
+         * This should not be used directly. Instead LearningResourceStoreService.getActor() should be used to fill in all account details
          * @param email the user email address
          */
         public LRS_Actor(String email) {

@@ -1,15 +1,11 @@
-/**********************************************************************************
- * $URL$
- * $Id$
- ***********************************************************************************
- *
- * Copyright (c) 2004, 2005, 2006, 2007, 2008, 2009 The Sakai Foundation
+/*
+ * Copyright (c) 2016, The Apereo Foundation
  *
  * Licensed under the Educational Community License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.opensource.org/licenses/ECL-2.0
+ *             http://opensource.org/licenses/ecl2
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- **********************************************************************************/
-
-
+ */
 
 package org.sakaiproject.tool.assessment.ui.listener.select;
 
@@ -30,17 +24,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import javax.servlet.http.HttpServletRequest;
+
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.math.NumberUtils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.api.SamigoApiFactory;
 import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
 import org.sakaiproject.tool.assessment.data.dao.grading.StudentGradingSummaryData;
@@ -61,7 +57,7 @@ import org.sakaiproject.tool.assessment.ui.bean.select.SelectAssessmentBean;
 import org.sakaiproject.tool.assessment.ui.bean.shared.PersonBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 import org.sakaiproject.tool.assessment.util.BeanSort;
-import org.sakaiproject.tool.assessment.util.ExtendedTimeService;
+import org.sakaiproject.tool.assessment.util.ExtendedTimeDeliveryService;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
@@ -71,16 +67,9 @@ import org.sakaiproject.util.ResourceLoader;
  * @author Ed Smiley
  * @version $Id$
  */
-
+@Slf4j
 public class SelectActionListener
     implements ActionListener {
-  private static Logger log = LoggerFactory.getLogger(SelectActionListener.class);
-  //private static ContextUtil cu;
-  private static BeanSort bs;
-  private static BeanSort bs2;
-  private static ExtendedTimeService extendedTimeService = null;
-  private static String EXTENDED_TIME_KEY = "extendedTime";
-
   private static final String AVG_SCORE = EvaluationModelIfc.AVERAGE_SCORE.toString();
   private static final String HIGH_SCORE = EvaluationModelIfc.HIGHEST_SCORE.toString();
   private static final String LAST_SCORE = EvaluationModelIfc.LAST_SCORE.toString();
@@ -126,7 +115,7 @@ public class SelectActionListener
 
     // ----------------- prepare Takeable assessment list -------------
     // 1a. get total no. of submission (for grade) per assessment by the given agent in current site
-    HashMap h = publishedAssessmentService.getTotalSubmissionPerAssessment(
+    Map h = publishedAssessmentService.getTotalSubmissionPerAssessment(
                 AgentFacade.getAgentString(), AgentFacade.getCurrentSiteId());
     // store it in personBean 'cos we would be using it to check if the total submisison
     // allowed is met later - extra protection to avoid students being too enterprising
@@ -135,7 +124,7 @@ public class SelectActionListener
 
     // 1b. get all the published assessmnet available in the site
     // note that agentId is not really used
-    ArrayList publishedAssessmentList =
+    List publishedAssessmentList =
         publishedAssessmentService.getBasicInfoOfAllPublishedAssessments(
         AgentFacade.getAgentString(), this.getTakeableOrderBy(select),
         select.isTakeableAscending(), AgentFacade.getCurrentSiteId());
@@ -150,10 +139,10 @@ public class SelectActionListener
     }
     
     // filter out the one that the given user do not have right to access
-    ArrayList takeableList = getTakeableList(publishedAssessmentList,  h, updatedAssessmentNeedResubmitList, updatedAssessmentList);
+    List takeableList = getTakeableList(publishedAssessmentList,  h, updatedAssessmentNeedResubmitList, updatedAssessmentList);
     
     // 1c. prepare delivery bean
-    ArrayList takeablePublishedList = new ArrayList();
+    List takeablePublishedList = new ArrayList();
     for (int i = 0; i < takeableList.size(); i++) {
       // note that this object is PublishedAssessmentFacade(assessmentBaseId,
       // title, releaseTo, startDate, dueDate, retractDate,lateHandling,
@@ -201,18 +190,16 @@ public class SelectActionListener
     processDisplayInfo(select);
     
     // 1. get the most recent submission, or the highest submissions of each assessment for a user, depending on grading option
-    ArrayList recentSubmittedList = 
+    List recentSubmittedList =
     	publishedAssessmentService.getBasicInfoOfLastOrHighestOrAverageSubmittedAssessmentsByScoringOption( AgentFacade.getAgentString(), AgentFacade.getCurrentSiteId(),"2".equals(select.getDisplayAllAssessments()));
    
-    HashMap publishedAssessmentHash = getPublishedAssessmentHash(publishedAssessmentList);
-    ArrayList submittedAssessmentGradingList = new ArrayList();
-    //log.info("recentSubmittedList size="+recentSubmittedList.size());
-    boolean hasHighest = false;
-    boolean hasMultipleSubmission = false;
-    HashMap feedbackHash = publishedAssessmentService.getFeedbackHash();
-    DeliveryBeanie deliveryAnt = null;
-    boolean isUnique = true;
-    HashSet<Long> recentSubmittedIds = new HashSet<Long>();
+    Map publishedAssessmentHash = getPublishedAssessmentHash(publishedAssessmentList);
+    List submittedAssessmentGradingList = new ArrayList();
+
+    boolean hasHighest;
+    boolean hasMultipleSubmission;
+    Map feedbackHash = publishedAssessmentService.getFeedbackHash();
+    Set<Long> recentSubmittedIds = new HashSet<>();
     select.setHasAnyAssessmentRetractForEdit(false);
     for (int k = 0; k < recentSubmittedList.size(); k++) {
     	AssessmentGradingData g = (AssessmentGradingData)
@@ -234,19 +221,19 @@ public class SelectActionListener
         delivery.setAssessmentId(g.getPublishedAssessmentId().toString());
         
         Integer submissionAllowed = getSubmissionAllowed(g.getPublishedAssessmentId(), publishedAssessmentHash);
-        if (submissionAllowed.intValue() == -1) {
+        if (submissionAllowed == -1) {
         	log.debug("submissionAllowed == -1");
         	continue;
         }
-        if (submissionAllowed.intValue() == 0) { // unlimited submissions
+        if (submissionAllowed == 0) { // unlimited submissions
           delivery.setMultipleSubmissions(true);
       	  hasMultipleSubmission=true;
         }
-        else if (submissionAllowed.intValue() == 1) {
+        else if (submissionAllowed == 1) {
        		delivery.setMultipleSubmissions(false);
        		hasMultipleSubmission=false;
        	}
-        else if (submissionAllowed.intValue() > 1) {
+        else if (submissionAllowed > 1) {
        		delivery.setMultipleSubmissions(true);
        		hasMultipleSubmission=true;
        	}
@@ -315,7 +302,7 @@ public class SelectActionListener
     bs.sort();
     
     Iterator iter = submittedAssessmentGradingList.iterator();
-    ArrayList averageScoreAssessmentGradingList = new ArrayList();
+    List averageScoreAssessmentGradingList = new ArrayList();
     
     while (iter.hasNext())
     {
@@ -325,7 +312,7 @@ public class SelectActionListener
     }
     
     String lastPublishedAssessmentId = "";
-    HashMap averageScoreMap = new HashMap();
+    Map averageScoreMap = new HashMap();
     double totalScores= 0d;
 	int totalSubmissions= 0;
 	double averageScore = 0d;
@@ -338,13 +325,13 @@ public class SelectActionListener
 			totalSubmissions++;
 			if (i == averageScoreAssessmentGradingList.size() - 1) {
 				averageScore = totalScores/totalSubmissions;
-				averageScoreMap.put(db.getAssessmentId(), Double.valueOf(averageScore));
+				averageScoreMap.put(db.getAssessmentId(), averageScore);
 			}
 		}
 		else {
 			if (i > 0) {
 				averageScore = totalScores/totalSubmissions;
-				averageScoreMap.put(lastPublishedAssessmentId, Double.valueOf(averageScore));
+				averageScoreMap.put(lastPublishedAssessmentId, averageScore);
 			}
 			lastPublishedAssessmentId = db.getAssessmentId(); 
 			totalScores = Double.parseDouble(db.getFinalScore());
@@ -352,14 +339,14 @@ public class SelectActionListener
 			
 			if (i == averageScoreAssessmentGradingList.size() - 1) {
 				averageScore = totalScores/totalSubmissions;
-				averageScoreMap.put(db.getAssessmentId(), Double.valueOf(averageScore));
+				averageScoreMap.put(db.getAssessmentId(), averageScore);
 			}
 		}
 	}
     
     /// --mustansar
-    ArrayList reviewableList=new ArrayList();
-    ArrayList recordedList=new ArrayList();
+    List reviewableList=new ArrayList();
+    List recordedList=new ArrayList();
     Iterator it=submittedAssessmentGradingList.iterator();
     String assessmentIdNew="";
     while(it.hasNext()){
@@ -537,7 +524,7 @@ public class SelectActionListener
 
     if (takeAscending != null && !takeAscending.trim().equals("") && !takeAscending.equals("null")) {
       try {
-        bean.setTakeableAscending((Boolean.valueOf(takeAscending)).booleanValue());
+        bean.setTakeableAscending((Boolean.valueOf(takeAscending)));
       }
       catch (Exception ex) { //skip
         log.warn(ex.getMessage());
@@ -550,7 +537,7 @@ public class SelectActionListener
 
     if (reviewAscending != null && !reviewAscending.trim().equals("")) {
       try {
-        bean.setReviewableAscending(Boolean.valueOf(reviewAscending).booleanValue());
+        bean.setReviewableAscending(Boolean.valueOf(reviewAscending));
       }
       catch (Exception ex) { //skip
        log.warn(ex.getMessage());
@@ -567,25 +554,28 @@ public class SelectActionListener
   // agent is authorizaed and filter out the one that does not meet the
   // takeable criteria.
   // SAK-1464: we also want to filter out assessment released To Anonymous Users
-  private ArrayList getTakeableList(ArrayList assessmentList, HashMap h, List updatedAssessmentNeedResubmitList, List updatedAssessmentList) {
-    ArrayList takeableList = new ArrayList();
+  private List getTakeableList(List assessmentList, Map <Long,Integer> h, List updatedAssessmentNeedResubmitList, List updatedAssessmentList) {
+    List takeableList = new ArrayList();
     GradingService gradingService = new GradingService();
-    HashMap numberRetakeHash = gradingService.getNumberRetakeHash(AgentFacade.getAgentString());
-    HashMap actualNumberRetake = gradingService.getActualNumberRetakeHash(AgentFacade.getAgentString());
+    Map<Long, StudentGradingSummaryData> numberRetakeHash = gradingService.getNumberRetakeHash(AgentFacade.getAgentString());
+    Map<Long, Integer> actualNumberRetake = gradingService.getActualNumberRetakeHash(AgentFacade.getAgentString());
+    ExtendedTimeDeliveryService extendedTimeDeliveryService;
     for (int i = 0; i < assessmentList.size(); i++) {
       PublishedAssessmentFacade f = (PublishedAssessmentFacade)assessmentList.get(i);
 			// Handle extended time info
-			extendedTimeService = new ExtendedTimeService(f);
-			if (extendedTimeService.hasExtendedTime()) {
-				f.setStartDate(extendedTimeService.getStartDate());
-				f.setDueDate(extendedTimeService.getDueDate());
-				f.setRetractDate(extendedTimeService.getRetractDate());
-				if (extendedTimeService.getTimeLimit() != 0) {
-					f.setTimeLimit(extendedTimeService.getTimeLimit());
+			extendedTimeDeliveryService = new ExtendedTimeDeliveryService(f);
+			if (extendedTimeDeliveryService.hasExtendedTime()) {
+				f.setStartDate(extendedTimeDeliveryService.getStartDate());
+				f.setDueDate(extendedTimeDeliveryService.getDueDate());
+				//Override late handling here, availability check done later
+				if (extendedTimeDeliveryService.getRetractDate() != null) {
+					f.setRetractDate(extendedTimeDeliveryService.getRetractDate());
+					f.setLateHandling(AssessmentAccessControlIfc.ACCEPT_LATE_SUBMISSION);
 				}
+				f.setTimeLimit(extendedTimeDeliveryService.getTimeLimit());
 			}
       if (f.getReleaseTo()!=null && !("").equals(f.getReleaseTo())
-          && f.getReleaseTo().indexOf("Anonymous Users") == -1 ) {
+          && !f.getReleaseTo().contains("Anonymous Users") ) {
         if (isAvailable(f, h, numberRetakeHash, actualNumberRetake, updatedAssessmentNeedResubmitList, updatedAssessmentList)) {
           takeableList.add(f);
         }
@@ -594,7 +584,7 @@ public class SelectActionListener
     return takeableList;
   }
 
-  public boolean isAvailable(PublishedAssessmentFacade f, HashMap h, HashMap numberRetakeHash, HashMap actualNumberRetakeHash, List updatedAssessmentNeedResubmitList, List updatedAssessmentList) {
+  public boolean isAvailable(PublishedAssessmentFacade f, Map <Long, Integer> h, Map<Long, StudentGradingSummaryData> numberRetakeHash, Map <Long, Integer> actualNumberRetakeHash, List updatedAssessmentNeedResubmitList, List updatedAssessmentList) {
     boolean returnValue = false;
     //1. prepare our significant parameters
     Integer status = f.getStatus();
@@ -603,13 +593,28 @@ public class SelectActionListener
     Date dueDate = f.getDueDate();
     Date retractDate = f.getRetractDate();
     boolean acceptLateSubmission = AssessmentAccessControlIfc.ACCEPT_LATE_SUBMISSION.equals(f.getLateHandling());
-    
+
+    if (dueDate == null && (retractDate != null && acceptLateSubmission)) {
+        dueDate = retractDate;
+    }
+
     if (!Integer.valueOf(1).equals(status)) {
     	return false;
     }
     
     if (startDate != null && startDate.after(currentDate)) {
     	return false;
+    }
+
+    int totalSubmitted = 0;
+
+    //boolean notSubmitted = false;
+    if (h.get(f.getPublishedAssessmentId()) != null){
+      totalSubmitted = ((Integer) h.get(f.getPublishedAssessmentId()));
+    }
+    
+    if (acceptLateSubmission && (dueDate != null && dueDate.before(currentDate)) && retractDate == null && totalSubmitted == 0) {
+      return true;
     }
     
     if (acceptLateSubmission
@@ -624,19 +629,12 @@ public class SelectActionListener
     
     int maxSubmissionsAllowed = 9999;
     if ( (Boolean.FALSE).equals(f.getUnlimitedSubmissions())){
-      maxSubmissionsAllowed = f.getSubmissionsAllowed().intValue();
+      maxSubmissionsAllowed = f.getSubmissionsAllowed();
     }
 
     int numberRetake = 0;
     if (numberRetakeHash.get(f.getPublishedAssessmentId()) != null) {
-    	numberRetake = (((StudentGradingSummaryData) numberRetakeHash.get(f.getPublishedAssessmentId())).getNumberRetake()).intValue();
-    }
-    int totalSubmitted = 0;
-    
-    //boolean notSubmitted = false;
-    if (h.get(f.getPublishedAssessmentId()) != null){
-      totalSubmitted = ( (Integer) h.get(f.getPublishedAssessmentId())).
-          intValue();
+    	numberRetake = (((StudentGradingSummaryData) numberRetakeHash.get(f.getPublishedAssessmentId())).getNumberRetake());
     }
     
       //2. time to go through all the criteria
@@ -653,7 +651,7 @@ public class SelectActionListener
 			} else {
 				int actualNumberRetake = 0;
 				if (actualNumberRetakeHash.get(f.getPublishedAssessmentId()) != null) {
-					actualNumberRetake = ((Integer) actualNumberRetakeHash.get(f.getPublishedAssessmentId())).intValue();
+					actualNumberRetake = (actualNumberRetakeHash.get(f.getPublishedAssessmentId()));
 				}
 				if (actualNumberRetake < numberRetake) {
 					returnValue = true;
@@ -666,7 +664,7 @@ public class SelectActionListener
     		if (retractDate == null || retractDate.after(currentDate)) {
 				int actualNumberRetake = 0;
 				if (actualNumberRetakeHash.get(f.getPublishedAssessmentId()) != null) {
-					actualNumberRetake = ((Integer) actualNumberRetakeHash.get(f.getPublishedAssessmentId())).intValue();
+					actualNumberRetake = (actualNumberRetakeHash.get(f.getPublishedAssessmentId()));
 				}
 				if (actualNumberRetake < numberRetake) {
 					returnValue = true;
@@ -700,7 +698,6 @@ public class SelectActionListener
     Date currentDate = new Date();
     
     if (p==null) {// published assessment may have been deleted
-      //log.info("*** pub has been deleted ="+a.getPublishedAssessmentId());
       return hasFeedback;
     }
 
@@ -721,17 +718,13 @@ public class SelectActionListener
 
   private boolean isAssessmentRetractForEdit(PublishedAssessmentFacade p){
 	  if (p == null) {// published assessment may have been deleted
-	      //log.info("*** pub has been deleted ="+a.getPublishedAssessmentId());
 	      return false;
 	    }
 	  
-	  if (AssessmentIfc.RETRACT_FOR_EDIT_STATUS.equals(p.getStatus())) {
-		  return true;
-	  }
-	  return false;
+	  return AssessmentIfc.RETRACT_FOR_EDIT_STATUS.equals(p.getStatus());
   }
   
-  private String hasStats(AssessmentGradingData a, HashMap feedbackHash){
+  private String hasStats(AssessmentGradingData a, Map feedbackHash){
     String hasStats = "false";
 
     AssessmentFeedbackIfc f= (AssessmentFeedbackIfc)feedbackHash.get(a.getPublishedAssessmentId());
@@ -742,12 +735,11 @@ public class SelectActionListener
 	hasStats = "true";
        }
     }
-    //log.debug("hasStats == " + hasStats);
     return hasStats;
   }
 
   private String showScore(AssessmentGradingData a,
-                           String hasFeedback, HashMap feedbackHash){
+                           String hasFeedback, Map feedbackHash){
     String showScore = "na";
     // must meet 2 conditions: hasFeedback==true && feedback.getShowStudentScore()==true
     AssessmentFeedbackIfc f= (AssessmentFeedbackIfc)feedbackHash.get(a.getPublishedAssessmentId());
@@ -761,7 +753,7 @@ public class SelectActionListener
     return showScore;
   }
 
-  private String getScoringType(Long publishedAssessmentId, HashMap publishedAssessmentHash){
+  private String getScoringType(Long publishedAssessmentId, Map publishedAssessmentHash){
 	    PublishedAssessmentFacade p = (PublishedAssessmentFacade)publishedAssessmentHash.
 	        get(publishedAssessmentId);
 	    if (p!=null) {
@@ -773,7 +765,7 @@ public class SelectActionListener
   }
   
 
-  private Integer getSubmissionAllowed(Long publishedAssessmentId, HashMap publishedAssessmentHash){
+  private Integer getSubmissionAllowed(Long publishedAssessmentId, Map publishedAssessmentHash){
 	    PublishedAssessmentFacade p = (PublishedAssessmentFacade)publishedAssessmentHash.
 	        get(publishedAssessmentId);
 	    if (p!=null)
@@ -784,7 +776,7 @@ public class SelectActionListener
 	    }
   }
   
-  private Date getFeedbackDate(Long publishedAssessmentId, HashMap publishedAssessmentHash){
+  private Date getFeedbackDate(Long publishedAssessmentId, Map publishedAssessmentHash){
     PublishedAssessmentFacade p = (PublishedAssessmentFacade)publishedAssessmentHash.
         get(publishedAssessmentId);
     if (p!=null)
@@ -793,7 +785,7 @@ public class SelectActionListener
       return null;
   }
 
-  private String getFeedbackDelivery(Long publishedAssessmentId, HashMap publishedAssessmentHash){
+  private String getFeedbackDelivery(Long publishedAssessmentId, Map publishedAssessmentHash){
     PublishedAssessmentFacade p = (PublishedAssessmentFacade)publishedAssessmentHash.
         get(publishedAssessmentId);
     if (p!=null)
@@ -802,7 +794,7 @@ public class SelectActionListener
       return null;
   }
   
-  private String getFeedbackComponentOption(Long publishedAssessmentId, HashMap publishedAssessmentHash){
+  private String getFeedbackComponentOption(Long publishedAssessmentId, Map publishedAssessmentHash){
 	    PublishedAssessmentFacade p = (PublishedAssessmentFacade)publishedAssessmentHash.
 	        get(publishedAssessmentId);
 	    if (p!=null) {
@@ -815,7 +807,7 @@ public class SelectActionListener
 	      return null;
 	  }
   
-  private boolean getHasAssessmentBeenModified(SelectAssessmentBean select, AssessmentGradingData g, HashMap publishedAssessmentHash){
+  private boolean getHasAssessmentBeenModified(SelectAssessmentBean select, AssessmentGradingData g, Map publishedAssessmentHash){
 	    PublishedAssessmentFacade p = (PublishedAssessmentFacade)publishedAssessmentHash.
 	        get(g.getPublishedAssessmentId());
 	    if (p != null) {
@@ -845,8 +837,8 @@ public class SelectActionListener
     return timeElapsedInString;
   }
 
-  public HashMap getPublishedAssessmentHash(ArrayList publishedAssessmentList){
-    HashMap h = new HashMap();
+  public Map getPublishedAssessmentHash(List publishedAssessmentList){
+    Map h = new HashMap();
     for (int i=0; i<publishedAssessmentList.size();i++){
       PublishedAssessmentFacade p = (PublishedAssessmentFacade)publishedAssessmentList.get(i);
       h.put(p.getPublishedAssessmentId(), p);
@@ -856,7 +848,7 @@ public class SelectActionListener
   
   private void setTimedAssessment(DeliveryBeanie delivery, PublishedAssessmentFacade pubAssessment){
 	  if (pubAssessment.getTimeLimit() != null) {
-		  int seconds = pubAssessment.getTimeLimit().intValue();
+		  int seconds = pubAssessment.getTimeLimit();
 		  int hour = 0;
 		  int minute = 0;
 		  if (seconds>=3600) {

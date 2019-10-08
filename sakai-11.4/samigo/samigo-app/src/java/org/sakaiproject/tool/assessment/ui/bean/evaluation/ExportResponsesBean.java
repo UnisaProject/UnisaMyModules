@@ -37,9 +37,8 @@ import javax.faces.event.ActionEvent;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -59,12 +58,11 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.ResourceLoader;
 
-
-
 /**
  * <p>Description: class form for evaluating total scores</p>
  *
  */
+@Slf4j
 public class ExportResponsesBean implements Serializable, PhaseAware {
 	
 	/**
@@ -81,12 +79,11 @@ public class ExportResponsesBean implements Serializable, PhaseAware {
 	public static final String FORMAT = "<format ";
 	public static final String FORMAT_BOLD = FORMAT + "bold/>";
 
+	private static final String MSG_BUNDLE = "org.sakaiproject.tool.assessment.bundle.EvaluationMessages";
 	
 	private String assessmentId;
 	private String assessmentName;
 	private boolean anonymous;
-
-	private static Logger log = LoggerFactory.getLogger(ExportResponsesBean.class);
 
 	/**
 	 * Creates a new TotalScoresBean object.
@@ -182,18 +179,20 @@ public class ExportResponsesBean implements Serializable, PhaseAware {
   	  	detailedStats.next();
   	  	boolean showPartAndTotalScoreSpreadsheetColumns = true;
   		boolean showDetailedStatisticsSheet = (Boolean) detailedStats.next();
-  	  	
-  	  	String audioMessage = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","audio_message");
-    	String fileUploadMessage = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","file_upload_message");
-    	String noSubmissionMessage = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","export_no_submission");
+
+        String audioMessage = ContextUtil.getLocalizedString(MSG_BUNDLE,"audio_message");
+        String fileUploadMessage = ContextUtil.getLocalizedString(MSG_BUNDLE,"file_upload_message");
+        String noSubmissionMessage = ContextUtil.getLocalizedString(MSG_BUNDLE,"export_no_submission");
         GradingService gradingService = new GradingService();
-        String poolString = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","pool");
-        String partString = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","part");
-        String questionString = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","question");
-        String responseString = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","response");
-        String rationaleString = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","rationale");
-        String itemGradingCommentsString = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","grader_comments");
-        String responseCommentsString = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","student_comments");
+        String poolString = ContextUtil.getLocalizedString(MSG_BUNDLE,"pool");
+        String partString = ContextUtil.getLocalizedString(MSG_BUNDLE,"part");
+        String questionString = ContextUtil.getLocalizedString(MSG_BUNDLE,"question");
+        String responseString = ContextUtil.getLocalizedString(MSG_BUNDLE,"response");
+        String rationaleString = ContextUtil.getLocalizedString(MSG_BUNDLE,"rationale");
+        String itemGradingCommentsString = ContextUtil.getLocalizedString(MSG_BUNDLE,"grader_comments");
+        String responseCommentsString = ContextUtil.getLocalizedString(MSG_BUNDLE,"student_comments");
+        String startTimeString = ContextUtil.getLocalizedString(MSG_BUNDLE,"start_time");
+        String submitTimeString = ContextUtil.getLocalizedString(MSG_BUNDLE,"submit_time");
         
         List exportResponsesDataList = gradingService.getExportResponsesData(assessmentId, anonymous, audioMessage, fileUploadMessage, noSubmissionMessage, 
         		showPartAndTotalScoreSpreadsheetColumns, poolString, partString, questionString, responseString, rationaleString, itemGradingCommentsString, useridMap, responseCommentsString);
@@ -208,25 +207,28 @@ public class ExportResponsesBean implements Serializable, PhaseAware {
         ArrayList<Object> headerList = new ArrayList<Object>();
         headerList.add(HEADER_MARKER);
         if (anonymous) {
-  		  headerList.add(ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","sub_id"));
+  		  headerList.add(ContextUtil.getLocalizedString(MSG_BUNDLE,"sub_id"));
   	  	}
   	  	else {
-  		  headerList.add(ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","last_name"));
-  		  headerList.add(ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","first_name"));
-  		  headerList.add(ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","user_name"));
-  		  headerList.add(ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","num_submission"));
+  		  headerList.add(ContextUtil.getLocalizedString(MSG_BUNDLE,"last_name"));
+  		  headerList.add(ContextUtil.getLocalizedString(MSG_BUNDLE,"first_name"));
+  		  headerList.add(ContextUtil.getLocalizedString(MSG_BUNDLE,"user_name"));
+  		  headerList.add(ContextUtil.getLocalizedString(MSG_BUNDLE,"num_submission"));
   	  	}
+
+        headerList.add(startTimeString);
+        headerList.add(submitTimeString);
 
         PublishedAssessmentService pubService = new PublishedAssessmentService();
         if (showPartAndTotalScoreSpreadsheetColumns) {
 	  	  	int numberOfSections = pubService.getPublishedSectionCount(Long.valueOf(assessmentId)).intValue();
 	  	  	if (numberOfSections > 1) {
 		  	  	for (int i = 1; i <= numberOfSections; i++) {
-		  	  		headerList.add(partString + " " + i + " " + ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","score"));
+		  	  		headerList.add(partString + " " + i + " " + ContextUtil.getLocalizedString(MSG_BUNDLE,"score"));
 		    	}
 	  	  	}
 	        
-	        headerList.add(ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","tot"));
+	        headerList.add(ContextUtil.getLocalizedString(MSG_BUNDLE,"tot"));
 	        headerList.add(itemGradingCommentsString);
         }
         //SAM-1693 the returned list could be null -DH
@@ -239,13 +241,13 @@ public class ExportResponsesBean implements Serializable, PhaseAware {
   		ArrayList<Object> newSheetList;
   	  	newSheetList = new ArrayList<Object>();
   	  	newSheetList.add(NEW_SHEET_MARKER);
-  	  	newSheetList.add(ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","responses"));
+  	  	newSheetList.add(ContextUtil.getLocalizedString(MSG_BUNDLE,"responses"));
   	  	list.add(0, newSheetList);
 
   	  	if (showDetailedStatisticsSheet) {
   	  		newSheetList = new ArrayList<Object>();
   	  		newSheetList.add(NEW_SHEET_MARKER);
-  	  		newSheetList.add(ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","item_analysis"));
+  	  		newSheetList.add(ContextUtil.getLocalizedString(MSG_BUNDLE,"item_analysis"));
   	  		list.add(newSheetList);
 
         	while (detailedStats.hasNext()) {
@@ -264,9 +266,9 @@ public class ExportResponsesBean implements Serializable, PhaseAware {
 	 */
     public String getDownloadFileName() {
 		Date now = new Date();
-		String dateFormat = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","export_filename_date_format");
+		String dateFormat = ContextUtil.getLocalizedString(MSG_BUNDLE,"export_filename_date_format");
 		DateFormat df = new SimpleDateFormat(dateFormat, new ResourceLoader().getLocale());
-		StringBuilder fileName = new StringBuilder(ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages","assessment"));
+		StringBuilder fileName = new StringBuilder(ContextUtil.getLocalizedString(MSG_BUNDLE,"assessment"));
         if(StringUtils.trimToNull(assessmentName) != null) {
         	assessmentName = assessmentName.replaceAll("\\s", "_"); // replace whitespace with '_'
             fileName.append("-");
@@ -357,7 +359,7 @@ public class ExportResponsesBean implements Serializable, PhaseAware {
 
 		CellStyle boldStyle = wb.createCellStyle();
 		Font font = wb.createFont();
-		font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+		font.setBold(true);
 		String fontName = ServerConfigurationService.getString("spreadsheet.font");
 		if (fontName != null) {
 			font.setFontName(fontName);
@@ -421,7 +423,13 @@ public class ExportResponsesBean implements Serializable, PhaseAware {
 						}
 						if (data != null) {
 							if (data instanceof Double) {
-								cell.setCellValue(((Double)data).doubleValue());
+								cell.setCellValue(ContextUtil.getRoundedValue(((Double)data).doubleValue(), 2));
+							} else if (data instanceof Date) {
+								// tell Excel this is a date
+								CellStyle style = wb.createCellStyle();
+								style.setDataFormat((short) 15);
+								cell.setCellStyle(style);
+								cell.setCellValue((Date) data);
 							} else {
 								AnswerSurveyConverter converter = new AnswerSurveyConverter();
 								String datac = converter.getAsString(null, null, data.toString());

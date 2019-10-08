@@ -72,7 +72,24 @@
     </h:column>
 
 
-    <h:column>
+      <h:column rendered="#{questionpool.showTags == 'true'}" >
+          <f:facet name="header">
+              <h:panelGroup>
+                  <h:outputText value="#{questionPoolMessages.t_tags}" />
+              </h:panelGroup>
+          </f:facet>
+          <t:dataList value="#{question.itemTagSet.toArray()}" var="tag" layout="unorderedList">
+              <f:verbatim><span></f:verbatim>
+              <h:outputText value="#{tag.tagLabel}"/>
+              <f:verbatim><span class="collection"></f:verbatim>
+              (<h:outputText value="#{tag.tagCollectionName}"/>)
+              <f:verbatim></span></span></br>  </f:verbatim>
+          </t:dataList>
+      </h:column>
+
+
+
+      <h:column>
       <f:facet name="header">
         <h:panelGroup>
           <h:outputText value="#{questionPoolMessages.q_type}" />
@@ -96,6 +113,15 @@
 
     </h:column>
     
+    <h:column>
+      <f:facet name="header">
+        <h:panelGroup>
+          <h:outputText value="#{questionPoolMessages.q_points}" />
+        </h:panelGroup>
+      </f:facet>
+       <h:outputText value="#{question.score}"/>
+    </h:column>
+
     <h:column>
       <f:facet name="header">
         <h:panelGroup>

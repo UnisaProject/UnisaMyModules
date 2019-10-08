@@ -19,8 +19,6 @@
  *
  **********************************************************************************/
 
-
-
 package org.sakaiproject.tool.assessment.ui.listener.author;
 
 import java.util.ArrayList;
@@ -37,11 +35,13 @@ import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
+import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AnswerFeedbackIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AnswerIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentIfc;
+import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTagIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.PublishedAssessmentIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemMetaDataIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTextAttachmentIfc;
@@ -65,11 +65,11 @@ import org.sakaiproject.tool.assessment.ui.bean.author.CalculatedQuestionVariabl
 import org.sakaiproject.tool.assessment.ui.bean.author.ImageMapItemBean;
 import org.sakaiproject.tool.assessment.ui.bean.author.ItemAuthorBean;
 import org.sakaiproject.tool.assessment.ui.bean.author.ItemBean;
+import org.sakaiproject.tool.assessment.ui.bean.author.ItemTagBean;
 import org.sakaiproject.tool.assessment.ui.bean.author.MatchItemBean;
 import org.sakaiproject.tool.assessment.ui.bean.author.CalculatedQuestionBean;
 import org.sakaiproject.tool.assessment.ui.bean.authz.AuthorizationBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
-import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.user.api.UserDirectoryService;
 
 import org.sakaiproject.util.FormattedText;
@@ -79,10 +79,9 @@ import org.sakaiproject.util.FormattedText;
  * <p>Description: Sakai Assessment Manager</p>
  * <p>Organization: Sakai Project</p>
  */
-
+@Slf4j
 public class ItemModifyListener implements ActionListener
 {
-  private static Logger log = LoggerFactory.getLogger(ItemModifyListener.class);
   //private String scalename;  // used for multiple choice Survey
 
   /**
@@ -279,6 +278,8 @@ public class ItemModifyListener implements ActionListener
       List attachmentList = itemfacade.getData().getItemAttachmentList(); 
       itemauthorbean.setAttachmentList(attachmentList);
       itemauthorbean.setResourceHash(null);
+      Set<ItemTagIfc> tagsList = itemfacade.getData().getItemTagSet();
+      itemauthorbean.setTagsList(tagsList);
       
       int itype=0; // default to true/false
       if (itemauthorbean.getItemType()!=null) {
@@ -378,6 +379,7 @@ public class ItemModifyListener implements ActionListener
 
       // set current ItemBean in ItemAuthorBean
       itemauthorbean.setCurrentItem(bean);
+      itemauthorbean.setTagsTempListToJson("[]");
 
 	// set outcome for action
 	itemauthorbean.setOutcome(nextpage);
@@ -1074,5 +1076,18 @@ public class ItemModifyListener implements ActionListener
     	bean.setSelectedSection(itemfacade.getData().getSection().getSectionId().toString());
     }
   }
+
+  private void populateItemTags(ItemAuthorBean itemauthorbean, ItemFacade itemfacade, ItemBean bean) {
+      final Set<ItemTagIfc> itemTagSet = itemfacade.getItemTagSet();
+      final List<ItemTagBean> itemTagIfcList = new ArrayList<>(itemTagSet.size());
+      for ( ItemTagIfc itemTagIfc : itemTagSet ) {
+          itemTagIfcList.add(itemTagBeanFrom(itemTagIfc));
+      }
+      bean.setItemTags(itemTagIfcList);
+  }
+
+    private ItemTagBean itemTagBeanFrom(ItemTagIfc itemTagIfc) {
+        return new ItemTagBean(itemTagIfc.getTagId(), itemTagIfc.getTagLabel(), itemTagIfc.getTagCollectionName());
+    }
 
 }

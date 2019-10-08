@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>msgcntr</artifactId>
 		<groupId>org.sakaiproject.msgcntr</groupId>
-		<version>11.4</version>
+		<version>12.6</version>
 	</parent>
 	<name>Sakai Message Forums Tool</name>
 	<groupId>org.sakaiproject.msgcntr</groupId>
@@ -40,7 +40,7 @@
 		<dependency>
 			<groupId>org.apache.myfaces.tomahawk</groupId>
 			<artifactId>tomahawk</artifactId>
-			<version>1.1.11</version>
+			<version>1.1.14</version>
 		</dependency>
 		<dependency>
 		  <groupId>javax.servlet</groupId>

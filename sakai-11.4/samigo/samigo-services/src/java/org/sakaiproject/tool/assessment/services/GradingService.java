@@ -19,15 +19,14 @@
  *
  **********************************************************************************/
 
-
 package org.sakaiproject.tool.assessment.services;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -48,22 +47,27 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.complex.ComplexFormat;
 import org.apache.commons.math3.exception.MathParseException;
 import org.apache.commons.math3.util.Precision;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.sakaiproject.event.cover.EventTrackingService;
+import org.sakaiproject.samigo.util.SamigoConstants;
 import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
 import org.sakaiproject.spring.SpringBeanLocator;
+import org.sakaiproject.tool.assessment.data.dao.assessment.EventLogData;
+import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedItemData;
 import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingAttachment;
 import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
 import org.sakaiproject.tool.assessment.data.dao.grading.ItemGradingAttachment;
 import org.sakaiproject.tool.assessment.data.dao.grading.ItemGradingData;
 import org.sakaiproject.tool.assessment.data.dao.grading.MediaData;
+import org.sakaiproject.tool.assessment.data.dao.grading.StudentGradingSummaryData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AnswerIfc;
+import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentAccessControlIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.EvaluationModelIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
@@ -73,27 +77,31 @@ import org.sakaiproject.tool.assessment.data.ifc.assessment.PublishedAssessmentI
 import org.sakaiproject.tool.assessment.data.ifc.grading.StudentGradingSummaryIfc;
 import org.sakaiproject.tool.assessment.data.ifc.shared.TypeIfc;
 import org.sakaiproject.tool.assessment.facade.AgentFacade;
+import org.sakaiproject.tool.assessment.facade.EventLogFacade;
 import org.sakaiproject.tool.assessment.facade.GradebookFacade;
+import org.sakaiproject.tool.assessment.facade.PublishedAssessmentFacade;
 import org.sakaiproject.tool.assessment.facade.TypeFacade;
 import org.sakaiproject.tool.assessment.facade.TypeFacadeQueriesAPI;
 import org.sakaiproject.tool.assessment.integration.context.IntegrationContextFactory;
 import org.sakaiproject.tool.assessment.integration.helper.ifc.GradebookServiceHelper;
+import org.sakaiproject.tool.assessment.services.assessment.EventLogService;
 import org.sakaiproject.tool.assessment.services.assessment.PublishedAssessmentService;
+import org.sakaiproject.tool.assessment.util.ExtendedTimeDeliveryService;
 import org.sakaiproject.tool.assessment.util.SamigoExpressionError;
 import org.sakaiproject.tool.assessment.util.SamigoExpressionParser;
-
 
 /**
  * The GradingService calls the back end to get/store grading information. 
  * It also calculates scores for autograded types.
  */
+@Slf4j
 public class GradingService
 {
 	/**
 	 *	Key for a complext numeric answer e.g. 9+9i 
 	 */
   public static final String ANSWER_TYPE_COMPLEX = "COMPLEX";
-  
+
   /**
    * key for a real number representation e.g 1 or 10E5 
    */
@@ -105,8 +113,8 @@ public class GradingService
   final String CALCULATION_OPEN = "[["; // not regex safe
   final String CALCULATION_CLOSE = "]]"; // not regex safe
   final String FORMAT_MASK = "0E0";
-  final Double MAX_THRESHOLD = 10000.0;
-  final Double MIN_THRESHOLD = 0.0001;
+  final BigDecimal DEFAULT_MAX_THRESHOLD = BigDecimal.valueOf(1.0e+11);
+  final BigDecimal DEFAULT_MIN_THRESHOLD = BigDecimal.valueOf(0.0001);
   /**
    * regular expression for matching the contents of a variable or formula name 
    * in Calculated Questions
@@ -122,14 +130,12 @@ public class GradingService
   final Pattern CALCQ_FORMULA_SPLIT_PATTERN = Pattern.compile("(" + OPEN_BRACKET + OPEN_BRACKET + CALCQ_VAR_FORM_NAME + CLOSE_BRACKET + CLOSE_BRACKET + ")");
   final Pattern CALCQ_CALCULATION_PATTERN = Pattern.compile("\\[\\[([^\\[\\]]+?)\\]\\]?"); // non-greedy
 
-  private Logger log = LoggerFactory.getLogger(GradingService.class);
-
   /**
    * Get all scores for a published assessment from the back end.
    */
-  public ArrayList getTotalScores(String publishedId, String which)
+  public List getTotalScores(String publishedId, String which)
   {
-    ArrayList results = null;
+    List results = null;
     try {
       results =
         new ArrayList(PersistenceService.getInstance().
@@ -141,9 +147,9 @@ public class GradingService
     return results;
   }
   
-  public ArrayList getTotalScores(String publishedId, String which, boolean getSubmittedOnly)
+  public List getTotalScores(String publishedId, String which, boolean getSubmittedOnly)
   {
-    ArrayList results = null;
+    List results = null;
     try {
       results =
         new ArrayList(PersistenceService.getInstance().
@@ -182,9 +188,9 @@ public class GradingService
     return results;
   }
 
-  public ArrayList getHighestAssessmentGradingList(Long publishedId)
+  public List getHighestAssessmentGradingList(Long publishedId)
   {
-    ArrayList results = null;
+    List results = null;
     try {
       results =
         new ArrayList(PersistenceService.getInstance().
@@ -197,7 +203,7 @@ public class GradingService
   
   public List getHighestSubmittedOrGradedAssessmentGradingList(Long publishedId)
   {
-    ArrayList results = null;
+    List results = null;
     try {
       results =
         new ArrayList(PersistenceService.getInstance().
@@ -208,9 +214,9 @@ public class GradingService
     return results;
   }
 
-  public ArrayList getLastAssessmentGradingList(Long publishedId)
+  public List getLastAssessmentGradingList(Long publishedId)
   {
-    ArrayList results = null;
+    List results = null;
     try {
       results =
         new ArrayList(PersistenceService.getInstance().
@@ -247,22 +253,20 @@ public class GradingService
     return results;
   }
   
-  public void saveTotalScores(ArrayList gdataList, PublishedAssessmentIfc pub)
+  public void saveTotalScores(List gdataList, PublishedAssessmentIfc pub)
   {
-      //log.debug("**** GradingService: saveTotalScores");
     try {
-     AssessmentGradingData gdata = null;
+     AssessmentGradingData gdata;
       if (gdataList.size()>0)
         gdata = (AssessmentGradingData) gdataList.get(0);
       else return;
 
       Integer scoringType = getScoringType(pub);
-      ArrayList oldList = getAssessmentGradingsByScoringType(
-          scoringType, gdata.getPublishedAssessmentId());
+      List oldList = getAssessmentGradingsByScoringType(scoringType, gdata.getPublishedAssessmentId());
       for (int i=0; i<gdataList.size(); i++){
         AssessmentGradingData ag = (AssessmentGradingData)gdataList.get(i);
         saveOrUpdateAssessmentGrading(ag);
-        EventTrackingService.post(EventTrackingService.newEvent("sam.total.score.update", 
+        EventTrackingService.post(EventTrackingService.newEvent(SamigoConstants.EVENT_ASSESSMENT_TOTAL_SCORE_UPDATE, 
         		"siteId=" + AgentFacade.getCurrentSiteId() +
         		", gradedBy=" + AgentFacade.getAgentString() + 
         		", assessmentGradingId=" + ag.getAssessmentGradingId() + 
@@ -274,9 +278,9 @@ public class GradingService
 
       // no need to notify gradebook if this submission is not for grade
       // we only want to notify GB when there are changes
-      ArrayList newList = getAssessmentGradingsByScoringType(
+      List newList = getAssessmentGradingsByScoringType(
         scoringType, gdata.getPublishedAssessmentId());
-      ArrayList l = getListForGradebookNotification(newList, oldList);
+      List l = getListForGradebookNotification(newList, oldList);
       
       notifyGradebook(l, pub);
     } catch (GradebookServiceException ge) {
@@ -293,9 +297,9 @@ public class GradingService
    * @param studentId
    */
 
-  public void notifyDeleteToGradebook(ArrayList gdataList, PublishedAssessmentIfc pub, String studentId){
+  public void notifyDeleteToGradebook(List gdataList, PublishedAssessmentIfc pub, String studentId){
     try {
-      AssessmentGradingData gdata = null;
+      AssessmentGradingData gdata;
       if (gdataList.size()>0) {
         gdata = (AssessmentGradingData) gdataList.get(0);
       } 
@@ -304,10 +308,10 @@ public class GradingService
       }
 
       Integer scoringType = getScoringType(pub);
-      ArrayList fullList = getAssessmentGradingsByScoringType(
+      List fullList = getAssessmentGradingsByScoringType(
           scoringType, gdata.getPublishedAssessmentId());
 
-      ArrayList l = new ArrayList();
+      List l = new ArrayList();
       for (int i=0; i< fullList.size(); i++){
          AssessmentGradingData ag = (AssessmentGradingData)fullList.get(i);
          if (ag.getAgentId().equals(studentId))
@@ -316,7 +320,7 @@ public class GradingService
       
       //When there is no more submission left for this student, update
       //this student's grade on gradebook as null(the initial state).
-      if(l.size() == 0)
+      if(l.isEmpty())
     	  l.add(gdata);
 
       notifyGradebook(l, pub);
@@ -330,10 +334,9 @@ public class GradingService
 
   }
 
-  private ArrayList getListForGradebookNotification(
-       ArrayList newList, ArrayList oldList){
-    ArrayList l = new ArrayList();
-    HashMap h = new HashMap();
+  private List getListForGradebookNotification(List newList, List oldList) {
+    List l = new ArrayList();
+    Map h = new HashMap();
     for (int i=0; i<oldList.size(); i++){
       AssessmentGradingData ag = (AssessmentGradingData)oldList.get(i);
       h.put(ag.getAssessmentGradingId(), ag);
@@ -363,9 +366,9 @@ public class GradingService
     return l;
   }
 
-  public ArrayList getAssessmentGradingsByScoringType(
+  public List getAssessmentGradingsByScoringType(
        Integer scoringType, Long publishedAssessmentId){
-    List l = null;
+    List l;
     // get the list of highest score
     if ((scoringType).equals(EvaluationModelIfc.HIGHEST_SCORE)){
       l = getHighestSubmittedOrGradedAssessmentGradingList(publishedAssessmentId);
@@ -402,7 +405,7 @@ public class GradingService
     return (forGrade && toGradebook);
   }
 
-  private void notifyGradebook(ArrayList l, PublishedAssessmentIfc pub){
+  private void notifyGradebook(List l, PublishedAssessmentIfc pub){
     for (int i=0; i<l.size(); i++){
       notifyGradebook((AssessmentGradingData)l.get(i), pub);
     }
@@ -412,10 +415,10 @@ public class GradingService
   /**
    * Get the score information for each item from the assessment score.
    */
-  public HashMap getItemScores(Long publishedId, Long itemId, String which)
+  public Map getItemScores(Long publishedId, Long itemId, String which)
   {
     try {
-      return (HashMap) PersistenceService.getInstance().
+      return PersistenceService.getInstance().
         getAssessmentGradingFacadeQueries()
           .getItemScores(publishedId, itemId, which);
     } catch (Exception e) {
@@ -424,10 +427,10 @@ public class GradingService
     }
   }
   
-  public HashMap getItemScores(Long publishedId, Long itemId, String which, boolean loadItemGradingAttachment)
+  public Map getItemScores(Long publishedId, Long itemId, String which, boolean loadItemGradingAttachment)
   {
     try {
-      return (HashMap) PersistenceService.getInstance().
+      return PersistenceService.getInstance().
         getAssessmentGradingFacadeQueries()
           .getItemScores(publishedId, itemId, which, loadItemGradingAttachment);
     } catch (Exception e) {
@@ -436,10 +439,10 @@ public class GradingService
     }
   }
 
-  public HashMap getItemScores(Long itemId, List scores, boolean loadItemGradingAttachment)
+  public Map getItemScores(Long itemId, List scores, boolean loadItemGradingAttachment)
   {
     try {
-      return (HashMap) PersistenceService.getInstance().
+      return PersistenceService.getInstance().
         getAssessmentGradingFacadeQueries()
           .getItemScores(itemId, scores, loadItemGradingAttachment);
     } catch (Exception e) {
@@ -451,10 +454,10 @@ public class GradingService
   /**
    * Get the last set of itemgradingdata for a student per assessment
    */
-  public HashMap getLastItemGradingData(String publishedId, String agentId)
+  public Map getLastItemGradingData(String publishedId, String agentId)
   {
     try {
-      return (HashMap) PersistenceService.getInstance().
+      return PersistenceService.getInstance().
         getAssessmentGradingFacadeQueries()
           .getLastItemGradingData(Long.valueOf(publishedId), agentId);
     } catch (Exception e) {
@@ -466,10 +469,10 @@ public class GradingService
   /**
    * Get the grading data for a given submission
    */
-  public HashMap getStudentGradingData(String assessmentGradingId)
+  public Map getStudentGradingData(String assessmentGradingId)
   {
     try {
-      return (HashMap) PersistenceService.getInstance().
+      return PersistenceService.getInstance().
         getAssessmentGradingFacadeQueries()
           .getStudentGradingData(assessmentGradingId);
     } catch (Exception e) {
@@ -481,12 +484,12 @@ public class GradingService
   /**
    * Get the last submission for a student per assessment
    */
-  public HashMap getSubmitData(String publishedId, String agentId, Integer scoringoption, String assessmentGradingId)
+  public Map getSubmitData(String publishedId, String agentId, Integer scoringoption, String assessmentGradingId)
   {
     try {
       Long gradingId = null;
       if (assessmentGradingId != null) gradingId = Long.valueOf(assessmentGradingId);
-      return (HashMap) PersistenceService.getInstance().
+      return PersistenceService.getInstance().
         getAssessmentGradingFacadeQueries().getSubmitData(Long.valueOf(publishedId), agentId, scoringoption, gradingId);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
@@ -530,22 +533,22 @@ public class GradingService
         getMedia(Long.valueOf(mediaId));
   }
 
-  public ArrayList getMediaArray(String itemGradingId){
+  public List<MediaData> getMediaArray(String itemGradingId){
     return PersistenceService.getInstance().getAssessmentGradingFacadeQueries().
         getMediaArray(Long.valueOf(itemGradingId));
   }
   
-  public ArrayList getMediaArray2(String itemGradingId){
+  public List<MediaData> getMediaArray2(String itemGradingId){
 	    return PersistenceService.getInstance().getAssessmentGradingFacadeQueries().
 	        getMediaArray2(Long.valueOf(itemGradingId));
   }
 
-  public ArrayList getMediaArray(ItemGradingData i){
+  public List<MediaData> getMediaArray(ItemGradingData i){
     return PersistenceService.getInstance().getAssessmentGradingFacadeQueries().
         getMediaArray(i);
   }
   
-  public HashMap getMediaItemGradingHash(Long assessmentGradingId) {
+  public Map<Long, List<ItemGradingData>> getMediaItemGradingHash(Long assessmentGradingId) {
 	    return PersistenceService.getInstance().getAssessmentGradingFacadeQueries().
 	    getMediaItemGradingHash(assessmentGradingId);
   }
@@ -775,7 +778,7 @@ public class GradingService
     }
   }
 
-  public HashMap getAssessmentGradingByItemGradingId(String publishedAssessmentId){
+  public Map<Long, AssessmentGradingData> getAssessmentGradingByItemGradingId(String publishedAssessmentId){
     try{
       return PersistenceService.getInstance().getAssessmentGradingFacadeQueries().
                getAssessmentGradingByItemGradingId(Long.valueOf(publishedAssessmentId));
@@ -794,7 +797,7 @@ public class GradingService
       Set itemGradingSet = adata.getItemGradingSet();
       Iterator iter = itemGradingSet.iterator();
       double totalAutoScore = 0;
-      double totalOverrideScore = adata.getTotalOverrideScore().doubleValue();
+      double totalOverrideScore = adata.getTotalOverrideScore();
       while (iter.hasNext()){
         ItemGradingData i = (ItemGradingData)iter.next();
         if (i.getItemGradingId().equals(gdata.getItemGradingId())){
@@ -804,14 +807,14 @@ public class GradingService
           i.setGradedDate(new Date());
 	}
         if (i.getAutoScore()!=null)
-          totalAutoScore += i.getAutoScore().doubleValue();
+          totalAutoScore += i.getAutoScore();
       }
       
-      adata.setTotalAutoScore( Double.valueOf(totalAutoScore));
-      if (Double.compare((totalAutoScore+totalOverrideScore),Double.valueOf("0").doubleValue())<0){
+      adata.setTotalAutoScore(totalAutoScore);
+      if (Double.compare((totalAutoScore+totalOverrideScore),Double.valueOf("0"))<0){
     	  adata.setFinalScore(Double.valueOf("0"));
       }else{
-    	  adata.setFinalScore(Double.valueOf(totalAutoScore+totalOverrideScore));
+    	  adata.setFinalScore(totalAutoScore+totalOverrideScore);
       }
       saveOrUpdateAssessmentGrading(adata);
       if (scoreDifference != 0){
@@ -830,8 +833,8 @@ public class GradingService
    * Assume this is a new item.
    */
   public void storeGrades(AssessmentGradingData data, PublishedAssessmentIfc pub,
-                          HashMap publishedItemHash, HashMap publishedItemTextHash,
-                          HashMap publishedAnswerHash, HashMap invalidFINMap, ArrayList invalidSALengthList) throws GradebookServiceException, FinFormatException
+                          Map publishedItemHash, Map publishedItemTextHash,
+                          Map publishedAnswerHash, Map invalidFINMap, List invalidSALengthList) throws GradebookServiceException, FinFormatException
   {
 	  log.debug("storeGrades: data.getSubmittedDate()" + data.getSubmittedDate());
 	  storeGrades(data, false, pub, publishedItemHash, publishedItemTextHash, publishedAnswerHash, true, invalidFINMap, invalidSALengthList);
@@ -841,16 +844,16 @@ public class GradingService
    * Assume this is a new item.
    */
   public void storeGrades(AssessmentGradingData data, PublishedAssessmentIfc pub,
-                          HashMap publishedItemHash, HashMap publishedItemTextHash,
-                          HashMap publishedAnswerHash, boolean persistToDB, HashMap invalidFINMap, ArrayList invalidSALengthList) throws GradebookServiceException, FinFormatException
+                          Map publishedItemHash, Map publishedItemTextHash,
+                          Map publishedAnswerHash, boolean persistToDB, Map invalidFINMap, List invalidSALengthList) throws GradebookServiceException, FinFormatException
   {
 	  log.debug("storeGrades (not persistToDB) : data.getSubmittedDate()" + data.getSubmittedDate());
 	  storeGrades(data, false, pub, publishedItemHash, publishedItemTextHash, publishedAnswerHash, persistToDB, invalidFINMap, invalidSALengthList);
   }
   
   public void storeGrades(AssessmentGradingData data, boolean regrade, PublishedAssessmentIfc pub,
-		  HashMap publishedItemHash, HashMap publishedItemTextHash,
-		  HashMap publishedAnswerHash, boolean persistToDB) throws GradebookServiceException, FinFormatException {
+		  Map publishedItemHash, Map publishedItemTextHash,
+		  Map publishedAnswerHash, boolean persistToDB) throws GradebookServiceException, FinFormatException {
 	  log.debug("storeGrades (not persistToDB) : data.getSubmittedDate()" + data.getSubmittedDate());
 	  storeGrades(data, regrade, pub, publishedItemHash, publishedItemTextHash, publishedAnswerHash, persistToDB, null, null);
   }
@@ -864,8 +867,8 @@ public class GradingService
    * false, we do everything from scratch.
    */
   public void storeGrades(AssessmentGradingData data, boolean regrade, PublishedAssessmentIfc pub,
-                          HashMap publishedItemHash, HashMap publishedItemTextHash,
-                          HashMap publishedAnswerHash, boolean persistToDB, HashMap invalidFINMap, ArrayList invalidSALengthList) 
+                          Map publishedItemHash, Map publishedItemTextHash,
+                          Map publishedAnswerHash, boolean persistToDB, Map invalidFINMap, List invalidSALengthList)
          throws GradebookServiceException, FinFormatException {
     log.debug("****x1. regrade ="+regrade+" "+(new Date()).getTime());
     try {
@@ -879,10 +882,10 @@ public class GradingService
       // calculate scores for new ones)
       Set<ItemGradingData> itemGradingSet = data.getItemGradingSet();
       if (itemGradingSet == null)
-        itemGradingSet = new HashSet<ItemGradingData>();
+        itemGradingSet = new HashSet<>();
       log.debug("****itemGrading size="+itemGradingSet.size());
       
-      List<ItemGradingData> tempItemGradinglist = new ArrayList<ItemGradingData>(itemGradingSet);
+      List<ItemGradingData> tempItemGradinglist = new ArrayList<>(itemGradingSet);
       
       // CALCULATED_QUESTION - if this is a calc question. Carefully sort the list of answers
       if (isCalcQuestion(tempItemGradinglist, publishedItemHash)) {
@@ -913,12 +916,12 @@ public class GradingService
       // For EMI: This keeps track of how many answers were given so we don't give
       // extra marks for to many answers.
       Map fibEmiAnswersMap = new HashMap();
-      Map<Long, Map<Long,Set<EMIScore>>> emiScoresMap = new HashMap<Long, Map<Long,Set<EMIScore>>>();
+      Map<Long, Map<Long,Set<EMIScore>>> emiScoresMap = new HashMap<>();
       
       //change algorithm based on each question (SAK-1930 & IM271559) -cwen
-      HashMap totalItems = new HashMap();
+      Map totalItems = new HashMap();
       log.debug("****x2. {}", (new Date()).getTime());
-      double autoScore = (double) 0;
+      double autoScore;
       Long itemId = (long)0;
       int calcQuestionAnswerSequence = 1; // sequence of answers for CALCULATED_QUESTION
       while(iter.hasNext())
@@ -941,10 +944,8 @@ public class GradingService
         	log.error("unable to retrive itemDataIfc for: {}", publishedItemHash.get(itemId));
         	continue;
         }
-        Iterator i = item.getItemMetaDataSet().iterator();
-        while (i.hasNext())
+        for (ItemMetaDataIfc meta : item.getItemMetaDataSet())
         {
-          ItemMetaDataIfc meta = (ItemMetaDataIfc) i.next();
           if (meta.getLabel().equals(ItemMetaDataIfc.REQUIRE_ALL_OK))
           {
             if (meta.getEntry().equals("true"))
@@ -960,7 +961,6 @@ public class GradingService
           }
         }
         Long itemType = item.getTypeId();  
-    	autoScore = (double) 0;
         itemGrading.setAssessmentGradingId(data.getAssessmentGradingId());
         //itemGrading.setSubmittedDate(new Date());
         itemGrading.setAgentId(agent);
@@ -984,11 +984,11 @@ public class GradingService
         	autoScore = 0d;
         	if (invalidFINMap != null) {
         		if (invalidFINMap.containsKey(itemId)) {
-        			ArrayList list = (ArrayList) invalidFINMap.get(itemId);
+        			List list = (ArrayList) invalidFINMap.get(itemId);
         			list.add(itemGrading.getItemGradingId());
         		}
         		else {
-        			ArrayList list = new ArrayList();
+        			List list = new ArrayList();
         			list.add(itemGrading.getItemGradingId());
         			invalidFINMap.put(itemId, list);
         		}
@@ -1001,12 +1001,12 @@ public class GradingService
         
         log.debug("**!regrade, autoScore="+autoScore);
         if (!(TypeIfc.MULTIPLE_CORRECT).equals(itemType) && !(TypeIfc.EXTENDED_MATCHING_ITEMS).equals(itemType))
-          totalItems.put(itemId, Double.valueOf(autoScore));
+          totalItems.put(itemId, autoScore);
         
         if (regrade && TypeIfc.AUDIO_RECORDING.equals(itemType))
         	itemGrading.setAttemptsRemaining(item.getTriesAllowed());
 	
-        itemGrading.setAutoScore(Double.valueOf(autoScore));
+        itemGrading.setAutoScore(autoScore);
       }
 
       if ((invalidFINMap != null && invalidFINMap.size() > 0) || (invalidSALengthList != null && invalidSALengthList.size() > 0)) {
@@ -1023,22 +1023,22 @@ public class GradingService
       
       log.debug("****x3. {}", (new Date()).getTime());
       
-      List<ItemGradingData> emiItemGradings = new ArrayList<ItemGradingData>();
+      List<ItemGradingData> emiItemGradings = new ArrayList<>();
       // the following procedure ensure total score awarded per question is no less than 0
       // this probably only applies to MCMR question type - daisyf
       iter = itemGradingSet.iterator();
       //since the itr goes through each answer (multiple answers for a signle mc question), keep track
       //of its total score by itemId -> autoScore[]{user's score, total possible}
-      Map<Long, Double[]> mcmcAllOrNothingCheck = new HashMap<Long, Double[]>();
+      Map<Long, Double[]> mcmcAllOrNothingCheck = new HashMap<>();
       
       //collect min score information to determine if the auto score will need to be adjusted
       //since there can be multiple questions store in map: itemId -> {user's score, minScore, # of answers}
-      Map<Long, Double[]> minScoreCheck = new HashMap<Long, Double[]>();
+      Map<Long, Double[]> minScoreCheck = new HashMap<>();
       double totalAutoScoreCheck = 0;
-      Map<Long, Integer> countMcmcAllItemGradings = new HashMap<Long, Integer>();
+      Map<Long, Integer> countMcmcAllItemGradings = new HashMap<>();
       //get item information to check if it's MCMS and Not Partial Credit
-      Long itemType2 = -1l;
-      String mcmsPartialCredit = "";
+      Long itemType2;
+      String mcmsPartialCredit;
       double itemScore = -1;
       while(iter.hasNext())
       {
@@ -1064,7 +1064,7 @@ public class GradingService
         	continue;
         }
 
-        double eachItemScore = ((Double) totalItems.get(itemId)).doubleValue();
+        double eachItemScore = ((Double) totalItems.get(itemId));
         if((eachItemScore < 0) && !((TypeIfc.MULTIPLE_CHOICE).equals(itemType2)||(TypeIfc.TRUE_FALSE).equals(itemType2)||(TypeIfc.MULTIPLE_CORRECT_SINGLE_SELECTION).equals(itemType2)))
         {
         	itemGrading.setAutoScore( Double.valueOf(0));
@@ -1079,12 +1079,12 @@ public class GradingService
         	mcmcAllOrNothingCheck.put(itemId, new Double[]{accumulatedScore, item.getScore()});
         	int count = 0;
         	if(countMcmcAllItemGradings.containsKey(itemId))
-        		count = ((Integer)countMcmcAllItemGradings.get(itemId)).intValue();
-        	countMcmcAllItemGradings.put(itemId, new Integer(++count));
+        		count = (countMcmcAllItemGradings.get(itemId));
+        	countMcmcAllItemGradings.put(itemId, ++count);
         }
         //min score check
         if(item.getMinScore() != null){
-        	Double accumulatedScore = new Double(itemGrading.getAutoScore());
+        	Double accumulatedScore = itemGrading.getAutoScore();
         	Double itemParts = 1d;
         	if(minScoreCheck.containsKey(itemId)){
         		Double[] accumulatedScoreArr = minScoreCheck.get(itemId);
@@ -1103,7 +1103,7 @@ public class GradingService
       // for the grading we only know scores after grading so we need
       // to reset the grading score here to the correct scores
       // this currently only applies to EMI question type
-      if (emiItemGradings != null && !emiItemGradings.isEmpty()) {
+      if (!emiItemGradings.isEmpty()) {
     	  Map<Long, Map<Long, Map<Long, EMIScore>>> emiOrderedScoresMap = reorderEMIScoreMap(emiScoresMap);
     	  iter = emiItemGradings.iterator();
     	  while (iter.hasNext()) {
@@ -1150,7 +1150,7 @@ public class GradingService
       // that means the user didn't answer all of the correct answers only.  
       // We need to set their score to 0 for all ItemGrading items
       for(Entry<Long, Double[]> entry : mcmcAllOrNothingCheck.entrySet()){
-    	  if(Double.compare(entry.getValue()[0], entry.getValue()[1]) != 0){    		  
+    	  if(!Precision.equalsIncludingNaN(entry.getValue()[0], entry.getValue()[1], 0.001d)) {	  
     		  //reset all scores to 0 since the user didn't get all correct answers
     		  iter = itemGradingSet.iterator();
     		  while(iter.hasNext()){
@@ -1168,10 +1168,10 @@ public class GradingService
       					  	log.error("unable to retrieve itemGrading's counter for: " + itemId2);
       					  	continue;
       				  }	  
-      				  double discount = (Math.abs(answer.getDiscount().doubleValue()) * ((double) -1));
-      				  int count = ((Integer)countMcmcAllItemGradings.get(itemId2)).intValue();
+      				  double discount = (Math.abs(answer.getDiscount()) * ((double) -1));
+      				  int count = (countMcmcAllItemGradings.get(itemId2));
       				  double itemGrDisc = discount/count;
-      				  itemGrading.setAutoScore(Double.valueOf(itemGrDisc));
+      				  itemGrading.setAutoScore(itemGrDisc);
     			  }
     		  }
     	  }
@@ -1188,7 +1188,7 @@ public class GradingService
     		  while(iter.hasNext()){
     			  ItemGradingData itemGrading = (ItemGradingData) iter.next();
     			  if(itemGrading.getPublishedItemId().equals(entry.getKey())){
-    				  itemGrading.setAutoScore(new Double(entry.getValue()[1]/entry.getValue()[2]));
+    				  itemGrading.setAutoScore(entry.getValue()[1]/entry.getValue()[2]);
     			  }
     		  }
     	  }
@@ -1212,13 +1212,12 @@ public class GradingService
       // whole assessment.
       Set fullItemGradingSet = getItemGradingSet(data.getAssessmentGradingId().toString());
       double totalAutoScore = getTotalAutoScore(fullItemGradingSet);
-      data.setTotalAutoScore( Double.valueOf(totalAutoScore));
+      data.setTotalAutoScore(totalAutoScore);
      
-      //log.debug("**#1 total AutoScore"+totalAutoScore);
-      if (Double.compare((totalAutoScore + data.getTotalOverrideScore().doubleValue()),new Double("0").doubleValue())<0){
+      if (Double.compare((totalAutoScore + data.getTotalOverrideScore()), new Double("0"))<0){
     	  data.setFinalScore( Double.valueOf("0"));
       }else{
-    	  data.setFinalScore(Double.valueOf(totalAutoScore + data.getTotalOverrideScore().doubleValue()));
+    	  data.setFinalScore(totalAutoScore + data.getTotalOverrideScore());
       }
       log.debug("****x6. "+(new Date()).getTime());
     } catch (GradebookServiceException ge) {
@@ -1255,38 +1254,53 @@ public class GradingService
   }
 
   private double getTotalAutoScore(Set itemGradingSet){
-      //log.debug("*** no. of itemGrading="+itemGradingSet.size());
     double totalAutoScore =0;
     Iterator iter = itemGradingSet.iterator();
     while (iter.hasNext()){
       ItemGradingData i = (ItemGradingData)iter.next();
-      //log.debug(i.getItemGradingId()+"->"+i.getAutoScore());
       if (i.getAutoScore()!=null)
-	totalAutoScore += i.getAutoScore().doubleValue();
+	totalAutoScore += i.getAutoScore();
     }
     return totalAutoScore;
   }
 
-  private void notifyGradebookByScoringType(AssessmentGradingData data, PublishedAssessmentIfc pub){
+  public void notifyGradebookByScoringType(AssessmentGradingData data, PublishedAssessmentIfc pub){
+    if (pub == null || pub.getEvaluationModel() == null) {
+      // should not come to here
+      log.warn("publishedAssessment is null or publishedAssessment.getEvaluationModel() is null");
+      return;
+    }
     Integer scoringType = pub.getEvaluationModel().getScoringType();
     if (updateGradebook(data, pub)){
       AssessmentGradingData d = data; // data is the last submission
       // need to decide what to tell gradebook
-      if ((scoringType).equals(EvaluationModelIfc.HIGHEST_SCORE))
+      if ((scoringType).equals(EvaluationModelIfc.HIGHEST_SCORE)) {
         d = getHighestSubmittedAssessmentGrading(pub.getPublishedAssessmentId().toString(), data.getAgentId());
+      }
+      // Send the average score if average was selected for multiple submissions
+      else if (scoringType.equals(EvaluationModelIfc.AVERAGE_SCORE)) {
+        // status = 5: there is no submission but grader update something in the score page
+        if(data.getStatus() == AssessmentGradingData.NO_SUBMISSION) {
+          d.setFinalScore(data.getFinalScore());
+        } else {
+          Double averageScore = PersistenceService.getInstance().getAssessmentGradingFacadeQueries().
+            getAverageSubmittedAssessmentGrading(pub.getPublishedAssessmentId(), data.getAgentId());
+          d.setFinalScore(averageScore);
+        }
+      }
       notifyGradebook(d, pub);
     }
   }
-  
+
   private double getScoreByQuestionType(ItemGradingData itemGrading, ItemDataIfc item,
                                        Long itemType, Map publishedItemTextHash, 
                                        Map totalItems, Map fibAnswersMap, Map<Long, Map<Long,Set<EMIScore>>> emiScoresMap,
-                                       HashMap publishedAnswerHash, boolean regrade,
+                                       Map publishedAnswerHash, boolean regrade,
                                        int calcQuestionAnswerSequence) throws FinFormatException {
     //double score = (double) 0;
-    double initScore = (double) 0;
+    double initScore;
     double autoScore = (double) 0;
-    double accumelateScore = (double) 0;
+    double accumelateScore;
     Long itemId = item.getItemId();
     int type = itemType.intValue();
     switch (type){ 
@@ -1298,8 +1312,8 @@ public class GradingService
     	}
     	//overridescore
     	if (itemGrading.getOverrideScore() != null)
-    		autoScore += itemGrading.getOverrideScore().doubleValue();
-    	totalItems.put(itemId, new Double(autoScore));
+    		autoScore += itemGrading.getOverrideScore();
+    	totalItems.put(itemId, autoScore);
     	break;// MC Single Correct
       case 12: // MC Multiple Correct Single Selection    	  
       case 3: // MC Survey
@@ -1307,8 +1321,8 @@ public class GradingService
               autoScore = getAnswerScore(itemGrading, publishedAnswerHash);
               //overridescore
               if (itemGrading.getOverrideScore() != null)
-                autoScore += itemGrading.getOverrideScore().doubleValue();
-	      totalItems.put(itemId,  Double.valueOf(autoScore));
+                autoScore += itemGrading.getOverrideScore();
+	      totalItems.put(itemId, autoScore);
               break;
       case 2: // MC Multiple Correct
               ItemTextIfc itemText = (ItemTextIfc) publishedItemTextHash.get(itemGrading.getPublishedItemTextId());
@@ -1317,7 +1331,7 @@ public class GradingService
               if (answerArray != null){
                 for (int i =0; i<answerArray.size(); i++){
                   AnswerIfc a = (AnswerIfc) answerArray.get(i);
-                  if (a.getIsCorrect().booleanValue())
+                  if (a.getIsCorrect())
                     correctAnswers++;
                 }
               }
@@ -1329,45 +1343,34 @@ public class GradingService
 
               //overridescore?
               if (itemGrading.getOverrideScore() != null)
-                autoScore += itemGrading.getOverrideScore().doubleValue();
+                autoScore += itemGrading.getOverrideScore();
               if (!totalItems.containsKey(itemId)){
-                totalItems.put(itemId,  Double.valueOf(autoScore));
-                //log.debug("****0. first answer score = "+autoScore);
+                totalItems.put(itemId, autoScore);
               }
               else{
-                accumelateScore = ((Double)totalItems.get(itemId)).doubleValue();
-                //log.debug("****1. before adding new score = "+accumelateScore);
-                //log.debug("****2. this answer score = "+autoScore);
+                accumelateScore = ((Double)totalItems.get(itemId));
                 accumelateScore += autoScore;
-                //log.debug("****3. add 1+2 score = "+accumelateScore);
-                totalItems.put(itemId,  Double.valueOf(accumelateScore));
-                //log.debug("****4. what did we put in = "+((Double)totalItems.get(itemId)).doubleValue());
+                totalItems.put(itemId, accumelateScore);
               }
               break;
 
-      case 9: // Matching     
-              initScore = getAnswerScore(itemGrading, publishedAnswerHash);
+      case 9: // Matching
+              initScore = isThisItemDistractor(item, itemGrading) ? getScoreDistractor(item, itemGrading) : getAnswerScore(itemGrading, publishedAnswerHash);
               if (initScore > 0) {
-            	  	int nonDistractors = 0;
-          	    	Iterator<ItemTextIfc> itemIter = item.getItemTextArraySorted().iterator();
-          	    	while (itemIter.hasNext()) {
-          	    		ItemTextIfc curItem = itemIter.next();
-          	    		if (!isDistractor(curItem)) {
-          	    			nonDistractors++;
-          	    		}
-          	    	}            	  
-                    autoScore = initScore / nonDistractors;
-              	}
+                autoScore = initScore / item.getItemTextArraySorted().size();
+              } else {
+                autoScore = initScore;
+              }
               //overridescore?
               if (itemGrading.getOverrideScore() != null)
-                autoScore += itemGrading.getOverrideScore().doubleValue();
+                autoScore += itemGrading.getOverrideScore();
 
               if (!totalItems.containsKey(itemId))
-                totalItems.put(itemId,  Double.valueOf(autoScore));
+                totalItems.put(itemId, autoScore);
               else {
-                accumelateScore = ((Double)totalItems.get(itemId)).doubleValue();
+                accumelateScore = ((Double)totalItems.get(itemId));
                 accumelateScore += autoScore;
-                totalItems.put(itemId,  Double.valueOf(accumelateScore));
+                totalItems.put(itemId, accumelateScore);
               }
               break;
 
@@ -1375,14 +1378,14 @@ public class GradingService
               autoScore = getFIBScore(itemGrading, fibAnswersMap, item, publishedAnswerHash) / (double) ((ItemTextIfc) item.getItemTextSet().toArray()[0]).getAnswerSet().size();
               //overridescore - cwen
               if (itemGrading.getOverrideScore() != null)
-                autoScore += itemGrading.getOverrideScore().doubleValue();
+                autoScore += itemGrading.getOverrideScore();
 
               if (!totalItems.containsKey(itemId))
-                totalItems.put(itemId, Double.valueOf(autoScore));
+                totalItems.put(itemId, autoScore);
               else {
-                accumelateScore = ((Double)totalItems.get(itemId)).doubleValue();
+                accumelateScore = ((Double)totalItems.get(itemId));
                 accumelateScore += autoScore;
-                totalItems.put(itemId, Double.valueOf(accumelateScore));
+                totalItems.put(itemId, accumelateScore);
               }
               break;
       case 15:  // CALCULATED_QUESTION
@@ -1401,14 +1404,14 @@ public class GradingService
     	  }
     	  //overridescore - cwen
           if (itemGrading.getOverrideScore() != null)
-            autoScore += itemGrading.getOverrideScore().doubleValue();
+            autoScore += itemGrading.getOverrideScore();
 
           if (!totalItems.containsKey(itemId))
-            totalItems.put(itemId, Double.valueOf(autoScore));
+            totalItems.put(itemId, autoScore);
           else {
-            accumelateScore = ((Double)totalItems.get(itemId)).doubleValue();
+            accumelateScore = (Double) totalItems.get(itemId);
             accumelateScore += autoScore;
-            totalItems.put(itemId, Double.valueOf(accumelateScore));
+            totalItems.put(itemId, accumelateScore);
           }
           break;
 
@@ -1423,17 +1426,17 @@ public class GradingService
     	  	    autoScore = itemGrading.getAutoScore();
     	  	  }
               if (itemGrading.getOverrideScore() != null)
-                autoScore += itemGrading.getOverrideScore().doubleValue();
+                autoScore += itemGrading.getOverrideScore();
               if (!totalItems.containsKey(itemId))
-                totalItems.put(itemId, Double.valueOf(autoScore));
+                totalItems.put(itemId, autoScore);
               else {
-                accumelateScore = ((Double)totalItems.get(itemId)).doubleValue();
+                accumelateScore = (Double) totalItems.get(itemId);
                 accumelateScore += autoScore;
-                totalItems.put(itemId, Double.valueOf(accumelateScore));
+                totalItems.put(itemId, accumelateScore);
               }
               break;
       case 16:    	  
-    	  initScore = getImageMapScore(itemGrading,item, (HashMap) publishedItemTextHash,publishedAnswerHash);
+    	  initScore = getImageMapScore(itemGrading,item, publishedItemTextHash,publishedAnswerHash);
     	  //if one answer is 0 or negative, and need all OK to be scored, then autoScore=-123456789
     	  //and we break the case...
     	  
@@ -1461,20 +1464,39 @@ public class GradingService
     	  
           //overridescore?
           if (itemGrading.getOverrideScore() != null)
-            autoScore += itemGrading.getOverrideScore().doubleValue();
+            autoScore += itemGrading.getOverrideScore();
           
           if (!totalItems.containsKey(itemId)){
-            totalItems.put(itemId,  Double.valueOf(autoScore));
+            totalItems.put(itemId, autoScore);
           }else {
-            accumelateScore = ((Double)totalItems.get(itemId)).doubleValue();
+            accumelateScore = (Double) totalItems.get(itemId);
             accumelateScore += autoScore;
-            totalItems.put(itemId,  Double.valueOf(accumelateScore));
+            totalItems.put(itemId, accumelateScore);
           }
           
           break;
     }
     
     return autoScore;
+  }
+
+  private boolean isThisItemDistractor(ItemDataIfc item, ItemGradingData thisItemGradingData) {
+    for (ItemTextIfc curItem : item.getItemTextArraySorted()) {
+      if (isDistractor(curItem) && curItem.getId().equals(thisItemGradingData.getPublishedItemTextId())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private double getScoreDistractor(ItemDataIfc item, ItemGradingData thisItemGradingData) {
+    if (thisItemGradingData.getPublishedAnswerId() == null) {
+      return 0;
+    } else if (thisItemGradingData.getPublishedAnswerId() < 0) {
+      return item.getScore();
+    } else {
+      return 0;
+    }
   }
 
 /**
@@ -1492,20 +1514,62 @@ public class GradingService
     }
     ItemDataIfc item = (ItemDataIfc) answer.getItem();
     Long itemType = item.getTypeId();
-    if (answer.getIsCorrect() == null || !answer.getIsCorrect().booleanValue())
+    if (answer.getIsCorrect() == null || !answer.getIsCorrect())
     {
     	// return (double) 0;
     	// Para que descuente (For discount)
     	if ((TypeIfc.EXTENDED_MATCHING_ITEMS).equals(itemType)||(TypeIfc.MULTIPLE_CHOICE).equals(itemType)||(TypeIfc.TRUE_FALSE).equals(itemType)||(TypeIfc.MULTIPLE_CORRECT_SINGLE_SELECTION).equals(itemType)){
-    		return (Math.abs(answer.getDiscount().doubleValue()) * ((double) -1));
+    		return (Math.abs(answer.getDiscount()) * ((double) -1));
     	}else{
     		return (double) 0;
     	}
     }
-    return answer.getScore().doubleValue();
+    return answer.getScore();
   }
 
-  public void notifyGradebook(AssessmentGradingData data, PublishedAssessmentIfc pub) throws GradebookServiceException {
+  public void updateAutosubmitEventLog(AssessmentGradingData adata) {
+	  EventLogService eventService = new EventLogService();
+	  EventLogFacade eventLogFacade = new EventLogFacade();
+	  Long gradingId = adata.getAssessmentGradingId();
+
+	  List<EventLogData> eventLogDataList = eventService.getEventLogData(gradingId);
+	  if (!eventLogDataList.isEmpty()) {
+		  EventLogData eventLogData= (EventLogData) eventLogDataList.get(0);
+		  //will do the i18n issue later.
+		  eventLogData.setErrorMsg("No Errors (Auto submit)");
+		  Date endDate = new Date();
+		  eventLogData.setEndDate(endDate);
+		  if(eventLogData.getStartDate() != null) {
+			  double minute= 1000*60;
+			  int eclipseTime = (int)Math.ceil(((endDate.getTime() - eventLogData.getStartDate().getTime())/minute));
+			  eventLogData.setEclipseTime(eclipseTime); 
+		  } else {
+			  eventLogData.setEclipseTime(null); 
+			  eventLogData.setErrorMsg("Error during auto submit");
+		  }
+		  eventLogFacade.setData(eventLogData);
+		  eventService.saveOrUpdateEventLog(eventLogFacade);
+	  }
+
+	  EventTrackingService.post(EventTrackingService.newEvent(SamigoConstants.EVENT_AUTO_SUBMIT_JOB,
+			  AutoSubmitAssessmentsJob.safeEventLength("publishedAssessmentId=" + adata.getPublishedAssessmentId() + 
+					  ", assessmentGradingId=" + gradingId), true));
+
+	  Map<String, Object> notiValues = new HashMap<>();
+	  notiValues.put("publishedAssessmentID", adata.getPublishedAssessmentId());
+	  notiValues.put("assessmentGradingID", gradingId);
+	  notiValues.put("userID", adata.getAgentId());
+	  notiValues.put("submissionDate", adata.getSubmittedDate());
+
+	  String confirmationNumber = adata.getAssessmentGradingId() + "-" + adata.getPublishedAssessmentId() + "-"
+
+			  + adata.getAgentId() + "-" + adata.getSubmittedDate().toString();
+	  notiValues.put( "confirmationNumber", confirmationNumber );
+
+	  EventTrackingService.post(EventTrackingService.newEvent(SamigoConstants.EVENT_ASSESSMENT_SUBMITTED_AUTO, notiValues.toString(), AgentFacade.getCurrentSiteId(), false, SamigoConstants.NOTI_EVENT_ASSESSMENT_SUBMITTED));
+  }
+  
+  private void notifyGradebook(AssessmentGradingData data, PublishedAssessmentIfc pub) throws GradebookServiceException {
     // If the assessment is published to the gradebook, make sure to update the scores in the gradebook
     String toGradebook = pub.getEvaluationModel().getToGradeBook();
 
@@ -1529,21 +1593,9 @@ public class GradingService
     // add retry logic to resolve deadlock problem while sending grades to gradebook
 
     Double originalFinalScore = data.getFinalScore();
-    int retryCount = PersistenceService.getInstance().getPersistenceHelper().getRetryCount().intValue();
+    int retryCount = PersistenceService.getInstance().getPersistenceHelper().getRetryCount();
     while (retryCount > 0){
     	try {
-    		// Send the average score if average was selected for multiple submissions
-    		Integer scoringType = pub.getEvaluationModel().getScoringType();
-    		if (scoringType.equals(EvaluationModelIfc.AVERAGE_SCORE)) {
-    			// status = 5: there is no submission but grader update something in the score page
-    			if(data.getStatus() ==5) {
-    				data.setFinalScore(data.getFinalScore());
-    			} else {
-    				Double averageScore = PersistenceService.getInstance().getAssessmentGradingFacadeQueries().
-    				getAverageSubmittedAssessmentGrading(Long.valueOf(pub.getPublishedAssessmentId()), data.getAgentId());
-    				data.setFinalScore(averageScore);
-    			}
-    		}
     		gbsHelper.updateExternalAssessmentScore(data, g);
     		retryCount = 0;
     	}
@@ -1587,7 +1639,7 @@ public class GradingService
 	  log.warn("retry....");
       retryCount--;
       try {
-    	  int deadlockInterval = PersistenceService.getInstance().getPersistenceHelper().getDeadlockInterval().intValue();
+    	  int deadlockInterval = PersistenceService.getInstance().getPersistenceHelper().getDeadlockInterval();
     	  Thread.sleep(deadlockInterval);
       }
       catch(InterruptedException ex){
@@ -1735,7 +1787,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
             }
 
             if (!alreadyused) {
-              totalScore += ((AnswerIfc) publishedAnswerHash.get(data.getPublishedAnswerId())).getScore().doubleValue();
+              totalScore += ((AnswerIfc) publishedAnswerHash.get(data.getPublishedAnswerId())).getScore();
               data.setIsCorrect(Boolean.TRUE);
             }
 
@@ -1747,7 +1799,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
     return totalScore;
   }
 
-  public boolean getFIBResult(ItemGradingData data, HashMap fibmap,  ItemDataIfc itemdata, HashMap publishedAnswerHash)
+  public boolean getFIBResult(ItemGradingData data, Map fibmap,  ItemDataIfc itemdata, Map publishedAnswerHash)
   {
 	  // this method is similiar to getFIBScore(), except it returns true/false for the answer, not scores.  
 	  // may be able to refactor code out to be reused, but totalscores for mutually exclusive case is a bit tricky. 
@@ -1834,7 +1886,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	  double totalScore = (double) 0;
 	  boolean matchresult = getFINResult(data, itemdata, publishedAnswerHash);
 	  if (matchresult){
-		  totalScore += ((AnswerIfc) publishedAnswerHash.get(data.getPublishedAnswerId())).getScore().doubleValue();
+		  totalScore += ((AnswerIfc) publishedAnswerHash.get(data.getPublishedAnswerId())).getScore();
 		  data.setIsCorrect(Boolean.TRUE);
 	  }	
 	  return totalScore;
@@ -1848,8 +1900,8 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	  boolean matchresult = false;
 	  ComplexFormat complexFormat = new ComplexFormat();
 	  Complex answerComplex = null;
-	  Complex studentAnswerComplex = null;
-	  BigDecimal answerNum = null, answer1Num = null, answer2Num = null, studentAnswerNum = null;
+	  Complex studentAnswerComplex;
+	  BigDecimal answerNum = null, answer1Num = null, answer2Num = null, studentAnswerNum;
 
 	  if (data.getPublishedAnswerId() == null) {
 		  return false;
@@ -1935,7 +1987,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
   }  
   
   
-  public double getImageMapScore(ItemGradingData data, ItemDataIfc itemdata, HashMap publishedItemTextHash, HashMap publishedAnswerHash)
+  public double getImageMapScore(ItemGradingData data, ItemDataIfc itemdata, Map publishedItemTextHash, Map publishedAnswerHash)
   {
 	  // Final score must be... 
 	  // IF NOT PARTIALCREDIT THEN 0 or total
@@ -1964,7 +2016,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	 
 	 ItemTextIfc itemTextIfc = (ItemTextIfc) publishedItemTextHash.get(data.getPublishedItemTextId());
 	 
-	 ArrayList answerArray = (ArrayList) itemTextIfc.getAnswerArray();
+	 List answerArray = (List) itemTextIfc.getAnswerArray();
 	 AnswerIfc answerIfc= (AnswerIfc) answerArray.get(0); 
 	 
 	 try{
@@ -1996,11 +2048,11 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 
   /**
    * Validate a students numeric answer 
-   * @param The answer to validate
+   * @param value answer to validate
    * @return a Map containing either Real or Complex answer keyed by {@link #ANSWER_TYPE_REAL} or {@link #ANSWER_TYPE_COMPLEX} 
    */
   public Map validate(String value) {
-	  HashMap map = new HashMap();
+	  Map map = new HashMap();
 	  if (value == null || value.trim().equals("")) {
 		  return map;
 	  }
@@ -2026,8 +2078,8 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 			  ComplexFormat complexFormat = new ComplexFormat(df);
 			  studentAnswerComplex = complexFormat.parse(trimmedValue);
 
-			  // This is because there is a bug parsing complex number. 9i is parsed as 9
-			  if (studentAnswerComplex.getImaginary() == 0 && trimmedValue.contains("i")) {
+			  // Only checks for complex numbers, not real numbers
+			  if (studentAnswerComplex.getImaginary() == 0) {
 				  isComplex = false;
 			  }
 		  } catch (Exception e) {
@@ -2059,10 +2111,10 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 			Map publishedItemTextHash, Map publishedAnswerHash) {
 
 		log.debug("getEMIScore( " + itemGrading +", " + itemId);
-		double autoScore = 0.0;
+		double autoScore;
 		if (!totalItems.containsKey(itemId)) {
 			totalItems.put(itemId, new HashMap());
-			emiScoresMap.put(itemId, new HashMap<Long, Set<EMIScore>>());
+			emiScoresMap.put(itemId, new HashMap<>());
 		}
 
 		autoScore = getAnswerScore(itemGrading, publishedAnswerHash);
@@ -2082,11 +2134,11 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 		// place the answer scores in a sorted set.
 		// so now we can mark the correct ones and discount the extra incorrect
 		// ones.
-		Set<EMIScore> scores = null;
+		Set<EMIScore> scores;
 		if (emiItemScoresMap.containsKey(itemTextId)) {
 			scores = emiItemScoresMap.get(itemTextId);
 		} else {
-			scores = new TreeSet<EMIScore>();
+			scores = new TreeSet<>();
 			emiItemScoresMap.put(itemTextId, scores);
 		}
 		scores.add(new EMIScore(itemId, itemTextId, itemGrading
@@ -2119,10 +2171,10 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 
 		// override score
 		if (itemGrading.getOverrideScore() != null)
-			autoScore += itemGrading.getOverrideScore().doubleValue();
+			autoScore += itemGrading.getOverrideScore();
 
-		HashMap totalItemTextScores = (HashMap) totalItems.get(itemId);
-		totalItemTextScores.put(itemTextId, Double.valueOf(autoScore));
+		Map totalItemTextScores = (Map) totalItems.get(itemId);
+		totalItemTextScores.put(itemTextId, autoScore);
 		return autoScore;
 	}
   /**
@@ -2142,14 +2194,14 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 		  return totalScore;
 	  }
 	  // this variable should look something like this "42.1|2,2"
-	  String allAnswerText = calculatedAnswersMap.get(calcQuestionAnswerSequence).toString();
+	  String allAnswerText = calculatedAnswersMap.get(calcQuestionAnswerSequence);
 	  
 	  // NOTE: this correctAnswer will already have been trimmed to the appropriate number of decimals
 	  BigDecimal correctAnswer = new BigDecimal(getAnswerExpression(allAnswerText));
 	  
 	  // Determine if the acceptable variance is a constant or a % of the answer
 	  String varianceString = allAnswerText.substring(allAnswerText.indexOf("|")+1, allAnswerText.indexOf(","));
-	  BigDecimal acceptableVariance = BigDecimal.ZERO;
+	  BigDecimal acceptableVariance;
 	  if (varianceString.contains("%")){
 		  double percentage = Double.valueOf(varianceString.substring(0, varianceString.indexOf("%")));
 		  acceptableVariance = correctAnswer.multiply( new BigDecimal(percentage / 100) );
@@ -2188,14 +2240,14 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 		  return result;
 	  }
 	  // this variable should look something like this "42.1|2,2"
-	  String allAnswerText = calculatedAnswersMap.get(calcQuestionAnswerSequence).toString();
+	  String allAnswerText = calculatedAnswersMap.get(calcQuestionAnswerSequence);
 
 	  // NOTE: this correctAnswer will already have been trimmed to the appropriate number of decimals
 	  BigDecimal correctAnswer = new BigDecimal(getAnswerExpression(allAnswerText));
 
 	  // Determine if the acceptable variance is a constant or a % of the answer
 	  String varianceString = allAnswerText.substring(allAnswerText.indexOf("|")+1, allAnswerText.indexOf(","));
-	  BigDecimal acceptableVariance = BigDecimal.ZERO;
+	  BigDecimal acceptableVariance;
 	  if (varianceString.contains("%")){
 		  double percentage = Double.valueOf(varianceString.substring(0, varianceString.indexOf("%")));
 		  acceptableVariance = correctAnswer.multiply( new BigDecimal(percentage / 100) );
@@ -2227,25 +2279,35 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
     AnswerIfc answer = (AnswerIfc) publishedAnswerHash.get(data.getPublishedAnswerId());
     if (answer == null || answer.getScore() == null)
       return (double) 0;
-    return answer.getScore().doubleValue();
+    return answer.getScore();
   }
 
   private void setIsLate(AssessmentGradingData data, PublishedAssessmentIfc pub){
 	  // If submit from timeout popup, we don't record LATE
 	  if (data.getSubmitFromTimeoutPopup()) {
-		  data.setIsLate( Boolean.valueOf(false));
+		  data.setIsLate(false);
 	  }
 	  else {
-		  if (pub.getAssessmentAccessControl() != null
-				  && pub.getAssessmentAccessControl().getDueDate() != null &&
-				  pub.getAssessmentAccessControl().getDueDate().before(new Date()))
-			  data.setIsLate(Boolean.TRUE);
-		  else
-			  data.setIsLate( Boolean.valueOf(false));
+		  Boolean isLate = false;
+		  AssessmentAccessControlIfc a = pub.getAssessmentAccessControl();
+		  if (a.getDueDate() != null && a.getDueDate().before(new Date())) {
+			isLate = Boolean.TRUE;
+		  } else {
+			isLate = Boolean.FALSE;
+		  }
+
+		  if (isLate) {
+			ExtendedTimeDeliveryService assessmentExtended = new ExtendedTimeDeliveryService((PublishedAssessmentFacade) pub, data.getAgentId());
+			if (assessmentExtended.hasExtendedTime() && assessmentExtended.getDueDate() != null && assessmentExtended.getDueDate().after(new Date())) {
+				isLate = Boolean.FALSE;
+			}
+		  }
+
+		  data.setIsLate(isLate);
 	  }
 	  
-    if (data.getForGrade().booleanValue())
-      data.setStatus( Integer.valueOf(1));
+    if (data.getForGrade())
+      data.setStatus(1);
     
     data.setTotalOverrideScore(Double.valueOf(0));
   }
@@ -2263,27 +2325,27 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
   /* Note:
    * assessmentGrading contains set of itemGrading that are not saved in the DB yet
    */
-  public void updateAssessmentGradingScore(AssessmentGradingData adata, PublishedAssessmentIfc pub){
+  public void updateAssessmentGradingScore(AssessmentGradingData adata, PublishedAssessmentIfc pub, String newComment, String oldComment){
     try {
       Set itemGradingSet = adata.getItemGradingSet();
       Iterator iter = itemGradingSet.iterator();
       double totalAutoScore = 0;
-      double totalOverrideScore = adata.getTotalOverrideScore().doubleValue();
+      double totalOverrideScore = adata.getTotalOverrideScore();
       while (iter.hasNext()){
         ItemGradingData i = (ItemGradingData)iter.next();
         if (i.getAutoScore()!=null)
-          totalAutoScore += i.getAutoScore().doubleValue();
+          totalAutoScore += i.getAutoScore();
         }
-        double oldAutoScore = adata.getTotalAutoScore().doubleValue();
+        double oldAutoScore = adata.getTotalAutoScore();
         double scoreDifference = totalAutoScore - oldAutoScore;
-        adata.setTotalAutoScore(Double.valueOf(totalAutoScore));
-        if (Double.compare((totalAutoScore+totalOverrideScore),Double.valueOf("0").doubleValue())<0){
+        adata.setTotalAutoScore(totalAutoScore);
+        if (Double.compare((totalAutoScore+totalOverrideScore),Double.valueOf("0"))<0){
         	adata.setFinalScore(Double.valueOf("0"));
         }else{
-        	adata.setFinalScore(Double.valueOf(totalAutoScore+totalOverrideScore));
+        	adata.setFinalScore(totalAutoScore+totalOverrideScore);
         }
         saveOrUpdateAssessmentGrading(adata);
-        if (scoreDifference != 0){
+        if (scoreDifference != 0 || !newComment.equals(oldComment)){
           notifyGradebookByScoringType(adata, pub);
         }
      } catch (GradebookServiceException ge) {
@@ -2327,8 +2389,8 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	    return pub;
 	  }
   
-  public ArrayList getLastItemGradingDataPosition(Long assessmentGradingId, String agentId) {
-	  	ArrayList results = null;
+  public List<Integer> getLastItemGradingDataPosition(Long assessmentGradingId, String agentId) {
+	  	List<Integer> results = null;
 	    try {
 	    	results = PersistenceService.getInstance().
 	        getAssessmentGradingFacadeQueries().getLastItemGradingDataPosition(assessmentGradingId, agentId);
@@ -2359,8 +2421,8 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	    return results;
 	  }
   
-  public HashSet getItemSet(Long publishedAssessmentId, Long sectionId) {
-	  	HashSet results = null;
+  public Set<PublishedItemData> getItemSet(Long publishedAssessmentId, Long sectionId) {
+	  	Set<PublishedItemData> results = null;
 	    try {
 	    	results = PersistenceService.getInstance().
 	        getAssessmentGradingFacadeQueries().getItemSet(publishedAssessmentId, sectionId);
@@ -2393,12 +2455,12 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 		 
 		 String REGEX = answer.replaceAll("\\*", "|*|");
 		 String[] oneblank = REGEX.split("\\|");
-		 for (int j = 0; j < oneblank.length; j++) {
-			 if ("*".equals(oneblank[j])) {
+		 for (String str : oneblank) {
+			 if ("*".equals(str)) {
 				 regex_quotebuf.append(".+");
 			 }
 			 else {
-				 regex_quotebuf.append(Pattern.quote(oneblank[j]));
+				 regex_quotebuf.append(Pattern.quote(str));
 			 }
 		 }
 
@@ -2434,13 +2496,12 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
   
   
   public List<ItemGradingData> getAllItemGradingDataForItemInGrading(Long assesmentGradingId, Long publihsedItemId) {
-	  List<ItemGradingData> results = new ArrayList<ItemGradingData>();
-	  results = PersistenceService.getInstance().getAssessmentGradingFacadeQueries().getAllItemGradingDataForItemInGrading(assesmentGradingId, publihsedItemId);
+	  List<ItemGradingData> results = PersistenceService.getInstance().getAssessmentGradingFacadeQueries().getAllItemGradingDataForItemInGrading(assesmentGradingId, publihsedItemId);
 	  return results;
   }
   
-  public HashMap getSiteSubmissionCountHash(String siteId) {
-	  HashMap results = new HashMap();
+  public Map<Long, Map<String, Integer>> getSiteSubmissionCountHash(String siteId) {
+	    Map<Long, Map<String, Integer>> results = new HashMap<>();
 	    try {
 	    	results = PersistenceService.getInstance().
 	        getAssessmentGradingFacadeQueries().getSiteSubmissionCountHash(siteId);
@@ -2450,8 +2511,8 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	    return results;
   }  
   
-  public HashMap getSiteInProgressCountHash(final String siteId) {
-	  HashMap results = new HashMap();
+  public Map<Long, Map<String, Long>> getSiteInProgressCountHash(final String siteId) {
+        Map<Long, Map<String, Long>> results = new HashMap<>();
 	    try {
 	    	results = PersistenceService.getInstance().
 	        getAssessmentGradingFacadeQueries().getSiteInProgressCountHash(siteId);
@@ -2472,19 +2533,19 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	    return actualNumberReatke;
   }
   
-  public HashMap getActualNumberRetakeHash(String agentIdString) {
-	  HashMap actualNumberReatkeHash = new HashMap();
+  public Map<Long, Integer> getActualNumberRetakeHash(String agentIdString) {
+	    Map<Long, Integer> actualNumberRetakeHash = new HashMap<>();
 	    try {
-	    	actualNumberReatkeHash = PersistenceService.getInstance().
+	    	actualNumberRetakeHash = PersistenceService.getInstance().
 	        getAssessmentGradingFacadeQueries().getActualNumberRetakeHash(agentIdString);
 	    } catch (Exception e) {
 	      log.error(e.getMessage(), e);
 	    }
-	    return actualNumberReatkeHash;
+	    return actualNumberRetakeHash;
   }
     
-  public HashMap getSiteActualNumberRetakeHash(String siteIdString) {
-	  HashMap numberRetakeHash = new HashMap();
+  public Map<Long, Map<String, Long>> getSiteActualNumberRetakeHash(String siteIdString) {
+        Map<Long, Map<String, Long>> numberRetakeHash = new HashMap<>();
 	    try {
 	    	numberRetakeHash = PersistenceService.getInstance().
 	        getAssessmentGradingFacadeQueries().getSiteActualNumberRetakeHash(siteIdString);
@@ -2517,8 +2578,8 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	    return numberRetake;
   }
   
-  public HashMap getNumberRetakeHash(String agentIdString) {
-	  HashMap numberRetakeHash = new HashMap();
+  public Map<Long, StudentGradingSummaryData> getNumberRetakeHash(String agentIdString) {
+	    Map<Long, StudentGradingSummaryData> numberRetakeHash = new HashMap<>();
 	    try {
 	    	numberRetakeHash = PersistenceService.getInstance().
 	        getAssessmentGradingFacadeQueries().getNumberRetakeHash(agentIdString);
@@ -2528,8 +2589,8 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	    return numberRetakeHash;
   }
   
-  public HashMap getSiteNumberRetakeHash(String siteIdString) {
-	  HashMap siteActualNumberRetakeList = new HashMap();
+  public Map<Long, Map<String, Integer>> getSiteNumberRetakeHash(String siteIdString) {
+	    Map<Long, Map<String, Integer>> siteActualNumberRetakeList = new HashMap();
 	    try {
 	    	siteActualNumberRetakeList = PersistenceService.getInstance().
 	        getAssessmentGradingFacadeQueries().getSiteNumberRetakeHash(siteIdString);
@@ -2593,7 +2654,6 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	      PersistenceService.getInstance().
 	        getAssessmentGradingFacadeQueries().removeUnsubmittedAssessmentGradingData(data);
 	    } catch (Exception e) {
-	      //log.error(e.getMessage(), e);
 	      log.error("Exception thrown from removeUnsubmittedAssessmentGradingData" + e.getMessage());
 	    }
   }
@@ -2617,7 +2677,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
    * @return map of calc answers
    */
   private Map<Integer, String> getCalculatedAnswersMap(ItemGradingData itemGrading, ItemDataIfc item) {
-      HashMap<Integer, String> calculatedAnswersMap = new HashMap<Integer, String>();
+      Map<Integer, String> calculatedAnswersMap = new HashMap<>();
       // return value from extractCalcQAnswersArray is not used, calculatedAnswersMap is populated by this call
       extractCalcQAnswersArray(calculatedAnswersMap, item, itemGrading.getAssessmentGradingId(), itemGrading.getAgentId());
       return calculatedAnswersMap;
@@ -2689,7 +2749,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
    * @return a list of matching key values OR empty if none are found
    */
   private List<String> extractCalculatedQuestionKeyFromItemText(String itemText, Pattern identifierPattern) {
-      LinkedHashSet<String> keys = new LinkedHashSet<String>();
+      LinkedHashSet<String> keys = new LinkedHashSet<>();
       if (itemText != null && itemText.trim().length() > 0) {
           Matcher keyMatcher = identifierPattern.matcher(itemText);
           while (keyMatcher.find()) {
@@ -2706,7 +2766,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
               }*/
           }
       }
-      return new ArrayList<String>(keys);
+      return new ArrayList<>(keys);
   }
 
   /**
@@ -2746,12 +2806,10 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
    * @return the original string, broken up based on the formula name delimiters
    */
   protected List<String> extractInstructionSegments(String instructions) {
-      List<String> segments = new ArrayList<String>();
+      List<String> segments = new ArrayList<>();
       if (instructions != null && instructions.length() > 0) {
           String[] results = CALCQ_FORMULA_SPLIT_PATTERN.split(instructions); // only works because all variables and calculations are already replaced
-          for (String part : results) {
-              segments.add(part);
-          }
+          segments.addAll(Arrays.asList(results));
           if (segments.size() == 1) {
               // add in the trailing segment
               segments.add("");
@@ -2782,14 +2840,14 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
    */
   public String toScientificNotation(String numberStr,int decimalPlaces){
 	  
-	  BigDecimal x = new BigDecimal(numberStr);
-	  x.setScale(decimalPlaces,RoundingMode.HALF_UP);	
+	  BigDecimal bdx = new BigDecimal(numberStr);
+	  bdx.setScale(decimalPlaces,RoundingMode.HALF_UP);	
 	  
 	  NumberFormat formatter;
 	  
-	  if (((( Math.abs(x.doubleValue())) >= MAX_THRESHOLD) || ( Math.abs(x.doubleValue()) <= MIN_THRESHOLD) 
-        || (numberStr.contains("e")) || numberStr.contains("E") ) 
-	    && (x.doubleValue() != 0)) {
+	  if ((bdx.abs().compareTo(DEFAULT_MAX_THRESHOLD) >= 0 || bdx.abs().compareTo(DEFAULT_MIN_THRESHOLD) <= 0
+        || numberStr.contains("e") || numberStr.contains("E") ) 
+	    && bdx.doubleValue() != 0) {
 		  formatter = new DecimalFormat(FORMAT_MASK);
 	  } else {
 		  formatter = new DecimalFormat("0");
@@ -2798,7 +2856,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	  formatter.setRoundingMode(RoundingMode.HALF_UP);	  
 	  formatter.setMaximumFractionDigits(decimalPlaces);
 	  
-	  String formattedNumber = formatter.format(x);
+	  String formattedNumber = formatter.format(bdx);
 
 	  return formattedNumber.replace(",",".");
   }
@@ -2860,7 +2918,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
    * when the question is saved, or if a divide by zero error occurs.
    */
   private Map<Integer, String> calculateFormulaValues(Map<String, String> variables, ItemDataIfc item) throws Exception {
-      Map<Integer, String> values = new HashMap<Integer, String>();
+      Map<Integer, String> values = new HashMap<>();
       String instructions = item.getInstruction();
       List<String> formulaNames = this.extractFormulas(instructions);
       for (int i = 0; i < formulaNames.size(); i++) {
@@ -2898,7 +2956,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
       final int MAX_ERROR_TRIES = 100;
       boolean hasErrors = true;
       Map<String, String> variableRangeMap = buildVariableRangeMap(item);
-      List<String> instructionSegments = new ArrayList<String>(0);
+      List<String> instructionSegments = new ArrayList<>(0);
 
       int attemptCount = 1;
       while (hasErrors && attemptCount <= MAX_ERROR_TRIES) {
@@ -2995,8 +3053,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	  String NaN = "NaN";
 	  if (answer.length() == 0) return false;
 	  if (answer.equals(INFINITY)) return false;
-	  if (answer.equals(NaN)) return false;	  
-	  return true;
+	  return !answer.equals(NaN);
   }
   
   /**
@@ -3019,7 +3076,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
       }
 
       if (variables == null) {
-          variables = new HashMap<String, String>();
+          variables = new HashMap<>();
       }
 
       for (Map.Entry<String, String> entry : variables.entrySet()) {
@@ -3074,7 +3131,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
           expression = "";
       } else {
           Matcher keyMatcher = CALCQ_CALCULATION_PATTERN.matcher(expression);
-          ArrayList<String> toReplace = new ArrayList<String>();
+          List<String> toReplace = new ArrayList<>();
           while (keyMatcher.find()) {
               String match = keyMatcher.group(1);
               toReplace.add(match); // should be the formula
@@ -3132,6 +3189,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
       } else {
           formula = StringUtils.trimToEmpty(formula).replaceAll("\\s+", " ");
       }
+
       return formula;
   }
 
@@ -3187,7 +3245,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
    * Takes a map of ranges and randomly chooses values for those ranges and stores them in a new map.
    */
    public Map<String, String> determineRandomValuesForRanges(Map<String, String> variableRangeMap, long itemId, long gradingId, String agentId, int validAnswersAttemptCount) {
-	  Map<String, String> variableValueMap = new HashMap<String, String>();
+	  Map<String, String> variableValueMap = new HashMap<>();
 	  
 	  // seed random number generator
 	  long seed = getCalcuatedQuestionSeed(itemId, gradingId, agentId, validAnswersAttemptCount);
@@ -3198,14 +3256,14 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	  {
 		  Map.Entry<String, String>entry = i.next();
 		  
-		  String delimRange = entry.getValue().toString(); // ie. "-100|100,2"
+		  String delimRange = entry.getValue(); // ie. "-100|100,2"
 		  		  
-		  double minVal = Double.valueOf(delimRange.substring(0, delimRange.indexOf('|')));
-		  double maxVal = Double.valueOf(delimRange.substring(delimRange.indexOf('|')+1, delimRange.indexOf(',')));
+		  BigDecimal minVal = new BigDecimal(delimRange.substring(0, delimRange.indexOf('|')));
+		  BigDecimal maxVal = new BigDecimal(delimRange.substring(delimRange.indexOf('|')+1, delimRange.indexOf(',')));
 		  int decimalPlaces = Integer.valueOf(delimRange.substring(delimRange.indexOf(',')+1, delimRange.length()));
 		  		  
 		  // This line does the magic of creating the random variable value within the range.
-		  Double randomValue = minVal + (maxVal - minVal) * generator.nextDouble();
+		  BigDecimal randomValue = maxVal.subtract(minVal).multiply(new BigDecimal(generator.nextDouble())).add(minVal);
 		  
 		  // Trim off excess decimal points based on decimalPlaces value
 		  /*BigDecimal bd = new BigDecimal(randomValue);
@@ -3232,7 +3290,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
    * variable names and variable ranges.
    */
    private Map<String, String> buildVariableRangeMap(ItemDataIfc item) {
-       HashMap<String, String> variableRangeMap = new HashMap<String, String>();
+       Map<String, String> variableRangeMap = new HashMap<>();
 
        String instructions = item.getInstruction();
        List<String> variables = this.extractVariables(instructions);
@@ -3272,9 +3330,9 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
    * CALCULATED_QUESTION
    * Simple to check to see if this is a calculated question. It's used in storeGrades() to see if the sort is necessary.
    */
-  private boolean isCalcQuestion(List tempItemGradinglist, HashMap publishedItemHash) {
+  private boolean isCalcQuestion(List tempItemGradinglist, Map publishedItemHash) {
 	  if (tempItemGradinglist == null) return false;
-	  if (tempItemGradinglist.size() == 0) return false;
+	  if (tempItemGradinglist.isEmpty()) return false;
 	  
 	  Iterator iter = tempItemGradinglist.iterator();
 	  while(iter.hasNext()){
@@ -3289,8 +3347,8 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
   }
 
   
-  public ArrayList getHasGradingDataAndHasSubmission(Long publishedAssessmentId) {
-	  ArrayList al = new ArrayList();
+  public List<Boolean> getHasGradingDataAndHasSubmission(Long publishedAssessmentId) {
+	    List<Boolean> al = new ArrayList<>();
 	    try {
 	    	al = PersistenceService.getInstance().
 	        getAssessmentGradingFacadeQueries().getHasGradingDataAndHasSubmission(publishedAssessmentId);
@@ -3333,12 +3391,13 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	    return list;
   }
   
-  public void autoSubmitAssessments() {
+  public int autoSubmitAssessments() {
 	  try {
-		  PersistenceService.getInstance().
+		  return PersistenceService.getInstance().
 		  getAssessmentGradingFacadeQueries().autoSubmitAssessments();
 	  } catch (Exception e) {
 		  log.error(e.getMessage(), e);
+		  return 1;
 	  }
   }
   
@@ -3385,12 +3444,12 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	  .saveOrUpdateAttachments(list);
   }
   
-  public HashMap getInProgressCounts(String siteId)  {
+  public Map getInProgressCounts(String siteId)  {
       return PersistenceService.getInstance().getAssessmentGradingFacadeQueries().
       getInProgressCounts(siteId);
   }
   
-  public HashMap getSubmittedCounts(String siteId)  {
+  public Map getSubmittedCounts(String siteId)  {
       return PersistenceService.getInstance().getAssessmentGradingFacadeQueries().
       getSubmittedCounts(siteId);
   }
@@ -3414,30 +3473,30 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 	  if (answer == null || answer.getScore() == null) {
 		  return 0d;
 	  }
-	  else if (answer.getIsCorrect().booleanValue()){ // instead of using answer score Item score needs to be used here 
-		  return (answer.getItem().getScore().doubleValue()); //--mustansar 
+	  else if (answer.getIsCorrect()){ // instead of using answer score Item score needs to be used here 
+		  return (answer.getItem().getScore()); //--mustansar 
 	  }
-	  return (answer.getItem().getScore().doubleValue()*answer.getPartialCredit().doubleValue())/100d;
+	  return (answer.getItem().getScore()*answer.getPartialCredit())/100d;
   }
   
   /**
-   *  Reoder a map of EMI scores
+   *  Reorder a map of EMI scores
    * @param emiScoresMap
    * @return
    */
   private Map<Long, Map<Long, Map<Long, EMIScore>>> reorderEMIScoreMap(Map<Long, Map<Long,Set<EMIScore>>> emiScoresMap){
-	  Map<Long, Map<Long, Map<Long, EMIScore>>> scoresMap = new HashMap<Long, Map<Long, Map<Long, EMIScore>>>();
+	  Map<Long, Map<Long, Map<Long, EMIScore>>> scoresMap = new HashMap<>();
 	  for(Map<Long,Set<EMIScore>> emiItemScoresMap: emiScoresMap.values()){
 		  for(Set<EMIScore> scoreSet: emiItemScoresMap.values()){
 			  for(EMIScore s: scoreSet){
 				  Map<Long, Map<Long, EMIScore>> scoresItem = scoresMap.get(s.itemId);
 				  if(scoresItem == null){
-					  scoresItem = new HashMap<Long, Map<Long, EMIScore>>();
+					  scoresItem = new HashMap<>();
 					  scoresMap.put(s.itemId, scoresItem);
 				  }
 				  Map<Long, EMIScore> scoresItemText = scoresItem.get(s.itemTextId);
 				  if(scoresItemText == null){
-					  scoresItemText = new HashMap<Long, EMIScore>();
+					  scoresItemText = new HashMap<>();
 					  scoresItem.put(s.itemTextId, scoresItemText);
 				  }
 				  scoresItemText.put(s.answerId, s);
@@ -3483,7 +3542,7 @@ Here are the definition and 12 cases I came up with (lydia, 01/2006):
 		Iterator<AnswerIfc> answerIter = answers.iterator();
 		while (answerIter.hasNext()) {
 			AnswerIfc answer = answerIter.next();
-			if (answer.getIsCorrect() != null && answer.getIsCorrect().booleanValue()) {
+			if (answer.getIsCorrect() != null && answer.getIsCorrect()) {
 				hasCorrectAnswer = true;
 				break;
 			}
@@ -3519,11 +3578,11 @@ class EMIScore implements Comparable<EMIScore>{
 	 * @param score
 	 */
 	public EMIScore(Long itemId, Long itemTextId, Long answerId, boolean correct, Double score){
-		this.itemId = itemId == null? 0L : itemId.longValue();
-		this.itemTextId = itemTextId == null? 0L : itemTextId.longValue();
-		this.answerId = answerId == null? 0L : answerId.longValue();
+		this.itemId = itemId == null? 0L : itemId;
+		this.itemTextId = itemTextId == null? 0L : itemTextId;
+		this.answerId = answerId == null? 0L : answerId;
 		this.correct = correct;
-		this.score = score == null? 0L : score.doubleValue();
+		this.score = score == null? 0L : score;
 	}
 
 	public int compareTo(EMIScore o) {
@@ -3577,4 +3636,3 @@ class EMIScore implements Comparable<EMIScore>{
 		return itemId + ":" + itemTextId + ":" + answerId + "(" + correct + ":" + score + ":" + effectiveScore + ")";
 	}
 }
-

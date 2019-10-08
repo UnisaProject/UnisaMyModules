@@ -20,6 +20,7 @@
  **********************************************************************************/
 
 package org.sakaiproject.tool.assessment.ui.listener.author;
+
 import java.util.Iterator;
 import java.util.Set;
 import java.util.List;
@@ -32,6 +33,7 @@ import javax.faces.event.ActionListener;
 import javax.faces.model.SelectItem;
 
 import org.sakaiproject.event.cover.EventTrackingService;
+import org.sakaiproject.samigo.util.SamigoConstants;
 import org.sakaiproject.tool.assessment.data.dao.assessment.SectionMetaData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionDataIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionMetaDataIfc;
@@ -54,11 +56,9 @@ import org.sakaiproject.util.FormattedText;
  * @author Ed Smiley
  * @version $Id$
  */
-
 public class EditPartListener
     implements ActionListener
 {
-  //private static Logger log = LoggerFactory.getLogger(EditPartListener.class);
   private boolean isEditPendingAssessmentFlow = true;
   
   public EditPartListener()
@@ -102,11 +102,11 @@ public class EditPartListener
     }
 
     if (isEditPendingAssessmentFlow) {
-    	EventTrackingService.post(EventTrackingService.newEvent("sam.assessment.revise", "siteId=" + AgentFacade.getCurrentSiteId() + ", sectionId=" + sectionId, true));
+    	EventTrackingService.post(EventTrackingService.newEvent(SamigoConstants.EVENT_ASSESSMENT_REVISE, "siteId=" + AgentFacade.getCurrentSiteId() + ", sectionId=" + sectionId, true));
     	assessmentService = new AssessmentService();
     }
     else {
-    	EventTrackingService.post(EventTrackingService.newEvent("sam.pubassessment.revise", "siteId=" + AgentFacade.getCurrentSiteId() + ", sectionId=" + sectionId, true));
+    	EventTrackingService.post(EventTrackingService.newEvent(SamigoConstants.EVENT_PUBLISHED_ASSESSMENT_REVISE, "siteId=" + AgentFacade.getCurrentSiteId() + ", sectionId=" + sectionId, true));
     	assessmentService = new PublishedAssessmentService();
     }
     section = assessmentService.getSection(sectionId);

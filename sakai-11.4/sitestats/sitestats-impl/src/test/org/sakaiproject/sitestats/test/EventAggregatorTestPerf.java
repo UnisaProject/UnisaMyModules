@@ -32,11 +32,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.mockito.Mockito;
 import org.easymock.IAnswer;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentTypeImageService;
 import org.sakaiproject.event.api.EventTrackingService;
@@ -51,12 +55,10 @@ import org.sakaiproject.sitestats.test.data.FakeData;
 import org.sakaiproject.sitestats.test.mocks.FakeSite;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.util.ResourceLoader;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 
-@ContextConfiguration(locations={
-		"/hbm-db.xml",
-		"/hibernate-test.xml"})
+@ContextConfiguration(locations = {"/hibernate-test.xml"})
+@Slf4j
 public class EventAggregatorTestPerf extends AbstractJUnit4SpringContextTests {
 	private static final int		MAX_USERS				= 250;
 	private static final int		MAX_RESOURCES			= 50;
@@ -66,8 +68,6 @@ public class EventAggregatorTestPerf extends AbstractJUnit4SpringContextTests {
 	private static final int		COUNT_RESOURCES_SMALL	= 5;
 	private static final int		COUNT_RESOURCES_MEDIUM	= 10;
 	private static final int		COUNT_RESOURCES_LARGE	= MAX_RESOURCES;
-
-	private Logger						LOG						= LoggerFactory.getLogger(EventAggregatorTestPerf.class);
 
 	private StatsManager			M_sm;
 	private StatsUpdateManager		M_sum;
@@ -81,12 +81,15 @@ public class EventAggregatorTestPerf extends AbstractJUnit4SpringContextTests {
 	private List<String>			siteUsers;
 	private List<String>			siteResources;
 
+	@Autowired
 	public void setStatsManager(StatsManager M_sm) {
 		this.M_sm = M_sm;
 	}
+	@Autowired
 	public void setStatsUpdateManager(StatsUpdateManager M_sum) {
 		this.M_sum = M_sum;
 	}
+	@Autowired
 	public void setEventTrackingService(EventTrackingService M_ets) {
 		this.M_ets = M_ets;
 	}
@@ -94,8 +97,8 @@ public class EventAggregatorTestPerf extends AbstractJUnit4SpringContextTests {
 	@Before
 	public void onSetUp() throws Exception {
 		/** run this before each test starts */
-		LOG.debug("Setting up tests...");
-		
+		log.debug("Setting up tests...");
+
 		// Setup site users
 		siteUsers = new ArrayList<String>();
 		for(int i=0; i<MAX_USERS; i++) {
@@ -110,7 +113,7 @@ public class EventAggregatorTestPerf extends AbstractJUnit4SpringContextTests {
 		// Site A:
 		//        - tools {SiteStats, Chat, Resources}
 		//        - users {user-0, user-1, ... , user-999}
-		Site siteA = new FakeSite(siteId,
+		Site siteA = Mockito.spy(FakeSite.class).set(siteId,
 				Arrays.asList(StatsManager.SITESTATS_TOOLID, FakeData.TOOL_CHAT, StatsManager.RESOURCES_TOOLID)
 		);
 		Set<String> usersSet = new HashSet<String>(siteUsers);
@@ -119,7 +122,7 @@ public class EventAggregatorTestPerf extends AbstractJUnit4SpringContextTests {
 		expect(M_ss.getSite(siteId)).andStubReturn(siteA);
 		expect(M_ss.isUserSite(siteId)).andStubReturn(false);
 		expect(M_ss.isSpecialSite(siteId)).andStubReturn(false);
-		expect(siteA.getCreatedTime()).andStubReturn((Time)anyObject());
+		Mockito.when(siteA.getCreatedTime()).thenReturn(Mockito.any(Time.class));
 		// Site 'non_existent_site' doesn't exist
 		expect(M_ss.isUserSite("non_existent_site")).andStubReturn(false);
 		expect(M_ss.isSpecialSite("non_existent_site")).andStubReturn(false);
@@ -157,6 +160,7 @@ public class EventAggregatorTestPerf extends AbstractJUnit4SpringContextTests {
 		((StatsManagerImpl)M_sm).setContentTypeImageService(M_ctis);
 		((StatsManagerImpl)M_sm).setResourceLoader(msgs);
 		((StatsManagerImpl)M_sm).setCountFilesUsingCHS(false);
+		((StatsManagerImpl)M_sm).setCountPagesUsingLBS(false);
 		((StatsUpdateManagerImpl)M_sum).setSiteService(M_ss);
 		((StatsUpdateManagerImpl)M_sum).setStatsManager(M_sm);
 	}
@@ -221,6 +225,6 @@ public class EventAggregatorTestPerf extends AbstractJUnit4SpringContextTests {
 		sb.append(userCount).append(" users, ").append(resourceCount).append(" resources, ").append(dayCount).append(" days: ");
 		sb.append(M_sum.getMetricsSummary(true));
 		M_sum.resetMetrics();
-		LOG.info(sb.toString());
+		log.info(sb.toString());
 	}
 }

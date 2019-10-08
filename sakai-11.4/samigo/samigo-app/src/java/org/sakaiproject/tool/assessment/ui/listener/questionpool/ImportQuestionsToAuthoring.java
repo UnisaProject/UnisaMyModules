@@ -26,10 +26,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Collections;
+
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
+
+import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.tool.assessment.data.dao.assessment.ItemData;
 import org.sakaiproject.tool.assessment.data.dao.assessment.ItemMetaData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AttachmentIfc;
@@ -52,9 +54,9 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
  * @version $Id$
  */
 
-public class ImportQuestionsToAuthoring implements ActionListener
+@Slf4j
+ public class ImportQuestionsToAuthoring implements ActionListener
 {
-  //private static Logger log = LoggerFactory.getLogger(ImportQuestionsToAuthoring.class);
   //private static ContextUtil cu;
 
 
@@ -65,7 +67,6 @@ public class ImportQuestionsToAuthoring implements ActionListener
    */
   public void processAction(ActionEvent ae) throws AbortProcessingException
   {
-    //log.info("ImportQuestionsToAuthoring:");
     QuestionPoolBean  qpoolbean= (QuestionPoolBean) ContextUtil.lookupBean("questionpool");
     if (!importItems(qpoolbean))
     {
@@ -106,6 +107,7 @@ public class ImportQuestionsToAuthoring implements ActionListener
 
         // SAM-2395 - iterate over the sorted list
         Iterator iter = sortedQuestions.iterator();
+        List<ItemFacade> itemsToSave = new ArrayList<>(sortedQuestions.size());
         while (iter.hasNext()) {
         // path instead. so we will fix it here
           itemfacade = (ItemFacade) iter.next();
@@ -129,7 +131,7 @@ public class ImportQuestionsToAuthoring implements ActionListener
               } else {
                   // if adding to the end
                 if (section.getItemSet() != null) {
-                    itemfacade.setSequence(section.getItemSet().size() + 1);
+                    itemfacade.setSequence(section.getItemSet().size() + itempos + 1);
                 } else {
                     // this is a new part 
                     itemfacade.setSequence(1);
@@ -143,15 +145,24 @@ public class ImportQuestionsToAuthoring implements ActionListener
                 itemfacade.setSequence(insertPosIntvalue + 1);
           }
 
-              delegate.saveItem(itemfacade);
-          // remove POOLID metadata if any,
-              delegate.deleteItemMetaData(itemfacade.getItemId(), ItemMetaData.POOLID, AgentFacade.getAgentString());
-              delegate.deleteItemMetaData(itemfacade.getItemId(), ItemMetaData.PARTID, AgentFacade.getAgentString());
-              delegate.addItemMetaData(itemfacade.getItemId(), ItemMetaData.PARTID,section.getSectionId().toString(), AgentFacade.getAgentString());
-      }
+              // SAK-38439 - Delete the PARTID and POOL meta data in the facade before saving to the DB
+              Iterator itMetaData = itemfacade.getItemMetaDataSet().iterator();
+              while (itMetaData.hasNext()) {
+                ItemMetaData metaData = (ItemMetaData) itMetaData.next();
+                String label = metaData.getLabel();
+                if (ItemMetaData.POOLID.equals(label) || ItemMetaData.PARTID.equals(label)) {
+                    itMetaData.remove();
+                }
+              }
+
+              itemfacade.addItemMetaData(ItemMetaData.PARTID, section.getSectionId().toString());
+              itemsToSave.add(itemfacade);
+            }
 
             itempos++;   // for next item in the destItem.
           }
+
+        delegate.saveItems(itemsToSave);
 
       // reset InsertPosition
       itemauthor.setInsertPosition("");
@@ -172,8 +183,8 @@ public class ImportQuestionsToAuthoring implements ActionListener
       }
     }
     catch (RuntimeException e) {
-	e.printStackTrace();
-	return false;
+        log.error(e.getMessage(), e);
+        return false;
     }
     return true;
   }
@@ -185,6 +196,4 @@ public class ImportQuestionsToAuthoring implements ActionListener
       attach.setLocation(url);
     }
   }
-
-
 }

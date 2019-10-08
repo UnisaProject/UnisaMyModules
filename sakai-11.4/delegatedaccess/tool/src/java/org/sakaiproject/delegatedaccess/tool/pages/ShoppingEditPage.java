@@ -24,8 +24,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.request.resource.PackageResourceReference;
@@ -40,8 +40,8 @@ import org.apache.wicket.extensions.markup.html.tree.table.ColumnLocation.Unit;
 import org.apache.wicket.extensions.markup.html.tree.table.IColumn;
 import org.apache.wicket.extensions.markup.html.tree.table.PropertyTreeColumn;
 import org.apache.wicket.extensions.markup.html.tree.table.TreeTable;
-import org.apache.wicket.extensions.markup.html.repeater.tree.AbstractTree;
-import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
@@ -54,6 +54,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.model.StringResourceModel;
+
 import org.sakaiproject.delegatedaccess.model.ListOptionSerialized;
 import org.sakaiproject.delegatedaccess.model.NodeModel;
 import org.sakaiproject.delegatedaccess.model.SelectOption;
@@ -70,18 +71,26 @@ import org.sakaiproject.delegatedaccess.utils.PropertyEditableColumnList;
  * @author Bryan Holladay (holladay@longsight.com)
  *
  */
+@Slf4j
 public class ShoppingEditPage extends BaseTreePage{
 	private TreeTable tree;
-	private static final Logger log = LoggerFactory.getLogger(ShoppingEditPage.class);
 	private String[] defaultRole = null;
 	private SelectOption filterHierarchy;
 	private String filterSearch = "";
 	private List<ListOptionSerialized> blankRestrictedTools;
 	private boolean modifiedAlert = false;
 
+	public static final String SCRIPT_DATEPICKER = "javascript/init-datepicker.js";
+
 	@Override
 	protected DefaultAbstractTree getTree() {
 		return  tree;
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(JavaScriptHeaderItem.forUrl(SCRIPT_DATEPICKER));
 	}
 
 	public ShoppingEditPage(){

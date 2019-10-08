@@ -47,13 +47,13 @@ $Id$
       <title><h:outputText value="#{commonMessages.total_scores}" /></title>
     <samigo:script path="/jsf/widget/hideDivision/hideDivision.js" />
     
-		<script type="text/javascript" src="/library/webjars/jquery/1.11.3/jquery.min.js"></script>
-		<script language='javascript' src='/samigo-app/js/jquery.dynamiclist.student.preview.js'></script>
-		<script language='javascript' src='/samigo-app/js/selection.student.preview.js'></script>
-		<script language='javascript' src='/samigo-app/js/selection.author.preview.js'></script>
+		<samigo:script path="/../library/webjars/jquery/1.12.4/jquery.min.js"/>
+		<samigo:script path="/js/jquery.dynamiclist.student.preview.js"/>
+		<samigo:script path="/js/selection.student.preview.js"/>
+		<samigo:script path="/js/selection.author.preview.js"/>
 
-		<link href="/samigo-app/css/imageQuestion.student.css" type="text/css" rel="stylesheet" media="all" />
-		<link href="/samigo-app/css/imageQuestion.author.css" type="text/css" rel="stylesheet" media="all" />
+		<samigo:stylesheet path="/css/imageQuestion.student.css"/>
+		<samigo:stylesheet path="/css/imageQuestion.author.css"/>
 		
 		<script type="text/JavaScript">		
 			jQuery(window).load(function(){
@@ -139,7 +139,7 @@ function toPoint(id)
     </h:commandLink>
     <h:outputText value="</span><li role='menuitem'><span>" escape="false" rendered="#{totalScores.firstItem ne ''}" /> 
     <h:commandLink title="#{evaluationMessages.t_histogram}" action="histogramScores" immediate="true"
-      rendered="#{totalScores.firstItem ne '' && !totalScores.hasRandomDrawPart}" >
+      rendered="#{totalScores.firstItem ne ''}" >
       <h:outputText value="#{evaluationMessages.stat_view}" />
       <f:actionListener
         type="org.sakaiproject.tool.assessment.ui.listener.evaluation.HistogramListener" />
@@ -170,7 +170,10 @@ function toPoint(id)
        #{part.questions-part.unansweredQuestions}#{evaluationMessages.splash}#{part.questions} #{deliveryMessages.ans_q}, #{part.pointsDisplayString} #{part.roundedMaxPoints} #{deliveryMessages.pt}" > 
         <t:dataList layout="unorderedList" itemStyleClass="list-group-item" styleClass="list-group question-wrapper" value="#{part.itemContents}" var="question">
                 <span class="badge">
-                  <h:outputText escape="false" value="#{question.roundedMaxPoints} #{deliveryMessages.pt} "/>
+                  <h:outputText escape="false" value="#{question.roundedMaxPoints}">
+                    <f:convertNumber maxFractionDigits="2"/>
+                  </h:outputText>
+                  <h:outputText escape="false" value=" #{deliveryMessages.pt} "/>
                 </span>
                 <h:outputLink value="##{part.number}#{deliveryMessages.underscore}#{question.number}"> 
                   <h:outputText escape="false" value="#{question.number}#{deliveryMessages.dot} #{question.strippedText}"/>
@@ -208,7 +211,7 @@ function toPoint(id)
               <f:validateDoubleRange/>
             </h:inputText>
             <span class="input-group-addon">
-            <h:outputText value=" #{deliveryMessages.splash} #{question.roundedMaxPoints} " />
+            <h:outputText value=" #{deliveryMessages.splash} #{question.roundedMaxPointsToDisplay} " />
             <h:outputText value="#{deliveryMessages.pt}"/>
             </span>
             <h:message for="adjustedScore" style="color:red"/>
