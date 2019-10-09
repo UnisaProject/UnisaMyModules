@@ -523,6 +523,17 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
     position: relative;
     list-style-type: none;	/* Unisa Changes:2019/02/13: Remove bullets from Lessons items */
 }
+/* Unisa Changes:2019/05/10: Remove bullets from Lessons items except bullets added by users in the content (.textbox class) */
+.mainList .textbox li {
+    list-style-type: inherit;	/* Display bullets and numbering in 'Add Content' */
+}
+.mainList .commentBody li {
+    list-style-type: inherit;	/* Display bullets and numbering in 'Add Comments' */
+}
+.mainList .studentDiv li {
+    list-style-type: inherit;	/* Display bullets and numbering in 'Student Pages' */
+}
+/* End Unisa Changes:2019/05/10 */
 .mainList li.canEdit > div.edit-col {
     vertical-align:top;
     padding-top: 0.35em;

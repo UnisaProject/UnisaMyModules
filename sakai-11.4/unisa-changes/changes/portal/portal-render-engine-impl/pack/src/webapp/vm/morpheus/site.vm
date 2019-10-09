@@ -46,19 +46,12 @@
 	                                            for(var i=0; i<cookiearray.length; i++){
 	                                            	var name = cookiearray[i].split('=')[0];
 	                                                var value = cookiearray[i].split('=')[1];
-	                                                if(value.startsWith("TGT-")) {
+	                                                if(value.substring(0,4)=="TGT-") {
 	                                                	ticket = value;
 	                                                }
 	                                            }
-	                                            document.write(
-	                                            	'<a target="_top" href="${studentAdminBaseUrl}/#!/home?'+ticket+'">
-	                                            		<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 
-	                                            			1px solid #AAA !important">myAdmin</button></a>');
+	                                            document.write('<a target="_top" href="${studentAdminBaseUrl}#!/home?'+ticket+'"><button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border:1px solid #AAA !important">myAdmin</button></a>');
 	                                      	</script>
-=			                        		#*<a target="_top" href="${studentAdminBaseUrl}">
-			                        			<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 1px solid 
-			                        				#AAA !important"><strong>myAdmin</strong></button>
-			                        		</a>*#
 			                    		</div>
 		                    		#end
 		                    		## <!-- If user is Staff -->
@@ -71,19 +64,12 @@
 	                                            for(var i=0; i<cookiearray.length; i++){
 	                                            	var name = cookiearray[i].split('=')[0];
 	                                                var value = cookiearray[i].split('=')[1];
-	                                                if(value.startsWith("TGT-")) {
+	                                                if(value.substring(0,4)=="TGT-") {
 	                                                	ticket = value;
 	                                                }
 	                                            }
-	                                            document.write(
-	                                            	'<a target="_top" href="${staffAdminBaseUrl}/#!/home?'+ticket+'">
-	                                            		<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 
-	                                            			1px solid #AAA !important">myAdmin</button></a>');
+	                                            document.write('<a target="_top" href="${staffAdminBaseUrl}#!/home?'+ticket+'"><button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border:1px solid #AAA !important">myAdmin</button></a>');
 	                                      	</script>
-			                        		#*<a target="_top" href="${staffAdminBaseUrl}">
-			                        			<button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 1px solid 
-			                        				#AAA !important"><strong>myAdmin</strong></button>
-			                        		</a>*#
 			                    		</div>
 		                    		#end
 					    	</div>

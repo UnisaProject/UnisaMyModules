@@ -65,7 +65,7 @@ public class GradebookSyncBean extends GradebookDependentBean implements Seriali
     private Assignment assignment;
     private EmailService emailService;	
     String url = "";				
-    private static final String WEBSERVICE_URL = "/unisa-axis/GradebookSyncStudentSystemWebService.jws";
+    private static final String WEBSERVICE_URL = "/sakai-axis/GradebookSyncStudentSystemWebService.jws";
     private static final String LOCAL_URL_PORT80 = "http://localhost:8080";
     private static final String LOCAL_URL_PORT82 = "http://localhost:8082";
     private static final String PORTAL_URL = "/portal";

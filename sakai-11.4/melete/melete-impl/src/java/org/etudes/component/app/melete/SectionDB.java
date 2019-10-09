@@ -2686,5 +2686,27 @@ public class SectionDB implements Serializable
 	{
 		this.moduleDB = moduleDB;
 	}
+	
+	public String getSectionContentFile(String resourceId)
+	{
+		
+		String SectionContentFile = null;
+
+		Session session = hibernateUtil.currentSession();
+		try
+		{
+			String queryString = "select filePath from ContentResource where resourceId = :resourceId";
+			Query query = session.createQuery(queryString);
+			query.setParameter("resourceId", resourceId);
+			SectionContentFile = (String) query.uniqueResult();
+		}
+		catch (Exception e)
+		{
+		
+		}
+		hibernateUtil.closeSession();
+		return SectionContentFile;
+		
+	}
 
 }

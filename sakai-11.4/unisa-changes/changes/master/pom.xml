@@ -350,14 +350,11 @@
 
   <dependencyManagement>
     <dependencies>
-   	 <!-- Sonette add 14 March 2019 - add for Azure Monitoring of applciation -->
-   	 <dependency>
         <groupId>com.microsoft.azure</groupId>
         <artifactId>applicationinsights-web</artifactId>
         <!-- or applicationinsights-core for bare API -->
         <version>2.3.1</version>
       </dependency>
-      <!-- END Sonette add 14 March 2019 - add for Azure Monitoring of applciation -->
       <!-- provided by the JDK, here to ensure its not packaged in child poms child poms may still override if necessary -->
       <dependency>
         <groupId>xalan</groupId>
@@ -1297,6 +1294,28 @@
         <version>${sakai.version}</version>
         <scope>provided</scope>
       </dependency>
+	  <!-- unisa change: add template dependency -->
+	   <dependency>
+        <groupId>org.sakaiproject.template</groupId>
+        <artifactId>sakai-template-api</artifactId>
+        <version>${sakai.version}</version>
+        <scope>provided</scope>
+      </dependency>
+	  
+	  <dependency>
+        <groupId>org.sakaiproject.template</groupId>
+        <artifactId>sakai-template-util</artifactId>
+        <version>${sakai.version}</version>
+      </dependency>
+      
+       <dependency>
+        <groupId>org.sakaiproject.welcome</groupId>
+        <artifactId>sakai-welcome-api</artifactId>
+        <version>${sakai.version}</version>
+        <scope>provided</scope>
+      </dependency>
+	  <!-- End of unisa change: add template dependency -->
+	  
       <dependency>
         <groupId>org.sakaiproject.emailtemplateservice</groupId>
         <artifactId>emailtemplateservice-api</artifactId>
@@ -1683,7 +1702,7 @@
 			<groupId>org.etudes</groupId> 
 			<artifactId>etudes-melete-api</artifactId> 
 			<version>${melete.version}</version> 
-			<scope>provided</scope> 
+			<scope>provided</scope> 	
 		</dependency> 
 	
 		<!-- END unisa-changes MELETE -->

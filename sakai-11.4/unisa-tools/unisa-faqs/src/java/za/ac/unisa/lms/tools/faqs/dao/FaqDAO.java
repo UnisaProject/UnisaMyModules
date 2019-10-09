@@ -48,16 +48,22 @@ public class FaqDAO extends SakaiDAO implements EntityProducer, EntityTransferre
 	public FaqDAO() {
 		log = LogFactory.getLog(this.getClass());
 		pstmtFactoryFaqCategory = new PreparedStatementCreatorFactory(
-				"insert into FAQ_CATEGORY (Category_ID,SITE_ID,Description,Modified_On) values " +
-				" (FAQ_CATEGORY_0.nextval,?, ?, sysdate)", new int[] { Types.VARCHAR,Types.VARCHAR });
+				// Sifiso Changes:2018/10/31:Convert Oracle to mySQL
+				/*"insert into FAQ_CATEGORY (Category_ID,SITE_ID,Description,Modified_On) values " +
+				" (FAQ_CATEGORY_0.nextval,?, ?, sysdate)", new int[] { Types.VARCHAR,Types.VARCHAR });*/
+				"insert into FAQ_CATEGORY (Category_ID,SITE_ID,Description,Modified_On) "+
+				"values (NULL,?, ?, sysdate())", new int[] { Types.VARCHAR,Types.VARCHAR });
 		pstmtFactoryFaqCategory.setGeneratedKeysColumnNames(new String[] {"Category_ID"} );
 		pstmtFactoryFaqCategory.setReturnGeneratedKeys(true);
 
 
 		pstmtFactoryFaqContent = new PreparedStatementCreatorFactory(
-				"insert into FAQ_CONTENT (Content_ID,Question, Answer, Category_ID, Modified_On) " +
+				// Sifiso Changes:2018/10/31:Convert Oracle to mySQL
+				/*"insert into FAQ_CONTENT (Content_ID,Question, Answer, Category_ID, Modified_On) " +
 				"values (FAQ_CONTENT_0.nextval,?, ?, ?,sysdate)",
-				new int[] { Types.VARCHAR, Types.VARCHAR, Types.INTEGER } );
+				new int[] { Types.VARCHAR, Types.VARCHAR, Types.INTEGER } );*/
+				"insert into FAQ_CONTENT (Content_ID,Question, Answer, Category_ID, Modified_On) " +
+				"values (NULL,?, ?, ?,sysdate())", new int[] { Types.VARCHAR, Types.VARCHAR, Types.INTEGER } );
 		pstmtFactoryFaqContent.setGeneratedKeysColumnNames(new String[] {"Content_ID"} );
 		pstmtFactoryFaqContent.setReturnGeneratedKeys(true);
 
@@ -237,7 +243,9 @@ public class FaqDAO extends SakaiDAO implements EntityProducer, EntityTransferre
 		JdbcTemplate jdt = new JdbcTemplate(getDataSource());
 
 		log.debug("Updating FAQ Category "+c.getCategoryId()+" on database");
-		jdt.update("update FAQ_CATEGORY set Description = ?, Modified_On = sysdate " +
+		// Sifiso Changes:2018/10/31:Convert from Oracle to mySQL
+		/*jdt.update("update FAQ_CATEGORY set Description = ?, Modified_On = sysdate " +*/
+		jdt.update("update FAQ_CATEGORY set Description = ?, Modified_On = sysdate() " +
 				   "where Category_Id = ?",
 				new Object[] {
 					c.getDescription(),
@@ -252,7 +260,9 @@ public class FaqDAO extends SakaiDAO implements EntityProducer, EntityTransferre
 
 		if (q.getQuestion()!=null){
 		log.debug("Updating FAQ Content "+q.getContentId()+" on database");
-		jdt.update("update FAQ_CONTENT set Question = ?, Answer = ?, Category_Id = ?, Modified_On = sysdate " +
+		// Sifiso Changes:2018/10/31:Convert from Oracle to mySQL
+		/*jdt.update("update FAQ_CONTENT set Question = ?, Answer = ?, Category_Id = ?, Modified_On = sysdate " +*/
+		jdt.update("update FAQ_CONTENT set Question = ?, Answer = ?, Category_Id = ?, Modified_On = sysdate() " +
 		"where Content_Id = ?",
 				new Object[] {
 					q.getQuestion(),
