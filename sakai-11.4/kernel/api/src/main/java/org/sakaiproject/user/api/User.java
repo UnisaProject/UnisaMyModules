@@ -43,23 +43,13 @@ public interface User extends Entity, Comparable
 	 */
 	User getModifiedBy();
 
-	/**
-	 * @return the time created.
-	 * @deprecated see {link {@link #getCreatedDate()}
-	 * 
-	 */
-	Time getCreatedTime();
+
 	
 	/**
 	 * @return the time created.
 	 */
 	Date getCreatedDate();
 
-	/**
-	 * @return the time last modified.
-	 * @deprecated see {link {@link #getModifiedDate()}
-	 */
-	Time getModifiedTime();
 
 	/**
 	 * @return the time last modified.
@@ -84,7 +74,7 @@ public interface User extends Entity, Comparable
 	/**
 	 * Access the user's name for sorting purposes.
 	 * 
-	 * @return The user's name for sorting purposes.
+	 * @return The user's name for sorting purposes, never <code>null</code>
 	 */
 	String getSortName();
 

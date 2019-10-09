@@ -19,14 +19,11 @@
  *
  **********************************************************************************/
 
-
-
 package org.sakaiproject.tool.assessment.ui.bean.evaluation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -35,9 +32,10 @@ import java.util.Set;
 
 import javax.faces.event.ActionEvent;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.commons.math3.util.Precision;
 import org.sakaiproject.jsf.model.PhaseAware;
 import org.sakaiproject.tool.assessment.business.entity.RecordingData;
@@ -47,16 +45,20 @@ import org.sakaiproject.tool.assessment.ui.bean.util.Validator;
 import org.sakaiproject.tool.assessment.ui.listener.evaluation.QuestionScoreListener;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 import org.sakaiproject.tool.assessment.util.AttachmentUtil;
+import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
  * <p>Description: class form for evaluating question scores</p>
  *
  */
+@Slf4j
 public class QuestionScoresBean
   implements Serializable, PhaseAware
 {
+  @Setter
   private String assessmentId;
+  @Setter
   private String publishedId;
 
   /** Use serialVersionUID for interoperability. */
@@ -65,65 +67,105 @@ public class QuestionScoresBean
   public static final String SHOW_SA_RATIONALE_RESPONSES_INLINE = "2"; 
   public static final String SHOW_SA_RATIONALE_RESPONSES_POPUP = "1"; 
 
+  @Setter
   private String assessmentName;
+  @Setter
   private String itemName;
-    private String partName;
+  @Setter
+  private String partName;
+  @Setter
   private String itemId;
+  @Setter
   private String anonymous;
+  @Setter
   private String groupName;
+  @Getter @Setter
   private double maxScore;
-  private Collection agents;
-  //private Collection sortedAgents;
+  @Getter @Setter
+  private List agents = null;
+  @Getter @Setter
   private Collection sections;
+  @Getter @Setter
   private Collection deliveryItem;
+  @Getter @Setter
   private String score;
+  @Getter @Setter
   private String discount;
+  @Getter @Setter
   private String answer;
+  @Getter @Setter
   private String questionScoreComments;
-  //private String sortProperty;
+  @Getter @Setter
   private String lateHandling; // read-only property set for UI late handling
+  @Getter @Setter
   private String dueDate;
+  @Getter @Setter
   private String sortType;
+  @Getter @Setter
   private boolean sortAscending = true;
+  @Getter @Setter
   private String roleSelection;
+  @Getter @Setter
   private String allSubmissions;
+  @Getter @Setter
   private RecordingData recordingData;
+  @Getter @Setter
   private String totalPeople;
+  @Getter @Setter
   private String typeId;
-  private HashMap scoresByItem;
-  private static Logger log = LoggerFactory.getLogger(QuestionScoresBean.class);
+  @Getter @Setter
+  private Map scoresByItem;
+  @Getter @Setter
+  private Map itemScoresMap;
+  @Getter @Setter
+  private PublishedAssessmentIfc publishedAssessment;
 
-  //private String selectedSectionFilterValue = TotalScoresBean.ALL_SECTIONS_SELECT_VALUE;
+  @Getter @Setter
   private String selectedSectionFilterValue = null;
-  
-  private String selectedSARationaleView =SHOW_SA_RATIONALE_RESPONSES_POPUP;
-  private ArrayList allAgents;
+  @Getter @Setter
+  private String selectedSARationaleView = SHOW_SA_RATIONALE_RESPONSES_POPUP;
+  @Setter
+  private List allAgents;
+  @Getter @Setter
   private boolean haveModelShortAnswer;
   
   //Paging.
-  private int firstScoreRow;
-  private int maxDisplayedScoreRows;
-  private int scoreDataRows;
+  @Getter @Setter
+  private int firstRow;
+  @Getter @Setter
+  private int maxDisplayedRows;
+  @Getter @Setter
+  private int dataRows;
+  @Getter @Setter
   private int audioMaxDisplayedScoreRows;
-  private int othersMaxDisplayedScoreRows;
+  @Getter @Setter
+  private int otherMaxDisplayedScoreRows;
+  @Getter @Setter
   private boolean hasAudioMaxDisplayedScoreRowsChanged;
   
   //Searching
+  @Getter @Setter
   private String searchString;
+  @Getter @Setter
   private String defaultSearchString;
   
+  @Getter @Setter
   private Map userIdMap;
-  private HashMap agentResultsByItemGradingId;
-  private boolean isAnyItemGradingAttachmentListModified;
+  @Getter @Setter
+  private Map agentResultsByItemGradingId;
+  @Getter @Setter
+  private boolean anyItemGradingAttachmentListModified;
+  @Getter @Setter
   private Boolean releasedToGroups = null;
-  
+  @Getter @Setter
+  private String showTagsInEvaluationStyle;
+
   /**
    * Creates a new QuestionScoresBean object.
    */
   public QuestionScoresBean()
   {
     log.debug("Creating a new QuestionScoresBean");
-    resetFields();
   }
 
 	protected void init() {
@@ -132,30 +174,36 @@ public class QuestionScoresBean
         if (searchString == null) {
 			searchString = defaultSearchString;
 		}
-		
+
+		if (agents == null) {
+			agents = new ArrayList();
+		}
+
 		// Get allAgents only at the first time
 		if (allAgents == null) {
 			allAgents = getAllAgents();
 		}
 		
-		ArrayList matchingAgents;
+		List matchingAgents;
 		if (isFilteredSearch()) {
 			matchingAgents = findMatchingAgents(searchString);
 		}
 		else {
 			matchingAgents = allAgents;
 		}
-		scoreDataRows = matchingAgents.size();
-		ArrayList newAgents = null;
-		if (maxDisplayedScoreRows == 0) {
-			newAgents = matchingAgents;
+		dataRows = matchingAgents.size();
+		List newAgents = new ArrayList();
+		if (maxDisplayedRows == 0) {
+			newAgents.addAll(matchingAgents);
 		} else {
-			int nextPageRow = Math.min(firstScoreRow + maxDisplayedScoreRows, scoreDataRows);
-			newAgents = new ArrayList(matchingAgents.subList(firstScoreRow, nextPageRow));
-			log.debug("init(): subList " + firstScoreRow + ", " + nextPageRow);
+			int nextPageRow = Math.min(firstRow + maxDisplayedRows, dataRows);
+			newAgents.addAll(matchingAgents.subList(firstRow, nextPageRow));
+			log.debug("init(): subList " + firstRow + ", " + nextPageRow);
 		}
-		
-		agents = newAgents;
+
+		agents.clear();
+		agents.addAll(newAgents);
+
 	}
  
 	// Following three methods are for interface PhaseAware
@@ -182,16 +230,6 @@ public class QuestionScoresBean
     return Validator.check(assessmentName, "N/A");
   }
 
-  /**
-   * set assessment name
-   *
-   * @param passessmentName the name
-   */
-  public void setAssessmentName(String passessmentName)
-  {
-    assessmentName = passessmentName;
-  }
-
  /**
    * get part name
    *
@@ -203,17 +241,6 @@ public class QuestionScoresBean
   }
 
   /**
-   * set part name
-   *
-   * @param ppartName the name
-   */
-  public void setPartName(String ppartName)
-  {
-    partName = ppartName;
-  }
-
-
-  /**
    * get item name
    *
    * @return the name
@@ -221,16 +248,6 @@ public class QuestionScoresBean
   public String getItemName()
   {
     return Validator.check(itemName, "N/A");
-  }
-
-  /**
-   * set item name
-   *
-   * @param pitemName the name
-   */
-  public void setItemName(String pitemName)
-  {
-    itemName = pitemName;
   }
 
   /**
@@ -244,16 +261,6 @@ public class QuestionScoresBean
   }
 
   /**
-   * set item id
-   *
-   * @param pitemId the id
-   */
-  public void setItemId(String pitemId)
-  {
-    itemId = pitemId;
-  }
-
-  /**
    * get assessment id
    *
    * @return the assessment id
@@ -261,16 +268,6 @@ public class QuestionScoresBean
   public String getAssessmentId()
   {
     return Validator.check(assessmentId, "0");
-  }
-
-  /**
-   * set assessment id
-   *
-   * @param passessmentId the id
-   */
-  public void setAssessmentId(String passessmentId)
-  {
-    assessmentId = passessmentId;
   }
 
   /**
@@ -284,16 +281,6 @@ public class QuestionScoresBean
   }
 
   /**
-   * set published id
-   *
-   * @param passessmentId the id
-   */
-  public void setPublishedId(String ppublishedId)
-  {
-    publishedId = ppublishedId;
-  }
-
-  /**
    * Is this anonymous grading?
    *
    * @return anonymous grading? true or false
@@ -304,52 +291,12 @@ public class QuestionScoresBean
   }
 
   /**
-   * Set switch if this is anonymous grading.
-   *
-   * @param panonymous anonymous grading? true or false
-   */
-  public void setAnonymous(String panonymous)
-  {
-    anonymous = panonymous;
-  }
-
-  /**
    * Get the group name
    * @return group name
    */
   public String getGroupName()
   {
     return Validator.check(groupName, "N/A");
-  }
-
-  /**
-   * set the group name
-   *
-   * @param pgroupName the name
-   */
-  public void setGroupName(String pgroupName)
-  {
-    groupName = pgroupName;
-  }
-
-  /**
-   * get the max score
-   *
-   * @return the max score
-   */
-  public double getMaxScore()
-  {
-    return Precision.round(maxScore, 2);
-  }
-
-  /**
-   * set max score
-   *
-   * @param pmaxScore set the max score
-   */
-  public void setMaxScore(double pmaxScore)
-  {
-    maxScore = pmaxScore;
   }
 
 /**
@@ -362,87 +309,21 @@ public class QuestionScoresBean
 	  ResourceLoader rb=new ResourceLoader("org.sakaiproject.tool.assessment.bundle.EvaluationMessages");
 	try{
 		if (this.getMaxScore() == 1.0)
-			return this.getMaxScore()+ " " + rb.getString("point");
+			return Precision.round(this.getMaxScore(), 2)+ " " + rb.getString("point");
 	else
-		return this.getMaxScore()+ " " + rb.getString("points");
+		return Precision.round(this.getMaxScore(), 2)+ " " + rb.getString("points");
 	}
 	catch(NumberFormatException e){
-		return this.getMaxScore()+ " " + rb.getString("point");
+		return Precision.round(this.getMaxScore(), 2)+ " " + rb.getString("point");
 	}
     }
-
-  /**
-   * get an agent result collection
-   *
-   * @return the collection
-   */
-  public Collection getAgents()
-  {
-    if (agents == null)
-      return new ArrayList();
-    return agents;
-  }
-
-  /**
-   * set the agent collection
-   *
-   * @param pagents the collection
-   */
-  public void setAgents(Collection pagents)
-  {
-    agents = pagents;
-  }
-
-  /**
-   * get a list of sections
-   *
-   * @return the collection
-   */
-  public Collection getSections()
-  {
-    if (sections == null)
-      return new ArrayList();
-    return sections;
-  }
-
-  /**
-   * set the section list
-   *
-   * @param psections the collection
-   */
-  public void setSections(Collection psections)
-  {
-    sections = psections;
-  }
-
-  /**
-   * get the item to display
-   *
-   * @return the collection
-   */
-  public Collection getDeliveryItem()
-  {
-    if (deliveryItem == null)
-      return new ArrayList();
-    return deliveryItem;
-  }
-
-  /**
-   * set the delivery item
-   *
-   * @param pitem the collection
-   */
-  public void setDeliveryItem(Collection pitem)
-  {
-    deliveryItem = pitem;
-  }
 
   /** This is a read-only calculated property.
    * @return list of uppercase student initials
    */
   public String getAgentInitials()
   {
-    Collection c = getAgents();
+    List c = getAgents();
     
     
     StringBuilder initialsbuf = new StringBuilder();  
@@ -452,13 +333,10 @@ public class QuestionScoresBean
       return "";
     }
 
-    Iterator it = c.iterator();
-
-    while (it.hasNext())
+    for(AgentResults ar : (List<AgentResults>) c)
     {
       try
       {
-        AgentResults ar = (AgentResults) it.next();
         String initial = ar.getLastInitial();
         initialsbuf.append(initial); 
       }
@@ -474,18 +352,6 @@ public class QuestionScoresBean
   }
 
   /**
-   * get agent resutls as an array
-   *
-   * @return the array
-   */
-  public Object[] getAgentArray()
-  {
-    if (agents == null)
-      return new Object[0];
-    return agents.toArray();
-  }
-
-  /**
    * get the total number of students for this assessment
    *
    * @return the number
@@ -493,16 +359,6 @@ public class QuestionScoresBean
   public String getTotalPeople()
   {
     return Validator.check(totalPeople, "N/A");
-  }
-
-  /**
-   * set the total number of people
-   *
-   * @param ptotalPeople the total
-   */
-  public void setTotalPeople(String ptotalPeople)
-  {
-    totalPeople = ptotalPeople;
   }
 
   /**
@@ -515,16 +371,6 @@ public class QuestionScoresBean
   }
 
   /**
-   * set the score
-   *
-   * @param pScore the score
-   */
-  public void setScore(String pScore)
-  {
-    score = pScore;
-  }
-
-  /**
    *
    * @return the discount
    */
@@ -532,17 +378,7 @@ public class QuestionScoresBean
   {
     return Validator.check(discount, "N/A");
   }
- 
-  /**
-   * set the discount
-   *
-   * @param pDiscount the discount
-   */
-  public void setDiscount(String pDiscount)
-  {
-    discount = pDiscount;
-  }
-  
+
   /**
    * get the answer text
    *
@@ -551,16 +387,6 @@ public class QuestionScoresBean
   public String getAnswer()
   {
     return Validator.check(answer, "N/A");
-  }
-
-  /**
-   * set the answer text
-   *
-   * @param pAnswertext the answer text
-   */
-  public void setAnswer(String pAnswertext)
-  {
-    answer = pAnswertext;
   }
 
   /**
@@ -574,17 +400,6 @@ public class QuestionScoresBean
   }
 
   /**
-   * set comments for question score
-   *
-   * @param pQuestionScoreComments the comments
-   */
-  public void setQuestionScoreComments(String pQuestionScoreComments)
-  {
-    log.debug("setting question score comments to "+pQuestionScoreComments);
-    questionScoreComments = pQuestionScoreComments;
-  }
-
-  /**
    * get late handling
    *
    * @return late handlign
@@ -595,16 +410,6 @@ public class QuestionScoresBean
   }
 
   /**
-   * set late handling
-   *
-   * @param plateHandling the late handling
-   */
-  public void setLateHandling(String plateHandling)
-  {
-    lateHandling = plateHandling;
-  }
-
-  /**
    * get the due date
    *
    * @return the due date as a String
@@ -612,16 +417,6 @@ public class QuestionScoresBean
   public String getDueDate()
   {
     return Validator.check(dueDate, "N/A");
-  }
-
-  /**
-   * set due date string
-   *
-   * @param dateString the date string
-   */
-  public void setDueDate(String dateString)
-  {
-    dueDate = dateString;
   }
 
   /**
@@ -639,39 +434,12 @@ public class QuestionScoresBean
   }
 
   /**
-   * set sort type, trigger property sorts
-   * @param psortType the type
-   */
-  public void setSortType(String psortType)
-  {
-    sortType = psortType;
-  }
-
-  /**
    * is scores table sorted in ascending order
    * @return true if it is
    */
   public boolean isSortAscending()
   {
     return sortAscending;
-  }
-
-  /**
-  *
-  * @param sortAscending is scores table sorted in ascending order
-  */
- public void setSortAscending(boolean sortAscending)
- {
-   this.sortAscending = sortAscending;
- }  
-  
-  /**
-   * Is this an all submissions or, just the largest
-   * @return true if is is, else false
-   */
-  public String getAllSubmissions()
-  {
-    return allSubmissions;
   }
 
   /**
@@ -699,70 +467,12 @@ public class QuestionScoresBean
   /**
    * DOCUMENTATION PENDING
    *
-   * @param proleSelection DOCUMENTATION PENDING
-   */
-  public void setRoleSelection(String proleSelection)
-  {
-    roleSelection = proleSelection;
-  }
-
-  /**
-   * DOCUMENTATION PENDING
-   *
    * @return DOCUMENTATION PENDING
    */
   public String getTypeId()
   {
     return Validator.check(typeId, "1");
   }
-
-  /**
-   * DOCUMENTATION PENDING
-   *
-   * @param ptypeId DOCUMENTATION PENDING
-   */
-  public void setTypeId(String ptypeId)
-  {
-    typeId = ptypeId;
-  }
-
-  /**
-   * reset the fields
-   */
-  public void resetFields()
-  {
-    //agents = new ArrayList();
-    //setAgents(agents);
-  }
-
-  /**
-   * encapsulates audio recording info
-   * @return recording data
-   */
-  public RecordingData getRecordingData()
-  {
-    return this.recordingData;
-  }
-
-  /**
-   * encapsulates audio recording info
-   * @param rd
-   */
-  public void setRecordingData(RecordingData rd)
-  {
-    this.recordingData = rd;
-  }
-
-  public HashMap getScoresByItem()
-  {
-    return scoresByItem;
-  }
-
-  public void setScoresByItem(HashMap newScores)
-  {
-    scoresByItem = newScores;
-  }
-
 
   public String getSelectedSectionFilterValue() {
 	  // lazy initialization
@@ -785,76 +495,7 @@ public class QuestionScoresBean
       }
   }
 
-  // itemScoresMap = (publishedItemId, HashMap)
-  //               = (Long publishedItemId, (Long publishedItemId, Array itemGradings))
-  private HashMap itemScoresMap; 
-  public void setItemScoresMap(HashMap itemScoresMap){
-    this.itemScoresMap = itemScoresMap;
-  }
-  public HashMap getItemScoresMap(){
-    return itemScoresMap;
-  }
-
-  private PublishedAssessmentIfc publishedAssessment;
-  public void setPublishedAssessment(PublishedAssessmentIfc publishedAssessment){
-    this.publishedAssessment = publishedAssessment; 
-  }
-  public PublishedAssessmentIfc getPublishedAssessment(){
-    return publishedAssessment;
-  }
- 
-public String getSelectedSARationaleView() {
-	return selectedSARationaleView;
-}
-
-public void setSelectedSARationaleView(String selectedSARationaleView) {
-	this.selectedSARationaleView = selectedSARationaleView;
-}
-
-public int getFirstRow() {
-    return firstScoreRow;
-}
-public void setFirstRow(int firstRow) {
-    firstScoreRow = firstRow;
-}
-
-public int getMaxDisplayedRows() {
-    return maxDisplayedScoreRows;
-}
-public void setMaxDisplayedRows(int maxDisplayedRows) {
-    maxDisplayedScoreRows = maxDisplayedRows;
-}
-
-public int getAudioMaxDisplayedScoreRows() {
-    return audioMaxDisplayedScoreRows;
-}
-public void setAudioMaxDisplayedScoreRows(int audioMaxDisplayedRows) {
-	audioMaxDisplayedScoreRows = audioMaxDisplayedRows;
-}
-
-public int getOtherMaxDisplayedScoreRows() {
-    return othersMaxDisplayedScoreRows;
-}
-public void setOtherMaxDisplayedScoreRows(int otherMaxDisplayedRows) {
-	othersMaxDisplayedScoreRows = otherMaxDisplayedRows;
-}
-
-public boolean getHasAudioMaxDisplayedScoreRowsChanged() {
-    return hasAudioMaxDisplayedScoreRowsChanged;
-}
-public void setHasAudioMaxDisplayedScoreRowsChanged(boolean hasAudioMaxDisplayedRowsChanged) {
-	hasAudioMaxDisplayedScoreRowsChanged = hasAudioMaxDisplayedRowsChanged;
-}
-
-public int getDataRows() {
-    return scoreDataRows;
-}
-
-public void setAllAgents(ArrayList allAgents) {
-	  this.allAgents = allAgents;
-}
-
-public ArrayList getAllAgents()
+public List getAllAgents()
 {
 	  String publishedId = ContextUtil.lookupParam("publishedId");
 	  QuestionScoreListener questionScoreListener = new QuestionScoreListener();
@@ -865,9 +506,6 @@ public ArrayList getAllAgents()
 	  return allAgents;
 }
 
-public String getSearchString() {
-    return searchString;
-}
 public void setSearchString(String searchString) {
     if (StringUtils.trimToNull(searchString) == null) {
         searchString = defaultSearchString;
@@ -893,8 +531,8 @@ public void clear(ActionEvent event) {
       return !StringUtils.equals(searchString, defaultSearchString);
 	}
 	
-	public ArrayList findMatchingAgents(final String pattern) {
-		ArrayList filteredList = new ArrayList();
+	public List findMatchingAgents(final String pattern) {
+		List filteredList = new ArrayList();
 		// name1 example: John Doe
 		StringBuilder name1;
 		// name2 example: Doe, John
@@ -919,31 +557,11 @@ public void clear(ActionEvent event) {
 		}
 		return filteredList;
 	}
-	
-	public boolean getHaveModelShortAnswer()
-	{
-		return haveModelShortAnswer;
-	}
-
-	public void setHaveModelShortAnswer(boolean haveModelShortAnswer)
-	{
-		this.haveModelShortAnswer = haveModelShortAnswer;
-	}
 
 	public boolean isReleasedToGroups() {
 		return this.getPublishedAssessment().getAssessmentAccessControl().getReleaseTo().equals(AssessmentAccessControl.RELEASE_TO_SELECTED_GROUPS);
 	}
-	
-	public Map getUserIdMap()
-	{
-		return userIdMap;
-	}
 
-	public void setUserIdMap(Map userIdMap)
-	{
-		this.userIdMap = userIdMap;
-	}	
-	
 	public void setAttachment(Long itemGradingId){
 		List itemGradingAttachmentList = new ArrayList();
 		AgentResults agentResults = (AgentResults) agentResultsByItemGradingId.get(itemGradingId);
@@ -958,23 +576,13 @@ public void clear(ActionEvent event) {
         	agentResults.setItemGradingAttachmentList(itemGradingAttachmentList);
 		}
 	}
-	
-	public HashMap getAgentResultsByItemGradingId()
-	{
-		return agentResultsByItemGradingId;
-	}
 
-	public void setAgentResultsByItemGradingId(HashMap agentResultsByItemGradingId)
-	{
-		this.agentResultsByItemGradingId = agentResultsByItemGradingId;
-	}
+    public String getShowTagsInEvaluationStyle() {
+        if (ServerConfigurationService.getBoolean("samigo.evaluation.usetags", Boolean.FALSE)){
+            return "";
+        }else{
+            return "display:none;";
+        }
+    }
 
-	public boolean getIsAnyItemGradingAttachmentListModified() {
-		return isAnyItemGradingAttachmentListModified;
-	}
-
-	public void setIsAnyItemGradingAttachmentListModified(boolean isAnyItemGradingAttachmentListModified)
-	{
-		this.isAnyItemGradingAttachmentListModified = isAnyItemGradingAttachmentListModified;
-	}
 }

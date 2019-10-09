@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.site.api.Site;
+import org.sakaiproject.site.api.SiteService.SiteTitleValidationStatus;
 
 /**
  * <p>
@@ -570,5 +571,33 @@ public class SiteService
 		if (service == null) return null;
 
 		return service.getUserSpecificSiteTitle( site, userID );
+	}
+
+	/**
+	 * Similar to getUserSpecificSiteTitle(Site site, String userId), but consumes the specified siteProviders (for performance savings)
+	 *
+	 * @see getUserspecificSiteTitle(Site site, String userId)
+	 * @param siteProviders the site providers corresponding to the specified site; if null, they will be looked up
+	 */
+	public static String getUserSpecificSiteTitle(Site site, String userId, List<String> siteProviders)
+	{
+		org.sakaiproject.site.api.SiteService service = getInstance();
+		if (service == null) return null;
+
+		return service.getUserSpecificSiteTitle(site, userId, siteProviders);
+	}
+
+	/**
+	 * Given the original and stripped site titles, determine that validation status of the stripped string.
+	 * @param orig the original, unaltered text as input by the user
+	 * @param stripped the HTML stripped text
+	 * @return {@link SiteTitleValidationStatus}
+	 */
+	public static SiteTitleValidationStatus validateSiteTitle(String orig, String stripped)
+	{
+		org.sakaiproject.site.api.SiteService service = getInstance();
+		if (service == null) { return null; }
+
+		return service.validateSiteTitle(orig, stripped);
 	}
 }

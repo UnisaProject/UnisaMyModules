@@ -50,9 +50,8 @@ var reportSuccess = function(msg){
  * There has been an error
  */
 var reportError = function(msg){
-    $('#messageError').html(msg).fadeTo("slow", 1).animate({
-        opacity: 1.0
-    }, 5000).fadeTo(3000, 0);
+    $('#messageError').html(msg).show();
+    window.scrollTo(0, 0);
 };
 
 /*
@@ -420,7 +419,7 @@ citations_new_resource.init = function() {
 	
 	
 	
-	$('.saveciteClient a').on('click', function(eventObject) {
+	$('.saveciteClient input').on('click', function(eventObject) {
 		$('#saveciteClientId').val($(eventObject.target).attr('id'));
 		var successObj = {
 			citationCollectionId: $('#citationCollectionId').val(),
@@ -521,6 +520,12 @@ citations_new_resource.init = function() {
 		};
 		citations_new_resource.processClick(successObj);
 		return false;
+	});
+	$('#newCitationListForm .citationFields').on('keypress', function(e) {
+		if(e.which == 13) {
+			e.preventDefault();
+			return false;
+		}
 	});
 	$('#ImportCitation').on('click', function(eventObject) {
 		var successObj = {

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.sitestats.api.EventStat;
@@ -258,7 +259,7 @@ public class ReportXMLReader extends AbstractObjectReader {
         //handler.element("chart", "sitestats://" + M_ers.getToolIcon(toolId));
 	}
 	
-	private void generateReportTable(List<Stat> data, ReportParams params) throws SAXException {
+	private void generateReportTable(List<? extends Stat> data, ReportParams params) throws SAXException {
         if (data == null || params == null) {
             throw new NullPointerException("Parameter 'data', 'params' must not be null");
         }
@@ -281,7 +282,7 @@ public class ReportXMLReader extends AbstractObjectReader {
         boolean showTotalUnique = M_rm.isReportColumnAvailable(params, StatsManager.T_UNIQUEVISITS);
         boolean showDuration = M_rm.isReportColumnAvailable(params, StatsManager.T_DURATION);
 
-        Iterator<Stat> i = data.iterator();
+        Iterator<? extends Stat> i = data.iterator();
         while(i.hasNext()){
         	Stat cs = i.next();
             handler.startElement("datarow");
@@ -307,7 +308,7 @@ public class ReportXMLReader extends AbstractObjectReader {
 	    			if(("-").equals(id)) {
 	    				userId = "-";
 	    				userName = msgs.getString("user_anonymous");
-	    			}else if(("?").equals(id)) {
+	    			}else if(EventTrackingService.UNKNOWN_USER.equals(id)) {
 	    				userId = "-";
 	    				userName = msgs.getString("user_anonymous_access");
 	    			}else{

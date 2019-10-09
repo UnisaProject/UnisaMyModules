@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) 2003-2017 The Apereo Foundation
+ *
+ * Licensed under the Educational Community License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *             http://opensource.org/licenses/ecl2
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /*
 * Licensed to The Apereo Foundation under one or more contributor license
 * agreements. See the NOTICE file distributed with this work for
@@ -66,6 +81,21 @@ public interface ExternalCalendaringService {
 	 * @return the VEvent for the given event or null if there was an error
 	 */
 	public VEvent createEvent(CalendarEvent event, Set<User> attendees);
+
+	/**
+	 * Creates an iCal VEvent for a Sakai CalendarEvent with the given attendees.
+	 * This must then be turned into a Calendar before it can be turned into an ICS file.
+	 * 
+	 * <br>If the CalendarEvent has the field 'vevent_uuid', that will be used as the UUID of the VEvent preferentially.
+	 * <br>If the CalendarEvent has the field 'vevent_sequence', that will be used as the sequence of the VEvent preferentially.
+	 * <br>If the CalendarEvent has the field 'vevent_url', that will be added to the URL property of the VEvent.
+	 * 
+	 * @param event Sakai CalendarEvent
+	 * @param attendees set of Users that have been invited to the event
+	 * @return the VEvent for the given event or null if there was an error
+	 */
+	public VEvent createEvent(CalendarEvent event, Set<User> attendees, boolean timeIsLocal);
+
 	
 	/**
 	 * Adds a list of attendees to an existing VEvent.
@@ -98,6 +128,7 @@ public interface ExternalCalendaringService {
 	
 	/**
 	 * Creates an iCal calendar from a list of VEvents.
+	 * timeIsLocal is set to true so it returns a local timezone element
 	 * 
 	 * @param events iCal VEvents
 	 * @return the Calendar for the given events or null if there was an error
@@ -111,7 +142,7 @@ public interface ExternalCalendaringService {
 	 * @param method the ITIP method for the calendar, e.g. "REQUEST"
 	 * @return the Calendar for the given events or null if there was an error
 	 */
-	public Calendar createCalendar(List<VEvent> events, String method);
+	public Calendar createCalendar(List<VEvent> events, String method, boolean timeIsLocal);
 	
 	/**
 	 * Write an iCal calendar out to a file in the filesystem and return the path.

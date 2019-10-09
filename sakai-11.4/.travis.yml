@@ -6,12 +6,18 @@ before_install:
   - echo "MAVEN_OPTS='-Xms168m -Xmx1536m -XX:NewSize=64m -Djava.awt.headless=true -Dorg.slf4j.simpleLogger.defaultLogLevel=warn'" > ~/.mavenrc
   # https://github.com/travis-ci/travis-ci/issues/4629
   # This stops lots of warning about the broken nexus.codehaus.org repository
-  - sed -i.bak -e 's|https://nexus.codehaus.org/snapshots/|https://oss.sonatype.org/content/repositories/codehaus-snapshots/|g' ~/.m2/settings.xml
-
+  - rm ~/.m2/settings.xml
+  
 language: java
 jdk:
-  - oraclejdk8
+  - openjdk8
 sudo: false
+
 cache:
  directories:
  - $HOME/.m2
+
+# We don't want to cache our own artifacts, just the externally downloaded ones.
+# This makes the cache smaller and helps highlight problems with a clean build
+before_cache:
+ - find $HOME/.m2/repository/org/sakaiproject -name \*-SNAPSHOT.\*  -delete

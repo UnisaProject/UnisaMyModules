@@ -4,6 +4,10 @@ Contributions to Sakai from all comers are welcome and encouraged.
 
 Please use these guidelines and the information in [README.md](README.md) to assure that your contributions are compatible with our (evolving) workflow and practices.
 
+## Code of conduct
+
+The Sakai project [participates in the Apereo Welcoming Policy](CODE_OF_CONDUCT.md).
+
 ## Contributor License Agreement
 Before a code submission will be accepted, you will need to submit a Contributor License Agreement (CLA). This is a one-off process that should only take a few moments to complete. See: https://www.apereo.org/licensing/agreements
 
@@ -11,7 +15,10 @@ To check the status of a CLA, please visit: http://licensing.apereo.org/
 
 ## Jira
 
-Bugs and features against Sakai are tracked in our [Jira instance](https://jira.sakaiproject.org/) and contributions must reflect a Jira reference number in the messages and git branch names (e.g., SAK-29469). To file or comment on a bug or feature, you will need a Jira account.
+Bugs and features against Sakai are tracked in our [Jira instance](https://jira.sakaiproject.org/) and contributions must reflect a Jira reference number in the messages and git branch names (e.g., SAK-29469), but please don't put these references in the code as over time files become full of them and the same information get be retrieved from git. To file or comment on a bug or feature, you will need a Jira account.
+
+## Overview of Sakai Development
+Please take a look at our [Confluence pages](https://confluence.sakaiproject.org/display/BOOT/Programmer%27s+Cafe) for pointers on getting started with Sakai development.
 
 ## Pull Requests
 

@@ -34,8 +34,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 import org.tsugi.basiclti.BasicLTIConstants;
 import org.tsugi.json.IMSJSONRequest;
 import org.tsugi.lti2.LTI2Config;
@@ -56,7 +56,6 @@ import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.lti.api.LTIService;
 import org.sakaiproject.util.ResourceLoader;
-import org.sakaiproject.util.foorm.SakaiFoorm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -70,13 +69,11 @@ import com.fasterxml.jackson.databind.ObjectWriter;
  */
 
 @SuppressWarnings("deprecation")
+@Slf4j
 public class LTI2Service extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	private static Logger M_log = LoggerFactory.getLogger(LTI2Service.class);
 	private static ResourceLoader rb = new ResourceLoader("blis");
-
-	protected static SakaiFoorm foorm = new SakaiFoorm();
 
 	protected static LTIService ltiService = null;
 
@@ -129,8 +126,8 @@ public class LTI2Service extends HttpServlet {
 		} catch (Exception e) {
 			String ipAddress = request.getRemoteAddr();
 			String uri = request.getRequestURI();
-			M_log.warn("General LTI2 Failure URI="+uri+" IP=" + ipAddress);
-			e.printStackTrace();
+			log.warn("General LTI2 Failure URI={} IP={}", uri, ipAddress);
+			log.error(e.getMessage(), e);
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); 
 			doErrorJSON(request, response, null, "General failure", e);
 		}
@@ -141,7 +138,7 @@ public class LTI2Service extends HttpServlet {
 		throws ServletException, IOException 
 	{
 		String ipAddress = request.getRemoteAddr();
-		M_log.debug("LTI Service request from IP=" + ipAddress);
+		log.debug("LTI Service request from IP={}", ipAddress);
 
 		String rpi = request.getPathInfo();
 		String uri = request.getRequestURI();
@@ -171,11 +168,11 @@ public class LTI2Service extends HttpServlet {
 
 		IMSJSONRequest jsonRequest = new IMSJSONRequest(request);
 		if ( jsonRequest.valid ) {
-			System.out.println(jsonRequest.getPostBody());
+			log.debug(jsonRequest.getPostBody());
 		}
 
 		response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED); 
-		M_log.warn("Unknown request="+uri);
+		log.warn("Unknown request={}", uri);
 		doErrorJSON(request, response, null, "Unknown request="+uri, null);
 	}
 
@@ -196,14 +193,13 @@ public class LTI2Service extends HttpServlet {
 			ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
 			// ***IMPORTANT!!!*** for Jackson 2.x use the line below instead of the one above: 
 			// ObjectWriter writer = mapper.writer().withDefaultPrettyPrinter();
-			// System.out.println(mapper.writeValueAsString(consumer));
 			response.setContentType(APPLICATION_JSON);
 			PrintWriter out = response.getWriter();
 			out.println(writer.writeValueAsString(consumer));
-			// System.out.println(writer.writeValueAsString(consumer));
+			log.debug(writer.writeValueAsString(consumer));
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 	}
 
@@ -212,10 +208,10 @@ public class LTI2Service extends HttpServlet {
 		// Load the configuration data
 		LTI2Config cnf = new SakaiLTI2Config();
 		if ( cnf.getGuid() == null ) {
-			M_log.error("*********************************************");
-			M_log.error("* LTI2 NOT CONFIGURED - Using Sample Data   *");
-			M_log.error("* Do not use this in production.  Test only *");
-			M_log.error("*********************************************");
+			log.error("*********************************************");
+			log.error("* LTI2 NOT CONFIGURED - Using Sample Data   *");
+			log.error("* Do not use this in production.  Test only *");
+			log.error("*********************************************");
 			// cnf = new org.tsugi.lti2.LTI2ConfigSample();
 			cnf = new SakaiLTI2Base();
 		}
@@ -231,7 +227,7 @@ public class LTI2Service extends HttpServlet {
 		// Not yet supported in Sakai
 		// consumer.addCapability(SakaiBLTIUtil.CANVAS_PLACEMENTS_ACCOUNTNAVIGATION);
 
-		if ( foorm.getLong(deploy.get(LTIService.LTI_ALLOWCONTENTITEM)) > 0 ) {
+		if ( SakaiBLTIUtil.getLong(deploy.get(LTIService.LTI_ALLOWCONTENTITEM)) > 0 ) {
 			consumer.addCapability(LTI2Messages.CONTENT_ITEM_SELECTION_REQUEST);
 			// Not yet supported in Sakai
 			// consumer.addCapability(SakaiBLTIUtil.SAKAI_CONTENTITEM_SELECTANY);
@@ -242,11 +238,11 @@ public class LTI2Service extends HttpServlet {
 			consumer.addCapability(SakaiBLTIUtil.CANVAS_PLACEMENTS_CONTENTIMPORT);
 		}
 
-		if (foorm.getLong(deploy.get(LTIService.LTI_SENDEMAILADDR)) > 0 ) {
+		if (SakaiBLTIUtil.getLong(deploy.get(LTIService.LTI_SENDEMAILADDR)) > 0 ) {
 			consumer.allowEmail();
 		}
 
-		if (foorm.getLong(deploy.get(LTIService.LTI_SENDNAME)) > 0 ) {
+		if (SakaiBLTIUtil.getLong(deploy.get(LTIService.LTI_SENDNAME)) > 0 ) {
 			consumer.allowName();
 		}
 
@@ -254,7 +250,7 @@ public class LTI2Service extends HttpServlet {
 		services.add(StandardServices.LTI2Registration(serverUrl + LTI2_PATH + SVC_tc_registration + "/" + profile_id));
 
 		String allowOutcomes = ServerConfigurationService.getString(SakaiBLTIUtil.BASICLTI_OUTCOMES_ENABLED, SakaiBLTIUtil.BASICLTI_OUTCOMES_ENABLED_DEFAULT);
-		if ("true".equals(allowOutcomes) && foorm.getLong(deploy.get(LTIService.LTI_ALLOWOUTCOMES)) > 0 ) {
+		if ("true".equals(allowOutcomes) && SakaiBLTIUtil.getLong(deploy.get(LTIService.LTI_ALLOWOUTCOMES)) > 0 ) {
 			consumer.allowResult();
 
 			services.add(LTI2ResultItem);
@@ -263,12 +259,12 @@ public class LTI2Service extends HttpServlet {
 		}
 
 		String allowRoster = ServerConfigurationService.getString(SakaiBLTIUtil.BASICLTI_ROSTER_ENABLED, SakaiBLTIUtil.BASICLTI_ROSTER_ENABLED_DEFAULT);
-		if ("true".equals(allowRoster) && foorm.getLong(deploy.get(LTIService.LTI_ALLOWROSTER)) > 0 ) {
+		if ("true".equals(allowRoster) && SakaiBLTIUtil.getLong(deploy.get(LTIService.LTI_ALLOWROSTER)) > 0 ) {
 			services.add(SakaiLTI2Services.BasicRoster(serverUrl+LTI1_PATH));
 		}
 
 		String allowSettings = ServerConfigurationService.getString(SakaiBLTIUtil.BASICLTI_SETTINGS_ENABLED, SakaiBLTIUtil.BASICLTI_SETTINGS_ENABLED_DEFAULT);
-		if ("true".equals(allowSettings) && foorm.getLong(deploy.get(LTIService.LTI_ALLOWSETTINGS)) > 0 ) {
+		if ("true".equals(allowSettings) && SakaiBLTIUtil.getLong(deploy.get(LTIService.LTI_ALLOWSETTINGS)) > 0 ) {
 			consumer.allowSettings();
 
 			services.add(SakaiLTI2Services.BasicSettings(serverUrl+LTI1_PATH));
@@ -291,17 +287,16 @@ public class LTI2Service extends HttpServlet {
 			doErrorJSON(request, response, jsonRequest, "Request is not in a valid format:"+jsonRequest.errorMessage, null);
 			return;
 		}
-		// System.out.println(jsonRequest.getPostBody());
 
 		Map<String,Object> deploy = ltiService.getDeployForConsumerKeyDao(profile_id);
 		if ( deploy == null ) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND); 
 			return;
 		}
-		Long deployKey = foorm.getLong(deploy.get(LTIService.LTI_ID));
+		Long deployKey = SakaiBLTIUtil.getLong(deploy.get(LTIService.LTI_ID));
 
 		// See if we can even register...
-		Long reg_state = foorm.getLong(deploy.get(LTIService.LTI_REG_STATE));
+		Long reg_state = SakaiBLTIUtil.getLong(deploy.get(LTIService.LTI_REG_STATE));
 		String key = null;
 		String secret = null;
 		String new_secret = null;
@@ -338,9 +333,9 @@ public class LTI2Service extends HttpServlet {
 		ToolProxy toolProxy = null;
 		try {
 			toolProxy = new ToolProxy(jsonRequest.getPostBody());
-			// System.out.println("OBJ:"+toolProxy);
+			log.debug("OBJ: {}", toolProxy);
 		} catch (Throwable t ) {
-			t.printStackTrace();
+			log.error(t.getMessage(), t);
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			doErrorJSON(request, response, jsonRequest, "JSON parse failed", null);
 			return;
@@ -426,12 +421,12 @@ public class LTI2Service extends HttpServlet {
 		if ( default_custom != null ) deployUpdate.put(LTIService.LTI_SETTINGS, default_custom.toString());
 		deployUpdate.put(LTIService.LTI_REG_PROFILE, toolProxy.toString());
 
-		M_log.debug("deployUpdate="+deployUpdate);
+		log.debug("deployUpdate={}", deployUpdate);
 
 		Object obj = ltiService.updateDeployDao(deployKey, deployUpdate);
 		boolean success = ( obj instanceof Boolean ) && ( (Boolean) obj == Boolean.TRUE);
 		if ( ! success ) {
-			M_log.warn("updateDeployDao fail deployKey="+deployKey+"\nretval="+obj+"\ndata="+deployUpdate);
+			log.warn("updateDeployDao fail deployKey={}\nretval={}\ndata={}", deployKey, obj, deployUpdate);
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			doErrorJSON(request, response, jsonRequest, "Failed update of deployment="+deployKey, null);
 			return;
@@ -444,12 +439,13 @@ public class LTI2Service extends HttpServlet {
 		String serverUrl = SakaiBLTIUtil.getOurServerUrl();
 		jsonResponse.put(LTI2Constants.JSONLD_ID, resourceUrl + SVC_tc_registration + "/" +profile_id);
 		jsonResponse.put(LTI2Constants.TOOL_PROXY_GUID, profile_id);
-		jsonResponse.put(LTI2Constants.CUSTOM_URL, resourceUrl + SVC_Settings + "/" + LTI2Util.SCOPE_ToolProxy + "/" +profile_id);
+		// TODO: Check if this is needed in LTI 2.1
+		// jsonResponse.put(LTI2Constants.CUSTOM_URL, resourceUrl + SVC_Settings + "/" + LTI2Util.SCOPE_ToolProxy + "/" +profile_id);
 		if ( tc_half_shared_secret != null ) jsonResponse.put(LTI2Constants.TC_HALF_SHARED_SECRET, tc_half_shared_secret);
 		response.setContentType(StandardServices.TOOLPROXY_ID_FORMAT);
 		response.setStatus(HttpServletResponse.SC_CREATED);
 		String jsonText = JSONValue.toJSONString(jsonResponse);
-		M_log.debug(jsonText);
+		log.debug(jsonText);
 		PrintWriter out = response.getWriter();
 		out.println(jsonText);
 	}
@@ -486,14 +482,13 @@ public class LTI2Service extends HttpServlet {
 			response.setContentType(StandardServices.RESULT_FORMAT);
 			response.setStatus(HttpServletResponse.SC_OK);
 			String jsonText = JSONValue.toJSONString(jsonResponse);
-			M_log.debug(jsonText);
+			log.debug(jsonText);
 			PrintWriter out = response.getWriter();
 			out.println(jsonText);
 		} else if ( "PUT".equals(request.getMethod()) ) { 
 			retval = "Error parsing input data";
 			try {
 				jsonRequest = new IMSJSONRequest(request);
-				// System.out.println(jsonRequest.getPostBody());
 				JSONObject requestData = (JSONObject) JSONValue.parse(jsonRequest.getPostBody());
 				String comment = (String) requestData.get(LTI2Constants.COMMENT);
 				JSONObject resultScore = (JSONObject) requestData.get(LTI2Constants.RESULTSCORE);
@@ -549,7 +544,7 @@ public class LTI2Service extends HttpServlet {
 		String bubbleStr = request.getParameter("bubble");
 		String acceptHdr = request.getHeader("Accept");
 		String contentHdr = request.getContentType();
-		M_log.debug("accept="+acceptHdr+" bubble="+bubbleStr);
+		log.debug("accept={} bubble={}", acceptHdr, bubbleStr);
 
 		if ( bubbleStr != null && bubbleStr.equals("all") &&
 			acceptHdr.indexOf(StandardServices.TOOLSETTINGS_FORMAT) < 0 ) {
@@ -567,7 +562,7 @@ public class LTI2Service extends HttpServlet {
 		boolean acceptComplex = acceptHdr == null || acceptHdr.indexOf(StandardServices.TOOLSETTINGS_FORMAT) >= 0 ;
 		boolean inputSimple = contentHdr == null || contentHdr.indexOf(StandardServices.TOOLSETTINGS_SIMPLE_FORMAT) >= 0 ;
 		boolean inputComplex = contentHdr != null && contentHdr.indexOf(StandardServices.TOOLSETTINGS_FORMAT) >= 0 ;
-		M_log.debug("as="+acceptSimple+" ac="+acceptComplex+" is="+inputSimple+" ic="+inputComplex);
+		log.debug("as={} ac={} is={} ic={}", acceptSimple, acceptComplex, inputSimple, inputComplex);
 
 		// Check the JSON on PUT and check the oauth_body_hash
 		IMSJSONRequest jsonRequest = null;
@@ -575,7 +570,7 @@ public class LTI2Service extends HttpServlet {
 		if ( "PUT".equals(request.getMethod()) ) {
 			try {
 				jsonRequest = new IMSJSONRequest(request);
-				M_log.debug("Settings PUT "+jsonRequest.getPostBody());
+				log.debug("Settings PUT {}", jsonRequest.getPostBody());
 				requestData = (JSONObject) JSONValue.parse(jsonRequest.getPostBody());
 			} catch (Exception e) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -599,7 +594,7 @@ public class LTI2Service extends HttpServlet {
 
 		if ( LTI2Util.SCOPE_LtiLink.equals(scope) || LTI2Util.SCOPE_ToolProxyBinding.equals(scope) ) {
 			placement_id = parts[5];
-			M_log.debug("placement_id="+placement_id);
+			log.debug("placement_id={}", placement_id);
 			String contentStr = placement_id.substring(8);
 			contentKey = SakaiBLTIUtil.getLongKey(contentStr);
 			if ( contentKey  >= 0 ) {
@@ -630,9 +625,9 @@ public class LTI2Service extends HttpServlet {
 			ltiService.filterContent(content, tool);
 
 			// Check settings to see if we are allowed to do this 
-			if (foorm.getLong(content.get(LTIService.LTI_ALLOWOUTCOMES)) > 0 ||
-				foorm.getLong(tool.get(LTIService.LTI_ALLOWOUTCOMES)) > 0 ) {
-				// Good news 
+			if (SakaiBLTIUtil.getLong(content.get(LTIService.LTI_ALLOWOUTCOMES)) > 0 ||
+				SakaiBLTIUtil.getLong(tool.get(LTIService.LTI_ALLOWOUTCOMES)) > 0 ) {
+				// Good news
 			} else {
 				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 				doErrorJSON(request,response, jsonRequest, "Item does not allow tool settings", null);
@@ -678,7 +673,7 @@ public class LTI2Service extends HttpServlet {
 
 		// Check settings to see if we are allowed to do this 
 		if ( deploy != null ) {
-			if (foorm.getLong(deploy.get(LTIService.LTI_ALLOWOUTCOMES)) > 0 ) {
+			if (SakaiBLTIUtil.getLong(deploy.get(LTIService.LTI_ALLOWOUTCOMES)) > 0 ) {
 				// Good news 
 			} else {
 				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -779,7 +774,7 @@ public class LTI2Service extends HttpServlet {
 			JSONObject jsonResponse = (JSONObject) obj;
 			response.setStatus(HttpServletResponse.SC_OK); 
 			PrintWriter out = response.getWriter();
-			M_log.debug("jsonResponse="+jsonResponse);
+			log.debug("jsonResponse={}", jsonResponse);
 			out.println(jsonResponse.toString());
 			return;
 		} else if ( "PUT".equals(request.getMethod()) ) {
@@ -815,7 +810,7 @@ public class LTI2Service extends HttpServlet {
 					proxyBindingNew.setProperty(LTIService.LTI_TOOL_ID, toolKey+"");
 					proxyBindingNew.setProperty(LTIService.LTI_SETTINGS, settings);
 					retval = ltiService.insertProxyBindingDao(proxyBindingNew);
-					M_log.info("inserted ProxyBinding setting="+proxyBindingNew);
+					log.info("inserted ProxyBinding setting={}", proxyBindingNew);
 				}
 			} else if ( LTI2Util.SCOPE_ToolProxy.equals(scope) ) {
 				deploy.put(LTIService.LTI_SETTINGS, settings);
@@ -840,13 +835,13 @@ public class LTI2Service extends HttpServlet {
 		throws java.io.IOException 
 		{
 			if (e != null) {
-				M_log.error(e.getLocalizedMessage(), e);
+				log.error(e.getLocalizedMessage(), e);
 			}
-			M_log.info(message);
-			if ( json != null ) M_log.info(json.postBody);
+			log.info(message);
+			if ( json != null ) log.info(json.postBody);
 
 			String jsonText = IMSJSONRequest.doErrorJSON(request, response, json, message, e);
-			M_log.info(jsonText);
+			log.info(jsonText);
 		}
 
 	public void destroy() {

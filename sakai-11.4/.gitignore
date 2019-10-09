@@ -2,7 +2,6 @@
 .project
 .classpath
 .settings
-.svn
 *.iml
 *.swp
 *.orig
@@ -16,4 +15,6 @@ sakai-demo.zip
 .DS_Store
 *nb-configuration.xml
 velocity.log
-/RemoteSystemsTempFiles
+node_modules
+bower_components
+rebel.xml

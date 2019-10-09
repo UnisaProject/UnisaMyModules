@@ -28,25 +28,26 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.data.dao.grading.ItemGradingData;
 import org.sakaiproject.tool.assessment.data.dao.shared.TypeD;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AnswerIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemAttachmentIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemMetaDataIfc;
+import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTagIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTextIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionDataIfc;
 import org.sakaiproject.tool.assessment.data.ifc.shared.TypeIfc;
 
+@Slf4j
 public class PublishedItemData
     implements java.io.Serializable, ItemDataIfc, Comparable<ItemDataIfc> {
-  static Logger errorLogger = LoggerFactory.getLogger("errorLogger");
   static ResourceBundle rb = ResourceBundle.getBundle("org.sakaiproject.tool.assessment.bundle.Messages");
 
   private static final long serialVersionUID = 7526471155622776147L;
@@ -75,9 +76,12 @@ public class PublishedItemData
   private Set itemMetaDataSet;
   private Set itemFeedbackSet;
   private ItemGradingData lastItemGradingDataByAgent;
-  private Set itemAttachmentSet;
+  private Set<ItemAttachmentIfc> itemAttachmentSet;
+  private Set<ItemTagIfc> itemTagSet;
   private Boolean partialCreditFlag;
   private Double minScore;
+  private String itemHash;
+  private String hash;
 
   private String themeText;
   private String leadInText;
@@ -88,6 +92,8 @@ public class PublishedItemData
   
   private Integer answerOptionsRichCount;
   private Integer answerOptionsSimpleOrRich;
+
+  private String tagListToJsonString;
   
   public PublishedItemData() {}
 
@@ -98,7 +104,7 @@ public class PublishedItemData
                   Boolean hasRationale, Integer status, String createdBy,
                   Date createdDate, String lastModifiedBy,
                   Date lastModifiedDate,
-                  Set itemTextSet, Set itemMetaDataSet, Set itemFeedbackSet, Boolean partialCreditFlag) {
+                  Set itemTextSet, Set itemMetaDataSet, Set itemFeedbackSet, Boolean partialCreditFlag, String hash, String itemHash) {
     this.section = section;
     this.sequence = sequence;
     this.duration = duration;
@@ -121,6 +127,8 @@ public class PublishedItemData
     this.itemFeedbackSet = itemFeedbackSet;
     this.partialCreditFlag=partialCreditFlag;
     this.minScore = minScore;
+    this.hash = hash;
+    this.itemHash = itemHash;
   }
 
   public PublishedItemData(SectionDataIfc section, Integer sequence,
@@ -130,7 +138,7 @@ public class PublishedItemData
                   Date createdDate, String lastModifiedBy,
                   Date lastModifiedDate,
                   Set itemTextSet, Set itemMetaDataSet, Set itemFeedbackSet,
-                  Integer triesAllowed, Boolean partialCreditFlag) {
+                  Integer triesAllowed, Boolean partialCreditFlag, String hash, String itemHash) {
     this.section = section;
     this.sequence = sequence;
     this.duration = duration;
@@ -154,6 +162,8 @@ public class PublishedItemData
     this.triesAllowed = triesAllowed;
     this.partialCreditFlag=partialCreditFlag;
     this.minScore = minScore;
+    this.hash = hash;
+    this.itemHash = itemHash;
   }
 
   public Long getItemId() {
@@ -326,6 +336,22 @@ public class PublishedItemData
     this.itemTextSet = itemTextSet;
   }
 
+  public String getHash() {
+    return this.hash;
+  }
+
+  public void setHash(String hash) {
+    this.hash = hash;
+  }
+
+  public String getItemHash() {
+    return this.itemHash;
+  }
+
+  public void setItemHash(String itemHash) {
+    this.itemHash = itemHash;
+  }
+
   public Set getItemMetaDataSet() {
     return itemMetaDataSet;
   }
@@ -333,6 +359,10 @@ public class PublishedItemData
   public void setItemMetaDataSet(Set itemMetaDataSet) {
     this.itemMetaDataSet = itemMetaDataSet;
   }
+
+  public Set<ItemTagIfc> getItemTagSet() { return itemTagSet; }
+
+  public void setItemTagSet(Set<ItemTagIfc> itemTagSet) { this.itemTagSet = itemTagSet; this.tagListToJsonString = convertTagListToJsonString(itemTagSet);}
 
   public Set getItemFeedbackSet() {
     return itemFeedbackSet;
@@ -454,7 +484,7 @@ public class PublishedItemData
     } 
   }
   catch (Exception e) {
-   e.printStackTrace();
+      log.error(e.getMessage(), e);
   }
 }
 
@@ -585,7 +615,7 @@ public class PublishedItemData
     */
    public String getAnswerKey() {
 		String answerKey = "";
-		ArrayList itemTextArray = getItemTextArraySorted();
+		ArrayList<ItemTextIfc> itemTextArray = getItemTextArraySorted();
 		if (itemTextArray.size() == 0)
 			return answerKey;
 
@@ -607,19 +637,39 @@ public class PublishedItemData
 				}
 			}
 			return answerKey;
+		} else if (typeId.equals(TypeD.MATCHING)) {
+
+			List<String> answerKeys = new ArrayList<>(itemTextArray.size());
+			for (ItemTextIfc question : itemTextArray) {
+				boolean isDistractor = true;
+
+				List<AnswerIfc> answersSorted = question.getAnswerArraySorted();
+				for (AnswerIfc answer : answersSorted) {
+					if (!getPartialCreditFlag() && answer.getIsCorrect()) {
+						answerKeys.add(question.getSequence() + ":" + answer.getLabel());
+						isDistractor = false;
+						break;
+					}
+				}
+
+				if (isDistractor) {
+					answerKeys.add(
+						question.getSequence()
+							+ ":"
+							+ rb.getString("choice_labels").split(":")[answersSorted.size()]);
+				}
+			}
+
+			answerKey = StringUtils.join(answerKeys, ", ");
+			return answerKey;
 		}
-	   
-		List answerArray = ((ItemTextIfc) itemTextArray.get(0))
-				.getAnswerArraySorted();
-		HashMap h = new HashMap();
-		
+
 		for (int i = 0; i < itemTextArray.size(); i++) {
 			ItemTextIfc text = (ItemTextIfc) itemTextArray.get(i);
 			List answers = text.getAnswerArraySorted();
 			for (int j = 0; j < answers.size(); j++) {
 				AnswerIfc a = (AnswerIfc) answers.get(j);
 				if (!this.getPartialCreditFlag() && (Boolean.TRUE).equals(a.getIsCorrect())) {
-					String pair = (String) h.get(a.getLabel());
 					if (!this.getTypeId().equals(TypeD.MATCHING)) {
 						if (this.getTypeId().equals(TypeD.TRUE_FALSE)) {
 							answerKey = a.getText();
@@ -635,13 +685,6 @@ public class PublishedItemData
 							} else {
 								answerKey += "," + a.getLabel();
 							}
-						}
-					} else {
-						if (pair == null) {
-							String s = a.getLabel() + ":" + text.getSequence();
-							h.put(a.getLabel(), s);
-						} else {
-							h.put(a.getLabel(), pair + " " + text.getSequence());
 						}
 					}
 				}
@@ -659,21 +702,6 @@ public class PublishedItemData
 							answerKey += ",&nbsp;" + a.getLabel() + "&nbsp;<span style='color: green'>(" + pc + "%&nbsp;" + correct + ")</span>";
 						}
 					}
-				}
-			}
-			if (this.getTypeId().equals(TypeD.MATCHING)) {
-				for (int k = 0; k < answerArray.size(); k++) {
-					AnswerIfc a = (AnswerIfc) answerArray.get(k);
-					String pair = (String) h.get(a.getLabel());
-					// if answer is not a match to any text, just print answer
-					// label
-					if (pair == null)
-						pair = a.getLabel() + ": ";
-
-					if (k != 0)
-						answerKey = answerKey + ",  " + pair;
-					else
-						answerKey = pair;
 				}
 			}
 		}
@@ -737,16 +765,61 @@ public class PublishedItemData
     this.itemAttachmentSet = itemAttachmentSet;
   }
 
-  public List getItemAttachmentList() {
-    ArrayList list = new ArrayList();
-    if (itemAttachmentSet !=null ){
-      Iterator iter = itemAttachmentSet.iterator();
-      while (iter.hasNext()){
-        ItemAttachmentIfc a = (ItemAttachmentIfc)iter.next();
-        list.add(a);
+  public List<ItemAttachmentIfc> getItemAttachmentList() {
+    if ( this.itemAttachmentSet == null || this.itemAttachmentSet.isEmpty() ) {
+      return new ArrayList<>();
+    }
+    return new ArrayList<>(this.itemAttachmentSet);
+  }
+
+  public Map<Long, ItemAttachmentIfc> getItemAttachmentMap() {
+    final Map<Long, ItemAttachmentIfc> map = new HashMap<>();
+    if ( this.itemAttachmentSet == null || this.itemAttachmentSet.isEmpty() ) {
+      return map;
+    }
+    for (ItemAttachmentIfc a : this.itemAttachmentSet) {
+      map.put(a.getAttachmentId(), a);
+    }
+    return map;
+  }
+
+  public void addItemAttachment(ItemAttachmentIfc attachment) {
+    if ( attachment == null ) {
+      return;
+    }
+    if ( this.itemAttachmentSet == null ) {
+      this.itemAttachmentSet = new HashSet<>();
+    }
+    attachment.setItem(this);
+    this.itemAttachmentSet.add(attachment);
+  }
+
+  public void removeItemAttachmentById(Long attachmentId) {
+    if ( attachmentId == null ) {
+      return;
+    }
+    if ( this.itemAttachmentSet == null || this.itemAttachmentSet.isEmpty() ) {
+      return;
+    }
+    Iterator i = this.itemAttachmentSet.iterator();
+    while ( i.hasNext() ) {
+      final ItemAttachmentIfc a = (ItemAttachmentIfc)i.next();
+      if ( attachmentId.equals(a.getAttachmentId()) ) {
+        i.remove();
+        a.setItem(null);
       }
     }
-    return list;
+  }
+
+  public void removeItemAttachment(ItemAttachmentIfc attachment) {
+    if ( attachment == null ) {
+      return;
+    }
+    attachment.setItem(null);
+    if ( this.itemAttachmentSet == null || this.itemAttachmentSet.isEmpty() ) {
+      return;
+    }
+    this.itemAttachmentSet.remove(attachment);
   }
   
   
@@ -992,4 +1065,34 @@ public class PublishedItemData
  public void setMinScore(Double minScore) {
          this.minScore = minScore;
  }
+
+  private String convertTagListToJsonString(Set<ItemTagIfc> itemTagSet) {
+
+    String tagsListToJson = "[";
+    if (itemTagSet != null) {
+      Iterator<ItemTagIfc> i = itemTagSet.iterator();
+      Boolean more = false;
+      while (i.hasNext()) {
+        if (more) {
+          tagsListToJson += ",";
+        }
+        ItemTagIfc tagToShow = (ItemTagIfc) i.next();
+        String tagId = tagToShow.getTagId();
+        String tagLabel = tagToShow.getTagLabel();
+        String tagCollectionName = tagToShow.getTagCollectionName();
+        tagsListToJson += "{\"tagId\":\"" + tagId + "\",\"tagLabel\":\"" + tagLabel + "\",\"tagCollectionName\":\"" + tagCollectionName + "\"}";
+        more = true;
+      }
+    }
+    tagsListToJson += "]";
+    return tagsListToJson;
+  }
+
+  public String getTagListToJsonString() {
+    return this.tagListToJsonString;
+  }
+
+  public void setTagListToJsonString(String tagListToJsonString) {
+    this.tagListToJsonString = tagListToJsonString;
+  }
 }

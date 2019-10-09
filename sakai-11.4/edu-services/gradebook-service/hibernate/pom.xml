@@ -4,7 +4,7 @@
     <parent>
         <artifactId>edu-services</artifactId>
         <groupId>org.sakaiproject.edu-services</groupId>
-        <version>11.4</version><!-- ProjectVersion -->
+        <version>12.6</version><!-- ProjectVersion -->
 		<relativePath>../../pom.xml</relativePath>
     </parent>
     <groupId>org.sakaiproject.edu-services.gradebook</groupId>
@@ -16,9 +16,10 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
+ 			<groupId>org.apache.commons</groupId>
+  			<artifactId>commons-lang3</artifactId>
+      <scope>provided</scope>
+		</dependency>
         <dependency>
             <groupId>org.sakaiproject.edu-services.gradebook</groupId>
             <artifactId>gradebook-service-api</artifactId>

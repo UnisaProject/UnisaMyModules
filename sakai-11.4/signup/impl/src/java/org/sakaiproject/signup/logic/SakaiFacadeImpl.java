@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) 2007-2017 The Apereo Foundation
+ *
+ * Licensed under the Educational Community License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *             http://opensource.org/licenses/ecl2
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /*
 * Licensed to The Apereo Foundation under one or more contributor license
 * agreements. See the NOTICE file distributed with this work for
@@ -31,10 +46,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.sakaiproject.util.api.FormattedText;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.FunctionManager;
 import org.sakaiproject.authz.api.Member;
@@ -65,6 +79,7 @@ import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
+import org.sakaiproject.util.api.FormattedText;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
@@ -77,9 +92,8 @@ import org.sakaiproject.util.ResourceLoader;
  * @author gl256
  * 
  */
+@Slf4j
 public class SakaiFacadeImpl implements SakaiFacade {
-
-	private static Logger log = LoggerFactory.getLogger(SakaiFacadeImpl.class);
 
 	private FunctionManager functionManager;
 	
@@ -1200,7 +1214,11 @@ public class SakaiFacadeImpl implements SakaiFacade {
 
 		    
 		    if(userUuids != null) {
-		    	group.removeMembers();
+		    	try {
+		    		group.deleteMembers();
+		    	} catch (IllegalStateException e) {
+		    		log.error(".createGroup: Members from group with id {} cannot be deleted because the group is locked", group.getId());
+		    	}
 		    			    	
 		    	for(String userUuid: userUuids) {
 		    		group = addUserToGroup(userUuid, group);
@@ -1270,8 +1288,13 @@ public class SakaiFacadeImpl implements SakaiFacade {
 				
 					//remove the differences from group members
 					for (String mem: tmpUsers){
-						group.removeMember(mem);
-						}			 
+						try {
+							group.deleteMember(mem);
+						} catch (IllegalStateException e) {
+							log.error(".addUsersToGroup: User with id {} cannot be deleted from group with id {} because the group is locked", mem, group.getId());
+							return false;
+						}
+					}
 				}
 
 				siteService.save(site);
@@ -1361,16 +1384,18 @@ public class SakaiFacadeImpl implements SakaiFacade {
 		Group group = site.getGroup(groupId);
 		
 		try {
-			group.removeMember(userId);
+			group.deleteMember(userId);
 			siteService.save(site);
 			
 			return true;
 			
+		} catch (IllegalStateException e) {
+			log.error(".removeUserFromGroup: User with id {} cannot be deleted from group with id {} because the group is locked", userId, group.getId());
 		} catch (Exception e) {
-        	log.error("removeUserFromGroup failed for user: " + userId + " and group: " + groupId, e);
-        } finally {
-        	disableSecurityAdvisor(securityAdvisor);
-        }
+			log.error("removeUserFromGroup failed for user: " + userId + " and group: " + groupId, e);
+		} finally {
+			disableSecurityAdvisor(securityAdvisor);
+		}
 		
 		return false;
 	}
@@ -1467,7 +1492,11 @@ public class SakaiFacadeImpl implements SakaiFacade {
 		//Each user should be marked as non provided
 		//Get role first from site definition. 
 		//However, if the user is inactive, getUserRole would return null; then use member role instead
-		group.addMember(userUuid, r != null ? r.getId() : memberRole != null? memberRole.getId() : "", m != null ? m.isActive() : true, false);
+		try {
+			group.insertMember(userUuid, r != null ? r.getId() : memberRole != null? memberRole.getId() : "", m != null ? m.isActive() : true, false);
+		} catch (IllegalStateException e) {
+			log.error(".addUserToGroup: User with id {} cannot be inserted in group with id {} because the group is locked", userUuid, group.getId());
+		}
 		
 		return group;
 	}

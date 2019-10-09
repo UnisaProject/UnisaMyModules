@@ -16,11 +16,9 @@
     <div id="dragDropWrapper">
     <form name="dropzone-form" action="#toolLink("ResourcesHelperAction" "doPost")&flow=save" class="dropzone" id="file-uploader">
         <input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
-        <div class="dz-default dz-message">$tlang.getString("label.dragZoneMessage")</div>
+        <div class="dz-default dz-message"><button type="button">$tlang.getString("label.dragZoneMessage")</button></div>
     </form>
-    <div>
-        <input type="checkbox" name="overwrite" id="overwrite" checked="checked" value="true">$tlang.getString("overwrite.text")
-    </div>
+    <br />
     <div id="fileUploaderDesc" class="instruction">
         <p>$tlang.getString("label.dragDescription")</p>
         <p>$instr_dnd_uploads</p>
@@ -28,6 +26,17 @@
     <form name="addContentForm" id="addContentForm" method="post" action="#toolForm("ResourcesHelperAction")"  enctype="multipart/form-data">
         <input type="hidden" name="pipe-init-id" id="pipe-init-id" value="$!{pipe-init-id}" />
         <input type="hidden" name="requestStateId" id="requestStateId" value="$!{requestStateId}" />
+
+        <fieldset>
+            <legend><h4>$tlang.getString("versioning.title") <small>$tlang.getString("versioning.hint") </small></h4></legend>
+            <div class="form-group">
+                <input type="radio" name="overwrite" id="overwrite_1" value="false" checked="checked"/>
+                <label for="overwrite_1">$tlang.getString("versioning.newversion")</label>
+                <input type="radio" name="overwrite" id="overwrite_2" value="true"/>
+                <label for="overwrite_2">$tlang.getString("versioning.overwrite")</label>
+            </div>
+        </fieldset>
+
         #if ($model.resourceTypeDef.hasNotificationDialog())
             #if($model.isDropbox())
                 ## SAK-18932 show email checkbox only when possible to use it
@@ -56,21 +65,29 @@
                 <div class="form">
                 ##<table>
                     #if($availability_is_enabled)
-                        <h4>$tlang.getString("avail.title") <small>$tlang.getString("avail.uploaded") </small></h4>
-                        <div class="form-group">
-                            <input type="radio" name="hidden" id="hidden_false" value="false" #if(!$upload_visibility_hidden)checked="checked" #end/>
-                            <label for="hidden_false">$tlang.getString("avail.show40")</label>
-                            <input type="radio" name="hidden" id="hidden_true" value="true" #if($upload_visibility_hidden)checked="checked" #end/>
-                            <label for="hidden_true">$tlang.getString("avail.hide40")</label>
-                        </div>
+                        <fieldset>
+                            <legend><h4>$tlang.getString("avail.title") <small>$tlang.getString("avail.uploaded") </small></h4></legend>
+                            <div class="form-group">
+                                <input type="radio" name="hidden" id="hidden_false" value="false" #if(!$upload_visibility_hidden)checked="checked" #end/>
+                                <label for="hidden_false">$tlang.getString("avail.show40")</label>
+                                <input type="radio" name="hidden" id="hidden_true" value="true" #if($upload_visibility_hidden)checked="checked" #end/>
+                                <label for="hidden_true">$tlang.getString("avail.hide40")</label>
+                            </div>
+                        </fieldset>
                     #end
                     <div class="form-group">
                         <h4><label for="notify">$tlang.getString("gen.email1")</label></h4>
                         <select name="notify" id="notify">
-                            <option value="r">$tlang.getString("gen.email2")</option>
-                            <option value="o">$tlang.getString("gen.email3")</option>
-                            <option value="n" selected="selected">$tlang.getString("gen.email4")</option>
-                        </select>
+							#if ($noti)
+								<option value="r" #if($noti=="r") selected="selected" #end>$tlang.getString("gen.email2")</option>
+								<option value="o" #if($noti=="o") selected="selected" #end>$tlang.getString("gen.email3")</option>
+								<option value="n" #if($noti=="n") selected="selected" #end>$tlang.getString("gen.email4")</option>
+							#else
+								<option value="r">$tlang.getString("gen.email2")</option>
+								<option value="o">$tlang.getString("gen.email3")</option>
+								<option value="n" selected="selected">$tlang.getString("gen.email4")</option>
+							#end							
+						</select>
                     </div>
                 </div>
             #end
@@ -179,8 +196,8 @@ Dropzone.options.fileUploader = {
         });
 
         this.on("sending", function(file, xhr, formData) {
-            var overwrite = document.querySelector("#overwrite").checked;
-            formData.append("overwrite",overwrite );
+            var overwrite = document.querySelector('input[name="overwrite"]:checked').value;
+            formData.append("overwrite",overwrite);
             formData.append("fullPath",file.fullPath);
             #if($model.isDropbox() || $model.isUserSite() || !$availability_is_enabled)
                 formData.append("hidden", false);

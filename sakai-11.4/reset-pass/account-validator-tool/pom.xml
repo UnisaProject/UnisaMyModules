@@ -15,7 +15,7 @@
    <parent>
      <groupId>org.sakaiproject.reset-pass</groupId>
 	<artifactId>reset-pass</artifactId>
-	<version>11.4</version>
+	<version>12.6</version>
    </parent>
 
    <properties>
@@ -81,12 +81,6 @@
          <type>war</type>
       </dependency>
       <dependency>
-         <groupId>junit</groupId>
-         <artifactId>junit</artifactId>
-         <version>3.8.1</version>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
       	<groupId>javax.servlet</groupId>
       	<artifactId>servlet-api</artifactId>
       </dependency>
@@ -95,6 +89,10 @@
 			<artifactId>joda-time</artifactId>
 			<version>${joda.time.version}</version>
 		</dependency>
+      <dependency>
+         <groupId>commons-lang</groupId>
+         <artifactId>commons-lang</artifactId>
+      </dependency>
    </dependencies>
 
    

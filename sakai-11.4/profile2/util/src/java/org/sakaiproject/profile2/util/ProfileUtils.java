@@ -38,22 +38,19 @@ import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.imgscalr.Scalr;
+
 import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.ResourceLoader;
 
-
+@Slf4j
 public class ProfileUtils {
-
-	private static final Logger log = LoggerFactory.getLogger(ProfileUtils.class);
-
 
 	/**
 	 * Check content type against allowed types. only JPEG,GIF and PNG are support at the moment
@@ -276,9 +273,9 @@ public class ProfileUtils {
 		
 		Locale locale = getUserPreferredLocale();
 		
-		//System.out.println("currentDate:" + currentTimeMillis);
-		//System.out.println("postingDate:" + postingTimeMillis);
-		//System.out.println("diff:" + diff);
+		//log.info("currentDate:" + currentTimeMillis);
+		//log.info("postingDate:" + postingTimeMillis);
+		//log.info("diff:" + diff);
 		
 		int MILLIS_IN_SECOND = 1000;
 		int MILLIS_IN_MINUTE = 1000 * 60;
@@ -434,7 +431,23 @@ public class ProfileUtils {
 		//so we escape anything that is left
 		return StringEscapeUtils.escapeHtml(stripped);
 	}
-	
+
+	/**
+	 * Strips html/xml tags from a string and returns the cleaned version.
+	 *
+	 * @param text any text (if this is null or empty then the input text is returned unchanged)
+	 * @param smartSpacing if true then try to make the text represent the intent of the html,
+	 *                     trims out duplicate spaces, converts block type html into a space, etc.,
+	 *                     else just removes html tags and leaves all other parts of the string intact,
+	 *                     NOTE: false is also slightly faster
+	 * @param stripEscapeSequences if true, strips out any escape sequences such as '&nbsp;'
+	 * @return the cleaned string
+	 * @see #convertFormattedTextToPlaintext(String) for alternative mechanism
+	 */
+	public static String stripHtmlFromText(String text, boolean smartSpacing, boolean stripEscapeSequences) {
+		return FormattedText.stripHtmlFromText(text, smartSpacing, stripEscapeSequences);
+	}
+
 	/**
 	 * Trims text to the given maximum number of displayed characters.
 	 * Supports HTML and preserves formatting. 

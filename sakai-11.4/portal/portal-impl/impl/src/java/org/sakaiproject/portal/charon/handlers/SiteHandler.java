@@ -23,23 +23,20 @@ package org.sakaiproject.portal.charon.handlers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Enumeration;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Cookie;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.Role;
 import org.sakaiproject.authz.cover.SecurityService;
 import org.sakaiproject.thread_local.cover.ThreadLocalManager;
@@ -57,6 +54,7 @@ import org.sakaiproject.portal.api.PortalRenderContext;
 import org.sakaiproject.portal.api.SiteView;
 import org.sakaiproject.portal.api.StoredState;
 import org.sakaiproject.portal.charon.site.AllSitesViewImpl;
+import org.sakaiproject.portal.charon.site.PortalSiteHelperImpl;
 import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.tool.api.ToolSession;
 import org.sakaiproject.tool.api.ToolManager;
@@ -79,12 +77,15 @@ import org.sakaiproject.portal.util.URLUtils;
 import org.sakaiproject.portal.util.ToolUtils;
 import org.sakaiproject.portal.util.ByteArrayServletResponse;
 import org.sakaiproject.util.Validator;
+import lombok.extern.slf4j.Slf4j;
+
 
 /**
  * @author ieb
  * @since Sakai 2.4
  * @version $Rev$
  */
+@Slf4j
 public class SiteHandler extends WorksiteHandler
 {
 
@@ -93,8 +94,6 @@ public class SiteHandler extends WorksiteHandler
 	private static final String INCLUDE_LOGO = "include-logo";
 
 	private static final String INCLUDE_TABS = "include-tabs";
-
-	private static final Logger log = LoggerFactory.getLogger(SiteHandler.class);
 
 	private static final String URL_FRAGMENT = "site";
 
@@ -125,7 +124,9 @@ public class SiteHandler extends WorksiteHandler
 
 	// SAK-27774 - We are going inline default but a few tools need a crutch 
 	// This is Sakai 11 only so please do not back-port or merge this default value
-	private static final String IFRAME_SUPPRESS_DEFAULT = ":all:sakai.rsf.evaluation";
+	private static final String IFRAME_SUPPRESS_DEFAULT = ":all:sakai.gradebook.gwt.rpc:com.rsmart.certification:sakai.melete:sakai.rsf.evaluation";
+
+	private static final long AUTO_FAVORITES_REFRESH_INTERVAL_MS = 30000;
 
 	public SiteHandler()
 	{
@@ -406,16 +407,19 @@ public class SiteHandler extends WorksiteHandler
 		session.removeAttribute(Portal.ATTR_SITE_PAGE + siteId);
 
 		// SAK-29138 - form a context sensitive title
+		List<String> providers = PortalSiteHelperImpl.getProviderIDsForSites(((List<Site>) Arrays.asList(new Site[] { site }))).get(site.getReference());
 		String title = ServerConfigurationService.getString("ui.service","Sakai") + " : "
-				+ portal.getSiteHelper().getUserSpecificSiteTitle( site, false );
+				+ portal.getSiteHelper().getUserSpecificSiteTitle(site, false, false, providers);
 
 		// Lookup the page in the site - enforcing access control
 		// business rules
 		SitePage page = portal.getSiteHelper().lookupSitePage(pageId, site);
 		if (page != null)
 		{
-			// store the last page visited
-			session.setAttribute(Portal.ATTR_SITE_PAGE + siteId, page.getId());
+			if (ServerConfigurationService.getBoolean("portal.rememberSitePage", true)) {
+				// store the last page visited
+				session.setAttribute(Portal.ATTR_SITE_PAGE + siteId, page.getId());
+			}
 			title += " : " + page.getTitle();
 		}
 
@@ -478,7 +482,7 @@ public class SiteHandler extends WorksiteHandler
 
 		// Note that this does not call includeTool()
 		PortalRenderContext rcontext = portal.startPageContext(siteType, title, site
-				.getSkin(), req);
+				.getSkin(), req, site);
 
 		if ( allowBuffer ) {
 			log.debug("Starting the buffer process...");
@@ -532,9 +536,11 @@ public class SiteHandler extends WorksiteHandler
 		if (SiteService.isUserSite(siteId)){
 			rcontext.put("siteTitle", rb.getString("sit_mywor") );
 			rcontext.put("siteTitleTruncated", rb.getString("sit_mywor") );
+			rcontext.put("isUserSite", true);
 		}else{
-			rcontext.put("siteTitle", Web.escapeHtml(site.getTitle()));
-			rcontext.put("siteTitleTruncated", portal.getSiteHelper().getUserSpecificSiteTitle( site, false ) );
+			rcontext.put("siteTitle", portal.getSiteHelper().getUserSpecificSiteTitle(site, false, true, providers));
+			rcontext.put("siteTitleTruncated", Validator.escapeHtml(portal.getSiteHelper().getUserSpecificSiteTitle(site, true, false, providers)));
+			rcontext.put("isUserSite", false);
 		}
 		
 		addLocale(rcontext, site, session.getUserId());
@@ -604,9 +610,7 @@ public class SiteHandler extends WorksiteHandler
 			if (toolContextPath.contains(toolSegment)) {
 				toolId = toolContextPath.substring(toolContextPath.lastIndexOf(toolSegment)+toolSegment.length());
 				ToolConfiguration toolConfig = site.getToolForCommonId(toolId);
-				if (log.isDebugEnabled()) {
-					log.debug("trying to resolve page id from toolId: ["+toolId+"]");
-				}
+				log.debug("trying to resolve page id from toolId: [{}]", toolId);
 				if (toolConfig != null) {
 					pageId = toolConfig.getPageId();
 				}
@@ -639,6 +643,10 @@ public class SiteHandler extends WorksiteHandler
 	protected void includeSiteNav(PortalRenderContext rcontext, HttpServletRequest req,
 			Session session, String siteId)
 	{
+		if (session.getUserId() != null) {
+			refreshAutoFavorites(session);
+		}
+
 		if (rcontext.uses(INCLUDE_SITE_NAV))
 		{
 
@@ -681,6 +689,29 @@ public class SiteHandler extends WorksiteHandler
 			catch (Exception any)
 			{
 			}
+		}
+	}
+
+	final static String AUTO_FAVORITES_LAST_REFRESHED_TIME = "autoFavoritesLastRefreshedTime";
+
+	private void refreshAutoFavorites(Session session) {
+		Long lastRefreshTime = (Long)session.getAttribute(AUTO_FAVORITES_LAST_REFRESHED_TIME);
+
+		if (lastRefreshTime == null) {
+			lastRefreshTime = Long.valueOf(0);
+		}
+
+		long now = System.currentTimeMillis();
+
+		if ((now - lastRefreshTime) > AUTO_FAVORITES_REFRESH_INTERVAL_MS) {
+			// Fetch the list of favorites, which will in turn populate the auto favorites.
+			try {
+				new FavoritesHandler().userFavorites(session.getUserId());
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+
+			session.setAttribute(AUTO_FAVORITES_LAST_REFRESHED_TIME, now);
 		}
 	}
 
@@ -851,11 +882,13 @@ public class SiteHandler extends WorksiteHandler
 			rcontext.put("roleSwitchState", roleswitchstate); // this will tell our UI if we are in a role swapped state or not
 
 			int tabDisplayLabel = 1;
-			
+			boolean toolsCollapsed = false;
+
 			if (loggedIn) 
 			{
 				Preferences prefs = PreferencesService.getPreferences(session.getUserId());
-				ResourceProperties props = prefs.getProperties("sakai:portal:sitenav");
+				ResourceProperties props = prefs.getProperties(org.sakaiproject.user.api.PreferencesService.SITENAV_PREFS_KEY);
+
 				try 
 				{
 					tabDisplayLabel = (int) props.getLongProperty("tab:label");
@@ -864,9 +897,14 @@ public class SiteHandler extends WorksiteHandler
 				{
 					tabDisplayLabel = 1;
 				}
+
+				try {
+					toolsCollapsed = props.getBooleanProperty("toolsCollapsed");
+				} catch (Exception any) {}
 			}
-			
+
 			rcontext.put("tabDisplayLabel", tabDisplayLabel);
+			rcontext.put("toolsCollapsed", Boolean.valueOf(toolsCollapsed));
 			
 			SiteView siteView = portal.getSiteHelper().getSitesView(
 					SiteView.View.DHTML_MORE_VIEW, req, session, siteId);

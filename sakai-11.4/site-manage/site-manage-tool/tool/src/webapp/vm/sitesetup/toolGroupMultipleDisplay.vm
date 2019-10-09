@@ -1,14 +1,4 @@
 <script type="text/javascript">
-      // SAK-22384
-      #if ($isMathJaxInstalled)
-      MATHJAX.isInstalled = true;
-      MATHJAX.initialEnabledTools = [
-      #foreach ($toolId in $toolRegistrationMathJaxEnabledList)
-          "$toolId",
-      #end
-      ];
-      #end
-
       $(document).ready(function() {
             setupCategTools();
             setLTIPrefix("$ltitool_id_prefix");
@@ -140,17 +130,66 @@
         </ol>
     </div>
     <div class="col-md-1 separator"></div>
-    <div id="toolSelectionList" class="col-md-4">
+    <div class="col-md-4">
+    <div id="toolSelectionList">
     <div id="toolSelectionListMessage" style="display:none" class="instruction">$tlang.getString("feat.selected.tools.none")</div>
     <ul>
         <li id="toolSelectionListHeader">
           <h3 id="toolSelectionListToolHeader">$tlang.getString("feat.selected.tools")</h3>
-          #if ($isMathJaxInstalled)
-          <h3 id="toolSelectionListMathJaxHeader">$tlang.getString("sinfo.mathjax.name")</h3>
-          #end
           <h3 id="toolSelectionListRemoveHeader">$tlang.getString("feat.removeHeading")</h3>
         </li>
     </ul>
+    </div>
+    <div class="mathJaxToggleArea">
+      <label class="onoffswitch-label" for="isMathJaxEnabledForSite">
+          $tlang.getString("sinfo.mathjax.allowForSite")
+          <a href="$mathJaxHelpURL" target="_blank">$tlang.getString("sinfo.mathjax.allowForSite.learnmore")</a>.
+      </label>
+      <div class="onoffswitch">
+          <input type="checkbox" name="isMathJaxEnabledForSite" class="onoffswitch-checkbox" id="isMathJaxEnabledForSite" #if($isMathJaxEnabledForSite)checked="checked"#end>
+      </div>
+    </div>
+    <div class="lessonsSubNavToggleArea" style='display: none'>
+      <label class="onoffswitch-label" for="isLessonsSubNavEnabledForSite">
+          $tlang.getString("sinfo.lessonbuildersubnav.allowForSite")
+      </label>
+      <div class="onoffswitch">
+          <input type="checkbox" name="isLessonsSubNavEnabledForSite" class="onoffswitch-checkbox" id="isLessonsSubNavEnabledForSite" #if($isLessonsSubNavEnabledForSite)checked="checked"#end>
+      </div>
+    </div>
+    <script>
+        $(function() {
+            var lessonsSubNavToggleArea = $('.lessonsSubNavToggleArea');
+            var toolSelectionList = $('#toolSelectionList');
+            var toolList = $('#toolHolderW');
+            var isLessonsSubNavEnabledForSiteCheckbox = $('#isLessonsSubNavEnabledForSite');
+
+            function checkForSelectedLessonsTools() {
+              if (toolSelectionList.find('li[id*=sakai_lessonbuildertool]:visible').length > 0) {
+                  lessonsSubNavToggleArea.show();
+              } else {
+                  lessonsSubNavToggleArea.hide();
+              }
+            };
+
+            toolList.find('input[type=checkbox]').on('click', function() {
+                setTimeout(checkForSelectedLessonsTools, 200); // fade out on selected item takes ~100ms
+                return true;
+            });
+
+            toolSelectionList.on('click', '.removeTool', function() {
+                setTimeout(checkForSelectedLessonsTools, 200); // fade out on selected item takes ~100ms
+                return true;
+            });
+
+            toolSelectionList.on('click mouseup keyup', '#alertBoxYes', function() {
+                setTimeout(checkForSelectedLessonsTools, 0);
+                return true;
+            });
+
+            checkForSelectedLessonsTools();
+        });
+    </script>
     </div>
   </div> <!-- row -->
 </div> <!-- toolHolderWW -->

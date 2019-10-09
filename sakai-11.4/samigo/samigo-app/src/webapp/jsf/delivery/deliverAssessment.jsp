@@ -47,13 +47,6 @@
          border-color: light grey;
        }
        
-       #delivPageWrapper
-       {
-            height:1800px;
-            width: 100%
-            float: left;
-       }
-       
        #delivAssessmentWrapper
        {
             width: 96%;
@@ -62,15 +55,20 @@
       </style>
 
       <%@ include file="/jsf/delivery/deliveryjQuery.jsp" %>
-      <script type='text/javascript' src='/library/js/headscripts.js'></script>
-      <script type='text/javascript' src="/sakai-editor/editor-bootstrap.js"></script>
-      <script type="text/javascript" src="/sakai-editor/editor.js"></script>
-      <script type="text/javascript" src="/sakai-editor/editor-launch.js"></script>
-	  <script type="text/javascript" src="/samigo-app/js/saveForm.js"></script>	  	  
+      <samigo:script path="/../sakai-editor/editor-bootstrap.js"/>
+      <samigo:script path="/../sakai-editor/editor.js"/>
+      <samigo:script path="/../sakai-editor/editor-launch.js"/>
+	  <samigo:script path="/js/saveForm.js"/>	  	  
     
 	<h:outputText value="#{delivery.mathJaxHeader}" escape="false" rendered="#{delivery.actionString=='takeAssessmentViaUrl' and delivery.isMathJaxEnabled}"/>
       </head>
 	<body>
+
+  <h:panelGroup rendered="#{delivery.assessmentSubmitted}">
+    <%@ include file="/jsf/delivery/assessmentHasBeenSubmittedContent.jsp" %>
+  </h:panelGroup>
+
+  <h:panelGroup rendered="#{!delivery.assessmentSubmitted}">
  
       <h:outputText value="<a name='top'></a>" escape="false" />
       
@@ -82,35 +80,10 @@
       	 </h:panelGrid>
       </div>
       
-		<div id="timer-expired-warning" style="display:none;">
-			<h3><h:outputText value="#{deliveryMessages.time_expired1}" /></h3>
-      		<p><h:outputText value="#{deliveryMessages.time_expired3}" /></p>
-      		<div id="squaresWaveG">
-				<div id="squaresWaveG_1" class="squaresWaveG">
-				</div>
-				<div id="squaresWaveG_2" class="squaresWaveG">
-				</div>
-				<div id="squaresWaveG_3" class="squaresWaveG">
-				</div>
-				<div id="squaresWaveG_4" class="squaresWaveG">
-				</div>
-				<div id="squaresWaveG_5" class="squaresWaveG">
-				</div>
-				<div id="squaresWaveG_6" class="squaresWaveG">
-				</div>
-				<div id="squaresWaveG_7" class="squaresWaveG">
-				</div>
-				<div id="squaresWaveG_8" class="squaresWaveG">
-				</div>
-			</div>
-		</div>
 		
 		<div id="time-30-warning" style="display:none;text-align:center">
-		<h:outputFormat value="#{deliveryMessages.time_30_warning}" escape="false" rendered="#{delivery.useDueDate}">
+		<h:outputFormat value="#{deliveryMessages.time_30_warning}" escape="false">
                 <f:param value="#{delivery.dayDueDateString}"/>
-        </h:outputFormat>
-        <h:outputFormat value="#{deliveryMessages.time_30_warning}" escape="false" rendered="#{!delivery.useDueDate}">
-                <f:param value="#{delivery.dayRetractDateString}"/>
         </h:outputFormat>
         <br /><br /><br />
         <h:outputText value="#{deliveryMessages.time_30_warning_2}" escape="false"/>
@@ -130,11 +103,11 @@
 		</div>
  
 <div class="portletBody Mrphs-sakai-samigo">
- <h:outputText value="<div style='#{delivery.settings.divBgcolor};#{delivery.settings.divBackground}'>" escape="false"/>
+<div>
 
 <!-- content... -->
 <h:form id="takeAssessmentForm" enctype="multipart/form-data"
-   onsubmit="saveTime(); serializeImagePoints()">
+   onsubmit="saveTime(); serializeImagePoints();">
 
 <!-- JAVASCRIPT -->
 <%@ include file="/js/delivery.js" %>
@@ -262,8 +235,8 @@ document.links[newindex].onclick();
 	</f:verbatim>
 </h:panelGroup>
 
-<link href="/samigo-app/css/imageQuestion.student.css" type="text/css" rel="stylesheet" media="all" />
-<link href="/samigo-app/css/imageQuestion.author.css" type="text/css" rel="stylesheet" media="all" />
+<samigo:stylesheet path="/css/imageQuestion.student.css"/>
+<samigo:stylesheet path="/css/imageQuestion.author.css"/>
 
 <script type="text/JavaScript">
 	var dynamicListMap = [];		
@@ -329,7 +302,7 @@ document.links[newindex].onclick();
 </h:panelGroup>
 
 <div id="delivPageWrapper">
-  <div id="delivAssessmentWrapper">
+<h:outputText value="<div id='delivAssessmentWrapper' style='#{delivery.settings.divBgcolor};#{delivery.settings.divBackground}'>" escape="false"/>
 
     <!-- IF A SECURE DELIVERY MODULE HAS BEEN SELECTED, INJECT ITS HTML FRAGMENT (IF ANY) HERE -->
     <h:outputText  value="#{delivery.secureDeliveryHTMLFragment}" escape="false"  />
@@ -380,9 +353,14 @@ document.links[newindex].onclick();
            <h:outputText value="#{deliveryMessages.q} #{question.sequence} #{deliveryMessages.of} #{part.numbering}"/>
          </h:panelGroup>
          <h:panelGroup styleClass="col-md-6 pull-right" layout="block">
-          <h:outputText value=" #{question.pointsDisplayString} #{question.roundedMaxPoints} #{deliveryMessages.pt}" rendered="#{delivery.actionString=='reviewAssessment'}"/>
-          <h:outputText value="#{question.roundedMaxPoints} #{deliveryMessages.pt}" rendered="#{delivery.settings.displayScoreDuringAssessments != '2' && question.itemData.scoreDisplayFlag && delivery.actionString!='reviewAssessment'}"  />
-          <h:outputText value="#{deliveryMessages.discount} #{question.itemData.discount} "  rendered="#{question.itemData.discount!='0.0' && delivery.settings.displayScoreDuringAssessments != '2' && question.itemData.scoreDisplayFlag}"  />
+          <h:outputText value=" #{question.pointsDisplayString} #{question.roundedMaxPointsToDisplay} #{deliveryMessages.pt}" rendered="#{delivery.actionString=='reviewAssessment'}"/>
+          <h:outputText value="#{question.roundedMaxPoints}" rendered="#{delivery.settings.displayScoreDuringAssessments != '2' && question.itemData.scoreDisplayFlag && delivery.actionString!='reviewAssessment'}"  >
+			<f:convertNumber maxFractionDigits="2"/>
+          </h:outputText>
+		  <h:outputText value=" #{deliveryMessages.pt}" rendered="#{delivery.settings.displayScoreDuringAssessments != '2' && question.itemData.scoreDisplayFlag && delivery.actionString!='reviewAssessment'}"  />
+          <h:outputText value="#{deliveryMessages.discount} #{question.itemData.discount} "  rendered="#{question.itemData.discount!='0.0' && delivery.settings.displayScoreDuringAssessments != '2' && question.itemData.scoreDisplayFlag}"  >
+			<f:convertNumber maxFractionDigits="2"/>
+          </h:outputText>
          </h:panelGroup>
        </h:panelGroup>
 
@@ -611,7 +589,7 @@ document.links[newindex].onclick();
 <!-- end content -->
 </div>
 <f:verbatim></div></f:verbatim>
-<script type="text/javascript" src="/samigo-app/js/questionProgress.js"></script>
+<samigo:script path="/js/questionProgress.js"/>
 <script type="text/JavaScript">
 	<%= request.getAttribute("html.body.onload") %> 
 	setLocation(); 
@@ -623,6 +601,7 @@ document.links[newindex].onclick();
 	questionProgress.access(<h:outputText value="#{delivery.navigation}"/>, <h:outputText value="#{delivery.questionLayout}"/>);
     questionProgress.setUp();
 </script>
+</h:panelGroup>
     </body>
   </html>
 </f:view>

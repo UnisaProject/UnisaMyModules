@@ -4,7 +4,7 @@
   <parent>
     <artifactId>sakai-gradebook-app</artifactId>
     <groupId>org.sakaiproject</groupId>
-    <version>11.4</version>
+    <version>12.6</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <groupId>org.sakaiproject</groupId>
@@ -40,6 +40,10 @@
       <artifactId>sakai-kernel-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.sakaiproject.kernel</groupId>
+      <artifactId>sakai-kernel-private</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.sakaiproject.edu-services.gradebook</groupId>
       <artifactId>gradebook-service-api</artifactId>
     </dependency>
@@ -63,16 +67,6 @@
         <artifactId>scoring-service-api</artifactId>
         <scope>provided</scope>
         <version>${sakai.version}</version>
-    </dependency>
-<!-- Standalone component -->
-	<!--    <dependency>
-      <groupId>org.sakaiproject.edu-services.sections</groupId>
-      <artifactId>sections-impl-standalone</artifactId>
-    </dependency> -->
-<!-- Used only for test data. -->
-    <dependency>
-      <groupId>org.sakaiproject.edu-services.sections</groupId>
-      <artifactId>sections-integrationsupport</artifactId>
     </dependency>
 <!-- this is required for any Sakai JSF tool -->
     <dependency>
@@ -131,9 +125,8 @@
       <version>1.0</version>
     </dependency>
     <dependency>
-      <groupId>jta</groupId>
+      <groupId>javax.transaction</groupId>
       <artifactId>jta</artifactId>
-      <version>h2.1.8</version>
     </dependency>
     <dependency>
       <groupId>cglib</groupId>
@@ -184,13 +177,12 @@
     <dependency>
       <groupId>org.apache.myfaces.tomahawk</groupId>
       <artifactId>tomahawk</artifactId>
-      <version>1.1.11</version>
+      <version>1.1.14</version>
     </dependency>
 <!-- Needed by MyFaces ExtensionsFilter -->
     <dependency>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
-      <version>1.1.1</version>
     </dependency>
 <!-- base64 used to implement STATE_SAVING_METHOD client -->
     <dependency>

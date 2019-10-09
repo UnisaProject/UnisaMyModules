@@ -29,10 +29,10 @@ import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 
-import org.hibernate.Hibernate;
+import javax.sql.rowset.serial.SerialBlob;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 import org.sakaiproject.api.common.edu.person.InetOrgPerson;
 import org.sakaiproject.api.common.edu.person.OrganizationalPerson;
 import org.sakaiproject.api.common.edu.person.Person;
@@ -41,10 +41,9 @@ import org.sakaiproject.component.cover.ServerConfigurationService;
 /**
  * @author <a href="mailto:lance@indiana.edu">Lance Speelmon </a>
  */
+@Slf4j
 public class InetOrgPersonImpl extends OrganizationalPersonImpl implements Person, OrganizationalPerson, InetOrgPerson
 {
-	private static final Logger LOG = LoggerFactory.getLogger(InetOrgPersonImpl.class);
-
 	/**
 	 * @see org.sakaiproject.service.profile.InetOrgPerson#getAudio()
 	 */
@@ -545,7 +544,12 @@ public class InetOrgPersonImpl extends OrganizationalPersonImpl implements Perso
 		{
 			return null;
 		}
-		return Hibernate.createBlob(this.jpegPhoto);
+		try {
+			return new SerialBlob(this.jpegPhoto);
+		} catch (SQLException e) {
+			log.warn(e.getMessage(), e);
+			return null;
+		}
 	}
 
 	public void setBlobImage(Blob blobImage)
@@ -555,9 +559,9 @@ public class InetOrgPersonImpl extends OrganizationalPersonImpl implements Perso
 
 	private byte[] toByteArray(Blob fromBlob)
 	{
-		if (LOG.isDebugEnabled())
+		if (log.isDebugEnabled())
 		{
-			LOG.debug("toByteArray(Blob " + fromBlob + ")");
+			log.debug("toByteArray(Blob " + fromBlob + ")");
 		}
 
 		try
@@ -569,7 +573,7 @@ public class InetOrgPersonImpl extends OrganizationalPersonImpl implements Perso
 		}
 		catch (SQLException e1)
 		{
-			LOG.error(e1.getMessage(), e1);
+			log.error(e1.getMessage(), e1);
 		}
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try
@@ -578,7 +582,7 @@ public class InetOrgPersonImpl extends OrganizationalPersonImpl implements Perso
 		}
 		catch (Exception e)
 		{
-			LOG.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 		finally
@@ -591,7 +595,7 @@ public class InetOrgPersonImpl extends OrganizationalPersonImpl implements Perso
 				}
 				catch (IOException ex)
 				{
-					LOG.error(ex.getMessage(), ex);
+					log.error(ex.getMessage(), ex);
 				}
 			}
 		}
@@ -599,9 +603,9 @@ public class InetOrgPersonImpl extends OrganizationalPersonImpl implements Perso
 
 	private byte[] toByteArray(Blob fromBlob, ByteArrayOutputStream baos) throws SQLException, IOException
 	{
-		if (LOG.isDebugEnabled())
+		if (log.isDebugEnabled())
 		{
-			LOG.debug("toByteArray(Blob " + fromBlob + ", ByteArrayOutputStream " + baos + ")");
+			log.debug("toByteArray(Blob " + fromBlob + ", ByteArrayOutputStream " + baos + ")");
 		}
 
 		if (fromBlob == null || fromBlob.length() < 1 || ServerConfigurationService.getString("profile.photoRepositoryPath", null) != null)
@@ -630,7 +634,7 @@ public class InetOrgPersonImpl extends OrganizationalPersonImpl implements Perso
 				}
 				catch (IOException ex)
 				{
-					LOG.error(ex.getMessage(), ex);
+					log.error(ex.getMessage(), ex);
 				}
 			}
 		}

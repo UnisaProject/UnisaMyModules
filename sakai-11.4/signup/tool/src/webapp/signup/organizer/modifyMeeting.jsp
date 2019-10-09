@@ -13,17 +13,49 @@
 		</style>	
 
 <h:outputText value="#{Portal.latestJQuery}" escape="false"/>
+        <script type="text/javascript" src="/library/js/lang-datepicker/lang-datepicker.js"></script>
         <script type="text/javascript" src="/sakai-signup-tool/js/signupScript.js"></script>
         
 		<script type="text/javascript">
-			jQuery.noConflict();
 			jQuery(document).ready(function(){
+
+                localDatePicker({
+                    input: '#meeting\\:startTime',
+                    useTime: 1,
+                    parseFormat: 'YYYY-MM-DD HH:mm:ss',
+                    allowEmptyDate: false,
+                    val: '<h:outputText value="#{EditMeetingSignupMBean.signupMeeting.startTime}"><f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"/></h:outputText>',
+                    ashidden: {
+                            iso8601: 'startTimeISO8601',
+                            month:"meeting_startTime_month",
+                            day:"meeting_startTime_day",
+                            year:"meeting_startTime_year",
+                            hour:"meeting_startTime_hours",
+                            minute:"meeting_startTime_minutes",
+                            ampm:"meeting_startTime_ampm"}
+                });
+
+                localDatePicker({
+                    input: '#meeting\\:endTime',
+                    useTime: 1,
+                    parseFormat: 'YYYY-MM-DD HH:mm:ss',
+                    allowEmptyDate: false,
+                    val: '<h:outputText value="#{EditMeetingSignupMBean.signupMeeting.endTime}"><f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"/></h:outputText>',
+                    ashidden: {
+                            iso8601: 'endTimeISO8601',
+                            month:"meeting_endTime_month",
+                            day:"meeting_endTime_day",
+                            year:"meeting_endTime_year",
+                            hour:"meeting_endTime_hours",
+                            minute:"meeting_endTime_minutes",
+                            ampm:"meeting_endTime_ampm"}
+                });
+
         		sakai.initSignupBeginAndEndsExact();
         	});
     	</script>
  
 		<script type="text/javascript">
-			jQuery.noConflict(); //this requried by calendar dropdown tomhawk
 			
 			var recurWarnTag1;
 	        var recurWarnTag2;
@@ -36,7 +68,6 @@
         		sakai.initSignupBeginAndEndsExact();
         		//for IE browser, it does nothing.
         		initGroupTypeRadioButton();
-    			replaceCalendarImageIcon(); 
     			userDefinedTsChoice();
     			isShowEmailChoice();
     			setIframeHeight_DueTo_Ckeditor();
@@ -110,9 +141,8 @@
 					<div class="form-group row ">
 						<h:outputLabel value="#{msgs.event_name}" for="title" escape="false" styleClass="col-lg-2 form-control-label form-required"/>
 						<div class="col-lg-10">
-							<h:inputText id="title" value="#{EditMeetingSignupMBean.signupMeeting.title}" required="true" size="40" 
+							<h:inputText id="title" value="#{EditMeetingSignupMBean.title}" size="40" 
 										styleClass="editText form-control">
-								<f:validator validatorId="Signup.EmptyStringValidator"/>
 								<f:validateLength maximum="255" />
 							</h:inputText>
 							<h:message for="title" errorClass="alertMessageInline"/>
@@ -214,9 +244,8 @@
 					<div class="form-group row ">
 						<h:outputLabel value="#{msgs.event_start_time}"  styleClass="col-lg-2 form-control-label form-required" escape="false"/>
 						<h:panelGroup styleClass="col-lg-10" rendered="#{!EditMeetingSignupMBean.customTsType}" layout="block">
-							<t:inputDate id="startTime" type="both"  ampm="true" value="#{EditMeetingSignupMBean.signupMeeting.startTime}" timeZone="#{UserTimeZone.userTimeZoneStr}"
-										style="color:black;" popupCalendar="true" onfocus="showRescheduleWarning();" onkeyup="setEndtimeMonthDateYear(); getSignupDuration(); sakai.updateSignupBeginsExact(); return false;"
-										onchange="sakai.updateSignupBeginsExact();"/>
+							<h:inputText value="#{EditMeetingSignupMBean.startTimeString}" size="28" id="startTime" 
+								onfocus="showRescheduleWarning();" onkeyup="getSignupDuration(); sakai.updateSignupBeginsExact(); return false;" onchange="sakai.updateSignupBeginsExact();"/>
 							<h:message for="startTime" errorClass="alertMessageInline"/>
 						</h:panelGroup>
 						<h:panelGroup rendered="#{EditMeetingSignupMBean.customTsType}" styleClass="col-lg-6" layout="block">
@@ -236,8 +265,8 @@
 					<div class="form-group row ">
 						<h:outputLabel value="#{msgs.event_end_time}" styleClass="col-lg-2 form-control-label form-required" escape="false"/>
 						<h:panelGroup styleClass="col-lg-10" rendered="#{!EditMeetingSignupMBean.customTsType}" layout="block">
-							<t:inputDate id="endTime" type="both" ampm="true" value="#{EditMeetingSignupMBean.signupMeeting.endTime}" timeZone="#{UserTimeZone.userTimeZoneStr}" style="color:black;" popupCalendar="true" 
-										onfocus="showRescheduleWarning();" onkeyup="getSignupDuration(); sakai.updateSignupEndsExact(); return false;" onchange="sakai.updateSignupEndsExact();"/>
+							<h:inputText value="#{EditMeetingSignupMBean.endTimeString}" size="28" id="endTime" 
+								onfocus="showRescheduleWarning();" onkeyup="getSignupDuration(); sakai.updateSignupEndsExact(); return false;" onchange="sakai.updateSignupEndsExact();"/>
 							<h:message for="endTime" errorClass="alertMessageInline"/>
 						</h:panelGroup>
 						<h:panelGroup rendered="#{EditMeetingSignupMBean.customTsType}" layout="block" styleClass="col-lg-6">
@@ -324,7 +353,7 @@
 								<h:panelGrid columns="1" columnClasses="miCol1">
 									<%-- multiple: --%>
 									<h:panelGroup rendered="#{EditMeetingSignupMBean.individualType}">
-										<h:panelGrid columns="2" id="mutipleCh" styleClass="mi" columnClasses="miCol1,miCol2"> 
+										<h:panelGrid columns="2" id="multipleCh" styleClass="mi" columnClasses="miCol1,miCol2"> 
 											<h:outputText id="maxAttendeesPerSlot" style="display:none" value="#{EditMeetingSignupMBean.maxAttendeesPerSlot}"></h:outputText>
 											<h:outputText id="maxSlots" style="display:none" value="#{EditMeetingSignupMBean.maxSlots}"></h:outputText>   
 											<h:outputText value="#{msgs.event_num_slot_avail_for_signup}" />

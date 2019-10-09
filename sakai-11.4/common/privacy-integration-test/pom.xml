@@ -5,7 +5,7 @@
  <parent>
     <artifactId>common</artifactId>
     <groupId>org.sakaiproject.common</groupId>
-    <version>11-SNAPSHOT</version><!-- ProjectVersion -->
+    <version>12-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Sakai Privacy Test</name>
@@ -19,15 +19,6 @@
     <dependency>
       <groupId>org.sakaiproject.common</groupId>
       <artifactId>sakai-privacy-hbm</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.sakaiproject.kernel</groupId>
-      <artifactId>test-harness</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
     </dependency>
   </dependencies>
   <build>

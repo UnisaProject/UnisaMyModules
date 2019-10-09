@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) 2003-2017 The Apereo Foundation
+ *
+ * Licensed under the Educational Community License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *             http://opensource.org/licenses/ecl2
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.sakaiproject.site.tool.helper.managegroup.impl;
 
 import java.util.ArrayList;
@@ -7,10 +22,13 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.StringJoiner;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import uk.org.ponder.messageutil.TargettedMessage;
+import uk.org.ponder.messageutil.TargettedMessageList;
+
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.Member;
 import org.sakaiproject.authz.api.Role;
@@ -30,18 +48,14 @@ import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.tool.api.ToolSession;
 
-import uk.org.ponder.messageutil.TargettedMessage;
-import uk.org.ponder.messageutil.TargettedMessageList;
 /**
  * 
  * @author 
  *
  */
+@Slf4j
 public class SiteManageGroupHandler {
-	
-    /** Our log (commons). */
-    private static final Logger M_log = LoggerFactory.getLogger(SiteManageGroupHandler.class);
-   
+
     private Collection<Member> groupMembers;
     private final GroupComparator groupComparator = new GroupComparator();
 	
@@ -187,7 +201,7 @@ public class SiteManageGroupHandler {
             
             } catch (IdUnusedException e) {
                 // The siteId we were given was bogus
-                M_log.warn(e.getMessage());
+                log.warn(e.getMessage());
             }
         }
         title = "";
@@ -282,7 +296,7 @@ public class SiteManageGroupHandler {
 
         } 
         catch (IdUnusedException | PermissionException e) {
-            M_log.warn(e.getMessage());
+            log.warn(e.getMessage());
         }
 
         return "";
@@ -357,7 +371,12 @@ public class SiteManageGroupHandler {
 
 				}
 				if (!found) {
-					group.removeMember(mId);
+					try {
+						group.deleteMember(mId);
+					} catch (IllegalStateException e) {
+						log.error(".processAddGroup: User with id {} cannot be deleted from group with id {} because the group is locked", mId, group.getId());
+						return null;
+					}
 				}
 			}
 
@@ -374,9 +393,14 @@ public class SiteManageGroupHandler {
                     // non-provided
                     // get role first from site definition.
                     // However, if the user is inactive, getUserRole would return null; then use member role instead
-                    group.addMember(memberId, r != null ? r.getId()
+                    try {
+                        group.insertMember(memberId, r != null ? r.getId()
                                               : memberRole != null? memberRole.getId() : "", m != null ? m.isActive() : true,
                                               false);
+                    } catch (IllegalStateException e) {
+                        log.error(".processAddGroup: User with id {} cannot be inserted in group with id {} because the group is locked", memberId, group.getId());
+                        return null;
+                    }
                 }
             }
 	            
@@ -388,7 +412,7 @@ public class SiteManageGroupHandler {
     			resetParams();
 	        } 
 	        catch (IdUnusedException | PermissionException e) {
-	        	M_log.warn(this + ".processAddGroup: cannot find site " + site.getId(), e);
+	        	log.warn(this + ".processAddGroup: cannot find site " + site.getId(), e);
 	            return null;
 	        }
     	}
@@ -405,7 +429,7 @@ public class SiteManageGroupHandler {
     	if (deleteGroupIds == null || deleteGroupIds.length == 0)
     	{
     		// no group chosen to be deleted
-    		M_log.debug(this + ".processConfirmGroupDelete: no group chosen to be deleted.");
+    		log.debug(this + ".processConfirmGroupDelete: no group chosen to be deleted.");
     		messages.addMessage(new TargettedMessage("delete_group_nogroup","no group chosen"));
     		return null;
     	}
@@ -427,24 +451,41 @@ public class SiteManageGroupHandler {
     {
     	// reset the warning messages
     	resetTargettedMessageList();
-    	
+
+    	// Trick to refresh site
+    	site = null;
+    	this.init();
+
     	if (site != null)
     	{
+            List<String> notDeletedGroupsTitles = new ArrayList<String>();
             for( String groupId : deleteGroupIds )
             {
                 Group g = site.getGroup(groupId);
                 if (g != null) {
-                    site.removeGroup(g);
+                    try {
+                        site.deleteGroup(g);
+                    } catch (IllegalStateException e) {
+                        notDeletedGroupsTitles.add(g.getTitle());
+                        log.error(".processDeleteGroups: Group with id {} cannot be removed because is locked", g.getId());
+                    }
                 }
+            }
+            if (!notDeletedGroupsTitles.isEmpty()) {
+                StringJoiner groupsTitles = new StringJoiner(", ");
+                for (String groupTitle:notDeletedGroupsTitles) {
+                    groupsTitles.add(groupTitle.toString());
+                }
+                messages.addMessage(new TargettedMessage("deletegroup.notallowed.groups.remove", new Object[]{groupsTitles.toString()}, TargettedMessage.SEVERITY_ERROR));
             }
 			try {
 				siteService.save(site);
 			} catch (IdUnusedException e) {
 				messages.addMessage(new TargettedMessage("editgroup.site.notfound.alert","cannot find site"));
-				M_log.warn(this + ".processDeleteGroups: Problem of saving site after group removal: site id =" + site.getId(), e);
+				log.warn(this + ".processDeleteGroups: Problem of saving site after group removal: site id =" + site.getId(), e);
 			} catch (PermissionException e) {
 				messages.addMessage(new TargettedMessage("editgroup.site.permission.alert","not allowed to find site"));
-				M_log.warn(this + ".processDeleteGroups: Permission problem of saving site after group removal: site id=" + site.getId(), e);
+				log.warn(this + ".processDeleteGroups: Permission problem of saving site after group removal: site id=" + site.getId(), e);
 			}
 	    	
 	    }

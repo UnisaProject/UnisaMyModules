@@ -4,7 +4,7 @@
   <parent>
     <artifactId>web-base</artifactId>
     <groupId>org.sakaiproject</groupId> 
-    <version>11.4</version>
+    <version>12.6</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>sakai-web-portlet</name>
@@ -61,6 +61,10 @@
       <groupId>org.apache.velocity</groupId>
       <artifactId>velocity</artifactId>
       <version>${sakai.velocity.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sakaiproject.velocity</groupId>
+      <artifactId>sakai-velocity-util</artifactId>
     </dependency>
     <dependency>
       <groupId>logkit</groupId>

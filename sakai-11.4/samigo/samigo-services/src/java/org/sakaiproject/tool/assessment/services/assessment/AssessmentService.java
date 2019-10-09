@@ -21,7 +21,6 @@
 
 package org.sakaiproject.tool.assessment.services.assessment;
 
-
 import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -30,30 +29,27 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.sakaiproject.authz.api.SecurityAdvisor;
-import org.sakaiproject.authz.api.SecurityAdvisor.SecurityAdvice;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentResource;
-import org.sakaiproject.exception.IdInvalidException;
+import org.sakaiproject.event.cover.EventTrackingService;
 import org.sakaiproject.exception.IdUnusedException;
-import org.sakaiproject.exception.IdUsedException;
 import org.sakaiproject.exception.InUseException;
-import org.sakaiproject.exception.InconsistentException;
-import org.sakaiproject.exception.OverQuotaException;
 import org.sakaiproject.exception.PermissionException;
-import org.sakaiproject.exception.ServerOverloadException;
 import org.sakaiproject.exception.TypeException;
+import org.sakaiproject.samigo.util.SamigoConstants;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentTemplateData;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AttachmentData;
 import org.sakaiproject.tool.assessment.data.dao.assessment.ItemData;
+import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAssessmentData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AnswerIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentAttachmentIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentBaseIfc;
@@ -67,21 +63,20 @@ import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTextIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionAttachmentIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionDataIfc;
 import org.sakaiproject.tool.assessment.data.ifc.shared.TypeIfc;
-import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAssessmentData;
+import org.sakaiproject.tool.assessment.entity.api.CoreAssessmentEntityProvider;
+import org.sakaiproject.tool.assessment.entity.api.PublishedAssessmentEntityProvider;
 import org.sakaiproject.tool.assessment.facade.AgentFacade;
 import org.sakaiproject.tool.assessment.facade.AssessmentFacade;
-import org.sakaiproject.tool.assessment.facade.PublishedAssessmentFacade;
 import org.sakaiproject.tool.assessment.facade.AssessmentFacadeQueriesAPI;
-import org.sakaiproject.tool.assessment.facade.PublishedAssessmentFacadeQueries;
 import org.sakaiproject.tool.assessment.facade.AssessmentTemplateFacade;
 import org.sakaiproject.tool.assessment.facade.ItemFacade;
+import org.sakaiproject.tool.assessment.facade.PublishedAssessmentFacade;
+import org.sakaiproject.tool.assessment.facade.PublishedAssessmentFacadeQueries;
 import org.sakaiproject.tool.assessment.facade.SectionFacade;
 import org.sakaiproject.tool.assessment.facade.TypeFacade;
 import org.sakaiproject.tool.assessment.services.ItemService;
 import org.sakaiproject.tool.assessment.services.PersistenceService;
 import org.sakaiproject.tool.assessment.services.QuestionPoolService;
-import org.sakaiproject.tool.assessment.entity.api.CoreAssessmentEntityProvider;
-import org.sakaiproject.tool.assessment.entity.api.PublishedAssessmentEntityProvider;
 import org.sakaiproject.tool.cover.ToolManager;
 
 /**
@@ -90,12 +85,11 @@ import org.sakaiproject.tool.cover.ToolManager;
  * 
  * @author Rachel Gollub <rgollub@stanford.edu>
  */
+@Slf4j
 public class AssessmentService {
-	private Logger log = LoggerFactory.getLogger(AssessmentService.class);
 	public static final int UPDATE_SUCCESS = 0;
 	public static final int UPDATE_ERROR_DRAW_SIZE_TOO_LARGE = 1;
 	private SecurityService securityService = ComponentManager.get(SecurityService.class);
-
 
 	/**
 	 * Creates a new QuestionPoolService object.
@@ -156,7 +150,7 @@ public class AssessmentService {
 		}
 	}
 
-	public ArrayList getAllAssessmentTemplates() {
+	public List<AssessmentTemplateFacade> getAllAssessmentTemplates() {
 		try {
 			return PersistenceService.getInstance()
 					.getAssessmentFacadeQueries().getAllAssessmentTemplates();
@@ -166,7 +160,7 @@ public class AssessmentService {
 		}
 	}
 
-	public ArrayList getAllActiveAssessmentTemplates() {
+	public List<AssessmentTemplateFacade> getAllActiveAssessmentTemplates() {
 		try {
 			return PersistenceService.getInstance()
 					.getAssessmentFacadeQueries()
@@ -177,7 +171,7 @@ public class AssessmentService {
 		}
 	}
 
-	public ArrayList getTitleOfAllActiveAssessmentTemplates() {
+	public List<AssessmentTemplateFacade> getTitleOfAllActiveAssessmentTemplates() {
 		try {
 			return PersistenceService.getInstance()
 					.getAssessmentFacadeQueries()
@@ -188,12 +182,12 @@ public class AssessmentService {
 		}
 	}
 
-	public ArrayList getAllAssessments(String orderBy) {
+	public List<AssessmentFacade> getAllAssessments(String orderBy) {
 		return PersistenceService.getInstance().getAssessmentFacadeQueries()
 				.getAllAssessments(orderBy); // signalling all & no paging
 	}
 
-	public ArrayList getAllActiveAssessments(String orderBy) {
+	public List<AssessmentFacade> getAllActiveAssessments(String orderBy) {
 		return PersistenceService.getInstance().getAssessmentFacadeQueries()
 				.getAllActiveAssessments(orderBy); // signalling all & no
 													// paging
@@ -204,7 +198,7 @@ public class AssessmentService {
 	 * @return an ArrayList of AssessmentFacade. It is IMPORTANT to note that
 	 *         the object is a partial object which contains no SectionFacade
 	 */
-	public ArrayList getSettingsOfAllActiveAssessments(String orderBy) {
+	public List<AssessmentFacade> getSettingsOfAllActiveAssessments(String orderBy) {
 		return PersistenceService.getInstance().getAssessmentFacadeQueries()
 				.getSettingsOfAllActiveAssessments(orderBy); // signalling
 																// all & no
@@ -218,7 +212,7 @@ public class AssessmentService {
 	 *         basic info such as title, lastModifiedDate. This method is used
 	 *         by Authoring Front Door
 	 */
-	public ArrayList getBasicInfoOfAllActiveAssessments(String orderBy,
+	public List<AssessmentFacade> getBasicInfoOfAllActiveAssessments(String orderBy,
 			boolean ascending) {
 		String siteAgentId = AgentFacade.getCurrentSiteId();
 		return PersistenceService.getInstance().getAssessmentFacadeQueries()
@@ -227,7 +221,7 @@ public class AssessmentService {
 													// paging
 	}
 
-	public ArrayList getBasicInfoOfAllActiveAssessments(String orderBy) {
+	public List<AssessmentFacade> getBasicInfoOfAllActiveAssessments(String orderBy) {
 		String siteAgentId = AgentFacade.getCurrentSiteId();
 		return PersistenceService
 				.getInstance()
@@ -238,7 +232,7 @@ public class AssessmentService {
 																					// paging
 	}
 
-	public ArrayList getAllAssessments(int pageSize, int pageNumber,
+	public List<AssessmentFacade> getAllAssessments(int pageSize, int pageNumber,
 			String orderBy) {
 		try {
 			if (pageSize > 0 && pageNumber > 0) {
@@ -294,7 +288,12 @@ public class AssessmentService {
 		return PersistenceService.getInstance().getAssessmentFacadeQueries()
 				.getQuestionSize(new Long(assessmentId));
 	}
-	
+
+	public List getQuestionsIdList(long assessmentId) {
+		return PersistenceService.getInstance().getAssessmentFacadeQueries()
+				.getQuestionsIdList(assessmentId);
+	}
+
 	public void update(AssessmentFacade assessment) {
 		PersistenceService.getInstance().getAssessmentFacadeQueries()
 				.saveOrUpdate(assessment);
@@ -401,7 +400,7 @@ public class AssessmentService {
 		if (section != null && section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE) != null
 				&& StringUtils.equals(section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE), SectionDataIfc.RANDOM_DRAW_FROM_QUESTIONPOOL.toString())) {
 			QuestionPoolService qpService = new QuestionPoolService();
-			ArrayList itemlist = qpService
+			List itemlist = qpService
 			.getAllItems(Long.valueOf(section
 					.getSectionMetaDataByLabel(SectionDataIfc.POOLID_FOR_RANDOM_DRAW)));
 			return verifyItemsDrawSize(itemlist.size(), section.getSectionMetaDataByLabel(SectionDataIfc.NUM_QUESTIONS_DRAWN));
@@ -432,7 +431,7 @@ public class AssessmentService {
 				&& StringUtils.equals(section.getSectionMetaDataByLabel(SectionDataIfc.AUTHOR_TYPE), SectionDataIfc.RANDOM_DRAW_FROM_QUESTIONPOOL.toString())) {
 
 			QuestionPoolService qpService = new QuestionPoolService();
-			ArrayList itemlist = qpService.getAllItems(Long.valueOf(section
+			List itemlist = qpService.getAllItems(Long.valueOf(section
 					.getSectionMetaDataByLabel(SectionDataIfc.POOLID_FOR_RANDOM_DRAW)));
 
 			if(verifyItemsDrawSize(itemlist.size(), section.getSectionMetaDataByLabel(SectionDataIfc.NUM_QUESTIONS_DRAWN))){
@@ -448,10 +447,11 @@ public class AssessmentService {
 					List poolIds = qpService.getPoolIdsByItem(item.getItemId()
 							.toString());
 					if (poolIds.size() == 0) {
-						// System.out.println("not in pool " + item.getItemId());
-						itemService.deleteItem(item.getItemId(), agentId);
+						Long deleteId = item.getItemId();
+						itemService.deleteItem(deleteId, agentId);
+						EventTrackingService.post(EventTrackingService.newEvent(SamigoConstants.EVENT_ASSESSMENT_ITEM_DELETE, "/sam/" +AgentFacade.getCurrentSiteId() + "/removed itemId=" + deleteId, true));
 						itemIter.remove();
-					} // else System.out.println("in pool " + item.getItemId());
+					}
 				}
 				// need to reload
 				section = getSection(section.getSectionId().toString());
@@ -527,6 +527,7 @@ public class AssessmentService {
 						}
 //					}
 					section.addItem(item);
+					EventTrackingService.post(EventTrackingService.newEvent(SamigoConstants.EVENT_ASSESSMENT_SAVEITEM, "/sam/" + AgentFacade.getCurrentSiteId() + "/saved  itemId=" + item.getItemId().toString(), true));
 					i = i + 1;
 				}
 
@@ -564,7 +565,7 @@ public class AssessmentService {
 		return UPDATE_SUCCESS;
 	}
 
-	public ArrayList getBasicInfoOfAllActiveAssessmentTemplates(String orderBy) {
+	public List<AssessmentTemplateFacade> getBasicInfoOfAllActiveAssessmentTemplates(String orderBy) {
 		return PersistenceService.getInstance().getAssessmentFacadeQueries()
 				.getBasicInfoOfAllActiveAssessmentTemplates(orderBy); // signalling
 																		// all &
@@ -647,11 +648,6 @@ public class AssessmentService {
 		}
 		return attachment;
 	}
-	
-	public void removeItemAttachment(String attachmentId) {
-		PersistenceService.getInstance().getAssessmentFacadeQueries()
-				.removeItemAttachment(new Long(attachmentId));
-	}
 
 	public ItemTextAttachmentIfc createItemTextAttachment(ItemTextIfc itemText,
 			String resourceId, String filename, String protocol) {
@@ -671,11 +667,6 @@ public class AssessmentService {
 			log.error(e.getMessage(), e);
 		}
 		return attachment;
-	}
-	
-	public void removeItemTextAttachment(String attachmentId) {
-		PersistenceService.getInstance().getAssessmentFacadeQueries()
-				.removeItemTextAttachment(new Long(attachmentId));
 	}
 
 	public void updateAssessmentLastModifiedInfo(
@@ -853,7 +844,7 @@ public class AssessmentService {
 					return SecurityAdvice.PASS;
 				}
 			}
-		};		
+		};
 		try {
 			securityService.pushAdvisor(securityAdvisor);
 			// create a copy of the resource
@@ -874,7 +865,7 @@ public class AssessmentService {
 		} catch (Exception e) {
 			log.warn("Could not copy resource " + resourceId + ", " + e.getMessage());
 		} finally{
-			securityService.popAdvisor();
+			securityService.popAdvisor(securityAdvisor);
 		}
 		return cr_copy;
 	}
@@ -994,7 +985,6 @@ public class AssessmentService {
 		}
 		catch (Exception e)
 		{
-		 Logger log = LoggerFactory.getLogger(AssessmentService.class);
 			log.warn("escapeResourceName: ", e);
 			return id;
 		}
@@ -1109,7 +1099,7 @@ public class AssessmentService {
 							String resourceIdOrig = "/" + StringUtils.substringAfter(attachment, "/access/content/");
 							String resourceId = URLDecoder.decode(resourceIdOrig);
 							String filename = StringUtils.substringAfterLast(attachment, "/");
-	
+
 							try {
 								cr = AssessmentService.getContentHostingService().getResource(resourceId);
 							} catch (IdUnusedException e) {
@@ -1119,9 +1109,9 @@ public class AssessmentService {
 							} catch (PermissionException e) {
 								log.warn("No permission for resource (" + resourceId + ") that was embedded in a question or answer");
 							}
-	
+
 							if (cr != null && StringUtils.isNotEmpty(filename)) {
-								
+
 								ContentResource crCopy = createCopyOfContentResource(cr.getId(), filename, toContext);
 								text = StringUtils.replace(text, resourceIdOrig, StringUtils.substringAfter(crCopy.getReference(), "/content"));
 							}
@@ -1131,7 +1121,7 @@ public class AssessmentService {
 						log.error(e.getMessage());
 					}
 					finally{
-						securityService.popAdvisor();
+						securityService.popAdvisor(securityAdvisor);
 					}
 				}
 			}

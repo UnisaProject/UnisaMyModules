@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.sakaiproject.signup</groupId>
         <artifactId>signup</artifactId>
-        <version>11.4</version>
+        <version>12.6</version>
     </parent>
 
     <name>Sakai Signup Tool</name>
@@ -75,12 +75,12 @@
         <dependency>
             	<groupId>javax.faces</groupId>
             	<artifactId>jsf-api</artifactId>
-            	<version>1.2_15</version>
+            	<version>1.2_15-06</version>
         </dependency>
         <dependency>
             	<groupId>javax.faces</groupId>
             	<artifactId>jsf-impl</artifactId>
-               <version>1.2_15</version>
+               <version>1.2_15-06</version>
         </dependency>
 		<!-- end of JSF related version issue -->
 		
@@ -111,6 +111,10 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
         </dependency>
+        <dependency>
+           <groupId>org.apache.poi</groupId>
+           <artifactId>poi-ooxml</artifactId>
+		</dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
@@ -153,22 +157,10 @@
             <groupId>org.mnode.ical4j</groupId>
             <artifactId>ical4j</artifactId>
         </dependency>
-        <!-- ical4j is dependent on backport -->
-   		<dependency>
-			<groupId>backport-util-concurrent</groupId>
-			<artifactId>backport-util-concurrent</artifactId>
-		</dependency>
-
         <!-- test dependencies -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>1.8.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

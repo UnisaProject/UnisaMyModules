@@ -34,8 +34,7 @@ import java.util.Stack;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.alias.api.AliasService;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ComponentManager;
@@ -62,7 +61,7 @@ import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException;
+import org.springframework.orm.hibernate4.HibernateOptimisticLockingFailureException;
 import org.hibernate.HibernateException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -100,10 +99,9 @@ import uk.ac.cam.caret.sakai.rwiki.utils.TimeLogger;
  */
 
 // FIXME: Component
+@Slf4j
 public class RWikiObjectServiceImpl implements RWikiObjectService
 {
-
-	private static Logger log = LoggerFactory.getLogger(RWikiObjectServiceImpl.class);
 
 	private RWikiCurrentObjectDao cdao;
 
@@ -150,7 +148,7 @@ public class RWikiObjectServiceImpl implements RWikiObjectService
 	
 	private int maxReferencesStringSize = 4000;
 
-	private boolean trackReads = ServerConfigurationService.getBoolean("wiki.trackreads", false);
+	private boolean trackReads = ServerConfigurationService.getBoolean("wiki.trackreads", true);
    
 	/**
 	 * Configuration: to run the ddl on init or not.
@@ -996,7 +994,7 @@ public class RWikiObjectServiceImpl implements RWikiObjectService
 			}
 			catch (Exception any)
 			{
-				any.printStackTrace();
+				log.error(any.getMessage(), any);
 				results.append(Messages.getString("RWikiObjectServiceImpl.31") + siteId //$NON-NLS-1$
 						+ " " + any.toString() + "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			}

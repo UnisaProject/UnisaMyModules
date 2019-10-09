@@ -23,11 +23,17 @@ package org.sakaiproject.poll.logic.test;
 
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import static org.mockito.Mockito.mock;
+import org.sakaiproject.id.api.IdManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+
 import org.sakaiproject.poll.dao.PollDao;
 import org.sakaiproject.poll.logic.test.stubs.ExternalLogicStubb;
 import org.sakaiproject.poll.model.Option;
@@ -35,18 +41,13 @@ import org.sakaiproject.poll.model.Poll;
 import org.sakaiproject.poll.model.Vote;
 import org.sakaiproject.poll.service.impl.PollListManagerImpl;
 import org.sakaiproject.poll.service.impl.PollVoteManagerImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 
 @ContextConfiguration(locations={
 		"/hibernate-test.xml",
 		"classpath:org/sakaiproject/poll/spring-hibernate.xml" })
-public class PollListManagerTest extends AbstractJUnit4SpringContextTests {
+@Slf4j
+public class PollListManagerTest extends AbstractTransactionalJUnit4SpringContextTests {
 
-	private static Logger log = LoggerFactory.getLogger(PollListManagerTest.class);	
-	
 	private TestDataPreload tdp = new TestDataPreload();
 
 	@Autowired
@@ -69,6 +70,7 @@ public class PollListManagerTest extends AbstractJUnit4SpringContextTests {
 		pollListManager.setExternalLogic(externalLogicStubb);
 		pollVoteManager.setExternalLogic(externalLogicStubb);
 		pollListManager.setPollVoteManager(pollVoteManager);
+		pollListManager.setIdManager(mock(IdManager.class));
 		
 		// preload testData
 		tdp.preloadTestData(dao);
@@ -98,7 +100,7 @@ public class PollListManagerTest extends AbstractJUnit4SpringContextTests {
 			Assert.fail("should not be allowed to read this poll");
 		} 
 		catch (SecurityException e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
     }
 
@@ -139,7 +141,7 @@ public class PollListManagerTest extends AbstractJUnit4SpringContextTests {
 			Assert.fail();
 		}
 		catch (IllegalArgumentException e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		
 		
@@ -151,7 +153,7 @@ public class PollListManagerTest extends AbstractJUnit4SpringContextTests {
 			Assert.fail();
 		}
 		catch (IllegalArgumentException e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		
 		externalLogicStubb.currentUserId = TestDataPreload.USER_NO_ACCEESS;
@@ -160,14 +162,14 @@ public class PollListManagerTest extends AbstractJUnit4SpringContextTests {
 			Assert.fail();
 		}
 		catch (IllegalArgumentException e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		catch (SecurityException se) {
-			se.printStackTrace();
+			log.error(se.getMessage(), se);
 		}
-		
+
     }
-	
+
 	@Test
     public void testDeletePoll() {
     	
@@ -188,12 +190,11 @@ public class PollListManagerTest extends AbstractJUnit4SpringContextTests {
 			pollListManager.deletePoll(poll1);
 			Assert.fail();
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		} 
 		catch (IllegalArgumentException e) {
 			// Successful tests should be quiet. IllegalArgumentException is actually expected on a null ID.
-			//e.printStackTrace();
+			//log.error(e.getMessage(), e);
 		}
 		
 		pollListManager.savePoll(poll1);
@@ -229,7 +230,7 @@ public class PollListManagerTest extends AbstractJUnit4SpringContextTests {
 			Assert.fail();
 		} catch (SecurityException e) {
 			// Successful tests should be quiet. SecurityException is expected here.
-			//e.printStackTrace();
+			//log.error(e.getMessage(), e);
 		}
 		
 		
@@ -237,8 +238,7 @@ public class PollListManagerTest extends AbstractJUnit4SpringContextTests {
     	try {
 			pollListManager.deletePoll(poll1);
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 			Assert.fail();
 		}
 		
@@ -251,7 +251,5 @@ public class PollListManagerTest extends AbstractJUnit4SpringContextTests {
 		Option o2 = pollListManager.getOptionById(option2Id);
 		Assert.assertNull(o1);
 		Assert.assertNull(o2);
-		
-		
     }
 }

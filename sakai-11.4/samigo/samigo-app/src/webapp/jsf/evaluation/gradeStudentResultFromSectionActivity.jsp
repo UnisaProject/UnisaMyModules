@@ -91,9 +91,9 @@ document.location='../evaluation/gradeStudentResult';
       <h:outputText value="#{evaluationMessages.title_total}" />
     </h:commandLink>
     
-    <h:outputText value=" #{evaluationMessages.separator} " rendered="#{totalScores.firstItem ne '' && !totalScores.hasRandomDrawPart}"  />
+    <h:outputText value=" #{evaluationMessages.separator} " rendered="#{totalScores.firstItem ne ''}"  />
     <h:commandLink title="#{evaluationMessages.t_histogram}" action="histogramScores" immediate="true"
-      rendered="#{totalScores.firstItem ne '' && !totalScores.hasRandomDrawPart}" >
+      rendered="#{totalScores.firstItem ne ''}" >
       <h:outputText value="#{evaluationMessages.stat_view}" />
       <f:actionListener
         type="org.sakaiproject.tool.assessment.ui.listener.evaluation.HistogramListener" />
@@ -248,7 +248,7 @@ document.location='../evaluation/gradeStudentResult';
 <h:inputHidden value="#{author.currentFormTime}" />
 
 <h:outputLink id="createEmail1" onclick="clickEmailLink(this, \"#{totalScores.graderName}\", '#{totalScores.graderEmailInfo}', \"#{studentScores.firstName} #{studentScores.lastName}\", '#{studentScores.email}', '#{totalScores.assessmentName}');" value="#"> 
-  <h:outputText value="  #{evaluationMessages.email} #{studentScores.firstName}" rendered="#{studentScores.email != null && studentScores.email != '' && email.fromEmailAddress != null && email.fromEmailAddress != ''}" />
+  <h:outputText value="  #{evaluationMessages.email} #{studentScores.firstName}" rendered="#{totalScores.anonymous eq 'false' && studentScores.email != null && studentScores.email != '' && email.fromEmailAddress != null && email.fromEmailAddress != ''}" />
 </h:outputLink>
 
 <h:commandLink id="hiddenlink1" value="" action="studentScores">

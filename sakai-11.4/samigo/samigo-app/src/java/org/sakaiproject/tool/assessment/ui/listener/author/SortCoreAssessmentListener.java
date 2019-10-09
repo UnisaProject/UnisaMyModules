@@ -19,19 +19,18 @@
  *
  **********************************************************************************/
 
-
-
 package org.sakaiproject.tool.assessment.ui.listener.author;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 import org.sakaiproject.tool.assessment.facade.AssessmentFacade;
 import org.sakaiproject.tool.assessment.facade.AssessmentFacadeQueries;
 import org.sakaiproject.tool.assessment.services.assessment.AssessmentService;
@@ -42,11 +41,10 @@ import org.sakaiproject.util.FormattedText;
 /**
  * <p>Description: SortCoreAssessmentListener</p>
  */
-
+@Slf4j
 public class SortCoreAssessmentListener
     implements ActionListener
 {
-  private static Logger log = LoggerFactory.getLogger(SortCoreAssessmentListener.class);
 
   public SortCoreAssessmentListener()
   {
@@ -66,7 +64,7 @@ public class SortCoreAssessmentListener
     //   getExternalContext().getRequestParameterMap().get("coreOrderBy");
     //author.setCoreAssessmentOrderBy(orderBy);
 
-    ArrayList assessmentList = new ArrayList();
+    List assessmentList = new ArrayList();
 
       assessmentList = assessmentService.getBasicInfoOfAllActiveAssessments(
         this.getCoreOrderBy(author), author.isCoreAscending());
@@ -104,7 +102,7 @@ public class SortCoreAssessmentListener
 
     if (coreAscending != null && !coreAscending.trim().equals("")) {
       try {
-        bean.setCoreAscending((Boolean.valueOf(coreAscending)).booleanValue());
+        bean.setCoreAscending(Boolean.valueOf(coreAscending));
       }
       catch (Exception ex) { //skip
         log.warn(ex.getMessage());

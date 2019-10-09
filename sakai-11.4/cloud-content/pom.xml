@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.sakaiproject</groupId>
     <artifactId>master</artifactId>
-    <version>11.4</version>
+    <version>12.6</version>
     <relativePath>../master/pom.xml</relativePath>
   </parent>
 
@@ -20,7 +20,6 @@
 
   <modules>
     <module>impl</module>
-    <module>pack</module>
   </modules>
 
 

@@ -22,9 +22,10 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.Member;
 import org.sakaiproject.authz.api.SecurityService;
@@ -63,6 +64,7 @@ import org.sakaiproject.util.ResourceLoader;
  * 
  * @author Aaron Zeckoski (azeckoski @ gmail.com)
  */
+@Slf4j
 public class ExternalLogic {
 
     public final static String EXTERNAL_DATASOURCE = "GB_REST";
@@ -70,8 +72,6 @@ public class ExternalLogic {
 
     public String serverId = "UNKNOWN_SERVER_ID";
     public final static String NO_LOCATION = "noLocationAvailable";
-
-    private final static Logger log = LoggerFactory.getLogger(ExternalLogic.class);
 
     protected AuthzGroupService authzGroupService;
     public void setAuthzGroupService(AuthzGroupService authzGroupService) {
@@ -442,7 +442,7 @@ public class ExternalLogic {
         for (CategoryDefinition categoryDefinition : gradebookService.getCategoryDefinitions(gbID)) {
         	List<SparseGradebookItem> assignmentsRest = getAssignmentsForCategories(categoryDefinition);
         	Category categoryRest=new Category(categoryDefinition.getName(), 
-        			categoryDefinition.getWeight(),categoryDefinition.getDrop_lowest(),
+        			categoryDefinition.getWeight(),categoryDefinition.getDropLowest(),
         			categoryDefinition.getDropHighest(),categoryDefinition.getKeepHighest(),assignmentsRest);
         	categories.add(categoryRest);
         }
@@ -674,7 +674,7 @@ public class ExternalLogic {
                 gbItem.name = makeSafeAssignmentName(gradebookId, gbItem.name);
                 if (EXTERNAL_ONLY) {
                     gradebookExternalAssessmentService.addExternalAssessment(gradebookId, gbItem.eid, 
-                            null, gbItem.name, gbItem.pointsPossible, gbItem.dueDate, EXTERNAL_DATASOURCE, false);
+                            null, gbItem.name, gbItem.pointsPossible, gbItem.dueDate, EXTERNAL_DATASOURCE, null, false);
                     // GradebookNotFoundException, ConflictingAssignmentNameException, ConflictingExternalIdException, AssignmentHasIllegalPointsException
                     // fetch the newly created assignment object so we can get the id from it
                     isExternal = true;
@@ -725,7 +725,7 @@ public class ExternalLogic {
                 }
                 if (isExternal) {
                     gradebookExternalAssessmentService.updateExternalAssessment(gradebookId, gbItem.eid, 
-                            null, assignment.getName(), assignment.getPoints(), assignment.getDueDate(), false);
+                            null, null, assignment.getName(), assignment.getPoints(), assignment.getDueDate(), false);
                     if (log.isDebugEnabled()) log.debug("updated external assignment ("+assignment+") from item: "+gbItem);
                 } else {
                     // assign new values to existing assignment

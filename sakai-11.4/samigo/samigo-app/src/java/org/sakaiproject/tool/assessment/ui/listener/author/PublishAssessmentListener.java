@@ -19,8 +19,6 @@
  *
  **********************************************************************************/
 
-
-
 package org.sakaiproject.tool.assessment.ui.listener.author;
 
 import java.io.UnsupportedEncodingException;
@@ -28,7 +26,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -43,15 +40,22 @@ import javax.faces.event.ActionListener;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sakaiproject.tool.assessment.integration.helper.ifc.CalendarServiceHelper;
+import lombok.extern.slf4j.Slf4j;
+
 import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.email.cover.EmailService;
 import org.sakaiproject.event.cover.EventTrackingService;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.site.api.Site;
+import org.sakaiproject.site.cover.SiteService;
+import org.sakaiproject.spring.SpringBeanLocator;
+import org.sakaiproject.samigo.util.SamigoConstants;
 import org.sakaiproject.service.gradebook.shared.AssignmentHasIllegalPointsException;
 import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
-import org.sakaiproject.service.gradebook.shared.GradebookService;
-import org.sakaiproject.spring.SpringBeanLocator;
+import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedSectionData;
+import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
+import org.sakaiproject.tool.assessment.facade.ExtendedTimeFacade;
+import org.sakaiproject.tool.assessment.integration.helper.ifc.CalendarServiceHelper;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedMetaData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentAccessControlIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentMetaDataIfc;
@@ -62,6 +66,7 @@ import org.sakaiproject.tool.assessment.facade.PublishedAssessmentFacade;
 import org.sakaiproject.tool.assessment.integration.context.IntegrationContextFactory;
 import org.sakaiproject.tool.assessment.integration.helper.ifc.GradebookServiceHelper;
 import org.sakaiproject.tool.assessment.services.GradingService;
+import org.sakaiproject.tool.assessment.services.PersistenceService;
 import org.sakaiproject.tool.assessment.services.assessment.AssessmentService;
 import org.sakaiproject.tool.assessment.services.assessment.PublishedAssessmentService;
 import org.sakaiproject.tool.assessment.ui.bean.author.AssessmentSettingsBean;
@@ -70,12 +75,8 @@ import org.sakaiproject.tool.assessment.ui.bean.author.PublishRepublishNotificat
 import org.sakaiproject.tool.assessment.ui.bean.evaluation.TotalScoresBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 import org.sakaiproject.tool.assessment.util.TextFormat;
-import org.sakaiproject.util.ResourceLoader;
-import org.sakaiproject.email.cover.EmailService;
-import org.sakaiproject.site.api.Site;
 import org.sakaiproject.tool.cover.ToolManager;
-import org.sakaiproject.site.cover.SiteService;
-import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.util.ResourceLoader;
 
 /**
  * <p>Title: Samigo</p>2
@@ -83,12 +84,9 @@ import org.sakaiproject.exception.IdUnusedException;
  * @author Ed Smiley
  * @version $Id$
  */
-
+@Slf4j
 public class PublishAssessmentListener
     implements ActionListener {
-
-
-  private static Logger log = LoggerFactory.getLogger(PublishAssessmentListener.class);
 
   private static final GradebookServiceHelper gbsHelper =
       IntegrationContextFactory.getInstance().getGradebookServiceHelper();
@@ -207,8 +205,23 @@ public class PublishAssessmentListener
     	   sendNotification(pub, publishedAssessmentService, subject, notificationMessage, 
     			   assessmentSettings.getReleaseTo());
        }
-       EventTrackingService.post(EventTrackingService.newEvent("sam.assessment.publish", "siteId=" + AgentFacade.getCurrentSiteId() + ", assessmentId=" + assessment.getAssessmentId() + ", publishedAssessmentId=" + pub.getPublishedAssessmentId(), true));
-       //update Calendar Events
+
+       ExtendedTimeFacade extendedTimeFacade = PersistenceService.getInstance().getExtendedTimeFacade();
+       extendedTimeFacade.copyEntriesToPub(pub.getData(), assessmentSettings.getExtendedTimes());
+
+       EventTrackingService.post(EventTrackingService.newEvent(SamigoConstants.EVENT_ASSESSMENT_PUBLISH, "siteId=" + AgentFacade.getCurrentSiteId() + ", assessmentId=" + assessment.getAssessmentId() + ", publishedAssessmentId=" + pub.getPublishedAssessmentId(), true));
+
+		Iterator<PublishedSectionData> sectionDataIterator = pub.getSectionSet().iterator();
+		while (sectionDataIterator.hasNext()){
+			PublishedSectionData sectionData = sectionDataIterator.next();
+			Iterator<ItemDataIfc> itemDataIfcIterator = sectionData.getItemSet().iterator();
+			while (itemDataIfcIterator.hasNext()){
+				ItemDataIfc itemDataIfc = itemDataIfcIterator.next();
+				EventTrackingService.post(EventTrackingService.newEvent(SamigoConstants.EVENT_PUBLISHED_ASSESSMENT_SAVEITEM, "/sam/" + AgentFacade.getCurrentSiteId() + "/publish, publishedItemId=" + itemDataIfc.getItemIdString(), true));
+			}
+		}
+
+		//update Calendar Events
        boolean addDueDateToCalendar = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("publishAssessmentForm:calendarDueDate") != null;
        calendarService.updateAllCalendarEvents(pub, assessmentSettings.getReleaseTo(), assessmentSettings.getGroupsAuthorized(), rl.getString("calendarDueDatePrefix") + " ", addDueDateToCalendar, notificationMessage);
     } catch (AssignmentHasIllegalPointsException gbe) {
@@ -253,7 +266,7 @@ public class PublishAssessmentListener
       error=true;
     }
     
-    if (!assessmentService.assessmentTitleIsUnique(assessmentId, TextFormat.convertPlaintextToFormattedTextNoHighUnicode(log, assessmentName), false)){
+    if (!assessmentService.assessmentTitleIsUnique(assessmentId, TextFormat.convertPlaintextToFormattedTextNoHighUnicode(assessmentName), false)){
       error=true;
       String nameUnique_err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages","assessmentName_error");
       FacesContext.getCurrentInstance().addMessage(null,new FacesMessage(nameUnique_err));
@@ -303,15 +316,15 @@ public class PublishAssessmentListener
 	  totalScoresBean.setPublishedId(pub.getPublishedAssessmentId().toString());
 	  Map useridMap= totalScoresBean.getUserIdMap(TotalScoresBean.CALLED_FROM_NOTIFICATION_LISTENER); 
 	  AgentFacade agent = null;
-	  int size = useridMap.size() + 1;
-	  ArrayList<InternetAddress> toIAList = new ArrayList();
+
+	  ArrayList<InternetAddress> toIAList = new ArrayList<>();
 	  try {
 		  toIAList.add(new InternetAddress(instructor.getEmail())); // send one copy to instructor
 	  } catch (AddressException e) {
 		  log.warn("AddressException encountered when constructing instructor's email.");
 	  }
 	  Iterator iter = useridMap.keySet().iterator();
-	  int i = 1;
+
 	  while (iter.hasNext()) {
 		  String userUid = (String) iter.next();
 		  agent = new AgentFacade(userUid);
@@ -344,7 +357,7 @@ public class PublishAssessmentListener
 	  
 	  List<String> headers = new  ArrayList<String>();
 	  headers.add("Content-Type: text/html");
-	  EmailService.sendMail(fromIA, toIA, subject.toString(), message, noReply, noReply, headers);
+	  EmailService.sendMail(fromIA, toIA, subject, message, noReply, noReply, headers);
   }
   
   public String getNotificationMessage(PublishRepublishNotificationBean publishRepublishNotification, String title, String releaseTo, String startDateString, String publishedURL, String releaseToGroupsAsString, String dueDateString, Integer timedHours, Integer timedMinutes, String unlimitedSubmissions, String submissionsAllowed, String scoringType, String feedbackDelivery, String feedbackDateString){
@@ -368,14 +381,14 @@ public class PublishAssessmentListener
 		  (!prePopulateText.trim().equals(rl.getString("pre_populate_text_publish")) && 
 		   !prePopulateText.trim().equals(rl.getString("pre_populate_text_republish")) && 
 		   !prePopulateText.trim().equals(rl.getString("pre_populate_text_regrade_republish")))) {
-		  message.append(TextFormat.convertPlaintextToFormattedTextNoHighUnicode(log, prePopulateText));
+		  message.append(TextFormat.convertPlaintextToFormattedTextNoHighUnicode(prePopulateText));
 		  message.append(newline);
 		  message.append(newline);
 	  }
 
 	  message.append("\"");
 	  message.append(bold_open);
-	  message.append(TextFormat.convertPlaintextToFormattedTextNoHighUnicode(log, title));
+	  message.append(TextFormat.convertPlaintextToFormattedTextNoHighUnicode(title));
 	  message.append(bold_close);
 	  message.append("\"");
 	  message.append(" ");
@@ -434,6 +447,9 @@ public class PublishAssessmentListener
 	  message.append(" ");
 	  if ("1".equals(scoringType)) {
 		  message.append(rl.getString("record_highest"));
+	  }
+	  else if ("4".equals(scoringType)) {
+		message.append(rl.getString("record_average"));
 	  }
 	  else {
 		  message.append(rl.getString("record_last"));

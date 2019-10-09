@@ -19,11 +19,8 @@
  *
  **********************************************************************************/
 
-
-
 package org.sakaiproject.tool.assessment.ui.listener.delivery;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Date;
 
@@ -32,20 +29,14 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
-import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentAccessControl;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedFeedback;
-import org.sakaiproject.tool.assessment.data.dao.authz.AuthorizationData;
 import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentAccessControlIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentFeedbackIfc;
@@ -59,23 +50,21 @@ import org.sakaiproject.tool.assessment.facade.PublishedAssessmentFacade;
 import org.sakaiproject.tool.assessment.services.GradingService;
 import org.sakaiproject.tool.assessment.services.assessment.AssessmentService;
 import org.sakaiproject.tool.assessment.services.assessment.PublishedAssessmentService;
-import org.sakaiproject.tool.assessment.services.PersistenceService;
 import org.sakaiproject.tool.assessment.ui.bean.author.AssessmentBean;
 import org.sakaiproject.tool.assessment.ui.bean.author.AuthorBean;
 import org.sakaiproject.tool.assessment.ui.bean.authz.AuthorizationBean;
-import org.sakaiproject.tool.assessment.ui.bean.cms.CourseManagementBean;
 import org.sakaiproject.tool.assessment.ui.bean.delivery.DeliveryBean;
 import org.sakaiproject.tool.assessment.ui.bean.delivery.FeedbackComponent;
 import org.sakaiproject.tool.assessment.ui.bean.delivery.SectionContentsBean;
 import org.sakaiproject.tool.assessment.ui.bean.delivery.SettingsDeliveryBean;
 import org.sakaiproject.tool.assessment.ui.bean.shared.PersonBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
-import org.sakaiproject.tool.assessment.ui.listener.util.TimeUtil;
 import org.sakaiproject.tool.assessment.ui.model.delivery.TimedAssessmentGradingModel;
 import org.sakaiproject.tool.assessment.ui.queue.delivery.TimedAssessmentQueue;
-import org.sakaiproject.tool.assessment.util.ExtendedTimeService;
+import org.sakaiproject.tool.assessment.util.ExtendedTimeDeliveryService;
 import org.sakaiproject.tool.assessment.ui.listener.author.RemovePublishedAssessmentThread;
 import org.sakaiproject.util.ResourceLoader;
+
 /**
  * <p>Title: Samigo</p>
  * <p>Purpose:  this module handles the beginning of the assessment
@@ -83,10 +72,9 @@ import org.sakaiproject.util.ResourceLoader;
  * @author Ed Smiley
  * @version $Id$
  */
-
+@Slf4j
 public class BeginDeliveryActionListener implements ActionListener
 {
-  private static Logger log = LoggerFactory.getLogger(BeginDeliveryActionListener.class);
 
   /**
    * ACTION.
@@ -264,7 +252,7 @@ public class BeginDeliveryActionListener implements ActionListener
   private FeedbackComponent populateFeedbackComponent(PublishedAssessmentFacade pubAssessment)
   {
     FeedbackComponent component = new FeedbackComponent();
-    AssessmentFeedbackIfc info =  (AssessmentFeedbackIfc) pubAssessment.getAssessmentFeedback();
+    AssessmentFeedbackIfc info =  pubAssessment.getAssessmentFeedback();
     if ( info != null) {
       component.setAssessmentFeedback(info);
     }
@@ -274,12 +262,12 @@ public class BeginDeliveryActionListener implements ActionListener
   public void populateSubmissionsRemaining(PublishedAssessmentService service, PublishedAssessmentIfc pubAssessment, DeliveryBean delivery) {
       AssessmentAccessControlIfc control = pubAssessment.getAssessmentAccessControl();
 
-      int totalSubmissions = service.getTotalSubmission(AgentFacade.getAgentString(), pubAssessment.getPublishedAssessmentId().toString()).intValue();
+      int totalSubmissions = service.getTotalSubmission(AgentFacade.getAgentString(), pubAssessment.getPublishedAssessmentId().toString());
       delivery.setTotalSubmissions(totalSubmissions);
 
       if (!(Boolean.TRUE).equals(control.getUnlimitedSubmissions())){
         // when re-takes are allowed always display 1 as number of remaining submission
-        int submissionsRemaining = control.getSubmissionsAllowed().intValue() - totalSubmissions;
+        int submissionsRemaining = control.getSubmissionsAllowed() - totalSubmissions;
         if (submissionsRemaining < 1) {
             submissionsRemaining = 1;
         }
@@ -328,12 +316,13 @@ public class BeginDeliveryActionListener implements ActionListener
     delivery.setCreatorName(AgentFacade.getDisplayNameByAgentId(pubAssessment.getCreatedBy()));
     delivery.setInstructorName(AgentFacade.getDisplayNameByAgentId(pubAssessment.getCreatedBy()));
     delivery.setSubmitted(false);
+    delivery.setAssessmentSubmitted(false);
     delivery.setGraded(false);
     delivery.setPartIndex(0);
     delivery.setQuestionIndex(0);
     delivery.setBeginTime(null);
     delivery.setFeedbackOnDate(false);
-		ExtendedTimeService extTimeService = new ExtendedTimeService(delivery.getPublishedAssessment());
+		ExtendedTimeDeliveryService extTimeService = new ExtendedTimeDeliveryService(delivery.getPublishedAssessment());
 		PublishedAssessmentFacade paFacade = delivery.getPublishedAssessment();
 
 		if (extTimeService.hasExtendedTime()) {
@@ -379,11 +368,23 @@ public class BeginDeliveryActionListener implements ActionListener
     delivery.setDeadline();
   }
 
-  private void setTimedAssessment(DeliveryBean delivery, PublishedAssessmentIfc pubAssessment, ExtendedTimeService extTimeService, AssessmentGradingData unSubmittedAssessmentGrading){
+  private void setTimedAssessment(DeliveryBean delivery, PublishedAssessmentIfc pubAssessment, ExtendedTimeDeliveryService extTimeService, AssessmentGradingData unSubmittedAssessmentGrading){
 
     AssessmentAccessControlIfc control = pubAssessment.getAssessmentAccessControl();
     // check if we need to time the assessment, i.e.hasTimeassessment="true"
     String hasTimeLimit = pubAssessment.getAssessmentMetaDataByLabel("hasTimeAssessment");
+
+    //Override time limit settings if there's values in extended time
+    if (extTimeService.hasExtendedTime()) {
+    	if (extTimeService.getTimeLimit() > 0) {
+    		control.setTimeLimit(extTimeService.getTimeLimit());
+    		hasTimeLimit = "true";
+    	}
+    	else {
+    		hasTimeLimit = "false";
+    	}
+    }
+    
     if (hasTimeLimit!=null && hasTimeLimit.equals("true") && control.getTimeLimit() != null){
 
     	delivery.setHasTimeLimit(true);
@@ -391,8 +392,6 @@ public class BeginDeliveryActionListener implements ActionListener
 
     	if (unSubmittedAssessmentGrading == null || unSubmittedAssessmentGrading.getAttemptDate() == null) {
     		try {
-    			if (extTimeService.hasExtendedTime() && extTimeService.getTimeLimit() > 0)
-    				control.setTimeLimit(extTimeService.getTimeLimit());
     			if (control.getTimeLimit() != null) {
     				Integer timeLimit = control.getTimeLimit();
     				if(timeLimit < 1) delivery.setHasTimeLimit(false); //TODO: figure out why I have to do this
@@ -462,7 +461,7 @@ public class BeginDeliveryActionListener implements ActionListener
     		if((now - start) > (timeLimitInSetting*1000)) {
     			// check if the queue is ahead and already submitted it
     			TimedAssessmentQueue queue = TimedAssessmentQueue.getInstance();
-    			TimedAssessmentGradingModel timedAG = (TimedAssessmentGradingModel)queue.
+    			TimedAssessmentGradingModel timedAG = queue.
     					get(unSubmittedAssessmentGrading.getAssessmentGradingId());
     			// if it was submitted (race condition) while checking, unblock it - sam will synch soon
     			if(timedAG != null && !timedAG.getSubmittedForGrade()) {
@@ -513,8 +512,6 @@ public class BeginDeliveryActionListener implements ActionListener
     				List resourceIdList = assessmentService.getAssessmentResourceIdList(pub);
     				PersonBean personBean = (PersonBean) ContextUtil.lookupBean("person");
     				personBean.setResourceIdListInPreview(resourceIdList);
-    				//log.info("****publishedId="+publishedId);
-    				//log.info("****clone publishedId="+pub.getPublishedAssessmentId());
     				RemovePublishedAssessmentThread thread = new RemovePublishedAssessmentThread(publishedId, "preview");
     				thread.start();
     			} 
@@ -523,7 +520,7 @@ public class BeginDeliveryActionListener implements ActionListener
     			}
     		}else{
     			FacesContext context = FacesContext.getCurrentInstance();
-    			if(success == AssessmentService.UPDATE_ERROR_DRAW_SIZE_TOO_LARGE){  		    		
+    			if(success == AssessmentService.UPDATE_ERROR_DRAW_SIZE_TOO_LARGE){
     				String err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages","update_pool_error_size_too_large");
     				context.addMessage(null,new FacesMessage(err));
     			}else{
@@ -569,12 +566,12 @@ public class BeginDeliveryActionListener implements ActionListener
 			  AssessmentBean assessmentBean = (AssessmentBean) ContextUtil.lookupBean("assessmentBean");
 			  if(assessmentBean != null && assessmentBean.getSections() != null){
 				  for(int i = 0; i < assessmentBean.getSections().size(); i++){
-					  SectionContentsBean sectionBean = (SectionContentsBean) assessmentBean.getSections().get(i);
+					  SectionContentsBean sectionBean = assessmentBean.getSections().get(i);
 					  if((sectionBean.getSectionAuthorTypeString() != null)
 							  && (sectionBean.getSectionAuthorTypeString().equals(SectionDataIfc.RANDOM_DRAW_FROM_QUESTIONPOOL
 									  .toString()))){
 						  //this has been updated so we need to reset it
-						  assessmentBean.getSections().set(i, new SectionContentsBean(assessmentService.getSection(sectionBean.getSectionId().toString())));						
+						  assessmentBean.getSections().set(i, new SectionContentsBean(assessmentService.getSection(sectionBean.getSectionId())));
 					  }
 				  }
 			  }

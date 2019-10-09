@@ -19,25 +19,13 @@
  *
  **********************************************************************************/
 
-
 package org.sakaiproject.tool.assessment.services;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.section.api.SectionAwareness;
-import org.sakaiproject.tool.assessment.facade.AssessmentFacadeQueriesAPI;
-import org.sakaiproject.tool.assessment.facade.AssessmentGradingFacadeQueriesAPI;
-import org.sakaiproject.tool.assessment.facade.AuthzQueriesFacadeAPI;
-import org.sakaiproject.tool.assessment.facade.FavoriteColChoicesFacadeQueriesAPI;
-import org.sakaiproject.tool.assessment.facade.EventLogFacadeQueriesAPI;
-import org.sakaiproject.tool.assessment.facade.ItemFacadeQueriesAPI;
-import org.sakaiproject.tool.assessment.facade.PublishedAssessmentFacadeQueriesAPI;
-import org.sakaiproject.tool.assessment.facade.PublishedItemFacadeQueriesAPI;
-import org.sakaiproject.tool.assessment.facade.PublishedSectionFacadeQueriesAPI;
-import org.sakaiproject.tool.assessment.facade.QuestionPoolFacadeQueriesAPI;
-import org.sakaiproject.tool.assessment.facade.SectionFacadeQueriesAPI;
-import org.sakaiproject.tool.assessment.facade.TypeFacadeQueriesAPI;
+import org.sakaiproject.tool.assessment.facade.*;
 import org.sakaiproject.tool.assessment.facade.authz.AuthorizationFacadeQueriesAPI;
 import org.sakaiproject.tool.assessment.facade.util.PagingUtilQueriesAPI;
 
@@ -47,9 +35,9 @@ import org.sakaiproject.tool.assessment.facade.util.PagingUtilQueriesAPI;
  * To change the template for this generated type comment go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
+@Slf4j
 public class PersistenceService{
 
-	private Logger log = LoggerFactory.getLogger(PersistenceService.class);
 	private QuestionPoolFacadeQueriesAPI questionPoolFacadeQueries;
 	private TypeFacadeQueriesAPI typeFacadeQueries;
 	private SectionFacadeQueriesAPI sectionFacadeQueries;
@@ -65,6 +53,7 @@ public class PersistenceService{
 	private SectionAwareness sectionAwareness;
 	private FavoriteColChoicesFacadeQueriesAPI favoriteColChoicesFacadeQueries;
 	private PersistenceHelper persistenceHelper;
+	private ExtendedTimeFacade extendedTimeFacade;
 	
 	
         private EventLogFacadeQueriesAPI eventLogFacadeQueries;  
@@ -174,7 +163,7 @@ public class PersistenceService{
 	public void setAssessmentGradingFacadeQueries(AssessmentGradingFacadeQueriesAPI assessmentGradingFacadeQueries){
 	    this.assessmentGradingFacadeQueries = assessmentGradingFacadeQueries;
 	}
-
+	
         public AuthorizationFacadeQueriesAPI getAuthorizationFacadeQueries(){
 	  return authorizationFacadeQueries;
         }
@@ -249,6 +238,14 @@ public class PersistenceService{
 
 	public FavoriteColChoicesFacadeQueriesAPI getFavoriteColChoicesFacadeQueries(){
 		return favoriteColChoicesFacadeQueries;
+	}
+
+	public void setExtendedTimeFacade(ExtendedTimeFacade extendedTimeFacade) {
+		this.extendedTimeFacade = extendedTimeFacade;
+	}
+
+	public ExtendedTimeFacade getExtendedTimeFacade() {
+		return extendedTimeFacade;
 	}
 }
 

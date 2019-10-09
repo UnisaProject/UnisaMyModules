@@ -23,6 +23,8 @@ package org.sakaiproject.tool.su;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
@@ -30,8 +32,8 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -41,6 +43,7 @@ import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.event.api.UsageSessionService;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService.SelectionType;
+import org.sakaiproject.time.api.UserTimeService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.user.api.User;
@@ -52,12 +55,10 @@ import org.sakaiproject.util.ResourceLoader;
 /**
  * @author zach.thomas@txstate.edu
  */
+@Slf4j
 public class SuTool
 {
 	private static final long serialVersionUID = 1L;
-
-	/** Our log (commons). */
-	private static Logger M_log = LoggerFactory.getLogger(SuTool.class);
 
 	protected static final String SU_BECOME_USER = "su.become";
 	protected static final String SU_VIEW_USER = "su.view";
@@ -77,6 +78,8 @@ public class SuTool
 			.getInstance();
 	
 	private EventTrackingService M_event_service = org.sakaiproject.event.cover.EventTrackingService.getInstance();
+
+	private UserTimeService userTimeService = (UserTimeService) ComponentManager.get(UserTimeService.class);
 
 	// getters for these vars
 	private String username;
@@ -115,7 +118,7 @@ public class SuTool
 				allowDelegatedAccessBecomeUser = true;
 			}
 		}catch(Exception e){
-			M_log.info("Could not inject Delegated Access logic bean, either doesn't exist or there is a bigger problem");
+			log.info("Could not inject Delegated Access logic bean, either doesn't exist or there is a bigger problem");
 		}
 	}
 
@@ -150,7 +153,7 @@ public class SuTool
 			{
 				message = msgs.getString("no_such_user") + ": " + username;
 				fc.addMessage("su", new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message + ":" + ee));
-				M_log.warn("[SuTool] Exception: " + message);
+				log.warn("[SuTool] Exception: " + message);
 				confirm = false;
 				return "error";
 			}
@@ -168,7 +171,7 @@ public class SuTool
 			confirm = false;
 			message = msgs.getFormattedMessage("already_that_user", new Object[] {username});
 			fc.addMessage("su", new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message));
-			M_log.warn("[SuTool] Exception: " + message);
+			log.warn("[SuTool] Exception: " + message);
 			confirm = false;
 			return "error";
 		}
@@ -184,7 +187,7 @@ public class SuTool
 
 		// set the session user from the value supplied in the form
       message = "Username " + sakaiSession.getUserEid() + " becoming " + validatedUserEid;
-		M_log.info("[SuTool] " + message);
+		log.info("[SuTool] " + message);
       message = msgs.getString("title");
 		fc.addMessage("su", new FacesMessage(FacesMessage.SEVERITY_INFO, message, message + ": "
 				+ userinfo.getDisplayName()));
@@ -211,7 +214,7 @@ public class SuTool
 			try{
 				initializeDelegatedAccessSession.invoke(delegatedAccessLogic, new Object[]{});
 			}catch(Exception e){
-				M_log.error(e.getMessage(), e);
+				log.error(e.getMessage(), e);
 			}
 		}
 
@@ -220,7 +223,7 @@ public class SuTool
 		try {
 			context.redirect(getPortalUrl());
 		} catch (IOException e) {
-			M_log.error("Failed to redirect to portal : " + e.getMessage());
+			log.error("Failed to redirect to portal : " + e.getMessage());
 		}
 		return "";
 	}
@@ -243,7 +246,7 @@ public class SuTool
 		if (!M_security.isSuperUser() && sakaiSession.getAttribute("delegatedaccess.accessmapflag") != null)
 		{
 			message = msgs.getString("unauthorized") + " " + sakaiSession.getUserId();
-			M_log.error("[SuTool] Fatal Error: " + message);
+			log.error("[SuTool] Fatal Error: " + message);
 			fc.addMessage("allowed", new FacesMessage(FacesMessage.SEVERITY_FATAL, message, message));
 			allowed = false;
 		}
@@ -280,7 +283,7 @@ public class SuTool
 							sakaiSession.setUserEid(userinfo.getEid());
 							siteList = org.sakaiproject.site.cover.SiteService.getSites(SelectionType.ACCESS, null, null, null, null, null);
 						}catch(Exception e){
-							M_log.info(e.getMessage(), e);
+							log.info(e.getMessage(), e);
 						}finally{
 							sakaiSession.setUserId(currentUserId);
 							sakaiSession.setUserEid(currentUserEid);
@@ -297,7 +300,7 @@ public class SuTool
 									}
 								}
 							}catch(Exception e){
-								M_log.info(e.getMessage(), e);
+								log.info(e.getMessage(), e);
 							}
 							if(anyAccess){
 								//this means that the current user has access to a site that the userinfo user is a member of, so
@@ -306,35 +309,35 @@ public class SuTool
 							}else{
 								//current user can't become a user that isn't within their DA access
 								message = msgs.getString("unauthorized_danoaccess");
-								M_log.error("[SuTool] Fatal Error: " + message + " " + sakaiSession.getUserId());
+								log.error("[SuTool] Fatal Error: " + message + " " + sakaiSession.getUserId());
 								fc.addMessage("allowed", new FacesMessage(FacesMessage.SEVERITY_FATAL, message, message));
 								allowed = false;
 							}
 						}else{
 							//the userinfo user either doesn't have any sites to access or there was an error
 							message = msgs.getString("unauthorized_danoaccess");
-							M_log.info("[SuTool] Fatal Error: " + message + " " + sakaiSession.getUserId());
+							log.info("[SuTool] Fatal Error: " + message + " " + sakaiSession.getUserId());
 							fc.addMessage("allowed", new FacesMessage(FacesMessage.SEVERITY_FATAL, message, message));
 							allowed = false;
 						}
 					}else{
 						//current user is trying to become a DA user, which isn't allowed
 						message = msgs.getString("unauthorized_da");
-						M_log.info("[SuTool] Fatal Error: " + message + " " + sakaiSession.getUserId());
+						log.info("[SuTool] Fatal Error: " + message + " " + sakaiSession.getUserId());
 						fc.addMessage("allowed", new FacesMessage(FacesMessage.SEVERITY_FATAL, message, message));
 						allowed = false;
 					}
 				}else{
 					//current user is not a DA user and not a super user, so they have no access
 					message = msgs.getString("unauthorized");
-					M_log.info("[SuTool] Fatal Error: " + message + " " + sakaiSession.getUserId());
+					log.info("[SuTool] Fatal Error: " + message + " " + sakaiSession.getUserId());
 					fc.addMessage("allowed", new FacesMessage(FacesMessage.SEVERITY_FATAL, message, message));
 					allowed = false;
 				}
 			}else{
 				//non admin users can't become an admin user
 				message = msgs.getString("unauthorized_superuser");
-				M_log.info("[SuTool] Fatal Error: " + message + " " + sakaiSession.getUserId());
+				log.info("[SuTool] Fatal Error: " + message + " " + sakaiSession.getUserId());
 				fc.addMessage("allowed", new FacesMessage(FacesMessage.SEVERITY_FATAL, message, message));
 				allowed = false;
 			}
@@ -375,6 +378,19 @@ public class SuTool
 		this.userinfo = userinfo;
 	}
 
+	public String getUserCreatedTime()
+	{
+		if (userinfo == null)
+		{
+			return "";
+		}
+
+		DateFormat dsf = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, msgs.getLocale());
+		dsf.setTimeZone(userTimeService.getLocalTimeZone());
+		Date createdDate = userinfo.getCreatedDate();
+		return dsf.format(createdDate == null ? new Date() : createdDate);
+	}
+
 	public String getMessage(){
 		return message;
 	}
@@ -395,7 +411,7 @@ public class SuTool
 					return Boolean.TRUE;
 				}
 			} catch (Exception e){
-				M_log.error(e.getMessage(), e);
+				log.error(e.getMessage(), e);
 			}
 		}
 		return Boolean.FALSE;	

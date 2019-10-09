@@ -315,8 +315,6 @@ public class FormattedTextTest {
         String repeatK    = "<span class class></span>";
         String repeatKV   = "<span class=\"one\" class=\"two\"></span>";
         String badK       = "<span class=\"foo\" class-></span>";
-        String badK2      = "<span class=\"foo\" data-></span>";
-        String badK3      = "<span class=\"foo\" data--></span>";
         String badKV      = "<span class=\"foo\" class-=\"one\"></span>";
 
         String resultRepeatK    = "<span></span>";
@@ -325,9 +323,9 @@ public class FormattedTextTest {
         String resultBadKV      = "<span class=\"foo\"></span>";
 
         // antisamy will not allow empty attributes OR unknown attributes
-        passTests   = new String[] { oneKV, twoKV, selfClose, subAttr, subAttrs };
-        failTests   = new String[] { repeatK, badK, badK2, badK3, badKV };
-        failResults = new String[] { resultRepeatK, resultBadK, resultBadK, resultBadK, resultBadKV };
+        passTests   = new String[] { oneKV, twoKV, selfClose, subAttr, subAttrs};
+        failTests   = new String[] { repeatK, badK, badKV };
+        failResults = new String[] { resultRepeatK, resultBadK, resultBadKV };
 
         result = formattedText.processFormattedText(repeatKV, new StringBuilder());
         Assert.assertEquals(resultRepeatKV, result);
@@ -729,6 +727,26 @@ public class FormattedTextTest {
         Assert.assertTrue( result.contains("insComplexValue"));
         Assert.assertTrue( result.contains("2013-10-29"));
         Assert.assertTrue( result.contains("/url/to/cite.html"));
+    }
+
+    @Test
+    public void testKNL_1531() {
+        // https://jira.sakaiproject.org/browse/KNL-1061
+        String strFromBrowser = null;
+        String result = null;
+        StringBuilder errorMessages = null;
+
+        strFromBrowser = "<div class=\"classValue\">divValue</div><img border=\"0\" aria-hidden=\"true\" aria-label=\"Close\" />";
+        errorMessages = new StringBuilder();
+        result = formattedText.processFormattedText(strFromBrowser, errorMessages);
+        Assert.assertNotNull(result);
+        Assert.assertFalse( errorMessages.length() > 10 );
+        Assert.assertTrue( result.contains("<div "));
+        Assert.assertTrue( result.contains("divValue"));
+        Assert.assertTrue( result.contains("<img"));
+        Assert.assertTrue( result.contains("aria-hidden"));
+        Assert.assertTrue( result.contains("aria-label"));
+        Assert.assertTrue( result.contains("Close"));
     }
 
     @Test
@@ -1135,6 +1153,21 @@ public class FormattedTextTest {
         result = formattedText.processFormattedText(result,errorMessages);
         Assert.assertTrue( errorMessages.length() == 0 );
         Assert.assertEquals(result, expectedAnchor);
+    }
+    
+    @Test
+    public void getHtmlBodyTest() {
+    	String result;
+        StringBuilder errorMessages = new StringBuilder();
+
+        result = formattedText.getHtmlBody("<html><body><div>Text</div></body></html>");
+        Assert.assertEquals("<div>Text</div>", result);
+        
+        result = formattedText.getHtmlBody("<div>Text</div>");
+        Assert.assertEquals("<div>Text</div>", result);
+
+        result = formattedText.getHtmlBody("");
+        Assert.assertEquals("", result);
     }
 
 
