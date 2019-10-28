@@ -1,0 +1,230 @@
+/**
+ * Copyright 2009 The Sakai Foundation
+ *
+ * Licensed under the Educational Community License, Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/ecl1.php
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#yaft_reply_container{
+	padding-left: 25px;
+}
+
+#yaft_edit_forum_container{
+	padding-left: 25px;
+}
+
+#yaft_toolbar_items{
+	float: left;
+}
+
+fieldset {
+    border: solid 1px black;
+	padding: 5px;
+	}
+#yaft_toolbar{
+    padding: 0px;
+}
+
+/* This governs the horizontal distance of a child from its parent */
+.yaft_messages{margin-left: 20px;}
+
+#yaft_search_bar{
+	float: right;
+}
+
+.yaft_profile_image {
+	float: left;
+	margin-right: 2px;
+}
+
+.yaft_unread_wrapper {
+	padding-left: 4px;
+	background-color: blue;
+}
+
+#yaft_container{
+	/*margin: 5px;*/
+}
+
+.yaft_profile_popup{
+	display: none;
+}
+
+.yaft_profile_popup_img{
+	float: right;
+	padding-left: 2px;
+}
+
+.yaft_profile_popup_name{
+	width: 190px;
+	font-weight: bold;
+	font-size: bigger;
+	float: left;
+	padding-left: 5px;
+}
+
+.yaft_profile_popup_name{
+	padding-left: 5px;
+}
+
+.yaft_message{
+	margin-bottom: 10px;
+	overflow: auto;
+	border: solid black 1px;
+	background-color: white;
+}
+
+#yaft_feedback_message {
+	color: red;
+	font-weight:bold;
+}
+
+.yaft_deleted_message{
+	display: none;
+	filter:alpha(opacity=50);
+	opacity: 0.5;
+}
+
+th.yaftSortableTableHeader { 
+    background-image: url(../images/bg.gif);     
+    cursor: pointer; 
+    background-repeat: no-repeat; 
+    background-position: center right; 
+}
+
+th.yaftSortableTableHeaderSortUp { 
+    background-image: url(../images/asc.gif); 
+}
+
+th.yaftSortableTableHeaderSortDown { 
+    background-image: url(../images/desc.gif); 
+} 
+
+.yaftForumDescription{
+	font-style: italic;
+	font-size: 8pt;
+	color: #666;
+}
+
+.yaftInvisible{
+	background-color: orange !important;
+}
+
+.yaftAlert{
+	display: none;
+	color: red;
+	font-weight: bold;
+}
+
+.cluetip-yaft {
+	padding: 10px;
+	border: black solid 1px;
+	background-color: white;
+}
+
+.clue-right-yaft .cluetip-arrows {
+  background-image: url(../images/darrowleft.gif);
+}
+.clue-left-yaft .cluetip-arrows {
+  background-image: url(../images/darrowright.gif);
+  left: 100%;
+  margin-right: -11px;
+}
+.clue-top-yaft .cluetip-arrows {
+  background-image: url(../images/darrowdown.gif);
+  top: 100%;
+  left: 50%;
+  margin-left: -11px;
+  height: 11px;
+  width: 22px;  
+}  
+.clue-bottom-yaft .cluetip-arrows {
+  background-image: url(../images/darrowup.gif);
+  top: -11px;
+  left: 50%;
+  margin-left: -11px;
+  height: 11px;
+  width: 22px;
+}
+.cluetip-yaft div#cluetip-close {
+	text-align: right;
+	margin: 0 5px 5px;
+	color: #900;
+}
+
+#yaft_content table td { padding: 3px; }
+#yaft_content table tr.odd td {
+	background-color: #FFFFC0;
+}
+
+#yaft_forum_table {
+    width: 100%;
+}
+
+#yaft_forum_table th div{
+	margin-right: 15px;
+}
+
+#yaft_discussion_table {
+    width: 100%;
+}
+
+#yaft_discussion_table th div{
+	margin-right: 15px;
+}
+
+#yaft_author_table {
+    width: 100%;
+}
+
+.yaft_group_title {
+	font-weight: bold;
+}
+
+.yaft_odd_row {
+	background-color: #FFFFC0;
+}
+
+.yaft_graded_in_label {
+    margin-left: 5px;
+    color: green;
+    font-weight: bold;
+}
+
+.yaft_small_graded_in_label {
+    margin-left: 5px;
+    color: green;
+    font-weight: italic;
+    font-size: smaller;
+}
+
+.yaft_grade_success_message {
+    margin-left: 5px;
+    color: green;
+    font-weight: bold;
+    display: none;
+}
+
+.textblock {
+    background-color: #FFFFDD;
+    border: 1px solid black;
+    border-radius: 1em 1em 1em 1em;
+    padding: 0 1em 1em;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: bold;
+    text-align: center;
+}
+
+#yaft_author_nav_buttons {
+    padding-bottom: 5px;
+}
