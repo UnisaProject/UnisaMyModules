@@ -1,0 +1,102 @@
+## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
+<div class="portletBody">
+
+#if($addFaqContent)
+#if($menu)
+	#toolbar($menu)
+#end
+#end
+
+#if ($userType == "Instructor")
+ <h3>
+ $tlang.getString("faq.faqview.heading") $siteTitle
+</h3>
+#end
+
+#if ($userType == "")
+ <h3>
+ $tlang.getString("faq.faqstudentview.heading") $siteTitle
+</h3>
+#end
+
+<div class="instruction">
+ $tlang.getString("faq.faqview.instruction") $siteTitle
+</div>
+
+<form name="listForm" action="#toolForm("FaqsToolAction")" method="post">
+ <table class ="listHier lines nolines" cellspacing="0" summary="$tlang.getString('gen.tablecaptionsite')">
+						<tr>
+							<th id="Id">$tlang.getString("faq.viewfaq.heading")</th>
+							<th id="Count">$tlang.getString("faq.viewfaq1.heading")</th>				
+							#if(($deleteFaqCategory == true) || ($deleteFaqContent == true && $faqExist == true))	
+							<th id="Count">$tlang.getString("faq.viewfaq2.heading")</th>
+							#end				
+						</tr>
+			         #set ($rowCount=0)
+			         #foreach ($category in $categories)
+			         #set ($rowCount =$rowCount + 1)
+						      <tr>	
+								<td>		
+								#if ($category.expanded == 'false')
+								<a href="#toolLinkParam("FaqsToolAction" "expandCategory" "itemReference=$category.categoryId")"> <img src="/library/image/sakai/expand.gif"/>  $category.description</a>
+								#end
+						
+							     #if ($category.expanded == 'true')
+							     <a href="#toolLinkParam("FaqsToolAction" "collapseCategory" "itemReference=$category.categoryId")"> <img src="/library/image/sakai/collapse.gif"/>  $category.description</a>
+									#end
+									
+									#if($editFaqCategory)
+									 <a href="#toolLinkParam("FaqsToolAction" "editcategory" "itemReference=$category.categoryId")"> $tlang.getString("faq.view") </a>
+									#end
+							       </td>
+							       
+							       <td> $category.modifiedOn 
+							       <td> 
+							       #if($deleteFaqCategory == 'true') 
+							      ## <input  type="checkbox" id="remove_cat" name="remove" value="$category.categoryId" />
+							        <input   type="checkbox" id="check-$rowCount" name="selectedCategories" value="$category.categoryId" />
+							       #end
+								</td>
+							</tr>
+							
+							#if ($category.expanded == 'true')
+							 #set ($rowCount2=0)
+							#foreach ($content in $contents)
+							 #set ($rowCount2 =$rowCount2 + 1)
+							<tr>
+							  <td>&nbsp;&nbsp;
+							   #set($concat ="-")
+							   #set( $ref = "$content.contentId$concat$content.categoryId")
+							   <a href="#toolLinkParam("FaqsToolAction" "editFaq" "itemReference=$ref")">  $content.question</a>	
+							   #if($editFaqContent)	  
+									 <a href="#toolLinkParam("FaqsToolAction" "editFaqContent" "itemReference=$ref")"> $tlang.getString("faq.view") </a>
+									#end
+							</td>
+							<td>
+							$content.modifiedOn 
+							</td>
+							 #if($deleteFaqContent == 'true') 
+							 	<td>
+							 	##<input  type="checkbox" id="remove_content" name="remove" value="$content.contentId" />
+							 	 <input   type="checkbox" id="check-$rowCount" name="selectedContents" value="$content.contentId" />
+							 	</td>
+						    #end    
+							</tr>
+							#end
+							#end
+							
+				
+			    #end
+    </table>
+    
+	 <p class="act">
+     	#if($deleteFaqCategory == true || ($deleteFaqContent == true && $faqExist ==true))
+			<input type="submit" class="active" name="eventSubmit_confirmRemove" value=" $tlang.getString("button.remove")"  accesskey="s"/>
+			<input type="submit" name="eventSubmit_doCancel" value=" $tlang.getString("button.clear") " accesskey="x"  />
+		</p>
+   <input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />   
+   #end
+
+   
+</form>													
+</div>
