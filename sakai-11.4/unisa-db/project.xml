@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+  <pomVersion>3</pomVersion>
+  <name>Unisa DB</name>
+  <groupId>sakaiproject</groupId>
+  <id>unisa-db</id>
+  <currentVersion>2.0.1</currentVersion>
+  <organization>
+    <name>University of South Africa</name>
+    <url>http://www.unisa.ac.za/</url>
+  </organization>
+  <inceptionYear>2003</inceptionYear>
+
+  <properties>
+    <deploy.type>components</deploy.type>
+  </properties>
+
+  <dependencies>
+
+    <!-- provision the enviromemnt for hsqldb -->
+    <dependency>
+      <groupId>hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>1.8.0.5</version>
+      <properties>
+        <!-- deploy dependency jar to "shared", "common" or "server": use <war.bundle>true</war.bundle> to include in war -->
+        <deploy.target>shared</deploy.target>
+      </properties>
+    </dependency>
+
+    <!-- provision the enviromemnt for hibernate -->
+    <dependency>
+      <groupId>aopalliance</groupId>
+      <artifactId>aopalliance</artifactId>
+      <version>1.0</version>
+      <properties>
+        <!-- deploy dependency jar to "shared", "common" or "server": use <war.bundle>true</war.bundle> to include in war -->
+        <deploy.target>shared</deploy.target>
+      </properties>
+    </dependency>
+
+    <dependency>
+      <groupId>cglib</groupId>
+      <artifactId>cglib-nodep</artifactId>
+      <version>2.1_3</version>
+      <properties>
+        <!-- deploy dependency jar to "shared", "common" or "server": use <war.bundle>true</war.bundle> to include in war -->
+        <deploy.target>shared</deploy.target>
+      </properties>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.1</version>
+      <properties>
+        <!-- deploy dependency jar to "shared", "common" or "server": use <war.bundle>true</war.bundle> to include in war -->
+        <deploy.target>shared</deploy.target>
+      </properties>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-dbcp</groupId>
+      <artifactId>commons-dbcp</artifactId>
+      <!-- Unisa-changes remove dbcb hardcoded version, get from master pom (SY 29 Jan 2014) -->
+      <!-- >version>1.2.2</version-->
+      <version>${commons.dbcp.version}</version>
+      <!--  end unisa-changes -->
+      <properties>
+        <!-- deploy dependency jar to "shared", "common" or "server": use <war.bundle>true</war.bundle> to include in war -->
+        <deploy.target>shared</deploy.target>
+      </properties>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-pool</groupId>
+      <artifactId>commons-pool</artifactId>
+      <version>1.3</version>
+      <properties>
+        <!-- deploy dependency jar to "shared", "common" or "server": use <war.bundle>true</war.bundle> to include in war -->
+        <deploy.target>shared</deploy.target>
+      </properties>
+    </dependency>
+
+    <dependency>
+      <groupId>dom4j</groupId>
+      <artifactId>dom4j</artifactId>
+      <version>1.6.1</version>
+      <properties>
+        <!-- deploy dependency jar to "shared", "common" or "server": use <war.bundle>true</war.bundle> to include in war -->
+        <deploy.target>shared</deploy.target>
+      </properties>
+    </dependency>
+
+    <dependency>
+      <groupId>ehcache</groupId>
+      <artifactId>ehcache</artifactId>
+      <version>1.1</version>
+      <properties>
+        <!-- deploy dependency jar to "shared", "common" or "server": use <war.bundle>true</war.bundle> to include in war -->
+        <deploy.target>shared</deploy.target>
+      </properties>
+    </dependency>
+
+
+
+    <dependency>
+      <groupId>jdbc</groupId>
+      <artifactId>jdbc2_0-stdext</artifactId>
+      <!-- version from hibernate 2.1.8 -->
+      <version>h2.1.8</version>
+      <properties>
+        <!-- deploy dependency jar to "shared", "common" or "server": use <war.bundle>true</war.bundle> to include in war -->
+        <deploy.target>shared</deploy.target>
+      </properties>
+    </dependency>
+
+    <dependency>
+      <groupId>jta</groupId>
+      <artifactId>jta</artifactId>
+      <!-- version from hibernate 2.1.8 -->
+      <version>h2.1.8</version>
+      <properties>
+        <!-- deploy dependency jar to "shared", "common" or "server": use <war.bundle>true</war.bundle> to include in war -->
+        <deploy.target>shared</deploy.target>
+      </properties>
+    </dependency>
+
+    <dependency>
+      <groupId>odmg</groupId>
+      <artifactId>odmg</artifactId>
+      <version>3.0</version>
+      <properties>
+        <!-- deploy dependency jar to "shared", "common" or "server": use <war.bundle>true</war.bundle> to include in war -->
+        <deploy.target>shared</deploy.target>
+      </properties>
+    </dependency>
+
+    <dependency>
+      <groupId>xalan</groupId>
+      <artifactId>xalan</artifactId>
+      <version>2.6.0</version>
+      <properties>
+        <!-- deploy dependency jar to "shared", "common" or "server": use <war.bundle>true</war.bundle> to include in war -->
+        <deploy.target>shared</deploy.target>
+      </properties>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+
+    <!-- java source -->
+    <sourceDirectory>src/java</sourceDirectory>
+
+    <!-- other resources for the jar - the message bundles -->
+    <resources>
+      <resource>
+        <directory>${basedir}/src/conf</directory>
+        <includes>
+          <include>**/*.properties</include>
+        </includes>
+      </resource>
+    </resources>
+  </build>
+
+</project>
