@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>base</artifactId>
+    <groupId>org.sakaiproject</groupId>
+    <version>12.6</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <name>Unisa Changes Project</name>
+  <groupId>org.sakaiproject</groupId>
+  <artifactId>unisa-changes-base</artifactId>
+  <packaging>pom</packaging>
+  <modules>
+	<module>overlays/library</module>
+  </modules>
+</project>
