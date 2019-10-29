@@ -12,6 +12,6 @@
   <artifactId>unisa-changes-base</artifactId>
   <packaging>pom</packaging>
   <modules>
-	<module>overlays/library</module>
+	<!--module>overlays/library</module-->
   </modules>
 </project>
