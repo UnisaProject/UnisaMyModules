@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2009 The Sakai Foundation
+
+    Licensed under the Educational Community License, Version 1.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.opensource.org/licenses/ecl1.php
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<assembly>
+	<id>tomcat-overlay</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<dependencySets>
+		<!-- shared -->
+		<dependencySet>
+			<outputDirectory>shared/lib</outputDirectory>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<includes>
+				<include>org.sakaiproject.yaft:yaft-api:jar:*</include>
+				<include>org.sakaiproject.yaft:yaft-help:jar:*</include>
+			</includes>
+		</dependencySet>
+		<!-- components -->
+		<dependencySet>
+			<outputDirectory>components/yaft-pack</outputDirectory>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveDependencies>false</useTransitiveDependencies>
+			<includes>
+				<include>org.sakaiproject.yaft:yaft-pack:war:*</include>
+			</includes>
+			<unpack>true</unpack>
+		</dependencySet>
+		<!-- webapps -->
+		<dependencySet>
+            <outputDirectory>webapps/</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputFileNameMapping>${artifact.artifactId}.war</outputFileNameMapping>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            <includes>
+                 <include>org.sakaiproject.yaft:yaft-tool:war:*</include>
+            </includes>
+            <unpack>false</unpack>
+        </dependencySet>
+	</dependencySets>
+	<!-- additional files -->
+	<fileSets>
+		<fileSet>
+			<outputDirectory></outputDirectory>
+			<includes>
+				<include>${project.basedir}/README*</include>
+			</includes>
+		</fileSet>
+	</fileSets>
+</assembly>

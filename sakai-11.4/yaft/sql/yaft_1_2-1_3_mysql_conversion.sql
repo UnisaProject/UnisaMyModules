@@ -1,0 +1,4 @@
+-- YAFT now uses the NotificationService for all notifications
+DROP TABLE YAFT_DISCUSSION_UNSUBS;
+DROP TABLE YAFT_FORUM_UNSUBS;
+DROP TABLE YAFT_PREFERENCES;
