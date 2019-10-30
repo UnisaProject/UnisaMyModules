@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+          "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+   <!-- put your value object in the class name, 
+      the table name is optional but you should specify it to avoid collisions -->
+   <class name="org.sakaiproject.qna.model.QnaAttachment" table="qna_ATTACHMENT">
+
+      <!-- create the primary key id, using native is typically the best way -->
+      <id name="id" type="string">
+         <generator class="uuid.hex"/>
+      </id>
+      <many-to-one name="question" class="org.sakaiproject.qna.model.QnaQuestion">
+         <column name="question_id"/>
+      </many-to-one>
+      <property name="attachmentId" type="string" length="255" not-null="true" />
+   </class>
+</hibernate-mapping>

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+          "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+   <!-- put your value object in the class name,
+      the table name is optional but you should specify it to avoid collisions -->
+   <class name="org.sakaiproject.qna.model.QnaCategory" table="qna_CATEGORIES">
+
+      <!-- create the primary key id, using native is typically the best way -->
+      <id name="id" type="string">
+         <generator class="uuid.hex"/>
+      </id>
+      <!--        linkage to questions -->
+      <bag name="questions" lazy="false" inverse="true" cascade="delete" batch-size="50">
+      		<key column="category_id"/>
+      		<one-to-many class="org.sakaiproject.qna.model.QnaQuestion" />
+      </bag>
+
+      <property name="ownerId" type="string" length="255" not-null="true" />
+      <property name="location" type="string" length="255" not-null="true" />
+      <property name="categoryText" type="string" length="255" not-null="true" />
+
+      <property name="dateLastModified" type="java.util.Date" not-null="true"/>
+      <property name="dateCreated" type="java.util.Date" not-null="true"/>
+
+      <property name="sortOrder" type="integer" />
+
+      <property name="hidden" type="boolean" not-null="true"/>
+   </class>
+</hibernate-mapping>

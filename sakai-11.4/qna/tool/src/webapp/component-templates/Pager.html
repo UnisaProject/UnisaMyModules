@@ -1,0 +1,53 @@
+<!--
+
+    Copyright (c) 2007-2009 The Sakai Foundation
+
+    Licensed under the Educational Community License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+                http://www.osedu.org/licenses/ECL-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+   <title>Questions</title>
+
+	<script type="text/javascript" language="JavaScript" src="/library/js/headscripts.js"></script>
+	<!-- vm/editor/FCKeditor/sakai_header.vm -->
+	<script type="text/javascript" src="/library/editor/FCKeditor/fckeditor.js"></script> 
+
+   <link href="tool_base.css" type="text/css" rel="stylesheet" media="all"/>   
+	<link href="tool.css" type="text/css" rel="stylesheet" media="all"/>
+	<link href="qna.css" type="text/css" rel="stylesheet" media="all"/>
+
+</head>
+
+<body>
+
+<!--  everything outside this <div> will be thrown away -->
+	<div rsf:id="pagerDivContainer:" class="listNav pagerDiv">
+		<div rsf:id="pager_viewing" class="instruction">Viewing 1 - 2 of 2 items</div>
+		<form rsf:id="pager_form" class="inlineForm">
+			<input rsf:id="pager_first_page" type="button" />
+			<input rsf:id="pager_prev_page" type="button" />
+			<label for="" class="skip">Press Enter, then use alt + up and down arrows to scroll through menu</label>
+			<select rsf:id="pager_select_box">
+			</select>
+			<input rsf:id="pager_next_page" type="button" />
+			<input rsf:id="pager_last_page" type="button" />
+		</form>
+	</div>
+
+</body>
+</html>

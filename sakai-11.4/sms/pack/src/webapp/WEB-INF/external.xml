@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+	<bean id="org.sakaiproject.sms.entity.SmsTaskEntityProviderImpl" class="org.sakaiproject.sms.entity.SmsTaskEntityProviderImpl">
+		<property name="smsService" ref="org.sakaiproject.sms.api.SmsService"/>
+		<property name="smsTaskLogic" ref="org.sakaiproject.sms.logic.hibernate.SmsTaskLogic"/>
+		<property name="developerHelperService" ref="org.sakaiproject.entitybroker.DeveloperHelperService"/>
+		<property name="externalLogic" ref="org.sakaiproject.sms.logic.external.ExternalLogic"/>
+		<property name="smsMessageLogic" ref="org.sakaiproject.sms.logic.hibernate.SmsMessageLogic"/>
+		<property name="smsTaskValidator" ref="org.sakaiproject.sms.logic.smpp.validate.SmsTaskValidator" />
+		<property name="securityService" ref="org.sakaiproject.authz.api.SecurityService" />
+		<property name="siteService" ref="org.sakaiproject.site.api.SiteService" />
+		<property name="userDirectoryService" ref="org.sakaiproject.user.api.UserDirectoryService" />
+	</bean>
+
+	<bean id="org.sakaiproject.sms.entity.SmsAccountEntityProviderImp" class="org.sakaiproject.sms.entity.SmsAccountEntityProviderImp">
+		<property name="smsAccountLogic" ref="org.sakaiproject.sms.logic.hibernate.SmsAccountLogic"/>
+		<property name="developerHelperService" ref="org.sakaiproject.entitybroker.DeveloperHelperService"/>
+		<property name="smsBilling" ref="org.sakaiproject.sms.api.SmsBilling" />
+		<property name="externalLogic" ref="org.sakaiproject.sms.logic.external.ExternalLogic"/>
+		<property name="securityService" ref="org.sakaiproject.authz.api.SecurityService" />
+		<property name="siteService" ref="org.sakaiproject.site.api.SiteService" />
+	</bean>
+	
+    <bean id="org.sakaiproject.sms.logic.external.NumberRoutingHelper" class="org.sakaiproject.sms.logic.external.NumberRoutingHelperImpl" init-method="init">
+        <property name="serverConfigurationService" ref="org.sakaiproject.component.api.ServerConfigurationService" />
+    </bean>
+
+
+
+
+    <bean id="org.sakaiproject.sms.logic.external.MobileNumberHelper" class="org.sakaiproject.sms.logic.external.MobileNumberHelperImpl">
+        <property name="sakaiPersonManager" ref="org.sakaiproject.api.common.edu.person.SakaiPersonManager" />
+        <property name="userDirectoryService" ref="org.sakaiproject.user.api.UserDirectoryService"/>
+        <property name="serverConfigurationService" ref="org.sakaiproject.component.api.ServerConfigurationService" />
+        <property name="numberRoutingHelper" ref="org.sakaiproject.sms.logic.external.NumberRoutingHelper" />
+    </bean>
+ 
+ <!-- Uncomment to use the Ldap mobile number helper remember to comment out the default bean above -->
+    <!-- 
+    <bean id="org.sakaiproject.sms.logic.external.MobileNumberHelper" class="org.sakaiproject.sms.logic.external.LdapMobileNumberHelper" init-method="init">
+       <property name="sakaiPersonManager" ref="org.sakaiproject.api.common.edu.person.SakaiPersonManager" />
+        <property name="userDirectoryService" ref="org.sakaiproject.user.api.UserDirectoryService"/>
+        <property name="serverConfigurationService" ref="org.sakaiproject.component.api.ServerConfigurationService" />
+        <property name="numberRoutingHelper" ref="org.sakaiproject.sms.logic.external.NumberRoutingHelper" />
+        <property name="memoryService" ref="org.sakaiproject.memory.api.MemoryService"/>
+        <property name="ldapHost">
+			<value>ldapserver.name</value>
+		</property>
+		<property name="ldapPort">
+			<value>636</value>
+		</property>
+		<property name="secureConnection">
+			<value>true</value>
+		</property>
+		<property name="basePath">
+			<value>o=org</value>
+		</property>
+		<property name="operationTimeout">
+			<value>5000</value>
+		</property>
+		<property name="attributeMappings">
+			<map>
+				<entry key="login">
+					<value>cn</value>
+				</entry>
+				<entry key="distinguishedName">
+					<value>dn</value>
+				</entry>
+				<entry key="firstName">
+					<value>givenName</value>
+				</entry>
+				<entry key="lastName">
+					<value>sn</value>
+				</entry>
+				<entry key="email">
+					<value>mail</value>
+				</entry>
+				<entry key="groupMembership">
+					<value>groupMembership</value>
+				</entry>
+				<entry key="mobileNumber">
+					<value>mobileNumber</value>
+				</entry>
+			</map>
+		</property>
+	</bean>-->
+	<!-- cache config for ldap lookup -->
+		<!-- defaults for cache -->
+    <bean id="org.sakaiproject.sms.logic.external.LdapMobileNumberHelper.userCache"
+          class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+       <property name="cacheManager">
+           <ref bean="org.sakaiproject.memory.api.MemoryService.cacheManager"/>
+       </property>
+       <property name="cacheName" value="org.sakaiproject.sms.logic.external.LdapMobileNumberHelper.userCache"/>
+       <property name="maxElementsInMemory" value="10000"/>
+       <property name="timeToIdle" value="300000"/>
+       <property name="timeToLive" value="300000"/>
+       <property name="overflowToDisk" value="false"/>
+       <property name="statisticsEnabled" value="true"/>
+    </bean>
+
+
+	<bean id="org.sakaiproject.sms.logic.external.ExternalLogic" class="org.sakaiproject.sms.logic.external.ExternalLogicImpl" init-method="init">
+		<property name="functionManager" ref="org.sakaiproject.authz.api.FunctionManager" />
+		<property name="securityService" ref="org.sakaiproject.authz.api.SecurityService" />
+		<property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager" />
+		<property name="siteService" ref="org.sakaiproject.site.api.SiteService" />
+		<property name="toolManager" ref="org.sakaiproject.tool.api.ToolManager" />
+		<property name="entityBroker" ref="org.sakaiproject.entitybroker.EntityBroker" />
+		<property name="userDirectoryService" ref="org.sakaiproject.user.api.UserDirectoryService" />
+		<property name="mobileNumberHelper" ref="org.sakaiproject.sms.logic.external.MobileNumberHelper" />
+        <property name="numberRoutingHelper" ref="org.sakaiproject.sms.logic.external.NumberRoutingHelper" />
+		<property name="aliasService" ref="org.sakaiproject.alias.api.AliasService"/>
+		<property name="timeService" ref="org.sakaiproject.time.api.TimeService" />
+		<property name="preferencesService" ref="org.sakaiproject.user.api.PreferencesService"/>
+		<property name="eventTrackingService" ref="org.sakaiproject.event.api.EventTrackingService"/>
+		<property name="serverConfigurationService" ref="org.sakaiproject.component.api.ServerConfigurationService" />
+	</bean>
+
+	<bean id="org.sakaiproject.sms.logic.external.ExternalEmailLogic" class="org.sakaiproject.sms.logic.external.ExternalEmailLogicImpl" init-method="init">
+		<property name="emailService" ref="org.sakaiproject.email.api.EmailService" />
+		<property name="emailTemplateService" ref="org.sakaiproject.emailtemplateservice.service.EmailTemplateService"/>
+	</bean>
+	</beans>

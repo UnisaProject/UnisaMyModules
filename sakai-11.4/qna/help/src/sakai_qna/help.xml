@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="qnaOverview" class="org.sakaiproject.component.app.help.model.ResourceBean">
+	     <property name="docId"><value>qnaOverview</value></property>
+	     <property name="name"><value>Q&amp;A Overview</value></property>
+	     <property name="location"><value>/sakai_qna/QNA_Overview.html</value></property>
+	     <property name="defaultForTool"><value>sakai.qna</value></property>
+	</bean>
+	
+	<bean id="qnaAskQuestion" class="org.sakaiproject.component.app.help.model.ResourceBean">
+	     <property name="docId"><value>qnaAskQuestion</value></property>
+	     <property name="name"><value>Ask a question</value></property>
+	     <property name="location"><value>/sakai_qna/QNA_AskQuestion.html</value></property>
+	</bean>
+	
+	<bean id="qnaAnswerQuestion" class="org.sakaiproject.component.app.help.model.ResourceBean">
+	     <property name="docId"><value>qnaAnswerQuestion</value></property>
+	     <property name="name"><value>Answer a question</value></property>
+	     <property name="location"><value>/sakai_qna/QNA_AnswerQuestion.html</value></property>
+	</bean>
+	
+	<bean id="qnaEditQuestion" class="org.sakaiproject.component.app.help.model.ResourceBean">
+	     <property name="docId"><value>qnaEditQuestion</value></property>
+	     <property name="name"><value>Edit / Delete Question</value></property>
+	     <property name="location"><value>/sakai_qna/QNA_EditDeleteQuestion.html</value></property>
+	</bean>
+	
+	<bean id="qnaPublishQuestion" class="org.sakaiproject.component.app.help.model.ResourceBean">
+	     <property name="docId"><value>qnaPublishQuestion</value></property>
+	     <property name="name"><value>Publish Question</value></property>
+	     <property name="location"><value>/sakai_qna/QNA_PublishQuestion.html</value></property>
+	</bean>
+	
+	<bean id="qnaCategory" class="org.sakaiproject.component.app.help.model.ResourceBean">
+	     <property name="docId"><value>qnaCategory</value></property>
+	     <property name="name"><value>Categories</value></property>
+	     <property name="location"><value>/sakai_qna/QNA_CreateEditDeleteCategory.html</value></property>
+	</bean>
+	
+	<bean id="qnaSettings" class="org.sakaiproject.component.app.help.model.ResourceBean">
+	     <property name="docId"><value>qnaSettings</value></property>
+	     <property name="name"><value>Change Settings</value></property>
+	     <property name="location"><value>/sakai_qna/QNA_ChangeSettings.html</value></property>
+	</bean>
+	
+	<bean id="qnaPermissions" class="org.sakaiproject.component.app.help.model.ResourceBean">
+	     <property name="docId"><value>qnaPermissions</value></property>
+	     <property name="name"><value>Adjust Permissions</value></property>
+	     <property name="location"><value>/sakai_qna/QNA_AdjustPermissions.html</value></property>
+	</bean>
+	
+	<bean id="qnaOrganise" class="org.sakaiproject.component.app.help.model.ResourceBean">
+	     <property name="docId"><value>qnaOrganise</value></property>
+	     <property name="name"><value>Organise Questions and Answers</value></property>
+	     <property name="location"><value>/sakai_qna/QNA_Organise.html</value></property>
+	</bean>
+
+    <bean id="org.sakaiproject.api.app.help.TableOfContents" 
+          class="org.sakaiproject.component.app.help.model.TableOfContentsBean">
+      <property name="name"><value>root</value></property>
+      <property name="categories">
+         <list>
+            <bean id="announcementCategory" class="org.sakaiproject.component.app.help.model.CategoryBean">
+               <property name="name"><value>Questions and Answers</value></property>
+               <property name="resources">
+                  <list>
+                        <ref bean="qnaOverview" />
+						<ref bean="qnaAskQuestion" />
+						<ref bean="qnaAnswerQuestion" />
+						<ref bean="qnaEditQuestion" />
+						<ref bean="qnaPublishQuestion" />
+						<ref bean="qnaCategory" />
+						<ref bean="qnaSettings" />
+						<ref bean="qnaPermissions" />
+						<ref bean="qnaOrganise" />
+                  </list>
+               </property>
+            </bean>
+           </list>
+         </property>
+       </bean>
+</beans>

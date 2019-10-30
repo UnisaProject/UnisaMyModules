@@ -1,0 +1,207 @@
+<!DOCTYPE html      PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:rsf="http://ponder.org.uk/rsf" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+        <script type="text/javascript" rsf:id="scr=portal-matter" language="JavaScript" src="/library/js/headscripts.js">
+        </script>
+        <link href="/library/skin/tool_base.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all"/>
+        <link href="/library/skin/default/tool.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all"/>
+        <link rel="stylesheet" href="/sms-user-tool/content/css/sms.css" type="text/css"/>
+        <link rel="stylesheet" href="/sms-user-tool/content/css/smsPopup.css" type="text/css"/>
+        <link rel="stylesheet" href="/sms-user-tool/content/css/ui.all.css" type="text/css"/>
+        
+        <!-- end standard on all pages -->
+        <!-- script type="text/javascript" language="JavaScript" src="/library/js/jquery/jquery-1.11.3.js"></script>
+        <script type="text/javascript" src="/library/js/jquery/ui/1.11.3/jquery-ui.js" -->
+        
+		<script type="text/javascript">includeLatestJQuery('user-sms');</script>
+		<link href="/library/webjars/jquery-ui/1.11.3/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+		<script type="text/javascript" src="/library/js/lang-datepicker/lang-datepicker.js"></script>
+		
+		<script type="text/javascript">
+
+
+			$( document ).ready(function() {
+				localDatePicker({
+					input:'#smsDatesScheduleDate',
+					useTime:1,
+					parseFormat: 'YYYY-MM-DD HH:mm:ss',
+					getval: '#smsDatesScheduleDate-iso8601',
+					ashidden: { iso8601: 'smsDatesScheduleDate-iso8601' }
+				});
+
+				localDatePicker({
+					input:'#smsDatesExpiryDate',
+					useTime:1,
+					parseFormat: 'YYYY-MM-DD HH:mm:ss',
+					getval: '#smsDatesExpiryDate-iso8601',
+					ashidden: { iso8601: 'smsDatesExpiryDate-iso8601' }
+				});
+			});
+		</script>        
+        
+        <script type="text/javascript" src="../js/smsPopup.js"></script>
+        <script type="text/javascript" src="../js/sms.js">
+        </script>
+        <!--script type="text/javascript" src="../js/facebox.js">
+        </script-->
+        <script type='text/javascript' src='../js/jquery.autocomplete/jquery.bgiframe.min.js'>
+        </script>
+        <script type='text/javascript' src='../js/jquery.autocomplete/jquery.dimensions.js'>
+        </script>
+        <script type='text/javascript' src='../js/jquery.autocomplete/jquery.autocomplete.js'>
+        </script>
+        <script type='text/javascript' src='../js/jquery.autocomplete/jquery.autocompletefb.js'>
+        </script>
+        <script type='text/javascript' src='../js/jquery.form.js'>
+        </script>
+        <link rel="stylesheet" type="text/css" href="../js/jquery.autocomplete/jquery.autocompletefb.css" />
+        <script type="text/javascript" language="JavaScript"
+                        src="../js/sms.task.js"></script>
+        <script type="text/javascript" language="JavaScript"
+                        src="../js/sms.utils.js"></script>
+         <script type="text/javascript" language="JavaScript"
+                        src="../js/sms.send.js"></script>
+                <title rsf:id="page-title">Sms Items</title>
+    </head>
+    <body>
+        <div class="portletBody">
+            <ul rsf:id="navIntraTool:" class="navIntraTool"/>
+            <h3 rsf:id="sms-header" class="insColor insBak insBorder">Create SMS</h3>
+            <div rsf:id="message-for:*" class="alertMessage">
+                <ul style="margin:0px;">
+                    <li>
+                        Message for user here
+                    </li>
+                </ul>
+            </div>
+             <p rsf:id="error-account" class="smsAlert">None</p>
+ 			 <p rsf:id="error-account-disabled" class="smsAlert">None</p>
+  			<p rsf:id="error-credits" class="smsAlert">None</p><a rsf:id="error-back" href="index.html">Back</a>
+            <span rsf:id="error-purchase">To purchase SMS credits, please email </span>
+            <a rsf:id="error-email" href="mailto:help@vula.uct.ac.za?subject=SMS Credits" target="_blank">help@vula.uct.ac.za</a>
+            
+            <form rsf:id="form" action="" method="post">
+            
+                <h4 rsf:id="msg=ui.send.message">
+                    Your message:
+                </h4>
+                <div class="Counter"><span id="smsBoxCounter" >160</span></div>
+        		<textarea rsf:id="messageBody" name="" cols="50" rows="7" class="" id="" style="width:400px;" >
+                </textarea>
+                <div>
+                    <h3 class="addItem clear"><a rsf:id="form-add-recipients" href="choose-recipients.html" rel="" id="smsAddRecipients">Add recipients</a></h3>
+                </div>
+
+                <div id="reportConsole" class="">
+
+                    <div>
+	                    <span rsf:id="msg=ui.console.selected">
+	                        Credits remaining:
+	                    </span>
+	                    <span rsf:id="console-selected" class="console-selected">
+	                        100
+	                    </span>
+                    </div>
+
+                    <div>
+                    <span rsf:id="msg=ui.console.estimated.credits">
+                        Credits remaining:
+                    </span>
+                    <span rsf:id="console-credits" class="console-credits">
+                        100
+                    </span>
+                    </div>
+
+                    <div>
+                    <span rsf:id="msg=ui.console.estimated.cost">
+                        Credits remaining:
+                    </span>
+                    <span rsf:id="console-cost" class="console-cost">
+                        100
+                    </span>
+                    </div>
+                    
+                 </div>
+
+                 <div id="smsDates">
+                    	
+                    <div id="smsDatesSchedule">
+                    	<div id="editSchedule" class="clear">
+							<span rsf:id="msg=ui.send.schedule.edit" class="schedule">Scheduled to be sent on:</span> <span rsf:id="schedule.date" class="console-cost">04 Jun 09 13.45 pm </span>
+							<a id="editScheduleChange" rsf:id="msg=ui.send.date.change" href="#">Change</a>
+						</div>
+						<div id="newSchedule">	
+							<h4 rsf:id="msg=ui.send.schedule.new" class="schedule">Schedule for a later date/time</h4>
+	                        <input rsf:id="booleanSchedule" type="checkbox" name="booleanSchedule" id="booleanSchedule" />
+	                        <label rsf:id="booleanSchedule-label">
+	                            Yes, I would like to schedule a later date to send this message.
+	                        </label>
+						</div>
+                        <div id="booleanScheduleDate" name="date" style="display:none;">
+                        	<input rsf:id="smsDatesScheduleDate-iso8601" type="hidden"
+								id="dateToSend" name="dateToSend" value="YYYY/MM/DD"
+								size="25" maxlength="25" /> 
+							<input type="text" id="smsDatesScheduleDate" name="smsDatesScheduleDate"/>							
+                        </div>
+                    </div>
+                    
+                    <div id="smsDatesExpiry">
+                    	<div id="editExpiry" class="clear">
+								<span rsf:id="msg=ui.send.expiry.edit" class="exipry">Message to expire on:</span> <span rsf:id="expiry.date" class="console-cost">04 Jun 09 13.45 pm </span>
+								<a id="editExpiryChange" rsf:id="msg=ui.send.date.change" href="#">Change</a>
+							</div>
+						<div id="newExpiry">	
+	                        <h4 rsf:id="msg=ui.send.expiry.new" class="exipry">Set expiry date/time</h4>
+	                        <input rsf:id="booleanExpiry" type="checkbox" name="booleanExpiry" id="booleanExpiry" />
+	                        <label rsf:id="booleanExpiry-label">
+	                            Yes, I would like to set an Expiry date.
+	                        </label>
+						</div>
+                        <div id="booleanExpiryDate" name="date" style="display:none;">
+							<input rsf:id="smsDatesExpiryDate-iso8601" type="hidden"
+								id="dateToExpire" name="dateToExpire" value="YYYY/MM/DD"
+								size="25" maxlength="25" /> 
+							<input type="text" id="smsDatesExpiryDate" name="smsDatesExpiryDate"/>		
+                        </div>
+                    </div>
+                </div>
+
+                <div id="error" style="display:none;" class="smsAlert">
+                    <div rsf:id="msg=ui.console.alert">
+                        Alert:
+                    </div>
+                    <span rsf:id="msg=ui.console.alert.invalidparams">
+                        100
+                    </span>
+          		</div>
+              	<div id="errorDateValidation" style="display:none;" class="smsAlert">
+                    <div rsf:id="msg=ui.console.alert">
+                        Alert:
+                    </div>
+                    <span rsf:id="msg=ui.error.date.invalid">
+                        100
+                    </span>
+          		</div>
+                <div class="act">
+                    <div rsf:id="msg=ui.error.selections.none" id="errorNoSelections" style="display:none;"> </div>
+                                    <!-- DOM elements for re-opening a task -->
+		          <input rsf:id="taskuserIds" id="taskuserIds" name="taskuserIds" type="hidden" value=""/>
+		          <input rsf:id="taskdeliveryEntityList" id="taskdeliveryEntityList" name="taskdeliveryEntityList" type="hidden" value=""/>
+		          <input rsf:id="taskdeliveryMobileNumbersSet"  id="taskdeliveryMobileNumbersSet" name="taskdeliveryMobileNumbersSet" type="hidden" value=""/>
+		          <input rsf:id="taskcopyMe"  id="taskcopyMe" name="taskcopyMe" type="hidden" value=""/>
+		          <input rsf:id="id" type="hidden" value="" name="id"/>
+                   <input rsf:id="sakaiSiteId" type="hidden" value="" name="sakaiSiteId"/>
+                    <input rsf:id="statusType" type="hidden" value="" name="statusType"/>
+                    <input rsf:id="form-send" type="button" disabled="disabled" id="smsSend" value="Send SMS" /> <img class="loadingImage" style="display:none;" src="/library/image/sakai/spinner.gif" alt="Loading" />
+					<a rsf:id="goto-home" id="" href="#" style="display:none">Home</a>
+                    <input rsf:id="back" type="button" value="Back" rel="back"/>
+                </div>
+            </form>
+			<br />
+			<input rsf:id="back2" type="button" value="Back" rel="back"/>
+            <!--A few line braeks to get rid of the scrollbar when facebox pops up.-->
+            <br /><br /><br /><br /><br />
+        </div>
+    </body>
+</html>

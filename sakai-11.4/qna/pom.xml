@@ -1,0 +1,91 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<name>Sakai Qna</name>
+	<groupId>org.sakaiproject</groupId>
+	<artifactId>qna</artifactId>
+	<organization>
+		<name>Sakai Project</name>
+		<url>http://sakaiproject.org/</url>
+	</organization>
+	<inceptionYear>2007</inceptionYear>
+	<packaging>pom</packaging>
+  
+	<parent>
+		<groupId>org.sakaiproject</groupId>
+		<artifactId>master</artifactId>
+		<version>12.6</version>
+		<relativePath>../master/pom.xml</relativePath>
+	</parent>
+	<modules>
+		<module>api</module>
+		<module>impl</module>
+		<module>pack</module>
+		<module>tool</module>
+		<module>help</module>
+	</modules>
+
+	<properties>
+		<!--<url.localsite>dav:http://source.sakaiproject.org/release/kernel/${project.version}</url.localsite>-->
+		<url.localsite>scp://source.sakaiproject.org/var/www/html/release/qna/${project.version}</url.localsite>
+	</properties>
+	<!-- handles the management of entitybroker related dependencies -->
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.sakaiproject.qna</groupId>
+				<artifactId>qna-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.sakaiproject.qna</groupId>
+				<artifactId>qna-impl</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<!--<dependency>
+				<groupId>org.sakaiproject.search</groupId>
+				<artifactId>search-api</artifactId>
+				<version>1.2.8</version>
+				<scope>provided</scope>
+			</dependency>-->
+			<dependency>
+				<groupId>org.sakaiproject.sms</groupId>
+				<artifactId>sms-api</artifactId>
+				<version>${project.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<!--<dependency>
+				<groupId>org.sakaiproject.entitybroker</groupId>
+				<artifactId>entitybroker-utils</artifactId>
+				<version>1.3.8</version>
+			</dependency>-->
+		</dependencies>
+	</dependencyManagement>
+
+	<!-- define source code repository location -->
+	<scm>
+		<connection>scm:svn:https://source.sakaiproject.org/contrib/qna/trunk</connection>
+		<developerConnection>scm:svn:https://source.sakaiproject.org/contrib/qna/trunk</developerConnection>
+		<url>https://source.sakaiproject.org/contrib/qna/trunk</url>
+	</scm>
+		<issueManagement>
+		<system>jira</system>
+		<url>http://jira.sakaiproject.org/browse/QNA</url>
+	</issueManagement>
+
+    
+	<pluginRepositories>
+		<pluginRepository>
+			<id>mc-release</id>
+			<name>Local Maven repository of releases</name>
+			<url>http://mc-repo.googlecode.com/svn/maven2/releases</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</pluginRepository>
+	</pluginRepositories>
+	<!-- Build -->
+
+</project>

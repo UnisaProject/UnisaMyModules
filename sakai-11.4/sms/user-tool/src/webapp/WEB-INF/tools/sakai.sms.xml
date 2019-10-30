@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registration>
+	<tool id="sakai.sms.user"
+		title="SMS Messages"
+		description="For sending SMS text messages">
+		<category name="course" />
+		<category name="project" />
+		<configuration name="functions.require" value="sms.send" />
+	</tool>	
+</registration>
