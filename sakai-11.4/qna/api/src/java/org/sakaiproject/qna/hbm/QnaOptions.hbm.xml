@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+          "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+   <!-- put your value object in the class name,
+      the table name is optional but you should specify it to avoid collisions -->
+   <class name="org.sakaiproject.qna.model.QnaOptions" table="qna_OPTIONS">
+
+      <!-- create the primary key id, using native is typically the best way -->
+      <id name="id" type="string">
+         <generator class="uuid.hex"/>
+      </id>
+
+<!--        linkage to custom emails -->
+      <set name="customEmails" lazy="false" inverse="true" cascade="all">
+      		<key column="options_id"/>
+      		<one-to-many class="org.sakaiproject.qna.model.QnaCustomEmail" />
+      </set>
+
+      <property name="ownerId" type="string" length="255" not-null="true" />
+      <property name="location" type="string" length="255" not-null="true" />
+      <property name="dateLastModified" type="java.util.Date" />
+      <property name="anonymousAllowed" type="boolean"/>
+      <property name="moderated" type="boolean"/>
+      <property name="emailNotification" type="boolean"/>
+      <property name="emailNotificationType" type="string" length="255"/>
+      <property name="defaultStudentView" type="string" length="255"/>
+      <property name="allowUnknownMobile" type="boolean">
+      	<column name="allowUnknownMobile" default="false"/>
+      </property>
+      <property name="mobileAnswersNr" type="integer">
+      	<column name="mobileAnswersNr" default="1" />
+      </property>
+      <property name="smsNotification" type="boolean">
+      	<column name="smsNotification" default="false" />
+      </property>
+      
+   </class>
+</hibernate-mapping>

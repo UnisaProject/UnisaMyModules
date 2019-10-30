@@ -1,0 +1,72 @@
+<!--
+
+    Copyright (c) 2007-2009 The Sakai Foundation
+
+    Licensed under the Educational Community License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+                http://www.osedu.org/licenses/ECL-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:rsf="http://ponder.org.uk/rsf" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+   <title rsf:id="page-title"></title>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   <link href="/library/skin/tool_base.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+   <link href="/library/skin/default/tool.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+   <script type="text/javascript" rsf:id="scr=portal-matter" language="JavaScript" src="/library/js/headscripts.js"></script>
+   <link href="../css/qna.css" type="text/css" rel="stylesheet" media="all" />
+   <script type="text/javascript" language="JavaScript" src="../js/qna.js"></script>
+</head>
+
+<body>
+<div class="portletBody">
+  <div rsf:id="navIntraTool:" class="navIntraTool"/>
+  <div rsf:id="searchTool:" class="searchTool"/>
+
+  <h3 rsf:id="page-title">Ask a question</h3>
+  <div rsf:id="message-for:*">
+	<span>Message for user here</span>
+  </div>
+  
+  <!--<div rsf:id="anonymous-note">Note: Your name will not be associated with this question. You will remain anonymous.</div>-->
+  <h4 rsf:id="question-title"><span rsf:id="anonymous-note">Anonymous </span>Question</h4>
+  
+ 
+  <form rsf:id="ask-question-form" method="post" enctype="multipart/form-data">
+	  <div class="textBox">
+      <div rsf:id="question-input:">
+	          <textarea rows="10" cols="50" name="question">This should be the FCK editor. </textarea>
+	  </div>
+      </div>
+
+	  <input rsf:id="answer-notify" id="answer-notify" name="answer-notify" type="checkbox" value="anonymous" />
+	  <label rsf:id="answer-notify-label" for="answer-notify">Notify me of answers to this question</label>
+	  <p><label rsf:id="category-title" for="category-select">Category</label> <select rsf:id="category-select" name="category-select"><option value="1">Will be replaced</option></select><label rsf:id="new-category-label" for="new-category-name"></label> <span class="tier2"><input rsf:id="new-category-name" size="60" name="new-category-name" type="text"/></span></p>
+
+	  <div rsf:id="attachmentsViewTool:"></div>
+	  
+	  <p>
+	  <input rsf:id="add-attachment-button" type="submit" value="Add Attachment"/></p>
+	  
+	  	<div rsf:id="moderated-note">Note: All questions are moderated. Your questions will not be published immediately on the site.</div>
+	  
+	  <div class="act">
+	  <p>
+	  	<input rsf:id="add-question-button" type="submit" value="Add Question" class="active"/>
+	  	<input rsf:id="cancel-button" type="submit" value="Cancel"/>
+	  </p>
+	  </div>
+  </form>
+  </div>
+</body>
+</html>

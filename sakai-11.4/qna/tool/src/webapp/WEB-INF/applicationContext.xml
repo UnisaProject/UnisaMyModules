@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- Enity Providers -->
+	<bean
+		parent="org.sakaiproject.entitybroker.entityprovider.AbstractEntityProvider"
+		class="org.sakaiproject.qna.tool.entity.AnswerEntityProvider">
+		<property name="answerLogic" ref="org.sakaiproject.qna.logic.AnswerLogic" />
+	</bean>
+	<bean
+		parent="org.sakaiproject.entitybroker.entityprovider.AbstractEntityProvider"
+		class="org.sakaiproject.qna.tool.entity.QuestionEntityProvider">
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+	</bean>
+	<bean
+		parent="org.sakaiproject.entitybroker.entityprovider.AbstractEntityProvider"
+		class="org.sakaiproject.qna.tool.entity.CategoryEntityProvider">
+		<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic"/>
+	</bean>
+   <!-- handles configuration of internationalization messages -->	
+	<bean id="messageLocator"
+		class="uk.org.ponder.springutil.SpringMessageLocator">
+		<property name="messageSource">
+			<bean
+				class="org.sakaiproject.util.ResourceLoaderMessageSource"
+				depends-on="TLABPostProcessorLoader">
+				<property name="basename">
+					<value>classpath:messages</value>
+				</property>
+				<property name="cacheSeconds">
+					<value>10</value>
+				</property>
+			</bean>
+		</property>
+		<property name="localeGetter" ref="requestLocaleProxy" />
+	</bean>
+	
+  <!-- is this causing the TML NPE?
+  , 
+ -->
+
+
+  <bean id="messageTemplateContributor" parent="templateContributorParent">
+  	<property name="baseDirectory" value="component-templates/" />
+  	<property name="templateNames"	value="Messages" />
+  </bean>
+
+  <bean id="qnaTemplateContributor"
+  	parent="templateContributorParent">
+  	<property name="baseDirectory" value="component-templates/" />
+  	<property name="templateNames"
+  		value="searchbar,navbar,category_question_list,detailed_question_list,standard_question_list,question_iterator,Pager,SortHeader,attachments_view" />
+  </bean>
+
+  <!-- For security purposes, only beans listed in the comma separated value list
+      may be the target of EL operations coming in over the request -->
+   <bean parent="requestAddressibleParent">
+      <property name="value" value="CategoryLocator,OptionsLocator,QuestionLocator,AnswerLocator,MultipleBeanMediator,DeleteMultiplesHelper,OrganiserHelper, integerReshaper"/>
+   </bean>
+
+   <!-- Control the location of the html templates (default: content/templates/) -->
+   <bean id="templateResolverStrategy" parent="CRITemplateResolverStrategy">
+      <property name="baseDirectory" value="templates/" />
+   </bean>
+
+   <!-- Override this definition from RSF-evolvers, to reflect the fact we are
+   	serving the RSF components templates from our own webapp (as provided using
+   	the "partial WAR" build strategy -->
+   <bean id="componentsTemplateResourceBase" class="java.lang.String">
+   	<constructor-arg value="/" />
+   </bean>
+
+<!--  <bean id="questionScope" parent="beanScopeParent">-->
+<!--  	<property name="copyPreservingBeans" value="QuestionLocator,fileAttachments" />-->
+<!--  </bean>-->
+
+  <!-- Inferrers -->
+  
+  <bean class="org.sakaiproject.qna.tool.inferrers.QuestionVPInferrer"></bean> 
+
+  
+  <bean class="org.sakaiproject.qna.tool.inferrers.AnswerVPInferrer">
+  	<property name="answerLogic" ref="org.sakaiproject.qna.logic.AnswerLogic" />
+  </bean>
+<!-- There is no category view - this returns the "edit category view
+  <bean class="org.sakaiproject.qna.tool.inferrers.CategoryVPInferrer"></bean>
+  -->
+  
+   <!-- added to propogate errors -->
+   <bean id="redirectOnLevel1Error" class="uk.org.ponder.springutil.BooleanFactory">
+       <property name="value" value="false" />
+   </bean>
+
+   <bean id="fatalErrorHandler"
+       class="uk.org.ponder.rsf.processor.support.DefaultFatalErrorHandler">
+       <property name="propagatedExceptions" value="java.lang.Throwable" />
+   </bean>
+
+   <bean parent="alterationWrapperParent">
+       <property name="value">
+           <bean parent="RSACBridgeProxy">
+               <property name="targetBeanName" value="allErrorsAllowable" />
+           </bean>
+       </property>
+   </bean>
+   
+   <bean id="integerReshaper" class="org.sakaiproject.qna.tool.utils.IntegerReshaper" />
+</beans>

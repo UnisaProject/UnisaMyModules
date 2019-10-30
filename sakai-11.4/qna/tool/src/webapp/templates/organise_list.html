@@ -1,0 +1,116 @@
+<!--
+
+    Copyright (c) 2007-2009 The Sakai Foundation
+
+    Licensed under the Educational Community License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+                http://www.osedu.org/licenses/ECL-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:rsf="http://ponder.org.uk/rsf" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+   <title rsf:id="page-title"></title>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   <link href="/library/skin/tool_base.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+   <link href="/library/skin/default/tool.css" rsf:id="scr=portal-matter" type="text/css" rel="stylesheet" media="all" />
+   <script type="text/javascript" rsf:id="scr=portal-matter" language="JavaScript" src="/library/js/headscripts.js"></script>
+   
+   <!--  standard on all pages -->
+   <link href="../css/qna.css" type="text/css" rel="stylesheet" media="all" />
+   <script type="text/javascript">includeLatestJQuery('qna');</script>
+   <script type="text/javascript" src="../js/interface/iutil.js"></script>
+   <script type="text/javascript" src="../js/interface/idrag.js"></script>
+   <script type="text/javascript" src="../js/interface/idrop.js"></script>
+   <script type="text/javascript" src="../js/interface/isortables.js"></script>
+   <script type="text/javascript" src="../js/inestedsortable_qna.js"></script>
+   <script type="text/javascript" language="JavaScript" src="../js/qna.js"></script>
+   <!-- end -->
+</head>
+
+<body>
+<div class="portletBody">
+	<script rsf:id="init-organiser" type="text/javascript">
+			initOrganiser();
+	</script>
+	
+	<div rsf:id="navIntraTool:" class="navIntraTool"/>
+	
+	
+	
+	<h3 rsf:id="page-title">Organise</h3>
+    
+    <div rsf:id="message-for:*">
+		<span>Message for user here</span>
+	</div>
+    <br/>
+	<span rsf:id="page-message1">page-message</span><br/>
+	<span rsf:id="page-message2">page-message</span>
+	
+
+	
+	<form rsf:id="organise-form" id="organise-form">
+	
+	<span rsf:id="category-sort-order"/>
+	<span rsf:id="question-sort-order"/>
+	<span rsf:id="question-category-order"/>
+		
+	<div class="wrap" style="width:95%">
+		<span id="nested-sortable" class="page-list">
+			<div rsf:id="category-entry:" id="category-entry" class="sortable-element-class">
+				<input rsf:id="category-sort-order-checkbox" id="category-sort-order-checkbox" type="checkbox" style="display:none" />
+				<table style="width:98%;table-layout:fixed;">
+					<tr>
+						<td style="overflow:hidden;width:85%;">
+							<div rsf:id="category-name" id="category-name" style="white-space: pre">Name of Category</div>
+						</td>
+						<td style="text-align:right;width:15%;">
+            					<a rsf:id="edit-category-link" id="edit-category-link" href="#" style="align:right"><img rsf:id="edit-category-icon" id="edit-category-icon"/></a>
+            					<a rsf:id="hide-category-link" id="hide-category-link" href="#" style="align:right"><img rsf:id="hide-category-icon" id="hide-category-icon"/></a>
+            					<a rsf:id="delete-category-link" id="edit-category-link" href="#" style="align:right"><img rsf:id="delete-category-icon" id="edit-category-icon"/></a>
+						</td>	
+					</tr>
+				</table>
+				
+				<span class="page-list">
+					<div rsf:id="question-entry:" id="question-entry" class="sortable-element-class no-nesting-class">
+						<input rsf:id="question-sort-order-checkbox" id="question-sort-order-checkbox" type="checkbox" style="display:none" />
+						<input rsf:id="question-category-order-checkbox" id="question-category-order-checkbox" type="checkbox" style="display:none" />
+						<table style="width:100%;table-layout:fixed;">
+							<tr>
+								<td style="overflow:hidden;width:85%;">
+									<div rsf:id="question-text" id="question-text" style="white-space: pre">Question text</div>
+								</td>
+								<td style="text-align:right;width:15%;">
+        						    	<a rsf:id="edit-question-link" id="edit-question-link" href="#"><img rsf:id="edit-question-icon" id="edit-question-icon"/></a>
+            							<a rsf:id="hide-question-link" id="hide-question-link" href="#"><img rsf:id="hide-question-icon" id="hide-question-icon"/></a>
+            							<a rsf:id="delete-question-link" id="edit-question-link" href="#"><img rsf:id="delete-question-icon" id="edit-question-icon"/></a>
+								 </td>
+							</tr>
+						</table>
+					</div>	
+				</span>	
+			</div>  	
+		</span>	
+	</div>
+	
+	<div class="act">
+	<p>
+		<input rsf:id="save-button" type="submit" value="Save" class="active"/>
+		<input rsf:id="cancel-button" type="submit" value="Cancel"/>
+	</p>
+	</div>
+	</form>
+	</div>
+	
+</body>
+</html>

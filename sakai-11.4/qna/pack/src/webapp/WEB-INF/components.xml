@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- Bring in the hibernate related beans -->
+    <import resource="spring-hibernate.xml" />
+    <import resource="sakai-hibernate.xml" />
+
+	<!-- add sakai application scope bean definitions here -->
+	<!-- create an external logic bean which abstracts out the Sakai bits -->
+	<bean id="org.sakaiproject.qna.logic.ExternalLogic"	class="org.sakaiproject.qna.logic.impl.ExternalLogicImpl" init-method="init">
+		<property name="functionManager" ref="org.sakaiproject.authz.api.FunctionManager" />
+		<property name="securityService" ref="org.sakaiproject.authz.api.SecurityService" />
+		<property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager" />
+		<property name="siteService" ref="org.sakaiproject.site.api.SiteService" />
+		<property name="toolManager" ref="org.sakaiproject.tool.api.ToolManager" />
+		<property name="userDirectoryService" ref="org.sakaiproject.user.api.UserDirectoryService" />
+		<property name="entityBroker" ref="org.sakaiproject.entitybroker.EntityBroker" />
+		<property name="emailService" ref="org.sakaiproject.email.api.EmailService" />
+		<!-- uncomment if using the sms service 
+		<property name="smsService" ref="org.sakaiproject.sms.api.SmsService" />-->
+	</bean>
+	
+	<bean id="org.sakaiproject.qna.logic.ExternalEventLogic" class="org.sakaiproject.qna.logic.impl.ExternalEventLogicImpl">
+		<property name="eventTrackingService" ref="org.sakaiproject.event.api.EventTrackingService" />
+	</bean>
+
+	<bean id="org.sakaiproject.qna.logic.PermissionLogic"
+		class="org.sakaiproject.qna.logic.impl.PermissionLogicImpl">
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+	</bean>
+
+	<bean id="org.sakaiproject.qna.logic.CategoryLogic"
+		class="org.sakaiproject.qna.logic.impl.CategoryLogicImpl">
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic"/>
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+		<property name="externalEventLogic" ref="org.sakaiproject.qna.logic.ExternalEventLogic" />	
+		<property name="dao" ref="org.sakaiproject.qna.dao.QnaDao" />
+		<property name="qnaBundleLogic" ref="org.sakaiproject.qna.logic.QnaBundleLogic" />
+	</bean>
+
+	<bean id="org.sakaiproject.qna.logic.SearchLogic" class="org.sakaiproject.qna.logic.impl.SearchLogicImpl">
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+		<property name="dao" ref="org.sakaiproject.qna.dao.QnaDao" />
+	</bean>
+
+	<bean id="org.sakaiproject.qna.logic.OptionsLogic"
+		class="org.sakaiproject.qna.logic.impl.OptionsLogicImpl">
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+		<property name="externalEventLogic" ref="org.sakaiproject.qna.logic.ExternalEventLogic" />	
+		<property name="dao" ref="org.sakaiproject.qna.dao.QnaDao" />
+		<property name="serverConfigurationService" ref="org.sakaiproject.component.api.ServerConfigurationService" />
+	</bean>
+
+	<bean id="org.sakaiproject.qna.logic.QuestionLogic"
+		class="org.sakaiproject.qna.logic.impl.QuestionLogicImpl">
+		<property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic" />
+		<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+		<property name="attachmentLogic" ref="org.sakaiproject.qna.logic.AttachmentLogic"/>
+		<property name="notificationLogic" ref="org.sakaiproject.qna.logic.NotificationLogic" />
+		<property name="externalEventLogic" ref="org.sakaiproject.qna.logic.ExternalEventLogic" />	
+		<property name="dao" ref="org.sakaiproject.qna.dao.QnaDao" />
+		<property name="developerHelperService" ref="org.sakaiproject.entitybroker.DeveloperHelperService"></property>
+		<property name="entityManager" ref="org.sakaiproject.entity.api.EntityManager"/>
+		<property name="authzGroupService" ref="org.sakaiproject.authz.api.AuthzGroupService"/>
+	</bean>
+
+	<bean id="org.sakaiproject.qna.logic.AnswerLogic" class="org.sakaiproject.qna.logic.impl.AnswerLogicImpl">
+		<property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic" />
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+		<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+		<property name="notificationLogic" ref="org.sakaiproject.qna.logic.NotificationLogic" />	
+		<property name="externalEventLogic" ref="org.sakaiproject.qna.logic.ExternalEventLogic" />	
+		<property name="dao" ref="org.sakaiproject.qna.dao.QnaDao" />
+	</bean>
+
+	<bean id="org.sakaiproject.qna.logic.AttachmentLogic" class="org.sakaiproject.qna.logic.impl.AttachmentLogicImpl">
+		<property name="contentHostingService" ref="org.sakaiproject.content.api.ContentHostingService" />
+	</bean>
+	
+	<bean id="org.sakaiproject.qna.logic.QnaBundleLogic" class="org.sakaiproject.qna.logic.impl.QnaBundleLogicImpl" init-method="init" />
+	
+	<bean id="org.sakaiproject.qna.logic.NotificationLogic" class="org.sakaiproject.qna.logic.impl.NotificationLogicImpl">
+		<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+		<property name="qnaBundleLogic" ref="org.sakaiproject.qna.logic.QnaBundleLogic" />
+		<property name="serverConfigurationService" ref="org.sakaiproject.component.api.ServerConfigurationService" />
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+	</bean>
+	<!-- uncomment to enable SMS -->
+	<!--
+ 	<bean id="QnaCommandRegister"
+		class="org.sakaiproject.sms.logic.incoming.helper.SmsCommandRegisterHelper" init-method="init" >
+		<property name="incomingLogicManager" ref="org.sakaiproject.sms.logic.incoming.SmsIncomingLogicManager" />
+		<property name="toolKey" value="qna" />
+		<property name="commands">
+			<list>
+				<bean class="org.sakaiproject.qna.logic.impl.sms.QuestionSmsCommand">
+					<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+					<property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic" />
+					<property name="qnaBundleLogic" ref="org.sakaiproject.qna.logic.QnaBundleLogic" />
+					<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+					<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+			        <property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+				</bean>
+				<bean class="org.sakaiproject.qna.logic.impl.sms.AnswerSmsCommand">
+					<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+					<property name="qnaBundleLogic" ref="org.sakaiproject.qna.logic.QnaBundleLogic" />
+					<property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />			
+					<property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic" />	
+					<property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />
+				</bean>
+				<bean class="org.sakaiproject.qna.logic.impl.sms.ReplySmsCommand">
+					<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+					<property name="qnaBundleLogic" ref="org.sakaiproject.qna.logic.QnaBundleLogic" />	
+					<property name="answerLogic" ref="org.sakaiproject.qna.logic.AnswerLogic" />	
+					<property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic" />
+				    <property name="externalLogic" ref="org.sakaiproject.qna.logic.ExternalLogic" />	
+				    <property name="permissionLogic" ref="org.sakaiproject.qna.logic.PermissionLogic" />
+				</bean>
+			</list>
+		</property>
+	</bean>	
+	-->
+
+
+	<!-- entity beans -->
+	<!--  
+	<bean id="org.sakaiproject.qna.logic.entity.QuestionEntityProvider" 
+			class="org.sakaiproject.qna.logic.impl.entity.QuestionEntityProviderImpl">
+			<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+	</bean>
+
+	<bean id="org.sakaiproject.qna.logic.entity.CategoryEntityProvider" 
+			class="org.sakaiproject.qna.logic.impl.entity.CategoryEntityProviderImpl">
+			<property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+	</bean>
+
+	<bean id="org.sakaiproject.qna.logic.entity.AnswerEntityProvider" 
+			class="org.sakaiproject.qna.logic.impl.entity.AnswerEntityProviderImpl">
+			<property name="answerLogic" ref="org.sakaiproject.qna.logic.AnswerLogic" />
+	</bean>
+	-->
+    <bean id="org.sakaiproject.qna.logic.entity.QnaEntityProducer" 
+    	class="org.sakaiproject.qna.logic.impl.entity.QnaEntityProducer"
+      	init-method="init">
+      <property name="entityManager" ref="org.sakaiproject.entity.api.EntityManager"/>
+      <property name="siteService" ref="org.sakaiproject.site.api.SiteService" />
+      <property name="dao"  ref="org.sakaiproject.qna.dao.QnaDao" />
+      <property name="categoryLogic" ref="org.sakaiproject.qna.logic.CategoryLogic" />
+      <property name="optionsLogic" ref="org.sakaiproject.qna.logic.OptionsLogic" />
+      <property name="attachmentLogic" ref="org.sakaiproject.qna.logic.AttachmentLogic" />
+    </bean>
+    
+    <!-- Search Adaptors -->
+	<bean id="qnaQuestionAdaptor"
+		class="org.sakaiproject.qna.logic.impl.entity.QuestionEntityContentProducer" init-method="init">
+		<property name="searchService">
+			<ref bean="org.sakaiproject.search.api.SearchService" />
+		</property>
+		<property name="searchIndexBuilder">
+			<ref bean="org.sakaiproject.search.api.SearchIndexBuilder" />
+		</property>
+		<property name="serverConfigurationService">
+			<ref bean="org.sakaiproject.component.api.ServerConfigurationService" />
+		</property>
+		<property name="toolName">
+			<value>qna-question</value>
+		</property>
+		<property name="entityBroker" ref="org.sakaiproject.entitybroker.EntityBroker" />
+		<property name="questionLogic" ref="org.sakaiproject.qna.logic.QuestionLogic" />
+		<property name="securityService" ref="org.sakaiproject.authz.api.SecurityService"/>
+		<property name="addEvents">
+			<list>
+				<value>qna.question.created</value>
+				<value>qna.question.updated</value>
+			</list>
+		</property>
+		<property name="removeEvents">
+			<list>
+				<value>qna.question.deleted</value>
+			</list>
+		</property>
+	</bean>
+ 
+ 	<bean id="qnaAnswerAdaptor"
+		class="org.sakaiproject.qna.logic.impl.entity.AnswerEntityContentProducer" init-method="init">
+		<property name="searchService">
+			<ref bean="org.sakaiproject.search.api.SearchService" />
+		</property>
+		<property name="searchIndexBuilder">
+			<ref bean="org.sakaiproject.search.api.SearchIndexBuilder" />
+		</property>
+		<property name="serverConfigurationService">
+			<ref bean="org.sakaiproject.component.api.ServerConfigurationService" />
+		</property>
+		<property name="toolName">
+			<value>qna-answer</value>
+		</property>
+		<property name="entityBroker" ref="org.sakaiproject.entitybroker.EntityBroker" />
+		<property name="answerLogic" ref="org.sakaiproject.qna.logic.AnswerLogic" />
+		<property name="securityService" ref="org.sakaiproject.authz.api.SecurityService"/>
+		<property name="addEvents">
+			<list>
+				<value>qna.answer.created</value>
+				<value>qna.answer.updated</value>
+			</list>
+		</property>
+		<property name="removeEvents">
+			<list>
+				<value>qna.answer.deleted</value>
+			</list>
+		</property>
+	</bean>
+       
+		
+</beans>

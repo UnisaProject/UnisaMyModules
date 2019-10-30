@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
+	"http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+    <!-- define the list of HBM mapping files -->
+    <bean id="org.sakaiproject.sms.hbmMappingList" class="java.util.ArrayList">
+        <constructor-arg>
+            <list>
+                <value>hibernate-mappings.hbm.xml</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+   <bean id="org.sakaiproject.sms.dao.SmsDaoTarget" class="org.sakaiproject.sms.dao.SmsDaoImpl">
+      <property name="sessionFactory" ref="org.sakaiproject.springframework.orm.hibernate.GlobalSessionFactory" />
+      <property name="persistentClasses">
+         <list>
+            <value>org.sakaiproject.sms.model.SmsAccount</value>
+            <value>org.sakaiproject.sms.model.SmsConfig</value>
+			<value>org.sakaiproject.sms.model.SmsMessage</value>
+            <value>org.sakaiproject.sms.model.SmsTask</value>
+            <value>org.sakaiproject.sms.model.SmsTransaction</value>
+         </list>
+        </property>
+    </bean>
+    
+       <!-- This wraps our DAO so that the transactions are managed -->
+   <bean id="org.sakaiproject.sms.dao.SmsDao" class="org.sakaiproject.genericdao.springutil.CurrentClassLoaderTxProxyFactoryBean">
+      <property name="transactionManager" ref="org.sakaiproject.springframework.orm.hibernate.GlobalTransactionManager" />
+      <property name="target" ref="org.sakaiproject.sms.dao.SmsDaoTarget" />
+      <property name="transactionAttributes">
+         <props>
+            <prop key="get*">PROPAGATION_REQUIRED,readOnly</prop>
+            <prop key="find*">PROPAGATION_REQUIRED,readOnly</prop>
+            <prop key="count*">PROPAGATION_REQUIRED,readOnly</prop>
+            <prop key="*">PROPAGATION_REQUIRED</prop>
+         </props>
+      </property>
+   </bean>
+
+</beans>
