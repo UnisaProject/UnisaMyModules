@@ -181,19 +181,17 @@ CKEDITOR.plugins.add( 'movieplayer',
 
                     var e = (oMovie || new Movie()) ;
                     updateMovieObject(e,tab1doc) ;
-                    
-                    
-                    
-                                                                   var realElement = CKEDITOR.dom.element.createFromHtml(e.getInnerHTML());
-                                                                   var fakeElement;
+										//debugger;
+										var realElement = CKEDITOR.dom.element.createFromHtml(e.getInnerHTML());
+										var fakeElement;
                     if(!isNew) {
                         //TODO: Is this still a problem with Safari?
                         if(!navigator.userAgent.contains('Safari')) {
                             //FCK.Selection.Delete();
                         }
-                                                                                fakeElement= this._.editor.createFakeElement( realElement, 'cke_movieplayer', 'movieplayer', true );
+												fakeElement= this._.editor.createFakeElement( realElement, 'cke_movieplayer', 'movieplayer', true );
                     }else{
-                                                                                fakeElement= this._.editor.createFakeElement( realElement, 'cke_movieplayer', 'movieplayer', true );
+												fakeElement= this._.editor.createFakeElement( realElement, 'cke_movieplayer', 'movieplayer', true );
                     }
                     
                     var appendUrl ='';
