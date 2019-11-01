@@ -1,0 +1,10 @@
+{
+	"version": 3,
+	"file": "portal.css",
+	"sources": [
+		"../../../unisa-master/sass/portal.scss",
+		"../../../unisa-master/sass/portal.scss/JSASS_CUSTOM.scss"
+	],
+	"mappings": "",
+	"names": []
+}
