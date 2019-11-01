@@ -1,0 +1,19 @@
+    <h2>{{translate 'group_posts_title_prefix'}} '{{groupTitle}}'</h2>
+	{{#unless posts.length}}
+	<div id="clog-posts-total-wrapper"><span id="clog-posts-total"></span><span>{{translate 'posts_in_total'}}</span></div>
+	{{else}}
+	<div id="clog-body-toggle">
+   		<input type="checkbox"
+                 {{#unless showBody}} checked {{/unless}}
+                 onclick="clog.toggleFullContent(this);"/>
+		<span>{{translate 'show_title_only_label'}}</span>
+   	</div>
+	{{/unless}}
+    <div id="clog-posts-wrapper">
+    	<br />
+  	 	<div id="clog-posts">
+		</div>
+	</div>
+    <div id="clog-loading-image">
+        <img src="/clog-tool/images/ajax-loader.gif" />
+    </div>
