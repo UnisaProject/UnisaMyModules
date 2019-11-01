@@ -1,0 +1,8 @@
+.classpath
+.idea
+*.iml
+.project
+*.swp
+tags
+target
+**/.tern-project
