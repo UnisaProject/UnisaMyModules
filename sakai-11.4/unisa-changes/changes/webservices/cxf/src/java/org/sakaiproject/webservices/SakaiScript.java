@@ -1633,7 +1633,7 @@ public class SakaiScript extends AbstractWebService {
     		}
     	}
     	catch (Exception e) {
-    		LOG.error("WS checkForUserFromDB(): " + e.getClass().getName() + " : " + e.getMessage());
+    		log.error("WS checkForUserFromDB(): " + e.getClass().getName() + " : " + e.getMessage());
     		return false;
     	}
     }
