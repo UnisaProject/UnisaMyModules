@@ -2511,7 +2511,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
      * Unisa Changes:2018/04/26:Added-Check if gradebook settings for module site is set to record
      * percentages and not points: grade_type = 2
      */
-    public boolean checkGradeType(AssignmentGradeRecord assignment){
+    public boolean checkGradeType(GradebookAssignment assignment){
     	if(assignment == null){
     		throw new IllegalArgumentException("null assignment passed to checkGradeType");
     	}

@@ -41,10 +41,12 @@ import org.sakaiproject.tool.gradebook.GradebookAssignment;
 import org.sakaiproject.tool.gradebook.GradingEvent;
 import org.sakaiproject.tool.gradebook.GradingEvents;
 import org.sakaiproject.tool.gradebook.jsf.FacesUtil;
+
 //Unisa Changes:2018/04/26:Added database dependency for UNISA Student system and GardeBookSync Bean
 import org.sakaiproject.tool.gradebook.business.impl.UnisaGradeBookDAO;
 import org.sakaiproject.tool.gradebook.ui.GradebookSyncBean;
 //End Unisa Changes
+
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -831,7 +833,7 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
 		gradebookTitleCheck = gradebookSyncBean.verifyGradebookTitle( assignment );
 		if( !gradebookTitleCheck ){
 			FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_exist_unisa_sys"));
-			if (logger.isInfoEnabled()) logger.info("Assignment does not exist in UNISA student system!");
+			//if (logger.isInfoEnabled()) logger.info("Assignment does not exist in UNISA student system!");
 			return redirectPage;
 		}
 		
@@ -847,7 +849,7 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
 			detailsCheck = true;
 		if( !detailsCheck ){
 			FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_exist_unisa_sys"));
-			if (logger.isInfoEnabled()) logger.info("Assignment does not exist in UNISA student system!");
+			//if (logger.isInfoEnabled()) logger.info("Assignment does not exist in UNISA student system!");
 			return redirectPage;
 		}
 		
@@ -855,7 +857,7 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
 		gradeTypeCheck = getGradebookManager().checkGradeType( assignment );
 		if (!gradeTypeCheck){
 			FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_grade_type_setting"));
-			if (logger.isInfoEnabled()) logger.info("Assignment grade_type is set to points (1)!");
+			//if (logger.isInfoEnabled()) logger.info("Assignment grade_type is set to points (1)!");
 			return redirectPage;
 		}
 		
@@ -864,12 +866,12 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
 			dueDateCheck = unisaStudentSysDao.checkDueDate( acadYear,semPeriod,moduleCode,assignmentNr );
 			if(!dueDateCheck){
 				FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_due_date"));
-				if (logger.isInfoEnabled()) logger.info("Assignment due date is NOT in the past!");
+				//if (logger.isInfoEnabled()) logger.info("Assignment due date is NOT in the past!");
 				return redirectPage;
 			}
 		}catch (Exception e){
 			e.printStackTrace();
-			if (logger.isErrorEnabled()) logger.error("Exception in checkDueDate() method!");
+			//if (logger.isErrorEnabled()) logger.error("Exception in checkDueDate() method!");
 		}
 		
 		//Check if assignment exists in UNISA Student System Database
@@ -877,12 +879,12 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
 			assignmentExists = unisaStudentSysDao.checkStudentSysAssignment( acadYear,semPeriod,moduleCode,assignmentNr );
 			if (!assignmentExists){
 				FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_exist_unisa_sys"));
-				if (logger.isInfoEnabled()) logger.info("Assignment does not exist in UNISA student system!");
+				//if (logger.isInfoEnabled()) logger.info("Assignment does not exist in UNISA student system!");
 				return redirectPage;
 			}
 		}catch (Exception e){
 			e.printStackTrace();
-			if (logger.isErrorEnabled()) logger.error("Exception in assignmentExists() method!");
+			//if (logger.isErrorEnabled()) logger.error("Exception in assignmentExists() method!");
 		}
 				
 		//Go to gradebookSync if all assignment details are in the correct format and grade type is 
@@ -899,5 +901,5 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
 		return redirectPage;
 	}
 	// End Unisa Changes
-	
+
 }
