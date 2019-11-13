@@ -185,7 +185,12 @@ public class SpreadsheetUploadBean extends GradebookDependentBean implements Ser
 				this.selectedCategory = getLocalizedString("cat_unassigned");
 			}
 		}
-
+		
+		//Unisa Changes:2017/08/28-Exam Instance Changes-2.7:Dont include item in course grades
+		//Dont release item to students
+		assignment.setReleased(false);		//Unisa Changes:Added
+		assignment.setCounted(false);		//Unisa Changes:Added
+		
 		if (this.selectedCategory == null) {
 			this.selectedCategory = AssignmentBean.UNASSIGNED_CATEGORY;
 		}
