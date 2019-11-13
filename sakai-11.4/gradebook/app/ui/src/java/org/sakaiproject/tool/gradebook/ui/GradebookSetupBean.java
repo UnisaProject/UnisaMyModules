@@ -887,16 +887,21 @@ public class GradebookSetupBean extends GradebookDependentBean implements Serial
 	 */
 	private void intializeGradeEntryAndCategorySettings()
 	{
+		//Unisa Changes:2017/08/28-Exam Instance Changes-2.7:Removed Points option
+		//No need for logic here - just set gradeEntryMethod to "percent" - ENTRY_OPT_PERCENT
+		int gradeEntryType = localGradebook.getGrade_type();
+		gradeEntryMethod = ENTRY_OPT_PERCENT;
+		/**
 		// Grade entry setting
-		final int gradeEntryType = this.localGradebook.getGrade_type();
-		if (gradeEntryType == GradebookService.GRADE_TYPE_PERCENTAGE) {
-			this.gradeEntryMethod = ENTRY_OPT_PERCENT;
-		} else if (gradeEntryType == GradebookService.GRADE_TYPE_LETTER) {
-			this.gradeEntryMethod = ENTRY_OPT_LETTER;
-		} else {
-			this.gradeEntryMethod = ENTRY_OPT_POINTS;
-		}
-
+		int gradeEntryType = localGradebook.getGrade_type();
+		if (gradeEntryType == GradebookService.GRADE_TYPE_PERCENTAGE)
+			gradeEntryMethod = ENTRY_OPT_PERCENT;
+		else if (gradeEntryType == GradebookService.GRADE_TYPE_LETTER)
+				gradeEntryMethod = ENTRY_OPT_LETTER;
+		else
+				gradeEntryMethod = ENTRY_OPT_POINTS;
+		**/
+		
 		// Category setting
 		final int categoryType = this.localGradebook.getCategory_type();
 
