@@ -72,6 +72,7 @@
 					This would be positioned directly under the Point Value entry if
 					only JSF supported "colspan"....
 				*/%>
+				<%-- Unisa Changes:2017/08/28-Exam Instance Changes-2.7:Remove Release and Count Checkboxes 
 				<h:panelGrid columns="2" columnClasses="prefixedCheckbox">
 				    <h:selectBooleanCheckbox id="released" value="#{spreadsheetUploadBean.assignment.released}" onclick="assignmentReleased(this.form.name, true);"
 						onkeypress="return submitOnEnter(event, 'gbForm:saveButton');"/>
@@ -87,7 +88,8 @@
 							onkeypress="return submitOnEnter(event, 'gbForm:saveButton');"/>
 						<h:outputLabel for="countAssignment" value="#{msgs.add_assignment_counted}" />
 					</h:panelGrid>
-				</h:panelGrid>
+				</h:panelGrid> --%>
+				
 				<h:outputText escape="false" value="<script type='text/javascript'>cat = #{spreadsheetUploadBean.categoriesEnabled};</script>" />
 				
 				<script type="text/javascript">

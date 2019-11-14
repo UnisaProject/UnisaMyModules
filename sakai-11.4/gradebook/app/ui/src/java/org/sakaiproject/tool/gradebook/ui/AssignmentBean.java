@@ -92,6 +92,11 @@ public class AssignmentBean extends GradebookDependentBean implements Serializab
 				this.assignment.setReleased(true);
 			}
 		}
+		
+		//Unisa Changes:2017/08/28-Exam Instance Changes-2.7:Dont include item in course grades
+		//Dont release item to students
+		assignment.setReleased(false);		//Unisa Changes:Added
+		assignment.setCounted(false);		//Unisa Changes:Added	
 
 		// initialization; shouldn't enter here after category drop down changes
 		if (this.selectedCategory == null && !UNASSIGNED_CATEGORY.equals(this.assignmentCategory)) {
