@@ -63,15 +63,12 @@ import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.tool.cover.SessionManager;
 import org.sakaiproject.tool.cover.ToolManager;
 
-/**
- * <p>
- * FaqsToolAction is the faqs display tool
- * </p>
- */
+@SuppressWarnings("deprecation")
 public class FaqsToolAction extends VelocityPortletPaneledAction {
 	private static final long serialVersionUID = 1L;
 	private static Logger M_log = LoggerFactory.getLogger(FaqsToolAction.class);
 	private static ResourceLoader rb = new ResourceLoader("faqs");
+	private EventTrackingService eventTrackingService = null;
 	@Getter
 	@Setter
 	private boolean addFaqContent;
@@ -92,7 +89,7 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 	private boolean deleteFaqCategory;
 	protected static final String expandedCatogories = "";
 	protected static final String STATE_DISPLAY_MODE = "display_mode";
-	private EventTrackingService eventTrackingService = null;
+
 
 	/**
 	 * Populate the state object, if needed.
@@ -279,6 +276,12 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 			return template + "_add_faq";
 		}
 		context.put("service", FaqsService.getInstance());
+		
+		if (eventTrackingService == null) {
+			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
+		}
+		eventTrackingService.post(eventTrackingService.newEvent("faqs.view",ToolManager.getCurrentPlacement().getContext(), false));
+		
 		return template + "_main_view";
 
 	}
@@ -312,6 +315,11 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		ids.add(listForm.getExpandCategoryId());
 		listForm.setExpandedCategories(ids);
 		state.setAttribute(expandedCatogories, ids);
+		
+		if (eventTrackingService == null) {
+			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
+		}
+		eventTrackingService.post(eventTrackingService.newEvent("faqs.contentview", 				ToolManager.getCurrentPlacement().getContext(), false));
 
 		return ids;
 	}
@@ -379,11 +387,9 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		FaqsService.insertFaqCategory(ToolManager.getCurrentPlacement().getContext(), categoryDesc);
 
 		if (eventTrackingService == null) {
-			eventTrackingService = (EventTrackingService) ComponentManager
-					.get("org.sakaiproject.event.api.EventTrackingService");
+			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
 		}
-		eventTrackingService.post(eventTrackingService.newEvent("faqs.categoryadd",
-				ToolManager.getCurrentPlacement().getContext(), false));
+		eventTrackingService.post(eventTrackingService.newEvent("faqs.categoryadd",ToolManager.getCurrentPlacement().getContext(), false));
 		}
 	}
 
@@ -392,6 +398,13 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
 		int itemReference = Integer.parseInt(rundata.getParameters().getString("itemReference").trim());
 		state.setAttribute("categoryList", FaqsService.getFaqCategory(itemReference));
+		
+		if (eventTrackingService == null) {
+			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
+		}
+		eventTrackingService.post(eventTrackingService.newEvent("faqs.categoryEdit",ToolManager.getCurrentPlacement().getContext(), false));
+	 
+	
 		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_CATEGORY");
 	}
 
@@ -412,7 +425,7 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		if (eventTrackingService == null) {
 			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
 		}
-		eventTrackingService.post(eventTrackingService.newEvent("faqs.categoryedit",
+		eventTrackingService.post(eventTrackingService.newEvent("faqs.categoryupdate",
 				ToolManager.getCurrentPlacement().getContext(), false));
 		return "";
 	}
@@ -426,6 +439,7 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 				Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[0])));  
 		state.setAttribute("categoryListForFaq", FaqsService.getFaqCategory(
 				Integer.parseInt(rundata.getParameters().getString("itemReference").trim().split("-")[1])));
+		
 		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_FAQ_CONTENT");
 	} 
 
@@ -443,6 +457,12 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		
 		 state.setAttribute("contentList", FaqsService.getFaqContent(contentId));  
 		 state.setAttribute("categoryListForFaq", FaqsService.getFaqCategory(categoryId)); 
+		 
+			if (eventTrackingService == null) {
+				eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
+			}
+			eventTrackingService.post(eventTrackingService.newEvent("faqs.contentedit",
+					ToolManager.getCurrentPlacement().getContext(), false));
 		 
 		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_FAQ_CONTENT");
 	}
@@ -488,6 +508,12 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 		}
 		state.setAttribute("nextId", nextId);
 		state.setAttribute("previousId", previousId);
+		
+		if (eventTrackingService == null) {
+			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
+		}
+		eventTrackingService.post(eventTrackingService.newEvent("faqs.contentedit",
+				ToolManager.getCurrentPlacement().getContext(), false));
 		
 		state.setAttribute(STATE_DISPLAY_MODE, "EDIT_FAQ");
 	}
@@ -581,6 +607,14 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 			return (String) state.setAttribute(STATE_DISPLAY_MODE, "ADD_FAQ");
 		}
  
+		//unisa event tracking 
+		if (eventTrackingService == null) {
+			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
+		}
+		eventTrackingService.post(eventTrackingService.newEvent("faqs.contentadd",
+				ToolManager.getCurrentPlacement().getContext(), false));
+		
+		
 		FaqsService.insertFaqContent(question, answer, categoryId);
 		
 		return (String) state.setAttribute(STATE_DISPLAY_MODE, null); 
@@ -607,6 +641,13 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 			addAlert(state, rb.getString("faq.alert.noanswer"));
 			return (String) state.setAttribute(STATE_DISPLAY_MODE, "EDIT_FAQ_CONTENT");
 		}	
+		
+		//unisa event tracking 
+		if (eventTrackingService == null) {
+			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
+		}
+		eventTrackingService.post(eventTrackingService.newEvent("faqs.contentupdate",
+				ToolManager.getCurrentPlacement().getContext(), false));
 		
 		FaqsService.updateFaqContent(faqContent);
 		return (String) state.setAttribute(STATE_DISPLAY_MODE, null); 
@@ -678,6 +719,12 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 			while (ci.hasNext()) {
 				FaqCategory q = (FaqCategory) ci.next();
 				FaqsService.deleteFaqCategory(q.getCategoryId());
+			    //unisa event traacking 
+				if (eventTrackingService == null) {
+					eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
+				}
+				eventTrackingService.post(eventTrackingService.newEvent("faqs.categorydelete",
+						ToolManager.getCurrentPlacement().getContext(), false));
 			}
 			
 		}
@@ -687,10 +734,18 @@ public class FaqsToolAction extends VelocityPortletPaneledAction {
 			while (ci.hasNext()) {
 					FaqContent q = (FaqContent) ci.next();
 					FaqsService.deleteFaqContent(q.getContentId());
+				    //unisa event traacking 
+					if (eventTrackingService == null) {
+						eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
+					}
+					eventTrackingService.post(eventTrackingService.newEvent("faqs.contentdelete",
+							ToolManager.getCurrentPlacement().getContext(), false));
 			}
 		}
-	state.setAttribute(STATE_DISPLAY_MODE, null);
+
 		
+		state.setAttribute(STATE_DISPLAY_MODE, null);
+				
 	}
 	
 	public void removeSpecific(RunData rundata, Context context) {

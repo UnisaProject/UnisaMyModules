@@ -53,6 +53,7 @@ import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.exception.PermissionException;
+import org.sakaiproject.event.api.EventTrackingService;
 
 @SuppressWarnings("deprecation")
 public class WelcomeAction extends VelocityPortletPaneledAction {
@@ -63,6 +64,7 @@ public class WelcomeAction extends VelocityPortletPaneledAction {
 	private boolean maintainUser;
 	private String siteId = null;
 	private String siteReference = null;
+	private EventTrackingService eventTrackingService = null;
 
 	/** Resource bundle using current language locale */
 	private static ResourceLoader rb = new ResourceLoader("admin");
@@ -110,6 +112,12 @@ public class WelcomeAction extends VelocityPortletPaneledAction {
 		bar.add(new MenuEntry(rb.getString("welcome.edit"), "editContent"));
 		context.put(Menu.CONTEXT_MENU, bar);
 
+		//add unisa eventtracking type
+		if (eventTrackingService == null) {
+			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
+		}
+		eventTrackingService.post(eventTrackingService.newEvent("welcome.view",	ToolManager.getCurrentPlacement().getContext(), false));
+		
 		if (MODE_EDIT.equals(state.getAttribute(STATE_DISPLAY_MODE))) {
 			template = template + "_edit";
 		}
@@ -148,6 +156,13 @@ public class WelcomeAction extends VelocityPortletPaneledAction {
 			state.setAttribute(STATE_DISPLAY_MODE, MODE_EDIT);
 			return;
 		}
+		
+	      	//add unisa eventtracking type
+				if (eventTrackingService == null) {
+					eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
+				}
+				eventTrackingService.post(eventTrackingService.newEvent("welcome.update",	ToolManager.getCurrentPlacement().getContext(), false));
+		
 		state.setAttribute(STATE_DISPLAY_MODE, null);
 	}
 
@@ -161,6 +176,11 @@ public class WelcomeAction extends VelocityPortletPaneledAction {
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
 		String revertContent = WelcomeService.revertWelcomeContent(siteId);
 		M_log.info(this + " Welcome message revert: success for the site  " + siteId);
+	  	//add unisa eventtracking type
+		if (eventTrackingService == null) {
+			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
+		}
+		eventTrackingService.post(eventTrackingService.newEvent("welcome.revert",	ToolManager.getCurrentPlacement().getContext(), false));
 		state.setAttribute(STATE_DISPLAY_MODE, null);
 	}
 
