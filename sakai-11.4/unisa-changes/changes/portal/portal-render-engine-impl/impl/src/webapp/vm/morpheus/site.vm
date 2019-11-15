@@ -26,6 +26,7 @@
                 ## Header
                 <div class="Mrphs-topHeader">
                           ## <!-- Unisa Changes:2019/11/15: myModules, myAdmin (For Students & Students) buttons -->
+                    #parse("/vm/morpheus/snippets/header-snippet.vm")
                    #if( ${loggedIn} ) 
 	                   <div class="clearfix col-lg-8 col-md-8 col-sm-8 col-xs-12 noRowPaddingLeft noRowPaddingRight loginAssistanceLinks defaultBottomMargin">
 							<div style="display: inline-block; padding-top: 8px;" class="col-lg-8 col-md-8 col-sm-12 col-xs-12 noRowPaddingLeft noRowPaddingRight">
@@ -76,7 +77,6 @@
 				   #end
 
                     ## <!-- End Unisa Changes:2019/11/15-->
-                    #parse("/vm/morpheus/snippets/header-snippet.vm")
                 </div>
 
                 #if (${tabsSites})
