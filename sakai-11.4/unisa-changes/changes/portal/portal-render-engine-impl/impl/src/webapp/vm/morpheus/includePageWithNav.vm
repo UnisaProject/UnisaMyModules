@@ -82,6 +82,14 @@
     #end ## END of IF ( $sitePages.pageNavToolsCount > 1 || ! $sitePages.pageMaxIfSingle )
 
     <div class="Mrphs-pagebody">
+    
+    #foreach( $page in $sitePages.pageNavTools )
+        #if (${page.current})
+            <div class="site-identifier ci-gray-light-bg">
+                <h3><a href="${page.pageResetUrl}" title="$rloader.sit_reset" class="Mrphs-hierarchy-item Mrphs-hierarchy--toolName"><span class="Mrphs-breadcrumb--reset-icon fa fa-refresh"></span></a>${page.pageTitle}</h3>
+            </div>
+        #end
+     #end
         ##parse("/vm/morpheus/includeSiteHierarchy.vm")
 
         #parse("/vm/morpheus/includePageBody.vm")
