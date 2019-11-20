@@ -1,0 +1,430 @@
+import java.sql.Types;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.lang.StringBuffer;
+
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
+import org.apache.axis.AxisFault;
+import org.apache.axis.utils.JavaUtils;
+import org.apache.commons.collections.map.ListOrderedMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.email.api.EmailService;
+import org.sakaiproject.email.api.Attachment;
+import org.sakaiproject.email.api.RecipientType;
+
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+
+import za.ac.unisa.lms.db.SakaiDAO;
+
+/**
+Webservice for the mapping of yaft ids
+mapping between two sites
+*/
+public class UnipoolYaftMappingWebservice {
+
+
+	// -------------------------------------------------------------------------
+	
+	private StringBuffer selectYaftForumIdForMapping;
+	private String errorEmailAddress = new String("syzelle@unisa.ac.za");
+	private String monitorEmailAddress = new String("syzelle@unisa.ac.za");
+	//"MyUnisaBugs@unisa.ac.za"
+	private StringBuffer emailHeading = new StringBuffer();
+	private StringBuffer emailBody = new StringBuffer();
+	private StringBuffer emailSuccessHeading = new StringBuffer();
+	private StringBuffer emailSuccessBody = new StringBuffer();
+	// -------------------------------------------------------------------------
+
+
+	/************************************************************************* */ 
+	/* Method to do mapping for Yaft 
+	 *  1) map module IDs
+	 *  2) map section IDs
+	 */
+	public void yaftDataToBeMapped(String toolId, String fromContext,
+		String toContext) throws AxisFault {
+		Log log = LogFactory.getLog(this.getClass());
+		boolean duplicateForumExist = false;
+		boolean duplicateDiscussionexist = false;
+		
+		emailSuccessBody.append("UnipoolYaftMappingWebService.wsdl <br>");
+		emailSuccessBody.append("Yaft Mapping from ");
+		emailSuccessBody.append(fromContext);
+		emailSuccessBody.append(" to ");
+		emailSuccessBody.append(toContext);
+		emailSuccessBody.append("\n\n <br>");
+		System.out.println("*************** IN yaftDataToBeMapped getforumIdList");
+		try {
+			// -------------------------------------------------------------------------
+			// QUERIES 
+			// query to retrieve the Yaft Forum ids that must be mapped
+			selectYaftForumIdForMapping= new StringBuffer();
+			
+			selectYaftForumIdForMapping.append("select YF.forum_id as from_ForumId,YF.title, ");
+			selectYaftForumIdForMapping.append(" (select YF2.forum_id ");
+			selectYaftForumIdForMapping.append(" from   yaft_forum YF2 ");
+			selectYaftForumIdForMapping.append(" where  YF2.site_id = ? ");// the site id where you were copying from
+			selectYaftForumIdForMapping.append(" and    YF2.title = YF.title "); 
+			selectYaftForumIdForMapping.append(" and    YF2.status != 'DELETED') as to_ForumId ");
+			selectYaftForumIdForMapping.append(" from yaft_forum YF ");
+			selectYaftForumIdForMapping.append(" where YF.site_id = ? ");// the site id where you were copying to
+			selectYaftForumIdForMapping.append(" and YF.status != 'DELETED' ");	
+	
+			/* ************ query to insert Yaft mapping ************************* */
+			StringBuffer InsertYaftMapping= new StringBuffer();
+			InsertYaftMapping.append("insert into uni_content_mapping(id, site_from_id, site_to_id, tool_name, tool_from_id, tool_to_id) ");
+			InsertYaftMapping.append("values((select nvl(max(id),0) +1 from uni_content_mapping), ?, ?, ?, ?, ?)");
+	
+			/* ********* query to retrieve the Yaft discussion fromIds that must be mapped */
+	 		StringBuffer selectYaftDiscussionIdForMapping= new StringBuffer();
+	 		
+	 		selectYaftDiscussionIdForMapping.append(" select YFD.forum_id as from_ForumId, YFD.discussion_id as from_DiscussionId, YM.subject, YM.MESSAGE_ID as from_messageid, ");
+	 		selectYaftDiscussionIdForMapping.append(" ( select YFD.discussion_id as toDiscussionId ");
+	 		selectYaftDiscussionIdForMapping.append(" from yaft_forum YF1, yaft_forum_discussion YFD1, yaft_discussion YD1, yaft_message YM1 ");
+	 		selectYaftDiscussionIdForMapping.append(" where YF1.site_id = ?");
+	 		selectYaftDiscussionIdForMapping.append(" and YF1.status != 'DELETED'"); 
+	 		selectYaftDiscussionIdForMapping.append(" and YF1.forum_id = ?");
+	 		selectYaftDiscussionIdForMapping.append(" and YF1.forum_id = YFD1.forum_id");
+	 		selectYaftDiscussionIdForMapping.append(" and YFD1.discussion_id = YD1.discussion_id");
+	 		selectYaftDiscussionIdForMapping.append(" and YM1.parent_message_id is null");
+	 		selectYaftDiscussionIdForMapping.append(" and YM1.SUBJECT = YM.SUBJECT");
+	 		selectYaftDiscussionIdForMapping.append(" and YM1.status != 'DELETED') as toDiscussionId");
+	 		selectYaftDiscussionIdForMapping.append(" from yaft_forum YF, yaft_forum_discussion YFD, yaft_discussion YD, yaft_message YM ");
+	 		selectYaftDiscussionIdForMapping.append(" where  YF.site_id = ?");
+	 		selectYaftDiscussionIdForMapping.append(" and YF.status != 'DELETED'"); 
+	 		selectYaftDiscussionIdForMapping.append(" and YF.forum_id = ?");
+	 		selectYaftDiscussionIdForMapping.append(" and YF.forum_id = YFD.forum_id");
+	 		selectYaftDiscussionIdForMapping.append(" and YFD.discussion_id = YD.discussion_id");
+	 		selectYaftDiscussionIdForMapping.append(" and YM.parent_message_id is null");
+	 		selectYaftDiscussionIdForMapping.append(" and YM.status != 'DELETED'");
+ 		
+	 		/* ********* query to retrieve the Yaft discussion toIds  that must be mapped 
+	 		StringBuffer selectYafToIdForMapping= new StringBuffer();
+	 		
+	 		selectYafToIdForMapping.append(" select YFD.discussion_id as toDiscussionId, YM.message_id as toMessageId, YM.subject ");
+	 		selectYafToIdForMapping.append(" from yaft_forum YF, yaft_forum_discussion YFD, yaft_discussion YD, yaft_message YM ");
+	 		selectYafToIdForMapping.append(" where YF.site_id = 'EUP1501-14-S1' ");
+	 		selectYafToIdForMapping.append(" and YF.status != 'DELETED'"); 
+	 		selectYafToIdForMapping.append(" and YF.forum_id = '1190de68-e3ea-4ca0-a20e-d71855170834'");
+	 		selectYafToIdForMapping.append(" and YF.forum_id = YFD.forum_id");
+	 		selectYafToIdForMapping.append(" and YFD.discussion_id = YD.discussion_id");
+	 		selectYafToIdForMapping.append(" and YM.parent_message_id is null");
+	 		selectYafToIdForMapping.append(" and YM.SUBJECT = 'Assignment 1'");
+	 		selectYafToIdForMapping.append(" and YM.status != 'DELETED'");*/
+			
+
+			/* ********* query to check for duplicate forum ids ******************** */
+	 		StringBuffer selectForumDuplicates= new StringBuffer();
+
+			selectForumDuplicates.append(" select distinct(YF.title) as Title from yaft_forum YF");
+			selectForumDuplicates.append(" where YF.site_id = ?");
+			selectForumDuplicates.append(" and YF.status != 'DELETED'");
+			selectForumDuplicates.append(" and 2<=(select count(YF2.title) from   yaft_forum YF2");
+			selectForumDuplicates.append(" where YF2.title = YF.title");
+			selectForumDuplicates.append(" and YF.site_id = YF2.site_id");
+			selectForumDuplicates.append(" and YF2.status != 'DELETED')");
+
+     
+			/* ********* query to check for duplicate dicussion ids ******************* */
+	 		StringBuffer selectDiscussionDuplicates= new StringBuffer();
+
+	 		selectDiscussionDuplicates.append(" select distinct(YM.subject) as Title from yaft_forum YF, yaft_forum_discussion YFD, yaft_discussion YD, yaft_message YM ");
+	 		selectDiscussionDuplicates.append(" where  YF.site_id = ?");
+	 		selectDiscussionDuplicates.append(" and    YF.status != 'DELETED' ");
+	 		//selectDiscussionDuplicates.append(" and    YF.forum_id = '9e42e7f1-0be7-4517-a90a-ccee05046bb5' ");
+	 		selectDiscussionDuplicates.append(" and    YF.forum_id = YFD.forum_id ");
+	 		selectDiscussionDuplicates.append(" and    YFD.discussion_id = YD.discussion_id ");
+	 		selectDiscussionDuplicates.append(" and    YD.status != 'DELETED' ");
+	 		selectDiscussionDuplicates.append(" and    YM.discussion_id = YD.discussion_id ");
+	 		selectDiscussionDuplicates.append(" and    YM.parent_message_id is null ");
+	 		selectDiscussionDuplicates.append(" and    YM.status != 'DELETED' ");
+	 		selectDiscussionDuplicates.append(" and 2<=(select count(YM1.subject) as Title from yaft_forum YF1, yaft_forum_discussion YFD1, yaft_discussion YD1, yaft_message YM1 ");
+	 		selectDiscussionDuplicates.append(" where   YF1.site_id = YF.site_id ");
+	 		selectDiscussionDuplicates.append(" and    YF1.forum_id = YF.forum_id ");
+	 		selectDiscussionDuplicates.append(" and    YF1.status != 'DELETED' ");
+	 		selectDiscussionDuplicates.append(" and    YF1.forum_id = YFD1.forum_id ");
+	 		selectDiscussionDuplicates.append(" and    YFD1.discussion_id = YD1.discussion_id ");
+	 		selectDiscussionDuplicates.append(" and    YD1.status != 'DELETED' ");
+	 		selectDiscussionDuplicates.append(" and    YM1.discussion_id = YD1.discussion_id ");
+	 		selectDiscussionDuplicates.append(" and    YM1.parent_message_id is null ");
+	 		selectDiscussionDuplicates.append(" and    YM1.subject = YM.subject ");
+	 		selectDiscussionDuplicates.append(" and    YM1.status != 'DELETED') ");
+	
+
+			JdbcTemplate jdt1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+			// -------------------------------------------------------------------------
+			/* *********** check for duplicate moduleIds, can then not be mapped *** */
+			List listDuplicateModuleIds = jdt1.queryForList(selectForumDuplicates.toString(),
+                                 new Object[] {fromContext});
+			
+			System.out.println("listDuplicateModuleIds.size = "+listDuplicateModuleIds.size());
+			if (listDuplicateModuleIds.size() >= 1) {
+				// if duplicates exist do not do the mapping but send e-mail that duplicates exist
+				duplicateForumExist = true;
+				
+				// send e-mail no mapping exists
+				emailHeading.append("UNIPOOLE MAPPING duplicates exist no mapping done for ");
+				emailBody.append("duplicates exist no mapping done for ");
+				emailBody.append(fromContext);
+				emailBody.append(" to ");
+				emailBody.append(toContext);
+				emailBody.append("<br> Duplicate Module Titles: <br> ");
+				Iterator moduleIt = listDuplicateModuleIds.iterator();
+			                    
+				while (moduleIt.hasNext()) {
+					ListOrderedMap moduleRecord = (ListOrderedMap) moduleIt.next();
+					emailBody.append("* ");
+					emailBody.append(moduleRecord.get("Title").toString());
+					emailBody.append("<br>");
+				} // end of while (moduleIt.hasNext())
+				try {
+					sendEmail(emailHeading.toString(), emailBody.toString(), errorEmailAddress);
+				} catch (AddressException ex) {
+					log.error(ex);
+				}
+			} // end of if (listDuplicateModuleIds.size() >= 1)
+			
+			// -------------------------------------------------------------------------
+			/* ********** check for duplicate sectionIds, can then not be mapped *** */
+			List listDuplicateSections = jdt1.queryForList(selectDiscussionDuplicates.toString(),
+                                 new Object[] {fromContext});
+			
+			System.out.println("listDuplicateSections.size = "+listDuplicateSections.size());
+			if (listDuplicateSections.size() >= 1) {
+				// if duplicates exist do not do the mapping but send e-mail that duplicates exist
+				duplicateDiscussionexist = true;
+				
+				// send e-mail no mapping exists
+				emailHeading = new StringBuffer();
+				emailBody = new StringBuffer();
+				emailHeading.append("UNIPOOLE MAPPING duplicates exist no mapping done for ");
+				emailBody.append("duplicates exist no mapping done for ");
+				emailBody.append(fromContext);
+				emailBody.append(" to ");
+				emailBody.append(toContext);
+				emailBody.append("<br> Duplicate Section Titles: <br> ");
+				Iterator sectionIt = listDuplicateSections.iterator();
+			                    
+				while (sectionIt.hasNext()) {
+					ListOrderedMap sectionRecord = (ListOrderedMap) sectionIt.next();
+					emailBody.append("* ");
+					emailBody.append(sectionRecord.get("Title").toString());
+					emailBody.append("<br>");
+				} // end of while (sectionIt.hasNext())
+				try {
+					sendEmail(emailHeading.toString(), emailBody.toString(), errorEmailAddress);
+				} catch (AddressException ex) {
+					log.error(ex);
+				}
+			} // end of if (listDuplicateSections.size() >= 1)
+			
+
+
+			if ((duplicateForumExist == false)&&(duplicateDiscussionexist == false)) {
+				// -------------------------------------------------------------------------
+				/* ************ retrieve all module id to be mapped ******************** */
+				//jdt1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+		
+				List listForumIds = jdt1.queryForList(selectYaftForumIdForMapping.toString(),
+	                                 new Object[] {fromContext,toContext});
+				
+				Iterator forumIds_it = listForumIds.iterator();
+			                    
+				while (forumIds_it.hasNext()) {
+					
+					StringBuffer toForumId = new StringBuffer();
+	        		StringBuffer toTitle = new StringBuffer();
+	        		StringBuffer fromForumId = new StringBuffer();
+					
+					ListOrderedMap forumIdRecord = (ListOrderedMap) forumIds_it.next();
+	               
+	                boolean mappingExist = false;
+	                
+	                if (!forumIdRecord.get("FROM_FORUMID").toString().equals("0")) {
+	                	mappingExist = true;
+		                
+						System.out.println("*************** MAP: NO MAPPING FOUND");
+					} // if fromModule != 0
+					
+					if (mappingExist == true) {
+						/* ************ ModuleId information ********************************** */
+						toForumId.append(forumIdRecord.get("TO_FORUMID").toString());
+		                toTitle.append(forumIdRecord.get("Title").toString());
+		                fromForumId.append(forumIdRecord.get("FROM_FORUMID").toString());
+						
+						System.out.println("*************** ModuleId MAP: "+ toTitle.toString()+" from="+fromForumId.toString()+" to="+toForumId.toString());
+						
+						// -------------------------------------------------------------------------
+						/* ************ for each module id to be mapped do an insert ************* */
+						System.out.println("*************** before insert ");
+						JdbcTemplate jdt2 = new JdbcTemplate(new SakaiDAO().getDataSource());
+						jdt2.update(InsertYaftMapping.toString(),
+							new Object[] {fromContext,toContext,toolId,fromForumId,toForumId});
+						System.out.println("*************** after insert ");
+						// -------------------------------------------------------------------------
+						
+						// ---------------------------------------
+						emailSuccessBody.append("ForumID MAP: title=");
+						emailSuccessBody.append(toTitle.toString());
+						emailSuccessBody.append(" fromModuleId= ");
+						emailSuccessBody.append(fromForumId.toString());
+						emailSuccessBody.append(" toModuleId= ");
+						emailSuccessBody.append(toForumId.toString());
+						emailSuccessBody.append("\n\n <br>");
+						// ---------------------------------------
+						
+						/* ************ for sections to be mapped                    ************* */
+						
+						System.out.println("*************** before jdt3");
+						JdbcTemplate jdt3 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				
+						System.out.println("*************** after jdt3");
+						List listdiscussionIds = jdt3.queryForList(selectYaftDiscussionIdForMapping.toString(),
+			                                 new Object[] {toContext, toForumId,fromContext,fromForumId});
+						
+						System.out.println("*************** after listDiscussionIds >> "+selectYaftDiscussionIdForMapping.toString());		
+						Iterator discussionIdIterator = listdiscussionIds.iterator();
+						System.out.println("*************** after discussionIdIterator iterator"+listdiscussionIds.size());
+									
+						while (discussionIdIterator.hasNext()) {
+						
+							StringBuffer toDiscussionId = new StringBuffer();
+						    StringBuffer toDiscussionTitle = new StringBuffer();
+						    StringBuffer fromDiscussionId = new StringBuffer();
+			
+							ListOrderedMap sectionIdRecord = (ListOrderedMap) discussionIdIterator.next();
+							toDiscussionId.append(sectionIdRecord.get("toDiscussionId").toString());
+							toDiscussionTitle.append(sectionIdRecord.get("subject").toString());
+							fromDiscussionId.append(sectionIdRecord.get("FROM_DISCUSSIONID").toString());
+			                
+			                System.out.println("*************** SectionId MAP: "+ toDiscussionTitle.toString()+" from="+fromDiscussionId.toString()+" to="+toDiscussionId.toString());
+			                
+			                // -------------------------------------------------------------------------
+							/* ************ for each section id to be mapped do an insert ************* */
+							System.out.println("*************** before section insert ");
+							JdbcTemplate jdt4 = new JdbcTemplate(new SakaiDAO().getDataSource());
+							jdt4.update(InsertYaftMapping.toString(),
+								new Object[] {fromContext,toContext,toolId,fromDiscussionId,toDiscussionId});
+							System.out.println("*************** after section insert ");
+							// -------------------------------------------------------------------------
+			
+							// ---------------------------------------
+							emailSuccessBody.append("SectionId MAP: toSectionTitle=");
+							emailSuccessBody.append(toDiscussionTitle.toString());
+							emailSuccessBody.append(" fromSectionId= ");
+							emailSuccessBody.append(fromDiscussionId.toString());
+							emailSuccessBody.append(" toSectionId= ");
+							emailSuccessBody.append(toDiscussionId.toString());
+							emailSuccessBody.append("\n\n <br>");
+							// ---------------------------------------		                
+			               
+			            }
+						
+						
+	
+					} else { // end of if (mappingExist == true)
+						// send e-mail no mapping exists
+						emailHeading.append("UNIPOOLE MAPPING no mapping exist");
+						emailBody.append("No mapping exist for ");
+						emailBody.append(fromContext);
+						emailBody.append(" to ");
+						emailBody.append(toContext);
+						emailBody.append("<br> on Forum Id Title ");
+						emailBody.append(forumIdRecord.get("Title").toString());
+						try {
+							sendEmail(emailHeading.toString(), emailBody.toString(), errorEmailAddress);
+						} catch (AddressException ex) {
+							log.error(ex);
+						}
+					} 
+					
+				} // end while (moduleIds_it.hasNext())
+				
+				// -------------------------------------------------------------------------
+		 // end of while (sectionIdIterator.hasNext())
+	            // -------------------------------------------------------------------------	
+	            if ((duplicateForumExist == false)||(duplicateForumExist==false)) {
+					/* ************ Mapping complete send e-mail                 ************* */
+					emailSuccessHeading.append("YAFT MAPPING COMPLETED FOR ");
+					emailSuccessHeading.append(toContext);
+					try {
+						sendEmail(emailSuccessHeading.toString(), emailSuccessBody.toString(), monitorEmailAddress);
+					} catch (AddressException ex) {
+						log.error(ex);
+					}
+				} //if ((duplicateModulesExist == false)||(duplicateModulesExist==false)) {
+				// -------------------------------------------------------------------------
+		
+			} else {// end if no duplicates
+				// send e-mail duplicates exist
+			} // end if if no duplicate else
+			
+		} catch (Exception  e) { //|AddressException
+			e.printStackTrace();
+			emailHeading = new StringBuffer();
+			emailBody = new StringBuffer();
+			emailHeading.append("UNIPOOLE MAPPING exception on UnipooleYaftMappingWebService.wsdl");
+			emailBody.append("While doing yaft mapping from ");
+			emailBody.append(fromContext);
+			emailBody.append(" to ");
+			emailBody.append(toContext);
+			emailBody.append(" exception: ");
+			emailBody.append(e);
+			try {
+				sendEmail(emailHeading.toString(), emailBody.toString(), errorEmailAddress);
+			} catch (AddressException ex) {
+				log.error(ex);
+			}
+			log.error(e);
+			throw new AxisFault(e.getMessage());
+		} // end try catch	
+
+
+
+		
+
+
+	} // end of yaftDataToBeMapped
+
+
+    public void sendEmail(String subject, String body, String emailAddress) throws AddressException {
+            
+        EmailService emailService;
+        emailService = (EmailService) ComponentManager.get(EmailService.class);
+
+        String tmpEmailFrom = ServerConfigurationService.getString("noReplyEmailFrom");
+
+        //System.out.println("GRADEBOOK email send: "+body);
+
+		InternetAddress toEmail = null;
+		try {
+        	toEmail = new InternetAddress(emailAddress);
+        } catch (AddressException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+       }
+        InternetAddress iaTo[] = new InternetAddress[1];
+        iaTo[0] = toEmail;
+        InternetAddress iaHeaderTo[] = new InternetAddress[1];
+        iaHeaderTo[0] = toEmail;
+        InternetAddress iaReplyTo[] = new InternetAddress[1];
+        iaReplyTo[0] = new InternetAddress(tmpEmailFrom);
+        List<String> contentList = new ArrayList<String>();
+        contentList.add("Content-Type: text/html");
+
+        emailService.sendMail(iaReplyTo[0],iaTo,subject,body,iaHeaderTo,iaReplyTo,contentList);
+    } // end of sendEmail
+
+			
+} // end of YaftMappingMasterCourse

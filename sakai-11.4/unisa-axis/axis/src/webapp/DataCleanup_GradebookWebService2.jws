@@ -1,0 +1,199 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.sql.DataSource;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
+import oracle.jdbc.OracleTypes;
+
+import org.apache.axis.AxisFault;
+import org.apache.commons.collections.map.ListOrderedMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.email.api.EmailService;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
+
+import za.ac.unisa.lms.db.SakaiDAO;
+
+
+/**
+This webservice is used to delete old data from old sites
+tool: Gradebook
+
+Sonette start with webservice 28 June
+*/
+public class DataCleanup_GradebookWebService2{
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	//private static final String[] EMAIL_LIST = {"syzelle@unisa.ac.za", "magagjs@unisa.ac.za", "mphahsm@unisa.ac.za"};
+	private static final String[] EMAIL_LIST = {"syzelle@unisa.ac.za"};
+	private static String emailAddressList = "";
+    private static final String LOCAL_URL_PORT80 = "http://localhost:8080";
+    private static final String LOCAL_URL_PORT82 = "http://localhost:8082";
+    private static final String PORTAL_URL = "/portal";
+    private static final String DB_SCHEMA = "SAKAIDBA";								// DB Schema name: <--CHANGE HERE
+    private static final String DB_PACKAGE = "SAKAIDBA";							// DB Package name: <--CHANGE HERE
+    private static final String STORED_PROC = "DELETE_GRADEBOOK";		// Stored Procedure name: <--CHANGE HERE
+
+	private EmailService emailService;
+	private Log log = LogFactory.getLog( this.getClass() );		
+	private boolean webServiceSuccess = false;				
+			
+	/** Actual method to do the GRADEBOOK data cleanup
+		Input:
+		1) year
+		2) semester period
+    */
+	public String gradebookDataCleanup( String academicYear, String semesterPeriod )throws AxisFault {
+	
+		// ----- variables
+		StringBuffer yearSemester = new StringBuffer();
+    	StringBuffer result = new StringBuffer();
+    	StringBuffer calenderIdStr = new StringBuffer();
+    	String serverUrl = ServerConfigurationService.getString( "serverUrl" );
+    	String outParamMsg = "";	//For Stored Procedure results
+    	String outParam = "";		//For Stored Procedure arguments
+		
+    	//get email address list
+    	for ( int i=0; i<EMAIL_LIST.length; i++ ){
+    		emailAddressList += EMAIL_LIST[i].toString()+",";
+    	}	
+	
+		// ----- Set yearSemester YY-S1
+	    yearSemester.append( academicYear.substring(2,4) );
+    	yearSemester.append( '-' );
+    	yearSemester.append( semesterPeriod );
+    	
+		// ----- get serverUrl (myDev, myQa, myUnisa or localhost)
+		String localPortal80 = LOCAL_URL_PORT80 + PORTAL_URL;
+		String localPortal82 = LOCAL_URL_PORT82 + PORTAL_URL;
+		if ( serverUrl.equals(LOCAL_URL_PORT80) || serverUrl.equals(LOCAL_URL_PORT82)
+			|| serverUrl.equals(localPortal80) || serverUrl.equals(localPortal82) ) {
+			serverUrl = "https://mydev.int.unisa.ac.za";
+		} 
+		else
+			serverUrl = "http://163.200.82.234:8020/portal";
+		
+		System.out.println( ">>>>>>>>>> SAKAI GRADEBOOK TOOL DATA CLEANUP For this period: "+yearSemester);
+
+		try {
+		
+			// JdbcTemplate for stored procedure
+			JdbcTemplate jdt2 = new JdbcTemplate( new SakaiDAO().getDataSource() );
+			
+			// Define SimpleJdbcCall object that will be used to call stored procedure
+			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall( jdt2 );
+			simpleJdbcCall.withSchemaName( DB_SCHEMA );			// Schema name
+			simpleJdbcCall.withProcedureName( STORED_PROC );	// Procedure name
+			//simpleJdbcCall.withCatalogName( DB_PACKAGE );		// Package Name
+			simpleJdbcCall.declareParameters(
+					new SqlParameter( "param_acadyear", OracleTypes.VARCHAR ),
+					new SqlParameter( "param_siteid", OracleTypes.VARCHAR ),
+					new SqlOutParameter( "param_message", OracleTypes.VARCHAR ) );
+          
+				
+			// Put Procedure IN and OUT parameters in a map
+			Map<String, Object> procParamsMap = new HashMap<String, Object>();
+			procParamsMap.put( "param_acadyear", yearSemester.toString() );
+			procParamsMap.put( "param_siteid", "" );
+			procParamsMap.put( "param_message", outParam );
+				
+			// Add IN and OUT parameters from above map into object for procedure call
+			SqlParameterSource inOutParams = new MapSqlParameterSource().addValues( procParamsMap );
+		
+			System.out.println( ">>>>>>>>>> SAKAI GRADEBOOK TOOL DATA CLEANUP - execute procedure");	
+			// Call Database Stored Procedure 'SAKAIDBA.DELETE_DISCUSSION_FORUM_DATA' for each site ID
+			// Execute stored procedure and return the OUT Param as a Map
+			Map<String,Object> outParamMsgMap = simpleJdbcCall.execute( inOutParams );
+			outParamMsg = (String)outParamMsgMap.get("param_message");		//Cast Map Results into String
+			
+			System.out.println( ">>>>>>>>>> SAKAI GRADEBOOK TOOL DATA CLEANUP - after procedure = "+outParamMsg);
+			// When OUT Param returns a message (not empty), webservice run is successfull
+			if( !outParamMsg.isEmpty() )
+				webServiceSuccess = true;
+
+							 
+		} catch ( Exception e ) { 
+			e.printStackTrace();
+			log.error( this+": gradebookDataCleanup(): GRADEBOOK DATA CLEANUP ERROR: "+
+					e.getMessage() );
+			String errorMessage = "GRADEBOOK DATA CLEANUP ERROR: "+ e.getMessage();
+			
+			for ( int i=0; i<EMAIL_LIST.length; i++ ){
+				try{
+					sendEmail( "GRADEBOOK CLEANUP ERROR", errorMessage, EMAIL_LIST[i] );
+				} catch( AddressException addE ){
+					log.error( this+": gradebookDataCleanup(): AddressException: unable to send email to: "+
+							emailAddressList+"\r\n"+addE.getMessage() );
+					addE.printStackTrace();
+				}catch ( Exception any ){
+					log.error( this+": gradebookDataCleanup(): Unable to send email to: "+emailAddressList+
+							"\r\n"+any.getMessage() );
+					any.printStackTrace();
+				} //end try-catch (send emails)
+			} //end for loop
+				
+		} // end of try-catch 
+		
+		if( webServiceSuccess ){
+			System.out.println( ">>>>>>>>>> SAKAI GRADEBOOK TOOL Web Service run SUCCESSFULL!</b><br>" );
+			
+			log.info( this+": gradebookDataCleanup(): <<>> Web Service run SUCCESSFULL! " );
+			log.info( this+": gradebookDataCleanup(): <<>> " + outParamMsg );
+		}else{
+			System.out.println( ">>>>>>>>>> SAKAI GRADEBOOK TOOL Web Service run UNSUCCESSFULL!</b><br>" );
+			log.info( this+": gradebookDataCleanup(): <<>> Web Service run UNSUCCESSFULL! " );
+		} //end if-else (webServiceSuccess)
+	    
+		//send emails
+		try {
+			for ( int i=0; i<EMAIL_LIST.length; i++ ){
+				String emailMessage = "Gradebook cleanup done \n "+outParamMsg;
+				sendEmail( "Gradebook DATA CLEANUP", emailMessage, EMAIL_LIST[i] );
+			}	
+		} catch ( AddressException e ) {
+			log.error( this+": gradebookDataCleanup(): AddressException: unable to send email to: "+
+					emailAddressList+"\r\n"+e.getMessage() );
+			e.printStackTrace();
+		} catch ( Exception any ){
+			log.error( this+": gradebookDataCleanup(): Unable to send email to: "+emailAddressList+
+						"\r\n"+any.getMessage() );
+			any.printStackTrace();
+		} //end try-catch (send emails)
+		
+		return result.toString();
+	
+	} // end of DataCleanup_GradebookWebService2 
+	
+    /* ----------------------------------------------------------------------------------------------------------------- */
+	public void sendEmail( String subject, String body, String emailAddress ) throws AddressException{
+
+		emailService = (EmailService) ComponentManager.get( EmailService.class );
+		String tmpEmailFrom = ServerConfigurationService.getString( "noReplyEmailFrom" );
+		
+		InternetAddress toEmail = new InternetAddress( emailAddress );
+		InternetAddress iaTo[] = new InternetAddress[1];
+		iaTo[0] = toEmail;
+		InternetAddress iaHeaderTo[] = new InternetAddress[1];
+		iaHeaderTo[0] = toEmail;
+		InternetAddress iaReplyTo[] = new InternetAddress[1];
+		iaReplyTo[0] = new InternetAddress( tmpEmailFrom );
+		List<String> contentList = new ArrayList<String>();
+		contentList.add("Content-Type: text/html");
+		
+		emailService.sendMail( iaReplyTo[0],iaTo,subject,body,iaHeaderTo,iaReplyTo,contentList );
+		log.info( this+": sendEmail(): email sent to: "+emailAddress+"\r\nemail send body: "+body );
+	} // end of sendEmail
+
+} // end of DataCleanup_GradebookWebService

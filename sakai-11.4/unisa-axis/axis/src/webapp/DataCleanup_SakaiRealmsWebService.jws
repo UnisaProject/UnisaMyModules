@@ -1,0 +1,199 @@
+import java.sql.Types;
+import org.apache.commons.collections.map.ListOrderedMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+
+
+import org.w3c.dom.*;
+
+import org.apache.axis.AxisFault;
+import org.apache.axis.utils.JavaUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.email.api.EmailService;
+import org.sakaiproject.email.api.Attachment;
+import org.sakaiproject.email.api.RecipientType;
+import org.sakaiproject.event.cover.UsageSessionService;
+import org.sakaiproject.event.api.UsageSession;
+
+import za.ac.unisa.lms.db.StudentSystemDAO;
+import za.ac.unisa.lms.db.SakaiDAO;
+
+
+/**
+This webservice is used to delete old data from old sites
+tool: Sakai Management REALMS
+
+Sonette start with webservice 14 June 2017
+*/
+public class DataCleanup_SakaiRealmsWebService {
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	private EmailService emailService;
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// QUERIES
+
+	// ----- Retrieve realms that must be deleted, delete per modified year
+	String SELECT_SAKAI_REALM = " SELECT REALM_KEY "+
+                     			" FROM   SAKAI_REALM"+
+                     			" WHERE  REALM_KEY=10078"; // hard code for testing 
+                     			//" WHERE  to_char(modifiedon,'YYYY') = ?"; 
+	
+	// ----- -----------------------------------------------
+	// ----- delete from table SAKAI_REALM_ROLE_DESC
+	String DELETE_REALM_ROLE_DESC = " DELETE FROM sakai_realm_role_desc"+
+									" WHERE realm_key = ?";
+									
+	// ----- -----------------------------------------------
+	// ----- delete from table SAKAI_REALM_RL_GR
+	String DELETE_REALM_RL_GR = " DELETE FROM sakai_realm_rl_gr "+
+								" WHERE realm_key = ?";
+
+	// ----- -----------------------------------------------
+	// ----- delete from table SAKAI_REALM_RL_FN
+	String DELETE_REALM_RL_FN = " DELETE FROM sakai_realm_rl_fn "+
+	                            " WHERE realm_key = ?";
+
+	// ----- -----------------------------------------------
+	// ----- delete from table SAKAI_REALM_PROVIDER
+	String DELETE_REALM_PROVIDER = " DELETE FROM sakai_realm_provider "+
+	                               " WHERE realm_key = ?";
+
+	// ----- -----------------------------------------------
+	// ----- delete from table SAKAI_REALM_PROPERTY
+	String DELETE_REALM_PROPERTY = " DELETE FROM sakai_realm_property "+
+	                               " WHERE realm_key = ?";
+
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	/** Actual method to do the site realm data cleanup
+		Input:
+		1) year
+    */
+	public void dataCleanupPerYear(String academicYear)throws AxisFault {
+	
+			
+		// ----- variables
+    	StringBuffer result = new StringBuffer();
+    	String serverUrl = ServerConfigurationService.getString("serverUrl");
+		
+		// ----- get serverUrl (myDev, myQa, myUnisa or localhost)
+		if (serverUrl.equals("http://localhost:8080")) {
+			serverUrl = "https://mydev.unisa.ac.za";
+		} 
+		serverUrl = "http://163.200.82.234:8020/portal";
+
+		JdbcTemplate jdt1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+		try {
+               
+            List recordsRealmKey = jdt1.queryForList(SELECT_SAKAI_REALM,
+                       new Object[] {});
+                       //new Object[] {academicYear});
+			Iterator recordsRealmKey_it = recordsRealmKey.iterator();
+					
+			// ----- For each site retrieved
+			while (recordsRealmKey_it.hasNext()) {
+				ListOrderedMap record_RealmKey = (ListOrderedMap) recordsRealmKey_it.next();
+					
+				StringBuffer realmKey = new StringBuffer();
+						                                                                                
+				realmKey.append(record_RealmKey.get("REALM_KEY").toString());
+				System.out.println(">>>>>>> Realm key:" +realmKey.toString());
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_REALM_ROLE_DESC
+				JdbcTemplate jdt_Delete1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete1.update(DELETE_REALM_ROLE_DESC,
+					new Object[] {realmKey.toString()});
+					System.out.println(">>>>>>> DELETE_REALM_ROLE_DESC:" +realmKey.toString());
+				} catch (Exception e) { //jdt_Delete1
+					System.out.println("***** DataCleanup_SakaiRealms: delete from table SAKAI_REALM_ROLE_DESC error "+e);
+				} //jdt_Delete1
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_REALM_RL_GR
+				JdbcTemplate jdt_Delete2 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete2.update(DELETE_REALM_RL_GR,
+					new Object[] {realmKey.toString()});
+					System.out.println(">>>>>>> DELETE_REALM_RL_GR:" +realmKey.toString());
+				} catch (Exception e) { //jdt_Delete2
+					System.out.println("***** DataCleanup_SakaiRealms: delete from table SAKAI_REALM_RL_GR error "+e);
+				} //jdt_Delete2
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_REALM_RL_FN
+				JdbcTemplate jdt_Delete3 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete3.update(DELETE_REALM_RL_FN,
+					new Object[] {realmKey.toString()});
+					System.out.println(">>>>>>> DELETE_REALM_RL_FN:" +realmKey.toString());
+				} catch (Exception e) { //jdt_Delete3
+					System.out.println("***** DataCleanup_SakaiRealms: delete from table SAKAI_REALM_RL_FN error "+e);
+				} //jdt_Delete3
+
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_REALM_PROVIDER 
+				JdbcTemplate jdt_Delete4 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete4.update(DELETE_REALM_PROVIDER,
+					new Object[] {realmKey.toString()});
+					System.out.println(">>>>>>> DELETE_REALM_PROVIDER:" +realmKey.toString());
+				} catch (Exception e) { //jdt_Delete4
+					System.out.println("***** DataCleanup_SakaiRealms: delete from table DELETE_REALM_PROVIDER error "+e);
+				} //jdt_Delete4
+
+				// ----- -----------------------------------------------
+				// ----- delete from table SAKAI_REALM_PROPERTY 
+				JdbcTemplate jdt_Delete5 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete5.update(DELETE_REALM_PROPERTY,
+					new Object[] {realmKey.toString()});
+					System.out.println(">>>>>>> DELETE_REALM_PROPERTY:" +realmKey.toString());
+				} catch (Exception e) { //jdt_Delete5
+					System.out.println("***** DataCleanup_SakaiRealms: delete from table DELETE_REALM_PROPERTY error "+e);
+				} //jdt_Delete5
+				
+				
+			} // end of while
+		} catch (Exception e) { // end of try recordsRealmKey
+			System.out.println("***** DataCleanup_SakaiRealms: delete from table SAKAI_SITE_PROPERTY error "+e);
+		} //jdt1 recordsRealmKey		
+		
+	
+	} // end of dataCleanupPerYear
+
+} // end of DataCleanup_SakaiReamlsWebService

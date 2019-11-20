@@ -1,0 +1,163 @@
+import java.sql.Types;
+import org.apache.commons.collections.map.ListOrderedMap;
+import java.util.Iterator;
+import java.util.List;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import org.apache.axis.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import org.sakaiproject.event.cover.UsageSessionService;
+import org.sakaiproject.event.api.UsageSession;
+import org.sakaiproject.component.cover.ServerConfigurationService;
+
+import za.ac.unisa.lms.db.StudentSystemDAO;
+import za.ac.unisa.lms.db.SakaiDAO;
+
+public class ExtractGradebookResultsWebService {
+
+    org.w3c.dom.Document doc;
+	public NodeList textLNList;
+	public NodeList textFNList;
+	String urlf;
+
+	public String userAgent = "Student Details";
+	// set the homepage to use as link
+	private String serverPath = ServerConfigurationService.getServerUrl();
+
+	private UsageSession usageSession;
+	
+	// assessment online types
+	private static final String ONLINE_TYPES = "'BL','DF','SA'";
+
+	private static final String RETRIEVE_ONLINEASSESSMENTS_ALL = "select MK_STUDY_UNIT_CODE, YEAR, PERIOD, ASSIGNMENT_NR "+
+				   " from UNQASS "+
+	               " where year = ?"+
+	               " and   period = ?"+
+	               " and   assignment_nr = 1"+
+	               " and   type = 'H'"+
+	               //" and   type_Gc176 in ("+ONLINE_TYPES+")"+
+	               " and   closing_date < sysdate";
+	               
+	private static final String RETRIEVE_ONLINEASSESSMENTS_MODULE = "select MK_STUDY_UNIT_CODE, YEAR, PERIOD, ASSIGNMENT_NR from UNQASS "+
+	               " where year = ?"+
+	               " and   period = ?"+
+	               " and   mk_study_unit_code = ?"+
+	               " and   assignment_nr = 1"+
+	               " and   type = 'H'"+
+	               //" and   type_Gc176 in ("+ONLINE_TYPES+")"+
+	               " and   closing_date < sysdate";
+
+	private static final String RETRIEVE_GRADEBOOKITEM = "select GBGOT.id as ID, GBGT.gradebook_uid, GBGOT.gradebook_id,"+ 
+	               " GBGOT.name "+ 
+	               " FROM GB_GRADABLE_OBJECT_T GBGOT, GB_GRADEBOOK_T GBGT "+
+	               " WHERE GBGOT.GRADEBOOK_ID = GBGT.ID"+ 
+	               " AND   GBGT.GRADEBOOK_UID = ?"+ // coursesite example EUP1501-12-Y1
+	               " AND   GBGOT.NAME LIKE ('?%')"; // unqass.assignment_nr
+	               
+    private static final String RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK = "SELECT GB.ID, GB.GRADABLE_OBJECT_ID, "+
+                   " SAKAI_USER_ID_MAP.EID, GB.DATE_RECORDED, GB.POINTS_EARNED, GBGOT.POINTS_POSSIBLE, "+
+                   " (GB.POINTS_EARNED/GBGOT.POINTS_POSSIBLE*100) AS Percentage"+  	               
+                   " FROM  GB_GRADE_RECORD_T GB, SAKAI_USER_ID_MAP, GB_GRADABLE_OBJECT_T GBGOT"+
+                   " WHERE GB.GRADABLE_OBJECT_ID = ?"+
+                   " AND   STUDENT_ID = SAKAI_USER_ID_MAP.USER_ID"+
+                   " AND   GB.GRADABLE_OBJECT_ID = GBGOT.ID";
+
+	/** Retrieve all marks from Sakai Gradebook that must be updated to the Student System
+		Input:
+			module = Module - either enter module code OR if for all modules enter ALL
+			acadYear = Academic year
+			semPeriod = Semester period
+	*/
+	public String getGradebookMarks(String module, int acadYear, int semPeriod)throws AxisFault {
+	
+		String result ="";
+
+		JdbcTemplate jdt = new JdbcTemplate(new StudentSystemDAO()
+				.getDataSource());
+		Log log = LogFactory.getLog(this.getClass());
+
+		try {
+
+			module = "ACEEN38";
+			List records;
+			if (module.equals("ALL")) {
+				records = jdt.queryForList(RETRIEVE_ONLINEASSESSMENTS_ALL,
+					new Object[] { new Integer(acadYear), new Integer(semPeriod)});
+			} else { // for specific module
+				records = jdt.queryForList(RETRIEVE_ONLINEASSESSMENTS_MODULE,
+					new Object[] { new String (module), new Integer(acadYear), new Integer(semPeriod)});
+			} //end of if (module.equals("ALL")
+
+			Iterator recordsIt = records.iterator();
+			while (recordsIt.hasNext()) {
+
+				ListOrderedMap record = (ListOrderedMap) recordsIt.next();
+				String r_module = record.get("MK_STUDY_UNIT_CODE").toString();
+				String r_acadYear = record.get("YEAR").toString();
+				String r_semPeriod = record.get("PERIOD").toString();
+				String r_assignmentNr = record.get("ASSIGNMENT_NR").toString();
+				String r_moduleSite = r_module+"-"+r_acadYear.substring(2,2)+"-";
+				if (r_semPeriod.equals("0")) {
+					r_moduleSite = r_moduleSite+"Y1";
+				}else if (r_semPeriod.equals("6")) {
+					r_moduleSite = r_moduleSite+"Y2";
+				}else if (r_semPeriod.equals("1")) {
+					r_moduleSite = r_moduleSite+"S1";
+				}else if (r_semPeriod.equals("2")) {
+					r_moduleSite = r_moduleSite+"S2";
+				}
+				System.out.println("moduleSite = "+r_moduleSite);
+				result = result+"moduleSite = "+r_moduleSite+"\n";
+				
+				// For each online assignment retrieved, retrieve the matching Gradebook item
+				JdbcTemplate jdt2 = new JdbcTemplate(new SakaiDAO()
+					.getDataSource());
+				
+				try {
+					List recordsGI = jdt2.queryForList(RETRIEVE_GRADEBOOKITEM,
+						new Object[] { new String(r_moduleSite), new String(r_assignmentNr)});
+
+					Iterator recordsGI_it = records.iterator();					
+					while (recordsGI_it.hasNext()) {
+
+						ListOrderedMap record_GradebookIds = (ListOrderedMap) recordsGI_it.next();
+						String gradebookId = record_GradebookIds.get("ID").toString();
+						System.out.println("Gradebook id for "+r_moduleSite+" = "+gradebookId);
+					} //end of while (recordsGI.hasNext()) 
+				} catch (Exception e) {
+					e.printStackTrace();
+					log.error(e);
+					throw new AxisFault(e.getMessage());
+				} // end try -catch Exception
+
+			} //end of while (recordsIt.hasNext())
+			if (result.equals("")) {
+				result = "no modules found";
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e);
+			throw new AxisFault(e.getMessage());
+		} // end try -catch Exception
+		
+		return result;
+
+	} // end getGradebookMarks 
+
+} // end of ExtractGradebookResultsWebService
