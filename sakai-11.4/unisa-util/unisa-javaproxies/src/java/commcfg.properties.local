@@ -1,0 +1,125 @@
+# $Header: /data/cvs/javaproxies/src/commcfg.properties,v 1.3 2004/09/27 10:09:18 vdberj Exp $
+#
+#
+#   Copyright 1999-2000, Computer Associates International, Inc
+#         All rights reserved
+#
+#   commcfg.properties - Communications configuration file for COOL:Gen.
+#
+# This file should be modified to associate TRANCODEs with the locations of
+# COOL:Gen servers.  It can also be used to control some runtime behaviors of
+# a COOL:Gen application/proxy.
+#
+##############  TRANCODES #################
+#
+# To associate TRANCODEs with hosts, an entry must exist in this file to point
+# to the associated host. The format of a line within this file is dependant
+# on what communication type will be used.  <...> is required, {...} is 
+# optional.
+# For TCP/IP the format is:
+#           <TRANCODE>=TCP <host> <service/port>
+# For MQSeries (MQS) the format is:
+#           <TRANCODE>=MQS {Queue Manager} {Queue Name} {Reply Queue Name}
+# For ECI the format is:
+#           <TRANCODE>=ECI <protocol> <address> <port> <system> \
+#                                {Client Security Class} {Server Security Class}
+#
+# (For ECI, <protocol> may be local, tcp, auto, http, https, or ssl.)
+#
+# It is possible to declare "wild-card" style TRANCODEs.  This is
+# accomplished by ending the TRANCODE with a '*'.  An example use is:
+#
+#     ABCD=TCP myhost1 2008
+#     ABC*=TCP myhost2 2008
+#     A*=TCP myhost3 2008
+#     *=TCP myhost4 2008
+#
+# This example would:
+#   - Route an exact match of ABCD to myhost1
+#   - Route all TRANCODEs starting with ABC (but not ABCD) to myhost2
+#   - Route all TRANCODEs starting with A (but not ABC) to myhost3
+#   - Route all other TRANCODEs to myhost4.
+#
+###########################################
+*=TCP unisasq1.unisa.ac.za 2503
+#*=TCP unisasq2.unisa.ac.za 2803
+############## CACHING ####################
+#
+# The commcfg.properties file may also be used to control how the Gen runtimes
+# cache this file.  By default caching is not performed and the file is
+# reread and reparsed for each flow out of the running application.  This allows
+# file changes to be reflected immediately.
+#
+# That default behavior may not be ideal in all environments.  Therefore the
+# special token 'CACHETIMEOUT' can be set to control the number of seconds to
+# wait between rereading of the file.  All flows that occur between the read
+# and the timeout use the cached version of the file in memory.  The first flow
+# after the timeout has expired will force the file to be reread and the timeout
+# to restart.  An example is:
+#
+#    CACHETIMEOUT=0     #(no timeout, default)
+#    CACHETIMEOUT=180   #(3 minute timeout)
+#    CACHETIMEOUT=NEVER #(cache will never be reread)
+#
+# The timeout is only useful within one process.  The NEVER setting will require
+# the process to be stopped and the runtime to be unloaded before
+# rereading the file.
+#
+# NOTE: Depending on how the commcfg.properties file is deployed in the
+# CLASSPATH of the JVM and what the behaviors of the JVM class loader are, the
+# file may never be reloaded regardless of the CACHETIMEOUT setting.  Basically, the
+# JVM may make its own local cache of the file after loading it once and would
+# then simply never reread it no matter how frequently the application code requested 
+# it.   
+#
+###########################################
+CACHETIMEOUT=NEVER
+
+############### TRACING ##################
+#
+# The commcfg.properties file can be used to enable and disable tracing within
+# the proxy runtimes.  Use the special token 'CMIDEBUG' to enable and disable
+# the tracing.  Examples of the use of this token are:
+#
+#    CMIDEBUG=ON        #(turn tracing on, write to file)
+#    CMIDEBUG=ON FILE   #(turn tracing on, write to file)
+#    CMIDEBUG=ON SYSTEM #(turn tracing on, write to system)
+#    CMIDEBUG=OFF       #(turn tracing off)
+#
+# The traces written to a file will be written to a file called trace.out.
+# The traces written to the system will be written to standard output, which
+# might be the Java Console, a command shell, or a service logfile depending
+# on how the program consuming the proxy was started.
+#
+###########################################
+CMIDEBUG=OFF
+
+############### MQSeries ##################
+#
+# The commcfg.properties file can be used to modify some of the environmental
+# settings used by MQSeries.  In particular, these set any of the 
+# MQEnvironment settings.  Optionally these settings may be accomplished
+# programmatically via the MQSDynamicCoopFlowExit class.
+#
+# See the MQSeries documentation for the proper values to be used for the
+# following settings.
+#
+###########################################
+#MQChannel=myChannel 
+#MQHostname=localhost 
+#MQPort=1414 
+#MQUserID=myUser 
+#MQPassword=myPassword 
+
+############### ECI ##################
+#
+# The commcfg.properties file can be used to modify the ECIRequestType
+# of the ECI cooperative flow.  By default, all ECI flows are done
+# with ECI_SYNC request types.  Under some conditions, it may be desirable
+# to perform the flows with the ECI_SYNC_TPN request type.   Use the following
+# property to specify to use the ECI_SYNC_TPN request type.
+#
+# See the ECI documentation for the uses of the various request types.
+#
+###########################################
+#ECIUseSyncTpn=YES 
