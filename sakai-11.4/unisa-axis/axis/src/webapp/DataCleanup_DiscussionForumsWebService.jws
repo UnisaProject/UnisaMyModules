@@ -1,0 +1,175 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.sql.DataSource;
+
+import oracle.jdbc.OracleTypes;
+
+import org.apache.axis.AxisFault;
+import org.apache.commons.collections.map.ListOrderedMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.jdbc.core.SqlParameter;
+
+import za.ac.unisa.lms.db.SakaiDAO;
+
+
+/**
+This webservice is used to delete old data from old sites
+tool: DiscussionForums
+
+Sifiso start with webservice 14 June 2017
+*/
+public class DataCleanup_DiscussionForumsWebService{
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+    private static final String LOCAL_URL_PORT80 = "http://localhost:8080";
+    private static final String LOCAL_URL_PORT82 = "http://localhost:8082";
+    private static final String PORTAL_URL = "/portal";
+    private static final String DB_SCHEMA = "SAKAIDBA";								// DB Schema name: <--CHANGE HERE
+    private static final String STORED_PROC = "DELETE_DISCUSSION_FORUM_DATA";		// Stored Procedure name: <--CHANGE HERE
+    private String webServiceReturn = "Fail";		// webserive return string
+
+	private Log log = LogFactory.getLog( this.getClass() );		
+			
+	/** Actual method to do the Discussion Forums data cleanup
+		Input:
+		1) year
+		2) semester period
+    */
+	public String discussionForumsDataCleanup( String academicYear, String semesterPeriod )throws AxisFault {
+	
+		// ----- variables
+		StringBuffer yearSemester = new StringBuffer();
+    	StringBuffer result = new StringBuffer();
+    	StringBuffer calenderIdStr = new StringBuffer();
+    	String serverUrl = ServerConfigurationService.getString( "serverUrl" );
+	
+		// ----- Set yearSemester YY-S1
+	    yearSemester.append( academicYear.substring(2,4) );
+    	yearSemester.append( '-' );
+    	yearSemester.append( semesterPeriod );
+    	
+    	/* -----------------------------------------------------------------------------------------------------------------*/
+    	// query to retrieve sites for specific academic year and semester
+    	// site_id like "YY-S1"
+    	String RETRIEVE_SITES = " SELECT site_id AS SITEID"+ 
+    							" FROM uforum_forum"+
+    							" WHERE site_id like '%"+yearSemester.toString()+"%'";											 
+    	/* ----------------------------------------------------------------------------------------------------------------- */
+ 
+		// ----- get serverUrl (myDev, myQa, myUnisa or localhost)
+		String localPortal80 = LOCAL_URL_PORT80 + PORTAL_URL;
+		String localPortal82 = LOCAL_URL_PORT82 + PORTAL_URL;
+		if ( serverUrl.equals(LOCAL_URL_PORT80) || serverUrl.equals(LOCAL_URL_PORT82)
+			|| serverUrl.equals(localPortal80) || serverUrl.equals(localPortal82) ) {
+			serverUrl = "https://mydev.int.unisa.ac.za";
+		} 
+		else
+			serverUrl = "http://163.200.82.234:8020/portal";
+		
+		result.append( "<br><br><u><b>SAKAI DISCUSSION FORUMS TOOL DATA CLEANUP</b></u><br>" );
+		result.append( "<br>serverUrl = " );
+		result.append( serverUrl );
+		result.append( "<br>" );
+		result.append( "For this period: " );
+		result.append( academicYear );
+		result.append( " - " );
+		result.append( semesterPeriod );
+		result.append( "<br><br><b>-------	Deleting Discussion Forums Records using Site ID -------</b><br>" );
+
+		try {
+			// retrieve old sites
+			JdbcTemplate jdt1 = new JdbcTemplate( new SakaiDAO().getDataSource() );
+			jdt1.setQueryTimeout( 0 );		//No limit for timeout
+			
+			// JdbcTemplate for stored procedure
+			JdbcTemplate jdt2 = new JdbcTemplate( new SakaiDAO().getDataSource() );
+			jdt2.setQueryTimeout( 0 );		//No limit for timeout
+			
+			// Define SimpleJdbcCall object that will be used to call stored procedure
+			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall( jdt2 );
+			simpleJdbcCall.withSchemaName( DB_SCHEMA );			// Schema name
+			simpleJdbcCall.withProcedureName( STORED_PROC );	// Procedure name
+			//simpleJdbcCall.withReturnValue();					// Return value of Procedure
+			simpleJdbcCall.declareParameters(
+					new SqlParameter( "param_siteid", OracleTypes.VARCHAR ) );
+          
+            List recordsSites = jdt1.queryForList( RETRIEVE_SITES,
+                       new Object[] {} );
+			Iterator recordsSites_it = recordsSites.iterator();
+			
+			result.append( "<br>RETRIEVE_SITES query:<br>" );
+			result.append( RETRIEVE_SITES );
+			result.append( "<br>" );
+					
+			// ----- For each site retrieved
+			while ( recordsSites_it.hasNext() ) {
+				ListOrderedMap record_Site = (ListOrderedMap) recordsSites_it.next();
+	
+				StringBuffer siteId = new StringBuffer();	                                                                                
+				siteId.append( record_Site.get("SITEID").toString() );
+									
+				result.append( "<br>*Site ID: " );
+				result.append( siteId.toString() );
+				result.append( "<br>" );
+				result.append( "<br>--- BEGIN Calling Stored Procedure '" + STORED_PROC + "' ---<br>" );
+				log.info( this+": discussionForumsDataCleanup(): <<>> SiteId = "+siteId.toString() );
+				log.info( this+": discussionForumsDataCleanup(): <<>> Calling Stored Procedure '" + 
+						STORED_PROC + "'" );
+				
+				// Put Procedure IN and OUT parameters in a map
+				Map<String, Object> procParamsMap = new HashMap<String, Object>();
+				procParamsMap.put( "param_siteid", siteId.toString() );
+				
+				// Add IN and OUT parameters from above map into object for procedure call
+				SqlParameterSource inParams = new MapSqlParameterSource().addValues( procParamsMap );
+				
+				// Call Database Stored Procedure 'SAKAIDBA.DELETE_DISCUSSION_FORUM_DATA' for each site ID
+				// Execute stored procedure
+				simpleJdbcCall.execute( inParams );
+
+				result.append( "<br><b>-- Stored Procedure Call SUCCESSFULL! --</b><br>" );
+				result.append( "<br>--- END Calling Stored Procedure '" + STORED_PROC + "' ---<br>" );
+				result.append( "<br>-----------------------------------------------------------------------------------------------<br>" );
+				log.info( this+": discussionForumsDataCleanup(): <<>> Stored Procedure Call SUCCESSFULL! " );
+				
+				webServiceReturn = "Success";
+			} // end of while (recordsSites_it.hasNext()) 
+							 
+		} catch ( Exception e ) {
+			e.printStackTrace();
+			log.error( this+": discussionForumsDataCleanup(): DISCUSSION FORUMS DATA CLEANUP ERROR: "+
+					e.getMessage() );
+			String errorMessage = "DISCUSSION FORUMS DATA CLEANUP ERROR: "+ e.getMessage();
+			
+			//Print error details to webserver/console
+			System.out.println( ">>>>>> DISCUSSION FORUMS CLEANUP ERROR <<<<<\r\n" + 
+					"-- Stored Procedure Call UNSUCCESSFULL! --\r\n" + errorMessage );	
+		} // end of try-catch recordsSites (RETRIEVE_SITES)
+		
+		String resultTmp = result.toString().replace("<br>", "\r\n");	//replace html carriage return tags
+		String resultTmp2 = resultTmp.replace("<b>", "");				//replace html bold open tags
+		String resultTmp3 = resultTmp2.replace("</b>", "");				//replace html bold close tags
+		String resultTmp4 = resultTmp3.replace("<u>", "");				//replace html underline open tags
+		String resultPrintlnStr = resultTmp4.replace("</u>", "");		//replace html underline close tags
+		
+		System.out.println( resultPrintlnStr );		//Print results to webserver log/console
+		
+		// result returns a long message so to prevent socket read timout, 
+		// dont return result for SAOP webservice, only return 'Success' String
+		// return result.toString();
+		return webServiceReturn;
+	
+	} // end of discussionForumsDataCleanup 
+
+} // end of DataCleanup_DiscussionForumsWebService

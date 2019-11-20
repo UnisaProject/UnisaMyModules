@@ -1,0 +1,691 @@
+import java.math.BigDecimal;
+import java.sql.Types;
+import java.util.Calendar;
+import org.apache.commons.collections.map.ListOrderedMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Hashtable;
+import java.util.Vector;
+import java.util.Date;
+
+import org.apache.axis.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import org.sakaiproject.event.cover.UsageSessionService;
+import org.sakaiproject.event.cover.EventTrackingService;
+import org.sakaiproject.event.api.UsageSession;
+
+import za.ac.unisa.lms.db.StudentSystemDAO;
+import za.ac.unisa.lms.db.SakaiDAO;
+
+import Saaal40j.Abean.Saaal40jGetStudentCourses;
+
+public class FreedomToasterWebService {
+
+	private static String EVENT_FREEDOMTOASTER_NOSTUDMAT = "freedomtoaster.nostudmat";
+	private static String EVENT_FREEDOMTOASTER_NOESTUDMAT = "freedomtoaster.noestudmat";
+	public String userAgent = "FreedomToaster Kiosk";
+
+	private UsageSession usageSession;
+
+	private static final String qualificationQuery = "select mk_highest_qualifi || ': ' || long_eng_descripti as qualname from stuann, " +
+			"grd where mk_student_nr = ? and mk_academic_year = ? and mk_highest_qualifi = code";
+
+	private static final String dailyUsageQuery = "select to_char(SYSDATE - INTERVAL '1' DAY,'YYYY-MM-DD') AS THE_DAY, count(DISTINCT S.SESSION_USER) AS THE_COUNT " + 
+		" from SAKAI_SESSION S LEFT OUTER JOIN SAKAI_EVENT E ON S.session_id = E.session_id " + 
+		" where E.EVENT = 'freedomtoaster.write' AND E.EVENT_DATE > (SYSDATE - INTERVAL '1' DAY)";
+
+	private static final String validStudentQuery = "select 1 from stu where nr = ?";
+
+	private static final String registeredQuery = "select st.status_code as Status from stusun st where st.fk_academic_year = ? " +
+			"and st.fk_academic_period = 1 and st.fk_student_nr = ? and st.status_code in ('TP','RG') ";
+			
+	private static final String lastAcademicYearQuery = "select max(mk_academic_year) as YEAR from stuann where mk_student_nr= ?";
+	
+	/* 
+	select s.mk_study_unit_code as Course,
+	           s.status_code as STATUS, FK_ANNSTMACADYEAR as ACADEMICYEAR,decode(s.SEMESTER_PERIOD,1,'S1',2,'S2',0,'Y1',6,'Y2') as SEMISTER,
+	           s.language_code as Lang,TO_CHAR(st.implementation_dat,'YYYY/MM/DD') as IMPL_DATE, 
+	           decode(st.fk_annstm_stmtyp, 'TL', 'Tutorial Letter', 'GD', 'Study Guide', 'MA','Florida Manual', 'WB','Workbook',
+               'QB','Question Bank','MO','Module','LB','Logbook','BL','Booklet','BB','Business Calculations','HL','H Law Documents','RE','Reader','MG','Mentor Guide') ||' '|| st.fk_annstmnr||' ('||
+               decode(st.fk_annstm_lang,'A','Afr','E','Eng','Both') ||') for '||st.fk_annstmname as Item,
+	           '/' || st.fk_annstmname || '/' || decode(st.fk_annstm_stmtyp, 'TL', 'tl', 'GD', 'sg', 'MA','ma', 'WB','wb', 
+	           'QB','qb','MO','mo','LB','lb','BL','bl','BB','bb','HL','hl','RE','re','MG','mg', lower(st.fk_annstm_stmtyp)) ||
+			   '/' || w.doc_name as Path, w.webid as webid, 
+			  decode((select 1 from dual where a.fk_webid > 0), 1, 1, 0) as WebStm
+			  from stusun s, 
+			  sunstm st, 
+			  annstm a, 
+			  webstm w
+			 where s.fk_academic_year = 2012 and 
+			   s.fk_academic_period in 1 and  
+			   s.fk_student_nr = 34105700 and 
+         s.semester_period in  (0,1,6) and
+			   s.mk_study_unit_code = st.mk_study_unit_code and 
+			   st.fk_annstmname = a.name and 
+			   st.fk_annstmacadyear = a.academic_year and 
+			   st.fk_annstmacadprd = a.academic_period and 
+			   st.fk_annstmnr = a.nr and 
+			   st.fk_annstm_lang = a.din_language and
+			   st.fk_annstm_stmtyp = a.fk_stmtypcode and 
+         ( a.fk_stmtypcode = 'BB' 
+				 or a.fk_stmtypcode = 'BL' 
+				 or a.fk_stmtypcode = 'GD' 
+				 or a.fk_stmtypcode = 'HL' 
+				 or a.fk_stmtypcode = 'LB' 
+    		 or a.fk_stmtypcode = 'MA' 
+				 or a.fk_stmtypcode = 'MO' 
+				 or a.fk_stmtypcode = 'MG' 
+				 or a.fk_stmtypcode = 'QB' 
+				 or a.fk_stmtypcode = 'RE' 
+				 or a.fk_stmtypcode = 'TL' 
+				 or a.fk_stmtypcode = 'WB') and 
+			   s.fk_academic_year = st.fk_annstmacadyear and 
+			   st.implementation_dat <= SYSDATE and   
+			   w.webid (+)= a.fk_webid and (    
+			    (s.semester_period = 0 and st.fk_annstmacadprd in (0,4,7)) or 
+			    (s.semester_period = 1 and st.fk_annstmacadprd in (1,3,4)) or  
+			    (s.semester_period = 2 and st.fk_annstmacadprd in (2,3,4)) or  
+			    (s.semester_period = 6 and st.fk_annstmacadprd in (4,6,7))) and   
+			    (w.expiration_date >= SYSDATE or w.expiration_date is NULL) and   
+			   w.doc_name is NOT NULL 
+UNION
+select s.mk_study_unit_code as Course,
+	           s.status_code as STATUS, FK_ANNSTMACADYEAR as ACADEMICYEAR,decode(s.SEMESTER_PERIOD,1,'S1',2,'S2',0,'Y1',6,'Y2') as SEMISTER,
+	           s.language_code as Lang,TO_CHAR(st.implementation_dat,'YYYY/MM/DD') as IMPL_DATE, 
+	           decode(st.fk_annstm_stmtyp, 'TL', 'Tutorial Letter', 'GD', 'Study Guide', 'MA','Florida Manual', 'WB','Workbook',
+               'QB','Question Bank','MO','Module','LB','Logbook','BL','Booklet','BB','Business Calculations','HL','H Law Documents','RE','Reader','MG','Mentor Guide') ||' '|| st.fk_annstmnr||' ('||
+               decode(st.fk_annstm_lang,'A','Afr','E','Eng','Both') ||') for '||st.fk_annstmname as Item,
+	           '/' || st.fk_annstmname || '/' || decode(st.fk_annstm_stmtyp, 'TL', 'tl', 'GD', 'sg', 'MA','ma', 'WB','wb', 
+	           'QB','qb','MO','mo','LB','lb','BL','bl','BB','bb','HL','hl','RE','re','MG','mg', lower(st.fk_annstm_stmtyp)) ||
+			   '/' || w.doc_name as Path, w.webid as webid, 
+			  decode((select 1 from dual where a.fk_webid > 0), 1, 1, 0) as WebStm
+			  from stusun s, 
+			  sunstm st, 
+			  annstm a, 
+			  webstm w, 
+			  regdat r 
+			 where s.fk_academic_year = 2012 and 
+			   s.fk_academic_period in 1 and  
+			   s.fk_student_nr = 34105700 and 
+         s.semester_period = 2 and
+			   s.mk_study_unit_code = st.mk_study_unit_code and 
+			   st.fk_annstmname = a.name and 
+			   st.fk_annstmacadyear = a.academic_year and 
+			   st.fk_annstmacadprd = a.academic_period and 
+			   st.fk_annstmnr = a.nr and 
+			   st.fk_annstm_lang = a.din_language and
+			   st.fk_annstm_stmtyp = a.fk_stmtypcode and 
+         ( a.fk_stmtypcode = 'BB' 
+				 or a.fk_stmtypcode = 'BL' 
+				 or a.fk_stmtypcode = 'GD' 
+				 or a.fk_stmtypcode = 'HL' 
+				 or a.fk_stmtypcode = 'LB' 
+    		 or a.fk_stmtypcode = 'MA' 
+				 or a.fk_stmtypcode = 'MO' 
+				 or a.fk_stmtypcode = 'MG' 
+				 or a.fk_stmtypcode = 'QB' 
+				 or a.fk_stmtypcode = 'RE' 
+				 or a.fk_stmtypcode = 'TL' 
+				 or a.fk_stmtypcode = 'WB') and 
+			   s.fk_academic_year = st.fk_annstmacadyear and 
+			   st.implementation_dat <= SYSDATE and   
+			   w.webid (+)= a.fk_webid and (    
+			    (s.semester_period = 0 and st.fk_annstmacadprd in (0,4,7)) or 
+			    (s.semester_period = 1 and st.fk_annstmacadprd in (1,3,4)) or  
+			    (s.semester_period = 2 and st.fk_annstmacadprd in (2,3,4)) or  
+			    (s.semester_period = 6 and st.fk_annstmacadprd in (4,6,7))) and   
+			    (w.expiration_date >= SYSDATE or w.expiration_date is NULL) and   
+			   w.doc_name is NOT NULL and 
+			  (s.fk_academic_year = r.academic_year and 
+               s.semester_period = r.semester_period and 
+               r.type = 'NOSTMISS' and 
+               SYSDATE not between r.from_date and r.to_date)
+       order by 1,7
+       
+       */
+
+	private static final String studyMaterialQuery = "select s.mk_study_unit_code as Course," 
+	          +" s.status_code as STATUS, FK_ANNSTMACADYEAR as ACADEMICYEAR,decode(s.SEMESTER_PERIOD,1,'S1',2,'S2',0,'Y1',6,'Y2') as SEMISTER,"
+	          +" s.language_code as Lang,TO_CHAR(st.implementation_dat,'YYYY/MM/DD') as IMPL_DATE, "
+	          +" decode(st.fk_annstm_stmtyp, 'TL', 'Tutorial Letter', 'GD', 'Study Guide', 'MA','Florida Manual', 'WB','Workbook'," 
+              +" 'QB','Question Bank','MO','Module','LB','Logbook','BL','Booklet','BB','Business Calculations','HL','H Law Documents','RE','Reader','MG','Mentor Guide') ||' '|| st.fk_annstmnr||' ('||"
+              +" decode(st.fk_annstm_lang,'A','Afr','E','Eng','Both') ||') for '||st.fk_annstmname as Item,"
+	          +" '/' || st.fk_annstmname || '/' || decode(st.fk_annstm_stmtyp, 'TL', 'tl', 'GD', 'sg', 'MA','ma', 'WB','wb', "
+	          +" 'QB','qb','MO','mo','LB','lb','BL','bl','BB','bb','HL','hl','RE','re','MG','mg', lower(st.fk_annstm_stmtyp)) ||" 
+			  +" '/' || w.doc_name as Path, w.webid as webid, "
+			  +" decode((select 1 from dual where a.fk_webid > 0), 1, 1, 0) as WebStm"
+			  +" from stusun s, "
+			  +"  sunstm st, "
+			  +"  annstm a, "
+			  +"  webstm w, "
+			  + " regdat r "
+			+" where s.fk_academic_year = ? and " 
+			+"   s.fk_academic_period in 1 and  "
+			+"   s.fk_student_nr = ? and "
+			+"   s.semester_period in  (0,1,6) and "
+			+"   s.mk_study_unit_code = st.mk_study_unit_code and "
+			+"   st.fk_annstmname = a.name and "
+			+"   st.fk_annstmacadyear = a.academic_year and " 
+			+"   st.fk_annstmacadprd = a.academic_period and "
+			+"   st.fk_annstmnr = a.nr and "
+			+"   st.fk_annstm_lang = a.din_language and" 
+			+"   st.fk_annstm_stmtyp = a.fk_stmtypcode and " 
+            +"   ( a.fk_stmtypcode = 'BB' "
+			+"	 or a.fk_stmtypcode = 'BL' "
+			+"	 or a.fk_stmtypcode = 'GD' "
+			+"	 or a.fk_stmtypcode = 'HL' "
+			+"	 or a.fk_stmtypcode = 'LB' "
+			+"	 or a.fk_stmtypcode = 'MA' "
+			+"	 or a.fk_stmtypcode = 'MO' "
+			+"	 or a.fk_stmtypcode = 'MG' "
+			+"	 or a.fk_stmtypcode = 'QB' "
+			+"	 or a.fk_stmtypcode = 'RE' "
+			+"	 or a.fk_stmtypcode = 'TL' "
+			+"	 or a.fk_stmtypcode = 'WB') and "
+			+"   s.fk_academic_year = st.fk_annstmacadyear and "  
+			+"   st.implementation_dat <= SYSDATE and "  
+			+"   w.webid (+)= a.fk_webid and ( "   
+			+"    (s.semester_period = 0 and st.fk_annstmacadprd in (0,4,7)) or "   
+			+"    (s.semester_period = 1 and st.fk_annstmacadprd in (1,3,4)) or " 
+			+"    (s.semester_period = 2 and st.fk_annstmacadprd in (2,3,4)) or " 
+			+"    (s.semester_period = 6 and st.fk_annstmacadprd in (4,6,7))) and "  
+			+"    (w.expiration_date >= SYSDATE or w.expiration_date is NULL) and "  
+			+"   w.doc_name is NOT NULL "
+            +" UNION "
+            +"select s.mk_study_unit_code as Course," 
+	          +" s.status_code as STATUS, FK_ANNSTMACADYEAR as ACADEMICYEAR,decode(s.SEMESTER_PERIOD,1,'S1',2,'S2',0,'Y1',6,'Y2') as SEMISTER,"
+	          +" s.language_code as Lang,TO_CHAR(st.implementation_dat,'YYYY/MM/DD') as IMPL_DATE, "
+	          +" decode(st.fk_annstm_stmtyp, 'TL', 'Tutorial Letter', 'GD', 'Study Guide', 'MA','Florida Manual', 'WB','Workbook'," 
+              +" 'QB','Question Bank','MO','Module','LB','Logbook','BL','Booklet','BB','Business Calculations','HL','H Law Documents','RE','Reader','MG','Mentor Guide') ||' '|| st.fk_annstmnr||' ('||"
+              +" decode(st.fk_annstm_lang,'A','Afr','E','Eng','Both') ||') for '||st.fk_annstmname as Item,"
+	          +" '/' || st.fk_annstmname || '/' || decode(st.fk_annstm_stmtyp, 'TL', 'tl', 'GD', 'sg', 'MA','ma', 'WB','wb', "
+	          +" 'QB','qb','MO','mo','LB','lb','BL','bl','BB','bb','HL','hl','RE','re','MG','mg', lower(st.fk_annstm_stmtyp)) ||" 
+			  +" '/' || w.doc_name as Path, w.webid as webid, "
+			  +" decode((select 1 from dual where a.fk_webid > 0), 1, 1, 0) as WebStm"
+			  +" from stusun s, "
+			  +"  sunstm st, "
+			  +"  annstm a, "
+			  +"  webstm w, "
+			  + " regdat r "
+			+" where s.fk_academic_year = ? and " 
+			+"   s.fk_academic_period in 1 and  "
+			+"   s.fk_student_nr = ? and "
+			+"   s.semester_period = 2 and "
+			+"   s.mk_study_unit_code = st.mk_study_unit_code and "
+			+"   st.fk_annstmname = a.name and "
+			+"   st.fk_annstmacadyear = a.academic_year and " 
+			+"   st.fk_annstmacadprd = a.academic_period and "
+			+"   st.fk_annstmnr = a.nr and "
+			+"   st.fk_annstm_lang = a.din_language and" 
+			+"   st.fk_annstm_stmtyp = a.fk_stmtypcode and " 
+            +"   ( a.fk_stmtypcode = 'BB' "
+			+"	 or a.fk_stmtypcode = 'BL' "
+			+"	 or a.fk_stmtypcode = 'GD' "
+			+"	 or a.fk_stmtypcode = 'HL' "
+			+"	 or a.fk_stmtypcode = 'LB' "
+			+"	 or a.fk_stmtypcode = 'MA' "
+			+"	 or a.fk_stmtypcode = 'MO' "
+			+"	 or a.fk_stmtypcode = 'MG' "
+			+"	 or a.fk_stmtypcode = 'QB' "
+			+"	 or a.fk_stmtypcode = 'RE' "
+			+"	 or a.fk_stmtypcode = 'TL' "
+			+"	 or a.fk_stmtypcode = 'WB') and "
+			+"   s.fk_academic_year = st.fk_annstmacadyear and "  
+			+"   st.implementation_dat <= SYSDATE and "  
+			+"   w.webid (+)= a.fk_webid and ( "   
+			+"    (s.semester_period = 0 and st.fk_annstmacadprd in (0,4,7)) or "   
+			+"    (s.semester_period = 1 and st.fk_annstmacadprd in (1,3,4)) or " 
+			+"    (s.semester_period = 2 and st.fk_annstmacadprd in (2,3,4)) or " 
+			+"    (s.semester_period = 6 and st.fk_annstmacadprd in (4,6,7))) and "  
+			+"    (w.expiration_date >= SYSDATE or w.expiration_date is NULL) and "  
+			+"   w.doc_name is NOT NULL and "
+			+"  (s.fk_academic_year = r.academic_year and "
+            +"   s.semester_period = r.semester_period and "
+            +"   r.type = 'NOSTMISS' and "
+            +"   SYSDATE not between r.from_date and r.to_date )"
+ 			+"  order by 1, 7";
+
+	public void logEvent(String eventType, String sessionId) {
+			this.usageSession = UsageSessionService.getSession(sessionId);
+			EventTrackingService.post(EventTrackingService.newEvent(eventType, null, false), usageSession);
+			if(eventType.equalsIgnoreCase("freedomtoaster.write") || eventType.equalsIgnoreCase("freedomtoaster.nowrite") || eventType.equalsIgnoreCase("freedomtoaster.cancel")) {
+				UsageSessionService.logout();
+				this.usageSession = null;
+			}
+	}
+
+	private int getLastAcademicYear(String studentNr) throws AxisFault {
+
+		JdbcTemplate jdt = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+
+		try {
+			List records = jdt.queryForList(lastAcademicYearQuery, new Object[] {
+					new Integer(studentNr) }, new int[] { Types.NUMERIC });
+			if (records.size() == 0) {
+				throw new Exception("Cannot determine current/last academic year for student "+ studentNr + ".\n" +
+						"Please check the student number and try again.");
+			} else {
+				return Integer.parseInt(((ListOrderedMap) records.get(0)).get("YEAR").toString());
+			}
+		} catch (AxisFault af) {
+			throw af;
+		} catch (Exception e) {
+			throw new AxisFault(e.getMessage());
+		}
+	}
+
+	private int getCurrentYear() {
+		int year = Calendar.getInstance().get(Calendar.YEAR);
+		Calendar calendar = Calendar.getInstance();
+		if (calendar.get(Calendar.MONTH) == 11) {
+			year += 1;
+		}
+		return year;
+	}
+
+	private String validateStudentNr(String studentNr, String ip) throws AxisFault {
+
+		if(ip != null || !(ip.equals(""))) {
+			usageSession = UsageSessionService.startSession(studentNr, ip, userAgent);
+		}
+		JdbcTemplate jdt = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+
+		try {
+			Integer.parseInt(studentNr);
+		} catch (Exception e) {
+			throw new AxisFault("The student number you have entered is not valid.\n" +
+						"Please check and try again.");
+		}
+
+		try {
+			List records = jdt.queryForList(validStudentQuery, new Object[] {
+					new Integer(studentNr) }, new int[] { Types.NUMERIC });
+			if (records.size() == 0) {
+				throw new Exception("The student number you have entered is not valid.\n" +
+						"Please check and try again.");
+			} else {
+				if(ip != null) {
+					return usageSession.getId();
+				} else {
+					return "";
+				}
+			}
+		} catch (AxisFault af) {
+			throw af;
+		} catch (Exception e) {
+			throw new AxisFault(e.getMessage());
+		}
+
+	}
+	public void  insertEventsOfStudymaterial(int stno,String ipaddress ,String eventType) throws AxisFault{
+        String sql = "INSERT INTO SM_AUDIT(smstno,smipaddr,smevent,smeventdate)"+ "values(?,?,?,systimestamp)";
+            System.out.println("Before inserting "); 
+            JdbcTemplate jdt = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+      try {
+          jdt.update(sql,new Object[] {stno,ipaddress,eventType});
+      }
+catch(Exception ex){
+                             throw new AxisFault("StudynaterialDevlivery app:"+ex);
+}
+    }
+	 public String retriveIpAddressOfServer(String ipaddress) throws AxisFault{
+        Log log = LogFactory.getLog(this.getClass());
+             String serverIPAddress ;
+                String query = "SELECT SMHOSTNAME " + " from SM_SERVER_IPMAP " + " where SMIPADDRESS = '" + ipaddress + "'" ;
+                 log.info("IpAddress Retrival Query is "+query);
+                  try{
+                    serverIPAddress = this.queryStringValue(query,"SMHOSTNAME").trim();
+                      }catch(Exception vE){
+                          log.error("error Message :::"+vE.getMessage());
+                        vE.printStackTrace();
+                        throw new AxisFault(
+                                                "AdditionsQueryDao : Error reading SERVERIP Number/ " + vE.getMessage());
+                          }
+                          return serverIPAddress;
+        }
+
+
+	public String getQualification(String studentNr) throws AxisFault {
+
+		validateStudentNr(studentNr, "");
+
+		JdbcTemplate jdt = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+
+		List records = jdt.queryForList(qualificationQuery, new Object[] {
+			new Integer(studentNr), new Integer(getLastAcademicYear(studentNr)) },
+			new int[] { Types.NUMERIC, Types.NUMERIC });
+
+		if (records.size() == 0) {
+			throw new AxisFault("The system cannot determine your current/last qualification record.");
+		}
+
+		return ((ListOrderedMap) records.get(0)).get("QUALNAME").toString();
+	}
+
+	public String[] getDailyUsage() throws AxisFault {
+		JdbcTemplate jdt = new JdbcTemplate(new SakaiDAO().getDataSource());
+		Log log = LogFactory.getLog(this.getClass());
+		try {
+
+			List records = jdt.queryForList(dailyUsageQuery);
+			Iterator recordsI = records.iterator();
+			if(recordsI.hasNext()) {
+
+				ListOrderedMap record = (ListOrderedMap) recordsI.next();
+				String[] usage = new String[2];
+				usage[0] = record.get("THE_DAY").toString();
+				usage[1] = record.get("THE_COUNT").toString();
+				return usage;
+				
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e);
+			throw new AxisFault(e.getMessage());
+		}
+		return null;
+	}
+	
+	public String[] getCourses(String studentNr) throws AxisFault {
+
+		validateStudentNr(studentNr, "");
+
+		JdbcTemplate jdt = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+		Log log = LogFactory.getLog(this.getClass());
+
+		int academicYear = getLastAcademicYear(studentNr);
+		Vector tempCourseList = new Vector();
+		boolean webstm = false;
+
+
+		try {
+		//check the status
+
+			List records = jdt.queryForList(registeredQuery, new Object[] {
+					new Integer(academicYear), new Integer(studentNr)  },
+					new int[] { Types.NUMERIC, Types.NUMERIC  });
+
+			if ((records.size() == 0)) {
+				/*logEvent(EVENT_FREEDOMTOASTER_NOSTUDMAT, usageSession.getId());*/
+				throw new Exception(
+						"You are not registered for any courses for this academic\n" +
+						"year and period or your internet or postal application for\n" +
+						"registration has not yet been completed. No study material\n" +
+						"can be provided. Please consult a Unisa registration\n"+
+						"assistant if you believe this information is not correct.");
+			}
+
+			records = jdt.queryForList(studyMaterialQuery, new Object[] {
+					new Integer(academicYear), new Integer(studentNr), new Integer(academicYear), new Integer(studentNr) },
+					new int[] { Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC });
+
+			Iterator recordsI = records.iterator();
+			int count = 0; 	
+			String path = "";
+			while (recordsI.hasNext()) {
+
+				ListOrderedMap record = (ListOrderedMap) recordsI.next();
+                    
+                        	if (((BigDecimal) record.get("WEBSTM")).intValue() == 1) {
+						 webstm = true;
+					}
+					int webid = Integer.parseInt(record.get("WEBID").toString());
+					path = getReturnPath(webid);	
+					String csv = record.get("COURSE") + ","
+							+ record.get("LANG") + "," + record.get("ITEM")
+							+ "," + record.get("WEBSTM") + ","
+							//+ record.get("PATH") + "," + record.get("STATUS") + "," 
+							+ path + "," + record.get("STATUS") + "," 
+					        + record.get("ACADEMICYEAR") + "," 
+					        + record.get("SEMISTER") + "," 
+					        + record.get("IMPL_DATE");			
+					tempCourseList.add(csv);                        
+			}
+
+			if (tempCourseList.size() == 0 ) {
+				/*logEvent(EVENT_FREEDOMTOASTER_NOESTUDMAT, usageSession.getId());*/
+				if(count > 0)	
+                        	{      
+                                    throw new Exception("Your study material is currently not available.\n"
+						+ "As an alternative, you can download your study material from my.unisa.ac.za as it becomes available.\n"
+						+ "We apologize for the inconvenience. Please note that registration for one or more of your courses is\n"
+						+ " not yet finalized perhaps due to outstanding documents or fees that \n"+
+                                                        "have not been received yet; Your registration can only be finalized\n" +
+                                                        "on receipt of the outstanding fees and/or documents. Consult the Unisa\n" +
+                                                        "registration desk if you believe this information is not correct." );
+				} else {
+                                     
+                                    throw new Exception("Your study material is currently not available.\n"
+						+ "As an alternative, you can download your study material, if you have been registered on my.unisa.ac.za as it becomes available or please try again later.\n"
+						+ "We apologize for the inconvenience.");
+				}
+
+
+			}
+
+			// result size + 1 (for the sessionId)
+			String[] result = new String[tempCourseList.size()+1];
+			/*result[0] = sessionId;*/
+			for (int i = 0; i < tempCourseList.size(); i++) {
+				result[i+1] = (String) tempCourseList.get(i);
+			}
+			return result;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e);
+			throw new AxisFault(e.getMessage());
+		}
+	}
+	public String[] getCourses(String studentNr, String ip) throws AxisFault {
+
+		String sessionId = validateStudentNr(studentNr, ip);
+
+		JdbcTemplate jdt = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+		Log log = LogFactory.getLog(this.getClass());
+
+		int academicYear = getLastAcademicYear(studentNr);
+		Vector tempCourseList = new Vector();
+		boolean webstm = false;
+
+
+		try {
+
+			List records = jdt.queryForList(registeredQuery, new Object[] {
+					new Integer(academicYear), new Integer(studentNr) },
+					new int[] { Types.NUMERIC, Types.NUMERIC });
+
+			if ((records.size() == 0)) {
+				/*logEvent(EVENT_FREEDOMTOASTER_NOSTUDMAT, usageSession.getId());*/
+				throw new Exception(
+						"You are not registered for any courses for this academic\n" +
+						"year or your internet or postal application for\n" +
+						"registration has not yet been completed. No study material\n" +
+						"can be provided. Please consult a Unisa registration\n"+
+						"assistant if you believe this information is not correct.");
+			}
+
+			records = jdt.queryForList(studyMaterialQuery, new Object[] {
+					new Integer(academicYear), new Integer(studentNr) },
+					new int[] { Types.NUMERIC, Types.NUMERIC });
+
+			Iterator recordsI = records.iterator();
+			int count = 0; 	
+			String path = "";
+			while (recordsI.hasNext()) {
+
+				ListOrderedMap record = (ListOrderedMap) recordsI.next();
+
+					if (((BigDecimal) record.get("WEBSTM")).intValue() == 1) {
+						webstm = true;
+					}
+					//path = getDocumentPath(record.get("WEBSTM").intValue()); 
+					path = "Path";
+				
+						String csv = record.get("COURSE") + ","
+							+ record.get("LANG") + "," + record.get("ITEM")
+							+ "," + record.get("WEBSTM") + ","
+							+ path + "," + record.get("STATUS") + "," 
+					        + record.get("ACADEMICYEAR") + "," 
+					        + record.get("SEMISTER") + "," 
+					        + record.get("IMPL_DATE");				
+					tempCourseList.add(csv);        
+			}
+
+			if (tempCourseList.size() == 0 ) {
+				/*logEvent(EVENT_FREEDOMTOASTER_NOESTUDMAT, usageSession.getId());*/
+				if(count > 0)	
+                        	{      
+                                    throw new Exception("Your study material is currently not available.\n"
+						+ "As an alternative, you can download your study material from my.unisa.ac.za as it becomes available.\n"
+						+ "We apologize for the inconvenience. Please note that registration for one or more of your courses is\n"
+						+ " not yet finalized perhaps due to outstanding documents or fees that \n"+
+                                                        "have not been received yet; Your registration can only be finalized\n" +
+                                                        "on receipt of the outstanding fees and/or documents. Consult the Unisa\n" +
+                                                        "registration desk if you believe this information is not correct." );
+				} else {
+                                     
+                                       throw new Exception("Your study material is currently not available.\n"
+						+ "As an alternative, you can download your study material, if you have been registered on my.unisa.ac.za as it becomes available or please try again later.\n"
+						+ "We apologize for the inconvenience.");
+				}
+
+
+			}
+
+			// result size + 1 (for the sessionId)
+			String[] result = new String[tempCourseList.size()+1];
+			result[0] = sessionId;
+			for (int i = 0; i < tempCourseList.size(); i++) {
+				result[i+1] = (String) tempCourseList.get(i);
+			}
+			return result;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e);
+			throw new AxisFault(e.getMessage());
+		}
+	}
+
+	public String getReturnPath(int webid)
+	{
+		JdbcTemplate jdt = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+                  Hashtable ht = new Hashtable();
+                  int count = 0, countrec = 0;
+                  List queryList1;
+                  List queryList2;
+                  List queryList3;
+                  String path = "";    
+         
+                  try {  
+                               
+                  String query1 = "select start_academic_yea, doc_name "+
+                                                "from webstm "+
+                                                "where webid = "+webid;
+		//System.out.println(query1);
+                  queryList1 = jdt.queryForList(query1);
+                  Iterator i = queryList1.iterator();
+                  i = queryList1.iterator();
+                  while(i.hasNext()){
+                          ListOrderedMap data1 = (ListOrderedMap) i.next();
+                          ht.put("syear",data1.get("start_academic_yea"));
+                          ht.put("docname",data1.get("doc_name"));
+                  }              
+                  String query2 = "select * from annstm "+
+                                                "where fk_webid = "+webid+
+                                                " and academic_year = "+ht.get("syear");
+		//System.out.println(query2);
+                  queryList2 = jdt.queryForList(query2);
+                  Iterator j = queryList2.iterator();
+                  j = queryList2.iterator();
+                  while(j.hasNext()){
+                          ListOrderedMap data2 = (ListOrderedMap) j.next();
+                          ht.put("acadprd", data2.get("academic_period"));
+                          ht.put("name", data2.get("name"));
+                          ht.put("lang", data2.get("din_language"));
+                          ht.put("type", data2.get("fk_stmtypcode").toString().toLowerCase());
+                          ht.put("nr", data2.get("nr"));                       
+                  }    
+                 
+                  String query3 = "select mk_study_unit_code "+
+                                                "from sunstm "+
+                                                "where fk_annstmacadyear = "+ht.get("syear")+
+                                                " and fk_annstmacadprd = "+ht.get("acadprd")+
+                                                " and fk_annstmname ='"+ht.get("name")+"'"+
+                                                " and fk_annstm_stmtyp ='"+ht.get("type").toString().toUpperCase()+"'"+
+                                                " and fk_annstmnr = "+ht.get("nr")+
+                                                " and fk_annstm_lang ='"+ht.get("lang")+"'";
+                  //System.out.println(query3);
+                  queryList3 = jdt.queryForList(query3);
+                  Iterator k = queryList3.iterator();
+                  k = queryList3.iterator();
+                  count = queryList3.size();
+                  ht.put("lname", ht.get("name"));
+                  if((ht.containsValue("tl")) || (ht.containsValue("tw")) || (ht.containsValue("tp"))) {
+                          ht.put("dirtype", "tl");
+                  } else if (ht.containsValue("ma")){
+                          ht.put("dirtype", "ma");
+                  } else if (ht.containsValue("wb")){
+                          ht.put("dirtype", "wb");
+                  } else if (ht.containsValue("qb")){
+                          ht.put("dirtype", "qb");
+                  } else if (ht.containsValue("mo")){
+                          ht.put("dirtype", "mo");
+                  } else if (ht.containsValue("lb")){
+                          ht.put("dirtype", "lb");
+                  } else if (ht.containsValue("bl")){
+                          ht.put("dirtype", "bl");
+                  } else if (ht.containsValue("bb")){
+                          ht.put("dirtype", "bb");
+                  } else if (ht.containsValue("hl")){
+                          ht.put("dirtype", "hl");
+                  } else if (ht.containsValue("re")){
+                          ht.put("dirtype", "re");
+                  } else if (ht.containsValue("mg")){
+                          ht.put("dirtype", "mg");
+                  } else {
+                          ht.put("dirtype", "sg");
+                  }
+                               
+                if (count > 1) {
+                        path = "/collect/"+ht.get("lname")+"/"+ht.get("dirtype")+"/"+ht.get("docname");
+                        // return true;
+                } else {
+                        path = "/"+ht.get("lname")+"/"+ht.get("dirtype")+"/"+ht.get("docname");
+                        // return false;
+                }
+		//System.out.println("PATH "+path);
+                               
+           } catch (Exception ex) {
+           // throw new Exception("MyUnisaContentQueryDAO: getDocumentPath:
+                        // (webid: "+webid+") Error occurred / "+ ex,ex);
+                   System.out.println(ex.getMessage());
+                }              
+                return path;
+	}
+    private String queryStringValue(String query , String field) {
+
+                    JdbcTemplate template = new JdbcTemplate(new StudentSystemDAO().getDataSource());
+                    List queryList ;
+                    String returnValue ="" ;
+                    queryList = template.queryForList(query);
+                   Iterator iterator = queryList.iterator();
+                    if(iterator.hasNext()){
+                         ListOrderedMap vListOrderdMap =  (ListOrderedMap) iterator.next();
+                        if(vListOrderdMap.get(field)== null){
+                          }else {
+                        returnValue =  vListOrderdMap.get(field).toString();
+                        }
+                     }
+                     else{
+                         returnValue = "null";
+                         }
+                   return returnValue;
+                }
+
+}
+

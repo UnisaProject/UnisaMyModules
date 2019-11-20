@@ -1,0 +1,192 @@
+import java.sql.Types;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.lang.StringBuffer;
+
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
+import org.apache.axis.AxisFault;
+import org.apache.axis.utils.JavaUtils;
+import org.apache.commons.collections.map.ListOrderedMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.email.api.EmailService;
+import org.sakaiproject.email.api.Attachment;
+import org.sakaiproject.email.api.RecipientType;
+
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+
+import za.ac.unisa.lms.db.SakaiDAO;
+
+/**
+Webservice for the mapping of ids within table uni_content_mapping
+reason:
+1) master site is created with their own content id's
+2) S2 site get created from master site with their own content id's
+3) digiband client gets created from S2 and get the same content id as on S2
+4) group sites are created from Master site and get their own content ids
+5) we need to map content ids in point 3 and 4
+*/
+public class UnipooleMappingWebService {
+
+
+	// -------------------------------------------------------------------------
+	private String errorEmailAddress = new String("syzelle@unisa.ac.za");
+	private String monitorEmailAddress = new String("syzelle@unisa.ac.za");
+	//"MyUnisaBugs@unisa.ac.za"
+	private StringBuffer emailHeading = new StringBuffer();
+	private StringBuffer emailBody = new StringBuffer();
+	private StringBuffer emailSuccessHeading = new StringBuffer();
+	private StringBuffer emailSuccessBody = new StringBuffer();
+	// -------------------------------------------------------------------------
+
+	/************************************************************************* */ 
+	/** Method to do mapping for Melete 
+	 *  1) map module IDs
+	 *  2) map section IDs
+	 */
+	public void mapUnipooleContent(String toolId, String groupSiteContext) throws AxisFault {
+		Log log = LogFactory.getLog(this.getClass());
+		
+		emailSuccessBody.append("UnipooleMappingWebService.wsdl <br>");
+		emailSuccessBody.append("Unipoole Mapping for ");
+		emailSuccessBody.append(groupSiteContext);
+		emailSuccessBody.append("<br>");
+		
+		try {
+			// -------------------------------------------------------------------------
+			// Queries
+			// -------------------------------------------------------------------------
+			// query to retrieve content that must be mapped
+		 	StringBuffer selectContentForMapping= new StringBuffer();
+				
+			selectContentForMapping.append(" SELECT UCM2.tool_to_id as groupsite_id,"); 
+			selectContentForMapping.append(" (select UCM1.tool_to_id");
+			selectContentForMapping.append(" from   uni_content_mapping UCM1");
+			selectContentForMapping.append(" where  UCM1.site_from_id = UCM2.site_from_id"); //EUP1501-15-Master
+			selectContentForMapping.append(" and    UCM1.site_to_id = ?"); //'EUP1501-15-S2'
+			selectContentForMapping.append(" and    UCM1.tool_name = ?");
+			selectContentForMapping.append(" and    UCM1.tool_from_id = UCM2.tool_from_id) as client_id");
+			selectContentForMapping.append(" FROM   uni_content_mapping UCM2");
+			selectContentForMapping.append(" WHERE  UCM2.site_to_id = ?");//'EUP1501-15-S2-1T'
+			selectContentForMapping.append(" AND    UCM2.site_from_id = ?	"); //EUP1501-15-Master
+			
+			// -------------------------------------------------------------------------
+			// insert of content ids that must be mapped
+		 	StringBuffer insertMapping= new StringBuffer();
+				
+			insertMapping.append(" INSERT INTO UNI_CONTENT_MAPPING");
+			insertMapping.append(" VALUES ((select nvl(max(id),0) +1 from uni_content_mapping),?,?,?,?,?)");
+				
+			// -------------------------------------------------------------------------
+			
+			StringBuffer masterSite = new StringBuffer(); // this will be the master site EUP1501-15-Master
+			masterSite.append(groupSiteContext.substring(0,10)); 
+			masterSite.append("-Master");
+			StringBuffer semesterSite = new StringBuffer(); // this will be the S1/S2/Y1/Y2 site EUP1501-15-S2
+			semesterSite.append(groupSiteContext.substring(0,13));
+			
+			System.out.println("Group site = "+groupSiteContext);
+			System.out.println("masterSite = "+masterSite.toString());
+			System.out.println("semesterSite = "+semesterSite.toString());
+			
+			// -------------------------------------------------------------------------
+			// get the content id's that must be mapped
+			JdbcTemplate jdt1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+			List listMapping = jdt1.queryForList(selectContentForMapping.toString(),
+	                                 new Object[] {semesterSite.toString(),toolId,groupSiteContext,masterSite.toString()});
+			if (listMapping.size() >= 1) {
+				Iterator mappingIt = listMapping.iterator();
+				                    
+				while (mappingIt.hasNext()) {
+					ListOrderedMap mappingRecord = (ListOrderedMap) mappingIt.next();
+					
+					StringBuffer idOnClient = new StringBuffer(); // current id on the digiband client
+					StringBuffer idOnGroupSite = new StringBuffer(); // id that must be on the digiband client, this is the group site id.
+					
+					idOnClient.append(mappingRecord.get("client_id").toString());
+					idOnGroupSite.append(mappingRecord.get("groupsite_id").toString());
+					
+					// -------------------------------------------------------------------------
+					// do insert of mapping
+					JdbcTemplate jdt2 = new JdbcTemplate(new SakaiDAO().getDataSource());
+					jdt2.update(insertMapping.toString(),
+								new Object[] {masterSite.toString(),groupSiteContext,toolId,idOnClient.toString(),idOnGroupSite.toString()});
+								
+					emailSuccessBody.append("<br> * idOnClient=");
+					emailSuccessBody.append(idOnClient.toString());
+					emailSuccessBody.append(" idOnGroupSite=");
+					emailSuccessBody.append(idOnGroupSite.toString());
+					
+				} // end of while (moduleIt.hasNext())
+			
+				// -------------------------------------------------------------------------
+				/* ************ Mapping complete send e-mail                 ************* */
+				emailSuccessHeading.append("UNIPOOLE MAPPING COMPLETED FOR ");
+				emailSuccessHeading.append(toContext);
+				try {
+					sendEmail(emailSuccessHeading.toString(), emailSuccessBody.toString(), monitorEmailAddress);
+				} catch (AddressException ex) {
+					log.error(ex);
+				}
+				// -------------------------------------------------------------------------
+		
+			} // end of if (listMapping.size() >= 1)
+		} catch (Exception  e) { //|AddressException
+			e.printStackTrace();
+			emailHeading = new StringBuffer();
+			emailBody = new StringBuffer();
+			emailHeading.append("UNIPOOLE MAPPING exception on UnipooleMappingWebService.wsdl ");
+			emailBody.append("While doing mapping for ");
+			emailBody.append(groupSiteContext);
+			emailBody.append(" exception: ");
+			emailBody.append(e);
+			try {
+				sendEmail(emailHeading.toString(), emailBody.toString(), errorEmailAddress);
+			} catch (AddressException ex) {
+				log.error(ex);
+			}
+			log.error(e);
+			throw new AxisFault(e.getMessage());
+		} // end try catch	
+		
+	} // end of public void mapUnipooleContent
+
+    public void sendEmail(String subject, String body, String emailAddress) throws AddressException {
+            
+        EmailService emailService;
+        emailService = (EmailService) ComponentManager.get(EmailService.class);
+
+        String tmpEmailFrom = ServerConfigurationService.getString("noReplyEmailFrom");
+
+        //System.out.println("GRADEBOOK email send: "+body);
+
+		InternetAddress toEmail = null;
+		try {
+        	toEmail = new InternetAddress(emailAddress);
+        } catch (AddressException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+       }
+        InternetAddress iaTo[] = new InternetAddress[1];
+        iaTo[0] = toEmail;
+        InternetAddress iaHeaderTo[] = new InternetAddress[1];
+        iaHeaderTo[0] = toEmail;
+        InternetAddress iaReplyTo[] = new InternetAddress[1];
+        iaReplyTo[0] = new InternetAddress(tmpEmailFrom);
+        List<String> contentList = new ArrayList<String>();
+        contentList.add("Content-Type: text/html");
+
+        emailService.sendMail(iaReplyTo[0],iaTo,subject,body,iaHeaderTo,iaReplyTo,contentList);
+    } // end of sendEmail
+
+} // end of public class UnipooleMappingWebService

@@ -1,0 +1,292 @@
+import java.sql.Types;
+import org.apache.commons.collections.map.ListOrderedMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+
+
+import org.w3c.dom.*;
+
+import org.apache.axis.AxisFault;
+import org.apache.axis.utils.JavaUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.email.api.EmailService;
+import org.sakaiproject.email.api.Attachment;
+import org.sakaiproject.email.api.RecipientType;
+import org.sakaiproject.event.cover.UsageSessionService;
+import org.sakaiproject.event.api.UsageSession;
+
+import za.ac.unisa.lms.db.StudentSystemDAO;
+import za.ac.unisa.lms.db.SakaiDAO;
+
+
+/**
+This webservice is used to delete old data from old sites
+tool: Sakai Gradebook
+
+Sonette start with webservice 20 June 2017
+*/
+public class DataCleanup_GradebookWebService {
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	private EmailService emailService;
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// QUERIES
+	
+	// ----- -----------------------------------------------
+	// ----- delete from table GB_GRADING_EVENT_T
+	String DELETE_GB_GRADING_EVENT_T = " DELETE FROM GB_GRADING_EVENT_T"+
+	                                   " WHERE  GRADABLE_OBJECT_ID IN (SELECT ID FROM GB_GRADABLE_OBJECT_T"+
+	                                   "                               WHERE  GRADEBOOK_ID = ?)"; 
+
+
+	// ----- -----------------------------------------------
+	// ----- delete from table GB_GRADE_RECORD_T
+	String DELETE_GB_GRADE_RECORD_T = " DELETE FROM GB_GRADE_RECORD_T"+
+									  " WHERE  GRADABLE_OBJECT_ID IN (SELECT ID FROM GB_GRADABLE_OBJECT_T"+
+									  "                               WHERE  GRADEBOOK_ID = ?)";
+
+
+	// ----- -----------------------------------------------
+	// ----- delete from table GB_COMMENT_T
+	String DELETE_GB_COMMENT_T = " DELETE FROM GB_COMMENT_T"+
+								 " WHERE  GRADABLE_OBJECT_ID IN (SELECT ID FROM GB_GRADABLE_OBJECT_T"+
+								 "                               WHERE  GRADEBOOK_ID = ?)";
+
+	// ----- -----------------------------------------------
+	// ----- delete from table GB_LETTERGRADE_PERCENT_MAPPING
+	String DELETE_GB_LETTERGRADE_PERCENT_MAPPING = " DELETE FROM GB_LETTERGRADE_PERCENT_MAPPING"+
+								                   " WHERE  GRADEBOOK_ID = ?";  
+
+
+	// ----- -----------------------------------------------
+	// ----- delete from table GB_GRADABLE_OBJECT_T
+	String DELETE_GB_GRADABLE_OBJECT_T = " DELETE FROM GB_GRADABLE_OBJECT_T"+
+								         " WHERE  GRADEBOOK_ID = ?";  
+
+	// ----- -----------------------------------------------
+	// ----- delete from table GB_SPREADSHEET_T
+	String DELETE_GB_SPREADSHEET_T = " DELETE FROM GB_SPREADSHEET_T"+
+								     " WHERE  GRADEBOOK_ID = ?";  
+
+	// ----- -----------------------------------------------
+	// ----- delete from table GB_PERMISSION_T
+	String DELETE_GB_PERMISSION_T = " DELETE FROM GB_PERMISSION_T"+
+								    " WHERE  GRADEBOOK_ID = ?"; 
+								    						    
+	// ----- -----------------------------------------------
+	// ----- delete from table GB_GRADE_MAP_T
+	String DELETE_GB_GRADE_MAP_T = " DELETE FROM GB_GRADE_MAP_T"+
+								    " WHERE  GRADEBOOK_ID = ?"; 
+
+
+	// ----- -----------------------------------------------
+	// ----- delete from table GB_CATEGORY_T
+	String DELETE_GB_CATEGORY_T = " DELETE FROM GB_CATEGORY_T"+
+								    " WHERE  GRADEBOOK_ID = ?";
+								    
+	// ----- -----------------------------------------------
+	// ----- delete from table GB_GRADEBOOK_T
+	String DELETE_GB_GRADEBOOK_T = " DELETE FROM GB_GRADEBOOK_T"+
+								    " WHERE  GRADEBOOK_ID = ?";  
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	/** Actual method to do the site gradebook data cleanup
+		Input:
+		1) year
+		2) semester
+    */
+	public void dataCleanupPerYearSemester(String academicYear, String semesterPeriod)throws AxisFault {
+	
+		// ----- variables
+		StringBuffer yearSemester = new StringBuffer();
+    		
+		// ----- Set yearSemester YY-S1
+	    yearSemester.append(academicYear.substring(2,4));
+    	yearSemester.append('-');
+    	yearSemester.append(semesterPeriod);
+		
+    	StringBuffer result = new StringBuffer();
+    	String serverUrl = ServerConfigurationService.getString("serverUrl");
+		
+		// ----- get serverUrl (myDev, myQa, myUnisa or localhost)
+		if (serverUrl.equals("http://localhost:8080")) {
+			serverUrl = "https://mydev.unisa.ac.za";
+		} 
+		serverUrl = "http://163.200.82.234:8020/portal";
+
+		// ----- Retrieve gradebook items where data must be deleted
+		String RETRIEVE_GRADEBOOK = " SELECT ID"+
+								  " FROM   GB_GRADEBOOK_T"+
+								  " WHERE  SUBSTR(GRADEBOOK_UID,9,5) = ('"+yearSemester+"')";
+		
+		System.out.println(">>>>>>>>>> DataCleanup_GradebookWebService retrieve_modules "+RETRIEVE_GRADEBOOK);		
+		
+		JdbcTemplate jdt1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+		try {
+               
+            List recordsGradebook = jdt1.queryForList(RETRIEVE_GRADEBOOK,
+                       new Object[] {});
+			Iterator recordsGradebook_it = recordsGradebook.iterator();
+					
+			// ----- For each gradebook retrieved
+			while (recordsGradebook_it.hasNext()) {
+				ListOrderedMap record_Gradebook = (ListOrderedMap) recordsGradebook_it.next();
+					
+				StringBuffer gradebookId = new StringBuffer();
+						                                                                                
+				gradebookId.append(record_Gradebook.get("ID").toString());
+				System.out.println(">>>>>>>>>> DataCleanup_GradebookWebService gradebookId= "+gradebookId.toString());
+
+				// ----- -----------------------------------------------
+				// ----- delete from table GB_GRADING_EVENT_T
+				JdbcTemplate jdt_Delete1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete1.update(DELETE_GB_GRADING_EVENT_T,
+					new Object[] {gradebookId.toString()});
+					System.out.println(">>>>>>> DELETE_GB_GRADING_EVENT_T:" +gradebookId.toString());
+				} catch (Exception e) { //jdt_Delete1
+					System.out.println("***** DataCleanup_GradebookWebService: delete from table SAKAI_GB_GRADING_EVENT_T error "+e);
+				} //jdt_Delete1
+
+				// ----- -----------------------------------------------
+				// ----- delete from table GB_GRADE_RECORD_T
+				JdbcTemplate jdt_Delete2 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete2.update(DELETE_GB_GRADE_RECORD_T,
+					new Object[] {gradebookId.toString()});
+					System.out.println(">>>>>>> DELETE_GB_GRADE_RECORD_T:" +gradebookId.toString());
+				} catch (Exception e) { //jdt_Delete2
+					System.out.println("***** DataCleanup_GradebookWebService: delete from table SAKAI_GB_GRADE_RECORD_T error "+e);
+				} //jdt_Delete2
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table GB_COMMENT_T
+				JdbcTemplate jdt_Delete3 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete3.update(DELETE_GB_COMMENT_T,
+					new Object[] {gradebookId.toString()});
+					System.out.println(">>>>>>> DELETE_GB_COMMENT_T:" +gradebookId.toString());
+				} catch (Exception e) { //jdt_Delete3
+					System.out.println("***** DataCleanup_GradebookWebService: delete from table SAKAI_GB_COMMENT_T error "+e);
+				} //jdt_Delete3
+
+				// ----- -----------------------------------------------
+				// ----- delete from table GB_LETTERGRADE_PERCENT_MAPPING 
+				JdbcTemplate jdt_Delete4 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete4.update(DELETE_GB_LETTERGRADE_PERCENT_MAPPING,
+					new Object[] {gradebookId.toString()});
+					System.out.println(">>>>>>> DELETE_GB_LETTERGRADE_PERCENT_MAPPING:" +gradebookId.toString());
+				} catch (Exception e) { //jdt_Delete4
+					System.out.println("***** DataCleanup_GradebookWebService: delete from table SAKAI_GB_LETTERGRADE_PERCENT_MAPPING error "+e);
+				} //jdt_Delete4
+				
+				// ----- -----------------------------------------------
+				// ----- delete from table GB_GRADABLE_OBJECT_T 
+				JdbcTemplate jdt_Delete5 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete5.update(DELETE_GB_GRADABLE_OBJECT_T,
+					new Object[] {gradebookId.toString()});
+					System.out.println(">>>>>>> DELETE_GB_GRADABLE_OBJECT_T:" +gradebookId.toString());
+				} catch (Exception e) { //jdt_Delete5
+					System.out.println("***** DataCleanup_GradebookWebService: delete from table SAKAI_GB_GRADABLE_OBJECT_T error "+e);
+				} //jdt_Delete5
+
+				// ----- -----------------------------------------------
+				// ----- delete from table GB_SPREADSHEET_T 
+				JdbcTemplate jdt_Delete6 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete6.update(DELETE_GB_SPREADSHEET_T,
+					new Object[] {gradebookId.toString()});
+					System.out.println(">>>>>>> DELETE_GB_SPREADSHEET_T:" +gradebookId.toString());
+				} catch (Exception e) { //jdt_Delete6
+					System.out.println("***** DataCleanup_GradebookWebService: delete from table SAKAI_GB_SPREADSHEET_T error "+e);
+				} //jdt_Delete6
+
+				// ----- -----------------------------------------------
+				// ----- delete from table GB_PERMISSION_T 
+				JdbcTemplate jdt_Delete7 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete7.update(DELETE_GB_PERMISSION_T,
+					new Object[] {gradebookId.toString()});
+					System.out.println(">>>>>>> DELETE_GB_PERMISSION_T:" +gradebookId.toString());
+				} catch (Exception e) { //jdt_Delete7
+					System.out.println("***** DataCleanup_GradebookWebService: delete from table SAKAI_GB_PERMISSION_T error "+e);
+				} //jdt_Delete7
+
+				// ----- -----------------------------------------------
+				// ----- delete from table GB_GRADE_MAP_T 
+				JdbcTemplate jdt_Delete8 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete8.update(DELETE_GB_GRADE_MAP_T,
+					new Object[] {gradebookId.toString()});
+					System.out.println(">>>>>>> DELETE_GB_GRADE_MAP_T:" +gradebookId.toString());
+				} catch (Exception e) { //jdt_Delete8
+					System.out.println("***** DataCleanup_GradebookWebService: delete from table SAKAI_GB_GRADE_MAP_T error "+e);
+				} //jdt_Delete8
+
+				// ----- -----------------------------------------------
+				// ----- delete from table GB_CATEGORY_T 
+				JdbcTemplate jdt_Delete9 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete9.update(DELETE_GB_CATEGORY_T,
+					new Object[] {gradebookId.toString()});
+					System.out.println(">>>>>>> DELETE_GB_CATEGORY_T:" +gradebookId.toString());
+				} catch (Exception e) { //jdt_Delete9
+					System.out.println("***** DataCleanup_GradebookWebService: delete from table SAKAI_GB_CATEGORY_T error "+e);
+				} //jdt_Delete9
+
+				// ----- -----------------------------------------------
+				// ----- delete from table GB_GRADEBOOK_T 
+				JdbcTemplate jdt_Delete10 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				try {
+					jdt_Delete10.update(DELETE_GB_GRADEBOOK_T,
+					new Object[] {gradebookId.toString()});
+					System.out.println(">>>>>>> DELETE_GB_GRADEBOOK_T:" +gradebookId.toString());
+				} catch (Exception e) { //jdt_Delete10
+					System.out.println("***** DataCleanup_GradebookWebService: delete from table SAKAI_GB_GRADEBOOK_T error "+e);
+				} //jdt_Delete10
+
+			} // end of while (recordsGradebook_it.hasNext())
+		
+		} catch (Exception e) { // end of try recordsGradebook
+			System.out.println("***** DataCleanup_SakaiRealms: delete from table SAKAI_SITE_PROPERTY error "+e);
+		} //jdt1 recordsGradebook		
+
+
+	} // end of dataCleanupPerYearSemester
+
+} // end of class DataCleanup_GradebookWebService
