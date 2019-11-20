@@ -3,7 +3,7 @@
     <head>
         <!-- START VM login.vm -->
         <meta charset="utf-8">
-         ##unisa change: to work the skin on IE
+          ##unisa change: to work the skin on IE
         <meta http-equiv="X-UA-Compatible" content="IE=edge”>
         ##end unisa change
         <meta name="viewport" content="width=device-width, initial-scale=1">
