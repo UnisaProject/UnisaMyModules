@@ -3,7 +3,6 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-<!-- unisa change: comment out
 	<bean id="org.sakaiproject.calendar.api.CalendarService"
 			class="org.sakaiproject.calendar.impl.DbCalendarService"
 			init-method="init"
@@ -41,8 +40,6 @@
 		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
 	</bean>
 
-	unisa-change: comment out
--->
     <!-- Just handles preloading of the institional calendars -->
 	<bean class="org.sakaiproject.calendar.impl.Preloader" init-method="init">
 		<constructor-arg ref="org.sakaiproject.calendar.api.ExternalCalendarSubscriptionService"/>
