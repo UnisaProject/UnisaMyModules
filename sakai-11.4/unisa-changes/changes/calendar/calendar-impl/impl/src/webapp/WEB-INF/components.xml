@@ -41,9 +41,11 @@
 	</bean>
 
     <!-- Just handles preloading of the institional calendars -->
+    <!--  unisa change
 	<bean class="org.sakaiproject.calendar.impl.Preloader" init-method="init">
 		<constructor-arg ref="org.sakaiproject.calendar.api.ExternalCalendarSubscriptionService"/>
 	</bean>
+	-->
 	
 	<bean id="org.sakaiproject.calendar.api.ExternalCalendarSubscriptionService"
 		class="org.sakaiproject.calendar.impl.BaseExternalCalendarSubscriptionService"
