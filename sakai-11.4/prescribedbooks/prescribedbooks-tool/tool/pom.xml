@@ -38,10 +38,10 @@
             <groupId>org.sakaiproject.kernel</groupId>
             <artifactId>sakai-kernel-util</artifactId>
         </dependency>
-        <dependency>
+<!--         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>sakai-prescribedbooks-api</artifactId>
-        </dependency>     
+        </dependency>    -->  
          <dependency>
             <groupId>org.sakaiproject.velocity</groupId>
             <artifactId>sakai-velocity-tool-api</artifactId>

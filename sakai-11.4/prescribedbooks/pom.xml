@@ -32,12 +32,12 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
+         <!--    <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>sakai-prescribedbooks-impl</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            
+             -->
                     <dependency>
       <groupId>org.sakaiproject</groupId>
       <artifactId>unisa-sharedclasses</artifactId>
