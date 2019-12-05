@@ -1,0 +1,531 @@
+import java.sql.Types;
+import org.apache.commons.collections.map.ListOrderedMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+
+import org.w3c.dom.*;
+
+import org.apache.axis.AxisFault;
+import org.apache.axis.utils.JavaUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.email.api.EmailService;
+import org.sakaiproject.email.api.Attachment;
+import org.sakaiproject.email.api.RecipientType;
+import org.sakaiproject.event.cover.UsageSessionService;
+import org.sakaiproject.event.api.UsageSession;
+
+import za.ac.unisa.lms.db.StudentSystemDAO;
+import za.ac.unisa.lms.db.SakaiDAO;
+
+public class ExtractGradebookResultsPerGroupsiteWebService {
+
+        private EmailService emailService;
+        public NodeList textLNList;
+        public NodeList textFNList;
+        String urlf;
+
+        // set the homepage to use as link
+        private String serverPath = ServerConfigurationService.getServerUrl();
+
+        private UsageSession usageSession;
+        
+        // assessment online types
+        private static final String ONLINE_TYPES = "'BL','DF','SA'";
+
+        private static final String RETRIEVE_ONLINEASSESSMENTS_ALL = "select MK_STUDY_UNIT_CODE, YEAR, PERIOD, ASSIGNMENT_NR "+
+                                   " from UNQASS "+
+                       " where year = ?"+
+                       " and   period = ?"+
+                       " and   assignment_nr = 1"+
+                       " and   type = 'H'"+
+                       " and   type_Gc176 in ("+ONLINE_TYPES+")"+
+                       " and   closing_date < sysdate";
+                       
+        private static final String RETRIEVE_ONLINEASSESSMENTS_MODULE = "select MK_STUDY_UNIT_CODE, YEAR, PERIOD, ASSIGNMENT_NR from UNQASS "+
+                       " where year = ?"+
+                       " and   period = ?"+
+                       " and   mk_study_unit_code = ?"+
+                       " and   assignment_nr = 1"+
+                       " and   type = 'H'"+
+                       " and   type_Gc176 in ("+ONLINE_TYPES+")"+
+                       " and   closing_date < sysdate";
+
+        private static final String RETRIEVE_GRADEBOOKITEM = "select GBGOT.id as ID, GBGT.gradebook_uid as GUID, GBGOT.gradebook_id,"+ 
+                       " GBGOT.name "+ 
+                       " FROM GB_GRADABLE_OBJECT_T GBGOT, GB_GRADEBOOK_T GBGT "+
+                       " WHERE GBGOT.GRADEBOOK_ID = GBGT.ID"+ 
+                       " AND   GBGT.GRADEBOOK_UID = upper(?)"+ // coursesite example EUP1501-12-Y1
+                       " AND   upper(substr(gbgot.name,1,?)) = ?"+ // unqass.assignment_nr
+                       " AND   GBGOT.removed != 1";
+                       //" AND   GBGOT.id in (2978,2849,2859)"; // add this line fo r testing purposes only,need to remove.
+                       //,2888,2898,2903 
+                      
+	/* replace with RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2 */                       
+    /*private static final String RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK = "SELECT GB.ID, GB.GRADABLE_OBJECT_ID, "+
+                   " (select sakai_user_id_map.eid from sakai_user_id_map where sakai_user_id_map.user_id = GB.STUDENT_ID) AS STNUMBER,"+ 
+                   " GB.DATE_RECORDED, GB.POINTS_EARNED, GBGOT.POINTS_POSSIBLE, "+
+                   " (GB.POINTS_EARNED/GBGOT.POINTS_POSSIBLE*100) AS PERCENTAGE, "+
+                   " (select sakai_user_id_map.eid from sakai_user_id_map where sakai_user_id_map.user_id = GB.GRADER_ID) AS GRADER"+                  
+                   " FROM  GB_GRADE_RECORD_T GB, GB_GRADABLE_OBJECT_T GBGOT"+
+                   " WHERE GB.GRADABLE_OBJECT_ID in (2978,2849)"+
+                   " AND   GB.GRADABLE_OBJECT_ID = GBGOT.ID"+
+                   " AND   GB.POINTS_EARNED is not null";*/
+   
+   private static final String RETRIEVE_PRIMARY_LECTURER = "select upper(novell_user_id) AS PRIML,"+
+                           " nvl((select usr.e_mail from usr where novell_user_code = usrsun.novell_user_id),'') AS USR_EMAIL,"+
+                           " nvl((select staff.email_address from staff where NOVELL_USER_ID = usrsun.novell_user_id),'') as STAFF_EMAIL"+
+                                   " FROM USRSUN"+ 
+                                   " where mk_study_unit_code = ?"+ 
+                                   " and mk_academic_year = ?"+ 
+                                   " and mk_semester_period = ?"+
+                                   " and system_type = 'L'"+ 
+                                   " and access_level = 'PRIML'";
+                   
+        /** Retrieve all marks from Sakai Gradebook that must be updated to the Student System
+                Input:
+                        module = Module - either enter module code OR if for all modules enter ALL
+                        acadYear = Academic year
+                        semPeriod = Semester period
+        */
+        public String getGradebookMarks(String module, String groupModuleSite, String acadYear, String semPeriod, String assignmentNr, String onlineType,
+                                        String primaryLecturer, String primaryLecturerEmail )throws AxisFault {
+        
+                String result ="";
+                String gradebookId = "";
+                boolean gradebookItemFound = false;
+                module = module.toUpperCase();
+                int errorsFound = 0;
+                int totalErrorsFound = 0;
+                int totalUpdated = 0;
+                String serverUrl = ServerConfigurationService.getString("serverUrl");
+                String monitorEmailContext = "";
+                String feedback = "";
+                
+                String id = "782985";
+                String userId = "gradebook";
+                String address = "";
+                if (serverUrl.equals("https://my.unisa.ac.za")) {
+                        address = "http://www2.unisa.ac.za/aol/asp/sql_exec_xml.asp";
+                } else {
+                        address = "http://www2dev.unisa.ac.za/aol/asp/sql_exec_xml.asp";
+                }
+                                                                        
+                /** For one record at a time: http://www2dev.unisa.ac.za/aol/asp/sql_exec_report2.asp?report=XML 
+                  * String address = "http://www2dev.unisa.ac.za/aol/asp/sql_exec_report2.asp?report=XML"; */
+                /* example of webservice call
+                  * completeUrlString = "http://www2dev.unisa.ac.za/aol/asp/sql_exec_report2.asp?export=XML&ID=782985&AcadYear=2012&Semester=0&StudNo=42658047&MODULE=EUP1501&AssNo=1&Percentage=50&Lecturer=syzelle&OnlineType=b"; */                                                  
+                /** For a batch of records as XML content: http://www2dev.unisa.ac.za/aol/asp/sql_exec_xml.asp?report=XML */
+                
+                Log log = LogFactory.getLog(this.getClass());
+                
+                try {
+                                                        
+                                /* ************ For each online assignment retrieved, retrieve the matching Gradebook item ****************/
+                                JdbcTemplate jdt2 = new JdbcTemplate(new SakaiDAO()
+                                        .getDataSource());
+                                try {
+                                                Integer tmpLength = assignmentNr.length()+11;
+                                                String assignmentNrLength = tmpLength.toString();
+                                                String tmpAssignmentNr = assignmentNr+" ASSIGNMENT";
+                                                List recordsGI = jdt2.queryForList(RETRIEVE_GRADEBOOKITEM,
+                                                        new Object[] {groupModuleSite, assignmentNrLength,tmpAssignmentNr});
+                                        
+                                                if (recordsGI.size() == 0) {
+                                                        gradebookItemFound = false;
+                                                        
+                                                        String subject = "Gradebook Item not found";
+                                                        String body = "Good day, <br> <br> Please note that the Gradebook Item was not found for "+groupModuleSite+" assignment number: "+assignmentNr;
+                                                        if (!primaryLecturerEmail.equals("")) {
+                                                                sendEmail(subject, body, primaryLecturerEmail);
+                                                        } else {
+                                                                sendEmail(subject, body, "syzelle@unisa.ac.za");
+                                                                sendEmail(subject, body, "fmyburgh@unisa.ac.za");
+                                                        }
+                                                        
+                                                } else {
+                                                        gradebookItemFound = true;
+                                                }
+                                                
+                                                Iterator recordsGI_it = recordsGI.iterator();
+                                                String gradebookItems = "";
+                                                                
+                                                /* for each gradebook item retrieved */                 
+                                                while (recordsGI_it.hasNext()) {
+        
+                                                        ListOrderedMap record_GradebookIds = (ListOrderedMap) recordsGI_it.next();
+                                                        gradebookId = record_GradebookIds.get("ID").toString();
+                                                        String gradebook_uid = record_GradebookIds.get("GUID").toString();
+                                                        // add all gradebook items ids to a string to use in query to select student grades
+                                                        if (gradebookItems.length() == 0) {
+                                                                gradebookItems = gradebookId;
+                                                        } else {
+                                                                gradebookItems = gradebookItems+","+gradebookId;
+                                                        }
+                                                        
+                                                } //end of while (recordsGI.hasNext())
+                                                sendEmail("gradebook items", gradebookItems, "syzelle@unisa.ac.za");    
+                                                /* ************ Retrieve marks for gradebook assessment ****************/
+                                                JdbcTemplate jdt3 = new JdbcTemplate(new SakaiDAO()
+                                                        .getDataSource());
+                                                                
+                                                try {
+                                                        String RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2 = "SELECT GB.ID, GB.GRADABLE_OBJECT_ID, "+
+                                                   " (select sakai_user_id_map.eid from sakai_user_id_map where sakai_user_id_map.user_id = GB.STUDENT_ID) AS STNUMBER,"+ 
+                                                   " GB.DATE_RECORDED, GB.POINTS_EARNED, GBGOT.POINTS_POSSIBLE, "+
+                                                   " (GB.POINTS_EARNED/GBGOT.POINTS_POSSIBLE*100) AS PERCENTAGE, "+
+                                                   " (select sakai_user_id_map.eid from sakai_user_id_map where sakai_user_id_map.user_id = GB.GRADER_ID) AS GRADER"+                  
+                                                   " FROM  GB_GRADE_RECORD_T GB, GB_GRADABLE_OBJECT_T GBGOT"+
+                                                   " WHERE GB.GRADABLE_OBJECT_ID in ("+gradebookItems+")"+
+                                                   " AND   GB.GRADABLE_OBJECT_ID = GBGOT.ID"+
+                                                   " AND   GB.POINTS_EARNED is not null"+
+                                                   " AND   (GB.POINTS_EARNED/GBGOT.POINTS_POSSIBLE*100) between -1 and 101";
+
+                                                        List recordsGrades = jdt3.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK2);
+                        
+                                                        Iterator recordsGrades_it = recordsGrades.iterator();
+                                                        Integer recordCounter = 0;
+                                                        String updateStuassXML = "";
+                                                        
+                                                        /* Document for inXML content */
+                                                        try {
+                                                                updateStuassXML="<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+
+                                                                                        "<data><fields><field1>acadYear</field1><field2>Semester</field2><field3>StudNo</field3>"+
+                                                                                        "<field4>MODULE</field4><field5>AssNo</field5><field6>Percentage</field6>"+
+                                                                                        "<field7>Lecturer</field7><field8>OnlineType</field8><field9>Perc</field9>"+
+                                                                                        "<field10>DateIn</field10><field11>DateOut</field11><field12>SeqNo</field12>"+
+                                                                                        "<field13>pperc</field13></fields><records>";
+
+                                                                while (recordsGrades_it.hasNext()) {
+                                                                        ListOrderedMap record_StudentResult = (ListOrderedMap) recordsGrades_it.next();
+                                                                                
+                                                                        String studentNr = record_StudentResult.get("STNUMBER").toString();
+                                                                        String percentage = record_StudentResult.get("PERCENTAGE").toString();
+                                                                        String lecturer = record_StudentResult.get("GRADER").toString(); // grader
+                                                                        String studentTmp = studentNr+"#"+percentage+"#"+lecturer;
+                                                                        boolean studentNrIsNumber = true;
+                                                                        
+                                                                        try {
+                                                                                int x = Integer.parseInt(studentNr);
+                                                                        }catch(NumberFormatException nFE) {
+                                                                                studentNrIsNumber = false;
+                                                                        }
+                                                                                
+                                                                        if (studentNrIsNumber == true) {
+                                                                                recordCounter = recordCounter+1;
+                                                                                updateStuassXML=updateStuassXML+"<record id=\""+recordCounter+"\">"+
+                                                                                                                "<value1>"+acadYear+"</value1><value2>"+semPeriod+"</value2>"+
+                                                                                                                "<value3>"+studentNr+"</value3><value4>"+module+"</value4>"+
+                                                                                                                "<value5>"+assignmentNr+"</value5><value6>"+percentage+"</value6>"+
+                                                                                                                "<value7>"+lecturer+"</value7><value8>"+onlineType+"</value8>"+
+                                                                                                                "<value9></value9><value10></value10><value11></value11>"+
+                                                                                                                "<value12></value12><value13></value13></record>";                                                                              
+                                                                        } // end of     if (studentNrIsNumber == true) {                                                
+                                                                
+                                                                        if (recordCounter == 50) {
+                                                                                // end xml file
+                                                                                updateStuassXML = updateStuassXML+"</records></data>";
+
+                                                                                /** update to student system
+                                                                                  * webservice
+                                                                                  * input: ID; AcadYear,Semester,StudNo,MODULE,AssNo,Percentage,Lecturer,OnlineType,Perc,DateIn,DateOut,SeqNo, pperc 
+                                                                                */
+                                                                                        
+                                                                                feedback = postMessage(updateStuassXML, address, id, userId, primaryLecturerEmail, groupModuleSite,assignmentNr);
+                                                                                String[] temp = feedback.split("#");
+                                                                                totalUpdated = totalUpdated+Integer.parseInt(temp[0]);
+                                                                                totalErrorsFound = totalErrorsFound+Integer.parseInt(temp[1]);
+                                                                                
+                                                                                                                                                                                                                                                                
+                                                                                /* Start the new file for next batch of updates */
+                                                                                updateStuassXML="<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"+
+                                                                                                "<data><fields><field1>acadYear</field1><field2>Semester</field2><field3>StudNo</field3>"+
+                                                                                                "<field4>MODULE</field4><field5>AssNo</field5><field6>Percentage</field6>"+
+                                                                                                "<field7>Lecturer</field7><field8>OnlineType</field8><field9>Perc</field9>"+
+                                                                                                "<field10>DateIn</field10><field11>DateOut</field11><field12>SeqNo</field12>"+
+                                                                                                "<field13>pperc</field13></fields><records>";
+                                                                                                System.out.println("+++++++++XML: "+updateStuassXML);
+                                                                                recordCounter = 0;
+                                                                        } // end of if (recordCounter == 1000) {        
+                                                                                
+                                                                } //end of while (recordsGrades_it.hasNext()) 
+                                                                        
+                                                                /* call for last batch of student numbers */
+                                                                // end xml file
+                                                                updateStuassXML = updateStuassXML+"</records></data>";
+                
+                                                                feedback = postMessage(updateStuassXML, address, id, userId,primaryLecturerEmail,groupModuleSite,assignmentNr);
+                                                                String[] temp = feedback.split("#");
+                                                                totalUpdated = totalUpdated+Integer.parseInt(temp[0]);
+                                                                totalErrorsFound = totalErrorsFound+Integer.parseInt(temp[1]);
+                                                                                                                                        
+                                                                //System.out.println("GRADEBOOK INTEGRATION END FOR: "+gradebook_uid);
+                                                                        
+                                                        } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                        } // end of try DocumentBuilder (inXML content)
+                                                } catch (Exception e) { // jdt3.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK,
+                                                        e.printStackTrace();
+                                                        log.error(e);
+                                                        //throw new AxisFault(e.getMessage());
+                                                        String errorMessage = "GRADEBOOK INTEGRATION ERROR: "+ e.getMessage();
+                                                        sendEmail("GRADEBOOK INTEGRATION ERROR", errorMessage, "syzelle@unisa.ac.za");
+                                                } // jdt3.queryForList(RETRIEVE_STUDENTWITH_MARKON_GRADEBOOK,
+
+                                        // Send monitor e-mail
+                                        monitorEmailContext = "Records updated: "+totalUpdated+"\n<br> Records failed: "+totalErrorsFound;
+                                        System.out.println("GRADEBOOK MONITOR :"+monitorEmailContext);
+                                        sendEmail("GRADEBOOK INTEGRATION "+module+"-"+acadYear+"-"+semPeriod+"-"+assignmentNr+"-"+onlineType+" COMPLETED", monitorEmailContext, "syzelle@unisa.ac.za"); 
+
+                                } catch (Exception e) {
+                                                e.printStackTrace();
+                                                log.error(e);
+                                                String errorMessage = "GRADEBOOK INTEGRATION ERROR: "+ e.getMessage();
+                                                System.out.println("GRADEBOOK INTEGRATION ERROR: "+ e.getMessage());
+                                                sendEmail("GRADEBOOK INTEGRATION ERROR", errorMessage, "syzelle@unisa.ac.za"); 
+                                                throw new AxisFault(e.getMessage());
+                                } // end try -catch Exception jdt2.queryForList(RETRIEVE_GRADEBOOKITEM
+                                                                                
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        log.error(e);
+                        throw new AxisFault(e.getMessage());
+                } // end String groupModuleSite = module+"-"+acadYear+"-";
+                
+                return result;
+
+        } // end getGradebookMarks 
+        
+        //postMessage(updateStuassXML, address, id, userId);
+        private String postMessage(String inXML, String address, String sqlId, String userId, String primaryLecturerEmail,
+                                        String groupModuleSite, String assignmentNr) throws Exception { 
+                Log log = LogFactory.getLog(this.getClass());
+                String errorsBody = "Good day, <br><br> Please note that the Gradebook updates for "+groupModuleSite+" assignment number: "+assignmentNr+" failed for the following students:<br> <br> \n <br>";
+                String monitorEmailContext = "";
+                String feedback = "";
+
+                int errorsFound = 0;
+                int successFound = 0;
+                                
+                //sendEmail("GRADEBOOK XML", inXML, "syzelle@unisa.ac.za");
+                
+                inXML = inXML.trim().replace(" ", "%20");
+                inXML = inXML.replaceAll("\"", "%22");
+                
+                String urlParameters = "?ID="+sqlId+"&USERID="+userId+"&inXML="+inXML;
+                //sendEmail("GRADEBOOK INTEGRATION "+module+"-"+acadYear+"-"+semPeriod+"-"+assignmentNr+"-"+onlineType+" IN XML", urlParameters, "syzelle@unisa.ac.za");
+                address = address+urlParameters;
+                try     { 
+                        URL url = new URL(address); 
+                        URLConnection uc = url.openConnection(); 
+                        HttpURLConnection conn = (HttpURLConnection) uc; 
+                        conn.setDoInput(true); 
+                        conn.setDoOutput(true); 
+                        conn.setRequestMethod("POST"); 
+                        conn.setRequestProperty("Content-type", "text/xml; charset="+"UTF-8");
+                        conn.setRequestProperty("Content-length", Integer.toString(urlParameters.getBytes().length)); 
+        
+                        // send request
+                        DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                        wr.writeBytes(urlParameters);
+                        wr.flush();
+                        wr.close();
+                        
+                        System.out.println(">>>>>>>> ExtractGradebookResultsPerGroupsiteWebService "+conn.getResponseCode());
+                        System.out.println(">>>>>>>> ExtractGradebookResultsPerGroupsiteWebService"+conn.getResponseMessage());
+                        
+                        BufferedInputStream bis = new BufferedInputStream(conn.getInputStream()); 
+                        DataInputStream dis = new DataInputStream(bis);
+                        /*while (dis.available() !=0) {
+                                System.out.println("DIS +++++++++++++++++"+dis.readLine());
+                        }*/
+
+                        String result2 = "";
+                        try {
+                                DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();                                                                                                         
+                                DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+                                Document docOutXML = docBuilder.parse(dis);
+                                System.out.println("docOutXML: "+docOutXML.toString());
+                                //result2 = result2 + " docOutXML = "+docOutXML;
+                                                                                                                                                                        
+                                docOutXML.getDocumentElement().normalize();
+                                                                                                                
+                                result2 = result2 + "%% look at outXML from STUASS UPDATE werbservice %%";
+                                                                                                                                                                                                        
+                                NodeList listOfRecords = docOutXML.getElementsByTagName("result");
+                                result2 = result2+ "NUMBER OF RECORDS ="+ listOfRecords.getLength();
+                                if(listOfRecords.getLength()!=0){
+                                                        
+                                        for (int s = 0; s < listOfRecords.getLength(); s++) {
+                                                Node firstDocTypeNode = listOfRecords.item(s);
+                                                if (firstDocTypeNode.getNodeType() == Node.ELEMENT_NODE) {
+                                                        Element firstElement = (Element) firstDocTypeNode;
+                                                NodeList valueOneE = firstElement.getElementsByTagName("value1");
+                                                NodeList valueTwoE = firstElement.getElementsByTagName("value2");
+                                                Element valueOne = (Element)valueOneE.item(0);
+                                                Element valueTwo = (Element)valueTwoE.item(0);
+                                                        NodeList valueOneList = valueOne.getChildNodes();
+                                                        NodeList valueTwoList = valueTwo.getChildNodes();
+                                                        String value1, value2 = "";
+                                                        try{
+                                                                value2 = ((Node)valueTwoList.item(0)).getNodeValue().trim();
+                                                                value1 = ((Node)valueOneList.item(0)).getNodeValue().trim();
+                                                                
+                                                                if (value2.equals("OK")) {
+                                                                        successFound = successFound+1;
+                                                                        errorsBody = errorsBody+"\nStudent: "+value1+" error "+value2;
+                                                                } else {
+                                                                        errorsFound = errorsFound+1;
+                                                                        errorsBody = errorsBody+"\nStudent: "+value1+" error "+value2; 
+                                                                } 
+                                                                
+                                                        }catch(Exception e){
+                                                                value2 = " ";
+                                                        }
+                                                } // end of if if (firstDocTypeNode.getNodeType() == Node.ELEMENT_NODE) { 
+                                                                                                                                 
+                                        } // end of for (int s = 0; s < listOfRecords.getLength(); s++) 
+                                } // end of if(listOfRecords.getLength()!=0)
+                        
+                        } catch (ParserConfigurationException e) {
+                                e.printStackTrace(); 
+                                log.error(e);
+                        } catch (SAXException e){ 
+                                e.printStackTrace(); 
+                                log.error(e);
+                        } catch (Exception e){ 
+                                e.printStackTrace(); 
+                                log.error(e);
+                        }// end of
+
+                        if (errorsFound >=1) {
+                                String errorsSubject = "Gradebook Integration errors occurred: "+groupModuleSite;
+                                                                
+                                emailService = (EmailService) ComponentManager.get(EmailService.class);
+                                String tmpEmailFrom = ServerConfigurationService.getString("noReplyEmailFrom");
+                                                                
+                                InternetAddress toEmail = null;
+                                try  {
+                                        toEmail = new InternetAddress(primaryLecturerEmail);
+                                } catch (AddressException e) {
+                                        // TODO Auto-generated catch block
+                                        e.printStackTrace();
+                                }
+                                                
+                                InternetAddress iaTo[] = new InternetAddress[1];
+                                iaTo[0] = toEmail;
+                                InternetAddress iaHeaderTo[] = new InternetAddress[1];
+                                iaHeaderTo[0] = toEmail;
+                                InternetAddress iaReplyTo[] = new InternetAddress[1];
+                                iaReplyTo[0] = new InternetAddress(tmpEmailFrom);
+                                List contentList = new ArrayList();
+                                contentList.add("Content-Type: text/html");
+
+                                //sendEmail(errorsSubject, errorsBody, primaryLecturerEmail);
+                        }
+                        
+                        // Send monitor e-mail
+                        monitorEmailContext = groupModuleSite+"<br>\n records updated="+successFound+" <br>\n errorsFound="+errorsFound;
+                        monitorEmailContext = "IN XML="+urlParameters +"\n --------------------------------------------"+errorsBody;
+                        feedback=successFound+"#"+errorsFound;
+                        System.out.println("==================== monitorEmailContext "+monitorEmailContext);
+                        sendEmail("GRADEBOOK INTEGRATION FEEDBACK "+groupModuleSite+"-"+assignmentNr, monitorEmailContext, "syzelle@unisa.ac.za");  
+                
+                        //System.out.println("BIS: "+bis);
+                        dis.close();
+                        bis.close(); 
+                } catch (IOException e) {
+                        e.printStackTrace(); 
+                        log.error(e);
+                } catch (Exception e){ 
+                        e.printStackTrace(); 
+                        log.error(e);
+                } 
+                return feedback;
+        } //end of postMessage 
+
+        
+        public void sendEmail(String subject, String body, String emailAddress) throws AddressException {
+                
+                emailService = (EmailService) ComponentManager.get(EmailService.class);
+
+                String tmpEmailFrom = ServerConfigurationService.getString("noReplyEmailFrom");
+
+                //System.out.println("GRADEBOOK email send: "+body);
+
+                InternetAddress toEmail = new InternetAddress(emailAddress);
+                InternetAddress iaTo[] = new InternetAddress[1];
+                iaTo[0] = toEmail;
+                InternetAddress iaHeaderTo[] = new InternetAddress[1];
+                iaHeaderTo[0] = toEmail;
+                InternetAddress iaReplyTo[] = new InternetAddress[1];
+                iaReplyTo[0] = new InternetAddress(tmpEmailFrom);
+                List<String> contentList = new ArrayList<String>();
+                contentList.add("Content-Type: text/html");
+
+                emailService.sendMail(iaReplyTo[0],iaTo,subject,body,iaHeaderTo,iaReplyTo,contentList);
+        } // end of sendEmail
+        
+        /*
+        public void sendEmailWithAttachment(String subject, String body, String emailAddress, List<Attachment> attachmentList) throws AddressException {
+
+                //Create a hash map
+                HashMap hm= new HashMap();
+                
+                emailService = (EmailService) ComponentManager.get(EmailService.class);
+                String tmpEmailFrom = ServerConfigurationService.getString("noReplyEmailFrom");
+                
+                InternetAddress toEmail = null;
+                   try  {
+                        toEmail = new InternetAddress(emailAddress);
+                   } catch (AddressException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                   }
+
+                InternetAddress iaTo[] = new InternetAddress[1];
+                iaTo[0] = toEmail;
+                InternetAddress iaHeaderTo[] = new InternetAddress[1];
+                iaHeaderTo[0] = toEmail;
+                InternetAddress iaReplyTo[] = new InternetAddress[1];
+                iaReplyTo[0] = new InternetAddress(tmpEmailFrom);
+                List contentList = new ArrayList();
+                contentList.add("Content-Type: text/html");
+                //put elements to the map
+                hm.put(RecipientType.TO,toEmail);
+                
+
+                emailService.sendMail(iaReplyTo[0], iaTo, subject, body, hm, iaReplyTo, contentList, attachmentList);
+        } // end of sendEmailWithAttachment */
+        
+} // end of ExtractGradebookResultsBatchWebService

@@ -1,0 +1,161 @@
+## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
+<div class="port letBody">
+
+ <h3>
+ $tlang.getString("prescribedbooks.heading") $siteTitle
+</h3>
+
+<div class="instruction">
+ $tlang.getString("prescribedbooks.booksellers.sites") <br> <br/>
+ $tlang.getString("prescribedbooks.booksellers.sites1")
+ $tlang.getString("prescribedbooks.booksellers.sites2")
+ $tlang.getString("prescribedbooks.booksellers.sites3")
+ $tlang.getString("prescribedbooks.booksellers.sites4")<br>
+</div>
+
+ <div>
+ 
+ 	#if($preBooklistExist)
+			<h3>
+	    	$tlang.getString("prescribedbooks.heading2")
+	       </h3>
+	       
+	       <div class="instruction">
+           $tlang.getString("prescribedbooks.equiries")	
+           </div>
+           
+	<table class="table table-hover table-striped table-bordered" summary="$tlang.getString("prescribedbooks.heading2")">
+	   	      #foreach ($pbooklist in $prebooklist)	
+			   
+				<tr class="highLightRow">
+					<th rowspan="7">$velocityCount</th>
+					<td>$tlang.getString("booklist.label.author")</td>
+					<td>$pbooklist.author </td>
+				</tr>
+				<tr>
+					<td nowrap="nowrap">$tlang.getString("booklist.label.title")</td>
+					<td> $pbooklist.title </td>
+				</tr>
+				<tr>
+					<td>$tlang.getString("booklist.label.year")</td>
+					<td>$pbooklist.pubYear</td>
+				</tr>
+				<tr>
+					<td>$tlang.getString("booklist.label.edition")</td>
+					<td>$pbooklist.edition</td>
+				</tr>
+				<tr>
+					<td>$tlang.getString("booklist.label.publisher")</td>
+					<td>$pbooklist.publisher</td>
+				</tr>
+				 <tr>
+					<td>$tlang.getString("booklist.label.bnotes")</td>
+					<td>$pbooklist.bookNotes</td>
+				</tr>
+					<tr>
+					<td>$tlang.getString("booklist.label.cnotes")</td>
+					<td>$pbooklist.courseNotes</td>
+				</tr>
+			#end
+ 			
+	</table>
+	#else
+     <div class="instruction">   $tlang.getString("prescribedbooks.instruction.nobooks")	
+    </div>
+    #end
+	
+	#if($recBooklistExist)
+			<h3>
+	    	$tlang.getString("recommendedbooks.heading")
+	       </h3>
+	       
+	         <div class="instruction">
+           $tlang.getString("recommendedbooks.equiries")	
+           </div>
+	       
+				
+	<table class="table table-hover table-striped table-bordered" summary="$tlang.getString("prescribedbooks.heading2")">
+	   
+		
+ 	      #foreach ($recBooksList in $recommendedBooksList)	
+			   
+				<tr class="highLightRow">
+					<th rowspan="5">$velocityCount</th>
+					<td>$tlang.getString("booklist.label.author")</td>
+					<td>$recBooksList.author </td>
+				</tr>
+				<tr>
+					<td nowrap="nowrap">$tlang.getString("booklist.label.title")</td>
+					<td> $recBooksList.title </td>
+				</tr>
+				<tr>
+					<td>$tlang.getString("booklist.label.year")</td>
+					<td>$recBooksList.pubYear</td>
+				</tr>
+				<tr>
+					<td>$tlang.getString("booklist.label.edition")</td>
+					<td>$recBooksList.edition</td>
+				</tr>
+				<tr>
+					<td>$tlang.getString("booklist.label.publisher")</td>
+					<td>$recBooksList.publisher</td>
+				</tr>
+			#end
+			
+	</table>
+	    #else
+           <div class="instruction">   $tlang.getString("recommendedbooks.instruction.nobooks")	
+           </div>
+			#end
+	
+	
+	 
+		#if($eResBooklistExist)
+			<h3>
+	    	$tlang.getString("ereservebooks.heading")
+	       </h3>
+	       
+	         <div class="instruction">
+           $tlang.getString("ereservebooks.equiries")	
+           </div>
+	       
+	   <table class="table table-hover table-striped table-bordered" summary="$tlang.getString("prescribedbooks.heading2")">
+	  
+ 	      #foreach ($eReservesList in $ereserveBooksList)	
+			   
+				<tr class="highLightRow">
+					<th rowspan="5">$velocityCount</th>
+					<td>$tlang.getString("booklist.label.author")</td>
+					<td>$eReservesList.author </td>
+				</tr>
+				<tr>
+					<td nowrap="nowrap">$tlang.getString("booklist.label.title")</td>
+					<td> $eReservesList.title </td>
+				</tr>
+				<tr>
+					<td>$tlang.getString("booklist.label.year")</td>
+					<td>$eReservesList.pubYear</td>
+				</tr>
+			 
+				<tr>
+					<td>$tlang.getString("booklist.label.publisher")</td>
+					<td>$eReservesList.publisher</td>
+				</tr>
+				 <tr>
+					<td>$tlang.getString("booklist.label.volume")</td>
+					<td>$eReservesList.volume</td>
+				</tr>
+ 
+			#end
+			
+	</table>
+	#else
+           <div class="instruction">   $tlang.getString("ereservebooks.instruction.nobooks")	
+           </div>
+			#end
+	
+	
+</div>
+ 
+</div>
+	

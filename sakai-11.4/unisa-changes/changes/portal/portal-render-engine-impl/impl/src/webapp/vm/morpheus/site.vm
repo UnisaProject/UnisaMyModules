@@ -3,9 +3,10 @@
 #set ( $d = "$")
 
     #parse("/vm/morpheus/includeStandardHead.vm")
-
-    <body #if( !${loggedIn} ) class="Mrphs-portalBody is-logged-out" #else class="Mrphs-portalBody ${logoSiteClass} #if ( ${toolsCollapsed} ) Mrphs-toolMenu-collapsed #end" #end $pageSiteType>
-
+##unis change comment out following line and add 
+##<body #if( !${loggedIn} ) class="Mrphs-portalBody is-logged-out" #else class="Mrphs-portalBody ${logoSiteClass} #if ( ${toolsCollapsed} ) Mrphs-toolMenu-collapsed #end" #end $pageSiteType>
+<body #if( !${loggedIn} ) class="container is-logged-out" #else class="container ${logoSiteClass} #if ( ${toolsCollapsed} ) Mrphs-toolMenu-collapsed #end" #end $pageSiteType>
+ ##end unisa change
         <noscript>
             <span id="portal_js_warn" class="Mrphs-noJs js-warn-no-js">${rloader.sit_noscript_message}</span>
         </noscript>
@@ -24,57 +25,59 @@
 
                 ## Header
                 <div class="Mrphs-topHeader">
-                          ## <!-- Unisa Changes:2019/03/14: myModules, myAdmin (For Students & Students) buttons -->
-                    #if( ${loggedIn} ) 
-	                    <div class="clearfix col-lg-8 col-md-8 col-sm-8 col-xs-12 noRowPaddingLeft noRowPaddingRight loginAssistanceLinks defaultBottomMargin">
+                          ## <!-- Unisa Changes:2019/11/15: myModules, myAdmin (For Students & Students) buttons -->
+                    #parse("/vm/morpheus/snippets/header-snippet.vm")
+                   #if( ${loggedIn} ) 
+	                   <div class="clearfix col-lg-8 col-md-8 col-sm-8 col-xs-12 noRowPaddingLeft noRowPaddingRight loginAssistanceLinks defaultBottomMargin">
 							<div style="display: inline-block; padding-top: 8px;" class="col-lg-8 col-md-8 col-sm-12 col-xs-12 noRowPaddingLeft noRowPaddingRight">
-		                    		<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
-						        		<a target="_top" href="/">
-						        			<button class="btn btn-ci-yellow-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 
-						        				1px solid #333 !important">myModules</button>
-						        		</a>
-		                    		</div>
-		                    		## <!-- If user is Student -->
-		                    		#if (${isStudentLoginUserDispId})
+		                   		<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
+						       		<a target="_top" href="/">
+						       			<button class="btn btn-ci-yellow-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border: 
+						       				1px solid #333 !important">myModules</button>
+						       		</a>
+		                   		</div>
+		                   		## <!-- If user is Student -->
+		                   		#if (${isStudentLoginUserDispId})
 										<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
 											<script type="text/javascript">
-	                                         	var allcookies = document.cookie;
-	                                            var cookiearray = allcookies.split(';');
-	                                            var ticket = "";
-	                                            for(var i=0; i<cookiearray.length; i++){
-	                                            	var name = cookiearray[i].split('=')[0];
-	                                                var value = cookiearray[i].split('=')[1];
-	                                                if(value.substring(0,4)=="TGT-") {
-	                                                	ticket = value;
-	                                                }
-	                                            }
-	                                            document.write('<a target="_top" href="${studentAdminBaseUrl}#!/home?'+ticket+'"><button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border:1px solid #AAA !important">myAdmin</button></a>');
-	                                      	</script>
-			                    		</div>
-		                    		#end
-		                    		## <!-- If user is Staff -->
-		                    		#if (${isStaffLoginUserDispId})
-			                    		<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
-			                    			<script type="text/javascript">
-	                                         	var allcookies = document.cookie;
-	                                            var cookiearray = allcookies.split(';');
-	                                            var ticket = "";
-	                                            for(var i=0; i<cookiearray.length; i++){
-	                                            	var name = cookiearray[i].split('=')[0];
-	                                                var value = cookiearray[i].split('=')[1];
-	                                                if(value.substring(0,4)=="TGT-") {
-	                                                	ticket = value;
-	                                                }
-	                                            }
-	                                            document.write('<a target="_top" href="${staffAdminBaseUrl}#!/home?'+ticket+'"><button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border:1px solid #AAA !important">myAdmin</button></a>');
-	                                      	</script>
-			                    		</div>
-		                    		#end
-					    	</div>
-					    </div>
-				    #end
-                    ## <!-- End Unisa Changes:2019/03/14-->
-                    #parse("/vm/morpheus/snippets/header-snippet.vm")
+	                                        	var allcookies = document.cookie;
+	                                           var cookiearray = allcookies.split(';');
+	                                           var ticket = "";
+	                                           for(var i=0; i<cookiearray.length; i++){
+	                                           	var name = cookiearray[i].split('=')[0];
+	                                               var value = cookiearray[i].split('=')[1];
+	                                               if(value.substring(0,4)=="TGT-") {
+	                                               	ticket = value;
+	                                               }
+	                                           }
+	                                           document.write('<a target="_top" href="${studentAdminBaseUrl}#!/home?'+ticket+'"><button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border:1px solid #AAA !important">myAdmin</button></a>');
+	                                     	</script>
+			                   		</div>
+		                   		#end
+		                   		## <!-- If user is Staff -->
+		                   		#if (${isStaffLoginUserDispId})
+			                   		<div class=" col-lg-6 col-md-6 col-sm-6 col-xs-6 noRowPaddingRight">
+			                   			<script type="text/javascript">
+	                                        	var allcookies = document.cookie;
+	                                           var cookiearray = allcookies.split(';');
+	                                           var ticket = "";
+	                                           for(var i=0; i<cookiearray.length; i++){
+	                                           	var name = cookiearray[i].split('=')[0];
+	                                               var value = cookiearray[i].split('=')[1];
+	                                               if(value.substring(0,4)=="TGT-") {
+	                                               	ticket = value;
+	                                               }
+	                                           }
+	                                           document.write('<a target="_top" href="${staffAdminBaseUrl}#!/home?'+ticket+'"><button class="btn btn-ci-gray-lighter-variant col-lg-12 col-md-12 col-sm-12 col-xs-12" type="button" style="border:1px solid #AAA !important">myAdmin</button></a>');
+	                                     	</script>
+			                   		</div>
+		                   		#end
+					   	</div>
+					   </div>
+				   #end
+                    #parse("/vm/morpheus/includeLoginNav.vm")
+
+                    ## <!-- End Unisa Changes:2019/11/15-->
                 </div>
 
                 #if (${tabsSites})
