@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site-layouts>
+<!--         <site-layout year="2005">
+                <optional-page title="Course Contact"><optional-tool title="Course Contact" toolId="unisa.studentemail"/></optional-page>
+                <optional-page title="FAQs"><optional-tool title="FAQs" toolId="unisa.faqs"/></optional-page>
+                <optional-remove title="Prescribed Books"/>
+        </site-layout>
+               <site-layout year="2006">
+                <optional-page title="Course Contact"><optional-tool title="Course Contact" toolId="unisa.studentemail"/></optional-page>
+                <optional-page title="FAQs"><optional-tool title="FAQs" toolId="unisa.faqs"/></optional-page>
+                <optional-remove title="Discussion Forum"/>
+        </site-layout>
+        <site-layout year="2007">
+                <optional-page title="Course Contact"><optional-tool title="Course Contact" toolId="unisa.studentemail"/></optional-page>
+                <optional-page title="FAQs"><optional-tool title="FAQs" toolId="unisa.faqs"/></optional-page>
+        </site-layout>
+
+        <site-layout year="2008">
+        	<optional-remove title="Class List"/>
+ 				<optional-remove title="Home"/>
+ 				<optional-page title="Home">
+					<optional-tool title="Welcome Message" toolId="unisa.welcome" >
+						<property name="layoutHints" value="0,0"/>
+					</optional-tool>
+					<optional-tool title="Calendar" toolId="sakai.summary.calendar" >
+						<property name="layoutHints" value="0,1"/>
+					</optional-tool>
+					<optional-tool title="Recent Announcements" toolId="sakai.synoptic.announcement" >
+						<property name="layoutHints" value="1,1"/>
+					</optional-tool>
+				</optional-page>
+				<optional-remove title="Class List"/>
+
+        </site-layout>
+
+
+        <site-layout year="2009">
+
+
+        		<optional-page title="Official Study Material"><optional-tool title="Official Study Material" toolId="sakai.studymaterial"/></optional-page>
+        		<optional-page title="Additional Resources"><optional-tool title="Addidtional Resources" toolId="sakai.resources"/></optional-page>
+
+
+
+                <optional-remove title="Official Study Material"/>
+                <optional-remove title="Additional Resources"/>
+        </site-layout>
+
+        <site-layout year = "2012">
+               	<optional-remove title="Blogger"/>
+        </site-layout>
+        <site-layout year = "2011">
+               	<optional-remove title="Blogger"/>
+        </site-layout>
+        <site-layout year = "2010">
+               	<optional-remove title="Blogger"/>
+        </site-layout>
+        <site-layout year = "2009">
+               	<optional-remove title="Blogger"/>
+        </site-layout>
+        <site-layout year = "2008">
+               	<optional-remove title="Blogger"/>
+        </site-layout>
+        <site-layout year = "2007">
+               	<optional-remove title="Blogger"/>
+        </site-layout>
+        <site-layout year = "2006">
+               	<optional-remove title="Blogger"/>
+        </site-layout>
+
+-->
+		<site-layout year = "2012">
+				<optional-remove title="Message Of The Day"/>
+				<optional-remove title="Message Of The Day"/>
+				<optional-remove title="Message Of The Day"/>
+				<optional-remove title="Message Of The Day"/>
+				<optional-remove title="Message Of The Day"/>
+				<optional-remove title="Message Of The Day"/>
+				<optional-remove title="Message Of The Day"/>
+               	<optional-remove title="Assignments"/>
+               	<optional-page title="Assignments">
+               		<optional-tool title="Assignments" toolId="sakai.basiclti">
+               			<property name="imsti.key" value="1"/>
+                        <property name="imsti.newpage" value="on"/>
+                        <property name="imsti.releasename" value="on"/>
+                        <property name="imsti.launch" value="http://www2dev.unisa.ac.za/aol/asp/echo.asp"/>
+                        <property name="imsti.tooltitle" value="Assignments"/>
+                        <property name="imsti.releaseemail" value="on"/>
+                        <property name="imsti.secret" value="1"/>
+                        <property name="imsti.pagetitle" value="Assignments"/>
+               		</optional-tool>
+               	</optional-page>
+			
+		</site-layout>
+</site-layouts>
+
+

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans>
+  	<form-bean name="displayForm" type="za.ac.unisa.lms.tools.cronjobs.forms.DisplayForm"/>
+  </form-beans>
+  <global-exceptions />
+  <global-forwards />
+  <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.cronjobs.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/display.do"
+        contextRelative="true" />
+    </action>
+
+    <action
+      parameter="action"
+      path="/display"
+      name="displayForm"
+      input="/WEB-INF/jsp/display.jsp"
+      validate="false"
+      type="za.ac.unisa.lms.tools.cronjobs.actions.DisplayAction">
+      <forward
+        name="display"
+        path="/WEB-INF/jsp/display.jsp"
+        contextRelative="true" />
+    </action>
+
+  </action-mappings>
+
+  <message-resources parameter="za.ac.unisa.lms.tools.cronjobs.ApplicationResources" />
+</struts-config>
