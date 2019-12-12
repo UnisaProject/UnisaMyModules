@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tomcatProjectProperties>
+    <rootDir>/src/webapp</rootDir>
+    <exportSource>false</exportSource>
+    <reloadable>true</reloadable>
+    <redirectLogger>false</redirectLogger>
+    <updateXml>true</updateXml>
+    <warLocation></warLocation>
+    <extraInfo></extraInfo>
+    <webPath>/unisa-cronjobs</webPath>
+    <webClassPathEntries>
+        <webClassPathEntry>/unisa-cronjobs/target/classes</webClassPathEntry>
+        <webClassPathEntry>MAVEN_REPO/commons-beanutils/jars/commons-beanutils-1.7.0.jar</webClassPathEntry>
+        <webClassPathEntry>MAVEN_REPO/commons-codec/jars/commons-codec-1.2.jar</webClassPathEntry>
+        <webClassPathEntry>MAVEN_REPO/commons-digester/jars/commons-digester-1.6.jar</webClassPathEntry>
+        <webClassPathEntry>MAVEN_REPO/jstl/jars/jstl-1.0.2.jar</webClassPathEntry>
+        <webClassPathEntry>MAVEN_REPO/opensymphony/jars/quartz-1.5.0.jar</webClassPathEntry>
+        <webClassPathEntry>MAVEN_REPO/sakaiproject/jars/sakai-struts-taglibs-2.0.1.jar</webClassPathEntry>
+        <webClassPathEntry>MAVEN_REPO/sakaiproject/jars/sakai-struts-tool-2.0.1.jar</webClassPathEntry>
+        <webClassPathEntry>MAVEN_REPO/sakaiproject/jars/sakai-util-2.3.0.jar</webClassPathEntry>
+        <webClassPathEntry>MAVEN_REPO/sakaiproject/jars/unisa-javaproxies-2.0.1.jar</webClassPathEntry>
+        <webClassPathEntry>MAVEN_REPO/sakaiproject/jars/unisa-sharedclasses-2.0.1.jar</webClassPathEntry>
+        <webClassPathEntry>MAVEN_REPO/struts/jars/struts-1.2.4.jar</webClassPathEntry>
+        <webClassPathEntry>MAVEN_REPO/taglibs/jars/standard-1.1.2.jar</webClassPathEntry>
+    </webClassPathEntries>
+</tomcatProjectProperties>
