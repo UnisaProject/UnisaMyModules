@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.cronjobs"
+		title="Cronjob Monitor Tool"
+		description="This tool displays the status of all current cron jobs.">
+		<category name="unisa.tools" />
+	</tool>
+</registration>
