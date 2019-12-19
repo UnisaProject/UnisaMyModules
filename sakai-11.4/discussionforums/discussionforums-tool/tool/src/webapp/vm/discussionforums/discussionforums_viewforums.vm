@@ -1,0 +1,50 @@
+## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
+<div class="portletBody">
+#if($addForum)
+	#if($menu)
+		#toolbar($menu)
+	#end
+#end
+
+<div>
+	<h3>
+		$tlang.getString("forum.index.heading") $siteTitle
+	</h3>
+<div>
+
+<div class="instruction">
+ $tlang.getString("forum.index.information0.new")<br><br>
+ $tlang.getString("forum.index.information1.new")
+ $tlang.getString("forum.index.information3.new")<br><br>
+ $tlang.getString("forum.index.information4.new")<br><br>
+</div>
+
+<form name="forumDetailsForm" action="#toolForm("DiscussionForumsAction")" method="post">
+ <table class ="listHier lines nolines" cellspacing="0" summary="$tlang.getString('gen.tablecaptionsite')">
+			<tr>
+				<th>$tlang.getString("forum.label.forumName")</th>
+				<th>$tlang.getString("forum.label.topics")</th>
+				<th>$tlang.getString("forum.label.posts")</th>
+				<th>$tlang.getString("forum.label.lastPost")</th>
+				<th>$tlang.getString("forum.label.creationDate")</th>				
+			</tr>
+
+   #foreach ($forum in $siteForums)
+      <tr>	
+		<td>
+		<a href="#toolLinkParam("DiscussionForumsAction" "showTopics" "forumId=$forum.forumId&forumName=$forum.forumName")">$forum.forumName</a>
+		<a href="#toolLinkParam("DiscussionForumsAction" "editForum" "editForum=true&forumId=$forum.forumId")"><img src="/sakai-discussionforums-tool/images/edit.gif" alt="Click to edit a forum"/></a>
+		<a href="#toolLinkParam("DiscussionForumsAction" "editForum" "editForum=false&forumId=$forum.forumId")"><img src="/sakai-discussionforums-tool/images/delete.gif" alt="Click to delete the forum"/></a>
+	    </td>
+		<td></td>
+		<td></td>
+	    <td>$forum.lastPostDate $forum.lastPoster</td> 
+	    <td>$forum.creationDate</td>
+	  </tr>
+	
+   #end
+					
+</table>
+
+</form>
+</div>
