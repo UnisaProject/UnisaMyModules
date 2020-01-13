@@ -28,8 +28,8 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.NumberConverter;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
@@ -39,8 +39,9 @@ import org.sakaiproject.util.ResourceLoader;
  * decimal places, removes any non-significant zeroes, and then returns it with a maximum of two decimal places.
  * Example: 10.0 -> 10, 10.50 -> 10.5
  */
-@Slf4j
 public class TotalPointsConverter extends NumberConverter {
+    private static final Logger log = LoggerFactory.getLogger(TotalPointsConverter.class);
+
     public TotalPointsConverter() {
         setType("number");
         ResourceLoader rl = new ResourceLoader();

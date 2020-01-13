@@ -44,7 +44,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.data.dao.grading.ItemGradingData;
 import org.sakaiproject.tool.assessment.data.dao.grading.MediaData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
@@ -66,10 +67,13 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
  * @version $Id$
  */
 
-@Slf4j
- public class DownloadAllMediaServlet extends HttpServlet
+public class DownloadAllMediaServlet extends HttpServlet
 {
+	/**
+	 * 
+	 */
 	private static final long serialVersionUID = 1465451058167004991L;
+	private static Logger log = LoggerFactory.getLogger(DownloadAllMediaServlet.class);
 	private GradingService gradingService = new GradingService();
 
   public DownloadAllMediaServlet()
@@ -162,6 +166,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
       }
 	  catch(IOException e){
 		  log.error(e.getMessage());
+		  e.printStackTrace();
 	  }
 	  finally {
 		  if (zos != null) {
@@ -300,6 +305,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 	  }
 	  catch (IOException e) {
 		  log.error(e.getMessage());
+		e.printStackTrace();
 	  }
 	  finally {
 		  if (zos != null) {

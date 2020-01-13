@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2003-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.gradebookng.tool.pages;
 
 import java.util.Locale;
@@ -20,7 +5,6 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -33,12 +17,10 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.gradebookng.business.GbRole;
 import org.sakaiproject.gradebookng.business.GradebookNgBusinessService;
-import org.sakaiproject.gradebookng.business.exception.GbAccessDeniedException;
 import org.sakaiproject.gradebookng.tool.component.GbFeedbackPanel;
 
 import lombok.extern.slf4j.Slf4j;
@@ -79,13 +61,7 @@ public class BasePage extends WebPage {
 
 		// setup some data that can be shared across all pages
 		this.currentUserUuid = this.businessService.getCurrentUser().getId();
-		role = GbRole.NONE;
-		try {
-			this.role = this.businessService.getUserRole();
-		} catch (final GbAccessDeniedException e) {
-			log.error("Error getting user role", e);
-			// do not redirect here, let the subclasses handle this!
-		}
+		this.role = this.businessService.getUserRole();
 
 		// set locale
 		setUserPreferredLocale();
@@ -131,7 +107,7 @@ public class BasePage extends WebPage {
 
 			@Override
 			public boolean isVisible() {
-				return (businessService.isUserAbleToEditAssessments());
+				return (BasePage.this.role == GbRole.INSTRUCTOR);
 			}
 		};
 		this.importExportPageLink.add(new Label("screenreaderlabel", getString("link.screenreader.tabnotselected")));
@@ -165,7 +141,7 @@ public class BasePage extends WebPage {
 
 			@Override
 			public boolean isVisible() {
-				return (businessService.isUserAbleToEditAssessments());
+				return (BasePage.this.role == GbRole.INSTRUCTOR);
 			}
 		};
 		this.settingsPageLink.add(new Label("screenreaderlabel", getString("link.screenreader.tabnotselected")));
@@ -210,18 +186,7 @@ public class BasePage extends WebPage {
 		response.render(StringHeaderItem
 				.forString("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"));
 
-		// Shared JavaScript and stylesheets
-		// Force Wicket to use Sakai's version of jQuery
-		response.render(
-				new PriorityHeaderItem(
-						JavaScriptHeaderItem
-								.forUrl(String.format("/library/webjars/jquery/1.12.4/jquery.min.js?version=%s", version))));
-		// And pair this instance of jQuery with a Bootstrap version we've tested with
-		response.render(
-				new PriorityHeaderItem(
-						JavaScriptHeaderItem
-								.forUrl(String.format("/library/webjars/bootstrap/3.3.7/js/bootstrap.min.js?version=%s", version))));
-		// Some global gradebookng styles
+		// Shared stylesheets
 		response.render(CssHeaderItem
 				.forUrl(String.format("/gradebookng-tool/styles/gradebook-shared.css?version=%s", version)));
 
@@ -230,7 +195,7 @@ public class BasePage extends WebPage {
 	/**
 	 * Helper to disable a link. Add the Sakai class 'current'.
 	 */
-	protected final void disableLink(final Link<Void> l) {
+	protected void disableLink(final Link<Void> l) {
 		l.add(new AttributeAppender("class", new Model<String>("current"), " "));
 		l.replace(new Label("screenreaderlabel", getString("link.screenreader.tabselected")));
 		l.setEnabled(false);
@@ -250,7 +215,7 @@ public class BasePage extends WebPage {
 		flagWithPopover.add(new AttributeModifier("data-html", "true"));
 		flagWithPopover.add(new AttributeModifier("data-container", "#gradebookGrades"));
 		flagWithPopover.add(new AttributeModifier("data-template",
-				"<div class=\"gb-popover popover\" role=\"tooltip\"><div class=\"arrow\"></div><div class=\"popover-content\"></div></div>"));
+				"'<div class=\"gb-popover popover\" role=\"tooltip\"><div class=\"arrow\"></div><div class=\"popover-content\"></div></div>'"));
 		flagWithPopover.add(new AttributeModifier("data-content", generatePopoverContent(message)));
 		flagWithPopover.add(new AttributeModifier("tabindex", "0"));
 
@@ -274,44 +239,5 @@ public class BasePage extends WebPage {
 		final Locale locale = this.businessService.getUserPreferredLocale();
 		log.debug("User preferred locale: " + locale);
 		getSession().setLocale(locale);
-	}
-
-	/**
-	 * Send a user to the access denied page with a message
-	 * 
-	 * @param message the message
-	 */
-	public final void sendToAccessDeniedPage(final String message) {
-		final PageParameters params = new PageParameters();
-		params.add("message", message);
-		log.debug("Redirecting to AccessDeniedPage: " + message);
-		throw new RestartResponseException(AccessDeniedPage.class, params);
-	}
-
-	public GbRole getCurrentRole() {
-		return BasePage.this.role;
-	}
-
-	/**
-	 * Performs role checks for instructor-only pages and redirects users to appropriate pages based on their role.
-	 * No role -> AccessDeniedPage. Student -> StudentPage. TA -> GradebookPage (if ta does not have the gradebook.editAssignments permission)
-	 */
-	protected final void defaultRoleChecksForInstructorOnlyPage()
-	{
-		switch (role)
-		{
-			case NONE:
-				sendToAccessDeniedPage(getString("error.role"));
-				break;
-			case STUDENT:
-				throw new RestartResponseException(StudentPage.class);
-			case TA:
-				if(businessService.isUserAbleToEditAssessments()) {
-					break;
-				}
-				throw new RestartResponseException(GradebookPage.class);
-			default:
-				break;
-		}
 	}
 }

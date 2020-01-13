@@ -1,5 +1,4 @@
 package org.sakaiproject.clog.api.datamodel;
-
 import java.util.ArrayList;
 import java.util.List;
 

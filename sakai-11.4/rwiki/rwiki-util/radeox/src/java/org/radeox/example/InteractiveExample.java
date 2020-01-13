@@ -27,7 +27,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import lombok.extern.slf4j.Slf4j;
 import org.radeox.api.engine.RenderEngine;
 import org.radeox.api.engine.context.RenderContext;
 import org.radeox.engine.BaseRenderEngine;
@@ -39,15 +38,17 @@ import org.radeox.engine.context.BaseRenderContext;
  * @version $Id: InteractiveExample.java 7707 2006-04-12 17:30:19Z
  *          ian@caret.cam.ac.uk $
  */
-@Slf4j
+
 public class InteractiveExample
 {
 	public static void main(String[] args)
 	{
-		log.info("Radeox 0.8");
-		log.info("Copyright (c) 2003 Stephan J. Schmidt, Matthias L. Jugel. "
+		System.err.println("Radeox 0.8");
+		System.err
+				.println("Copyright (c) 2003 Stephan J. Schmidt, Matthias L. Jugel. "
 						+ "\nAll Rights Reserved.");
-		log.info("See License Agreement for terms and conditions of use.");
+		System.err
+				.println("See License Agreement for terms and conditions of use.");
 
 		RenderEngine engine = new BaseRenderEngine();
 
@@ -57,16 +58,18 @@ public class InteractiveExample
 		String line;
 		try
 		{
-			log.info("> ");
+			System.out.print("> ");
+			System.out.flush();
 			while ((line = reader.readLine()) != null)
 			{
-				log.info(engine.render(line, context));
-				log.info("> ");
+				System.out.println(engine.render(line, context));
+				System.out.print("> ");
+				System.out.flush();
 			}
 		}
 		catch (IOException e)
 		{
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 	}
 }

@@ -1,32 +1,14 @@
-/**
- * Copyright (c) 2003-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.gradebookng.tool.model;
 
 import java.io.Serializable;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import org.sakaiproject.gradebookng.business.model.ProcessedGradeItem;
+import org.sakaiproject.service.gradebook.shared.Assignment;
 
 import lombok.Getter;
 import lombok.Setter;
-
-import org.sakaiproject.gradebookng.business.importExport.UserIdentificationReport;
-import org.sakaiproject.gradebookng.business.model.ImportedSpreadsheetWrapper;
-import org.sakaiproject.gradebookng.business.model.ProcessedGradeItem;
-import org.sakaiproject.service.gradebook.shared.Assignment;
 
 /**
  * Model object used for the import wizard panels
@@ -34,13 +16,6 @@ import org.sakaiproject.service.gradebook.shared.Assignment;
 public class ImportWizardModel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * Representation of the spreadsheet
-	 */
-	@Getter
-	@Setter
-	private ImportedSpreadsheetWrapper spreadsheetWrapper;
 
 	/**
 	 * List of items that have been uploaded
@@ -78,7 +53,7 @@ public class ImportWizardModel implements Serializable {
 	private List<ProcessedGradeItem> itemsToCreate;
 
 	/**
-	 * List of items from the spreadsheet that just need their data updated.
+	 * List of items from the spreadsheet that just need their data updated
 	 */
 	@Getter
 	@Setter
@@ -92,16 +67,10 @@ public class ImportWizardModel implements Serializable {
 	private List<ProcessedGradeItem> itemsToModify;
 
 	/**
-	 * Maps items from the spreadsheet to the assignments that need to be created once the wizard has been completed
+	 * The list of assignments to be created once the form has been filled in
 	 */
 	@Getter
 	@Setter
-	private Map<ProcessedGradeItem, Assignment> assignmentsToCreate = new LinkedHashMap<>();
+	private List<Assignment> assignmentsToCreate = new ArrayList<Assignment>();
 
-	/**
-	 * The {@link UserIdentificationReport} generated during parsing of the raw import file
-	 */
-	@Getter
-	@Setter
-	private UserIdentificationReport userReport;
 }

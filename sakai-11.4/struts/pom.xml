@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>base</artifactId>
+    <groupId>org.sakaiproject</groupId>
+    <version>11.4</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <name>Sakai Struts Project</name>
+  <groupId>org.sakaiproject</groupId>
+  <artifactId>Struts-base</artifactId>
+  <packaging>pom</packaging>
+  <modules>
+    <module>tool</module>
+    <module>taglibs</module>
+    <module>example</module>
+  </modules>
+</project>

@@ -21,20 +21,19 @@
 
 package org.sakaiproject.memory.impl;
 
-import java.util.*;
-
-import lombok.extern.slf4j.Slf4j;
-
 import net.sf.ehcache.CacheException;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.event.CacheEventListener;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.memory.api.CacheEventListener.CacheEntryEvent;
 import org.sakaiproject.memory.api.CacheEventListener.EventType;
 import org.sakaiproject.memory.api.CacheStatistics;
 import org.sakaiproject.memory.api.Configuration;
+
+import java.util.*;
 
 /**
  * Ehcache based implementation of a Cache.
@@ -42,8 +41,9 @@ import org.sakaiproject.memory.api.Configuration;
  *
  * @author Aaron Zeckoski (azeckoski @ unicon.net) (azeckoski @ gmail.com)
  */
-@Slf4j
 public class EhcacheCache<K, V> extends BasicCache<K, V> implements CacheEventListener {
+    final Logger log = LoggerFactory.getLogger(BasicMapCache.class);
+
     /**
      * Underlying cache implementation
      */
@@ -99,7 +99,6 @@ public class EhcacheCache<K, V> extends BasicCache<K, V> implements CacheEventLi
             }
         } else {
             value = (V) element.getObjectValue();
-            ArrayList<String> w = new ArrayList();
         }
         return value;
     } // get

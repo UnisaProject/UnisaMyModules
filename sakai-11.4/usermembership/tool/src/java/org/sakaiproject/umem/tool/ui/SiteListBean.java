@@ -43,8 +43,8 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.AuthzPermissionException;
@@ -67,10 +67,11 @@ import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.util.ResourceLoader;
 
+
+
 /**
  * @author <a href="mailto:nuno@ufp.pt">Nuno Fernandes</a>
  */
-@Slf4j
 public class SiteListBean {
 	private static final long			serialVersionUID	= 2L;
 	private static final String			SORT_SITE_NAME		= "siteName";
@@ -80,6 +81,8 @@ public class SiteListBean {
 	private static final String			SORT_SITE_PV		= "published";
 	private static final String			SORT_USER_STATUS	= "userStatus";
 	private static final String			SORT_SITE_TERM		= "siteTerm";
+	/** Our log (commons). */
+	private static Logger					LOG					= LoggerFactory.getLogger(SiteListBean.class);
 	/** Resource bundle */
 	private transient ResourceLoader	msgs				= new ResourceLoader("org.sakaiproject.umem.tool.bundle.Messages");
 	/** Controller fields */
@@ -261,7 +264,7 @@ public class SiteListBean {
 							else return -res;
 						}
 					}catch(Exception e){
-						log.warn("Error occurred while sorting by: "+fieldName, e);
+						LOG.warn("Error occurred while sorting by: "+fieldName, e);
 					}
 				}
 				return 0;
@@ -283,11 +286,11 @@ public class SiteListBean {
 			}
 	
 			if(refreshQuery){
-				log.debug("Refreshing query...");
+				LOG.debug("Refreshing query...");
 				try{
 					doSearch();
 				}catch(SQLException e){
-					log.warn("Failed to perform search on usermembership", e);
+					LOG.warn("Failed to perform search on usermembership", e);
 				}
 				refreshQuery = false;
 			}
@@ -341,8 +344,8 @@ public class SiteListBean {
 				userSitesRows.add(new UserSitesRow(id, t, tp, grps, rn, pv, active, term));
 			}
 		}catch(SQLException e){
-			log.warn("SQL error occurred while retrieving user memberships for user: " + userId, e);
-			log.warn("UserMembership will use alternative methods for retrieving user memberships.");
+			LOG.warn("SQL error occurred while retrieving user memberships for user: " + userId, e);
+			LOG.warn("UserMembership will use alternative methods for retrieving user memberships.");
 			doSearch3();
 		}finally{
 			try{
@@ -369,7 +372,7 @@ public class SiteListBean {
 		userSitesRows = new ArrayList<>();
 		thisUserId = M_session.getCurrentSessionUserId();
 		setSakaiSessionUser(userId);
-		log.debug("Switched CurrentSessionUserId: " + M_session.getCurrentSessionUserId());
+		LOG.debug("Switched CurrentSessionUserId: " + M_session.getCurrentSessionUserId());
 		List siteList = org.sakaiproject.site.cover.SiteService.getSites(SelectionType.ACCESS, null, null, null, SortType.TITLE_ASC, null);
 		setSakaiSessionUser(thisUserId);
 
@@ -380,7 +383,7 @@ public class SiteListBean {
 			userSitesRows.add(row);
 		}
 		long end = (new Date()).getTime();
-		log.debug("doSearch2() took total of "+((end - start)/1000)+" sec.");
+		LOG.debug("doSearch2() took total of "+((end - start)/1000)+" sec.");
 	}
 
 	/**
@@ -409,12 +412,12 @@ public class SiteListBean {
 					UserSitesRow row = new UserSitesRow(site, getGroups(userId, site), getActiveUserRoleInSite(userId, site));
 					userSitesRows.add(row);
 				}catch(IdUnusedException e){
-					log.warn("Unable to retrieve site for site id: " + id, e);
+					LOG.warn("Unable to retrieve site for site id: " + id, e);
 				}
 			}
 		}catch(SQLException e){
-			log.warn("SQL error occurred while retrieving user memberships for user: " + userId, e);
-			log.warn("UserMembership will use alternative methods for retrieving user memberships (ONLY Published sites will be listed).");
+			LOG.warn("SQL error occurred while retrieving user memberships for user: " + userId, e);
+			LOG.warn("UserMembership will use alternative methods for retrieving user memberships (ONLY Published sites will be listed).");
 			doSearch2();
 		}finally{
 			try{
@@ -430,7 +433,7 @@ public class SiteListBean {
 				}
 			}
 		}
-		log.debug("Group ops took " + (timeSpentInGroups / 1000) + " secs");
+		LOG.debug("Group ops took " + (timeSpentInGroups / 1000) + " secs");
 	}
 
 	/**
@@ -450,7 +453,7 @@ public class SiteListBean {
 		}
 		long end = (new Date()).getTime();
 		timeSpentInGroups += (end - start);
-		log.debug("getGroups("+userId+", "+site.getTitle()+") took "+((end - start)/1000)+" sec.");
+		LOG.debug("getGroups("+userId+", "+site.getTitle()+") took "+((end - start)/1000)+" sec.");
 		return groups.toString();
 	}
 	
@@ -480,7 +483,7 @@ public class SiteListBean {
 				groups.append(t);
 			}
 		}catch(SQLException e){
-			log.error("SQL error occurred while retrieving group memberships for user: " + userId, e);
+			LOG.error("SQL error occurred while retrieving group memberships for user: " + userId, e);
 		}finally{
 			try{
 				if(rs != null)
@@ -497,7 +500,7 @@ public class SiteListBean {
 		}
 		long end = (new Date()).getTime();
 		timeSpentInGroups += (end - start);
-		log.debug("getGroups("+userId+", "+siteId+") took "+((end - start)/1000)+" sec.");
+		LOG.debug("getGroups("+userId+", "+siteId+") took "+((end - start)/1000)+" sec.");
 		return groups.toString();
 	}
 
@@ -529,7 +532,7 @@ public class SiteListBean {
 			refreshQuery = true;
 			return "sitelist";
 		}catch(Exception e){
-			log.error("Error getting userId var.");
+			LOG.error("Error getting userId var.");
 			return "userlist";
 		}
 	}
@@ -642,7 +645,7 @@ public class SiteListBean {
 					}
 					catch( IdUnusedException ex )
 					{
-						log.warn( "site not found, id=" + row.getSiteId(), ex );
+						LOG.warn( "site not found, id=" + row.getSiteId(), ex );
 					}
 				}
 
@@ -659,19 +662,19 @@ public class SiteListBean {
 					}
 					catch( GroupNotDefinedException ex )
 					{
-						log.warn( "realm not found, id=" + realmID, ex );
+						LOG.warn( "realm not found, id=" + realmID, ex );
 					}
 					catch( AuthzPermissionException ex )
 					{
-						log.warn( "permission exception updating realm, id=" + realmID, ex );
+						LOG.warn( "permission exception updating realm, id=" + realmID, ex );
 					}
 					catch( NullPointerException ex )
 					{
-						log.warn( "could not retieve user (" + userId + ") or user's role from site (" + site.getId() + ")", ex );
+						LOG.warn( "could not retieve user (" + userId + ") or user's role from site (" + site.getId() + ")", ex );
 					}
 					catch( Exception ex )
 					{
-						log.error( "unexpected error occurred, user=" + userId + ", site=" + site.getId(), ex );
+						LOG.error( "unexpected error occurred, user=" + userId + ", site=" + site.getId(), ex );
 					}
 				}
 			}

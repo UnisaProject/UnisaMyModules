@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.EmailValidator;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.genericdao.api.finders.ByPropsFinder;
@@ -32,11 +34,9 @@ import org.sakaiproject.qna.model.QnaCustomEmail;
 import org.sakaiproject.qna.model.QnaOptions;
 import org.sakaiproject.qna.model.constants.QnaConstants;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class OptionsLogicImpl implements OptionsLogic {
 
+	private static Log log = LogFactory.getLog(OptionsLogicImpl.class);
 
 	private PermissionLogic permissionLogic;
 	private QnaDao dao;

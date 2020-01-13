@@ -31,6 +31,8 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.gradebook.jsf.iterator.IteratorComponent;
 
 /*
@@ -46,6 +48,8 @@ import org.sakaiproject.tool.gradebook.jsf.iterator.IteratorComponent;
  */
 
 public class DhtmlPopupComponent extends IteratorComponent implements NamingContainer {
+	private static final Logger log = LoggerFactory.getLogger(DhtmlPopupComponent.class);
+
 	public final static String COMPONENT_TYPE = "org.sakaiproject.tool.gradebook.jsf.dhtmlpopup";
 
 	// These must agree with the JavaScript logic.

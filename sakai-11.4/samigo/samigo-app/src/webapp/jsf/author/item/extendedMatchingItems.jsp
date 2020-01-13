@@ -577,8 +577,6 @@
 				</h:panelGrid>
 			</h:panelGroup>
 
-			<%@ include file="/jsf/author/item/tags.jsp" %>
-
 			<p class="act">
 				<h:commandButton rendered="#{itemauthor.target=='assessment'}"
 					value="#{authorMessages.button_save}"

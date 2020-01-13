@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.tsastudentnumber"
+		title="Unisa Student Number for CAO Applications"
+		description="Unisa Student Number for CAO Applications">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

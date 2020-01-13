@@ -78,6 +78,7 @@ public class HTMLParserTest extends TestCase
 				SearchUtils.appendCleanString(n, sb);
 			}
 			String result = sb.toString();
+//			System.err.println("Result is "+result);
 			if ( p.containsKey(tname+".result") ) {
 				assertEquals("Tokens dont match ", loadFile(p.getProperty(tname+".result")), sb.toString());
 			}
@@ -91,6 +92,7 @@ public class HTMLParserTest extends TestCase
 	 */
 	private String loadFile(String property) throws IOException
 	{
+		System.err.println("Loading :"+property+":");
 		BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(property),"UTF-8"));
 		StringBuilder sb = new StringBuilder();
 		for ( String s = br.readLine(); s != null; s = br.readLine()) {

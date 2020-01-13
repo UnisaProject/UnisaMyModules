@@ -27,8 +27,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.user.api.UserDirectoryProvider;
@@ -39,9 +39,10 @@ import org.sakaiproject.user.api.UserEdit;
  * IMSEntUserDirectoryProvider is a sample UserDirectoryProvider.
  * </p>
  */
-@Slf4j
 public class IMSEntUserDirectoryProvider implements UserDirectoryProvider
 {
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(IMSEntUserDirectoryProvider.class);
 
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Dependencies and their setter methods
@@ -57,7 +58,7 @@ public class IMSEntUserDirectoryProvider implements UserDirectoryProvider
 	 */
 	public void setSqlService(SqlService service)
 	{
-		log.info("Setting Sql Service");
+		M_log.info("Setting Sql Service");
 		m_sqlService = service;
 	}
 
@@ -87,12 +88,12 @@ public class IMSEntUserDirectoryProvider implements UserDirectoryProvider
 	{
 		try
 		{
-			log.info("init()");
+			M_log.info("init()");
 		}
 		catch (Exception t)
 		{
-			log.info(this + ".init() - failed attempting to log " + t);
-			log.warn(".init(): " + t);
+			M_log.info(this + ".init() - failed attempting to log " + t);
+			M_log.warn(".init(): " + t);
 		}
 
 		try
@@ -101,24 +102,24 @@ public class IMSEntUserDirectoryProvider implements UserDirectoryProvider
 			if (m_autoDdl && m_sqlService != null)
 			{
 				m_sqlService.ddl(this.getClass().getClassLoader(), "imsent_provider");
-				log.info("Back from autoddl");
+				M_log.info("Back from autoddl");
 			}
 
 			// Check to see if we are ready to run...
 			if (!isReady())
 			{
-				log.warn(".init(): Not properly initialized.");
+				M_log.warn(".init(): Not properly initialized.");
 			}
 		}
 		catch (Exception t)
 		{
-			log.warn(".init(): ", t);
+			M_log.warn(".init(): ", t);
 			m_isReady = false;
 		}
 		// Check to see if we are ready to run...
 		if (!isReady())
 		{
-			log.warn(".init(): Not properly initialized.");
+			M_log.warn(".init(): Not properly initialized.");
 		}
 
 	} // init
@@ -128,7 +129,7 @@ public class IMSEntUserDirectoryProvider implements UserDirectoryProvider
 	 */
 	public void destroy()
 	{
-		log.info("destroy()");
+		M_log.info("destroy()");
 	} // destroy
 
 	/**
@@ -148,7 +149,7 @@ public class IMSEntUserDirectoryProvider implements UserDirectoryProvider
 
 		if (m_sqlService == null)
 		{
-			log.warn("sqlService injection failed");
+			M_log.warn("sqlService injection failed");
 			retval = false;
 		}
 
@@ -211,7 +212,7 @@ public class IMSEntUserDirectoryProvider implements UserDirectoryProvider
 		Object fields[] = new Object[1];
 		fields[0] = userId;
 
-		log.info("SQL:" + statement);
+		M_log.info("SQL:" + statement);
 		List rv = m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
@@ -227,12 +228,12 @@ public class IMSEntUserDirectoryProvider implements UserDirectoryProvider
 					rv.lastName = result.getString(5);
 					rv.firstName = result.getString(6);
 					rv.eMail = result.getString(7);
-					log.info("Inside reader " + rv);
+					M_log.info("Inside reader " + rv);
 					return rv;
 				}
 				catch (SQLException e)
 				{
-					log.warn(this + ".authenticateUser: " + userId + " : " + e);
+					M_log.warn(this + ".authenticateUser: " + userId + " : " + e);
 					return null;
 				}
 			}
@@ -240,8 +241,8 @@ public class IMSEntUserDirectoryProvider implements UserDirectoryProvider
 
 		if ((rv != null) && (rv.size() > 0))
 		{
-			log.info("Returning ");
-			log.info(" " + (SakaiIMSUser) rv.get(0));
+			M_log.info("Returning ");
+			M_log.info(" " + (SakaiIMSUser) rv.get(0));
 			return (SakaiIMSUser) rv.get(0);
 		}
 		return null;
@@ -285,7 +286,7 @@ public class IMSEntUserDirectoryProvider implements UserDirectoryProvider
 		if (edit == null) return false;
 		String userId = edit.getEid();
 
-		log.info("getUser(" + userId + ")");
+		M_log.info("getUser(" + userId + ")");
 		SakaiIMSUser rv = retrieveUser(userId, false);
 		if (rv == null) return false;
 		copyInfo(edit, rv);
@@ -322,7 +323,7 @@ public class IMSEntUserDirectoryProvider implements UserDirectoryProvider
 		if (!isReady()) return false;
 		if ((edit == null) || (email == null)) return false;
 
-		log.info("findUserByEmail(" + email + ")");
+		M_log.info("findUserByEmail(" + email + ")");
 		SakaiIMSUser rv = retrieveUser(email, true);
 		if (rv == null) return false;
 		copyInfo(edit, rv);
@@ -345,7 +346,7 @@ public class IMSEntUserDirectoryProvider implements UserDirectoryProvider
 	{
 		if (!isReady()) return false;
 		if ((userId == null) || (password == null)) return false;
-		log.info("authenticateUser(" + userId + ")");
+		M_log.info("authenticateUser(" + userId + ")");
 		SakaiIMSUser rv = retrieveUser(userId, false);
 		if (rv == null) return false;
 		return (password.compareTo(rv.password) == 0);

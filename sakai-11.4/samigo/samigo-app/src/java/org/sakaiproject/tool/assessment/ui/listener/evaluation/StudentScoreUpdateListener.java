@@ -19,6 +19,8 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.ui.listener.evaluation;
 
 import java.util.ArrayList;
@@ -27,7 +29,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.faces.application.FacesMessage;
@@ -36,13 +37,10 @@ import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.math3.util.Precision;
-
-import org.sakaiproject.component.cover.ComponentManager;
-import org.sakaiproject.event.api.EventTrackingService;
-import org.sakaiproject.event.api.NotificationService;
-import org.sakaiproject.samigo.util.SamigoConstants;
+import org.sakaiproject.event.cover.EventTrackingService;
 import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
 import org.sakaiproject.tool.assessment.data.dao.grading.ItemGradingAttachment;
 import org.sakaiproject.tool.assessment.data.dao.grading.ItemGradingData;
@@ -55,7 +53,6 @@ import org.sakaiproject.tool.assessment.ui.bean.delivery.SectionContentsBean;
 import org.sakaiproject.tool.assessment.ui.bean.evaluation.StudentScoresBean;
 import org.sakaiproject.tool.assessment.ui.bean.evaluation.TotalScoresBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
-import org.sakaiproject.tool.assessment.util.SamigoLRSStatements;
 import org.sakaiproject.tool.assessment.util.TextFormat;
 
 /**
@@ -68,12 +65,11 @@ import org.sakaiproject.tool.assessment.util.TextFormat;
  * @author Rachel Gollub
  * @version $Id$
  */
-@Slf4j
+
 public class StudentScoreUpdateListener
   implements ActionListener
 {
-  private final EventTrackingService eventTrackingService= ComponentManager.get( EventTrackingService.class );
-
+  private static Logger log = LoggerFactory.getLogger(StudentScoreUpdateListener.class);
   private static ContextUtil cu;
 
   /**
@@ -85,10 +81,10 @@ public class StudentScoreUpdateListener
     AbortProcessingException
   {
     log.debug("Student Score Update LISTENER.");
-    StudentScoresBean bean = (StudentScoresBean) ContextUtil.lookupBean("studentScores");
-    TotalScoresBean tbean = (TotalScoresBean) ContextUtil.lookupBean("totalScores");
+    StudentScoresBean bean = (StudentScoresBean) cu.lookupBean("studentScores");
+    TotalScoresBean tbean = (TotalScoresBean) cu.lookupBean("totalScores");
     tbean.setAssessmentGradingHash(tbean.getPublishedAssessment().getPublishedAssessmentId());
-    DeliveryBean delivery = (DeliveryBean) ContextUtil.lookupBean("delivery");
+    DeliveryBean delivery = (DeliveryBean) cu.lookupBean("delivery");
     log.debug("Calling saveStudentScores.");
     try {
       if (!saveStudentScores(bean, tbean, delivery))
@@ -97,7 +93,7 @@ public class StudentScoreUpdateListener
       }
     } catch (GradebookServiceException ge) {
        FacesContext context = FacesContext.getCurrentInstance();
-       String err=(String)ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages", "gradebook_exception_error");
+       String err=(String)cu.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages", "gradebook_exception_error");
        context.addMessage(null, new FacesMessage(err));
 
     }
@@ -117,12 +113,16 @@ public class StudentScoreUpdateListener
     AssessmentGradingData adata = null;
     try
     {
-      List<SectionContentsBean> parts = delivery.getPageContents().getPartsContents();
+      ArrayList parts = delivery.getPageContents().getPartsContents();
+      Iterator iter = parts.iterator();
       boolean updateFlag = false;
-      for (SectionContentsBean part : parts) {
-        List<ItemContentsBean> items = part.getItemContents();
-        for (ItemContentsBean question : items) {
-
+      while (iter.hasNext())
+      {
+        ArrayList items = ((SectionContentsBean) iter.next()).getItemContents();
+        Iterator iter2 = items.iterator();
+        while (iter2.hasNext())
+        {
+          ItemContentsBean question = (ItemContentsBean) iter2.next();
           List<ItemGradingData> gradingarray = question.getItemGradingDataArray();
           log.debug("****1. pub questionId = " + question.getItemData().getItemId());
           log.debug("****2. Gradingarray length = " + gradingarray.size());
@@ -138,17 +138,22 @@ public class StudentScoreUpdateListener
 
           int fibFinNumCorrect  = 0;
           if (question.getItemData().getTypeId().equals(Long.valueOf(8)) || question.getItemData().getTypeId().equals(Long.valueOf(11))) {
-        	for (ItemGradingData data : gradingarray) {
-        	  if (Boolean.TRUE.equals(data.getIsCorrect())) {
-        		  fibFinNumCorrect++;
+        	  Iterator itemGradingIter = gradingarray.iterator();
+        	  while (itemGradingIter.hasNext()){
+        		  Object obj = itemGradingIter.next();
+        		  ItemGradingData data = (ItemGradingData) obj;
+        		  if (Boolean.TRUE.equals(data.getIsCorrect())) {
+        			  fibFinNumCorrect++;
+        		  }
         	  }
-        	}
           }
           
           log.debug("****3a Gradingarray length2 = " + gradingarray.size());
           log.debug("****3b set points = " + question.getExactPoints() + ", comments to " + question.getGradingComment());
-          for (ItemGradingData data : gradingarray)
+          Iterator iter3 = gradingarray.iterator();
+          while (iter3.hasNext())
           {
+            ItemGradingData data = (ItemGradingData) iter3.next();
             if (adata == null && data.getAssessmentGradingId() != null){
               adata = delegate.load(data.getAssessmentGradingId().toString());
             }
@@ -169,9 +174,9 @@ public class StudentScoreUpdateListener
             }
             double oldAutoScore = 0;
             if (data.getAutoScore() !=null) {
-              oldAutoScore=data.getAutoScore();
+              oldAutoScore=data.getAutoScore().doubleValue();
             }
-            String newComments = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(question.getGradingComment());
+            String newComments = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(log, question.getGradingComment());
             if (newComments != null) {
       		  newComments = newComments.trim();
             }
@@ -189,14 +194,14 @@ public class StudentScoreUpdateListener
             // if newAutoScore != oldAutoScore then updateScore = true
             boolean updateScore = !(Precision.equalsIncludingNaN(newAutoScore, oldAutoScore, 0.0001));
             boolean updateComments = !newComments.equals(oldComments);
-            StringBuilder logString = new StringBuilder();
+            StringBuffer logString = new StringBuffer();
             logString.append("gradedBy=");
             logString.append(AgentFacade.getAgentString());
             logString.append(", itemGradingId=");
             logString.append(data.getItemGradingId());
             
             if (updateScore) {
-              data.setAutoScore(newAutoScore);
+              data.setAutoScore(Double.valueOf(newAutoScore));
               logString.append(", newAutoScore=");
               logString.append(newAutoScore);
               logString.append(", oldAutoScore=");
@@ -215,18 +220,18 @@ public class StudentScoreUpdateListener
               data.setGradedDate(new Date());
               String targetString = "siteId=" + AgentFacade.getCurrentSiteId() + ", " + logString.toString();
               String safeString = targetString.length() > 255 ? targetString.substring(0, 255) : targetString;
-              eventTrackingService.post(eventTrackingService.newEvent(SamigoConstants.EVENT_ASSESSMENT_STUDENT_SCORE_UPDATE, safeString, true));
+              EventTrackingService.post(EventTrackingService.newEvent("sam.student.score.update", safeString, true));
               log.debug("****4 itemGradingId="+data.getItemGradingId());
               log.debug("****5 set points = " + data.getAutoScore() + ", comments to " + data.getComments());
             }
-		data.setAnswerText(data.getAnswerText());
+		data.setAnswerText(ContextUtil.stringWYSIWYG(data.getAnswerText()));
             itemGradingSet.add(data);
           }
         }
         if (adata==null){
           // this is for cases when studnet submitted an assessment but skipped all teh questions
           // when we won't be able to get teh assessmentGrading based on itemGrdaing ('cos there is none).
-          String assessmentGradingId = ContextUtil.lookupParam("gradingData");
+          String assessmentGradingId = cu.lookupParam("gradingData");
           adata = delegate.load(assessmentGradingId);
         }
         adata.setItemGradingSet(itemGradingSet);
@@ -235,7 +240,7 @@ public class StudentScoreUpdateListener
       if (adata == null)
         return true; // Nothing to save.
 
-      String newComments = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(bean.getComments());
+      String newComments = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(log, bean.getComments());
       if (newComments != null) {
     	  newComments = newComments.trim();
       }
@@ -250,25 +255,25 @@ public class StudentScoreUpdateListener
     	  oldComments = "";
       }
 
-      StringBuilder logString = new StringBuilder();
-      logString.append("gradedBy=");
-      logString.append(AgentFacade.getAgentString());
-      logString.append(", assessmentGradingId=");
-      logString.append(adata.getAssessmentGradingId());
       if (!newComments.equals(oldComments)) {
     	  updateFlag = true;
     	  adata.setComments(newComments);
     	  adata.setGradedBy(AgentFacade.getAgentString());
     	  adata.setGradedDate(new Date());
+    	  StringBuffer logString = new StringBuffer();
+          logString.append("gradedBy=");
+          logString.append(AgentFacade.getAgentString());
+          logString.append(", assessmentGradingId=");
+          logString.append(adata.getAssessmentGradingId());
           logString.append(", newComments=");
           logString.append(newComments);
           logString.append(", oldComments=");
           logString.append(oldComments);
+    	  EventTrackingService.post(EventTrackingService.newEvent("sam.student.score.update", logString.toString(), true));
       }
 
       if (updateFlag) {
-    	  delegate.updateAssessmentGradingScore(adata, tbean.getPublishedAssessment(), newComments, oldComments);
-    	  eventTrackingService.post(eventTrackingService.newEvent(SamigoConstants.EVENT_ASSESSMENT_STUDENT_SCORE_UPDATE, logString.toString(), AgentFacade.getCurrentSiteId(), true, NotificationService.NOTI_OPTIONAL, SamigoLRSStatements.getStatementForStudentScoreUpdate(adata, tbean.getPublishedAssessment())));
+    	  delegate.updateAssessmentGradingScore(adata, tbean.getPublishedAssessment());
       }
       log.debug("Saved student scores.");
       
@@ -276,58 +281,69 @@ public class StudentScoreUpdateListener
 
     } catch (GradebookServiceException ge) {
        FacesContext context = FacesContext.getCurrentInstance();
-       String err=(String)ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages", "gradebook_exception_error");
+       String err=(String)cu.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages", "gradebook_exception_error");
        context.addMessage(null, new FacesMessage(err));
 
     }
     catch (Exception e)
     {
-      log.warn("Error saving scores", e);
+      e.printStackTrace();
       return false;
     }
     return true;
   }
 
     public void updateAttachment(DeliveryBean delivery){
-    	List<SectionContentsBean> parts = delivery.getPageContents().getPartsContents();
-    	List<ItemGradingAttachment> attachmentList = new ArrayList();
-    	for (SectionContentsBean part : parts) {
-    		List<ItemContentsBean> items = part.getItemContents();
-    		for (ItemContentsBean question : items) {
+    	ArrayList parts = delivery.getPageContents().getPartsContents();
+    	Iterator iter = parts.iterator();
+    	List attachmentList = new ArrayList();
+    	while (iter.hasNext())
+    	{
+    		ArrayList items = ((SectionContentsBean) iter.next()).getItemContents();
+    		Iterator iter2 = items.iterator();
+    		while (iter2.hasNext())
+    		{
+    			ItemContentsBean question = (ItemContentsBean) iter2.next();
     			List<ItemGradingData> gradingarray = question.getItemGradingDataArray();
     			log.debug("Gradingarray length2 = " + gradingarray.size());
-    			for (ItemGradingData itemGradingData : gradingarray) {
-    			    List<ItemGradingAttachment> oldList = itemGradingData.getItemGradingAttachmentList();
-    				List<ItemGradingAttachment> newList = question.getItemGradingAttachmentList();
-    				if ((oldList == null || oldList.isEmpty()) && (newList == null || newList.isEmpty())) {
+    			Iterator<ItemGradingData> iter3 = gradingarray.iterator();
+    			while (iter3.hasNext()) {
+    				ItemGradingData itemGradingData = iter3.next();
+    				List oldList = itemGradingData.getItemGradingAttachmentList();
+    				List newList = question.getItemGradingAttachmentList();
+    				if ((oldList == null || oldList.size() == 0 ) && (newList == null || newList.size() == 0)) {
     					continue;
     				}
     				
-    				Map<Long, ItemGradingAttachment> map = getAttachmentIdHash(oldList);
-                    for (ItemGradingAttachment itemGradingAttachment : newList) {
-                        if (map.get(itemGradingAttachment.getAttachmentId()) != null) {
-                            // exist already, remove it from map
-                            map.remove(itemGradingAttachment.getAttachmentId());
-                        } else {
-                            // new attachments
-                            itemGradingAttachment.setItemGrading(itemGradingData);
-                            attachmentList.add(itemGradingAttachment);
-                        }
-                    }
+    				HashMap map = getAttachmentIdHash(oldList);
+    				for (int i=0; i<newList.size(); i++){
+    					ItemGradingAttachment itemGradingAttachment = (ItemGradingAttachment) newList.get(i);
+    					if (map.get(itemGradingAttachment.getAttachmentId()) != null){
+    						// exist already, remove it from map
+    						map.remove(itemGradingAttachment.getAttachmentId());
+    					}
+    					else{
+    						// new attachments
+    						itemGradingAttachment.setItemGrading(itemGradingData);
+    						attachmentList.add(itemGradingAttachment);
+    					}
+    				}      
     				// save new ones
     				GradingService gradingService = new GradingService();
     				if (attachmentList.size() > 0) {
     					gradingService.saveOrUpdateAttachments(attachmentList);
-    					eventTrackingService.post(eventTrackingService.newEvent(SamigoConstants.EVENT_ASSESSMENT_STUDENT_SCORE_UPDATE, 
+    					EventTrackingService.post(EventTrackingService.newEvent("sam.student.score.update", 
     							"siteId=" + AgentFacade.getCurrentSiteId() + ", Adding " + attachmentList.size() + " attachments for itemGradingData id = " + itemGradingData.getItemGradingId(), 
     							true));
     				}
     				
     				// remove old ones
-    				Set<Long> set = map.keySet();
-    				for (Long attachmentId : set) {
+    				Set set = map.keySet();
+    				Iterator iter4 = set.iterator();
+    				while (iter4.hasNext()){
+    					Long attachmentId = (Long)iter4.next();
     					gradingService.removeItemGradingAttachment(attachmentId.toString());
-    					eventTrackingService.post(eventTrackingService.newEvent(SamigoConstants.EVENT_ASSESSMENT_STUDENT_SCORE_UPDATE, 
+    					EventTrackingService.post(EventTrackingService.newEvent("sam.student.score.update", 
     							"siteId=" + AgentFacade.getCurrentSiteId() + ", Removing attachmentId = " + attachmentId, true));
     				}
     			}
@@ -335,9 +351,12 @@ public class StudentScoreUpdateListener
     	}
     }
 
-    private Map<Long, ItemGradingAttachment> getAttachmentIdHash(List<ItemGradingAttachment> list){
-    	Map<Long, ItemGradingAttachment> map = new HashMap<>();
-    	if (list != null) list.forEach(a -> map.put(a.getAttachmentId(), a));
+    private HashMap getAttachmentIdHash(List list){
+    	HashMap map = new HashMap();
+    	for (int i=0; i<list.size(); i++){
+    		ItemGradingAttachment a = (ItemGradingAttachment)list.get(i);
+    		map.put(a.getAttachmentId(), a);
+    	}
     	return map;
     }
 }

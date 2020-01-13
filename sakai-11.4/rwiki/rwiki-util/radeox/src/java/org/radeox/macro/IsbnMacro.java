@@ -61,8 +61,7 @@ public class IsbnMacro extends BaseLocaleMacro
 
 		if (params.getLength() == 1)
 		{
-			String isbn = params.get("0").replaceAll("[^0-9-]", "");
-			BookServices.getInstance().appendUrl(writer, isbn); //$NON-NLS-1$
+			BookServices.getInstance().appendUrl(writer, params.get("0")); //$NON-NLS-1$
 			return;
 		}
 		else

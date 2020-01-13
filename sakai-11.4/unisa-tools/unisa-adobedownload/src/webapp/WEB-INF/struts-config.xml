@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	    <form-bean name="courseForm" type="za.ac.unisa.lms.tools.adobedownload.forms.CourseForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.adobedownload.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/addcourse.do?action=verifyCourse"
+				contextRelative="true" />
+		</action>
+		<action
+      attribute="courseForm"
+      name="courseForm"
+      parameter="action"
+      path="/addcourse"
+      type="za.ac.unisa.lms.tools.adobedownload.actions.AddCourse"
+      scope="session"
+      validate="false">
+      <forward
+        name="verifyCourse"
+        path="/WEB-INF/jsp/verifycourse.jsp"
+        contextRelative="true" />        
+         <forward
+        name="licenceagreement"
+        path="/WEB-INF/jsp/licenceagreement.jsp"
+        contextRelative="true" />  
+        <forward
+        name="viewreasons"
+        path="/WEB-INF/jsp/viewreasons.jsp"
+        contextRelative="true" />   
+        <forward
+        name="download"
+        path="/WEB-INF/jsp/download.jsp"
+        contextRelative="true" />         
+		</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.adobedownload.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

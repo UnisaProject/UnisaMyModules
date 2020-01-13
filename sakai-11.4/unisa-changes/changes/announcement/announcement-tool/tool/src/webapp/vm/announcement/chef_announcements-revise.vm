@@ -54,30 +54,16 @@ function resizeFrame(){
 	});
 </script>	
 <div class="portletBody container-fluid">
-    #if ($isOnWorkspaceTab.equals("false"))
-		#if($menu && $EnabledMenuItemExists)
-			#if ($toolId == "sakai.synoptic.announcement")
-				<ul class="navIntraTool actionToolBar" role="menu">
-					<li class="firstToolBarItem" role="menuitem"><span><a href="#" title="$tlang.getString("gen.recopt")" onclick="location = '#toolLink("$action" "doOptions")';return false;">
-						$tlang.getString("custom.options")
-						<span class="skip">$toolTitle</span>
-					</a></span></li>
-				</ul>
-			#else
-				#toolbar($menu)
-			#end
-		#end
-	#end
-
-	#* unisa change <div class="page-header">
-		<h3>
-		#if ( $newAnn =="true")
-			$tlang.getString("revise.add")
-		#else
-			$tlang.getString("revise.revise")
-		#end
-		</h3>
-	</div> *#
+	<!-- Unisa Changes:2018/10/17:Change heading margins by adding class unisaToolHeading and h3 tag -->
+	<!-- <div class="page-header"> -->
+	<!-- 	<h1> -->
+	<!-- 	#if ( $newAnn =="true") -->
+	<!-- 		$tlang.getString("revise.add") -->
+	<!-- 	#else -->
+	<!-- 		$tlang.getString("revise.revise") -->
+	<!-- 	#end -->
+	<!-- 	</h1> -->
+	<!-- </div> -->
 	
 	<div class="unisaToolHeading">
 		<h3>
@@ -87,7 +73,8 @@ function resizeFrame(){
 			$tlang.getString("revise.revise")
 		#end
 		</h3>
-	</div> 
+	</div>
+	<!-- End Unisa Changes:2018/10/17-->	
 	
 	#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("gen.alert.message", $alertMessage)</div><div class="clear"></div>#end
 		
@@ -153,7 +140,7 @@ function resizeFrame(){
 							<h4>$tlang.getString("displayto.access")</h4>
 						</legend>
 					
-				#if ($!groups && ($!groups.size()>1)) #set ($show_group = "true") #else #set ($show_group = "false") #end
+				#if ($!groups || ($!groups.size()>1)) #set ($show_group = "true") #else #set ($show_group = "false") #end
 				#if ( $motd )
 					## no show this selection, but set default to public
 					<input type="hidden" name="announceTo" id="pubview" value="pubview" checked="checked" onclick="updateEmailDropdownOptions()" />
@@ -438,6 +425,7 @@ function resizeFrame(){
 					</div>
 				</div>	
 			#end
+		</div>	
 		
 		#if ($notiHistory)
 			<div class="specialLink act act-outer"><a href="#" class="indnt2 specialLink" id="notiHistoryToggle">$tlang.getString("revise.notify.ver_link")</a></div>

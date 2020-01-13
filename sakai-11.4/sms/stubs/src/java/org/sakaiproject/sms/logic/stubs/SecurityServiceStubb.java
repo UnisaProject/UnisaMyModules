@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
-import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.user.api.User;
 
 public class SecurityServiceStubb implements SecurityService {
@@ -92,15 +91,5 @@ public class SecurityServiceStubb implements SecurityService {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
-        public boolean isUserRoleSwapped() throws IdUnusedException {
-                // TODO Auto-generated method stub
-                return false;
-        }
-
-        public boolean isUserRoleSwapped(String siteId) throws IdUnusedException {
-                // TODO Auto-generated method stub
-                return false;
-        }
 
 }

@@ -24,21 +24,23 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
-import java.security.Key;
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
-import lombok.extern.slf4j.Slf4j;
 
 import org.sakaiproject.component.cover.ServerConfigurationService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.security.*;
+import javax.crypto.*;
+import javax.crypto.spec.*;
 
 /**
  * Some Sakai Utility code for the Rutgers LinkTool.
  */
-@Slf4j
 public class LinkToolUtil {
+
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(LinkToolUtil.class);
 
 	private static final String privkeyname = "sakai.rutgers.linktool.privkey";
 	private static final String saltname = "sakai.rutgers.linktool.salt";
@@ -61,7 +63,7 @@ public class LinkToolUtil {
 		}
 		catch (Exception e)
 		{
-			log.error("Unable to read key from {}", filename);
+			M_log.error("Unable to read key from " + filename);
 			privkey = null;
 		}
 		finally
@@ -74,7 +76,7 @@ public class LinkToolUtil {
 				}
 				catch (Exception e)
 				{
-					log.error("Unable to close file {}", filename);
+					M_log.error("Unable to close file " + filename);
 				}
 			}
 		}
@@ -115,13 +117,13 @@ public class LinkToolUtil {
 		try 
 		{
 			/* Generate key. */
-			log.info("Generating new key in {}{}", dirname, privkeyname);
+			M_log.info("Generating new key in " + dirname + privkeyname);
 			SecretKey key = KeyGenerator.getInstance("Blowfish").generateKey();
 
 			/* Write private key to file. */
 			writeKey(key, dirname + privkeyname);
 		} catch (Exception e) {
-			log.debug("Error generating key", e);
+			M_log.debug("Error generating key", e);
 		}
 
 	}
@@ -141,11 +143,11 @@ public class LinkToolUtil {
 		}
 		catch (FileNotFoundException e)
 		{
-			log.error("Unable to write new key to {}", filename);
+			M_log.error("Unable to write new key to " + filename);
 		}
 		catch (IOException e)
 		{
-			log.error("Unable to write new key to {}", filename);
+			M_log.error("Unable to write new key to " + filename);
 		}
 		finally
 		{
@@ -157,7 +159,7 @@ public class LinkToolUtil {
 				}
 				catch (Exception e)
 				{
-					log.error("Unable to write new key to {}", filename);
+					M_log.error("Unable to write new key to " + filename);
 				}
 			}
 		}
@@ -179,7 +181,7 @@ public class LinkToolUtil {
 			SecretKey key = keyGen.generateKey();
 			writeKey(key, dirname + saltname);
 		} catch (Exception e) {
-			log.warn("Error generating salt", e);
+			M_log.warn("Error generating salt", e);
 		}
 	}
 
@@ -200,17 +202,17 @@ public class LinkToolUtil {
 			// Encode bytes to base64 to get a string
 			return byteArray2Hex(enc);
 		} catch (javax.crypto.BadPaddingException e) {
-			log.warn("linktool encrypt bad padding");
+			M_log.warn("linktool encrypt bad padding");
 		} catch (javax.crypto.IllegalBlockSizeException e) {
-			log.warn("linktool encrypt illegal block size");
+			M_log.warn("linktool encrypt illegal block size");
 		} catch (java.security.NoSuchAlgorithmException e) {
-			log.warn("linktool encrypt no such algorithm");
+			M_log.warn("linktool encrypt no such algorithm");
 		} catch (java.security.InvalidKeyException e) {
-			log.warn("linktool encrypt invalid key");
+			M_log.warn("linktool encrypt invalid key");
 		} catch (javax.crypto.NoSuchPaddingException e) {
-			log.warn("linktool encrypt no such padding");
+			M_log.warn("linktool encrypt no such padding");
 		} catch (java.io.UnsupportedEncodingException e) {
-			log.warn("linktool encrypt unsupported encoding");
+			M_log.warn("linktool encrypt unsupported encoding");
 		}
 		return null;
 	}
@@ -227,7 +229,7 @@ public class LinkToolUtil {
 			// Decode using utf-8
 			return new String(utf8, "UTF8");
 		} catch (Exception ignore) {
-			log.warn("linktool decrypt failed");
+			M_log.warn("linktool decrypt failed");
 		}
 		return null;
 	}
@@ -271,9 +273,9 @@ public class LinkToolUtil {
 			salt = readSecretKey(homedir + saltname, "HmacSHA1");
 
 			if ( salt != null && secretKey != null ) {
-				log.info("LinkToolSetup complete");
+				M_log.info("LinkToolSetup complete");
 			} else {
-				log.warn("LinkToolSetup failed - cannot create encrypted sessions");
+				M_log.warn("LinkToolSetup failed - cannot create encrypted sessions");
 			}
 			LinkToolSetupComplete = true;
 		}

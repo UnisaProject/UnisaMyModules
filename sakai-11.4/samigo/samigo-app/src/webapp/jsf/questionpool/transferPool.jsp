@@ -22,7 +22,7 @@
                 }
               window.onload = initPage;
             </script>
-            <samigo:script path="/../library/js/spinner.js"/>
+            <script src="/library/js/spinner.js" type="text/javascript"></script>
         </head>
     <body onload="disableCheckboxes();<%= request.getAttribute("html.body.onload") %>">
 
@@ -38,7 +38,7 @@
                     <h:inputHidden id="disabledCheckboxes" value="" />
 
                     <br/>
-                    <div class="tier2">
+                    <div class="tier4">
                         <h:selectBooleanCheckbox id="checkAllCheckbox" onclick="checkAllCheckboxes(this);updateButtonStatusOnCheck(document.getElementById('transferPool:transferpoolSubmit'), document.getElementById('transferPool')); " value="#{questionpool.checkAll}" />
                         <h:outputText value="#{questionPoolMessages.transfer_pool_select_all}" />
                     </div>

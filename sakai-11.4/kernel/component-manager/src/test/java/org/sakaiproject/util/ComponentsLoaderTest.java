@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2003-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.util;
 
 import java.io.File;
@@ -20,16 +5,12 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.springframework.context.ConfigurableApplicationContext;
-
 import org.sakaiproject.component.impl.SpringCompMgr;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Verifies behaviors of {@link ComponentsLoader}.
@@ -37,7 +18,6 @@ import org.sakaiproject.component.impl.SpringCompMgr;
  * @author dmccallum@unicon.net
  *
  */
-@Slf4j
 public class ComponentsLoaderTest {
 
 	/** the primary SUT */
@@ -62,6 +42,7 @@ public class ComponentsLoaderTest {
 	@After
 	public void tearDown() throws Exception {
 		builder.tearDown();
+		componentMgr.close();
 	}
 	
 	/**
@@ -341,6 +322,6 @@ public class ComponentsLoaderTest {
 
 	
 	private void sayUnusableBuilder(String invokingMethod) {
-		log.debug("Unable to execute {}, probably b/c necessary code generation tools are not available. Please see http://maven.apache.org/general.html#tools-jar-dependency for information on making tools.jar visible in the Maven classpaths.", invokingMethod);
+		System.out.println("Unable to execute " + invokingMethod +", probably b/c necessary code generation tools are not available. Please see http://maven.apache.org/general.html#tools-jar-dependency for information on making tools.jar visible in the Maven classpaths.");
 	}
 }

@@ -23,7 +23,6 @@
 
 package examples;
 
-import lombok.extern.slf4j.Slf4j;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.radeox.macro.Macro;
@@ -40,7 +39,7 @@ import java.io.*;
  * @author Stephan J. Schmidt
  * @version $Id$
  */
-@Slf4j
+
 public class MacroExample extends RadeoxTestSupport {
   public MacroExample(String name) {
     super(name);
@@ -56,7 +55,7 @@ public class MacroExample extends RadeoxTestSupport {
     try {
       macro.execute(writer, new BaseMacroParameter());
     } catch (IllegalArgumentException e) {
-      log.error(e.getMessage(), e);  //To change body of catch statement use Options | File Templates.
+      e.printStackTrace();  //To change body of catch statement use Options | File Templates.
     } catch (IOException e) {
       //
     }
@@ -77,7 +76,7 @@ public class MacroExample extends RadeoxTestSupport {
 //        contentOfFile.append(line);
 //      }
 //    } catch (IOException e) {
-//      log.error(e.getMessage(), e);
+//      e.printStackTrace();
 //    }
 //    String content = contentOfFile.toString();
 //    Macro macro = compiler.compileMacro(content);
@@ -92,7 +91,7 @@ public class MacroExample extends RadeoxTestSupport {
       MacroParameter params = new BaseMacroParameter();
       macro.execute(writer, params);
     } catch (IllegalArgumentException e) {
-      log.error(e.getMessage(), e);  //To change body of catch statement use Options | File Templates.
+      e.printStackTrace();  //To change body of catch statement use Options | File Templates.
     } catch (IOException e) {
       //
     }
@@ -109,7 +108,7 @@ public class MacroExample extends RadeoxTestSupport {
       macro.setInitialContext(context);
       macro.execute(writer, params);
     } catch (IllegalArgumentException e) {
-      log.error(e.getMessage(), e);  //To change body of catch statement use Options | File Templates.
+      e.printStackTrace();  //To change body of catch statement use Options | File Templates.
     } catch (IOException e) {
       //
     }
@@ -125,7 +124,7 @@ public class MacroExample extends RadeoxTestSupport {
       params.setParams("stephan");
       macro.execute(writer, params);
     } catch (IllegalArgumentException e) {
-      log.error(e.getMessage(), e);  //To change body of catch statement use Options | File Templates.
+      e.printStackTrace();  //To change body of catch statement use Options | File Templates.
     } catch (IOException e) {
       //
     }

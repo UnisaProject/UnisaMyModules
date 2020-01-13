@@ -23,6 +23,9 @@ package org.sakaiproject.citation.impl;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.sakaiproject.citation.util.api.OsidConfigurationException;
 import org.sakaiproject.citation.api.SiteOsidConfiguration;
 
@@ -31,6 +34,8 @@ import org.sakaiproject.citation.api.SiteOsidConfiguration;
  */
 public class SampleSiteOsidConfiguration implements SiteOsidConfiguration
 {
+ 	private static Logger _log = LoggerFactory.getLogger(SampleSiteOsidConfiguration.class);
+
  	/*
  	 * Citation Helper XML database and configuration file names
  	 *

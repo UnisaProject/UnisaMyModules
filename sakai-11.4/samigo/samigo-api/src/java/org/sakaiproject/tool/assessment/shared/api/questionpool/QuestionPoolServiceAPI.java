@@ -74,7 +74,7 @@ public interface QuestionPoolServiceAPI
   /**
    * Get the size of a subpool.
    */
-  public long getSubPoolSize(Long poolId);
+  public int getSubPoolSize(Long poolId);
 
   /**
    * Checks to see if a pool has subpools

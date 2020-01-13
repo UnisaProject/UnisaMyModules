@@ -22,20 +22,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Extension of BasicPerson to include connection related information and
- * social networking info.
+ * Extension of BasicPerson to include connection related information.
  * 
  * @author Steve Swinsburg (steve.swinsburg@gmail.com)
  *
  */
 
-@NoArgsConstructor @Getter @Setter
+@NoArgsConstructor
 public class BasicConnection extends BasicPerson implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
-    private String email;
-    private String profileUrl;
+	
+	@Getter @Setter
 	private int onlineStatus;
-	private SocialNetworkingInfo socialNetworkingInfo;
+
 }

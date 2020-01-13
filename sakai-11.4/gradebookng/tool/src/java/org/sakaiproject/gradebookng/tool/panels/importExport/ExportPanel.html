@@ -35,17 +35,13 @@
                                 <p><wicket:message key="importExport.export.advancedOption.description"/></p>
                             </div>
                         </div>
-                        
-                       	<div class="messageWarning"><wicket:message key="importExport.export.advancedOption.warning" /></div>
-                       	
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <p><wicket:message key="importExport.export.advancedOption.warning"/></p>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-sm-6">
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" wicket:id="includeStudentId">
-                                        <wicket:message key="importExport.export.advancedOption.includeStudentId"/>
-                                    </label>
-                                </div>
                                 <div class="checkbox">
                                     <label>
                                         <input type="checkbox" wicket:id="includeStudentName">
@@ -54,18 +50,10 @@
                                 </div>
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" wicket:id="includeStudentDisplayId">
-                                        <wicket:message key="importExport.export.advancedOption.includeStudentDisplayId"/>
+                                        <input type="checkbox" wicket:id="includeStudentId">
+                                        <wicket:message key="importExport.export.advancedOption.includeStudentId"/>
                                     </label>
                                 </div>
-                                <wicket:enclosure child="includeStudentNumber">
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" wicket:id="includeStudentNumber">
-                                            <wicket:message key="importExport.export.advancedOption.includeStudentNumber"/>
-                                        </label>
-                                    </div>
-                                </wicket:enclosure>
                                 <wicket:enclosure child="includePoints">
                                     <div class="checkbox">
                                         <label>
@@ -74,6 +62,12 @@
                                         </label>
                                     </div>
                                 </wicket:enclosure>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" wicket:id="includeCourseGrade">
+                                        <wicket:message key="importExport.export.advancedOption.includeCourseGrade"/>
+                                    </label>
+                                </div>
                                 <div class="checkbox">
                                     <label>
                                         <input type="checkbox" wicket:id="includeLastLogDate">
@@ -96,12 +90,6 @@
                                 </div>
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" wicket:id="includeCourseGrade">
-                                        <wicket:message key="importExport.export.advancedOption.includeCourseGrade"/>
-                                    </label>
-                                </div>
-                                <div class="checkbox">
-                                    <label>
                                         <input type="checkbox" wicket:id="includeCalculatedGrade">
                                         <wicket:message key="importExport.export.advancedOption.includeCalculatedGrade"/>
                                     </label>
@@ -114,23 +102,9 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="row">
-                            <wicket:enclosure>
-                                <div class="col-sm-12">
-                                    <div class="form-group">
-                                        <label for="filterByGroup"><wicket:message key="filter.groups" /></label>
-                                        <select id="filterByGroup" wicket:id="groupFilter">
-                                            <option value="1">Section 1</option>
-                                            <option value="2">Section 2</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </wicket:enclosure>
-                        </div>
                     </div>
-                    <div class="modal-footer act">
-                        <button wicket:id="downloadCustomGradebook" type="button" class="button_color pull-left active" data-dismiss="modal">
+                    <div class="modal-footer">
+                        <button wicket:id="downloadCustomGradebook" type="button" class="button_color pull-left" data-dismiss="modal">
                             <wicket:message key="importExport.template.button.customGradebook"/>
                         </button>
                         <button type="button" class="pull-right" data-dismiss="modal">

@@ -29,9 +29,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.codec.binary.Base64;
-
 import org.sakaiproject.api.app.podcasts.PodfeedService;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.content.cover.ContentHostingService;
@@ -44,7 +44,6 @@ import org.sakaiproject.user.api.Evidence;
 import org.sakaiproject.user.cover.AuthenticationManager;
 import org.sakaiproject.util.IdPwEvidence;
 
-@Slf4j
 public class RSSPodfeedServlet extends HttpServlet {
 	/** Used to set the MIME type of the response back to the client **/
 	private static final String RESPONSE_MIME_TYPE = "application/xml; charset=UTF-8";
@@ -59,6 +58,8 @@ public class RSSPodfeedServlet extends HttpServlet {
 	private static final String FEED_TYPE = "type";
 
 	private PodfeedService podfeedService;
+
+	private final Logger LOG = LoggerFactory.getLogger(RSSPodfeedServlet.class);
 
 	/**
 	 * The doGet method of the servlet. <br>
@@ -92,7 +93,7 @@ public class RSSPodfeedServlet extends HttpServlet {
 			siteId = reqURL.substring(1, reqURL.lastIndexOf("/"));
 		}
 
-		log.debug("Podcast feed requested for site: " + siteId);
+		LOG.debug("Podcast feed requested for site: " + siteId);
 
 		// get podcast folder id to determine if public/private
 		final String podcastsCollection = podfeedService.retrievePodcastFolderId(siteId);
@@ -118,7 +119,7 @@ public class RSSPodfeedServlet extends HttpServlet {
 
 				// authenticate
 				try {
-					log.info("Authenticating " + e);
+					LOG.info("Authenticating " + e);
 					final Authentication a = AuthenticationManager
 							.authenticate(e);
 
@@ -210,7 +211,7 @@ public class RSSPodfeedServlet extends HttpServlet {
 	 *             if an error occure
 	 */
 	public void init() throws ServletException {
-		log.debug(this + ": RSSPodfeedServlet.init()");
+		LOG.debug(this + ": RSSPodfeedServlet.init()");
 
 		podfeedService = (PodfeedService) ComponentManager
 				.get("org.sakaiproject.api.app.podcasts.PodfeedService");
@@ -244,7 +245,7 @@ public class RSSPodfeedServlet extends HttpServlet {
 		final String header = request.getHeader("Authorization");
 		String[] elements = null;
 
-		log.debug("Authorization: " + header);
+		LOG.debug("Authorization: " + header);
 
 		if (header != null)
 			elements = header.split(" ");
@@ -254,24 +255,24 @@ public class RSSPodfeedServlet extends HttpServlet {
 			final String type = elements[0];
 			final String hash = elements[1];
 
-			log.debug("type: " + type + " hash: " + hash);
+			LOG.debug("type: " + type + " hash: " + hash);
 
 			final String[] credential = (new String(base64Encoder.decode(hash.getBytes())))
 					.split(":");
 
-			log.debug("credential: " + credential);
+			LOG.debug("credential: " + credential);
 
 			if (credential != null && credential.length >= 2) {
 				final String eid = credential[0];
 				final String password = credential[1];
 
-				log.debug("eid: " + eid + " password: ********");
+				LOG.debug("eid: " + eid + " password: ********");
 
 				if ((eid.length() == 0) || (password.length() == 0)) {
 					return null;
 				}
 
-				return new IdPwEvidence(eid, password, request.getRemoteAddr());
+				return new IdPwEvidence(eid, password);
 
 			}
 

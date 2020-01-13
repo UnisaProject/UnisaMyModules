@@ -22,9 +22,10 @@
 
 package org.sakaiproject.tool.assessment.facade;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
 import org.sakaiproject.tool.assessment.data.model.Tree;
@@ -63,13 +64,11 @@ public interface QuestionPoolFacadeQueriesAPI
 
   public QuestionPoolIteratorFacade getAllPoolsWithAccess(String agentId);
   
-  public List<QuestionPoolFacade> getBasicInfoOfAllPools(String agentId);
+  public ArrayList getBasicInfoOfAllPools(String agentId);
  
   public boolean poolIsUnique(Long questionPoolId, String title, Long parentPoolId, String agentId);
 
   public List getAllItems(Long questionPoolId);
-
-  public List getAllItemsIds(final Long questionPoolId);
 
   public List getAllItemFacadesOrderByItemText(Long questionPoolId,
 					       String orderBy, String ascending);
@@ -168,16 +167,7 @@ public interface QuestionPoolFacadeQueriesAPI
 
   public List getSubPools(Long poolId);
 
-  public long getSubPoolSize(Long poolId);
-
-  /**
-   * get number of subpools for each pool in a single query.
-   * returns a List of Long arrays. Each array is 0: poolid, 1: count of subpools
-   *
-   * @param agent
-   * @return List<Long[]>
-   */
-  public List<Long[]> getSubPoolSizes(String agent);
+  public int getSubPoolSize(Long poolId);
 
   /**
    * DOCUMENTATION PENDING
@@ -215,7 +205,7 @@ public interface QuestionPoolFacadeQueriesAPI
 
   public QuestionPoolFacade getPoolById(Long questionPoolId);
 
-  public Map getQuestionPoolItemMap();
+  public HashMap getQuestionPoolItemMap();
 
   public Long copyItemFacade(ItemDataIfc itemData);
   
@@ -223,7 +213,7 @@ public interface QuestionPoolFacadeQueriesAPI
 
   public Integer getCountItemFacades(Long questionPoolId);
   
-  public Map<Long, Integer> getCountItemFacadesForUser(String agentId);
+  public HashMap<Long, Integer> getCountItemFacadesForUser(String agentId);	  
   
   /**
    * Shared Pools with other user

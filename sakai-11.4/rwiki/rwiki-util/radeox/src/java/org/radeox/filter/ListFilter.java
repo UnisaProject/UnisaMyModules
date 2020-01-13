@@ -28,7 +28,8 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.radeox.filter.context.FilterContext;
 import org.radeox.filter.regex.LocaleRegexTokenFilter;
 import org.radeox.regex.MatchResult;
@@ -41,9 +42,10 @@ import org.radeox.regex.MatchResult;
  * 
  * @version $Id$
  */
-@Slf4j
+
 public class ListFilter extends LocaleRegexTokenFilter implements CacheFilter
 {
+	private static Logger log = LoggerFactory.getLogger(ListFilter.class);
 
 	private final static Map openList = new HashMap();
 
@@ -104,7 +106,7 @@ public class ListFilter extends LocaleRegexTokenFilter implements CacheFilter
 		{
 			BufferedReader reader = new BufferedReader(new StringReader(result
 					.group(0)));
-			// log.info("match="+result.group(0));
+			// System.err.println("match="+result.group(0));
 			addList(buffer, reader);
 		}
 		catch (Exception e)

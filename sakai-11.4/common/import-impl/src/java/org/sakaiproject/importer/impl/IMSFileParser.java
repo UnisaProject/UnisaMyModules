@@ -38,21 +38,16 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import org.xml.sax.SAXException;
-
 import org.sakaiproject.importer.api.Importable;
 import org.sakaiproject.importer.api.IMSResourceTranslator;
 import org.sakaiproject.importer.impl.importables.FileResource;
 import org.sakaiproject.importer.impl.importables.Folder;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
-@Slf4j
 public abstract class IMSFileParser extends ZipFileParser {
 	protected Map<String, Node> resourceMap = new HashMap<String, Node>();
 	protected Map<String, IMSResourceTranslator> translatorMap = new HashMap<String, IMSResourceTranslator>();
@@ -77,19 +72,23 @@ public abstract class IMSFileParser extends ZipFileParser {
             DocumentBuilder docBuilder = builderFactory.newDocumentBuilder();
             this.archiveManifest = (Document) docBuilder.parse(fis);
         } catch (FileNotFoundException e) {
-            log.error(e.getMessage(), e);
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         } catch (ParserConfigurationException e) {
-            log.error(e.getMessage(), e);
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         } catch (SAXException e) {
-            log.error(e.getMessage(), e);
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         } finally {
             if (fis != null) {
                 try {
                     fis.close();
                 } catch (IOException e) {
-                    log.error(e.getMessage(), e);
+                    // we tried
                 }
             }
         }

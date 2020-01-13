@@ -15,6 +15,8 @@
  */
 package org.sakaiproject.qna.logic.impl.sms;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.qna.logic.AnswerLogic;
 import org.sakaiproject.qna.logic.ExternalLogic;
 import org.sakaiproject.qna.logic.OptionsLogic;
@@ -26,8 +28,6 @@ import org.sakaiproject.qna.model.QnaQuestion;
 import org.sakaiproject.sms.logic.incoming.ParsedMessage;
 import org.sakaiproject.sms.logic.incoming.ShortMessageCommand;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Reply to a existing question. 
  * Usage: REPLY <question nr> <answer text>
@@ -35,9 +35,9 @@ import lombok.extern.slf4j.Slf4j;
  * @author wilhelm@psybergate.co.za
  * 
  */
-@Slf4j
 public class ReplySmsCommand implements ShortMessageCommand {
 
+	private static Log log = LogFactory.getLog(ReplySmsCommand.class);
 	private static final String REPLY = "REPLY";
 	private static final String REPLY_ALIAS = "R";
 

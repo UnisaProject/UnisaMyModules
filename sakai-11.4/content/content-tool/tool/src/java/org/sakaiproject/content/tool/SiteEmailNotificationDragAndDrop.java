@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2003-2016 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.content.tool;
 
 import java.util.Iterator;
@@ -21,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-
-import lombok.extern.slf4j.Slf4j;
 
 import org.sakaiproject.util.SiteEmailNotification;
 import org.sakaiproject.util.api.FormattedText;
@@ -34,6 +17,7 @@ import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.content.api.ContentHostingService;
+import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.content.api.ContentCollection;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.component.cover.ComponentManager;
@@ -41,6 +25,7 @@ import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.event.api.Event;
+import org.sakaiproject.event.api.Notification;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.Group;
@@ -49,10 +34,15 @@ import org.sakaiproject.authz.api.Member;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.exception.TypeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
+//import org.sakaiproject.content.cover.ComponentManager;
+
 public class SiteEmailNotificationDragAndDrop extends SiteEmailNotification
 {
+	static final Logger logger = LoggerFactory.getLogger(SiteEmailNotificationDragAndDrop.class);
+
 	/* property bundles */
 	private static final String DEFAULT_RESOURCECLASS = "org.sakaiproject.localization.util.SiteemaconProperties";
 	private static final String DEFAULT_RESOURCEBUNDLE = "org.sakaiproject.localization.bundle.siteemacon.siteemacon";
@@ -214,7 +204,7 @@ public class SiteEmailNotificationDragAndDrop extends SiteEmailNotification
 				site = siteService.getSite(siteId);
 			}
 			catch (IdUnusedException e) {
-				log.warn("Could not getSite for {} not returning any recipients.", siteId);
+				logger.warn("Could not getSite for " + siteId + " not returning any recipients.");
 				return recipients;
 			}
 
@@ -262,7 +252,7 @@ public class SiteEmailNotificationDragAndDrop extends SiteEmailNotification
 						}
 						catch(UserNotDefinedException e1)
 						{
-							log.warn("UserNotDefinedException trying to get user: {}", dropboxOwnerId);
+							logger.warn("UserNotDefinedException trying to get user: " + dropboxOwnerId);
 						}
 					}
 
@@ -369,11 +359,11 @@ public class SiteEmailNotificationDragAndDrop extends SiteEmailNotification
 						}
 
 					} catch (PermissionException e) {
-						log.error(e.getMessage(), e);
+						e.printStackTrace();
 					} catch (IdUnusedException e) {
-						log.error(e.getMessage(), e);
+						e.printStackTrace();
 					} catch (TypeException e) {
-						log.error(e.getMessage(), e);
+						e.printStackTrace();
 					}
 				}
 
@@ -475,32 +465,14 @@ public class SiteEmailNotificationDragAndDrop extends SiteEmailNotification
 			buf.append("<p>");
 		}
 
-		boolean plural = this.fileList.size() > 1;
-		Object[] replacementValues = new Object[] {this.fileList.size()};
-		String numResourcesMsg;
-		if (ContentHostingService.EVENT_RESOURCE_AVAILABLE.equals(function) || ContentHostingService.EVENT_RESOURCE_ADD.equals(function))
+		if ((contentHostingService.EVENT_RESOURCE_AVAILABLE.equals(function))||(contentHostingService.EVENT_RESOURCE_ADD.equals(function)))
 		{
-			if (plural)
-			{
-				numResourcesMsg = rb.getFormattedMessage("anewresDnD.plural", replacementValues);
-			}
-			else
-			{
-				numResourcesMsg = rb.getString("anewresDnD");
-			}
+			buf.append(rb.getString("anewresDnD"));
 		}
 		else
 		{
-			if (plural)
-			{
-				numResourcesMsg = rb.getFormattedMessage("anewres2DnD.plural", replacementValues);
-			}
-			else
-			{
-				numResourcesMsg = rb.getString("anewres2DnD");
-			}
+			buf.append(rb.getString("anewres2DnD"));
 		}
-		buf.append(numResourcesMsg);
 		buf.append(" ");
 		buf.append(rb.getString("tothe"));
 		buf.append(" \"");
@@ -595,11 +567,11 @@ public class SiteEmailNotificationDragAndDrop extends SiteEmailNotification
 		} 
 		catch (PermissionException e) 
 		{
-			log.warn("PermissionException trying to get title for individual dropbox: {}", dropboxId);
+			logger.warn("PermissionException trying to get title for individual dropbox: " + dropboxId);
 		} 
 		catch (IdUnusedException e) 
 		{
-			log.warn("IdUnusedException trying to get title for individual dropbox: {}", dropboxId);
+			logger.warn("IdUnusedException trying to get title for individual dropbox: " + dropboxId);
 		}
 
 		if ( doHtml ) 

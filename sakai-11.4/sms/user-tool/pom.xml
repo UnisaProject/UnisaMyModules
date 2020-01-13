@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.sakaiproject.sms</groupId>
 		<artifactId>sms</artifactId>
-		<version>12.6</version>
+		<version>11.4</version><!--Sms.version-->
 	</parent>
 	<properties>
 		<mysql.connector.version>5.1.5</mysql.connector.version>
@@ -34,10 +34,13 @@
 			<groupId>org.sakaiproject.sms</groupId>
 			<artifactId>sms-stubs</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+		</dependency>
 
                 <!-- RSF dependencies -->
-        <dependency>
+<dependency>
             <groupId>org.sakaiproject.rsf</groupId>
             <artifactId>sakai-rsf-core</artifactId>
             <version>${project.version}</version>

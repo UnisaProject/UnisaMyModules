@@ -1,0 +1,30 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="0,30" dimension="256,91" />
+  <StrutsActivity path="/studyquotation.do" location="0,225" dimension="466,112" />
+  <StrutsActivity path="/WEB-INF/jsp/studyquotationinput.jsp" location="-30,405" dimension="213,49" />
+  <StrutsActivity path="/WEB-INF/jsp/studyquotationdisplay.jsp" location="360,405" dimension="222,49" />
+  <StrutsTransition id="/default.do,default,/studyquotation.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="128,121" />
+      <AbsolutePoint location="128,225" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/studyquotation.do,study-quotation-display,/WEB-INF/jsp/studyquotationdisplay.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="375,337" />
+      <AbsolutePoint location="375,405" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/studyquotation.do,study-quotation-input,/WEB-INF/jsp/studyquotationinput.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="168,337" />
+      <AbsolutePoint location="168,405" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/WEB-INF/jsp/studyquotationinput.jsp,null,/studyquotation.do,2" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="76,405" />
+      <AbsolutePoint location="76,337" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans >
+    <form-bean name="smsBatchForm" type="za.ac.unisa.lms.tools.smsbatch.forms.SmsBatchForm" />
+
+  </form-beans>
+
+  <global-exceptions />
+  <global-forwards />
+  <action-mappings >
+  <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.smsbatch.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/smsbatch.do?act=menu"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="smsBatchForm"
+      input="/WEB-INF/jsp/smsstep2.jsp"
+      name="smsBatchForm"
+      parameter="act"
+      path="/smsbatch"
+      type="za.ac.unisa.lms.tools.smsbatch.actions.SmsBatchAction"
+      validate="false">
+      <forward
+        name="firstpage"
+        path="/WEB-INF/jsp/menu.jsp"
+        contextRelative="true" />
+      <forward
+        name="displayforward"
+        path="/WEB-INF/jsp/display.jsp"
+        contextRelative="true" />
+      <forward
+        name="step2forward"
+        path="/WEB-INF/jsp/smsstep2.jsp"
+        contextRelative="true" />
+      <forward
+        name="step1forward"
+        path="/WEB-INF/jsp/smsstep1.jsp"
+        contextRelative="true" />
+      <forward
+        name="searchforward"
+        path="/WEB-INF/jsp/search.jsp"
+        contextRelative="true" />
+      <forward
+        name="step3forward"
+        path="/WEB-INF/jsp/smsstep3.jsp"
+        contextRelative="true" />
+      <forward
+        name="userunknown"
+        path="/WEB-INF/jsp/userunknown.jsp"
+        contextRelative="true" />
+    </action>
+     <action
+      attribute="smsBatchForm"
+      name="smsBatchForm"
+      parameter="act"
+      path="/smsFile"
+      type="za.ac.unisa.lms.tools.smsbatch.actions.SmsFileAction"
+      validate="false">
+      <forward
+        name="step1forward"
+        path="/WEB-INF/jsp/smsFileStep1.jsp"
+        contextRelative="true" />
+       <forward
+        name="step2forward"
+        path="/WEB-INF/jsp/smsFileStep2.jsp"
+        contextRelative="true" />
+       <forward
+        name="step3forward"
+        path="/WEB-INF/jsp/smsFileStep3.jsp"
+        contextRelative="true" /> 
+        <forward
+        name="viewerrors"
+        path="/WEB-INF/jsp/viewErrors.jsp"
+        contextRelative="true" /> 
+       <forward
+        name="userunknown"
+        path="/WEB-INF/jsp/userunknown.jsp"
+        contextRelative="true" />
+       <forward
+        name="firstpage"
+        path="/smsbatch.do?act=menu"
+        contextRelative="true" />
+      </action>
+     
+  </action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.smsbatch.ApplicationResources" />
+	
+</struts-config>

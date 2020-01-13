@@ -1,0 +1,35 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="242,88" />
+  <StrutsActivity path="/eshop.do" location="45,195" dimension="274,88" />
+  <StrutsActivity path="/WEB-INF/jsp/viewadverts.jsp" location="0,345" dimension="175,49" />
+  <StrutsActivity path="/WEB-INF/jsp/editadvert.jsp" location="585,225" dimension="166,49" />
+  <StrutsActivity path="/WEB-INF/jsp/addadvert.jsp" location="240,405" dimension="166,49" />
+  <StrutsActivity path="/WEB-INF/jsp/showadvert.jsp" location="390,330" dimension="173,49" />
+  <StrutsTransition id="/eshop.do,eshop-view-advert,/WEB-INF/jsp/viewadverts.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="160,283" />
+      <AbsolutePoint location="160,345" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/eshop.do,eshop-edit-advert,/WEB-INF/jsp/editadvert.jsp,1" routingType="1">
+    <Bendpoints />
+  </StrutsTransition>
+  <StrutsTransition id="/eshop.do,eshop-show-advert,/WEB-INF/jsp/showadvert.jsp,1" routingType="1">
+    <Bendpoints>
+      <Point rDim1="283,31" rDim2="-11,-84" />
+      <Point rDim1="358,31" rDim2="64,-84" />
+    </Bendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/eshop.do,eshop-add-advert,/WEB-INF/jsp/addadvert.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="280,283" />
+      <AbsolutePoint location="280,405" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/eshop.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="171,138" />
+      <AbsolutePoint location="171,195" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

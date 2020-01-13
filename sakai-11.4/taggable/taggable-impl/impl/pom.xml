@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.sakaiproject.taggable</groupId>
         <artifactId>taggable</artifactId>
-        <version>12.6</version>
+        <version>11.4</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -17,10 +17,7 @@
         <url>http://sakaiproject.org/</url>
     </organization>
     <inceptionYear>2003</inceptionYear>
-    <packaging>sakai-component</packaging>
-    <properties>
-        <deploy.target>components</deploy.target>
-    </properties>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>

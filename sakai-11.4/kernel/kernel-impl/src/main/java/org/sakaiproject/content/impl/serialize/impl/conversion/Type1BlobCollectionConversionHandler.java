@@ -31,17 +31,18 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.sakaiproject.content.impl.serialize.impl.Type1BaseContentCollectionSerializer;
 import org.sakaiproject.util.conversion.SchemaConversionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author ieb
  */
-@Slf4j
 public class Type1BlobCollectionConversionHandler implements SchemaConversionHandler
 {
+	private static final Logger log = LoggerFactory.getLogger(Type1BlobCollectionConversionHandler.class);
+
 	/*
 	 * (non-Javadoc)
 	 *
@@ -81,6 +82,7 @@ public class Type1BlobCollectionConversionHandler implements SchemaConversionHan
 			}
 			break;
 		}
+		//System.out.println("getSource(" + id + ") \n" + rv + "\n");
 		return rv;
 	}
 
@@ -122,11 +124,13 @@ public class Type1BlobCollectionConversionHandler implements SchemaConversionHan
 			}
 			else
 			{
+				//System.out.println("convertSource(" + id + ") result.length == " + result.length + "\n" + new String(result));
 				InputStream stream = new ByteArrayInputStream(result);
 				updateRecord.setBinaryStream(1, stream, result.length);
 				//updateRecord.setBytes(1, result);
 
 				updateRecord.setString(2, id);
+				//System.out.println("\n\nconvertSource(" + id + ") result.length == " + result.length + " returning true");
 
 				return true;
 			}
@@ -173,6 +177,7 @@ public class Type1BlobCollectionConversionHandler implements SchemaConversionHan
 			Blob blob = rs.getBlob(1);
 			if(blob != null)
 			{
+				//System.out.println("getValidateSource(" + id + ") blob == " + blob + " blob.length == " + blob.length());
 				rv = blob.getBytes(1L, (int) blob.length());
 			}
 			else
@@ -198,6 +203,10 @@ public class Type1BlobCollectionConversionHandler implements SchemaConversionHan
 			rv = rs.getBytes(1);
 			break;
 		}
+		//System.out.println("getValidateSource(" + id + ") \n" + rv + "\n");
 		return rv;
 	}
+
+
+
 }

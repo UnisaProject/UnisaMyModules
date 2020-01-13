@@ -19,6 +19,9 @@
  *
  **********************************************************************************/
 
+
+
+
 package org.sakaiproject.tool.assessment.jsf.renderer;
 
 import java.io.IOException;
@@ -33,7 +36,8 @@ import javax.faces.context.ResponseWriter;
 import javax.faces.el.ValueBinding;
 import javax.faces.render.Renderer;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -50,10 +54,11 @@ import lombok.extern.slf4j.Slf4j;
  * @version $Id$
  */
 
-@Slf4j
 public class PagerRenderer
   extends Renderer
 {
+
+  private static Logger log = LoggerFactory.getLogger(PagerRenderer.class);
 
   public void encodeBegin(FacesContext context,
     UIComponent component) throws IOException

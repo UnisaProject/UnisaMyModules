@@ -14,14 +14,15 @@
 
 	#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("gen.alert.message", $alertMessage)</div><div class="clear"></div>#end
 	
-	#*  unisa change 
-	<div class="page-header">
-	  <h2>$validator.escapeHtml($message.Header.subject)</h2>
-	</div>
-	*#
+	<!-- Unisa Changes:2018/10/17:Change heading margins by adding class unisaToolHeading and h3 tag -->
+	<!-- <div class="page-header"> -->
+	<!--   <h2>$validator.escapeHtml($message.Header.subject)</h2> -->
+	<!-- </div> -->
+	
 	<div class="unisaToolHeading">
 	  <h3>$validator.escapeHtml($message.Header.subject)</h3>
 	</div>
+	<!-- End Unisa Changes:2018/10/17-->
 
 	<div class="form-horizontal">
 	  <div class="form-group">
@@ -79,25 +80,19 @@
 
 	</div>
 
-	<div class="page-header">
-		<h4>
-			$tlang.getString("meta.message")
-		</h4>
-	</div>
-	
-	 #* <!-- Unisa Changes:2018/10/17:Change heading margins by adding class unisaToolHeading and h3 tag (leave h4 tag below) -->
+	<!-- Unisa Changes:2018/10/17:Change heading margins by adding class unisaToolHeading and h3 tag (leave h4 tag below) -->
 	<!-- <div class="page-header"> -->
 	<!-- 	<h4> -->
 	<!-- 		$tlang.getString("meta.message") -->
 	<!-- 	</h4> -->
-	<!-- </div> --> *#
+	<!-- </div> -->
 	
 	<div class="unisaToolHeading">
 		<h4>
 			$tlang.getString("meta.message")
 		</h4>
 	</div>	
-	##<!-- End Unisa Changes:2018/10/17-->
+	<!-- End Unisa Changes:2018/10/17-->
 	
 	<div class="message-body">
 		<p>$validator.escapeHtmlFormattedText($message.body)</p>

@@ -26,15 +26,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.messageforums.Area;
 import org.sakaiproject.api.app.messageforums.BaseForum;
 import org.sakaiproject.api.app.messageforums.DBMembershipItem;
 
-@Slf4j
 public class AreaImpl extends MutableEntityImpl implements Area
 {
+
+  private static final Logger LOG = LoggerFactory.getLogger(AreaImpl.class);
 
   private String contextId;
 
@@ -238,8 +239,8 @@ public Set getDiscussionForumsSet() {
   ////////////////////////////////////////////////////////////////////////
   
   public void addPrivateForum(BaseForum forum) {
-      if (log.isDebugEnabled()) {
-          log.debug("addPrivateForum(forum " + forum + ")");
+      if (LOG.isDebugEnabled()) {
+          LOG.debug("addPrivateForum(forum " + forum + ")");
       }
       
       if (forum == null) {
@@ -254,8 +255,8 @@ public Set getDiscussionForumsSet() {
   }
 
   public void removePrivateForum(BaseForum forum) {
-      if (log.isDebugEnabled()) {
-          log.debug("removePrivateForum(forum " + forum + ")");
+      if (LOG.isDebugEnabled()) {
+          LOG.debug("removePrivateForum(forum " + forum + ")");
       }
       
       if (forum == null) {
@@ -267,8 +268,8 @@ public Set getDiscussionForumsSet() {
   }
        
   public void addDiscussionForum(BaseForum forum) {
-      if (log.isDebugEnabled()) {
-          log.debug("addForum(forum " + forum + ")");
+      if (LOG.isDebugEnabled()) {
+          LOG.debug("addForum(forum " + forum + ")");
       }
       
       if (forum == null) {
@@ -283,8 +284,8 @@ public Set getDiscussionForumsSet() {
   }
 
   public void removeDiscussionForum(BaseForum forum) {
-      if (log.isDebugEnabled()) {
-          log.debug("removeDiscussionForum(forum " + forum + ")");
+      if (LOG.isDebugEnabled()) {
+          LOG.debug("removeDiscussionForum(forum " + forum + ")");
       }
       
       if (forum == null) {
@@ -297,8 +298,8 @@ public Set getDiscussionForumsSet() {
   }
        
   public void addOpenForum(BaseForum forum) {
-      if (log.isDebugEnabled()) {
-          log.debug("addOpenForum(forum " + forum + ")");
+      if (LOG.isDebugEnabled()) {
+          LOG.debug("addOpenForum(forum " + forum + ")");
       }
       
       if (forum == null) {
@@ -313,8 +314,8 @@ public Set getDiscussionForumsSet() {
   }
 
   public void removeOpenForum(BaseForum forum) {
-      if (log.isDebugEnabled()) {
-          log.debug("removeOpenForum(forum " + forum + ")");
+      if (LOG.isDebugEnabled()) {
+          LOG.debug("removeOpenForum(forum " + forum + ")");
       }
       
       if (forum == null) {
@@ -326,8 +327,8 @@ public Set getDiscussionForumsSet() {
   }
   
   public void addMembershipItem(DBMembershipItem item) {
-    if (log.isDebugEnabled()) {
-        log.debug("addMembershipItem(item " + item + ")");
+    if (LOG.isDebugEnabled()) {
+        LOG.debug("addMembershipItem(item " + item + ")");
     }
     
     if (item == null) {
@@ -341,8 +342,8 @@ public Set getDiscussionForumsSet() {
 }
 
   public void removeMembershipItem(DBMembershipItem item) {
-    if (log.isDebugEnabled()) {
-        log.debug("removeMembershipItem(item " + item + ")");
+    if (LOG.isDebugEnabled()) {
+        LOG.debug("removeMembershipItem(item " + item + ")");
     }
     
     if (item == null) {

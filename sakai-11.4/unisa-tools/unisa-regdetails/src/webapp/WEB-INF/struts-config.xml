@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans >
+    <form-bean name="regDetailsForm" type="za.ac.unisa.lms.tools.regdetails.forms.RegDetailsForm" />
+
+
+  </form-beans>
+
+  <global-exceptions />
+  <global-forwards />
+  <action-mappings >
+    <action
+      parameter="action"
+      scope="session"
+      path="/default"
+      type="za.ac.unisa.lms.tools.regdetails.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/displayRegDetails.do?action=display"
+        contextRelative="true" />      
+      <forward
+        name="displayContactDetails"
+        path="/additions.do?action=displayContactDetails"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="regDetailsForm"
+      name="regDetailsForm"
+      parameter="action"
+      scope="session"
+      path="/displayRegDetails"
+      type="za.ac.unisa.lms.tools.regdetails.actions.DisplayRegDetailsAction"
+      validate="false">
+      <forward
+        name="invaliduser"
+        path="/WEB-INF/jsp/studentsOnly.jsp"
+        contextRelative="true" />
+      <forward
+        name="display"
+        path="/WEB-INF/jsp/displayRegDetails.jsp"
+        contextRelative="true" />
+      <forward
+        name="notregistered"
+        path="/WEB-INF/jsp/notregistered.jsp"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="regDetailsForm"
+      name="regDetailsForm"
+      parameter="action"
+      scope="session"
+      path="/additions"
+      type="za.ac.unisa.lms.tools.regdetails.actions.AdditionsAction"
+      validate="false">
+      <forward
+        name="oneSubmission"
+        path="/WEB-INF/jsp/oneSubmission.jsp"
+        contextRelative="true" />
+      <forward
+        name="step3"
+        path="/WEB-INF/jsp/additionsStep3.jsp"
+        contextRelative="true" />
+      <forward
+        name="step4"
+        path="/WEB-INF/jsp/additionsstep4.jsp"
+        contextRelative="true" />
+      <forward
+        name="step4a"
+        path="/WEB-INF/jsp/additionsStep4a.jsp"
+        contextRelative="true" />
+      <forward
+        name="step2a"
+        path="/WEB-INF/jsp/additionsStep2a.jsp"
+        contextRelative="true" />
+      <forward
+        name="confirm"
+        path="/WEB-INF/jsp/confirmAddition.jsp"
+        contextRelative="true" />
+      <forward
+        name="closed"
+        path="/WEB-INF/jsp/additionsClosed.jsp"
+        contextRelative="true" />
+      <forward
+        name="step2b"
+        path="/WEB-INF/jsp/additionsStep2b.jsp"
+        contextRelative="true" />
+      <forward
+        name="step2c"
+        path="/WEB-INF/jsp/additionsStep2c.jsp"
+        contextRelative="true" />
+      <forward
+        name="step2d"
+        path="/WEB-INF/jsp/additionsStep2d.jsp"
+        contextRelative="true" />
+      <forward
+        name="saved"
+        path="/WEB-INF/jsp/additionSaved.jsp"
+        contextRelative="true" />
+       <forward
+        name="selfhelpError"
+        path="/WEB-INF/jsp/selfhelpError.jsp"
+        contextRelative="true" />
+       <forward
+        name="selfhelpSuccess"
+        path="/WEB-INF/jsp/selfhelpSuccess.jsp"
+        contextRelative="true" />
+       <forward
+        name="additionalSuInfo"
+        path="/WEB-INF/jsp/additionalSuInformation.jsp"
+        contextRelative="true" />
+      <forward
+        name="cancel"
+        path="/displayRegDetails.do?action=display"
+        contextRelative="true" />
+      <forward
+        name="home"
+        path="/displayRegDetails.do?action=display"
+        contextRelative="true" />
+      <forward
+        name="exit"
+        path="/WEB-INF/jsp/displayRegDetails.jsp"
+        contextRelative="true" />
+      <forward
+        name="step1"
+        path="/WEB-INF/jsp/additionsStep1.jsp"
+        contextRelative="true" />
+        <forward
+        name="step1a"
+        path="/WEB-INF/jsp/additionsStep1a.jsp"
+        contextRelative="true" />
+        <forward
+        name="specialisation"
+        path="/WEB-INF/jsp/additionsspecialisation.jsp"
+        contextRelative="true" />
+      <forward
+        name="displayContactDetails"
+        path="/WEB-INF/jsp/contactDetails.jsp"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="regDetailsForm"
+      name="regDetailsForm"
+      parameter="action"
+      scope="session"
+      path="/cancel"
+      type="za.ac.unisa.lms.tools.regdetails.actions.CancelAction"
+      validate="false">
+      <forward
+        name="confirm"
+        path="/WEB-INF/jsp/confirmCancel.jsp"
+        contextRelative="true" />
+      <forward
+        name="saved"
+        path="/WEB-INF/jsp/cancelSaved.jsp"
+        contextRelative="true" />
+      <forward
+        name="cancel"
+        path="/WEB-INF/jsp/displayRegDetails.jsp"
+        contextRelative="true" />
+      <forward
+        name="step1"
+        path="/WEB-INF/jsp/cancelStep1.jsp"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="regDetailsForm"
+      name="regDetailsForm"
+      parameter="action"
+      scope="session"
+      path="/exchange"
+      type="za.ac.unisa.lms.tools.regdetails.actions.ExchangeAction"
+      validate="false">
+      <forward
+        name="confirm"
+        path="/WEB-INF/jsp/confirmExchange.jsp"
+        contextRelative="true" />
+      <forward
+        name="saved"
+        path="/WEB-INF/jsp/exchangesaved.jsp"
+        contextRelative="true" />
+      <forward
+        name="cancel"
+        path="/WEB-INF/jsp/displayRegDetails.jsp"
+        contextRelative="true" />
+      <forward
+        name="step1"
+        path="/WEB-INF/jsp/exchangestep1.jsp"
+        contextRelative="true" />
+    </action>
+    
+     <action
+      attribute="regDetailsForm"
+      name="regDetailsForm"
+      parameter="action"
+      scope="session"
+      path="/finalYearStudent"
+      type="za.ac.unisa.lms.tools.regdetails.actions.FinalYearStudentAction"
+      validate="false">
+      <forward
+        name="confirm"
+        path="/WEB-INF/jsp/finalyear/confirmFinalYear.jsp"
+        contextRelative="true" />
+      <forward
+        name="saved"
+        path="/WEB-INF/jsp/finalyear/finalYearSaved.jsp"
+        contextRelative="true" />
+      <forward
+        name="cancel"
+        path="/WEB-INF/jsp/displayRegDetails.jsp"
+        contextRelative="true" />
+      <forward
+        name="step1"
+        path="/WEB-INF/jsp/finalyear/finalYearStep1.jsp"
+        contextRelative="true" />
+     <forward
+        name="step2"
+        path="/WEB-INF/jsp/finalyear/finalYearStep2.jsp"
+        contextRelative="true" />
+    <forward
+        name="requirementerror"
+        path="/WEB-INF/jsp/finalyear/finalYearError.jsp"
+        contextRelative="true" />
+    <forward
+        name="home"
+        path="/displayRegDetails.do?action=display"
+        contextRelative="true" />
+    </action>
+
+   <action
+      attribute="regDetailsForm"
+      name="regDetailsForm"
+      parameter="action"
+      scope="session"
+      path="/croc"
+      type="za.ac.unisa.lms.tools.regdetails.actions.CrocAction"
+      validate="false">
+      <forward
+        name="confirm"
+        path="/WEB-INF/jsp/confirmCroc.jsp"
+        contextRelative="true" />
+      <forward
+        name="cancel"
+        path="/displayRegDetails.do?action=display"
+        contextRelative="true" />
+      <forward
+        name="stepCROC1"
+        path="/WEB-INF/jsp/requestCROC1.jsp"
+        contextRelative="true" />
+      <forward
+        name="stepCROC2"
+        path="/WEB-INF/jsp/requestCROC2.jsp"
+        contextRelative="true" />
+      <forward
+        name="invaliduser"
+        path="/WEB-INF/jsp/studentsOnly.jsp"
+        contextRelative="true" />
+    </action>
+  </action-mappings>
+
+  <message-resources parameter="za.ac.unisa.lms.tools.regdetails.ApplicationResources" />
+  <!--  Validator plugin -->
+  <plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property property="pathnames" value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+	</plug-in>
+</struts-config>
+

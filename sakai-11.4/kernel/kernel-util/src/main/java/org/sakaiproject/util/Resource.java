@@ -21,7 +21,8 @@
 
 package org.sakaiproject.util;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.util.ResourceLoader;
@@ -32,8 +33,9 @@ import org.sakaiproject.util.ResourceLoader;
  * copy of the bundle.
  *
  */
-@Slf4j
 public class Resource {
+	private static Logger log = LoggerFactory.getLogger(Resource.class);
+	
 	public Resource() {
 		// constructor
 	}

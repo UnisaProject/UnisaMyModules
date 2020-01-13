@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+
+	<form-beans>
+		<form-bean name="formTestForm" type="org.sakaiproject.struts.example.forms.FormTestForm"/>
+		<form-bean name="htmlAreaTestForm" type="org.sakaiproject.struts.example.forms.HtmlAreaTestForm"/>
+		<form-bean name="newHtmlAreaTestForm" type="org.sakaiproject.struts.example.forms.NewHtmlAreaTestForm"/>
+	</form-beans>
+	<global-exceptions />
+	<global-forwards />
+	<action-mappings >
+		<action forward="/WEB-INF/jsp/index.jsp" path="/index" />
+		<action forward="/WEB-INF/jsp/taglibs/index.jsp" path="/taglibs/index" />
+		<action forward="/WEB-INF/jsp/taglibs/htmltag.jsp" path="/taglibs/htmltag" />
+		<action forward="/WEB-INF/jsp/taglibs/headingtag.jsp" path="/taglibs/headingtag" />
+		<action forward="/WEB-INF/jsp/taglibs/groupheadingtag.jsp" path="/taglibs/groupheadingtag" />
+		<action forward="/WEB-INF/jsp/taglibs/grouptabletag.jsp" path="/taglibs/grouptabletag" />
+		<action forward="/WEB-INF/jsp/taglibs/instructiontag.jsp" path="/taglibs/instructiontag" />
+		<action forward="/WEB-INF/jsp/taglibs/requiredtag.jsp" path="/taglibs/requiredtag" />
+		<action forward="/WEB-INF/jsp/taglibs/toolbartag.jsp" path="/taglibs/toolbartag" />
+		<action forward="/WEB-INF/jsp/taglibs/htmlareatag.jsp" path="/taglibs/htmlareatag" name="htmlAreaTestForm" validate="false" />
+		<action forward="/WEB-INF/jsp/taglibs/newhtmlareatag.jsp" path="/taglibs/newhtmlareatag" name="newHtmlAreaTestForm" validate="false" />
+		<action path="/taglibs/flatlisttag" type="org.sakaiproject.struts.example.actions.ExampleDataAction">
+			<forward name="display" path="/WEB-INF/jsp/taglibs/flatlisttag.jsp"></forward> 
+		</action>
+		<action path="/taglibs/messagestag" type="org.sakaiproject.struts.example.actions.ExampleDataAction">
+			<forward name="display" path="/WEB-INF/jsp/taglibs/messagestag.jsp"></forward> 
+		</action>
+		<action path="/taglibs/actionstag" type="org.sakaiproject.struts.example.actions.FormTestAction" parameter="action" name="formTestForm" validate="false">
+			<forward name="display" path="/WEB-INF/jsp/taglibs/actionstag.jsp"></forward> 
+		</action>
+		<action forward="/WEB-INF/jsp/components/componentmanager.jsp" path="/components/componentmanager" />
+		<action forward="/WEB-INF/jsp/components/sessionmanager.jsp" path="/components/sessionmanager" />
+		<action forward="/WEB-INF/jsp/components/userdirectoryservice.jsp" path="/components/userdirectoryservice" />
+	</action-mappings>
+
+	<message-resources parameter="org.sakaiproject.struts.example.ApplicationResources" />
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property property="pathnames" value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+	</plug-in>
+	
+</struts-config>

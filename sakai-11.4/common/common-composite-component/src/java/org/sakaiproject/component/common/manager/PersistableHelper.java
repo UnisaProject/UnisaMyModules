@@ -24,10 +24,9 @@ package org.sakaiproject.component.common.manager;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.beanutils.PropertyUtils;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.common.manager.Persistable;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
@@ -35,10 +34,11 @@ import org.sakaiproject.tool.api.SessionManager;
 /**
  * @author <a href="mailto:lance@indiana.edu">Lance Speelmon</a>
  */
-@Slf4j
 public class PersistableHelper
 {
 	private static final String SYSTEM = "SYSTEM";
+
+	private static final Logger LOG = LoggerFactory.getLogger(PersistableHelper.class);
 
 	private static final String LASTMODIFIEDDATE = "lastModifiedDate";
 
@@ -53,9 +53,9 @@ public class PersistableHelper
 	public void modifyPersistableFields(Persistable persistable)
 	{
 		Date now = new Date(); // time sensitive
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("modifyPersistableFields(Persistable " + persistable + ")");
+			LOG.debug("modifyPersistableFields(Persistable " + persistable + ")");
 		}
 		if (persistable == null) throw new IllegalArgumentException("Illegal persistable argument passed!");
 
@@ -68,7 +68,7 @@ public class PersistableHelper
 		}
 		catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)
 		{
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}
@@ -76,9 +76,9 @@ public class PersistableHelper
 	public void createPersistableFields(Persistable persistable)
 	{
 		Date now = new Date(); // time sensitive
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("modifyPersistableFields(Persistable " + persistable + ")");
+			LOG.debug("modifyPersistableFields(Persistable " + persistable + ")");
 		}
 		if (persistable == null) throw new IllegalArgumentException("Illegal persistable argument passed!");
 
@@ -93,14 +93,14 @@ public class PersistableHelper
 		}
 		catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)
 		{
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}
 
 	private String getActor()
 	{
-		log.debug("getActor()");
+		LOG.debug("getActor()");
 
 		String actor = null;
 		Session session = sessionManager.getCurrentSession();
@@ -130,9 +130,9 @@ public class PersistableHelper
 	 */
 	public void setSessionManager(SessionManager sessionManager)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setSessionManager(SessionManager " + sessionManager + ")");
+			LOG.debug("setSessionManager(SessionManager " + sessionManager + ")");
 		}
 
 		this.sessionManager = sessionManager;

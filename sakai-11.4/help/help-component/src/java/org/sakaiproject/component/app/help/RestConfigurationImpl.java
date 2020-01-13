@@ -31,22 +31,21 @@ import java.net.URLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.codec.binary.Base64;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.api.app.help.RestConfiguration;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import org.sakaiproject.api.app.help.RestConfiguration;
+
 
 /**
  * @author <a href="mailto:jlannan.iupui.edu">Jarrod Lannan</a>
  * @version $Id$
  * 
  */
-@Slf4j
 public class RestConfigurationImpl implements RestConfiguration
 {
 
@@ -60,6 +59,8 @@ public class RestConfigurationImpl implements RestConfiguration
 
   private static String REST_DOMAIN_URL;
   private static String REST_CORPUS_URL;
+
+  private final static Logger LOG = LoggerFactory.getLogger(RestConfigurationImpl.class);
 
   /**
    * @see org.sakaiproject.api.app.help.RestConfiguration#getOrganization()
@@ -179,9 +180,9 @@ public class RestConfigurationImpl implements RestConfiguration
   public String getCorpusDocument()
   {
 
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("getCorpusDocument()");
+      LOG.debug("getCorpusDocument()");
     }
 
     URL url = null;
@@ -209,11 +210,11 @@ public class RestConfigurationImpl implements RestConfiguration
     }
     catch (MalformedURLException e)
     {
-      log.error("Malformed URL in REST document: " + url.getPath(), e);
+      LOG.error("Malformed URL in REST document: " + url.getPath(), e);
     }
     catch (IOException e)
     {
-      log.error("Could not open connection to REST document: " + url.getPath(),
+      LOG.error("Could not open connection to REST document: " + url.getPath(),
           e);
     }
     finally
@@ -227,7 +228,7 @@ public class RestConfigurationImpl implements RestConfiguration
       }
       catch (IOException e)
       {
-        log.error("error closing corpus doc", e);
+        LOG.error("error closing corpus doc", e);
       }
     }
 
@@ -267,7 +268,7 @@ public class RestConfigurationImpl implements RestConfiguration
     }            
     catch (Exception e)
     {
-      log.error(e.getMessage(), e);
+      LOG.error(e.getMessage(), e);
     }     
     
     return null;

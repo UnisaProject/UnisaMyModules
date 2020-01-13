@@ -17,14 +17,13 @@
  **********************************************************************************/
 package org.sakaiproject.sms.logic.smpp.simulatorrequired.test;
 
-
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.log4j.Level;
+import static org.junit.Assert.*;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sakaiproject.sms.logic.exception.SmsTaskNotFoundException;
@@ -50,8 +49,6 @@ import org.sakaiproject.sms.model.constants.SmsConstants;
 import org.sakaiproject.sms.util.AbstractBaseTestCase;
 import org.sakaiproject.sms.util.DateUtil;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * This test also send messages to the smpp simulator but it check the specific
  * statuses of sent messages. It also test the retrieval of the next sms task
@@ -61,7 +58,6 @@ import lombok.extern.slf4j.Slf4j;
  * 
  */
 
-@Slf4j
 public class SmsCoreTest extends AbstractBaseTestCase {
 
 	static SmsSmppImpl smsSmppImpl = null;
@@ -71,7 +67,8 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 	static SmsBillingImpl smsBillingImpl = new SmsBillingImpl();
 	static SmsConfig SmsConfigImpl = new SmsConfig();
 
-
+	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger
+			.getLogger(SmsCoreTest.class);
 
 	@BeforeClass
 	public static void beforeClass(){
@@ -106,7 +103,7 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 
 		smsCoreImpl.setSmsSmpp(smsSmppImpl);
 
-		//log.setLevel(Level.WARN);
+		LOG.setLevel(Level.WARN);
 		smsAccount = new SmsAccount();
 		smsAccount.setSakaiUserId("SMSCoreTest"
 				+ externalLogic.getCurrentUserId());
@@ -209,7 +206,7 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 			smsTask4.setSmsAccountId(smsAccount.getId());
 			hibernateLogicLocator.getSmsTaskLogic().persistSmsTask(smsTask4);
 
-			Assert.assertEquals(true, smsTask1.getId().equals(
+			assertEquals(true, smsTask1.getId().equals(
 					smsCoreImpl.getNextSmsTask().getId()));
 			smsCoreImpl.processNextTask();
 
@@ -220,7 +217,7 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 				e1.printStackTrace();
 			}
 
-			Assert.assertEquals(true, smsTask2.getId().equals(
+			assertEquals(true, smsTask2.getId().equals(
 					smsCoreImpl.getNextSmsTask().getId()));
 			smsCoreImpl.processNextTask();
 			try {
@@ -229,7 +226,7 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			Assert.assertEquals(true, smsTask3.getId().equals(
+			assertEquals(true, smsTask3.getId().equals(
 					smsCoreImpl.getNextSmsTask().getId()));
 			smsCoreImpl.processNextTask();
 			try {
@@ -238,7 +235,7 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			Assert.assertEquals(true, smsCoreImpl.getNextSmsTask() == (null));
+			assertEquals(true, smsCoreImpl.getNextSmsTask() == (null));
 
 			// we give the delivery reports time to get back.
 			try {
@@ -257,17 +254,17 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 			hibernateLogicLocator.getSmsTaskLogic()
 					.getSmsTask(smsTask4.getId());
 
-			Assert.assertEquals(true, smsTask1Update.getMessagesWithSmscStatus(
+			assertEquals(true, smsTask1Update.getMessagesWithSmscStatus(
 					SmsConst_SmscDeliveryStatus.ENROUTE).size() == 0);
-			Assert.assertEquals(true, smsTask1Update.getMessagesWithStatus(
+			assertEquals(true, smsTask1Update.getMessagesWithStatus(
 					SmsConst_DeliveryStatus.STATUS_PENDING).size() == 0);
-			Assert.assertEquals(true, smsTask2Update.getMessagesWithSmscStatus(
+			assertEquals(true, smsTask2Update.getMessagesWithSmscStatus(
 					SmsConst_SmscDeliveryStatus.ENROUTE).size() == 0);
-			Assert.assertEquals(true, smsTask2Update.getMessagesWithStatus(
+			assertEquals(true, smsTask2Update.getMessagesWithStatus(
 					SmsConst_DeliveryStatus.STATUS_PENDING).size() == 0);
-			Assert.assertEquals(true, smsTask3Update.getMessagesWithSmscStatus(
+			assertEquals(true, smsTask3Update.getMessagesWithSmscStatus(
 					SmsConst_SmscDeliveryStatus.ENROUTE).size() == 0);
-			Assert.assertEquals(true, smsTask3Update.getMessagesWithStatus(
+			assertEquals(true, smsTask3Update.getMessagesWithStatus(
 					SmsConst_DeliveryStatus.STATUS_PENDING).size() == 0);
 
 		}
@@ -321,7 +318,7 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 			smsTask2.setSmsAccountId(smsAccount.getId());
 			hibernateLogicLocator.getSmsTaskLogic().persistSmsTask(smsTask2);
 
-			Assert.assertEquals(true, smsTask1.getId().equals(
+			assertEquals(true, smsTask1.getId().equals(
 					smsCoreImpl.getNextSmsTask().getId()));
 			smsCoreImpl.processNextTask();
 
@@ -332,7 +329,7 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 				e1.printStackTrace();
 			}
 
-			Assert.assertEquals(true, smsTask2.getId().equals(
+			assertEquals(true, smsTask2.getId().equals(
 					smsCoreImpl.getNextSmsTask().getId()));
 			smsCoreImpl.processNextTask();
 
@@ -349,16 +346,16 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 			SmsTask smsTask2Update = hibernateLogicLocator.getSmsTaskLogic()
 					.getSmsTask(smsTask2.getId());
 
-			Assert.assertEquals(true, smsTask1Update.getMessagesWithSmscStatus(
+			assertEquals(true, smsTask1Update.getMessagesWithSmscStatus(
 					SmsConst_SmscDeliveryStatus.ENROUTE).size() == 0);
-			Assert.assertEquals(smsTask1Update.getStatusCode().equals(
+			assertEquals(smsTask1Update.getStatusCode().equals(
 					SmsConst_DeliveryStatus.STATUS_EXPIRE), true);
 
-			Assert.assertEquals(smsTask2Update.getStatusCode().equals(
+			assertEquals(smsTask2Update.getStatusCode().equals(
 					SmsConst_DeliveryStatus.STATUS_SENT), true);
-			Assert.assertEquals(true, smsTask2Update.getMessagesWithSmscStatus(
+			assertEquals(true, smsTask2Update.getMessagesWithSmscStatus(
 					SmsConst_SmscDeliveryStatus.ENROUTE).size() == 0);
-			Assert.assertEquals(true, smsTask2Update.getMessagesWithStatus(
+			assertEquals(true, smsTask2Update.getMessagesWithStatus(
 					SmsConst_DeliveryStatus.STATUS_PENDING).size() == 0);
 		}
 
@@ -392,7 +389,7 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 		smsTask.setStatusCode(SmsConst_DeliveryStatus.STATUS_PENDING);
 		smsTask.setAttemptCount(0);
 
-		log.info("Disconnecting from server for fail test ");
+		LOG.info("Disconnecting from server for fail test ");
 		smsSmppImpl.disconnectGateWay();
 		for (int i = 0; i < 5; i++) {
 			smsCoreImpl.processTask(smsTask);
@@ -404,14 +401,14 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 		}
 		SmsTask smsTaskUpdate = hibernateLogicLocator.getSmsTaskLogic()
 				.getSmsTask(smsTask.getId());
-		Assert.assertEquals(true, smsTaskUpdate.getStatusCode().equals(
+		assertEquals(true, smsTaskUpdate.getStatusCode().equals(
 				SmsConst_DeliveryStatus.STATUS_FAIL));
-		Assert.assertEquals(true, smsTaskUpdate.getAttemptCount() == 5);
-		Assert.assertEquals(true, smsTaskUpdate.getMessagesWithStatus(
+		assertEquals(true, smsTaskUpdate.getAttemptCount() == 5);
+		assertEquals(true, smsTaskUpdate.getMessagesWithStatus(
 				SmsConst_DeliveryStatus.STATUS_FAIL).size() > 0);
 
 		hibernateLogicLocator.getSmsTaskLogic().deleteSmsTask(smsTask);
-		log.info("Reconnecting to server after fail test ");
+		LOG.info("Reconnecting to server after fail test ");
 		smsSmppImpl.connectToGateway();
 	}
 
@@ -460,14 +457,14 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 
 		try {
 			smsCoreImpl.insertTask(insertTask);
-			Assert.fail("Excpected validation exception");
+			fail("Excpected validation exception");
 		} catch (SmsTaskValidationException e1) {
-			Assert.assertTrue(e1.getErrorMessages().size() > 0);
-			log.debug(e1.getErrorMessagesAsBlock());
+			assertTrue(e1.getErrorMessages().size() > 0);
+			LOG.debug(e1.getErrorMessagesAsBlock());
 		} catch (SmsSendDeniedException se) {
-			Assert.fail("SmsSendDeniedException caught");
+			fail("SmsSendDeniedException caught");
 		} catch (SmsSendDisabledException sd) {
-			Assert.fail("SmsSendDisabledException caught");
+			fail("SmsSendDisabledException caught");
 		}
 	}
 
@@ -510,16 +507,16 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 
 		try {
 			smsCoreImpl.insertTask(insertTask);
-			Assert.fail("Excpected validation exception");
+			fail("Excpected validation exception");
 		} catch (SmsTaskValidationException e1) {
-			Assert.assertTrue(e1.getErrorMessages().size() > 0);
-			Assert.assertTrue(e1.getErrorMessages().get(0).indexOf(
+			assertTrue(e1.getErrorMessages().size() > 0);
+			assertTrue(e1.getErrorMessages().get(0).indexOf(
 					"sms.errors.task.credit.insufficient") > -1);
-			log.debug(e1.getErrorMessagesAsBlock());
+			LOG.debug(e1.getErrorMessagesAsBlock());
 		} catch (SmsSendDeniedException se) {
-			Assert.fail("SmsSendDeniedException caught");
+			fail("SmsSendDeniedException caught");
 		} catch (SmsSendDisabledException sd) {
-			Assert.fail("SmsSendDisabledException caught");
+			fail("SmsSendDisabledException caught");
 		}
 	}
 
@@ -561,12 +558,12 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 		SmsTask insertTaskUpdate = hibernateLogicLocator.getSmsTaskLogic()
 				.getSmsTask(insertTask.getId());
 
-		Assert.assertEquals(insertTaskUpdate.getStatusCode(),
+		assertEquals(insertTaskUpdate.getStatusCode(),
 				SmsConst_DeliveryStatus.STATUS_ABORT);
 
 		for (SmsMessage smsMessage : insertTaskUpdate.getSmsMessages()) {
 
-			Assert.assertEquals(smsMessage.getStatusCode(),
+			assertEquals(smsMessage.getStatusCode(),
 					SmsConst_DeliveryStatus.STATUS_ABORT);
 		}
 
@@ -585,13 +582,13 @@ public class SmsCoreTest extends AbstractBaseTestCase {
 
 		try {
 			smsCoreImpl.insertTask(insertTask);
-			Assert.fail("SmsSendDisabledException shoud be thrown");
+			fail("SmsSendDisabledException shoud be thrown");
 		} catch (SmsTaskValidationException e) {
-			Assert.fail("SmsTaskValidationException caught");
+			fail("SmsTaskValidationException caught");
 		} catch (SmsSendDeniedException e) {
-			Assert.fail("SmsSendDeniedException caught");
+			fail("SmsSendDeniedException caught");
 		} catch (SmsSendDisabledException e) {
-			Assert.assertNotNull(e);
+			assertNotNull(e);
 		}
 
 		// test shouldn't be dependant on eachother

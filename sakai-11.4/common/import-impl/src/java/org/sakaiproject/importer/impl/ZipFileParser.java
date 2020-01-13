@@ -21,12 +21,13 @@
 
 package org.sakaiproject.importer.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,7 +36,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
 import javax.activation.MimetypesFileTypeMap;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -43,15 +43,12 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
-
 import org.sakaiproject.importer.api.ImportDataSource;
 import org.sakaiproject.importer.api.ImportFileParser;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+import java.io.InputStream;
 
-@Slf4j
 public abstract class ZipFileParser implements ImportFileParser {
 	protected MimetypesFileTypeMap mimeTypes = new MimetypesFileTypeMap();
 	protected String pathToData;
@@ -158,9 +155,11 @@ public abstract class ZipFileParser implements ImportFileParser {
                             ofile.write(buffer, 0, bytesRead);
                         }
                     } catch (FileNotFoundException e) {
-                        log.error(e.getMessage(), e);
+                        // TODO Auto-generated catch block (is this ok?)
+                        e.printStackTrace();
                     } catch (IOException e) {
-                        log.error(e.getMessage(), e);
+                        // TODO Auto-generated catch block (is this ok?)
+                        e.printStackTrace();
                     } finally {
                         if (ofile != null) {
                             try {
@@ -245,22 +244,22 @@ public abstract class ZipFileParser implements ImportFileParser {
 		    }
 		    return null;
 		} catch (IOException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 			return null;
 		} catch (ParserConfigurationException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 			return null;
 		} catch (FactoryConfigurationError e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 			return null;
 		} catch (SAXException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 			return null;
 		} finally {
 		    try {
                 zipStream.close();
             } catch (IOException e) {
-                log.error(e.getMessage(), e);
+                // we tried
             }
 		    
 		}

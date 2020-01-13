@@ -23,8 +23,6 @@ package org.sakaiproject.event.api;
 
 import java.util.Date;
 
-import org.sakaiproject.event.api.LearningResourceStoreService.LRS_Statement;
-
 /**
  * Allows Event object to be serializable for distribution
  * KNL-1184
@@ -59,7 +57,6 @@ public class SimpleEvent implements Event {
         setPriority(event.getPriority());
         setEventTime(event.getEventTime());
         setServerId(serverId);
-        setLRSStatement(event.getLrsStatement());
     }
 
     /** The Event's sequence number. */
@@ -70,9 +67,6 @@ public class SimpleEvent implements Event {
 
     /** The Event's resource reference string. */
     protected String resource = "";
-
-    /** The Event's lrs statement */
-    protected LRS_Statement lrsStatement = null;
 
     /** The Event's context. May be null. */
     protected String context = null;
@@ -131,25 +125,6 @@ public class SimpleEvent implements Event {
      */
     public void setResource(String id) {
         resource = (id != null) ? id : "";
-    }
-    
-    /**
-     * Access the resource metadata.
-     * 
-     * @return The resource metadata string.
-     */
-    public LRS_Statement getLrsStatement() {
-        return lrsStatement;
-    }
-
-    /**
-     * Set the resource lrsStatement.
-     * 
-     * @param id
-     *        The resource LRS Statement.
-     */
-    public void setLRSStatement(LRS_Statement lrsStatement) {
-        this.lrsStatement = lrsStatement; 
     }
 
     /**

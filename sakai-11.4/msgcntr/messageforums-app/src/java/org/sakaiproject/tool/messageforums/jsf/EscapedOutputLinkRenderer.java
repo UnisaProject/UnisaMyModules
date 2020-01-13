@@ -7,13 +7,11 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
 import com.sun.faces.renderkit.html_basic.OutputLinkRenderer;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * This class is a wrapper for {@link OutputLinkRenderer} to escape ampersands in URL parameters.
  * This is required until Sakai uses JSF 1.2_11 or above versions.
  */
-@Slf4j
 public class EscapedOutputLinkRenderer extends OutputLinkRenderer {
 
 	@Override
@@ -30,7 +28,7 @@ public class EscapedOutputLinkRenderer extends OutputLinkRenderer {
 					}
 					paramList[i].set(pn, pv);
 				} catch (UnsupportedEncodingException e) {
-					log.error(e.getMessage(), e);
+					e.printStackTrace();
 				}
 			}
 		}

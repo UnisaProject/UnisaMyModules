@@ -21,21 +21,10 @@
 package org.sakaiproject.tool.impl;
 
 import com.google.common.collect.MapMaker;
-
-import java.io.Serializable;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentMap;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang3.StringUtils;
-
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.azeckoski.reflectutils.ConstructorUtils;
-
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.event.api.UsageSession;
 import org.sakaiproject.event.api.UsageSessionService;
@@ -43,6 +32,13 @@ import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.tool.api.*;
 import org.sakaiproject.tool.api.Breakdownable.BreakdownableSize;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.io.Serializable;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Implements the handling of Session and other bean breakdowns and rebuilds
@@ -55,7 +51,6 @@ import org.sakaiproject.tool.api.Breakdownable.BreakdownableSize;
  *
  * NOTE that org.sakaiproject.tool.impl.RebuildBreakdownService.cache must be set to a distributed store (like terracotta)
  */
-@Slf4j
 public class RebuildBreakdownServiceImpl implements RebuildBreakdownService {
     final static String SPECIAL_SESSION_KEY_PREFIX                  = "_sakai_session_";
     final static String SESSION_USER_ID_KEY                         = SPECIAL_SESSION_KEY_PREFIX+"UserId";
@@ -71,6 +66,7 @@ public class RebuildBreakdownServiceImpl implements RebuildBreakdownService {
     final static String SESSION_LAST_BREAKDOWN_KEY                  = SPECIAL_SESSION_KEY_PREFIX+"LastBreakdownTime";
     final static String SESSION_LAST_REBUILD_KEY                    = SPECIAL_SESSION_KEY_PREFIX+"LastRebuildTime";
 
+    private static final Logger log = LoggerFactory.getLogger(RebuildBreakdownServiceImpl.class);
     private final int minSecondsBetweenStoresDefault = 10;
     private final int minSecondsAfterRebuildDefault = 30;
     private final int smallestMinSecondsBetweenStores = 1;

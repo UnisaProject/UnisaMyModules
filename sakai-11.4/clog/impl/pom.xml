@@ -11,7 +11,7 @@
     <parent>
         <artifactId>clog</artifactId>
         <groupId>org.sakaiproject.clog</groupId>
-        <version>12.6</version>
+        <version>11.4</version>
     </parent>
   
     <dependencies>
@@ -25,8 +25,7 @@
         </dependency-->
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-			<version>3.0.1</version>
+            <artifactId>servlet-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.sakaiproject.kernel</groupId>
@@ -51,10 +50,6 @@
         <dependency>
             <groupId>org.sakaiproject.search</groupId>
             <artifactId>search-util</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>

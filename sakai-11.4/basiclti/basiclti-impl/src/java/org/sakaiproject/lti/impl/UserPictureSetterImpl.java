@@ -18,7 +18,8 @@ package org.sakaiproject.lti.impl;
 
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.tsugi.basiclti.BasicLTIConstants;
 
@@ -31,8 +32,9 @@ import org.sakaiproject.user.api.User;
 /**
  *  @author Adrian Fish <a.fish@lancaster.ac.uk>
  */
-@Slf4j
 public class UserPictureSetterImpl implements UserPictureSetter {
+
+	private static Logger M_log = LoggerFactory.getLogger(UserPictureSetterImpl.class);
 
     private ProfileImageLogic profileImageLogic = null;
     public void setProfileImageLogic(ProfileImageLogic profileImageLogic) {
@@ -62,7 +64,7 @@ public class UserPictureSetterImpl implements UserPictureSetter {
     	String imageUrl = (String) payload.get(BasicLTIConstants.USER_IMAGE);
     	        
     	if(imageUrl != null && imageUrl.length() > 0) {
-    		log.debug("User image supplied by consumer: {}", imageUrl);
+    		M_log.debug("User image supplied by consumer: " + imageUrl);
     	        
             try {
                 profileImageLogic.saveOfficialImageUrl(user.getId(), imageUrl);
@@ -70,7 +72,7 @@ public class UserPictureSetterImpl implements UserPictureSetter {
                 prefs.setUseOfficialImage(true);
                 profilePreferencesLogic.savePreferencesRecord(prefs);
             } catch(Exception e) {
-                log.error("Failed to setup launcher's Profile2 picture.",e);
+                M_log.error("Failed to setup launcher's Profile2 picture.",e);
             }
     	}
     }

@@ -29,7 +29,8 @@ import javax.ws.rs.QueryParam;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.content.api.ContentCollection;
 import org.sakaiproject.content.api.ContentCollectionEdit;
 import org.sakaiproject.content.api.ContentEntity;
@@ -66,9 +67,9 @@ import org.w3c.dom.Node;
 
 @WebService
 @SOAPBinding(style = SOAPBinding.Style.RPC, use = SOAPBinding.Use.LITERAL)
-@Slf4j
 public class ContentHosting extends AbstractWebService {
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ContentHosting.class);
 	private static final String VIRTUAL_ROOT_ID = "Virtual-Root-Identifier";
 	private static final String VIRTUAL_ROOT_NAME = "Federated Collections";
 	private static final String RESOURCE_TYPE_COLLECTION = "collection";
@@ -133,7 +134,7 @@ public class ContentHosting extends AbstractWebService {
 			return collection.getBodySizeK();
 		}
 		catch (Exception e) {
-			log.error("getSiteCollectionSize(): " + e.getClass().getName() + " : " + e.getMessage());
+			LOG.error("getSiteCollectionSize(): " + e.getClass().getName() + " : " + e.getMessage());
 		}
 		return -1;
 	}
@@ -183,7 +184,7 @@ public class ContentHosting extends AbstractWebService {
 			return Xml.writeDocumentToString(dom);
 		}
 		catch (Exception e) {
-			log.error("getAllSitesCollectionSize(): " + e.getClass().getName() + " : " + e.getMessage());
+			LOG.error("getAllSitesCollectionSize(): " + e.getClass().getName() + " : " + e.getMessage());
 		}
 		return "failure";
 	}
@@ -246,7 +247,7 @@ public class ContentHosting extends AbstractWebService {
 			return newCollectionId;
 		}
 		catch (Exception e) {
-			log.error("createFolder(): " + e.getClass().getName() + " : " + e.getMessage());
+			LOG.error("createFolder(): " + e.getClass().getName() + " : " + e.getMessage());
 		}
 		return "failure";
 	}
@@ -291,7 +292,7 @@ public class ContentHosting extends AbstractWebService {
 			byte[] content = null;
 			if (binary) {
 				content = base64.decode(contentMime);
-				log.info("createContentItem(): File of size: " + content + " found");	
+				LOG.info("createContentItem(): File of size: " + content + " found");	
 			}
 			else {
 				content = contentMime.getBytes();
@@ -303,7 +304,7 @@ public class ContentHosting extends AbstractWebService {
 		}
 	
 		catch (Exception e) {
-			log.error("createContentItem(): " + e.getClass().getName() + " : " + e.getMessage());
+			LOG.error("createContentItem(): " + e.getClass().getName() + " : " + e.getMessage());
 		}
 		return "failure";
 	}
@@ -354,7 +355,7 @@ public class ContentHosting extends AbstractWebService {
 		}
 	
 		catch (Exception e) {
-			log.error("updateContentItem(): " + e.getClass().getName() + " : " + e.getMessage());
+			LOG.error("updateContentItem(): " + e.getClass().getName() + " : " + e.getMessage());
 		}
 		return "failure";
 	}
@@ -385,7 +386,7 @@ public class ContentHosting extends AbstractWebService {
 		}
 	
 		catch (Exception e) {
-			log.error("deleteResource(): " + e.getClass().getName() + " : " + e.getMessage());
+			LOG.error("deleteResource(): " + e.getClass().getName() + " : " + e.getMessage());
 		}
 		return "failure";
 	}
@@ -426,7 +427,7 @@ public class ContentHosting extends AbstractWebService {
 		}
 	
 		catch (Exception e) {
-			log.error("getContentData(): " + e.getClass().getName() + " : " + e.getMessage());
+			LOG.error("getContentData(): " + e.getClass().getName() + " : " + e.getMessage());
 		}
 		return encodedData;
 	}
@@ -778,7 +779,7 @@ public class ContentHosting extends AbstractWebService {
 		try {
 			//check only admin
 			if (!securityService.isSuperUser()) {
-				log.warn("syncResources(): Permission denied. Restricted to admin users.");
+				LOG.warn("syncResources(): Permission denied. Restricted to admin users.");
 				return "WS syncResources(): Permission denied. Restricted to admin users.";
 			}
 			
@@ -826,7 +827,7 @@ public class ContentHosting extends AbstractWebService {
 		
 		}
 		catch (Exception e) {  
-			log.error ("syncResources(): " + e.getClass().getName() + " : " + e.getMessage());
+			LOG.error ("syncResources(): " + e.getClass().getName() + " : " + e.getMessage());
 		 	return e.getClass().getName() + " : " + e.getMessage();
 		}
 		return "success";
@@ -850,7 +851,7 @@ public class ContentHosting extends AbstractWebService {
             @WebParam(name = "hidden", partName = "hidden") @QueryParam("hidden") Boolean isHidden) {
 
 		if (StringUtils.isBlank(sessionId) || StringUtils.isBlank(siteId) || isHidden == null) {
-			log.warn("WebService siteHideResources: sessionid, siteid, hidden are required");
+			LOG.warn("WebService siteHideResources: sessionid, siteid, hidden are required");
 			return "failure";
 		}
 
@@ -861,11 +862,11 @@ public class ContentHosting extends AbstractWebService {
 		try {
 			 site = siteService.getSite(siteId);
 			 if (siteService.isSpecialSite(site.getId())) {
-				log.warn("siteHideResources: cannot run on a special site: {}", siteId);
+				LOG.warn("siteHideResources: cannot run on a special site: {}", siteId);
 				return "failure";
 			 }
 		} catch (IdUnusedException iue) {
-			log.warn("WebService siteHideResources: site " + siteId + " doesn't exist");
+			LOG.warn("WebService siteHideResources: site " + siteId + " doesn't exist");
 			return "failure";
 		}
 
@@ -887,7 +888,7 @@ public class ContentHosting extends AbstractWebService {
 				}
 			}
 		} catch (Exception e) {
-			log.warn("WebService siteHideResources: cannot hide items in the root collection, " + e.getMessage());
+			LOG.warn("WebService siteHideResources: cannot hide items in the root collection, " + e.getMessage());
 			return "failure";
 		}
 

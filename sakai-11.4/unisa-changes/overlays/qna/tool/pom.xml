@@ -7,7 +7,7 @@
   <parent>
     <artifactId>unisa-overlays-qna</artifactId>
     <groupId>unisa.overlays.qna</groupId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Unisa Overlay on QNA tool</name>
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.sakaiproject.qna</groupId>
       <artifactId>qna-tool</artifactId>
-      <version>12.6</version>
+      <version>11.4</version>
       <type>war</type>
       <scope>runtime</scope>
     </dependency>

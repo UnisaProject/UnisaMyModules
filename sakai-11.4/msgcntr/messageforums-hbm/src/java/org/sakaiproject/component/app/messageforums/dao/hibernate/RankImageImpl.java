@@ -20,13 +20,14 @@
  **********************************************************************************/
 package org.sakaiproject.component.app.messageforums.dao.hibernate;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.messageforums.Rank;
 import org.sakaiproject.api.app.messageforums.RankImage;
 
-@Slf4j
 public class RankImageImpl extends MutableEntityImpl implements RankImage {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RankImageImpl.class);
 
     private Long rankImageId;
 

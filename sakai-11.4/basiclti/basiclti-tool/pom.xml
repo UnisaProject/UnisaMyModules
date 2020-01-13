@@ -5,7 +5,7 @@
     <parent>
         <artifactId>basiclti</artifactId>
         <groupId>org.sakaiproject.basiclti</groupId>
-        <version>12.6</version>
+        <version>11.4</version>
     </parent>
     
     <name>Basic LTI Admin Tool (basiclti-tool)</name>
@@ -19,7 +19,12 @@
     <packaging>war</packaging>
     
     <dependencies>
-
+        <!-- HACK -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>basiclti-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- HACK -->
 
         <dependency>

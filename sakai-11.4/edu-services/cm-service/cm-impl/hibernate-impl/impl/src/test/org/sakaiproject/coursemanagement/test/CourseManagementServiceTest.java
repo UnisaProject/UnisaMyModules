@@ -25,14 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.sakaiproject.coursemanagement.api.AcademicSession;
 import org.sakaiproject.coursemanagement.api.CourseManagementService;
 import org.sakaiproject.coursemanagement.api.CourseOffering;
@@ -41,9 +38,11 @@ import org.sakaiproject.coursemanagement.api.Section;
 import org.sakaiproject.coursemanagement.api.exception.IdNotFoundException;
 import org.sakaiproject.coursemanagement.impl.CourseOfferingCmImpl;
 import org.sakaiproject.coursemanagement.impl.DataLoader;
+import org.springframework.beans.factory.annotation.Autowired;
 
-@Slf4j
 public class CourseManagementServiceTest extends CourseManagementTestBase {
+	private static final Logger log = LoggerFactory.getLogger(CourseManagementServiceTest.class);
+	
 	@Autowired
 	private CourseManagementService cm;
 	

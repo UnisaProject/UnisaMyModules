@@ -23,6 +23,8 @@ package org.sakaiproject.util;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -31,8 +33,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -44,9 +46,11 @@ import org.springframework.core.io.Resource;
  * Load the available Sakai components into the shared component manager's Spring ApplicationContext
  * </p>
  */
-@Slf4j
 public class ComponentsLoader
 {
+	/** Our logger */
+	private static Logger M_log = LoggerFactory.getLogger(ComponentsLoader.class);
+
 	/** Folder containing override definitions for beans */
 	private File overridesFolder;
 	
@@ -73,7 +77,7 @@ public class ComponentsLoader
 			// make sure it's a dir.
 			if (!root.isDirectory())
 			{
-				log.warn("load: root not directory: " + componentsRoot);
+				M_log.warn("load: root not directory: " + componentsRoot);
 				return;
 			}
 
@@ -82,7 +86,7 @@ public class ComponentsLoader
 
 			if (packageArray == null)
 			{
-				log.warn("load: empty directory: " + componentsRoot);
+				M_log.warn("load: empty directory: " + componentsRoot);
 				return;
 			}
  			List<File> packages = Arrays.asList(packageArray);
@@ -94,7 +98,7 @@ public class ComponentsLoader
  			if (System.getProperty("sakai.components.reverse.load") != null) {
  				Collections.reverse(packages);
  			}
-			log.info("load: loading components from: " + componentsRoot);
+			M_log.info("load: loading components from: " + componentsRoot);
 
 			// process the packages
 			for (File packageDir : packages)
@@ -106,12 +110,12 @@ public class ComponentsLoader
 				}
 				else
 				{
-					log.warn("load: skipping non-package entry: " + packageDir);
+					M_log.warn("load: skipping non-package entry: " + packageDir);
 				}
 			}
 		}
 		catch (Exception e) {
-			log.error("load: exception: " + e, e);
+			M_log.error("load: exception: " + e, e);
 		}
 	}
 
@@ -129,7 +133,7 @@ public class ComponentsLoader
 		ClassLoader current = Thread.currentThread().getContextClassLoader();
 		ClassLoader loader = newPackageClassLoader(dir);
 
-		log.info("loadComponentPackage: " + dir);
+		M_log.info("loadComponentPackage: " + dir);
 
 		Thread.currentThread().setContextClassLoader(loader);
 
@@ -155,10 +159,10 @@ public class ComponentsLoader
 			File demoXml = new File(webinf, "components-demo.xml");
 			if("true".equalsIgnoreCase(System.getProperty("sakai.demo")))
 			{
-				if(log.isDebugEnabled()) log.debug("Attempting to load demo components");
+				if(M_log.isDebugEnabled()) M_log.debug("Attempting to load demo components");
 				if(demoXml.exists())
 				{
-					if(log.isInfoEnabled()) log.info("Loading demo components from " + dir);
+					if(M_log.isInfoEnabled()) M_log.info("Loading demo components from " + dir);
 					beanDefList.add(new FileSystemResource(demoXml.getCanonicalPath()));
 				}
 			}
@@ -167,21 +171,21 @@ public class ComponentsLoader
 				if(demoXml.exists())
 				{
 					// Only log that we're skipping the demo components if they exist
-					if(log.isInfoEnabled()) log.info("Skipping demo components from " + dir);
+					if(M_log.isInfoEnabled()) M_log.info("Skipping demo components from " + dir);
 				}
 			}
 			if (overridesFolder != null) {
 				File override = new File(overridesFolder, dir.getName()+ ".xml");
 				if (override.isFile()) {
 					beanDefList.add(new FileSystemResource(override.getCanonicalPath()));
-					if(log.isInfoEnabled()) log.info("Overriding component definitions with "+ override);
+					if(M_log.isInfoEnabled()) M_log.info("Overriding component definitions with "+ override);
 				}
 			}
 			reader.loadBeanDefinitions(beanDefList.toArray(new Resource[0]));
 		}
 		catch (Exception e)
 		{
-			log.error("loadComponentPackage: exception loading: " + xml + " : " + e, e);
+			M_log.error("loadComponentPackage: exception loading: " + xml + " : " + e, e);
 		}
 		finally
 		{
@@ -238,7 +242,7 @@ public class ComponentsLoader
                 URL url = new URL("file:" + classes.getCanonicalPath() + "/");
                 urls.add(url);
             } catch (Exception e) {
-                log.warn("Bad url for classes: "+classes.getPath()+" : "+e);
+                M_log.warn("Bad url for classes: "+classes.getPath()+" : "+e);
             }
 		}
 
@@ -267,7 +271,7 @@ public class ComponentsLoader
 	                        URL url = new URL("file:" + jars[j].getCanonicalPath());
 	                        urls.add(url);
 	                    } catch (Exception e) {
-	                        log.warn("Bad url for jar: "+jars[j].getPath()+" : "+e);
+	                        M_log.warn("Bad url for jar: "+jars[j].getPath()+" : "+e);
 	                    }
 				    }
 				}

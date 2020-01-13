@@ -27,13 +27,24 @@ package org.sakaiproject.lessonbuildertool.tool.producers;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.content.api.ContentHostingService;
+import org.sakaiproject.content.api.FilePickerHelper;
+import org.sakaiproject.lessonbuildertool.tool.beans.SimplePageBean;
+import org.sakaiproject.lessonbuildertool.tool.view.FilePickerViewParameters;
+import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.tool.api.ToolSession;
 
-import uk.org.ponder.localeutil.LocaleGetter;
 import uk.org.ponder.messageutil.MessageLocator;
+import uk.org.ponder.localeutil.LocaleGetter;                                                                                          
+import org.sakaiproject.rsf.helper.HelperViewParameters;
 import uk.org.ponder.rsf.components.UICommand;
 import uk.org.ponder.rsf.components.UIContainer;
 import uk.org.ponder.rsf.components.UIOutput;
+import uk.org.ponder.rsf.components.UIInput;
 import uk.org.ponder.rsf.components.decorators.UIFreeAttributeDecorator;                                                               
 import uk.org.ponder.rsf.flow.jsfnav.NavigationCase;
 import uk.org.ponder.rsf.flow.jsfnav.NavigationCaseReporter;
@@ -43,16 +54,6 @@ import uk.org.ponder.rsf.viewstate.SimpleViewParameters;
 import uk.org.ponder.rsf.viewstate.ViewParameters;
 import uk.org.ponder.rsf.viewstate.ViewParamsReporter;
 
-import org.sakaiproject.component.cover.ServerConfigurationService;
-import org.sakaiproject.content.api.ContentHostingService;
-import org.sakaiproject.content.api.FilePickerHelper;
-import org.sakaiproject.lessonbuildertool.tool.beans.SimplePageBean;
-import org.sakaiproject.lessonbuildertool.tool.view.FilePickerViewParameters;
-import org.sakaiproject.rsf.helper.HelperViewParameters;
-import org.sakaiproject.tool.api.SessionManager;
-import org.sakaiproject.tool.api.ToolManager;
-import org.sakaiproject.tool.api.ToolSession;
-
 /**
  * Uses the ResourcePicker to permit adding resources to the page.
  * 
@@ -61,8 +62,8 @@ import org.sakaiproject.tool.api.ToolSession;
  * @author Eric Jeney <jeney@rutgers.edu>
  * 
  */
-@Slf4j
 public class ResourcePickerProducer implements ViewComponentProducer, ViewParamsReporter, NavigationCaseReporter {
+	private static final Logger log = LoggerFactory.getLogger(ResourcePickerProducer.class);
 	public static final String VIEW_ID = "ResourcePicker";
 
 	public String getViewID() {
@@ -139,7 +140,7 @@ public class ResourcePickerProducer implements ViewComponentProducer, ViewParams
 		toolSession.setAttribute(SimplePageBean.LESSONBUILDER_ADDBEFORE, ((FilePickerViewParameters) viewparams).getAddBefore());
 		toolSession.setAttribute(SimplePageBean.LESSONBUILDER_ITEMNAME, ((FilePickerViewParameters) viewparams).getName());
 
-		if (simplePageBean.isStudentPage(simplePageBean.getCurrentPage())) {
+		if (simplePageBean.getCurrentPage().getOwner() != null) {
 		    toolSession.setAttribute(FilePickerHelper.DEFAULT_COLLECTION_ID, "/user/" + simplePageBean.getCurrentUserId() + "/");
 		}
 
@@ -149,9 +150,9 @@ public class ResourcePickerProducer implements ViewComponentProducer, ViewParams
 		// rsf:id helper-binding method binding
 		String process = null;
 
-		if (((FilePickerViewParameters) viewparams).isWebsite())
+		if (((FilePickerViewParameters) viewparams).getWebsite())
 		    process = "#{simplePageBean.processWebSite}";
-		else if (((FilePickerViewParameters) viewparams).getCaption())
+		if (((FilePickerViewParameters) viewparams).getCaption())
 		    process = "#{simplePageBean.processCaption}";
 		else if (((FilePickerViewParameters) viewparams).getResourceType())
 		    process = "#{simplePageBean.processMultimedia}";

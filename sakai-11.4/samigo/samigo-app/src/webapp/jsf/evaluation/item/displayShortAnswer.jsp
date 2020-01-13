@@ -38,6 +38,5 @@ include file for displaying short answer essay questions
 </h:dataTable>
 </h:panelGroup>
 </h:panelGrid>
-<%@ include file="/jsf/evaluation/item/displayTags.jsp" %>
 
 

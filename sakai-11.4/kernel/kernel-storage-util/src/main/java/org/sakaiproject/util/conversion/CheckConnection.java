@@ -28,17 +28,18 @@ import java.sql.Statement;
 
 import javax.sql.DataSource;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.util.ByteStorageConversion;
 
 /**
  * @author ieb
  * @deprecated unused as of 12 Dec 2011, planned for removal after 2.9
  */
-@Slf4j
 public class CheckConnection
 {
+	private static final Logger log = LoggerFactory.getLogger(CheckConnection.class);
+
 	public void check(DataSource tds) throws Exception
 	{
 		Connection connection = null;

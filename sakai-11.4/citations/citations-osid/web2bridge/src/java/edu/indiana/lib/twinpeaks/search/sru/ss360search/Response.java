@@ -41,6 +41,7 @@ import edu.indiana.lib.twinpeaks.search.MatchItem;
 import edu.indiana.lib.twinpeaks.search.QueryBase;
 import edu.indiana.lib.twinpeaks.search.SearchResultBase;
 import edu.indiana.lib.twinpeaks.util.DomUtils;
+import edu.indiana.lib.twinpeaks.util.LogUtils;
 import edu.indiana.lib.twinpeaks.util.SearchException;
 import edu.indiana.lib.twinpeaks.util.SessionContext;
 import edu.indiana.lib.twinpeaks.util.StatusUtils;
@@ -539,7 +540,7 @@ public class Response extends SearchResultBase implements Constants
 
 		try
 		{
-			log.debug("{} {}", errorText, xmlObject);
+			LogUtils.displayXml(log, errorText, xmlObject);
 		} catch (Exception ignore) { }
 	}
 
@@ -552,7 +553,7 @@ public class Response extends SearchResultBase implements Constants
 
 		try
 		{
-			log.debug("{}", xmlObject);
+			LogUtils.displayXml(log, xmlObject);
 		} catch (Exception ignore) { }
 	}
 }

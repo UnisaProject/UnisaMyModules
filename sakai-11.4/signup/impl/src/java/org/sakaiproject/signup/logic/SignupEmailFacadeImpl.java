@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2007-2016 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 /*
 * Licensed to The Apereo Foundation under one or more contributor license
 * agreements. See the NOTICE file distributed with this work for
@@ -37,16 +22,15 @@ package org.sakaiproject.signup.logic;
 import java.io.File;
 import java.util.*;
 
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-
-import lombok.extern.slf4j.Slf4j;
 import lombok.Getter;
 import lombok.Setter;
-import net.fortuna.ical4j.model.component.VEvent;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.validator.EmailValidator;
 
+import net.fortuna.ical4j.model.component.VEvent;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.apache.commons.validator.EmailValidator;
 import org.sakaiproject.email.api.AddressValidationException;
 import org.sakaiproject.email.api.Attachment;
 import org.sakaiproject.email.api.EmailAddress;
@@ -77,13 +61,15 @@ import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
 
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
+
 /**
  * <P>
  * This is an implementation of SignupEmailFacade interface, which provided
  * methods for Signup tool to send emails out via emailService
  * </P>
  */
-@Slf4j
 public class SignupEmailFacadeImpl implements SignupEmailFacade {
 
 	@Getter @Setter
@@ -97,7 +83,10 @@ public class SignupEmailFacadeImpl implements SignupEmailFacade {
 	
 	@Setter
 	private SignupCalendarHelper calendarHelper;
-
+	
+	private Logger logger = LoggerFactory.getLogger(SignupEmailFacadeImpl.class);
+	
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -161,7 +150,7 @@ public class SignupEmailFacadeImpl implements SignupEmailFacade {
 			User creator = userDirectoryService.getUser(meeting.getCreatorUserId());
 			organizerCoordinators.add(creator);
 		}catch (UserNotDefinedException e) {
-			log.warn("User is not found and Email is not sent away for oraginzer userId:"
+			logger.warn("User is not found and Email is not sent away for oraginzer userId:"
 					+ meeting.getCreatorUserId());
 		}
 		
@@ -171,7 +160,7 @@ public class SignupEmailFacadeImpl implements SignupEmailFacade {
 				User coUser = userDirectoryService.getUser(cId);
 				organizerCoordinators.add(coUser);
 			}catch (UserNotDefinedException e) {
-				log.warn("User is not found and Email is not sent away for coordinator userId:" + cId);
+				logger.warn("User is not found and Email is not sent away for coordinator userId:" + cId);
 			}
 		}
 		
@@ -324,7 +313,7 @@ public class SignupEmailFacadeImpl implements SignupEmailFacade {
 					email = new PromoteAttendeeEmail(participant, item, signupEventTrackingInfo.getMeeting(),
 							sakaiFacade);
 				else {
-					log.warn("For attendee(Eid):" + participant.getEid() + " - No such message type:"
+					logger.warn("For attendee(Eid):" + participant.getEid() + " - No such message type:"
 							+ item.getMessageType() + " was found and no email was able to send away");
 					return;
 				}
@@ -366,7 +355,7 @@ public class SignupEmailFacadeImpl implements SignupEmailFacade {
 	/* send email via Sakai email Service */
 	private void sendEmail(User user, SignupEmailNotification email) {
 		
-		log.debug("sendMail called for user:" + user.getEid());
+		logger.debug("sendMail called for user:" + user.getEid());
 		
 		try {
 			EmailMessage message = convertSignupEmail(email, user);
@@ -376,10 +365,10 @@ public class SignupEmailFacadeImpl implements SignupEmailFacade {
 			}
 			
 		} catch (NoRecipientsException e) {
-			log.error("Cannot send mail. No recipient." + e.getMessage());
+			logger.error("Cannot send mail. No recipient." + e.getMessage());
 		} catch (AddressValidationException e) {
 			//this should be caught when adding the email address, since it is validated then.
-			log.warn("Cannot send mail to user: " +  user.getEid() + ". Invalid email address." + EmailAddress.toString(e.getInvalidEmailAddresses()));
+			logger.warn("Cannot send mail to user: " +  user.getEid() + ". Invalid email address." + EmailAddress.toString(e.getInvalidEmailAddresses()));
 		}
 		
 	}
@@ -514,7 +503,7 @@ public class SignupEmailFacadeImpl implements SignupEmailFacade {
 												try{
 													user = userDirectoryService.getUser(att.getAttendeeUserId());
 												} catch (UserNotDefinedException e) {
-													log.warn("User is not found for userId: " + att.getAttendeeUserId());
+													logger.warn("User is not found for userId: " + att.getAttendeeUserId());
 													isException = true;
 												}
 												sakaiUsers.add(user);
@@ -551,10 +540,10 @@ public class SignupEmailFacadeImpl implements SignupEmailFacade {
 
 			} catch (UserNotDefinedException ue) {
 				isException = true;
-				log.warn("User is not found for userId: " + meeting.getCreatorUserId());
+				logger.warn("User is not found for userId: " + meeting.getCreatorUserId());
 			} catch (Exception e) {
 				isException = true;
-				log.error("Exception: " + e.getClass() + ": " + e.getMessage(), e);
+				logger.error("Exception: " + e.getClass() + ": " + e.getMessage(), e);
 			}
 		}
 		
@@ -587,7 +576,7 @@ public class SignupEmailFacadeImpl implements SignupEmailFacade {
 									user, this.sakaiFacade, emailUserSiteGroup.getSiteId());
 							sendEmail(user, email);
 						} catch (UserNotDefinedException e) {
-							log.warn("User is not found for userId: " + attendee.getAttendeeUserId());
+							logger.warn("User is not found for userId: " + attendee.getAttendeeUserId());
 							isExcepiotn = true;
 						}
 						/*
@@ -637,7 +626,7 @@ public class SignupEmailFacadeImpl implements SignupEmailFacade {
 					}
 
 				} catch (UserNotDefinedException e) {
-					log.warn("User is not found for userId: " + attendee.getAttendeeUserId());
+					logger.warn("User is not found for userId: " + attendee.getAttendeeUserId());
 				}
 
 			}
@@ -721,7 +710,7 @@ public class SignupEmailFacadeImpl implements SignupEmailFacade {
 		//if these are eventaully converted to proper email templates, this should be alleviated
 		message.setSubject(email.getSubject());
 		
-		log.debug("email.getFromAddress(): " + email.getFromAddress());
+		logger.debug("email.getFromAddress(): " + email.getFromAddress());
 		
 		message.setFrom(email.getFromAddress());
 		message.setContentType("text/html; charset=UTF-8");
@@ -738,7 +727,7 @@ public class SignupEmailFacadeImpl implements SignupEmailFacade {
 		if(StringUtils.isNotBlank(emailAddress) && EmailValidator.getInstance().isValid(emailAddress)) {
 			message.addRecipient(EmailAddress.RecipientType.TO, recipient.getDisplayName(), emailAddress);
 		} else {
-			log.debug("Invalid email for user: " + recipient.getDisplayId() + ". No email will be sent to this user");
+			logger.debug("Invalid email for user: " + recipient.getDisplayId() + ". No email will be sent to this user");
 			return null;
 		}
 		

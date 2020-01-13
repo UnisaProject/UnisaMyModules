@@ -23,7 +23,6 @@ import java.util.Date;
 import net.sourceforge.groboutils.junit.v1.TestRunnable;
 
 import org.apache.log4j.Level;
-import org.junit.Assert;
 import org.sakaiproject.sms.dao.StandaloneSmsDaoImpl;
 import org.sakaiproject.sms.logic.HibernateLogicLocator;
 import org.sakaiproject.sms.logic.impl.hibernate.SmsAccountLogicImpl;
@@ -201,7 +200,7 @@ public class SmsSchedulerThread extends TestRunnable {
 			e.printStackTrace();
 		}
 		LOG.info(sessionName + ": 1 min passed ");
-		Assert.assertTrue(smsCoreImpl.getNextSmsTask() == null);
+		assertTrue(smsCoreImpl.getNextSmsTask() == null);
 		LOG.info(sessionName + ": Success ");
 		smsSchedulerImpl.stopSmsScheduler();
 		smsSmppImpl.disconnectGateWay();

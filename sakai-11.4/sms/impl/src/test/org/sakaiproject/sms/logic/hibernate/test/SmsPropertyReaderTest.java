@@ -1,7 +1,6 @@
 package org.sakaiproject.sms.logic.hibernate.test;
 
-
-import org.junit.Assert;
+import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sakaiproject.sms.model.constants.SmsConstants;
@@ -33,11 +32,11 @@ public class SmsPropertyReaderTest extends AbstractBaseTestCase {
 	public void testGetMessage_Found() {
 		String propertyValue = SmsPropertyReader
 				.getProperty(TEST_PROPERTY_NAME);
-		Assert.assertFalse("Property file not found", propertyValue
+		assertFalse("Property file not found", propertyValue
 				.equals(SmsConstants.PROPERTY_FILE_NOT_FOUND));
-		Assert.assertFalse("Property not found", propertyValue
+		assertFalse("Property not found", propertyValue
 				.equals(SmsConstants.PROPERTY_NOT_FOUND));
-		Assert.assertTrue(propertyValue.equals(TEST_PROPERTY_VALUE));
+		assertTrue(propertyValue.equals(TEST_PROPERTY_VALUE));
 	}
 
 	/**
@@ -46,9 +45,9 @@ public class SmsPropertyReaderTest extends AbstractBaseTestCase {
     @Test
 	public void testGetMessage_NotFound() {
 		String propertyValue = SmsPropertyReader.getProperty("non-existent");
-		Assert.assertFalse("Property file not found", propertyValue
+		assertFalse("Property file not found", propertyValue
 				.equals(SmsConstants.PROPERTY_FILE_NOT_FOUND));
-		Assert.assertTrue("Property not found", propertyValue
+		assertTrue("Property not found", propertyValue
 				.equals(SmsConstants.PROPERTY_NOT_FOUND));
 	}
 

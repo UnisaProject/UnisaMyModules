@@ -5,17 +5,17 @@
     <parent>
         <groupId>org.sakaiproject.message</groupId>
         <artifactId>message</artifactId>
-        <version>12.6</version>
+        <version>11.4</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <name>message-search-adapters-impl</name>
     <groupId>org.sakaiproject.message</groupId>
     <artifactId>message-search-adapters-impl</artifactId>
-    <packaging>sakai-component</packaging>
+    <packaging>jar</packaging>
 
     <properties>
-        <deploy.target>components</deploy.target>
+        <deploy.target />
         <maven.test.jvmargs />
     </properties>
 

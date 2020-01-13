@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:wicket="http://wicket.apache.org">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd">
 
     <body>
         <wicket:panel>
@@ -20,18 +20,6 @@
 					<input wicket:id="points" type="text" class="form-control" />
 				</div>
 			</div>
-			<wicket:container wicket:id="scaleGradesContainer">
-				<div class="form-group form-group-sm">
-					<div class="col-xs-offset-3 col-xs-6">
-						<div class="checkbox">
-							<label>
-								<input wicket:id="scaleGrades" type="checkbox" />
-								<span><wicket:message key="label.addgradeitem.scalegrades" /></span>
-							</label>
-						</div>
-					</div>
-				</div>
-			</wicket:container>
 			<div class="form-group form-group-sm">
 				<div class="col-xs-offset-3 col-xs-6">
 					<div class="checkbox">
@@ -48,7 +36,7 @@
 				</label>
 				<div class="col-xs-4">
                     <div class="input-group">
-                        <input wicket:id="duedate" type="text" class="form-control gb-datepicker" aria-describedby="duedate-help"/>
+                        <input wicket:id="duedate" type="text" class="form-control gb-datepicker" wicket:message="data-format:format.date,placeholder:label.date" aria-describedby="duedate-help"/>
                         <span class="input-group-btn">
                             <button class="btn btn-sm btn-default invoke-datepicker-btn" type="button"><span class="glyphicon glyphicon-calendar"></span></button>
                             <button class="btn btn-sm btn-default clear-datepicker-btn" type="button"><span class="glyphicon glyphicon-remove"></span></button>
@@ -63,10 +51,10 @@
                                     input: '#' + $datepicker.attr('id'),
                                     useTime: 0,
                                     icon: 0,
-                                    allowEmptyDate: true,
-                                    parseFormat: 'YYYY-MM-DD',
-                                    val: $datepicker.val(),
-                                    ashidden: { iso8601: 'duedate_iso8601' }
+                                    dateFormat: $datepicker.data("format"),
+                                    timeFormat: '',
+                                    parseFormat: $datepicker.data("format"),
+                                    ashidden: { iso8601: $datepicker.attr('id') + '_iso8601' }
                                 })
     
                                 // setup input button to trigger date-time picker

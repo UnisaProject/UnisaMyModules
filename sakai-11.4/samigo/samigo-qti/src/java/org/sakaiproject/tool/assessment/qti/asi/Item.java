@@ -19,6 +19,8 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.qti.asi;
 
 import java.util.Collections;
@@ -26,12 +28,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringEscapeUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import org.sakaiproject.tool.assessment.data.dao.assessment.Answer;
 import org.sakaiproject.tool.assessment.data.dao.assessment.ItemText;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AnswerIfc;
@@ -39,7 +41,6 @@ import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemAttachmentIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemMetaDataIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTextIfc;
-import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTagIfc;
 import org.sakaiproject.tool.assessment.data.ifc.shared.TypeIfc;
 import org.sakaiproject.tool.assessment.qti.constants.AuthoringConstantStrings;
 import org.sakaiproject.tool.assessment.qti.constants.QTIConstantStrings;
@@ -54,9 +55,9 @@ import org.sakaiproject.tool.assessment.qti.helper.item.ItemHelperIfc;
  * @author Ed Smiley esmiley@stanford.edu
  * @version $Id$
  */
-@Slf4j
 public class Item extends ASIBaseClass
 {
+  private static Logger log = LoggerFactory.getLogger(Item.class);
   private ItemHelperIfc helper;
 
 
@@ -167,29 +168,9 @@ public class Item extends ASIBaseClass
     setFieldentry("ITEM_KEYWORD",
       item.getItemMetaDataByLabel(ItemMetaDataIfc.KEYWORD));
     setFieldentry("ITEM_RUBRIC", item.getItemMetaDataByLabel(ItemMetaDataIfc.RUBRIC ));
-
-
-      Set<ItemTagIfc> tagIfcSet = item.getItemTagSet();
-      String tagsString = "";
-      Boolean first=true;
-      for (ItemTagIfc tagIfc: tagIfcSet) {
-         if (!first){
-            tagsString += ", ";
-         }
-         tagsString += tagIfc.getTagLabel();
-         if (!(tagIfc.getTagCollectionName().isEmpty())){
-             tagsString += " ("+tagIfc.getTagCollectionName() + ")";
-         }else{
-           tagsString += " (No tag collection)";
-         }
-         first=false;
-      }
-
-    setFieldentry("ITEM_TAGS", tagsString);
-
-      setFieldentry("ATTACHMENT", getAttachment(item));
-
-      // set TIMEALLOWED and NUM_OF_ATTEMPTS for audio recording questions:
+    setFieldentry("ATTACHMENT", getAttachment(item));
+    
+    // set TIMEALLOWED and NUM_OF_ATTEMPTS for audio recording questions:
     if (item.getDuration()!=null){
     	setFieldentry("TIMEALLOWED",
     			item.getDuration().toString()); 

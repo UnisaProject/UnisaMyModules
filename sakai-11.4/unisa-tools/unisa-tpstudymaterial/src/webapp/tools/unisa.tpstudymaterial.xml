@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.tpstudymaterial"
+		title="View Unisa Official Study Material"
+		description="">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

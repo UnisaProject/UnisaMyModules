@@ -21,25 +21,10 @@
 
 package org.sakaiproject.calendar.impl;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.*;
-
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.calendar.api.Calendar;
 import org.sakaiproject.calendar.api.*;
@@ -60,20 +45,34 @@ import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.api.TimeRange;
 import org.sakaiproject.time.api.TimeService;
+import org.sakaiproject.tool.api.Placement;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.BaseResourcePropertiesEdit;
 import org.sakaiproject.util.FormattedText;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-@Slf4j
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
+
 public class BaseExternalCalendarSubscriptionService implements
 		ExternalCalendarSubscriptionService
 {
+	/** Logging */
+	private static Logger m_log = LoggerFactory.getLogger(BaseExternalCalendarSubscriptionService.class);
+
 	/** Schedule tool ID */
-	final static String SCHEDULE_TOOL_ID = "sakai.schedule";
+	private final static String SCHEDULE_TOOL_ID = "sakai.schedule";
 
 	/** Default context for institutional subscriptions */
-	final static String INSTITUTIONAL_CONTEXT = "!worksite";
+	private final static String INSTITUTIONAL_CONTEXT = "!worksite";
 
 	/** Default context for user-provided subscriptions */
 	private final static String USER_CONTEXT = "!user";
@@ -88,15 +87,13 @@ public class BaseExternalCalendarSubscriptionService implements
 	private boolean mergeIntoMyworkspace = true;
 
 	/** Column map for iCal processing */
-	private Map<String, String> columnMap = null;
+	private Map columnMap = null;
 
 	/** Cache map of Institutional Calendars: <String url, Calendar cal> */
 	private SubscriptionCache institutionalSubscriptionCache = null;
 
 	/** Cache map of user Calendars: <String url, Calendar cal> */
 	private SubscriptionCache usersSubscriptionCache = null;
-
-	private Clock clock;
 
 	// ######################################################
 	// Spring services
@@ -214,39 +211,34 @@ public class BaseExternalCalendarSubscriptionService implements
 		this.m_idManager = idManager;
 	}
 
-	public void setClock(Clock clock) {
-		this.clock = clock;
-	}
+	/** Dependency: Timer */
+	protected Timer m_timer = null;
 
 	public void init()
 	{
 		// external calendar subscriptions: enable?
 		enabled = m_configurationService.getBoolean(SAK_PROP_EXTSUBSCRIPTIONS_ENABLED, true);
 		mergeIntoMyworkspace = m_configurationService.getBoolean(SAK_PROP_EXTSUBSCRIPTIONS_MERGEINTOMYWORKSPACE, true); 
-		log.info("init(): enabled: " + enabled + ", merge from other sites into My Workspace? "+mergeIntoMyworkspace);
+		m_log.info("init(): enabled: " + enabled + ", merge from other sites into My Workspace? "+mergeIntoMyworkspace);
 
 		if (enabled)
 		{
 			// INIT the caches
-			long userCacheRefreshRate = 60 * m_configurationService.getInt(SAK_PROP_EXTSUBSCRIPTIONS_USER_CACHETIME, 120);
-			long instCacheRefreshRate = 60 * m_configurationService.getInt(SAK_PROP_EXTSUBSCRIPTIONS_INST_CACHETIME, 120);
-			long userCacheMaxEntries = m_configurationService.getInt(SAK_PROP_EXTSUBSCRIPTIONS_USER_CACHEENTRIES, 32);
-			long instCacheMaxEntries = m_configurationService.getInt(SAK_PROP_EXTSUBSCRIPTIONS_INST_CACHEENTRIES, 32);
-			SimpleConfiguration<String, BaseExternalSubscriptionDetails> userCacheConfig = new SimpleConfiguration<>(userCacheMaxEntries, userCacheRefreshRate, 0);
-			SimpleConfiguration<String, BaseExternalSubscriptionDetails> instCacheConfig = new SimpleConfiguration<>(instCacheMaxEntries, instCacheRefreshRate, 0);
-			userCacheConfig.setStatisticsEnabled(true);
-			instCacheConfig.setStatisticsEnabled(true);
+			long cacheRefreshRate = 43200; // 12 hours
+			SimpleConfiguration cacheConfig = new SimpleConfiguration(1000, cacheRefreshRate, 0); // 12 hours
+			cacheConfig.setStatisticsEnabled(true);
 			institutionalSubscriptionCache = new SubscriptionCache(
-					m_memoryService.createCache("org.sakaiproject.calendar.impl.BaseExternalCacheSubscriptionService.institutionalCache", instCacheConfig), clock);
+					m_memoryService.createCache("org.sakaiproject.calendar.impl.BaseExternalCacheSubscriptionService.institutionalCache", cacheConfig));
 			usersSubscriptionCache = new SubscriptionCache(
-					m_memoryService.createCache("org.sakaiproject.calendar.impl.BaseExternalCacheSubscriptionService.userCache", userCacheConfig), clock);
+					m_memoryService.createCache("org.sakaiproject.calendar.impl.BaseExternalCacheSubscriptionService.userCache", cacheConfig));
 			// TODO replace this with a real solution for when the caches are distributed by disabling the timer and using jobscheduler
 			if (institutionalSubscriptionCache.getCache().isDistributed()) {
-				log.error(institutionalSubscriptionCache.getCache().getName()+" is distributed but calendar subscription caches have a local timer refresh which means they will cause cache replication storms once every "+instCacheRefreshRate+" seconds, do NOT distribute this cache");
+				m_log.error(institutionalSubscriptionCache.getCache().getName()+" is distributed but calendar subscription caches have a local timer refresh which means they will cause cache replication storms once every "+cacheRefreshRate+" seconds, do NOT distribute this cache");
 			}
 			if (usersSubscriptionCache.getCache().isDistributed()) {
-				log.error(usersSubscriptionCache.getCache().getName()+" is distributed but calendar subscription caches have a local timer refresh which means they will cause cache replication storms once every "+userCacheRefreshRate+" seconds, do NOT distribute this cache");
+				m_log.error(usersSubscriptionCache.getCache().getName()+" is distributed but calendar subscription caches have a local timer refresh which means they will cause cache replication storms once every "+cacheRefreshRate+" seconds, do NOT distribute this cache");
 			}
+			m_timer = new Timer(); // init timer
 
 			// iCal column map
 			try
@@ -256,12 +248,26 @@ public class BaseExternalCalendarSubscriptionService implements
 			}
 			catch (ImportException e1)
 			{
-				log.error("Unable to get column map for ICal import. External subscriptions will be disabled.");
+				m_log
+						.error("Unable to get column map for ICal import. External subscriptions will be disabled.");
 				enabled = false;
+				return;
+			}
+
+			// load institutional calendar subscriptions as timer tasks, this is so that 
+			// we don't slow up the loading of sakai.
+			for (final InsitutionalSubscription sub: getInstitutionalSubscriptions()) {
+				m_timer.schedule(new TimerTask() {
+					@Override
+					public void run() {
+						String reference =  calendarSubscriptionReference(INSTITUTIONAL_CONTEXT, getIdFromSubscriptionUrl(sub.url));
+						getCalendarSubscription(reference);
+					}
+					
+				}, 0, cacheRefreshRate);
 			}
 		}
 	}
-
 
 	public void destroy()
 	{
@@ -289,7 +295,7 @@ public class BaseExternalCalendarSubscriptionService implements
 	 */
 	public String calendarSubscriptionReference(String context, String id)
 	{
-		return BaseExternalSubscriptionDetails.calendarSubscriptionReference(context, id);
+		return BaseExternalSubscription.calendarSubscriptionReference(context, id);
 	}
 
 	/*
@@ -297,12 +303,7 @@ public class BaseExternalCalendarSubscriptionService implements
 	 * 
 	 * @see org.sakaiproject.calendar.impl.ExternalCalendarSubscriptionService#getCalendarSubscription(java.lang.String)
 	 */
-	public ExternalCalendarSubscription getCalendarSubscription(String reference)
-	{
-		return getCalendarSubscription(reference, null, null);
-	}
-	
-	public ExternalCalendarSubscription getCalendarSubscription(String reference, String userId, String tzid)
+	public Calendar getCalendarSubscription(String reference)
 	{
 		if (!isEnabled() || reference == null) return null;
 
@@ -310,50 +311,46 @@ public class BaseExternalCalendarSubscriptionService implements
 		Reference _ref = m_entityManager.newReference(reference);
 		String subscriptionUrl = getSubscriptionUrlFromId(_ref.getId());
 		if (subscriptionUrl == null || subscriptionUrl.equals("null")) return null;
-		log.debug("ExternalCalendarSubscriptionService.getCalendarSubscription("
+		m_log.debug("ExternalCalendarSubscriptionService.getCalendarSubscription("
 				+ reference + ")");
-		log.debug(" |-> subscriptionUrl: " + subscriptionUrl);
+		m_log.debug(" |-> subscriptionUrl: " + subscriptionUrl);
 
-		BaseExternalSubscriptionDetails subscription = getExternalSubscription(subscriptionUrl,
-				_ref.getContext(), userId, tzid);
+		ExternalSubscription subscription = getExternalSubscription(subscriptionUrl,
+				_ref.getContext());
 
 
-		log.debug(" |-> Subscription is " + subscription);
+		m_log.debug(" |-> Subscription is " + subscription);
 		if (subscription != null)
 		{
-			log.debug(" |-> Calendar is " + subscription.getCalendar());
+			m_log.debug(" |-> Calendar is " + subscription.getCalendar());
 			return subscription.getCalendar();
 		}
 		else
 		{
-			log.debug(" |-> Calendar is NULL");
+			m_log.debug(" |-> Calendar is NULL");
 			return null;
 		}
 	}
 
-	private BaseExternalSubscriptionDetails getExternalSubscription(String subscriptionUrl, String context) {
-		return getExternalSubscription(subscriptionUrl, context, null, null);
-	}
-	
-	private BaseExternalSubscriptionDetails getExternalSubscription(String subscriptionUrl, String context, String userId, String tzid) {
+	private ExternalSubscription getExternalSubscription(String subscriptionUrl, String context) {
 		// Decide which cache to use.
 		SubscriptionCache cache = (getInstitutionalSubscription(subscriptionUrl) != null)? institutionalSubscriptionCache : usersSubscriptionCache;
 		
-		BaseExternalSubscriptionDetails subscription = cache.get(subscriptionUrl);
+		ExternalSubscription subscription = cache.get(subscriptionUrl);
 		// Did we get it?
 		if (subscription == null)
 		{
-			subscription = loadCalendarSubscriptionFromUrl(subscriptionUrl, context, userId, tzid);
+			subscription = loadCalendarSubscriptionFromUrl(subscriptionUrl, context);
 			cache.put(subscription);
 		}
 		return subscription;
 	}
 
-	public Set<ExternalSubscriptionDetails> getCalendarSubscriptionChannelsForChannels(
+	public Set<String> getCalendarSubscriptionChannelsForChannels(
 			String primaryCalendarReference,
 			Collection<Object> channels)
 	{
-		Set<ExternalSubscriptionDetails> subscriptionChannels = new HashSet<ExternalSubscriptionDetails>();
+		Set<String> subscriptionChannels = new HashSet<String>();
 		Set<String> subscriptionUrlsAdded = new HashSet<String>();
 		if(isMyWorkspace(primaryCalendarReference) && (!mergeIntoMyworkspace || m_securityService.isSuperUser())) {
 			channels = new ArrayList<Object>();
@@ -361,13 +358,14 @@ public class BaseExternalCalendarSubscriptionService implements
 		}
 		for (Object channel : channels)
 		{
-			Set<ExternalSubscriptionDetails> channelSubscriptions = getCalendarSubscriptionChannelsForChannel((String) channel);
-			for (ExternalSubscriptionDetails channelSub : channelSubscriptions)
+			Set<String> channelSubscriptions = getCalendarSubscriptionChannelsForChannel((String) channel);
+			for (String channelSub : channelSubscriptions)
 			{
-				if (!subscriptionUrlsAdded.contains(channelSub.getSubscriptionUrl()))
+				Reference ref = m_entityManager.newReference(channelSub);
+				if (!subscriptionUrlsAdded.contains(ref.getId()))
 				{
 					subscriptionChannels.add(channelSub);
-					subscriptionUrlsAdded.add(channelSub.getSubscriptionUrl());
+					subscriptionUrlsAdded.add(ref.getId());
 				}
 			}
 		}
@@ -379,9 +377,9 @@ public class BaseExternalCalendarSubscriptionService implements
 	 * 
 	 * @see org.sakaiproject.calendar.impl.ExternalCalendarSubscriptionService#getCalendarSubscriptionChannelsForSite()
 	 */
-	public Set<ExternalSubscriptionDetails> getCalendarSubscriptionChannelsForChannel(String reference)
+	public Set<String> getCalendarSubscriptionChannelsForChannel(String reference)
 	{
-		Set<ExternalSubscriptionDetails> channels = new HashSet<ExternalSubscriptionDetails>();
+		Set<String> channels = new HashSet<String>();
 		if (!isEnabled() || reference == null) return channels;
 
 		// get externally subscribed urls from tool config
@@ -393,7 +391,8 @@ public class BaseExternalCalendarSubscriptionService implements
 		}
 		catch (IdUnusedException e)
 		{
-			log.error("ExternalCalendarSubscriptionService.getCalendarSubscriptionChannelsForChannel(): IdUnusedException for context in reference: "
+			m_log
+					.error("ExternalCalendarSubscriptionService.getCalendarSubscriptionChannelsForChannel(): IdUnusedException for context in reference: "
 							+ reference);
 			return channels;
 		}
@@ -405,26 +404,10 @@ public class BaseExternalCalendarSubscriptionService implements
 			if (prop != null)
 			{
 				String[] chsPair = prop.split(SUBS_REF_DELIMITER);
-				for (String aChsPair : chsPair) {
-					String[] pair = aChsPair.split(SUBS_NAME_DELIMITER);
-					Reference refc = m_entityManager.newReference(pair[0]);
-					String url = getSubscriptionUrlFromId(refc.getId());
-					ExternalSubscriptionDetails esd = getExternalSubscription(url, ref.getContext());
-					channels.add(esd);
-				}
-			}
-			String propTz = config.getProperty(TC_PROP_SUBCRIPTIONS_WITH_TZ);
-			if (propTz != null)
-			{
-				String[] chsPair = propTz.split(SUBS_REF_DELIMITER);
-				for (String aChsPair : chsPair) {
-					String[] pair = aChsPair.split(SUBS_NAME_DELIMITER);
-					Reference refc = m_entityManager.newReference(pair[0]);
-					String url = getSubscriptionUrlFromId(refc.getId());
-					String userId = pair[1];
-					String tzid = pair[2];
-					ExternalSubscriptionDetails esd = getExternalSubscription(url, ref.getContext(), userId, tzid);
-					channels.add(esd);
+				for (int i = 0; i < chsPair.length; i++)
+				{
+					String[] pair = chsPair[i].split(SUBS_NAME_DELIMITER);
+					channels.add(pair[0]);
 				}
 			}
 		}
@@ -432,17 +415,17 @@ public class BaseExternalCalendarSubscriptionService implements
 		return channels;
 	}
 
-	public Set<ExternalSubscriptionDetails> getAvailableInstitutionalSubscriptionsForChannel(
+	public Set<ExternalSubscription> getAvailableInstitutionalSubscriptionsForChannel(
 			String reference)
 	{
-		Set<ExternalSubscriptionDetails> subscriptions = new HashSet<ExternalSubscriptionDetails>();
+		Set<ExternalSubscription> subscriptions = new HashSet<ExternalSubscription>();
 		if (!isEnabled() || reference == null) return subscriptions;
 
 		Reference ref = m_entityManager.newReference(reference);
 		// If the cache has been flushed then we may need to reload it.
 		for (InsitutionalSubscription sub : getInstitutionalSubscriptions()) {
 			// Need to have way to load these.
-			BaseExternalSubscriptionDetails subscription = getExternalSubscription(sub.url, ref.getContext());
+			ExternalSubscription subscription = getExternalSubscription(sub.url, ref.getContext());
 			if (subscription != null) {
 				subscription.setContext(ref.getContext());
 				subscriptions.add(subscription);
@@ -452,22 +435,23 @@ public class BaseExternalCalendarSubscriptionService implements
 		return subscriptions;
 	}
 
-	public Set<ExternalSubscriptionDetails> getSubscriptionsForChannel(String reference,
-																	   boolean loadCalendar)
+	public Set<ExternalSubscription> getSubscriptionsForChannel(String reference,
+			boolean loadCalendar)
 	{
-		Set<ExternalSubscriptionDetails> subscriptions = new HashSet<>();
+		Set<ExternalSubscription> subscriptions = new HashSet<ExternalSubscription>();
 		if (!isEnabled() || reference == null) return subscriptions;
 
 		// get externally subscribed urls from tool config
 		Reference ref = m_entityManager.newReference(reference);
-		Site site;
+		Site site = null;
 		try
 		{
 			site = m_siteService.getSite(ref.getContext());
 		}
 		catch (IdUnusedException e)
 		{
-			log.error("ExternalCalendarSubscriptionService.getSubscriptionsForChannel(): IdUnusedException for context in reference: "
+			m_log
+					.error("ExternalCalendarSubscriptionService.getSubscriptionsForChannel(): IdUnusedException for context in reference: "
 							+ reference);
 			return subscriptions;
 		}
@@ -479,65 +463,32 @@ public class BaseExternalCalendarSubscriptionService implements
 			if (prop != null)
 			{
 				String[] chsPair = prop.split(SUBS_REF_DELIMITER);
-				for (String aChsPair : chsPair) {
-					String[] pair = aChsPair.split(SUBS_NAME_DELIMITER);
+				for (int i = 0; i < chsPair.length; i++)
+				{
+					String[] pair = chsPair[i].split(SUBS_NAME_DELIMITER);
 					String r = pair[0];
 					Reference r1 = m_entityManager.newReference(r);
 					String url = getSubscriptionUrlFromId(r1.getId());
-					String name;
+					String name = null;
 					if (pair.length == 2)
 						name = pair[1];
-					else {
-						try {
+					else
+					{
+						try
+						{
 							name = institutionalSubscriptionCache.get(url)
 									.getSubscriptionName();
-						} catch (Exception e) {
+						}
+						catch (Exception e)
+						{
 							name = url;
 						}
 					}
-					BaseExternalSubscriptionDetails detail;
-					if (loadCalendar) {
-						detail = getExternalSubscription(url, ref.getContext());
-					} else {
-						detail = new BaseExternalSubscriptionDetails(
-								name, url, ref.getContext(),
-								null, isInstitutionalCalendar(r));
-
-					}
-					subscriptions.add(detail);
-				}
-			}
-			String propWithTZ = config.getProperty(TC_PROP_SUBCRIPTIONS_WITH_TZ);
-			if (propWithTZ != null)
-			{
-				String[] chsSubscription = propWithTZ.split(SUBS_REF_DELIMITER);
-				for (String aChsSubscription : chsSubscription) {
-					String[] subscription = aChsSubscription.split(SUBS_NAME_DELIMITER);
-					String r = subscription[0];
-					Reference r1 = m_entityManager.newReference(r);
-					String url = getSubscriptionUrlFromId(r1.getId());
-					String userId = subscription[1];
-					String tzid = subscription[2];
-					String name;
-					if (subscription.length == 4) {
-						name = subscription[3];
-					} else {
-						try {
-							name = institutionalSubscriptionCache.get(url).getSubscriptionName();
-						} catch (Exception e) {
-							name = url;
-						}
-					}
-					BaseExternalSubscriptionDetails detail;
-					if (loadCalendar) {
-						detail = getExternalSubscription(url, ref.getContext(), userId, tzid);
-					} else {
-						detail = new BaseExternalSubscriptionDetails(
-								name, url, ref.getContext(),
-								null, isInstitutionalCalendar(r), userId, tzid);
-
-					}
-					subscriptions.add(detail);
+					ExternalSubscription subscription = new BaseExternalSubscription(
+							name, url, ref.getContext(),
+							loadCalendar ? getCalendarSubscription(r) : null,
+							isInstitutionalCalendar(r));
+					subscriptions.add(subscription);
 				}
 			}
 		}
@@ -549,16 +500,10 @@ public class BaseExternalCalendarSubscriptionService implements
 	 * (non-Javadoc)
 	 * 
 	 * @see org.sakaiproject.calendar.impl.ExternalCalendarSubscriptionService#setSubscriptionsForChannel(String,
-	 *      Collection<ExternalSubscriptionDetails>)
+	 *      Collection<ExternalSubscription>)
 	 */
 	public void setSubscriptionsForChannel(String reference,
-			Collection<ExternalSubscription> subscriptions) {
-		setSubscriptionsForChannel(reference, subscriptions, false);
-	}
-	
-	
-	private void setSubscriptionsForChannel(String reference,
-			Collection<ExternalSubscription> subscriptions, boolean withTz)
+			Collection<ExternalSubscription> subscriptions)
 	{
 		if (!isEnabled() || reference == null) return;
 
@@ -571,7 +516,8 @@ public class BaseExternalCalendarSubscriptionService implements
 		}
 		catch (IdUnusedException e)
 		{
-			log.error("ExternalCalendarSubscriptionService.setSubscriptionsForChannel(): IdUnusedException for context in reference: "
+			m_log
+					.error("ExternalCalendarSubscriptionService.setSubscriptionsForChannel(): IdUnusedException for context in reference: "
 							+ reference);
 			return;
 		}
@@ -580,20 +526,19 @@ public class BaseExternalCalendarSubscriptionService implements
 		if (tc != null)
 		{
 			boolean first = true;
-			StringBuilder tmpStr = new StringBuilder();
+			StringBuffer tmpStr = new StringBuffer();
 			for (ExternalSubscription subscription : subscriptions)
 			{
 				if (!first) tmpStr.append(SUBS_REF_DELIMITER);
 				first = false;
 
 				tmpStr.append(subscription.getReference());
-
-				if (!isInstitutionalCalendar(subscription.getReference()))
+				if (!subscription.isInstitutional())
 					tmpStr.append(SUBS_NAME_DELIMITER + subscription.getSubscriptionName());
 			}
 
 			Properties config = tc.getConfig();
-			config.setProperty(withTz?TC_PROP_SUBCRIPTIONS_WITH_TZ:TC_PROP_SUBCRIPTIONS, tmpStr.toString());
+			config.setProperty(TC_PROP_SUBCRIPTIONS, tmpStr.toString());
 			tc.save();
 		}
 	}
@@ -622,12 +567,12 @@ public class BaseExternalCalendarSubscriptionService implements
 
 	public String getIdFromSubscriptionUrl(String url)
 	{
-		return BaseExternalSubscriptionDetails.getIdFromSubscriptionUrl(url);
+		return BaseExternalSubscription.getIdFromSubscriptionUrl(url);
 	}
 
 	public String getSubscriptionUrlFromId(String id)
 	{
-		return BaseExternalSubscriptionDetails.getSubscriptionUrlFromId(id);
+		return BaseExternalSubscription.getSubscriptionUrlFromId(id);
 	}
 
 	// ######################################################
@@ -692,8 +637,8 @@ public class BaseExternalCalendarSubscriptionService implements
 		return subs;
 	}
 
-	BaseExternalSubscriptionDetails loadCalendarSubscriptionFromUrl(String url,
-																	String context, String userId, String tzid)
+	ExternalSubscription loadCalendarSubscriptionFromUrl(String url,
+			String context)
 	{
 		InsitutionalSubscription sub = getInstitutionalSubscription(url);
 		String name = null;
@@ -703,18 +648,18 @@ public class BaseExternalCalendarSubscriptionService implements
 			name = sub.name;
 			forcedEventType = sub.eventType;
 		}
-		return loadCalendarSubscriptionFromUrl(url, context, userId, tzid, name, forcedEventType);
-	}
+		return loadCalendarSubscriptionFromUrl(url, context, name, forcedEventType);	}
 
-	BaseExternalSubscriptionDetails loadCalendarSubscriptionFromUrl(String url,
-																	String context, String userId, String tzid, String calendarName, String forcedEventType)
+	ExternalSubscription loadCalendarSubscriptionFromUrl(String url,
+			String context, String calendarName, String forcedEventType)
 	{
-		boolean institutional = INSTITUTIONAL_CONTEXT.equals(context);
-		String error = null;
+		ExternalSubscription subscription = new BaseExternalSubscription(calendarName,
+				url, context, null, INSTITUTIONAL_CONTEXT.equals(context));
+		ExternalCalendarSubscription calendar = null;
+		List<CalendarEvent> events = null;
+		BufferedInputStream stream = null;
 		try
 		{
-			ExternalCalendarSubscription calendar;
-			List<CalendarEvent> events;
 			URL _url = new URL(url);
 			if (calendarName == null) calendarName = _url.getFile();
 
@@ -726,11 +671,10 @@ public class BaseExternalCalendarSubscriptionService implements
 			conn.setReadTimeout(TIMEOUT);
 			// Now make the connection.
 			conn.connect();
-			try (BufferedInputStream stream =  new BufferedInputStream(conn.getInputStream())) {
-				// import
-				events = m_importerService.doImport(CalendarImporterService.ICALENDAR_IMPORT,
-						stream, columnMap, null, tzid);
-			}
+			stream =  new BufferedInputStream(conn.getInputStream());
+			// import
+			events = m_importerService.doImport(CalendarImporterService.ICALENDAR_IMPORT,
+					stream, columnMap, null);
 
 			String subscriptionId = getIdFromSubscriptionUrl(url);
 			String reference = calendarSubscriptionReference(context, subscriptionId);
@@ -740,46 +684,57 @@ public class BaseExternalCalendarSubscriptionService implements
 				String eventType = event.getType();
 				if (forcedEventType != null) eventType = forcedEventType;
 				calendar.addEvent(event.getRange(), event.getDisplayName(), event
-						.getDescription(), eventType, event.getLocation(), userId,
-						event.getRecurrenceRule(), null);
+						.getDescription(), eventType, event.getLocation(), event
+						.getRecurrenceRule(), null);
 			}
 			calendar.setName(calendarName);
-			BaseExternalSubscriptionDetails subscription = new BaseExternalSubscriptionDetails(calendarName, url, context, calendar, institutional, userId, tzid, true, null, Instant.now(clock));
-			log.info("Loaded calendar subscription: " + subscription.toString());
-			return subscription;
+			subscription.setCalendar(calendar);
+			subscription.setInstitutional(getInstitutionalSubscription(url) != null);
+			m_log.info("Loaded calendar subscription: " + subscription.toString());
 		}
 		catch (ImportException e)
 		{
-			log.info("Error loading calendar subscription '" + calendarName
+			m_log.info("Error loading calendar subscription '" + calendarName
 					+ "' (will NOT retry again): " + url);
-
+			String subscriptionId = getIdFromSubscriptionUrl(url);
+			String reference = calendarSubscriptionReference(context, subscriptionId);
+			calendar = new ExternalCalendarSubscription(reference);
+			calendar.setName(calendarName);
+			// By setting the calendar to be an empty one we make sure that we don't attempt to re-retrieve it
+			// When 2 hours are up it will get refreshed through.
+			subscription.setCalendar(calendar);
 		}
 		catch (PermissionException e)
 		{
-			// This should never be called (for now)
-			log.warn("Failed to add event to calendar '"+ calendarName, e);
-			error = "Failed to parse calendar.";
+			// This will never be called (for now)
+			e.printStackTrace();
 		}
 		catch (MalformedURLException e)
 		{
-			log.info("Mal-formed URL in calendar subscription '" + calendarName
+			m_log.info("Mal-formed URL in calendar subscription '" + calendarName
 					+ "': " + url);
-			error = "Bad URL";
 		}
 		catch (IOException e)
 		{
-			log.info("Unable to read calendar subscription '" + calendarName
+			m_log.info("Unable to read calendar subscription '" + calendarName
 					+ "' from URL (I/O Error): " + url);
-			error = "Failed to connect to server";
 		}
 		catch (Exception e)
 		{
-			log.info("Unknown error occurred while reading calendar subscription '"
+			m_log.info("Unknown error occurred while reading calendar subscription '"
 					+ calendarName + "' from URL: " + url);
-			error = "Unknown";
 		}
-		BaseExternalSubscriptionDetails subscription = new BaseExternalSubscriptionDetails(calendarName,
-				url, context, null, institutional, userId, tzid, false, error, Instant.now(clock));
+		finally
+		{
+			if (stream != null) {
+				// Also closes the underlying InputStream
+				try {
+					stream.close();
+				} catch (IOException e) {
+					// Ignore
+				}
+			}
+		}
 		return subscription;
 	}
 	
@@ -802,7 +757,7 @@ public class BaseExternalCalendarSubscriptionService implements
 	public class ExternalCalendarSubscription implements Calendar
 	{
 		/** Memory storage */
-		protected Map<String, CalendarEvent> m_storage = new HashMap<>();
+		protected Map<String, CalendarEvent> m_storage = new HashMap<String, CalendarEvent>();
 
 		/** The context in which this calendar exists. */
 		protected String m_context = null;
@@ -848,14 +803,6 @@ public class BaseExternalCalendarSubscriptionService implements
 				String description, String type, String location, RecurrenceRule rrule,
 				List attachments) throws PermissionException
 		{
-			String currentUser = m_sessionManager.getCurrentSessionUserId();
-			return addEvent(range, displayName, description, type, location, currentUser, rrule, attachments);
-		}
-		
-		public CalendarEvent addEvent(TimeRange range, String displayName,
-				String description, String type, String location, String creator,
-				RecurrenceRule rrule, List attachments) throws PermissionException
-		{
 			// allocate a new unique event id
 			// String id = getUniqueId();
 			String id = getUniqueIdBasedOnFields(displayName, description, type, location, m_id);
@@ -869,7 +816,7 @@ public class BaseExternalCalendarSubscriptionService implements
 			edit.setDescription(description);
 			edit.setType(type);
 			edit.setLocation(location);
-			edit.setCreator(creator);
+			edit.setCreator();
 			if (rrule != null) edit.setRecurrenceRule(rrule);
 
 			// put in storage
@@ -1484,15 +1431,11 @@ public class BaseExternalCalendarSubscriptionService implements
 			return null;
 		}
 
-		public void setCreator(String creator)
+		public void setCreator()
 		{
-			String userId = creator;
-			// If creator is unknown, the creator is current user
-			if (userId==null) {
-				userId = m_sessionManager.getCurrentSessionUserId();
-			}
+			String currentUser = m_sessionManager.getCurrentSessionUserId();
 			String now = m_timeService.newTime().toString();
-			m_properties.addProperty(ResourceProperties.PROP_CREATOR, userId);
+			m_properties.addProperty(ResourceProperties.PROP_CREATOR, currentUser);
 			m_properties.addProperty(ResourceProperties.PROP_CREATION_DATE, now);
 		}
 
@@ -1551,7 +1494,7 @@ public class BaseExternalCalendarSubscriptionService implements
 				}
 				catch (IdUnusedException e)
 				{
-					log.warn(".getSiteName(): " + e);
+					m_log.warn(".getSiteName(): " + e);
 				}
 			}
 			

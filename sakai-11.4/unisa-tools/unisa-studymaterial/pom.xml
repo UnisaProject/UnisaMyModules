@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <parent>
+    <artifactId>master</artifactId>
+    <groupId>org.sakaiproject</groupId>
+    <version>11.4</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.sakaiproject</groupId>
+  <artifactId>unisa-studymaterial</artifactId>
+  <packaging>pom</packaging>
+  <name>Unisa Study Material</name>
+  <version>0.1</version>
+  <inceptionYear>2007</inceptionYear>
+  <organization>
+    <name>Sakai Project</name>
+    <url>http://sakaiproject.org/</url>
+  </organization>
+  <modules>
+    <module>tool</module>
+  </modules>
+  <dependencies>
+
+  <dependency>
+ 	<groupId>org.sakaiproject.kernel</groupId>
+ 	<artifactId>sakai-kernel-api</artifactId>
+ 	<version>${sakai.version}</version>
+   </dependency>
+     	<dependency>
+   		<groupId>org.sakaiproject.kernel</groupId>
+   		<artifactId>sakai-component-manager</artifactId>
+   		<version>${sakai.version}</version>
+ 	</dependency>
+ 	<dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <version>1.4.3</version>
+    </dependency>
+ <dependency>
+          <!-- must include this in the war for sakai 2.9+ -->
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-webmvc</artifactId>
+          <scope>compile</scope>
+        </dependency>
+        
+              <dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>4.11</version>
+    <scope>test</scope>
+  </dependency>
+   <!-- core library -->
+   <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+       <artifactId>resteasy-jaxrs</artifactId>
+      <version>3.0.6.Final</version>
+   </dependency>
+  <!-- JAXB support -->
+  <dependency>
+    <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-jaxb-provider</artifactId>
+    <version>3.0.6.Final</version>
+  </dependency>
+  <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>jaxrs-api</artifactId>
+      <version>3.0.6.Final</version>
+  </dependency>
+  <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-client</artifactId>
+      <version>3.0.6.Final</version>
+  </dependency>
+<!--   <dependency>
+      <groupId>net.sf.scannotation</groupId>
+      <artifactId>scannotation</artifactId>
+      <version>1.0.3</version>
+  </dependency> -->
+  
+  		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+    
+  </dependencies>
+</project>

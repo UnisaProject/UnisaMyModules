@@ -23,10 +23,11 @@ package org.sakaiproject.calendar.impl;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.calendar.api.Calendar;
 import org.sakaiproject.calendar.api.CalendarEdit;
 import org.sakaiproject.calendar.api.CalendarEvent;
@@ -40,10 +41,12 @@ import org.sakaiproject.util.DoubleStorageUser;
 * <p>DbCalendarService fills out the BaseCalendarService with a database implementation.</p>
 * <p>The sql scripts in src/sql/chef_calendar.sql must be run on the database.</p>
 */
-@Slf4j
 public class DbCalendarService
 	extends BaseCalendarService
 {
+	/** Our logger. */
+	private static Logger M_log = LoggerFactory.getLogger(DbCalendarService.class);
+
 	/** The name of the db table holding calendar calendars. */
 	protected String m_cTableName = "CALENDAR_CALENDAR";
 
@@ -134,11 +137,11 @@ public class DbCalendarService
 			SAK11204Fix sf =  new SAK11204Fix(this);
 			sf.apply(m_autoDdl);
 
-			log.info("init(): tables: " + m_cTableName + " " + m_rTableName + " locks-in-db: " + m_locksInDb);
+			M_log.info("init(): tables: " + m_cTableName + " " + m_rTableName + " locks-in-db: " + m_locksInDb);
 		}
 		catch (Throwable t)
 		{
-			log.warn("init(): ", t);
+			M_log.warn("init(): ", t);
 		}
 	}
 
@@ -227,8 +230,8 @@ public class DbCalendarService
 			Integer startDateHours = (int)(startDate/oneHour);
 			Integer endDateHours = (int)(endDate/oneHour);
 			
-			if ( log.isDebugEnabled() ) {
-				log.debug("Selecting Range from "+(new Date(startDate)).toGMTString()+" to "+(new Date(endDate)).toGMTString());
+			if ( M_log.isDebugEnabled() ) {
+				M_log.debug("Selecting Range from "+(new Date(startDate)).toGMTString()+" to "+(new Date(endDate)).toGMTString());
 			}
 			
             String filter = "((RANGE_START > ? and RANGE_START < ? ) " +

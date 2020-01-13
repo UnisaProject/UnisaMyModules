@@ -18,6 +18,8 @@
 
 package org.sakaiproject.sms.tool.renderers;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.sms.bean.SearchFilterBean;
 import org.sakaiproject.sms.bean.SearchResultContainer;
 import org.sakaiproject.sms.logic.SmsTaskLogic;
@@ -32,7 +34,6 @@ import org.sakaiproject.sms.tool.producers.TaskListPopupProducer;
 import org.sakaiproject.sms.tool.util.NullHandling;
 import org.springframework.util.Assert;
 
-import lombok.extern.slf4j.Slf4j;
 import uk.org.ponder.rsf.components.UIBranchContainer;
 import uk.org.ponder.rsf.components.UIContainer;
 import uk.org.ponder.rsf.components.UIInitBlock;
@@ -42,9 +43,9 @@ import uk.org.ponder.rsf.components.UIMessage;
 import uk.org.ponder.rsf.components.UIOutput;
 import uk.org.ponder.rsf.components.decorators.UIIDStrategyDecorator;
 
-@Slf4j
 public class TaskListResultsRenderer implements SearchResultsRenderer {
 
+	private static Log LOG = LogFactory.getLog(TaskListResultsRenderer.class);
 
 	private SearchResultContainer<SmsTask> smsTaskList = new SearchResultContainer<SmsTask>(
 			SmsUiConstants.NO_RESULTS_PAGING_SIZE);
@@ -81,7 +82,7 @@ public class TaskListResultsRenderer implements SearchResultsRenderer {
 					.getPagedSmsTasksForCriteria(searchFilterBean);
 			sortViewParams.current_count = smsTaskList.getNumberOfPages();
 		} catch (SmsSearchException e) {
-			log.error(e.getLocalizedMessage(), e);
+			LOG.error(e);
 			fail = true;
 		}
 

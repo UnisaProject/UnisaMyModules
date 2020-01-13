@@ -26,6 +26,9 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.portal.api.Portal;
@@ -44,7 +47,6 @@ import org.sakaiproject.tool.cover.SessionManager;
 import org.sakaiproject.util.Web;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.api.ServerConfigurationService;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Handler to process directtool urls including storing destination state
@@ -54,9 +56,10 @@ import lombok.extern.slf4j.Slf4j;
  * @version $Rev$
  * 
  */
-@Slf4j
 public class DirectToolHandler extends BasePortalHandler
 {
+	private static Logger M_log = LoggerFactory.getLogger(DirectToolHandler.class);
+
 	private static ServerConfigurationService serverConfigurationService = (ServerConfigurationService)ComponentManager.get(ServerConfigurationService.class);
 
 	public static final String URL_FRAGMENT = "directtool";
@@ -143,7 +146,7 @@ public class DirectToolHandler extends BasePortalHandler
 			ToolSession ts = s.getToolSession(placementId);
 			ts.clearAttributes();
 			portalService.setResetState(null);
-			log.debug("Tool state reset");
+			M_log.debug("Tool state reset");
 		}
 
 		// find the tool registered for this

@@ -29,10 +29,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-/**
- * Like the SitePresence but it includes a total number of visits and when they last visited for a site/user.
- * @see SitePresence
- */
 public class SitePresenceTotalImpl implements SitePresenceTotal, Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -50,12 +46,7 @@ public class SitePresenceTotalImpl implements SitePresenceTotal, Serializable {
         siteId = sp.getSiteId();
         userId = sp.getUserId();
         totalVisits = 1;
-        setLastVisitTime(sp.getDate());
-    }
-
-    public void updateFrom(SitePresence sp) {
-        incrementTotalVisits();
-        setLastVisitTime(sp.getDate());
+        setLastVisitTime(sp.getLastVisitStartTime());
     }
 
     public void incrementTotalVisits() {

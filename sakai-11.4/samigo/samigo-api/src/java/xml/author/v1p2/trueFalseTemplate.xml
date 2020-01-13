@@ -27,10 +27,6 @@
         <fieldlabel>ITEM_RUBRIC</fieldlabel>
         <fieldentry/>
       </qtimetadatafield>
-	  <qtimetadatafield>
-		<fieldlabel>ITEM_TAGS</fieldlabel>
-		<fieldentry/>
-	  </qtimetadatafield>
       <qtimetadatafield>
         <fieldlabel>ATTACHMENT</fieldlabel>
         <fieldentry/>
@@ -111,3 +107,4 @@
 		</flow_mat>
 	</itemfeedback>
 </item>
+ 

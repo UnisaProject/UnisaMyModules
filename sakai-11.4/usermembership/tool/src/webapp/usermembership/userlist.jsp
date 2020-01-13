@@ -79,38 +79,37 @@
 				firstItem="#{UserListBean.firstItem}"
 				pageSize="#{UserListBean.pageSize}"
 				accesskeys="true"
-				immediate="true"
+				immediate="true"				
 				rendered="#{UserListBean.renderPager}"
 				textItem="#{msgs.users}" />
 		
 	 	<t:dataTable 
 			value="#{UserListBean.userRows}"
 			var="row"
-			styleClass="table table-hover table-striped table-bordered"
-			columnClasses="visible,hidden-xs,visible,visible,visible,hidden-xs,hidden-xs,hidden-xs"
+			styleClass="listHier narrowTable"
 			sortColumn="#{UserListBean.userSortColumn}" 
             sortAscending="#{UserListBean.userSortAscending}"
             first="#{UserListBean.firstItem}"
             rows="#{UserListBean.rowsNumber}"
             rendered="#{UserListBean.renderTable}">
-			<t:column id="userID">
+			<h:column id="userID">
 				<f:facet name="header">
 		            <t:commandSortHeader columnName="id" immediate="true" arrow="true">
-		                <h:outputText value="#{msgs.user_id}"/>
+		                <h:outputText value="#{msgs.user_id}"/>		                
 		            </t:commandSortHeader>
-		        </f:facet>
+		        </f:facet>		  
 		        <h:commandLink action="#{SiteListBean.processActionUserId}" value="#{row.userDisplayId}">
 					<f:param name="userId" value="#{row.userID}"/>
-				</h:commandLink>
-			</t:column>
-			<t:column id="internalUserId" headerstyleClass="hidden-xs">
+				</h:commandLink>      
+			</h:column>
+			<h:column id="internalUserId">
 				<f:facet name="header">
 		            <t:commandSortHeader columnName="internalUserId" immediate="true" arrow="true">
-		                <h:outputText value="#{msgs.internal_user_id}"/>
+		                <h:outputText value="#{msgs.internal_user_id}"/>		                
 		            </t:commandSortHeader>
-		        </f:facet>
+		        </f:facet>		  
 				<h:outputText value="#{row.userID}"/>
-			</t:column>
+			</h:column>
 			<h:column id="userName">
 				<f:facet name="header">
 		            <t:commandSortHeader columnName="name" immediate="true" arrow="true">
@@ -135,38 +134,35 @@
 		        </f:facet>
 				<h:outputText value="#{row.userType}"/>
 			</h:column>
-			<t:column id="authority" headerstyleClass="hidden-xs">
+			<h:column id="authority">
 				<f:facet name="header">
 		            <t:commandSortHeader columnName="authority" immediate="true" arrow="true">
 		                <h:outputText value="#{msgs.user_authority}"/>
 		            </t:commandSortHeader>
 		        </f:facet>
 				<h:outputText value="#{row.authority}"/>
-			</t:column>
-			<t:column id="createdOn" headerstyleClass="hidden-xs">
+			</h:column>
+			<h:column id="createdOn">
 				<f:facet name="header">
 		            <t:commandSortHeader columnName="createdOn" immediate="true" arrow="true">
 		                <h:outputText value="#{msgs.user_created_on}"/>
 		            </t:commandSortHeader>
 		        </f:facet>
-				<h:outputText value="#{row.createdOn}">
-					<f:convertDateTime dateStyle="medium" timeZone="#{UserListBean.userTimeZone}"/>
-				</h:outputText>
-			</t:column>
-			<t:column id="modifiedOn" headerstyleClass="hidden-xs">
+				<h:outputText value="#{row.createdOn}"/>
+			</h:column>
+			<h:column id="modifiedOn">
 				<f:facet name="header">
 		            <t:commandSortHeader columnName="modifiedOn" immediate="true" arrow="true">
 		                <h:outputText value="#{msgs.user_modified_on}"/>
 		            </t:commandSortHeader>
 		        </f:facet>
-				<h:outputText value="#{row.modifiedOn}">
-					<f:convertDateTime dateStyle="medium" timeZone="#{UserListBean.userTimeZone}"/>
-				</h:outputText>
-			</t:column>
+				<h:outputText value="#{row.modifiedOn}"/>
+			</h:column>
 		</t:dataTable>
 	
-		<h:outputText value="#{msgs.no_enrollments}" rendered="#{UserListBean.emptyUserList}" styleClass="instruction" />
-
+		<p class="instruction" style="margin-top: 40px;">
+			<h:outputText value="#{msgs.no_enrollments}" rendered="#{UserListBean.emptyUserList}" />
+		</p>		
 		<t:div styleClass="act" rendered="#{!UserListBean.emptyUserList && UserListBean.renderTable}">
 			<h:commandButton id="exportCsv" actionListener="#{UserListBean.exportAsCsv}" value="#{msgs.export_csv_button}"/>
 			<h:commandButton id="exportXls" actionListener="#{UserListBean.exportAsXls}" value="#{msgs.export_excel_button}"/>

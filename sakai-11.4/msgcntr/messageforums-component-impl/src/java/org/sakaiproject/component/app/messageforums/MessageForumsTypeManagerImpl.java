@@ -23,8 +23,8 @@ package org.sakaiproject.component.app.messageforums;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.messageforums.MessageForumsTypeManager;
 import org.sakaiproject.api.common.type.Type;
 import org.sakaiproject.api.common.type.TypeManager;
@@ -34,9 +34,9 @@ import org.sakaiproject.db.api.SqlService;
  * @author <a href="mailto:rshastri@iupui.edu">Rashmi Shastri</a>
  *
  */
-@Slf4j
 public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
 {
+  private static final Logger LOG = LoggerFactory.getLogger(MessageForumsTypeManagerImpl.class);
   private static final String NOT_SPECIFIED = "notSpecified";
   private static final String ALL_PARTICIPANTS = "allParticipants";
   private static final String GROUP = "group";
@@ -80,7 +80,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
 
   public void init() throws Exception
   {
-	  log.info("init()");           
+	  LOG.info("init()");           
 	  try {
 	  	//  run ddl 
 		  /*if (autoDdl.booleanValue()){
@@ -90,13 +90,13 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
 			  }       
 			  catch (Throwable t)
 			  {
-				  log.warn(this + ".init(): ", t);
+				  LOG.warn(this + ".init(): ", t);
 			  }
 		  }*/
 		  loadInitialDefaultPermissionType();
 	  }
 	  catch (Exception e) {
-		  log.warn("Error loading initial default permissions", e);
+		  LOG.warn("Error loading initial default permissions", e);
 	  }
   }
 
@@ -105,15 +105,15 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
    */
   public void setTypeManager(TypeManager typeManager)
   {
-    if(log.isDebugEnabled())
+    if(LOG.isDebugEnabled())
     {
-      log.debug("setTypeManager(TypeManager "+typeManager +")");
+      LOG.debug("setTypeManager(TypeManager "+typeManager +")");
     }
     this.typeManager = typeManager;
   }
   
   public String getOwnerLevelType(){
-  	log.debug("getOwnerLevelType()");
+  	LOG.debug("getOwnerLevelType()");
   	
   	if(initPermissionTypes != null && initPermissionTypes.get(OWNER) != null)
   	{
@@ -133,7 +133,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
   }
   
   public String getAuthorLevelType(){
-  	log.debug("getAuthorLevelType()");
+  	LOG.debug("getAuthorLevelType()");
   	if(initPermissionTypes != null && initPermissionTypes.get(AUTHOR) != null)
   	{
   		return (String) initPermissionTypes.get(AUTHOR);
@@ -152,7 +152,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
   }
   
   public String getNoneditingAuthorLevelType(){
-  	log.debug("getNoneditingAuthorLevelType()");
+  	LOG.debug("getNoneditingAuthorLevelType()");
   	if(initPermissionTypes != null && initPermissionTypes.get(NONEDITING_AUTHOR) != null)
   	{
   		return (String) initPermissionTypes.get(NONEDITING_AUTHOR);
@@ -171,7 +171,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
   }
   
   public String getReviewerLevelType(){
-  	log.debug("getReviewerLevelType()");
+  	LOG.debug("getReviewerLevelType()");
   	if(initPermissionTypes != null && initPermissionTypes.get(REVIEWER) != null)
   	{
   		return (String) initPermissionTypes.get(REVIEWER);
@@ -190,7 +190,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
   }
   
   public String getContributorLevelType(){
-  	log.debug("getContributorLevelType()");
+  	LOG.debug("getContributorLevelType()");
   	if(initPermissionTypes != null && initPermissionTypes.get(CONTRIBUTOR) != null)
   	{
   		return (String) initPermissionTypes.get(CONTRIBUTOR);
@@ -209,7 +209,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
   }
   
   public String getNoneLevelType(){
-  	log.debug("getNoneLevelType()");
+  	LOG.debug("getNoneLevelType()");
   	if(initPermissionTypes != null && initPermissionTypes.get(NONE) != null)
   	{
   		return (String) initPermissionTypes.get(NONE);
@@ -228,7 +228,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
   }
   
   public String getCustomLevelType(){
-  	log.debug("getCustomLevelType()");
+  	LOG.debug("getCustomLevelType()");
   	if(initPermissionTypes != null && initPermissionTypes.get(CUSTOM) != null)
   	{
   		return (String) initPermissionTypes.get(CUSTOM);
@@ -253,7 +253,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
    */
   public String getPrivateMessageAreaType()
   {
-    log.debug("getPrivateMessageAreaType()");
+    LOG.debug("getPrivateMessageAreaType()");
     Type type = typeManager.getType(AUTHORITY, DOMAIN, PRIVATE);
     if (type != null)
     {
@@ -268,7 +268,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
   
   public String getUserDefinedPrivateTopicType()
   {
-    log.debug("getUserDefinedPrivateTopicType()");
+    LOG.debug("getUserDefinedPrivateTopicType()");
     Type type = typeManager.getType(AUTHORITY, DOMAIN, PRIVATE_USER_DEFINED_TOPIC);
     if (type != null)
     {
@@ -286,7 +286,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
    */
   public String getDiscussionForumType()
   {
-    log.debug("getDiscussionForumType()");
+    LOG.debug("getDiscussionForumType()");
     Type type = typeManager.getType(AUTHORITY, DOMAIN, DISCUSSION);
     if (type != null)
     {
@@ -305,7 +305,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
    */
   public String getOpenDiscussionForumType()
   {
-    log.debug("getOpenDiscussionForumType()");
+    LOG.debug("getOpenDiscussionForumType()");
     Type type = typeManager.getType(AUTHORITY, DOMAIN, OPEN);
     if (type != null)
     {
@@ -323,7 +323,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
    */
   public String getReceivedPrivateMessageType()
   {
-    log.debug("getReceivedPrivateMessageType()");
+    LOG.debug("getReceivedPrivateMessageType()");
     Type type = typeManager.getType(AUTHORITY, DOMAIN, RECEIVED);
     //authority = "org.sakaiproject.component.app.messageforums"
     //domain="sakai_messageforums"
@@ -345,7 +345,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
    */
   public String getSentPrivateMessageType()
   {
-    log.debug("getSentPrivateMessageType()");
+    LOG.debug("getSentPrivateMessageType()");
     Type type = typeManager.getType(AUTHORITY, DOMAIN, SENT);
     if (type != null)
     {
@@ -363,7 +363,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
    */
   public String getDeletedPrivateMessageType()
   {
-    log.debug("getDeletedPrivateMessageType()");
+    LOG.debug("getDeletedPrivateMessageType()");
     Type type = typeManager.getType(AUTHORITY, DOMAIN, DELETED);
     if (type != null)
     {
@@ -382,7 +382,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
    */
   public String getDraftPrivateMessageType()
   {
-    log.debug("getDraftPrivateMessageType()");
+    LOG.debug("getDraftPrivateMessageType()");
     Type type = typeManager.getType(AUTHORITY, DOMAIN, DRAFT);
     if (type != null)
     {
@@ -400,7 +400,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
    */
   public String getRoleType()
   {
-    log.debug("getRoleType()");
+    LOG.debug("getRoleType()");
     Type type = typeManager.getType(AUTHORITY, DOMAIN, ROLE);
     if (type != null)
     {
@@ -416,7 +416,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
 
   public String getUserType()
   {
-    log.debug("getUserType()");
+    LOG.debug("getUserType()");
     Type type = typeManager.getType(AUTHORITY, DOMAIN, USER);
     if (type != null)
     {
@@ -434,7 +434,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
    */
   public String getGroupType()
   {
-    log.debug("getGroupType()");
+    LOG.debug("getGroupType()");
     Type type = typeManager.getType(AUTHORITY, DOMAIN, GROUP);
     if (type != null)
     {
@@ -453,7 +453,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
    */
   public String getAllParticipantType()
   {
-    log.debug("getAllParticipantType()");
+    LOG.debug("getAllParticipantType()");
     Type type = typeManager.getType(AUTHORITY, DOMAIN, ALL_PARTICIPANTS);
     if (type != null)
     {
@@ -471,7 +471,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
    */
   public String getNotSpecifiedType()
   {
-    log.debug("getNotSpecifiedType()");
+    LOG.debug("getNotSpecifiedType()");
     Type type = typeManager.getType(AUTHORITY, DOMAIN, NOT_SPECIFIED);
     if (type != null)
     {
@@ -488,7 +488,7 @@ public class MessageForumsTypeManagerImpl implements MessageForumsTypeManager
   /** Return the typeUUId fro custom created topic  */
   public String getCustomTopicType(String topicTitle)
   {
-    log.debug("getCustomTopicType()");
+    LOG.debug("getCustomTopicType()");
     Type type = typeManager.getType(AUTHORITY, DOMAIN, topicTitle);
     if (type != null)
     {

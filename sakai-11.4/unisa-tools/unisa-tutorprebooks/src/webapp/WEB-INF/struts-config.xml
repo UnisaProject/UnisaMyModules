@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+   <data-sources />
+   <form-beans >
+    
+    <form-bean name="mainForm" type="za.ac.unisa.lms.tools.tutorprebooks.forms.MainForm" />
+ 
+   </form-beans>
+  
+   <global-exceptions />
+   <global-forwards />
+   <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.tutorprebooks.actions.DefaultAction" validate="false">
+       <forward
+        name="default"
+          path="/tutorMain.do?action=mainDisplay"
+        contextRelative="true" />
+        
+    </action>
+    
+   
+	<action
+		attribute="mainForm"
+		name="mainForm"
+		parameter="action"		
+	    path="/tutorMain"
+	        scope="session"
+		type="za.ac.unisa.lms.tools.tutorprebooks.actions.TutorMainAction" validate="false">
+        
+		<forward name="mainDisplay" path="/WEB-INF/jsp/main.jsp" contextRelative="true"/>
+		<forward name="viewreportsforward" path="/WEB-INF/jsp/viewreports.jsp" contextRelative="true" />
+		<forward name="showreportforward" path="/WEB-INF/jsp/viewreports.jsp" contextRelative="true" />
+				
+	</action>
+    
+      
+    </action-mappings>
+   
+    <message-resources parameter="za.ac.unisa.lms.tools.tutorprebooks.ApplicationResources"/>
+     
+</struts-config>

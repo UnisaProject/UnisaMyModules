@@ -21,13 +21,13 @@
 
 package org.sakaiproject.component.app.messageforums.dao.hibernate;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.messageforums.EmailNotification;
 
-@Slf4j
 public class EmailNotificationImpl implements EmailNotification {
 
+	private static final Logger LOG = LoggerFactory.getLogger(EmailNotificationImpl.class);
 	private Long id;
 
 	private String notificationLevel;
@@ -60,7 +60,7 @@ public class EmailNotificationImpl implements EmailNotification {
 	}
 
 	public void setNotificationLevel(String notilevel) {
-		log.debug("EmailNotifcationImpl.setnotificaitonlevel");
+		LOG.debug("EmailNotifcationImpl.setnotificaitonlevel");
 		this.notificationLevel = notilevel;
 
 	}

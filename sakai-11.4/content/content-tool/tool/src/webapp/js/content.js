@@ -14,63 +14,63 @@ var sortJSON = function(data, key){
 };
 
 var iconDecider = function(itemType){
-    var path = 'fa fa-';
+    var path = '/library/image/sakai/';
     switch (itemType) {
         case "application/mac-binhex40":
         case "application/x-tar":
         case "application/zip":
         case "application/x-stuffit":
-            return path + 'file-archive-o';
+            return path + 'compressed.gif';
             
         case "application/msword":
         case "application/rtf":
         case "text/rtf":
-            return path + 'file-word-o';
+            return path + 'word.gif';
             
         case "application/vnd.ms-excel":
         case "text/csv":
-            return path + 'file-excel-o';
+            return path + 'excel.gif';
             
         case "image/vnd.adobe.photoshop":
         case "application/x-photoshop":
-            return path + 'file-o';
+            return path + 'photoshop.gif';
             
         case "image/gif":
         case "image/png":
         case "image/jpeg":
-            return path + 'file-image-o';
+            return path + 'image.gif';
             
         case "video/mpeg":
         case "video/quicktime":
         case "video/msvideo":
         case "video/avi":
         case "video/x-msvideo":
-            return path + 'file-video-o';
+            return path + 'movie.gif';
             
         case "audio/mpeg":
         case "audio/x-midi":
-            return path + 'file-audio-o';
+            return path + 'audio.gif';
             
         case "application/pdf":
-            return path + 'file-pdf-o';
+            return path + 'pdf.gif';
         case "application/postscript":
-            return path + 'file-o';
+            return path + 'postscript.gif';
         case "application/vnd.ms-powerpoint":
-            return path + 'file-powerpoint-o';
+            return path + 'ppt.gif';
         case "application/x-msaccess":
-            return path + 'file-o';
+            return path + 'access.gif';
         case "application/x-shockwave-flash":
-            return path + 'file-o';
+            return path + 'shockwave.gif';
         case "audio/x-pn-realaudio":
-            return path + 'file-o';
+            return path + 'real.gif';
         case "text/html":
-            return path + 'file-code-o';
+            return path + 'html.gif';
         case "text/plain":
-            return path + 'file-text-o';
+            return path + 'text.gif';
         case "text/x-java-source":
-            return path + 'file-code-o';
+            return path + 'java.gif';
         default:
-            return path + 'file-o';
+            return path + 'generic.gif';
     }
 };
 
@@ -146,7 +146,6 @@ var renderHierarchyWithJsonTree = function(data){
             itemType = 'folder';
             item.text = item.text;
             itemUrl = pathToFolder;
-            item.icon = (item.numChildren > 0) ? 'fa fa-folder' : 'fa fa-folder-o';
         }
         else {
             itemType = 'file';

@@ -17,6 +17,10 @@
 **********************************************************************************/
 package edu.indiana.lib.twinpeaks.search;
 
+import edu.indiana.lib.twinpeaks.util.DomUtils;
+import edu.indiana.lib.twinpeaks.util.LogUtils;
+import edu.indiana.lib.twinpeaks.util.StringUtils;
+
 import java.util.ArrayList;
 
 import javax.xml.parsers.*;
@@ -24,9 +28,6 @@ import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.w3c.dom.html.*;
 import org.xml.sax.*;
-
-import edu.indiana.lib.twinpeaks.util.DomUtils;
-import edu.indiana.lib.twinpeaks.util.StringUtils;
 
 /**
  * Preferred URL handling - reference implementation for the Sirsi Web2 Bridge.

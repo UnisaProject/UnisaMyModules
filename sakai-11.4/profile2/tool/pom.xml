@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>org.sakaiproject.profile2</groupId>
 		<artifactId>profile2</artifactId>
-	    <version>12.6</version>
+	    <version>11.4</version>
 	</parent>
 
 	<dependencies>
@@ -64,8 +64,13 @@
     	</dependency>
     	<dependency>
 			<groupId>org.sakaiproject.common</groupId>
-			<artifactId>sakai-common-api</artifactId>
+			<artifactId>sakai-common-edu-person-api</artifactId>
 			<scope>provided</scope>
+    	</dependency>
+    	<dependency>
+      		<groupId>org.sakaiproject.common</groupId>
+      		<artifactId>sakai-common-manager-api</artifactId>
+      		<scope>provided</scope>
     	</dependency>
 	    <dependency>
       		<groupId>org.sakaiproject.entitybroker</groupId>
@@ -94,11 +99,6 @@
 		<dependency>
 			<groupId>org.sakaiproject.kernel</groupId>
 			<artifactId>sakai-kernel-util</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.googlecode.json-simple</groupId>
-			<artifactId>json-simple</artifactId>
-			<version>1.1.1</version>
 		</dependency>
 	</dependencies>
 	

@@ -11,10 +11,8 @@
 
   <filter-mapping>
     <filter-name>sakai.request</filter-name>
-    <url-pattern>/*</url-pattern>
+    <servlet-name>ProviderServlet</servlet-name>
     <dispatcher>REQUEST</dispatcher>
-    <dispatcher>FORWARD</dispatcher>
-    <dispatcher>INCLUDE</dispatcher>
   </filter-mapping>
 
   <servlet>

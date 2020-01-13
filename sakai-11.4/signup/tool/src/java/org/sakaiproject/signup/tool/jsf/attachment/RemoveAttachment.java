@@ -22,22 +22,19 @@ package org.sakaiproject.signup.tool.jsf.attachment;
 import java.util.Iterator;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.OptimisticLockingFailureException;
-
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.signup.logic.SignupMeetingService;
 import org.sakaiproject.signup.model.SignupAttachment;
 import org.sakaiproject.signup.model.SignupMeeting;
 import org.sakaiproject.signup.tool.jsf.organizer.action.SignupAction;
 import org.sakaiproject.signup.tool.util.Utilities;
+import org.springframework.dao.OptimisticLockingFailureException;
 
 /**
  * <p>
  * This class will provide business logic for 'Remove Attachment' action by user.
  * </P>
  */
-@Slf4j
 public class RemoveAttachment extends SignupAction {
 
 	/**
@@ -62,9 +59,9 @@ public class RemoveAttachment extends SignupAction {
 			
 			handleVersion(meeting, remAttach);
 		} catch (PermissionException pe) {
-			log.warn(Utilities.rb.getString("no.permissoin.do_it"));
+			logger.warn(Utilities.rb.getString("no.permissoin.do_it"));
 		}catch (Exception e){
-			log.warn(e.getMessage());
+			logger.warn(e.getMessage());
 		}
 	}
 

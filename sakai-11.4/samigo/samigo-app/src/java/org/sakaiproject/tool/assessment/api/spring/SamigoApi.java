@@ -22,7 +22,6 @@
 
 package org.sakaiproject.tool.assessment.api.spring;
 
-import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.tool.assessment.api.SamigoApiFactory;
 import org.sakaiproject.tool.assessment.shared.api.assessment.AssessmentServiceAPI;
 import org.sakaiproject.tool.assessment.shared.api.assessment.ItemServiceAPI;
@@ -35,6 +34,8 @@ import org.sakaiproject.tool.assessment.shared.api.grading.GradebookServiceAPI;
 import org.sakaiproject.tool.assessment.shared.api.grading.GradingServiceAPI;
 import org.sakaiproject.tool.assessment.shared.api.qti.QTIServiceAPI;
 import org.sakaiproject.tool.assessment.shared.api.questionpool.QuestionPoolServiceAPI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -44,9 +45,9 @@ import org.sakaiproject.tool.assessment.shared.api.questionpool.QuestionPoolServ
  * @author Ed Smiley <esmiley@stanford.edu>
  *
  */
-@Slf4j
- public class SamigoApi extends SamigoApiFactory
+public class SamigoApi extends SamigoApiFactory
 {
+  private static Logger log = LoggerFactory.getLogger(SamigoApi.class);
 
   private AssessmentServiceAPI assessmentServiceAPI;
   private GradebookServiceAPI gradebookServiceAPI;

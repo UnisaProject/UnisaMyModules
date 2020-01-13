@@ -67,7 +67,7 @@ public class AdminMenu extends Panel {
 			Locator.getFacade().getStatsAuthz().isUserAbleToViewSiteStatsAdmin(siteId);
 		MenuItem reportsPage = new MenuItem("reportsPage", new ResourceModel("menu_adminreports"), AdminReportsPage.class, pageParameters, false);
 		//unisa change
-		 //reportsPage.setVisible(reportsPageVisible);
+		//reportsPage.setVisible(reportsPageVisible);
 		 reportsPage.setVisible(false);
 		add(reportsPage);
 		

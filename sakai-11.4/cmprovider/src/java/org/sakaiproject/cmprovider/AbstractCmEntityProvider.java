@@ -1,20 +1,7 @@
-/**
- * Copyright (c) 2015-2016 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.cmprovider;
 
+import java.lang.Class;
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,7 +9,8 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import javax.validation.Validation;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.cmprovider.data.CmEntityData;
@@ -43,7 +31,6 @@ import org.sakaiproject.tool.api.Session;
  *
  * @author Christopher Schauer
  */
-@Slf4j
 public abstract class AbstractCmEntityProvider implements RESTful, CoreEntityProvider, AutoRegisterEntityProvider {
 
   /**
@@ -118,6 +105,8 @@ public abstract class AbstractCmEntityProvider implements RESTful, CoreEntityPro
   protected SessionManager sessionManager;
   public void setSessionManager(SessionManager manager) { sessionManager = manager; }
 
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractCmEntityProvider.class);
+
   public String[] getHandledOutputFormats() {
     return new String[] { Formats.JSON };
   }
@@ -151,7 +140,7 @@ public abstract class AbstractCmEntityProvider implements RESTful, CoreEntityPro
     validateUser();
     String eid = getIdFromReference(ref);
 
-    log.info("Retrieving " + getEntityPrefix() + " with eid=" + eid + "...");
+    LOG.info("Retrieving " + getEntityPrefix() + " with eid=" + eid + "...");
     try {
       return get(eid);
     } catch (IdNotFoundException ex) {
@@ -182,7 +171,7 @@ public abstract class AbstractCmEntityProvider implements RESTful, CoreEntityPro
   public void deleteEntity(EntityReference ref, Map<String, Object> params) {
     validateRequest(params, null);
     String eid = getIdFromReference(ref);
-    log.info("Deleting " + getEntityPrefix() + " with eid=" + eid + "...");
+    LOG.info("Deleting " + getEntityPrefix() + " with eid=" + eid + "...");
     delete(eid);
   }
 
@@ -191,7 +180,7 @@ public abstract class AbstractCmEntityProvider implements RESTful, CoreEntityPro
     validateDataObject(entity);
     CmEntityData data = (CmEntityData)entity;
 
-    log.info("Inserting " + getEntityPrefix() + " with eid=" + data.getId() + "...");
+    LOG.info("Inserting " + getEntityPrefix() + " with eid=" + data.getId() + "...");
     if (!entityExists(data.getId())) {
       create(data);
     } else {

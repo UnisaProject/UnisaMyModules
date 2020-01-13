@@ -21,12 +21,10 @@
 
 package org.sakaiproject.content.impl.test;
 
-import java.time.Instant;
 import java.util.*;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.content.api.ContentCollection;
 import org.sakaiproject.content.api.ContentEntity;
 import org.sakaiproject.content.api.ContentHostingHandler;
@@ -41,6 +39,8 @@ import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.cover.TimeService;
 import org.sakaiproject.util.BaseResourcePropertiesEdit;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * MockContentEntity
@@ -48,6 +48,8 @@ import org.sakaiproject.util.BaseResourcePropertiesEdit;
  */
 public class MockContentEntity implements ContentEntity, GroupAwareEdit
 {
+	private static final Logger logger = LoggerFactory.getLogger(MockContentEntity.class);
+	
 	protected String entityId;
 	protected String containingCollectionId;
 	protected String reference;
@@ -399,10 +401,6 @@ public class MockContentEntity implements ContentEntity, GroupAwareEdit
 		}
 	}
 
-	@Override
-	public void setAvailabilityInstant(boolean hidden, Instant releaseDate, Instant retractDate) {
-		setAvailability(hidden, TimeService.newTime(releaseDate.toEpochMilli()), TimeService.newTime(retractDate.toEpochMilli()));	
-	}
 	/* (non-Javadoc)
 	 * @see org.sakaiproject.content.api.GroupAwareEdit#setGroupAccess(java.util.Collection)
 	 */
@@ -487,22 +485,5 @@ public class MockContentEntity implements ContentEntity, GroupAwareEdit
 	{
 		return this.isActiveEdit;
 	}
-	@Override
-	public Instant getReleaseInstant() {
-		return Instant.ofEpochMilli(this.releaseDate.getTime());
-	}
-	@Override
-	public Instant getRetractInstant() {
-		return Instant.ofEpochMilli(this.releaseDate.getTime());
-	}
-	@Override
-	public void setReleaseInstant(Instant date) {
-		this.releaseDate = TimeService.newTime(date.toEpochMilli());
-		
-	}
-	@Override
-	public void setRetractInstant(Instant time) {
-		this.retractDate = TimeService.newTime(time.toEpochMilli());
-		
-	}
+
 }

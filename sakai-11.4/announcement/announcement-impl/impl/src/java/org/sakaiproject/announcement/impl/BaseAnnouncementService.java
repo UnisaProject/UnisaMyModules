@@ -46,10 +46,9 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang3.StringUtils;
-
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.alias.api.Alias;
 import org.sakaiproject.alias.api.AliasService;
 import org.sakaiproject.announcement.api.AnnouncementChannel;
@@ -106,10 +105,13 @@ import org.w3c.dom.Element;
  * BaseAnnouncementService extends the BaseMessage for the specifics of Announcement.
  * </p>
  */
-@Slf4j
+
 public abstract class BaseAnnouncementService extends BaseMessage implements AnnouncementService, ContextObserver,
 		EntityTransferrer, EntityTransferrerRefMigrator
 {
+	/** Our logger. */
+	private static Logger M_log = LoggerFactory.getLogger(BaseAnnouncementService.class);
+
 	/** private constants definitions */
 	private final static String SAKAI_ANNOUNCEMENT_TOOL_ID = "sakai.announcements";
 	private static final String PORTLET_CONFIG_PARM_MERGED_CHANNELS = "mergedAnnouncementChannels";
@@ -229,11 +231,11 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 			TransformerFactory tFactory = TransformerFactory.newInstance();
 			docTransformer = tFactory.newTransformer();
 			
-			log.info("init()");
+			M_log.info("init()");
 		}
 		catch (Throwable t)
 		{
-			log.warn("init(): ", t);
+			M_log.warn("init(): ", t);
 		}
 
 	} // init
@@ -547,7 +549,7 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 		        throw new IllegalArgumentException("anouncement eventId() input cannot be null or blank");
 		    } catch (Exception e) {
 		        secure = "INVALID_KEY";
-		        log.error("Bad call to BaseAnnouncementService.eventId(String) - input string is blank, generating '{}' event name and logging trace", secure, e);
+		        M_log.error("Bad call to BaseAnnouncementService.eventId(String) - input string is blank, generating '"+secure+"' event name and logging trace", e);
 		    }
 		}
 		return SECURE_ANNC_ROOT + secure;
@@ -614,7 +616,7 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 						context = parts[3];
 				}
 				else
-					log.warn("parse(): unknown message subtype: {} in ref: {}", subType, reference);
+					M_log.warn("parse(): unknown message subtype: " + subType + " in ref: " + reference);
 			}
 
 			// Translate context alias into site id (only for rss) if necessary
@@ -634,7 +636,7 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 					}
 					catch (Exception e)
 					{
-						log.debug(this+".parseEntityReference(): {}", e.toString());
+						M_log.debug(this+".parseEntityReference(): "+e.toString());
 						return false;
 					}
 				}
@@ -642,7 +644,7 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 				// if context still isn't valid, then no valid alias or site was specified
 				if (!m_siteService.siteExists(context))
 				{
-					log.warn(this+".parseEntityReference() no valid site or alias: {}", context);
+					M_log.warn(this+".parseEntityReference() no valid site or alias: " + context);
 					return false;
 				}
 			}
@@ -687,7 +689,7 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 			}
 		} catch (IdUnusedException e) {
 		    // ignore the error, continue with the default method
-		    log.debug("Could not find channelRef in channel property, falling back to default method...");
+		    M_log.debug("Could not find channelRef in channel property, falling back to default method...");
 		}
 		
 		if (channelRef == null || channelRef.trim().length() == 0) {
@@ -897,7 +899,7 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 			AnnouncementChannel anncChan = (AnnouncementChannel)getChannelPublic( channelReference(rssRef.getContext(), SiteService.MAIN_CONTAINER) );
 			if ( anncChan == null )
 			{
-				log.warn(this+".printAnnouncementRss invalid request {}", rssRef.getContext());
+				M_log.warn(this+".printAnnouncementRss invalid request "+rssRef.getContext());
 				return;
 			}
 			List anncList = anncChan.getMessagesPublic(null,false);
@@ -917,7 +919,7 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 		}
 		catch (Exception e)
 		{
-			log.warn(this+"printAnnouncementRss ", e);
+			M_log.warn(this+"printAnnouncementRss ", e);
 		}
 	}
 
@@ -1123,13 +1125,13 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 				Collections.reverse(messageList);
 			}			
 		} catch (IdUnusedException e) {
-			log.warn(e.getMessage());
+			M_log.warn(e.getMessage());
 		}
 		catch (PermissionException e) {
-			log.warn(e.getMessage());
+			M_log.warn(e.getMessage());
 		}
 		catch (NullPointerException e) {
-			log.warn(e.getMessage());
+			M_log.warn(e.getMessage());
 		}
 		return messageList;
 
@@ -1237,7 +1239,7 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 					}
 					
 					// not to import any assignment-generated announcement
-					String assignmentReference = StringUtils.trimToNull(oMessage.getProperties().getProperty(AnnouncementService.ASSIGNMENT_REFERENCE));
+					String assignmentReference = StringUtil.trimToNull(oMessage.getProperties().getProperty(AnnouncementService.ASSIGNMENT_REFERENCE));
 					if (toBeImported && assignmentReference != null)
 					{
 						toBeImported = false;
@@ -1256,7 +1258,7 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 						nMessageHeader.setDate(oMessageHeader.getDate());
 						nMessageHeader.setMessage_order(oMessageHeader.getMessage_order());
 						// when importing, refer to property to determine draft status
-						if (!m_serverConfigurationService.getBoolean("import.importAsDraft", true))
+						if ("false".equalsIgnoreCase(m_serverConfigurationService.getString("import.importAsDraft")))
 						{
 							nMessageHeader.setDraft(oMessageHeader.getDraft());
 						}
@@ -1323,18 +1325,18 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 										catch (Exception eeAny)
 										{
 											// if the new resource cannot be added
-											log.warn(" cannot add new attachment with id={}", nAttachmentId);
+											M_log.warn(" cannot add new attachment with id=" + nAttachmentId);
 										}
 									}
 									catch (Exception eAny)
 									{
 										// if cannot find the original attachment, do nothing.
-										log.warn(" cannot find the original attachment with id={}", oAttachmentId);
+										M_log.warn(" cannot find the original attachment with id=" + oAttachmentId);
 									}
 								}
 								catch (Exception any)
 								{
-									log.info(any.getMessage());
+									M_log.info(any.getMessage());
 								}
 							}
 							else
@@ -1361,11 +1363,11 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 		}
 		catch (IdUnusedException e)
 		{
-			log.warn(" MessageChannel {} cannot be found. ", fromContext);
+			M_log.warn(" MessageChannel " + fromContext + " cannot be found. ");
 		}
 		catch (Exception any)
 		{
-			log.warn(".importResources(): exception in handling {} : {}", serviceName(), any);
+			M_log.warn(".importResources(): exception in handling " + serviceName() + " : ", any);
 		}
 		
 		return null;
@@ -1417,14 +1419,14 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 					}
 					catch(Exception e)
 					{
-						log.debug("Unable to remove Announcements ", e.getMessage(), e);
+						M_log.debug("Unable to remove Announcements " + e);
 					}
 				}
 
 			}
 			catch (Exception e)
 			{
-				log.debug("transferCopyEntities: End removing Announcement data");
+				M_log.debug("transferCopyEntities: End removing Announcement data");
 			}
 		}
 	}
@@ -1630,20 +1632,20 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 					try {
 						releaseDate = me.getProperties().getDateProperty(AnnouncementService.RELEASE_DATE);
 					} catch (EntityPropertyNotDefinedException e) {
-						if (log.isDebugEnabled()) {
-							log.debug("Exception moving an unreleased item.",e);
+						if (M_log.isDebugEnabled()) {
+							M_log.debug("Exception moving an unreleased item.",e);
 						}
 						continue;
 					} catch (EntityPropertyTypeException e) {
-						if (log.isDebugEnabled()) {
-							log.debug("Exception moving an unreleased item.",e);
+						if (M_log.isDebugEnabled()) {
+							M_log.debug("Exception moving an unreleased item.",e);
 						}
 						continue;
 					}
 					//releaseDate of this item is after current date, so set it later than max
 					if (releaseDate.compareTo(new Date()) > 0) {
-						if (log.isDebugEnabled()) {
-							log.debug("Placing unreleased announcement to top of list {}", me.getId());
+						if (M_log.isDebugEnabled()) {
+							M_log.debug("Placing unreleased announcement to top of list " + me.getId());
 						}
 						//Try to set the current max of these other messages
 						try {
@@ -1651,14 +1653,14 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 							em.getHeaderEdit().setMessage_order(++currentMax);
 							super.commitMessage(em, NotificationService.NOTI_IGNORE, "");
 						} catch (InUseException e) {
-							if (log.isDebugEnabled()) {
-								log.debug("Exception moving an unreleased item.",e);
+							if (M_log.isDebugEnabled()) {
+								M_log.debug("Exception moving an unreleased item.",e);
 							}
 							continue;
 						}
 						catch (IdUnusedException e) {
-							if (log.isDebugEnabled()) {
-								log.debug("Exception moving an unreleased item.",e);
+							if (M_log.isDebugEnabled()) {
+								M_log.debug("Exception moving an unreleased item.",e);
 							}
 							continue;
 						}
@@ -1666,7 +1668,7 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 					}
 				}
 			} catch (PermissionException ex) {
-				log.error(ex.getMessage());
+				M_log.error(ex.getMessage());
 			}
 		}
 		
@@ -1687,7 +1689,7 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 				}
 				msg.getHeaderEdit().setMessage_order(++currentMax);
 			} catch (PermissionException ex) {
-				log.error(ex.getMessage());
+				M_log.error(ex.getMessage());
 			}
 			return currentMax;
 		}
@@ -1970,14 +1972,14 @@ public abstract class BaseAnnouncementService extends BaseMessage implements Ann
 					}
 					catch(Exception e)
 					{
-						log.debug("Unable to remove Announcements {}", e.getMessage(), e);
+						M_log.debug("Unable to remove Announcements " + e);
 					}
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			log.debug("transferCopyEntities: End removing Announcement data");
+			M_log.debug("transferCopyEntities: End removing Announcement data");
 		}
 		transferCopyEntitiesRefMigrator(fromContext, toContext, ids);
 		return null;

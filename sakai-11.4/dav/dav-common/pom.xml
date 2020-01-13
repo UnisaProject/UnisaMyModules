@@ -4,7 +4,7 @@
   <parent>
     <artifactId>dav-base</artifactId>
     <groupId>org.sakaiproject</groupId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>sakai-dav-common</name>
@@ -17,7 +17,7 @@
   <inceptionYear>2003</inceptionYear>
   <packaging>jar</packaging>
   <properties>
-    <deploy.target>shared</deploy.target>
+    <deploy.target>common</deploy.target>
   </properties>
   <dependencies />
   <build>

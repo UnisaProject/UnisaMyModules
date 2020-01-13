@@ -23,25 +23,63 @@
 
 package org.sakaiproject.lessonbuildertool.ccexport;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Collections;
+import java.util.SortedSet;
+import java.util.SortedMap;
+import java.util.TreeSet;
+import java.util.TreeMap;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Map;
+import java.util.Iterator;
+import java.net.URLEncoder;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.site.api.ToolConfiguration;
+
+import org.w3c.dom.Document;
+
+import org.sakaiproject.site.api.Group;
+import org.sakaiproject.site.api.Site;
+import org.sakaiproject.site.cover.SiteService;
+import org.sakaiproject.tool.api.Session;
+import org.sakaiproject.tool.cover.ToolManager;
+import org.sakaiproject.tool.cover.SessionManager;
+import org.sakaiproject.content.api.ContentResource;
+import org.sakaiproject.content.cover.ContentHostingService;
 
 import uk.org.ponder.messageutil.MessageLocator;
 
-import org.sakaiproject.component.cover.ServerConfigurationService;
-import org.sakaiproject.component.cover.ComponentManager;
-import org.sakaiproject.db.api.SqlReader;
-import org.sakaiproject.db.cover.SqlService;
-import org.sakaiproject.lessonbuildertool.ccexport.ForumsExport.ForumItem;
+import org.sakaiproject.lessonbuildertool.SimplePageItem;
 import org.sakaiproject.lessonbuildertool.model.SimplePageToolDao;
+import org.sakaiproject.db.cover.SqlService;
+import org.sakaiproject.db.api.SqlReader;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import org.sakaiproject.lessonbuildertool.ccexport.ZipPrintStream;
+import org.sakaiproject.lessonbuildertool.ccexport.ForumsExport;
+import org.sakaiproject.lessonbuildertool.ccexport.ForumsExport.ForumItem;
 import org.sakaiproject.lessonbuildertool.service.LessonEntity;
-import org.sakaiproject.site.api.Site;
-import org.sakaiproject.site.api.ToolConfiguration;
-import org.sakaiproject.site.cover.SiteService;
+
+
+import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.entity.api.ResourceProperties;
+import org.sakaiproject.util.Validator;
+import org.sakaiproject.util.FormattedText;
 
 /* 
  * Most contrib code is put in opt-src. However this uses no
@@ -54,8 +92,11 @@ import org.sakaiproject.site.cover.SiteService;
  * The purpose of the singleton setup is just to get the dependencies.
  * So they are all declared static.
  */
-@Slf4j
+
 public class JForumExport extends ForumsExport {
+
+    private static Logger log = LoggerFactory.getLogger(JForumExport.class);
+
     private static SimplePageToolDao simplePageToolDao;
 
     public void setSimplePageToolDao(Object dao) {

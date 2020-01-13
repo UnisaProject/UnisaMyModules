@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2005 Sakai Foundation Licensed under the
+    Educational Community License, Version 2.0 (the "License"); you may
+    not use this file except in compliance with the License. You may
+    obtain a copy of the License at
+
+    http://www.osedu.org/licenses/ECL-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an "AS IS"
+    BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+    or implied. See the License for the specific language governing
+    permissions and limitations under the License.
+
+-->
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+          "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<!-- Evaluation project lead: Aaron Zeckoski (aaronz@vt.edu) -->
+<hibernate-mapping default-cascade="none">
+    <class name="org.sakaiproject.evaluation.model.EvalEmailProcessingData" table="EVAL_EMAIL_PROCESSING_QUEUE" dynamic-insert="false" dynamic-update="false">
+        <id name="id" type="java.lang.Long" unsaved-value="null">
+            <column name="ID" />
+            <generator class="native" />
+        </id>
+    
+    	<property name="eauId" type="java.lang.Long" index="eval_emailq_id">
+    		<column name="EAU_ID" />
+    	</property>
+    	<property name="userId" type="java.lang.String" index="eval_emailq_userid">
+            <column name="USER_ID" length="255" index="eval_user_temp_map"/>
+        </property>
+        <property name="groupId" type="java.lang.String">
+            <column name="GROUP_ID" not-null="true" length="255" />
+        </property>
+        <property name="emailTemplateId" type="java.lang.Long" index="eval_emailq_id">
+        	<column name="EMAIL_TEMPLATE_ID"  index="eval_user_temp_map"></column>
+        </property>
+    	<property name="evalId" type="java.lang.Long" index="eval_emailq_evalid">
+    		<column name="EVALUATION_ID" />
+    	</property>
+    	<property name="responseId" type="java.lang.Long">
+    		<column name="RESPONSE_ID" />
+    	</property>
+        <property name="evalDueDate" type="java.util.Date" index="eval_emailq_duedate">
+            <column name="EVAL_DUE_DATE" />
+        </property>
+        <property name="processingStatus" type="java.lang.Byte" >
+        	<column name="PROCESSING_STATUS" />
+        </property>
+	</class>
+</hibernate-mapping>

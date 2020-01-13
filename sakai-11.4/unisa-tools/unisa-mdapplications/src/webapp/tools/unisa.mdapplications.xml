@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.mdapplications"
+		title="M and D Application for admission"
+		description="M and D Application for admission">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

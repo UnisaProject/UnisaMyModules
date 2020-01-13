@@ -36,7 +36,7 @@
       <body onload="<%= request.getAttribute("html.body.onload") %>">
       <div class="portletBody container-fluid">
 
-<samigo:script path="/js/info.js"/>
+<script type="text/javascript" src="/samigo-app/js/info.js"></script>
 <script type="text/JavaScript">
 
 function clickPendingSelectActionLink(field){

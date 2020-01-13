@@ -21,10 +21,18 @@
 
 package org.sakaiproject.jsf.renderer;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.text.MessageFormat;
-import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.component.api.ServerConfigurationService;
+import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.content.api.ContentHostingService;
+import org.sakaiproject.jsf.model.InitObjectContainer;
+import org.sakaiproject.jsf.util.ConfigurationResource;
+import org.sakaiproject.jsf.util.RendererUtil;
+import org.sakaiproject.util.EditorConfiguration;
+import org.sakaiproject.util.Web;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
@@ -33,14 +41,10 @@ import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
 import javax.faces.model.SelectItem;
 import javax.faces.render.Renderer;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.sakaiproject.component.cover.ComponentManager;
-import org.sakaiproject.component.api.ServerConfigurationService;
-import org.sakaiproject.jsf.model.InitObjectContainer;
-import org.sakaiproject.jsf.util.ConfigurationResource;
-import org.sakaiproject.jsf.util.RendererUtil;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.text.MessageFormat;
+import java.util.*;
 
 /**
  * <p>Formerly RichTextEditArea.java</p>
@@ -68,7 +72,6 @@ import org.sakaiproject.jsf.util.RendererUtil;
  * @author Ed Smiley esmiley@stanford.edu (modifications)
  * @version $Id$
  */
-@Slf4j
 public class InputRichTextRenderer extends Renderer
 {
   private static final String SCRIPT_PATH;
@@ -88,6 +91,8 @@ public class InputRichTextRenderer extends Renderer
      new MessageFormat("\"{0}\" : \"<a href=''{1}''>{0}</a>\"");
   private static final MessageFormat LIST_ITEM_FORMAT_FCK =
      new MessageFormat("[\"{0}\", \"{1}\"]");
+
+  private static final Logger log = LoggerFactory.getLogger(InputRichTextRenderer.class);
 
   // we have static resources for our script path and built-in toolbars etc.
   static {

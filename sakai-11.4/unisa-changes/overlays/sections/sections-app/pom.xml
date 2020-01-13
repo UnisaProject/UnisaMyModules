@@ -7,7 +7,7 @@
   <parent>
     <artifactId>unisa-overlays-sections</artifactId>
     <groupId>unisa.overlays.sections</groupId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Unisa overlay Sections tool</name>
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.sakaiproject</groupId>
       <artifactId>sakai-sections-tool</artifactId>
-      <version>12.6</version>
+      <version>11.4</version>
       <type>war</type>
       <scope>runtime</scope>
     </dependency>

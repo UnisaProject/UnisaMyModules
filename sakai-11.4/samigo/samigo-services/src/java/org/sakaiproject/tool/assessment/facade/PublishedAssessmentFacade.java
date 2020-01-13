@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentData;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedMetaData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentAccessControlIfc;
@@ -45,11 +45,11 @@ import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionDataIfc;
 import org.sakaiproject.tool.assessment.data.ifc.shared.TypeIfc;
 import org.sakaiproject.tool.assessment.services.assessment.PublishedAssessmentService;
 
-@Slf4j
 public class PublishedAssessmentFacade
     implements java.io.Serializable, PublishedAssessmentIfc, Cloneable
 {
   private static final long serialVersionUID = 7526471155622776147L;
+  private Logger log = LoggerFactory.getLogger(PublishedAssessmentFacade.class);
   public static final Integer ACTIVE_STATUS =  Integer.valueOf(1);
   public static final Integer INACTIVE_STATUS = Integer.valueOf(0);
   public static final Integer ANY_STATUS = Integer.valueOf(2);
@@ -599,12 +599,7 @@ public class PublishedAssessmentFacade
   }
 
   public Date getStartDate() {
-	  //Check access control if this is null
-	  if (this.startDate == null && this.publishedAccessControl != null) {
-		  return this.publishedAccessControl.getStartDate();
-	  }
-
-	  return this.startDate;
+    return this.startDate;
   }
   
   public void setStartDate(Date date) {
@@ -612,11 +607,7 @@ public class PublishedAssessmentFacade
 	}
 
   public Date getDueDate() {
-	  //Check access control if this is null
-	  if (this.dueDate == null && this.publishedAccessControl != null) {
-		  return this.publishedAccessControl.getDueDate();
-	  }
-	  return this.dueDate;
+    return this.dueDate;
   }
   
   public void setDueDate(Date date) {
@@ -666,12 +657,7 @@ public class PublishedAssessmentFacade
   }
 
   public Date getRetractDate() {
-	  //Check access control if this is null
-	  if (this.retractDate == null && this.publishedAccessControl != null) {
-		  return this.publishedAccessControl.getRetractDate();
-	  }
-
-	  return this.retractDate;
+    return this.retractDate;
   }
   
   public void setRetractDate(Date date) {
@@ -860,11 +846,6 @@ public class PublishedAssessmentFacade
   }
   
   public Integer getTimeLimit() {
-	  //Check access control if this is null
-	  if (this.timeLimit == null && this.publishedAccessControl != null) {
-		  return this.publishedAccessControl.getTimeLimit();
-	  }
-
 	  return this.timeLimit;
   }
 
@@ -886,9 +867,5 @@ public class PublishedAssessmentFacade
 
   public void setLastModifiedDateForDisplay(String lastModifiedDateForDisplay) {
 	  this.lastModifiedDateForDisplay = lastModifiedDateForDisplay;
-  }
-
-  public void setLateHandling(Integer lateHandling) {
-	  this.lateHandling = lateHandling;
   }
 }

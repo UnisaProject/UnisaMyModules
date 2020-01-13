@@ -22,28 +22,8 @@
 
 package org.sakaiproject.lessonbuildertool.tool.producers;
 
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import lombok.extern.slf4j.Slf4j;
-
-import uk.org.ponder.localeutil.LocaleGetter;
-import uk.org.ponder.messageutil.MessageLocator;
-import uk.org.ponder.rsf.components.*;
-import uk.org.ponder.rsf.components.decorators.UIFreeAttributeDecorator;
-import uk.org.ponder.rsf.components.decorators.UIStyleDecorator;
-import uk.org.ponder.rsf.flow.jsfnav.NavigationCase;
-import uk.org.ponder.rsf.flow.jsfnav.NavigationCaseReporter;
-import uk.org.ponder.rsf.view.ComponentChecker;
-import uk.org.ponder.rsf.view.ViewComponentProducer;
-import uk.org.ponder.rsf.viewstate.SimpleViewParameters;
-import uk.org.ponder.rsf.viewstate.ViewParameters;
-import uk.org.ponder.rsf.viewstate.ViewParamsReporter;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.GroupNotDefinedException;
@@ -57,9 +37,24 @@ import org.sakaiproject.lessonbuildertool.tool.view.GeneralViewParameters;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
+import uk.org.ponder.localeutil.LocaleGetter;
+import uk.org.ponder.messageutil.MessageLocator;
+import uk.org.ponder.rsf.components.*;
+import uk.org.ponder.rsf.components.decorators.UIFreeAttributeDecorator;
+import uk.org.ponder.rsf.components.decorators.UIStyleDecorator;
+import uk.org.ponder.rsf.flow.jsfnav.NavigationCase;
+import uk.org.ponder.rsf.flow.jsfnav.NavigationCaseReporter;
+import uk.org.ponder.rsf.view.ComponentChecker;
+import uk.org.ponder.rsf.view.ViewComponentProducer;
+import uk.org.ponder.rsf.viewstate.SimpleViewParameters;
+import uk.org.ponder.rsf.viewstate.ViewParameters;
+import uk.org.ponder.rsf.viewstate.ViewParamsReporter;
 
-@Slf4j
+import java.util.*;
+
 public class ChecklistProgressProducer implements ViewComponentProducer, NavigationCaseReporter, ViewParamsReporter {
+    private static Logger log = LoggerFactory.getLogger(ChecklistProgressProducer.class);
+
     private SimplePageBean simplePageBean;
     private ShowPageProducer showPageProducer;
     private SimplePageToolDao simplePageToolDao;
@@ -86,7 +81,7 @@ public class ChecklistProgressProducer implements ViewComponentProducer, Navigat
             try {
                 simplePageBean.updatePageObject(gparams.getSendingPage());
             } catch (Exception e) {
-                log.error("Checklist permission exception {}, {}", e.getMessage(), e);
+                System.out.println("Checklist permission exception " + e);
                 return;
             }
         }
@@ -118,7 +113,12 @@ public class ChecklistProgressProducer implements ViewComponentProducer, Navigat
 
             List<SimplePageItem> allChecklists = simplePageToolDao.findAllChecklistsInSite(siteId);
             if (allChecklists != null) {
-                allChecklists.sort( (SimplePageItem o1, SimplePageItem o2) -> o1.getName().compareToIgnoreCase(o2.getName()) );
+                Collections.sort(allChecklists, new Comparator<SimplePageItem>() {
+                    @Override
+                    public int compare(SimplePageItem simplePageItem, SimplePageItem t1) {
+                        return simplePageItem.getName().compareTo(t1.getName());
+                    }
+                });
                 for (SimplePageItem checklist : allChecklists) {
                     // Don't include the current checklist
                     if(checklist.getId() != simplePageBean.getItemId()) {

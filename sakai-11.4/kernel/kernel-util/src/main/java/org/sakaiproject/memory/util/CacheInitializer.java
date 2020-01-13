@@ -1,28 +1,13 @@
-/**
- * Copyright (c) 2003-2016 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.memory.util;
+
+import net.sf.ehcache.config.CacheConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
-
-import lombok.extern.slf4j.Slf4j;
-
-import net.sf.ehcache.config.CacheConfiguration;
 
 /**
  * Utility class to configure a cache. Could have used common beanutils but
@@ -31,8 +16,10 @@ import net.sf.ehcache.config.CacheConfiguration;
  * @author buckett
  * @deprecated since Sakai 2.9, do not use this anymore (use the sakai config settings instead), this will be removed in 11
  */
-@Slf4j
 public class CacheInitializer {
+
+	private static final Logger M_log = LoggerFactory.getLogger(CacheInitializer.class);
+
 	private Map<String, String> configMap;
 
 	public CacheInitializer() {
@@ -57,7 +44,7 @@ public class CacheInitializer {
 				String value = splitParts[1];
 				configMap.put(key, value);
 			} else {
-				log.warn("Couldn't parse cache config of: " + part);
+				M_log.warn("Couldn't parse cache config of: " + part);
 			}
 		}
 		return this;
@@ -83,16 +70,16 @@ public class CacheInitializer {
 				String key = Character.toLowerCase(method.getName().charAt(
 						"set".length()))
 						+ method.getName().substring("set".length() + 1);
-				log.debug("Looking in config map for: {}", key);
+				M_log.debug("Looking in config map for: {}", key);
 				String value = configMap.get(key);
 				if (value != null) {
 					Class clazz = method.getParameterTypes()[0];
-					log.debug("Need to convert to :" + clazz);
+					M_log.debug("Need to convert to :" + clazz);
 					Object obj = covertValue(value, clazz);
 
 					if (obj != null) {
 						invokeMethod(method, cacheConfig, obj);
-						log.debug("Setting {}#{} to {}", clazz, key, value);
+						M_log.debug("Setting {}#{} to {}", clazz, key, value);
 					}
 
 				}
@@ -122,10 +109,10 @@ public class CacheInitializer {
 					|| char.class.equals(clazz)) {
 				obj = Character.valueOf(value.charAt(0));
 			} else {
-				log.debug("Can't convert to :{}", clazz);
+				M_log.debug("Can't convert to :{}", clazz);
 			}
 		} catch (NumberFormatException nfe) {
-			log.debug("Ignored bad number: {}", value);
+			M_log.debug("Ignored bad number: {}", value);
 		}
 		return obj;
 	}
@@ -134,7 +121,7 @@ public class CacheInitializer {
 		try {
 			method.invoke(obj, value);
 		} catch (Exception e) {
-			log.debug(e.getMessage(), e);
+			M_log.debug(e.getMessage(), e);
 		}
 	}
 

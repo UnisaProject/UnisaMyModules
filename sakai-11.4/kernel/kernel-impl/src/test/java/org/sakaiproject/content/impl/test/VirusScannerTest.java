@@ -21,15 +21,12 @@
 
 package org.sakaiproject.content.impl.test;
 
-import java.io.ByteArrayInputStream;
-
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
-
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentResourceEdit;
 import org.sakaiproject.content.impl.BaseContentService;
@@ -37,6 +34,8 @@ import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.test.SakaiKernelTestBase;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
+
+import java.io.ByteArrayInputStream;
 
 import static org.junit.runners.MethodSorters.NAME_ASCENDING;
 
@@ -48,18 +47,21 @@ import static org.junit.runners.MethodSorters.NAME_ASCENDING;
  * To change this template use File | Settings | File Templates.
  */
 @FixMethodOrder(NAME_ASCENDING)
-@Slf4j
 public class VirusScannerTest extends SakaiKernelTestBase {
-    @BeforeClass
-    public static void beforeClass() {
-        try {
+
+    //private static final String SIMPLE_FOLDER1 = "/admin/folder1/";
+    private static final Logger log = LoggerFactory.getLogger(VirusScannerTest.class);
+
+	@BeforeClass
+	public static void beforeClass() {
+		try {
             log.debug("starting oneTimeSetup");
             oneTimeSetup("antivirus");
             log.debug("finished oneTimeSetup");
-        } catch (Exception e) {
-            log.warn(e.getMessage(), e);
-        }
-    }
+		} catch (Exception e) {
+			log.warn(e.getMessage(), e);
+		}
+	}
 	
     /**
      * Checks the resources of zero bytes are handled correctly.

@@ -34,6 +34,8 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.sms.logic.external.ExternalLogic;
 import org.sakaiproject.sms.logic.incoming.ParsedMessage;
 import org.sakaiproject.sms.logic.incoming.ShortMessageCommand;
@@ -44,15 +46,13 @@ import org.sakaiproject.sms.model.constants.SmsConstants;
 import org.sakaiproject.sms.model.smpp.SmsSmppProperties;
 import org.sakaiproject.user.api.User;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Stub implementation of {@link ExternalLogic} for testing
  * 
  */
-@Slf4j
 public class ExternalLogicStub implements ExternalLogic {
 
+	private static final Log LOG = LogFactory.getLog(ExternalLogicStub.class);
 	/**
 	 * The default sakai_userId to be used in development mode.
 	 */
@@ -163,7 +163,7 @@ public class ExternalLogicStub implements ExternalLogic {
 		final String host = "127.0.0.1";
 		final String from = "it3lmb@nwu.ac.za";
 
-		log.debug("Sending email to:" + toAddress + " subject:" + subject
+		LOG.debug("Sending email to:" + toAddress + " subject:" + subject
 				+ " body:" + body);
 		// Get system properties
 		Properties properties = System.getProperties();
@@ -184,9 +184,9 @@ public class ExternalLogicStub implements ExternalLogic {
 			message.setText(body);
 			// Transport.send(message); disable email in jetty deployments
 		} catch (AddressException e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 		} catch (MessagingException e) {
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 		}
 		// System.out.println("Message Send.....");
 

@@ -4,7 +4,7 @@
   <parent>
     <artifactId>rwiki-base</artifactId>
     <groupId>org.sakaiproject</groupId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
@@ -111,23 +111,27 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>jstl</artifactId>
+      <type>jar</type>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>taglibs</groupId>
       <artifactId>standard</artifactId>
       <version>1.1.2</version>
+      <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>org.easymock</groupId>
+      <groupId>easymock</groupId>
       <artifactId>easymock</artifactId>
-      <version>3.4</version>
+      <version>1.1</version>
+      <type>jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.velocity</groupId>
       <artifactId>velocity</artifactId>
-      <version>${sakai.velocity.version}</version>
+      <version>1.6.4</version>
+      <type>jar</type>
     </dependency>
     <dependency>
       <groupId>velocity-tools</groupId>
@@ -135,12 +139,9 @@
       <version>1.4</version>
     </dependency>
     <dependency>
-      <groupId>org.sakaiproject.velocity</groupId>
-      <artifactId>sakai-velocity-util</artifactId>
-    </dependency>
-    <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
+      <type>jar</type>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>

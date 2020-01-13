@@ -19,26 +19,24 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.ui.listener.author;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.event.cover.EventTrackingService;
-import org.sakaiproject.samigo.util.SamigoConstants;
 import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.spring.SpringBeanLocator;
-import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedSectionData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentMetaDataIfc;
-import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
 import org.sakaiproject.tool.assessment.facade.AgentFacade;
 import org.sakaiproject.tool.assessment.facade.GradebookFacade;
 import org.sakaiproject.tool.assessment.facade.PublishedAssessmentFacade;
@@ -56,10 +54,11 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
  * @author Ed Smiley
  * @version $Id$
  */
-@Slf4j
+
 public class RemovePublishedAssessmentListener
     implements ActionListener
 {
+  private static Logger log = LoggerFactory.getLogger(RemovePublishedAssessmentListener.class);
   private static final GradebookServiceHelper gbsHelper = IntegrationContextFactory.getInstance().getGradebookServiceHelper();
   private static final boolean integrated = IntegrationContextFactory.getInstance().isIntegrated();
   private CalendarServiceHelper calendarService = IntegrationContextFactory.getInstance().getCalendarServiceHelper();
@@ -91,20 +90,12 @@ public class RemovePublishedAssessmentListener
       if(calendarDueDateEventId != null){
     	  calendarService.removeCalendarEvent(AgentFacade.getCurrentSiteId(), calendarDueDateEventId);
       }
-      EventTrackingService.post(EventTrackingService.newEvent(SamigoConstants.EVENT_PUBLISHED_ASSESSMENT_REMOVE, "siteId=" + AgentFacade.getCurrentSiteId() + ", publisedAssessmentId=" + assessmentId, true));
-      Iterator<PublishedSectionData> sectionDataIterator = assessment.getSectionSet().iterator();
-        while (sectionDataIterator.hasNext()){
-            PublishedSectionData sectionData = sectionDataIterator.next();
-            Iterator<ItemDataIfc> itemDataIfcIterator = sectionData.getItemSet().iterator();
-            while (itemDataIfcIterator.hasNext()){
-                ItemDataIfc itemDataIfc = itemDataIfcIterator.next();
-                EventTrackingService.post(EventTrackingService.newEvent(SamigoConstants.EVENT_PUBLISHED_ASSESSMENT_UNINDEXITEM, "/sam/" + AgentFacade.getCurrentSiteId() + "/unindexed, publishedItemId=" + itemDataIfc.getItemIdString(), true));
-            }
-        }
+      EventTrackingService.post(EventTrackingService.newEvent("sam.pubAssessment.remove", "siteId=" + AgentFacade.getCurrentSiteId() + ", publisedAssessmentId=" + assessmentId, true));
+          
       
       AuthorBean author = (AuthorBean) ContextUtil.lookupBean("author");
-      List publishedAssessmentList = author.getPublishedAssessments();
-      List list = new ArrayList();
+      ArrayList publishedAssessmentList = author.getPublishedAssessments();
+      ArrayList list = new ArrayList();
       for (int i=0; i<publishedAssessmentList.size();i++){
     	  PublishedAssessmentFacade pa = (PublishedAssessmentFacade) publishedAssessmentList.get(i);
         if (!(assessmentId).equals(pa.getPublishedAssessmentId().toString())) {
@@ -113,8 +104,8 @@ public class RemovePublishedAssessmentListener
       }
       author.setPublishedAssessments(list);
       
-      List inactivePublishedAssessmentList = author.getInactivePublishedAssessments();
-      List inactiveList = new ArrayList();
+      ArrayList inactivePublishedAssessmentList = author.getInactivePublishedAssessments();
+      ArrayList inactiveList = new ArrayList();
       for (int i=0; i<inactivePublishedAssessmentList.size();i++){
     	  PublishedAssessmentFacade pa = (PublishedAssessmentFacade) inactivePublishedAssessmentList.get(i);
         if (!(assessmentId).equals(pa.getPublishedAssessmentId().toString())) {

@@ -26,10 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +36,7 @@ import java.util.Map;
 
 import org.sakaiproject.calendar.impl.GenericCalendarImporter;
 import org.sakaiproject.exception.ImportException;
+import org.sakaiproject.time.api.TimeBreakdown;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
@@ -61,9 +61,8 @@ public class OutlookReader extends CSVReader
 	 * Import a CSV file from a stream and callback on each row.
 	 * @param stream Stream of CSV (or other delimited data)
 	 * @param handler Callback for each row.
-	 * @return tzid of calendar (returns null if it does not exist)
 	 */
-	public String importStreamFromDelimitedFile(
+	public void importStreamFromDelimitedFile(
 		InputStream stream,
 		ReaderImportRowHandler handler) throws ImportException
 	{
@@ -142,10 +141,6 @@ public class OutlookReader extends CSVReader
 			// If we get this far, increment the line counter.
 			lineNumber++;
 		}
-		
-		// tzid of calendar
-		return null;
-
 	}
 	
 	/**
@@ -167,17 +162,10 @@ public class OutlookReader extends CSVReader
 	}
 
 	/* (non-Javadoc)
-	 * @see org.sakaiproject.tool.calendar.schedimportreaders.Reader#filterEvents(java.util.List, java.lang.String[], String)
+	 * @see org.sakaiproject.tool.calendar.schedimportreaders.Reader#filterEvents(java.util.List, java.lang.String[])
 	 */
-	public List filterEvents(List events, String[] customFieldNames, String tzid) throws ImportException
+	public List filterEvents(List events, String[] customFieldNames) throws ImportException
 	{
-		ZoneId dstZoneId = ZoneId.of(getTimeService().getLocalTimeZone().getID());		
-		ZoneId srcZoneId;
-		if (tzid != null) {
-			srcZoneId = ZoneId.of(tzid);
-		} else {
-			srcZoneId = dstZoneId;
-		}
 		setColumnDelimiter(",");
 
 		Iterator it = events.iterator();
@@ -191,39 +179,78 @@ public class OutlookReader extends CSVReader
 			Map eventProperties = (Map)it.next();
 
 			Date startTime = (Date) eventProperties.get(defaultHeaderMap.get(GenericCalendarImporter.START_TIME_DEFAULT_COLUMN_HEADER));
-			Date startDate = (Date) eventProperties.get(defaultHeaderMap.get(GenericCalendarImporter.DATE_DEFAULT_COLUMN_HEADER));
+			TimeBreakdown startTimeBreakdown = null;
+			
+			if ( startTime != null )
+			{
+            // if the source time zone were known, this would be
+            // a good place to set it: startCal.setTimeZone()
+            GregorianCalendar startCal = new GregorianCalendar();
+            startCal.setTimeInMillis( startTime.getTime() );
+            startTimeBreakdown = 
+                    getTimeService().newTimeBreakdown( 0, 0, 0, 
+                       startCal.get(Calendar.HOUR_OF_DAY),
+                       startCal.get(Calendar.MINUTE),
+                       startCal.get(Calendar.SECOND),
+                        0 );
+			}
+         else
+			{
+            throw new ImportException( rb.getString("err_no_stime") );
+			}
+			
 			Date endTime = (Date) eventProperties.get(defaultHeaderMap.get(GenericCalendarImporter.END_TIME_DEFAULT_COLUMN_HEADER));
-			Date endDate = (Date) eventProperties.get(defaultHeaderMap.get(GenericCalendarImporter.ENDS_DEFAULT_COLUMN_HEADER));
-			
-			if (startTime == null ) {
-				throw new ImportException(rb.getString("err_no_stime"));
-			}
-			if (endTime == null ) {
-				throw new ImportException(rb.getString("err_no_etime"));
-			}
-			
-			// Raw date + raw time
-			Instant startInstant = startTime.toInstant();
-			Instant endInstant = endTime.toInstant();
-			
-			if (startDate != null) {
-				startInstant = startInstant.plusMillis(startDate.getTime());
-			}
-			if (endDate != null) {
-				endInstant = endInstant.plusMillis(endDate.getTime());
-			}
-			
-			// Duration of event
-			long duration = endInstant.toEpochMilli() - startInstant.toEpochMilli();
-			
-			// Raw + calendar/owner TZ's offset
-			ZonedDateTime srcZonedDateTime = startInstant.atZone(srcZoneId);
-			long millis = startInstant.plusMillis(srcZonedDateTime.getOffset().getTotalSeconds() * 1000).toEpochMilli();
+			TimeBreakdown endTimeBreakdown = null;
 
-			// Time Service will ajust to current user's TZ
-			eventProperties.put(GenericCalendarImporter.ACTUAL_TIMERANGE,
-				getTimeService().newTimeRange(millis, duration));
+			if ( endTime != null )
+			{
+            // if the source time zone were known, this would be
+            // a good place to set it: endCal.setTimeZone()
+            GregorianCalendar endCal = new GregorianCalendar();
+            endCal.setTimeInMillis( endTime.getTime() );
+            endTimeBreakdown = 
+                    getTimeService().newTimeBreakdown( 0, 0, 0, 
+                       endCal.get(Calendar.HOUR_OF_DAY),
+                       endCal.get(Calendar.MINUTE),
+                       endCal.get(Calendar.SECOND),
+                       0 );
+			}
+         else
+			{
+            throw new ImportException( rb.getString("err_no_etime") );
+			}
+
+			Date startDate = (Date) eventProperties.get(defaultHeaderMap.get(GenericCalendarImporter.DATE_DEFAULT_COLUMN_HEADER));
+         
+         // if the source time zone were known, this would be
+         // a good place to set it: startCal.setTimeZone()
+         GregorianCalendar startCal = new GregorianCalendar();
+			if ( startDate != null )
+            startCal.setTimeInMillis( startDate.getTime() );
+            
+         startTimeBreakdown.setYear( startCal.get(Calendar.YEAR) );
+         startTimeBreakdown.setMonth( startCal.get(Calendar.MONTH)+1 );
+         startTimeBreakdown.setDay( startCal.get(Calendar.DAY_OF_MONTH) );
 			
+			Date endDate = (Date) eventProperties.get(defaultHeaderMap.get(GenericCalendarImporter.ENDS_DEFAULT_COLUMN_HEADER));
+         
+         // if the source time zone were known, this would be
+         // a good place to set it: startCal.setTimeZone()
+         GregorianCalendar endCal = new GregorianCalendar();
+			if ( endDate != null )
+            endCal.setTimeInMillis( endDate.getTime() );
+			
+         endTimeBreakdown.setYear( endCal.get(Calendar.YEAR) );
+         endTimeBreakdown.setMonth( endCal.get(Calendar.MONTH)+1 );
+         endTimeBreakdown.setDay( endCal.get(Calendar.DAY_OF_MONTH) );
+         
+			eventProperties.put(
+				GenericCalendarImporter.ACTUAL_TIMERANGE,
+				getTimeService().newTimeRange(
+               getTimeService().newTimeLocal(startTimeBreakdown),
+               getTimeService().newTimeLocal(endTimeBreakdown),
+					true,
+					false));
 		}
 		
 		return events;
@@ -234,7 +261,7 @@ public class OutlookReader extends CSVReader
 	 */
 	public Map<String, String> getDefaultColumnMap()
 	{
-		Map<String, String> columnHeaderMap = new HashMap<>();
+		Map<String, String> columnHeaderMap = new HashMap<String, String>();
 
 		columnHeaderMap.put(GenericCalendarImporter.TITLE_DEFAULT_COLUMN_HEADER, rb.getString("import.outlook.subject_header"));
 		columnHeaderMap.put(GenericCalendarImporter.DESCRIPTION_DEFAULT_COLUMN_HEADER, rb.getString("import.outlook.description_header"));

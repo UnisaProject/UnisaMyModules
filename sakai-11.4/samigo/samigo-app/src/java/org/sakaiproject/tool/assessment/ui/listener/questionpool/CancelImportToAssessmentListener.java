@@ -25,8 +25,8 @@ import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.ui.bean.questionpool.QuestionPoolBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 
@@ -35,9 +35,10 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
  * <p>Description: Sakai Assessment Manager</p>
  * @version $Id$
  */
-@Slf4j
+
 public class CancelImportToAssessmentListener implements ActionListener
 {
+  private static Logger log = LoggerFactory.getLogger(CancelImportToAssessmentListener.class);
   private static ContextUtil cu;
 
 
@@ -48,6 +49,7 @@ public class CancelImportToAssessmentListener implements ActionListener
    */
   public void processAction(ActionEvent ae) throws AbortProcessingException
   {
+    //log.info("CancelImportToAssessmentListener:");
     QuestionPoolBean  qpoolbean= (QuestionPoolBean) cu.lookupBean("questionpool");
     qpoolbean.setImportToAuthoring(false);
 

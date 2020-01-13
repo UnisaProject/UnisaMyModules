@@ -19,6 +19,8 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.ui.listener.author;
 
 import java.text.ParseException;
@@ -34,8 +36,8 @@ import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.samigo.util.SamigoConstants;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentAccessControl;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentFeedback;
@@ -63,11 +65,12 @@ import org.sakaiproject.user.cover.UserDirectoryService;
  * @author Ed Smiley
  * @version $Id$
  */
-@Slf4j
+
 public class TemplateUpdateListener
     extends TemplateBaseListener
     implements ActionListener
 {
+    private static final Logger LOG = LoggerFactory.getLogger(TemplateUpdateListener.class);
 
   /**
    * Normal listener method.
@@ -78,14 +81,20 @@ public class TemplateUpdateListener
   {
     FacesContext context = FacesContext.getCurrentInstance();
 
+    //log.info("DEBUG: TEMPLATE UPDATE LISTENER.");
+    //log.info("debugging ActionEvent: " + ae);
+    //log.info("debug requestParams: " + requestParams);
+    //log.info("debug reqMap: " + reqMap);
     TemplateBean templateBean = lookupTemplateBean(context);
     IndexBean templateIndex = (IndexBean) ContextUtil.lookupBean("templateIndex");
 
+
     
-    String tempName = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(templateBean.getTemplateName());
+    String tempName = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(LOG, templateBean.getTemplateName());
     AssessmentService assessmentService = new AssessmentService();
 
     boolean isUnique = assessmentService.assessmentTitleIsUnique(templateBean.getIdString(),tempName,true);
+    //log.debug("*** is unique="+isUnique);
     if(tempName!=null && (tempName.trim()).equals("")){
      	String err1=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.TemplateMessages","templateName_empty");
 	context.addMessage(null,new FacesMessage(err1));
@@ -174,7 +183,7 @@ public class TemplateUpdateListener
       {
         template = (delegate.getAssessmentTemplate(templateIdString)).getData();
         if (template == null) {
-          log.info("Can't find template " + templateIdString);
+          LOG.info("Can't find template " + templateIdString);
           throw new AbortProcessingException("Can't find template ");
          }
       }
@@ -185,7 +194,7 @@ public class TemplateUpdateListener
       if (!"0".equals(templateIdString)) {
         String author =  (String)template.getCreatedBy();
         if (author == null || !author.equals(UserDirectoryService.getCurrentUser().getId())) {
-          log.info("trying to update template not your own " + author + " " + UserDirectoryService.getCurrentUser().getId());
+          LOG.info("trying to update template not your own " + author + " " + UserDirectoryService.getCurrentUser().getId());
           throw new AbortProcessingException("Attempted to update template owned by another author " + author + " " + UserDirectoryService.getCurrentUser().getId());
         }
       }
@@ -235,7 +244,7 @@ public class TemplateUpdateListener
       }
       catch( NullPointerException | NumberFormatException ex )
       {
-          log.warn(ex.getMessage());
+          LOG.warn(ex.getMessage());
           aac.setInstructorNotification( SamigoConstants.NOTI_PREF_INSTRUCTOR_EMAIL_DEFAULT );
       }
       
@@ -320,6 +329,7 @@ public class TemplateUpdateListener
     	  		(templateBean.getFeedbackComponent_Statistics());
       }
 
+      //log.info("templateId = " + templateIdString);
       if ("0".equals(templateIdString)) // New template
       {
         template.setCreatedBy(AgentFacade.getAgentString());
@@ -329,6 +339,7 @@ public class TemplateUpdateListener
       {
         template.setCreatedBy(ContextUtil.lookupParam("createdBy"));
         SimpleDateFormat format = new SimpleDateFormat();
+        //log.info("Date is " + templateBean.getCreatedDate());
         template.setCreatedDate(format.parse
           (ContextUtil.lookupParam("createdDate")));
       }
@@ -340,7 +351,7 @@ public class TemplateUpdateListener
 
       delegate.deleteAllMetaData((AssessmentTemplateData)template);
 
-      log.debug("**** after deletion of meta data");
+      LOG.debug("**** after deletion of meta data");
       HashSet<AssessmentMetaData> set = new HashSet<>();
       Iterator iter = templateBean.getValueMap().keySet().iterator();
       while (iter.hasNext())
@@ -362,11 +373,11 @@ public class TemplateUpdateListener
     }
     catch (RuntimeException ex)
     {
-      log.error(ex.getMessage(), ex);
+      LOG.error(ex.getMessage(), ex);
       return false;
     } 
     catch (ParseException e) {
-    	log.error(e.getMessage(), e);
+    	LOG.error(e.getMessage(), e);
         return false;
 	}
 

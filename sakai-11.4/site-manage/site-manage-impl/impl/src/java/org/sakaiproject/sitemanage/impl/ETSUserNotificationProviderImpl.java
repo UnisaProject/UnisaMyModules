@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Locale;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.email.api.EmailService;
 import org.sakaiproject.emailtemplateservice.model.RenderedTemplate;
@@ -38,9 +38,10 @@ import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.util.ResourceLoader;
 
-@Slf4j
 public class ETSUserNotificationProviderImpl implements UserNotificationProvider {
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ETSUserNotificationProviderImpl.class);
+	
 	private static final String NOTIFY_ADDED_PARTICIPANT ="sitemange.notifyAddedParticipant";
 
 	private static final String NOTIFY_NEW_USER ="sitemanage.notifyNewUserEmail"; 
@@ -93,7 +94,7 @@ public class ETSUserNotificationProviderImpl implements UserNotificationProvider
 	}
 
 	public void init() {
-		log.info("init()");
+		LOG.info("init()");
 
 		ClassLoader loader = ETSUserNotificationProviderImpl.class.getClassLoader();
 		emailTemplateService.importTemplateFromXmlFile(loader.getResourceAsStream("notifyAddedParticipants.xml"), NOTIFY_ADDED_PARTICIPANT);
@@ -235,7 +236,7 @@ public class ETSUserNotificationProviderImpl implements UserNotificationProvider
 		}
 		catch (Exception e)
 		{
-			log.warn(this + " cannot find user " + instructorId, e);
+			LOG.warn(this + " cannot find user " + instructorId, e);
 			return false;
 		}
 	}
@@ -281,7 +282,7 @@ public class ETSUserNotificationProviderImpl implements UserNotificationProvider
 		}
 		catch (Exception e)
 		{
-			log.warn(this + " problem in send site request email to support for " + currentUserDisplayName, e );
+			LOG.warn(this + " problem in send site request email to support for " + currentUserDisplayName, e );
 			return "";
 		}
 	}
@@ -368,7 +369,7 @@ public class ETSUserNotificationProviderImpl implements UserNotificationProvider
 		String from = serverConfigurationService.getString("setup.request",
 				null);
 		if (from == null) {
-			log.warn(this + " - no 'setup.request' in configuration");
+			LOG.warn(this + " - no 'setup.request' in configuration");
 			from = "postmaster@".concat(serverConfigurationService
 					.getServerName());
 		}
@@ -396,7 +397,7 @@ public class ETSUserNotificationProviderImpl implements UserNotificationProvider
 	 * @return the email content
 	 */
 	private String emailTemplateServiceSend(String templateName, Locale locale, User user, String from, String to, String headerTo, String replyTo, Map<String, String> replacementValues) {
-		log.debug("getting template: " + templateName);
+		LOG.debug("getting template: " + templateName);
 		RenderedTemplate template;
 		try { 
 			if (locale == null)
@@ -420,13 +421,13 @@ public class ETSUserNotificationProviderImpl implements UserNotificationProvider
 			}
 		}
 		catch (Exception e) {
-			log.warn(this + e.getMessage());
+			LOG.warn(this + e.getMessage());
 			return null;
 		}
 		return null;
 	}
 	
-	public void notifySiteImportCompleted(String toEmail, Locale locale, String siteId, String siteTitle){
+	public void notifySiteImportCompleted(String toEmail, String siteId, String siteTitle){
 		if(toEmail != null && !"".equals(toEmail)){
 			
 			// Create the map of replacement values
@@ -438,7 +439,7 @@ public class ETSUserNotificationProviderImpl implements UserNotificationProvider
 			// Use the email template service to send the email
 			String headerTo = toEmail;
 			String replyTo = toEmail;
-			emailTemplateServiceSend(SITE_IMPORT_EMAIL_TEMPLATE_KEY, locale, userDirectoryService.getCurrentUser(), getSetupRequestEmailAddress(),
+			emailTemplateServiceSend(SITE_IMPORT_EMAIL_TEMPLATE_KEY, Locale.ENGLISH, userDirectoryService.getCurrentUser(), getSetupRequestEmailAddress(),
 					toEmail, headerTo, replyTo, replacementValues);
 		}
 	}

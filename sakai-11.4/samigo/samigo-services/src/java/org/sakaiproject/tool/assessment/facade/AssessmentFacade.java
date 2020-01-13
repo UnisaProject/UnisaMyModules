@@ -30,7 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
 import org.osid.assessment.AssessmentException;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentData;
 import org.sakaiproject.tool.assessment.data.dao.assessment.SectionData;
@@ -47,7 +46,6 @@ import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionDataIfc;
  * @version 1.0
  */
 
-@Slf4j
 public class AssessmentFacade extends AssessmentBaseFacade
     implements java.io.Serializable, AssessmentIfc
 {
@@ -182,7 +180,7 @@ public class AssessmentFacade extends AssessmentBaseFacade
       this.data = (AssessmentIfc) assessment.getData();
     }
     catch (AssessmentException ex) {
-      log.error(ex.getMessage(), ex);
+      ex.printStackTrace();
       throw new DataFacadeException(ex.getMessage());
     }
     return this.data.getAssessmentTemplateId();

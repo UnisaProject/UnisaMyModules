@@ -1,45 +1,41 @@
-/**
- * Copyright (c) 2003-2016 The Apereo Foundation
+/**********************************************************************************
+* $URL$
+* $Id$
+***********************************************************************************
+*
+ * Copyright (c) 2003, 2004, 2005, 2006, 2008 The Sakai Foundation
  *
  * Licensed under the Educational Community License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *             http://opensource.org/licenses/ecl2
+ *       http://www.opensource.org/licenses/ECL-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*
+**********************************************************************************/
 package org.sakaiproject.api.app.scheduler;
 
-import org.quartz.Job;
-
 /**
- * This is used to represent a job that can be run through the Sakai Scheduler tool.
+ * Created by IntelliJ IDEA.
+ * User: John Ellis
+ * Date: Dec 1, 2005
+ * Time: 12:35:51 PM
+ * To change this template use File | Settings | File Templates.
  */
 public interface JobBeanWrapper {
 
-   String SPRING_BEAN_NAME = "org.sakaiproject.api.app.scheduler.JobBeanWrapper.bean";
-   String JOB_TYPE = "org.sakaiproject.api.app.scheduler.JobBeanWrapper.jobType";
+   public static final String SPRING_BEAN_NAME = "org.sakaiproject.api.app.scheduler.JobBeanWrapper.bean";
+   public static final String JOB_TYPE = "org.sakaiproject.api.app.scheduler.JobBeanWrapper.jobType";
 
-   /**
-    * @return The Spring Bean ID to retrieve from the application context.
-     */
-   String getBeanId();
+   public String getBeanId();
 
-   /**
-    * This is the class that will get registered with Quartz to be run.
-    * @return A Class that implements the Job interface.
-     */
-   Class<? extends Job> getJobClass();
+   public Class getJobClass();
 
-   /**
-    * This is the name that is displayed in the interface for the job.
-    * @return A summary of the job.
-     */
-   String getJobType();
+   public String getJobType();
 
 }

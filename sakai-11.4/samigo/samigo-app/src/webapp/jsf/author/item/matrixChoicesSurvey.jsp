@@ -245,9 +245,7 @@
             </div>
        </div>
     </h:panelGroup>
-
-        <%@ include file="/jsf/author/item/tags.jsp" %>
-
+    
 </div>
 <%-- BUTTONS --%>
 <p class="act">

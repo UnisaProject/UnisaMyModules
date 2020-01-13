@@ -5,14 +5,14 @@
     <parent>
         <groupId>org.sakaiproject</groupId>
         <artifactId>master</artifactId>
-        <version>12.6</version>		<!-- Unisa Changes:2018/04/25: Version from 11-SNAPSHOT to 12.6-->
+        <version>11.4</version>		<!-- Unisa Changes:2018/04/25: Version from 11-SNAPSHOT to 11.4-->
 		<relativePath>../master/pom.xml</relativePath>
     </parent>
 
     <name>sakai-metaobj base pom</name>
     <groupId>org.sakaiproject.metaobj</groupId>
     <artifactId>metaobj-base</artifactId>
-    <version>12.6</version>			<!-- Unisa Changes:2018/04/25: Version from 11-SNAPSHOT to 12.6-->
+    <version>11.4</version>			<!-- Unisa Changes:2018/04/25: Version from 11-SNAPSHOT to 11.4-->
     <packaging>pom</packaging>
 
     <modules>

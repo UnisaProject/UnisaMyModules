@@ -135,4 +135,3 @@ should be included in file importing DeliveryMessages
   <h:outputText value="#{question.itemData.inCorrectItemFeedback}" escape="false" />
 </h:panelGroup>
 
-<%@ include file="/jsf/author/preview_item/tags.jsp" %>

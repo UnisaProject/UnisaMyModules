@@ -41,7 +41,7 @@
               }
               window.onload = flagFolders;
 </script>
-<samigo:script path="/../library/js/spinner.js"/>
+<script src="/library/js/spinner.js" type="text/javascript"></script>
       </head>
 <body onload="collapseAllRowsForSelectList();flagRows();;<%= request.getAttribute("html.body.onload") %>">
   

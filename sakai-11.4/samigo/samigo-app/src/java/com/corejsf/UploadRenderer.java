@@ -39,11 +39,12 @@ import javax.faces.render.Renderer;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.fileupload.FileItem;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class UploadRenderer extends Renderer {
 
+  private static Logger log = LoggerFactory.getLogger(UploadRenderer.class);
   private static final String UPLOAD = ".upload";
 
   public UploadRenderer() {

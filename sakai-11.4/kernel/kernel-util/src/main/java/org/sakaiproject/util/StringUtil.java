@@ -29,16 +29,13 @@ import java.util.Iterator;
  * <p>
  * StringUtil collects together some string utility classes.
  * </p>
- * @deprecated use {@link org.apache.commons.lang3.StringUtils}, this will be removed after 2.9 - Dec 2011
+ * @deprecated use commons-lang StringUtils, this will be removed after 2.9 - Dec 2011
  */
 @Deprecated 
 public class StringUtil
 {
 	/**
-	 * @param source
-	 * @param splitter
-	 * @return
-	 * @deprecated use {@link org.apache.commons.lang3.StringUtils#split(String, String)}
+	 * Like jdk1.4's String.split...
 	 */
 	public static String[] split(String source, String splitter)
 	{
@@ -204,7 +201,7 @@ public class StringUtil
 	 * @param value
 	 *        The string to trim.
 	 * @return value trimmed of blanks, and if nothing left, made null.
-	 * @deprecated use {@link org.apache.commons.lang3.StringUtils#trimToNull(String)}
+	 * @deprecated use commons-lang StringUtils.trimToNull
 	 */
 	public static String trimToNull(String value)
 	{
@@ -235,7 +232,7 @@ public class StringUtil
 	 * @param value
 	 *        The string to trim.
 	 * @return value trimmed of blanks, assuring it not to be null.
-	 * @deprecated use {@link org.apache.commons.lang3.StringUtils#trimToEmpty(String)}
+	 * @deprecated use commons-lang StringUtils.trimToEmpty
 	 */
 	public static String trimToZero(String value)
 	{

@@ -21,11 +21,8 @@
 
 package org.sakaiproject.citation.impl;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.osid.OsidContext;
-import org.osid.OsidException;
-import org.osid.OsidManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * OsidLoader loads a specific implementation of an Open Service Interface
@@ -90,9 +87,10 @@ import org.osid.OsidManager;
  * O.K.I&#46; OSID Definition License}.
  * </p>
  */
-@Slf4j
 public class SakaiOsidLoader implements java.io.Serializable
 {
+	private static Logger M_log = LoggerFactory.getLogger(SakaiOsidLoader.class); 
+	
 	/**
 	 * Get an InputStream for a particular file name - first check the sakai.home area and then 
 	 * revert to the classpath.
@@ -156,7 +154,7 @@ public class SakaiOsidLoader implements java.io.Serializable
 	}
 
 	private static java.util.Properties getConfiguration(
-			OsidManager manager) throws OsidException {
+			org.osid.OsidManager manager) throws org.osid.OsidException {
 		java.util.Properties properties = null;
 
 		if (null != manager) {
@@ -240,11 +238,11 @@ public class SakaiOsidLoader implements java.io.Serializable
 	 *         org.osid.OsidException#ERROR_ASSIGNING_CONFIGURATION
 	 *         ERROR_ASSIGNING_CONFIGURATION}
 	 */
-	public static OsidManager getManager(
+	public static org.osid.OsidManager getManager(
 			String osidPackageManagerName, String implPackageName,
-			OsidContext context,
+			org.osid.OsidContext context,
 			java.util.Properties additionalConfiguration)
-	throws OsidException {
+	throws org.osid.OsidException {
 		try {
 			if ((null != context) && (null != osidPackageManagerName) &&
 					(null != implPackageName)) {
@@ -253,32 +251,32 @@ public class SakaiOsidLoader implements java.io.Serializable
 				String managerClassName = makeFullyQualifiedClassName(implPackageName,
 						className);
 
-	log.debug("oin {}", osidInterfaceName);
+	//				System.out.println("oin " + osidInterfaceName);
 	Class osidInterface = Class.forName(osidInterfaceName);
 	
 	if (null != osidInterface) {
-		log.debug("mcn {}", managerClassName);
+	//	System.out.println("mcn " + managerClassName);
 		Class managerClass = Class.forName(managerClassName);
 	
 		if (null != managerClass) {
 			if (osidInterface.isAssignableFrom(managerClass)) {
-				OsidManager manager = (OsidManager) managerClass.newInstance();
+				org.osid.OsidManager manager = (org.osid.OsidManager) managerClass.newInstance();
 	
 				if (null != manager) {
 					try {
 						manager.osidVersion_2_0();
 					} catch (Throwable ex) {
-						throw new OsidException(OsidException.VERSION_ERROR);
+						throw new org.osid.OsidException(org.osid.OsidException.VERSION_ERROR);
 					}
 	
 					try {
 						manager.assignOsidContext(context);
 					} catch (Exception ex) {
-						throw new OsidException(OsidException.ERROR_ASSIGNING_CONTEXT);
+						throw new org.osid.OsidException(org.osid.OsidException.ERROR_ASSIGNING_CONTEXT);
 					}
 	
 					try {
-			log.debug("man {}", manager);
+			//					System.out.println("man " + manager);
 			java.util.Properties configuration = getConfiguration(manager);
 			
 			if (null == configuration) {
@@ -287,61 +285,61 @@ public class SakaiOsidLoader implements java.io.Serializable
 			
 			if (null != additionalConfiguration) {
 				java.util.Enumeration enumer = additionalConfiguration.propertyNames();
-				log.debug("enumer {}", enumer);
+			//	System.out.println("enumer " + enumer);
 			
 			while (enumer.hasMoreElements()) {
 				java.io.Serializable key = (java.io.Serializable) enumer.nextElement();
 			
-				log.debug("key {}", key);
+			//	System.out.println("key "+key);
 				if (null != key) {
-					log.debug("Serializing....");
+			//		System.out.println("Serializing....");
 					java.io.Serializable value = (java.io.Serializable) additionalConfiguration.get(key);
-					log.debug("Done");
+			//		System.out.println("Done");
 			
 					if (null != value) {
 						configuration.put(key, value);
-						log.debug("put complete");
+			//			System.out.println("put complete");
 					}
 				}
 			}
 		}
 		
-		log.debug("assigning...");
+		//System.out.println("assigning...");
 		manager.assignConfiguration(configuration);
-		log.debug("done.");
+		//System.out.println("done.");
 		
 		return manager;
 						} catch (Exception ex) {
-							throw new OsidException(OsidException.ERROR_ASSIGNING_CONFIGURATION);
+							throw new org.osid.OsidException(org.osid.OsidException.ERROR_ASSIGNING_CONFIGURATION);
 						}
 					}
 		
-					throw new OsidException(OsidException.MANAGER_INSTANTIATION_ERROR);
+					throw new org.osid.OsidException(org.osid.OsidException.MANAGER_INSTANTIATION_ERROR);
 				}
 		
-				throw new OsidException(OsidException.MANAGER_NOT_OSID_IMPLEMENTATION);
+				throw new org.osid.OsidException(org.osid.OsidException.MANAGER_NOT_OSID_IMPLEMENTATION);
 			}
 		
-			throw new OsidException(OsidException.MANAGER_NOT_FOUND);
+			throw new org.osid.OsidException(org.osid.OsidException.MANAGER_NOT_FOUND);
 		}
 		
-		throw new OsidException(OsidException.INTERFACE_NOT_FOUND);
+		throw new org.osid.OsidException(org.osid.OsidException.INTERFACE_NOT_FOUND);
 					}
 		
-					throw new OsidException(OsidException.NULL_ARGUMENT);
-				} catch (OsidException oex) {
-					log.warn("getManager() OsidException ", oex);
-					throw new OsidException(oex.getMessage());
-				} catch (Throwable ex) {
-					log.warn("getManager() Throwable ", ex);
-					throw new OsidException(OsidException.OPERATION_FAILED);
+					throw new org.osid.OsidException(org.osid.OsidException.NULL_ARGUMENT);
+				} catch (org.osid.OsidException oex) {
+					M_log.warn("getManager() OsidException ", oex);
+					throw new org.osid.OsidException(oex.getMessage());
+				} catch (java.lang.Throwable ex) {
+					M_log.warn("getManager() Throwable ", ex);
+					throw new org.osid.OsidException(org.osid.OsidException.OPERATION_FAILED);
 				}
 			}
 		
 			/******* Utility Methods For Sakai Implementations ********/
 		
 			private static String makeClassName(String packageManagerName)
-			throws OsidException {
+			throws org.osid.OsidException {
 		String className = packageManagerName;
 
 		if (null != className) {
@@ -359,7 +357,7 @@ public class SakaiOsidLoader implements java.io.Serializable
 	}
 
 	private static String makeFullyQualifiedClassName(String packageName,
-			String className) throws OsidException {
+			String className) throws org.osid.OsidException {
 		String cName = className;
 
 		if (null != packageName) {

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.publicexamtimetable"
+		title="Unisa Publicexamtimetable"
+		description="Unisa publicexamtimetable tool">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

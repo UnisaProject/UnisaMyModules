@@ -17,7 +17,7 @@ $(document).ready(
     	$(tr).css('color','#AAA');
     });
     $("#eventLogId\\:assessmentTitle option").each(function(){
-    	if(typeof this.innerHTML.contains !== "undefined" && this.innerHTML.contains('-deleted')){
+    	if(this.innerHTML.contains('-deleted')){
     		this.style="color:#AAA";
     	}
     });

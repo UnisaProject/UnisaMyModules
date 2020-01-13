@@ -15,15 +15,13 @@
  */
 package org.sakaiproject.qna.logic.impl;
 
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.qna.logic.ExternalLogic;
 import org.sakaiproject.qna.logic.PermissionLogic;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class PermissionLogicImpl implements PermissionLogic {
-
+	private static Log log = LogFactory.getLog(PermissionLogic.class);
 	
 	private ExternalLogic externalLogic;
 	public void setExternalLogic(ExternalLogic externalLogic) {

@@ -24,10 +24,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
 import junit.framework.Assert;
 
-import org.sakaiproject.component.section.support.UserManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.section.api.CourseManager;
 import org.sakaiproject.section.api.SectionManager;
 import org.sakaiproject.section.api.coursemanagement.Course;
@@ -35,9 +35,10 @@ import org.sakaiproject.section.api.coursemanagement.CourseSection;
 import org.sakaiproject.section.api.coursemanagement.ParticipationRecord;
 import org.sakaiproject.section.api.coursemanagement.User;
 import org.sakaiproject.section.api.facade.Role;
+import org.sakaiproject.component.section.support.UserManager;
 
-@Slf4j
 public class CourseManagerTest extends SectionsTestBase {
+	private static final Logger log = LoggerFactory.getLogger(CourseManagerTest.class);
 
 	private CourseManager courseManager;
 	private SectionManager sectionManager;

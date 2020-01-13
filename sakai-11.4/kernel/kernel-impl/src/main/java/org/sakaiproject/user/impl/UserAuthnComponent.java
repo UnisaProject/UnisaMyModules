@@ -21,9 +21,8 @@
 
 package org.sakaiproject.user.impl;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.sakaiproject.util.IPAddrUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.user.api.Authentication;
 import org.sakaiproject.user.api.AuthenticationException;
 import org.sakaiproject.user.api.AuthenticationManager;
@@ -41,9 +40,11 @@ import org.sakaiproject.user.api.UserNotDefinedException;
  * An Authentication component working with the UserDirectoryService.
  * </p>
  */
-@Slf4j
 public abstract class UserAuthnComponent implements AuthenticationManager
 {
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(UserAuthnComponent.class);
+
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Dependencies
 	 *********************************************************************************************************************************************************************************************************************************************************/
@@ -65,7 +66,7 @@ public abstract class UserAuthnComponent implements AuthenticationManager
 	 */
 	public void init()
 	{
-		log.info("init()");
+		M_log.info("init()");
 	}
 
 	/**
@@ -73,7 +74,7 @@ public abstract class UserAuthnComponent implements AuthenticationManager
 	 */
 	public void destroy()
 	{
-		log.info("destroy()");
+		M_log.info("destroy()");
 	}
 
 	/**********************************************************************************************************************************************************************************************************************************************************
@@ -110,18 +111,10 @@ public abstract class UserAuthnComponent implements AuthenticationManager
 				authenticationCache().putAuthenticationFailure(evidence.getIdentifier(), evidence.getPassword());
 				throw new AuthenticationException("Invalid Login: Either user not found or password incorrect.");
 			}
-
-			// Check to see if the user account is disabled
 			String disabled = user.getProperties().getProperty("disabled");
 			if (disabled != null && "true".equals(disabled))
 			{
-				throw new AuthenticationException("Account Disabled: The user's authentication has been disabled");
-			}
-
-			// Check optional whitelist for this account
-			String whitelist = user.getProperties().getProperty("ip-whitelist");
-			if (whitelist != null && !whitelist.isEmpty() && !IPAddrUtil.matchIPList(whitelist, evidence.getRemoteAddr())) {
-				throw new AuthenticationException("Authentication refused: The user may only authenticate from whitelisted addresses");
+				throw new AuthenticationException("Account Disabled: The users authentication has been disabled");
 			}
 
 			rv = new org.sakaiproject.util.Authentication(user.getId(), user.getEid());

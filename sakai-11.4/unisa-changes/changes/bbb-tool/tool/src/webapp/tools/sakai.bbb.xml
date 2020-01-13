@@ -2,8 +2,7 @@
 <registration>
     <tool id="sakai.bbb" 
     	title="Meetings" 
-    	description="Sakai Interface onto the BigBlueButton conferencing tool" 
-         version="12.6">
+    	description="Sakai Interface onto the BigBlueButton conferencing tool">
 		<category name="course" />
 		<category name="onlcourse" />
 		<category name="Postgraduate"/>

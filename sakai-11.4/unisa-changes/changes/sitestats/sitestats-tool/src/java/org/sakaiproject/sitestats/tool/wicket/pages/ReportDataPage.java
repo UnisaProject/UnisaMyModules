@@ -26,7 +26,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -49,8 +50,6 @@ import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.model.StringResourceModel;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.handler.EmptyRequestHandler;
-
-import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.sitestats.api.EventStat;
@@ -79,9 +78,9 @@ import org.sakaiproject.user.api.UserNotDefinedException;
 /**
  * @author Nuno Fernandes
  */
-@Slf4j
 public class ReportDataPage extends BasePage {
 	private static final long			serialVersionUID	= 1L;
+	private static Logger					LOG					= LoggerFactory.getLogger(ReportDataPage.class);
 
 	private String						realSiteId;
 	private String						siteId;
@@ -331,7 +330,7 @@ public class ReportDataPage extends BasePage {
 					final String userId = ((Stat) model.getObject()).getUserId();
 					String name = null;
 					if (userId != null) {
-						if(("-").equals(userId) || EventTrackingService.UNKNOWN_USER.equals(userId)) {
+						if(("-").equals(userId) || ("?").equals(userId)) {
 							name = "-";
 						}else{
 							try{
@@ -371,7 +370,7 @@ public class ReportDataPage extends BasePage {
 					if (userId != null) {
 						if(("-").equals(userId)) {
 							name = (String) new ResourceModel("user_anonymous").getObject();
-						}else if(EventTrackingService.UNKNOWN_USER.equals(userId)) {
+						}else if(("?").equals(userId)) {
 							name = (String) new ResourceModel("user_anonymous_access").getObject();
 						}else{
 							name= Locator.getFacade().getStatsManager().getUserNameForDisplay(userId);
@@ -618,12 +617,12 @@ public class ReportDataPage extends BasePage {
 			out.write(hssfWorkbookBytes);
 			out.flush();
 		}catch(IOException e){
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}finally{
 			try{
 				if(out != null) out.close();
 			}catch(IOException e){
-				log.error(e.getMessage());
+				LOG.error(e.getMessage());
 			}
 		}
 	}
@@ -644,12 +643,12 @@ public class ReportDataPage extends BasePage {
 			out.write(csvString.getBytes());
 			out.flush();
 		}catch(IOException e){
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}finally{
 			try{
 				if(out != null) out.close();
 			}catch(IOException e){
-				log.error(e.getMessage());
+				LOG.error(e.getMessage());
 			}
 		}
 	}
@@ -670,12 +669,12 @@ public class ReportDataPage extends BasePage {
 			out.write(pdf);
 			out.flush();
 		}catch(IOException e){
-			log.error(e.getMessage());
+			LOG.error(e.getMessage());
 		}finally{
 			try{
 				if(out != null) out.close();
 			}catch(IOException e){
-				log.error(e.getMessage());
+				LOG.error(e.getMessage());
 			}
 		}
 	}

@@ -31,8 +31,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.api.ToolSession;
 import org.sakaiproject.tool.cover.SessionManager;
 import org.sakaiproject.tool.api.Tool;
@@ -48,9 +48,11 @@ import org.sakaiproject.component.api.ServerConfigurationService;
  * @author University of Michigan, Sakai Software Development Team
  * @version $Revision$
  */
-@Slf4j
 public class JsfTool extends HttpServlet
 {
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(JsfTool.class);
+
 	/** The file extension to get to JSF. */
 	protected static final String JSF_EXT = ".jsf";
 
@@ -104,7 +106,7 @@ public class JsfTool extends HttpServlet
 	 */
 	public void destroy()
 	{
-		log.info("destroy");
+		M_log.info("destroy");
 
 		super.destroy();
 	}
@@ -217,7 +219,7 @@ public class JsfTool extends HttpServlet
 		res.addHeader("Pragma", "no-cache");
 
 		// dispatch to the target
-		log.debug("dispatching path: " + req.getPathInfo() + " to: " + target + " context: "
+		M_log.debug("dispatching path: " + req.getPathInfo() + " to: " + target + " context: "
 				+ getServletContext().getServletContextName());
 		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(target);
 		dispatcher.forward(req, res);
@@ -297,7 +299,7 @@ public class JsfTool extends HttpServlet
 			m_path = m_path.substring(0, m_path.length() - 1);
 		}
 
-		log.info("init: "+config.getServletName()+"["+context.getInitParameter("javax.faces.STATE_SAVING_METHOD")+"]"+" default: " + m_default + " path: " + m_path);
+		M_log.info("init: "+config.getServletName()+"["+context.getInitParameter("javax.faces.STATE_SAVING_METHOD")+"]"+" default: " + m_default + " path: " + m_path);
 	}
 
 	/**

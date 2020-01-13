@@ -3,16 +3,15 @@ package org.sakaiproject.sms.logic.external.test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.*;
+
 import org.sakaiproject.sms.logic.external.MobileNumberHelperImpl;
 import org.sakaiproject.sms.logic.external.NumberRoutingHelperImpl;
 import org.sakaiproject.sms.logic.stubs.SakaiPersonManagerStub;
 import org.sakaiproject.sms.logic.stubs.ServerConfigurationServiceStubb;
 import org.sakaiproject.sms.logic.stubs.UserDirectoryServiceStub;
-
 
 public class MobileNumberHelperTest {
 
@@ -33,13 +32,13 @@ public class MobileNumberHelperTest {
     @Test
 	public void testGetMobile() {
 		String number = mobileNumberHelper.getUserMobileNumber("test");
-		Assert.assertEquals("27123456789", number);
+		assertEquals("27123456789", number);
 	}
 
     @Test
 	public void testNullGetMobile() {
 		String number = mobileNumberHelper.getUserMobileNumber(null);
-		Assert.assertEquals(null, number);
+		assertEquals(null, number);
 	}
 
     @Test
@@ -50,10 +49,10 @@ public class MobileNumberHelperTest {
 		userids.add("test3");
 		Map<String, String> numbers = mobileNumberHelper
 				.getUserMobileNumbers(userids);
-		Assert.assertEquals(3, numbers.size());
-		Assert.assertEquals("27123456789", numbers.get("test1"));
-		Assert.assertEquals("27123456789", numbers.get("test2"));
-		Assert.assertEquals("27123456789", numbers.get("test3"));
+		assertEquals(3, numbers.size());
+		assertEquals("27123456789", numbers.get("test1"));
+		assertEquals("27123456789", numbers.get("test2"));
+		assertEquals("27123456789", numbers.get("test3"));
 	}
 
     @Test
@@ -64,10 +63,10 @@ public class MobileNumberHelperTest {
 		userids.add("test3");
 		Map<String, String> numbers = mobileNumberHelper
 				.getUserMobileNumbers(userids);
-		Assert.assertEquals(2, numbers.size());
-		Assert.assertEquals("27123456789", numbers.get("test1"));
-		Assert.assertEquals(null, numbers.get("test2"));
-		Assert.assertEquals("27123456789", numbers.get("test3"));
+		assertEquals(2, numbers.size());
+		assertEquals("27123456789", numbers.get("test1"));
+		assertEquals(null, numbers.get("test2"));
+		assertEquals("27123456789", numbers.get("test3"));
 	}
 	
     @Test
@@ -75,45 +74,45 @@ public class MobileNumberHelperTest {
 		
 		// South Africa (00 / 0 / 27)
 		
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("0831234567", "00", "0", "27"));    
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("083-123-4567", "00", "0", "27"));
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("083 123-4567", "00", "0", "27"));
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("083/123,4567", "00", "0", "27"));
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("083.123.4567", "00", "0", "27"));
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("083 123 4567", "00", "0", "27"));
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("+27 83 123-4567", "00", "0", "27"));
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("+27+83-123-4567", "00", "0", "27"));
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("+27 83 123-4567", "00", "0", "27"));
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("+27 83 123-4567", "00", "0", "27"));
-		Assert.assertEquals("447831234567", numberRoutingHelper.normalizeNumber("00 44 783 123-4567", "00", "0", "27"));
-		Assert.assertEquals("447831234567", numberRoutingHelper.normalizeNumber("+44 783 123-4567", "00", "0", "27"));
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("0831234567", "00", "0", "27"));    
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("083-123-4567", "00", "0", "27"));
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("083 123-4567", "00", "0", "27"));
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("083/123,4567", "00", "0", "27"));
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("083.123.4567", "00", "0", "27"));
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("083 123 4567", "00", "0", "27"));
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("+27 83 123-4567", "00", "0", "27"));
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("+27+83-123-4567", "00", "0", "27"));
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("+27 83 123-4567", "00", "0", "27"));
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("+27 83 123-4567", "00", "0", "27"));
+		assertEquals("447831234567", numberRoutingHelper.normalizeNumber("00 44 783 123-4567", "00", "0", "27"));
+		assertEquals("447831234567", numberRoutingHelper.normalizeNumber("+44 783 123-4567", "00", "0", "27"));
 
 		// US (00 / 1 / 1)
 		
-		Assert.assertEquals("12121234567", numberRoutingHelper.normalizeNumber("212 123 4567", "00", "1", "1"));
-		Assert.assertEquals("12121234567", numberRoutingHelper.normalizeNumber("+1 212 123 4567", "00", "1", "1"));
-		Assert.assertEquals("12121234567", numberRoutingHelper.normalizeNumber("+1 212.123.4567", "00", "1", "1"));
-		Assert.assertEquals("12121234567", numberRoutingHelper.normalizeNumber("+1 (212) 123 4567", "00", "1", "1"));
-		Assert.assertEquals("12121234567", numberRoutingHelper.normalizeNumber("1 (212) 123 4567", "00", "1", "1"));
-		Assert.assertEquals("12121234567", numberRoutingHelper.normalizeNumber("1-212-123-4567", "00", "1", "1"));
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("+27 83 123-4567", "00", "1", "1"));
-		Assert.assertEquals("447831234567", numberRoutingHelper.normalizeNumber("00 44 783 123-4567", "00", "1", "1"));
+		assertEquals("12121234567", numberRoutingHelper.normalizeNumber("212 123 4567", "00", "1", "1"));
+		assertEquals("12121234567", numberRoutingHelper.normalizeNumber("+1 212 123 4567", "00", "1", "1"));
+		assertEquals("12121234567", numberRoutingHelper.normalizeNumber("+1 212.123.4567", "00", "1", "1"));
+		assertEquals("12121234567", numberRoutingHelper.normalizeNumber("+1 (212) 123 4567", "00", "1", "1"));
+		assertEquals("12121234567", numberRoutingHelper.normalizeNumber("1 (212) 123 4567", "00", "1", "1"));
+		assertEquals("12121234567", numberRoutingHelper.normalizeNumber("1-212-123-4567", "00", "1", "1"));
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("+27 83 123-4567", "00", "1", "1"));
+		assertEquals("447831234567", numberRoutingHelper.normalizeNumber("00 44 783 123-4567", "00", "1", "1"));
 
 		// UK (00 / 0 / 44)
 		
-		Assert.assertEquals("12121234567", numberRoutingHelper.normalizeNumber("+1 212 123 4567", "00", "0", "44"));
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("+27 83 123-4567", "00", "0", "44"));
-		Assert.assertEquals("12121234567", numberRoutingHelper.normalizeNumber("00 1 212 123 4567", "00", "0", "44"));
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("00 27 83 123-4567", "00", "0", "44"));
-		Assert.assertEquals("447831234567", numberRoutingHelper.normalizeNumber("0783 123-4567", "00", "0", "44"));
+		assertEquals("12121234567", numberRoutingHelper.normalizeNumber("+1 212 123 4567", "00", "0", "44"));
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("+27 83 123-4567", "00", "0", "44"));
+		assertEquals("12121234567", numberRoutingHelper.normalizeNumber("00 1 212 123 4567", "00", "0", "44"));
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("00 27 83 123-4567", "00", "0", "44"));
+		assertEquals("447831234567", numberRoutingHelper.normalizeNumber("0783 123-4567", "00", "0", "44"));
 		
 		// Numbers already in canonical international form should stay unchanged
 		
-		Assert.assertEquals("447831234567", numberRoutingHelper.normalizeNumber("44 783 123 4567", "00", "0", "44"));
-		Assert.assertEquals("447831234567", numberRoutingHelper.normalizeNumber("44 783 123 4567", "00", "0", "27"));
-		Assert.assertEquals("447831234567", numberRoutingHelper.normalizeNumber("44 783 123 4567", "00", "1", "1"));
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("27 83 123-4567", "00", "0", "27"));
-		Assert.assertEquals("27831234567", numberRoutingHelper.normalizeNumber("27831234567", "00", "0", "27"));
+		assertEquals("447831234567", numberRoutingHelper.normalizeNumber("44 783 123 4567", "00", "0", "44"));
+		assertEquals("447831234567", numberRoutingHelper.normalizeNumber("44 783 123 4567", "00", "0", "27"));
+		assertEquals("447831234567", numberRoutingHelper.normalizeNumber("44 783 123 4567", "00", "1", "1"));
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("27 83 123-4567", "00", "0", "27"));
+		assertEquals("27831234567", numberRoutingHelper.normalizeNumber("27831234567", "00", "0", "27"));
 		
 		
 	}

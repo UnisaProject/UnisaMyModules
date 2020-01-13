@@ -20,12 +20,14 @@
  **********************************************************************************/
 package org.sakaiproject.component.app.messageforums.dao.hibernate;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.messageforums.PrivateForum;
 
 public class PrivateForumImpl extends BaseForumImpl implements PrivateForum {
 
+    private static final Logger LOG = LoggerFactory.getLogger(PrivateForumImpl.class);
+    
     private String owner;
     private Boolean autoForward;
     private String autoForwardEmail;

@@ -24,12 +24,13 @@ package org.sakaiproject.tool.messageforums;
 
 import java.util.Comparator;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.Role;
 
-@Slf4j
 public class AuthzGroupComparator implements Comparator {
+
+	private static Logger LOG = LoggerFactory.getLogger(DiscussionForumTool.class);
 
 	private String m_property = null;
 

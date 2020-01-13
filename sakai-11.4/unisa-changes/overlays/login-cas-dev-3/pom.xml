@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>unisa-changes-base</artifactId>
+    <groupId>org.sakaiproject</groupId>
+    <version>2.9.1</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <name>Unisa Overlay on Login for CAS-DEV Login </name>
+  <groupId>unisa.overlays.login.cas-dev</groupId>
+  <artifactId>unisa-overlays-login-cas-dev</artifactId>
+  <packaging>pom</packaging>
+  <modules>  
+	<module>login-tool/tool</module>
+  </modules>
+</project>

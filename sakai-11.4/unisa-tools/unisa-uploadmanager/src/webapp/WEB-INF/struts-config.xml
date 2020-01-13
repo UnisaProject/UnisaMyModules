@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	  <form-bean name="uploadManagerForm" type="za.ac.unisa.lms.tools.uploadmanager.forms.UploadManagerForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="act"
+			path="/default"
+			type="za.ac.unisa.lms.tools.uploadmanager.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/uploadmanager.do?act=materialFilter"
+				contextRelative="true" />
+		</action>
+			<action
+      attribute="uploadManagerForm"
+      name="uploadManagerForm"
+      parameter="act"
+      path="/uploadmanager"
+      scope="session"
+      type="za.ac.unisa.lms.tools.uploadmanager.actions.StudyMaterialAction" validate="true">
+       <forward
+        name="search"
+        path="/WEB-INF/jsp/search.jsp"
+        contextRelative="true" />
+      <forward
+        name="mainfilter"
+        path="/WEB-INF/jsp/studyitems.jsp"
+        contextRelative="true" />
+      <forward
+        name="uploadscreen"
+        path="/WEB-INF/jsp/uploadmanager.jsp"
+        contextRelative="true" />
+         <forward
+        name="fileupload"
+        path="/WEB-INF/jsp/fileupload.jsp"
+        contextRelative="true" /> 
+
+         <forward
+        name="viewstudymaterial"
+        path="/WEB-INF/jsp/viewstudymaterial.jsp"
+        contextRelative="true" /> 
+        </action>
+        
+        			<action
+      attribute="uploadManagerForm"
+      name="uploadManagerForm"
+      parameter="act"
+      path="/fileuploadmanager"
+      scope="session"
+      type="za.ac.unisa.lms.tools.uploadmanager.actions.StudyMaterialAction" validate="true" input="/WEB-INF/jsp/fileupload.jsp">
+       <forward
+        name="search"
+        path="/WEB-INF/jsp/search.jsp"
+        contextRelative="true" />
+      <forward
+        name="mainfilter"
+        path="/WEB-INF/jsp/studyitems.jsp"
+        contextRelative="true" />
+      <forward
+        name="uploadscreen"
+        path="/WEB-INF/jsp/uploadmanager.jsp"
+        contextRelative="true" />
+         <forward
+        name="fileupload"
+        path="/WEB-INF/jsp/fileupload.jsp"
+        contextRelative="true" /> 
+
+         <forward
+        name="viewstudymaterial"
+        path="/WEB-INF/jsp/viewstudymaterial.jsp"
+        contextRelative="true" /> 
+        </action>
+        
+        
+       
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.uploadmanager.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

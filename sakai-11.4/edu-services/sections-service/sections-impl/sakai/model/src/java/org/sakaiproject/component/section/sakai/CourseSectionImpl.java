@@ -30,13 +30,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.section.api.coursemanagement.Course;
 import org.sakaiproject.section.api.coursemanagement.CourseSection;
 import org.sakaiproject.section.api.coursemanagement.Meeting;
@@ -45,33 +44,34 @@ import org.sakaiproject.site.api.Group;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.time.api.TimeService;
 
-@Slf4j
 public class CourseSectionImpl implements CourseSection, Comparable<CourseSection>, Serializable {
-    private static final long serialVersionUID = 1L;
-    private static final String TIME_FORMAT_LONG = "h:mm a";
-    private static final String TIME_FORMAT_DATE_TZ = "dd/MM/yyyy HH:mm zzzz";
-    public static final String SEP_CHARACTER = ",";
-    public static final String CATEGORY = "sections_category";
-    public static final String END_TIME = "sections_end_time";
-    public static final String START_TIME = "sections_start_time";
-    public static final String LOCATION = "sections_location";
-    public static final String MAX_ENROLLMENTS = "sections_max_enrollments";
-    public static final String MONDAY = "sections_monday";
-    public static final String TUESDAY = "sections_tuesday";
-    public static final String WEDNESDAY = "sections_wednesday";
-    public static final String THURSDAY = "sections_thursday";
-    public static final String FRIDAY = "sections_friday";
-    public static final String SATURDAY = "sections_saturday";
-    public static final String SUNDAY = "sections_sunday";
-    public static final String EID = "sections_eid";
 
-    // Fields from Site Group
-    protected String description;
+	private static final long serialVersionUID = 1L;
+	private static final String TIME_FORMAT_LONG = "h:mm a";
+	private static final String TIME_FORMAT_DATE_TZ = "dd/MM/yyyy HH:mm zzzz";
+	private static final Logger log = LoggerFactory.getLogger(CourseSectionImpl.class);
+	public static final String SEP_CHARACTER = ",";
+	public static final String CATEGORY = "sections_category";
+	public static final String END_TIME = "sections_end_time";
+	public static final String START_TIME = "sections_start_time";
+	public static final String LOCATION = "sections_location";
+	public static final String MAX_ENROLLMENTS = "sections_max_enrollments";
+	public static final String MONDAY = "sections_monday";
+	public static final String TUESDAY = "sections_tuesday";
+	public static final String WEDNESDAY = "sections_wednesday";
+	public static final String THURSDAY = "sections_thursday";
+	public static final String FRIDAY = "sections_friday";
+	public static final String SATURDAY = "sections_saturday";
+	public static final String SUNDAY = "sections_sunday";
+	public static final String EID = "sections_eid";
 
-    // Fields from CourseSection
+	// Fields from Site Group
+	protected String description;
+
+	// Fields from CourseSection
     protected String uuid;
-    protected Course course;
-    protected String category;
+	protected Course course;
+	protected String category;
     protected Integer maxEnrollments;
     protected List<Meeting> meetings;
     protected String title;
@@ -426,10 +426,10 @@ public class CourseSectionImpl implements CourseSection, Comparable<CourseSectio
 
     	// Ensure that we've got a meetings object
     	if(meetings == null) {
-    		meetings = new ArrayList<>();
+    		meetings = new ArrayList<Meeting>();
     	}
     	
-    	for(Iterator<Meeting> iter = meetings.iterator(); iter.hasNext();) {
+    	for(Iterator iter = meetings.iterator(); iter.hasNext();) {
     		Meeting meeting = (Meeting)iter.next();
     		// Ensure that the location has no SEP_CHARACTERs in it
     		String meetingLocation = meeting.getLocation();
@@ -447,7 +447,7 @@ public class CourseSectionImpl implements CourseSection, Comparable<CourseSectio
     	props.addProperty(CourseSectionImpl.LOCATION, locationBuffer.toString());
 
     	StringBuilder startTimeBuffer = new StringBuilder();
-    	for(Iterator<Meeting> iter = meetings.iterator(); iter.hasNext();) {
+    	for(Iterator iter = meetings.iterator(); iter.hasNext();) {
     		Meeting meeting = (Meeting)iter.next();
     		Time meetingStart = meeting.getStartTime();
     		if(meetingStart != null) {
@@ -461,7 +461,7 @@ public class CourseSectionImpl implements CourseSection, Comparable<CourseSectio
     	props.addProperty(CourseSectionImpl.START_TIME, startTimeBuffer.toString());
 
     	StringBuilder endTimeBuffer = new StringBuilder();
-    	for(Iterator<Meeting> iter = meetings.iterator(); iter.hasNext();) {
+    	for(Iterator iter = meetings.iterator(); iter.hasNext();) {
     		Meeting meeting = (Meeting)iter.next();
     		Time meetingEnd = meeting.getEndTime();
     		if(meetingEnd != null) {
@@ -475,7 +475,7 @@ public class CourseSectionImpl implements CourseSection, Comparable<CourseSectio
     	props.addProperty(CourseSectionImpl.END_TIME, endTimeBuffer.toString());
     		
     	StringBuilder mondayBuffer = new StringBuilder();
-    	for(Iterator<Meeting> iter = meetings.iterator(); iter.hasNext();) {
+    	for(Iterator iter = meetings.iterator(); iter.hasNext();) {
     		Meeting meeting = (Meeting)iter.next();
         	mondayBuffer.append(meeting.isMonday());
     		if(iter.hasNext()) {
@@ -486,7 +486,7 @@ public class CourseSectionImpl implements CourseSection, Comparable<CourseSectio
     	props.addProperty(CourseSectionImpl.MONDAY, mondayBuffer.toString());
 
     	StringBuilder tuesdayBuffer = new StringBuilder();
-    	for(Iterator<Meeting> iter = meetings.iterator(); iter.hasNext();) {
+    	for(Iterator iter = meetings.iterator(); iter.hasNext();) {
     		Meeting meeting = (Meeting)iter.next();
         	tuesdayBuffer.append(meeting.isTuesday());
     		if(iter.hasNext()) {
@@ -497,7 +497,7 @@ public class CourseSectionImpl implements CourseSection, Comparable<CourseSectio
     	props.addProperty(CourseSectionImpl.TUESDAY, tuesdayBuffer.toString());
 
     	StringBuilder wednesdayBuffer = new StringBuilder();
-    	for(Iterator<Meeting> iter = meetings.iterator(); iter.hasNext();) {
+    	for(Iterator iter = meetings.iterator(); iter.hasNext();) {
     		Meeting meeting = (Meeting)iter.next();
         	wednesdayBuffer.append(Boolean.valueOf(meeting.isWednesday()));
     		if(iter.hasNext()) {
@@ -508,7 +508,7 @@ public class CourseSectionImpl implements CourseSection, Comparable<CourseSectio
     	props.addProperty(CourseSectionImpl.WEDNESDAY, wednesdayBuffer.toString());
 
     	StringBuilder thursdayBuffer = new StringBuilder();
-    	for(Iterator<Meeting> iter = meetings.iterator(); iter.hasNext();) {
+    	for(Iterator iter = meetings.iterator(); iter.hasNext();) {
     		Meeting meeting = (Meeting)iter.next();
         	thursdayBuffer.append(Boolean.valueOf(meeting.isThursday()));
     		if(iter.hasNext()) {
@@ -519,7 +519,7 @@ public class CourseSectionImpl implements CourseSection, Comparable<CourseSectio
     	props.addProperty(CourseSectionImpl.THURSDAY, thursdayBuffer.toString());
 
     	StringBuilder fridayBuffer = new StringBuilder();
-    	for(Iterator<Meeting> iter = meetings.iterator(); iter.hasNext();) {
+    	for(Iterator iter = meetings.iterator(); iter.hasNext();) {
     		Meeting meeting = (Meeting)iter.next();
         	fridayBuffer.append(Boolean.valueOf(meeting.isFriday()));
     		if(iter.hasNext()) {
@@ -530,7 +530,7 @@ public class CourseSectionImpl implements CourseSection, Comparable<CourseSectio
     	props.addProperty(CourseSectionImpl.FRIDAY, fridayBuffer.toString());
     	
     	StringBuilder saturdayBuffer = new StringBuilder();
-    	for(Iterator<Meeting> iter = meetings.iterator(); iter.hasNext();) {
+    	for(Iterator iter = meetings.iterator(); iter.hasNext();) {
     		Meeting meeting = (Meeting)iter.next();
         	saturdayBuffer.append(Boolean.valueOf(meeting.isSaturday()));
     		if(iter.hasNext()) {
@@ -541,7 +541,7 @@ public class CourseSectionImpl implements CourseSection, Comparable<CourseSectio
     	props.addProperty(CourseSectionImpl.SATURDAY, saturdayBuffer.toString());
 
     	StringBuilder sundayBuffer = new StringBuilder();
-    	for(Iterator<Meeting> iter = meetings.iterator(); iter.hasNext();) {
+    	for(Iterator iter = meetings.iterator(); iter.hasNext();) {
     		Meeting meeting = (Meeting)iter.next();
         	sundayBuffer.append(Boolean.valueOf(meeting.isSunday()));
     		if(iter.hasNext()) {

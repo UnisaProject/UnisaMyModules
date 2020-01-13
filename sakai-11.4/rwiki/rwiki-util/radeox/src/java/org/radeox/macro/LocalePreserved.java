@@ -3,7 +3,8 @@ package org.radeox.macro;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.radeox.api.engine.context.InitialRenderContext;
 import org.radeox.api.engine.context.RenderContext;
 
@@ -29,9 +30,11 @@ import org.radeox.api.engine.context.RenderContext;
  * limitations under the License.
  * --LICENSE NOTICE--
  */
-@Slf4j
+
 public abstract class LocalePreserved extends Preserved implements LocaleMacro
 {
+	private static Logger log = LoggerFactory.getLogger(LocalePreserved.class);
+
 	private String name;
 
 	public String getName()

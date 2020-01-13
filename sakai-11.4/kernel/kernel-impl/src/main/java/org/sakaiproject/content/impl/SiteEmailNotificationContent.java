@@ -23,8 +23,6 @@ package org.sakaiproject.content.impl;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.component.cover.ComponentManager;
@@ -42,6 +40,7 @@ import org.sakaiproject.exception.TypeException;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.user.api.User;
+import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.util.EmailNotification;
 import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.Resource;
@@ -56,7 +55,6 @@ import org.sakaiproject.util.StringUtil;
  * 
  * @author Sakai Software Development Team
  */
-@Slf4j
 public class SiteEmailNotificationContent extends SiteEmailNotification
 {
 	
@@ -415,11 +413,11 @@ public class SiteEmailNotificationContent extends SiteEmailNotification
 					}
 					
 				} catch (PermissionException e) {
-					log.error(e.getMessage(), e);
+					e.printStackTrace();
 				} catch (IdUnusedException e) {
-					log.error(e.getMessage(), e);
+					e.printStackTrace();
 				} catch (TypeException e) {
-					log.error(e.getMessage(), e);
+					e.printStackTrace();
 				}
 			}
 			

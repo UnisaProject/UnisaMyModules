@@ -21,11 +21,10 @@
 
 package org.sakaiproject.content.tool;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -45,12 +44,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.PrintWriter;
 
+import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.lang.StringUtils;
-
-import org.sakaiproject.exception.IdLengthException;
-import org.sakaiproject.util.FileItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.cheftool.Context;
 import org.sakaiproject.cheftool.JetspeedRunData;
 import org.sakaiproject.cheftool.RunData;
@@ -82,6 +81,7 @@ import org.sakaiproject.tool.api.ToolException;
 import org.sakaiproject.tool.api.ToolSession;
 import org.sakaiproject.tool.cover.SessionManager;
 import org.sakaiproject.tool.cover.ToolManager;
+import org.sakaiproject.util.FileItem;
 import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.ParameterParser;
 import org.sakaiproject.util.ResourceLoader;
@@ -89,9 +89,11 @@ import org.sakaiproject.util.Validator;
 import org.sakaiproject.event.cover.EventTrackingService;
 import org.sakaiproject.event.api.NotificationEdit;
 
-@Slf4j
 public class ResourcesHelperAction extends VelocityPortletPaneledAction 
 {
+	/** the logger for this class */
+	 private static final Logger logger = LoggerFactory.getLogger(ResourcesHelperAction.class);
+	 
 	 private static final ResourceConditionsHelper conditionsHelper = new ResourceConditionsHelper();
 	 
 	/** Resource bundle using current language locale */
@@ -177,7 +179,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			RunData data,
 			SessionState state)
 	{
-		log.debug("{}.buildAccessContext()", this);
+		logger.debug(this + ".buildAccessContext()");
 		String template = ACCESS_TEXT_TEMPLATE;
 		return template;
 	}
@@ -189,7 +191,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			RunData data,
 			SessionState state)
 	{
-		log.debug("{}.buildCreateContext()", this);
+		logger.debug(this + ".buildCreateContext()");
 		String template = CREATE_UPLOAD_TEMPLATE;
 		
 		ToolSession toolSession = SessionManager.getCurrentToolSession();
@@ -236,7 +238,8 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			RunData data,
 			SessionState state)
 	{
-		log.debug("{}.buildMainPanelContext()", this);
+		logger.debug(this + ".buildMainPanelContext()");
+		// context.put("sysout", System.out);
 		context.put("tlang", rb);
 		context.put("metaLang", metaLang);
 
@@ -314,7 +317,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 					attributes += "\t" + name + " ==> " + val + "\n";
 				}
 			}
-			log.debug(attributes, new Throwable());
+			logger.debug(attributes, new Throwable());
             return ERROR_PAGE_TEMPLATE;
 		}
 		if(pipe.isActionCompleted())
@@ -359,6 +362,8 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			template = buildNewUrlsContext(portlet, context, data, state);
 			break;
 		default:
+			// hmmmm
+		    logger.info(this + "hmmm");
 			template = buildMakeSitePageContext(portlet, context, data, state);
 			break;
 		}
@@ -368,7 +373,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 
 	public String buildMakeSitePageContext(VelocityPortlet portlet, Context context,
 			RunData data, SessionState state) {
-		log.debug("{}.buildMakeSitePage()", this);
+		logger.debug(this + ".buildMakeSitePage()");
 
 		int requestStateId = ResourcesAction.preserveRequestState(state, new String[]{ResourcesAction.PREFIX + ResourcesAction.REQUEST});
 		context.put("requestStateId", requestStateId);
@@ -381,7 +386,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 
 	protected String buildNewUrlsContext(VelocityPortlet portlet, Context context, RunData data, SessionState state)
 	 {
-		log.debug("{}.buildNewUrlsContext()", this);
+		logger.debug(this + ".buildNewUrlsContext()");
 		context.put("site_id", ToolManager.getCurrentPlacement().getContext());
 		ToolSession toolSession = SessionManager.getCurrentToolSession();
 
@@ -442,9 +447,6 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		int requestStateId = ResourcesAction.preserveRequestState(state, new String[]{ResourcesAction.PREFIX + ResourcesAction.REQUEST});
 		context.put("requestStateId", requestStateId);
 		
-		// Get default notification ("r", "o" or "n") 
-		context.put("noti", ServerConfigurationService.getString("content.default.notification", "n"));
-		
 		return CREATE_URLS_TEMPLATE;
 	 }
 
@@ -459,7 +461,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 	 */
 	private String buildNewFoldersContext(VelocityPortlet portlet, Context context, RunData data, SessionState state)
 	{
-		log.debug("{}.buildNewFoldersContext()", this);
+		logger.debug(this + ".buildNewFoldersContext()");
 		context.put("site_id", ToolManager.getCurrentPlacement().getContext());
 		ToolSession toolSession = SessionManager.getCurrentToolSession();
 
@@ -505,9 +507,6 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		int requestStateId = ResourcesAction.preserveRequestState(state, new String[]{ResourcesAction.PREFIX + ResourcesAction.REQUEST});
 		context.put("requestStateId", requestStateId);
 
-		// Get default notification ("r", "o" or "n") 
-		context.put("noti", ServerConfigurationService.getString("content.default.notification", "n"));
-		
 		return CREATE_FOLDERS_TEMPLATE;
 	}
 
@@ -522,7 +521,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 	 */
 	protected String buildReplaceContext(VelocityPortlet portlet, Context context, RunData data, SessionState state)
 	{
-		log.debug("{}.buildReplaceContext()", this);
+		logger.debug(this + ".buildReplaceContext()");
 		ToolSession toolSession = SessionManager.getCurrentToolSession();
 
 		ResourceToolActionPipe pipe = (ResourceToolActionPipe) toolSession.getAttribute(ResourceToolAction.ACTION_PIPE);
@@ -549,9 +548,6 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		int requestStateId = ResourcesAction.preserveRequestState(state, new String[]{ResourcesAction.PREFIX + ResourcesAction.REQUEST});
 		context.put("requestStateId", requestStateId);
 
-		// Get default notification ("r", "o" or "n") 
-		context.put("noti", ServerConfigurationService.getString("content.default.notification", "n"));
-		
 		return REPLACE_CONTENT_TEMPLATE;
 	}
 
@@ -562,7 +558,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			RunData data,
 			SessionState state)
 	{
-		log.debug("{}.buildReviseContext()", this);
+		logger.debug(this + ".buildReviseContext()");
 		String template = REVISE_TEXT_TEMPLATE;
 		ToolSession toolSession = SessionManager.getCurrentToolSession();
 
@@ -631,9 +627,6 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		int requestStateId = ResourcesAction.preserveRequestState(state, new String[]{ResourcesAction.PREFIX + ResourcesAction.REQUEST});
 		context.put("requestStateId", requestStateId);
 
-		// Get default notification ("r", "o" or "n") 
-		context.put("noti", ServerConfigurationService.getString("content.default.notification", "n"));
-		
 		return template;
 	}
 
@@ -646,7 +639,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 	 */
 	protected String buildUploadFilesContext(VelocityPortlet portlet, Context context, RunData data, SessionState state)
 	{
-		log.debug("{}.buildUploadFilesContext()", this);
+		logger.debug(this + ".buildUploadFilesContext()");
 		ToolSession toolSession = SessionManager.getCurrentToolSession();
 		context.put("site_id", ToolManager.getCurrentPlacement().getContext());
 		
@@ -740,9 +733,6 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		int requestStateId = ResourcesAction.preserveRequestState(state, new String[]{ResourcesAction.PREFIX + ResourcesAction.REQUEST});
 		context.put("requestStateId", requestStateId);
 
-		// Get default notification ("r", "o" or "n") 
-		context.put("noti", ServerConfigurationService.getString("content.default.notification", "n"));
-		
 		return CREATE_UPLOADS_TEMPLATE;
 	}
 	
@@ -759,14 +749,14 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			pipe.setActionCompleted(true);
 		}
 		
-		log.debug("{}.doFinishUpload() finished action", this);
+		logger.debug(this + ".doFinishUpload() finished action");
 		toolSession.setAttribute(ResourceToolAction.DONE, Boolean.TRUE);
 	}	
 	
 
 	public void doCancel(RunData data)
 	{
-		log.debug("{}.doCancel()", this);
+		logger.debug(this + ".doCancel()");
 		SessionState state = ((JetspeedRunData)data).getPortletSessionState (((JetspeedRunData)data).getJs_peid ());
 		ParameterParser params = data.getParameters ();
 		ToolSession toolSession = SessionManager.getCurrentToolSession();
@@ -806,7 +796,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 	
 	public void doContinue(RunData data)
 	{
-		log.debug("{}.doContinue()", this);
+		logger.debug(this + ".doContinue()");
 		SessionState state = ((JetspeedRunData)data).getPortletSessionState (((JetspeedRunData)data).getJs_peid ());
 		ParameterParser params = data.getParameters ();
 
@@ -854,7 +844,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		
 		ListItem item = new ListItem(pipe.getContentEntity());
 		// notification
-		int noti = determineNotificationPriority(params, item.isDropbox);
+		int noti = determineNotificationPriority(params, item.isDropbox, item.userIsMaintainer());
 
 		pipe.setRevisedMimeType(pipe.getMimeType());
 		if(ResourceType.TYPE_TEXT.equals(resourceType) || ResourceType.MIME_TYPE_TEXT.equals(mimetype))
@@ -887,7 +877,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 				content = uri.toString();
 			} catch (Exception e) {
 				//ok to ignore, just use the original url
-				log.debug("URL can not be encoded: {}:{}", e.getClass(), e.getCause());
+				logger.debug("URL can not be encoded: " + e.getClass() + ":" + e.getCause());
 			}
 			
 			pipe.setRevisedMimeType(ResourceType.MIME_TYPE_URL);
@@ -918,7 +908,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		} 
 		catch (UnsupportedEncodingException e) 
 		{
-			log.warn("{}: {}", this, e.toString());
+			logger.warn( this + ": " + e.toString() );
 			addAlert(state, rb.getString("alert.utf8encoding"));
 			pipe.setActionCanceled(false);
 			pipe.setErrorEncountered(true);
@@ -931,7 +921,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 	
 	public void doCreateFolders(RunData data)
 	{
-		log.debug("{}.doCreateFolders()", this);
+		logger.debug(this + ".doCreateFolders()");
 		SessionState state = ((JetspeedRunData)data).getPortletSessionState (((JetspeedRunData)data).getJs_peid ());
 		ParameterParser params = data.getParameters ();
 
@@ -1072,7 +1062,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 	
 	public void doReplace(RunData data)
 	{
-		log.debug("{}.doReplace()", this);
+		logger.debug(this + ".doReplace()");
 		SessionState state = ((JetspeedRunData)data).getPortletSessionState (((JetspeedRunData)data).getJs_peid ());
 		ParameterParser params = data.getParameters ();
 		ToolSession toolSession = SessionManager.getCurrentToolSession();
@@ -1096,7 +1086,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			pipe.setActionCanceled(false);
 			pipe.setErrorEncountered(true);
 			pipe.setActionCompleted(false);
-			log.debug("{}.doReplace() setting error on pipe", this);
+			logger.debug(this + ".doReplace() setting error on pipe");
 			String uploadMax = ServerConfigurationService.getString(ResourcesConstants.SAK_PROP_MAX_UPLOAD_FILE_SIZE);
 			addAlert(state, rb.getFormattedMessage("alert.over-per-upload-quota", new Object[]{uploadMax}));
 			return;
@@ -1109,7 +1099,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		}
 		catch(Exception e)
 		{
-			log.warn("Exception ", e);
+			logger.warn("Exception ", e);
 		}
 		
 		if(fileitem == null)
@@ -1140,29 +1130,42 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		else if (fileitem.getFileName().length() > 0)
 		{
 			String filename = Validator.getFileName(fileitem.getFileName());
-			InputStream stream = fileitem.getInputStream();
-			pipe.setRevisedContentStream(stream);
-			String contentType = fileitem.getContentType().replaceAll("\"", "");
-			pipe.setRevisedMimeType(contentType);
-			pipe.setFileName(filename);
-
-			if (ResourceType.MIME_TYPE_HTML.equals(contentType) || ResourceType.MIME_TYPE_TEXT.equals(contentType)) {
-				pipe.setRevisedResourceProperty(ResourceProperties.PROP_CONTENT_ENCODING, ResourcesAction.UTF_8_ENCODING);
-			} else if (pipe.getPropertyValue(ResourceProperties.PROP_CONTENT_ENCODING) != null) {
-				pipe.setRevisedResourceProperty(ResourceProperties.PROP_CONTENT_ENCODING, (String) pipe.getPropertyValue(ResourceProperties.PROP_CONTENT_ENCODING));
-			}
-
+			InputStream stream;
+				stream = fileitem.getInputStream();
+				if(stream == null)
+				{
+					byte[] bytes = fileitem.get();
+					pipe.setRevisedContent(bytes);
+				}
+				else
+				{
+					 pipe.setRevisedContentStream(stream);
+				}
+				String contentType = fileitem.getContentType().replaceAll("\"", "");
+				//pipe.setRevisedContent(bytes);
+				pipe.setRevisedMimeType(contentType);
+				pipe.setFileName(filename);
+				
+				if(ResourceType.MIME_TYPE_HTML.equals(contentType) || ResourceType.MIME_TYPE_TEXT.equals(contentType))
+				{
+					pipe.setRevisedResourceProperty(ResourceProperties.PROP_CONTENT_ENCODING, ResourcesAction.UTF_8_ENCODING);
+				}
+				else if(pipe.getPropertyValue(ResourceProperties.PROP_CONTENT_ENCODING) != null)
+				{
+					pipe.setRevisedResourceProperty(ResourceProperties.PROP_CONTENT_ENCODING, (String) pipe.getPropertyValue(ResourceProperties.PROP_CONTENT_ENCODING));
+				}
+				
 			ListItem newFile = new ListItem(pipe.getContentEntity());
 			// notification
-			int noti = determineNotificationPriority(params, newFile.isDropbox);
+			int noti = determineNotificationPriority(params, newFile.isDropbox, newFile.userIsMaintainer());
 			newFile.setNotification(noti);
-
+			
 			pipe.setRevisedListItem(newFile);
-
+			
 			pipe.setActionCanceled(false);
 			pipe.setErrorEncountered(false);
 			pipe.setActionCompleted(true);
-
+			
 			toolSession.setAttribute(ResourceToolAction.DONE, Boolean.TRUE);
 		}
 
@@ -1171,7 +1174,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 	
 	public void doAddUrls(RunData data)
 	{
-		log.debug("{}.soAddUrls()", this);
+		logger.debug(this + ".soAddUrls()");
 		SessionState state = ((JetspeedRunData)data).getPortletSessionState (((JetspeedRunData)data).getJs_peid ());
 		ParameterParser params = data.getParameters ();
 		ToolSession toolSession = SessionManager.getCurrentToolSession();
@@ -1327,7 +1330,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			}
 			
 			// notification
-			int noti = determineNotificationPriority(params, newFile.isDropbox);
+			int noti = determineNotificationPriority(params, newFile.isDropbox, newFile.userIsMaintainer());
 			newFile.setNotification(noti);
 			
 			//alerts.addAll(newFile.checkRequiredProperties());
@@ -1388,36 +1391,49 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			dropboxNotifications = ResourcesAction.DROPBOX_NOTIFICATIONS_DEFAULT_VALUE;
 		}
 		
-		log.debug("{}.getDropboxNotificationsProperty() dropboxNotifications == {}", this, dropboxNotifications);
+		logger.debug(this + ".getDropboxNotificationsProperty() dropboxNotifications == " + dropboxNotifications);
 
 		return dropboxNotifications;
 	}
 
 	/**
 	 * @param params
+	 * @param newFile
+	 * @return
 	 */
-	protected int determineNotificationPriority(ParameterParser params, boolean contextIsDropbox) 
+	protected int determineNotificationPriority(ParameterParser params, boolean contextIsDropbox, boolean userIsMaintainer) 
 	{
 		int noti = NotificationService.NOTI_NONE;
 		// %%STATE_MODE_RESOURCES%%
 		if (contextIsDropbox)
 		{
 			boolean notification = false;
-			String notifyDropbox = getDropboxNotificationsProperty();
 			
-			if(ResourcesAction.DROPBOX_NOTIFICATIONS_ALWAYS.equals(notifyDropbox))
-			{
-				noti = NotificationService.NOTI_REQUIRED;
-			}
-			else if(ResourcesAction.DROPBOX_NOTIFICATIONS_ALLOW.equals(notifyDropbox))
+			if(userIsMaintainer)	// if the user is a site maintainer
 			{
 				notification = params.getBoolean("notify_dropbox");
 				if(notification)
 				{
-					noti = NotificationService.NOTI_OPTIONAL;
+					noti = NotificationService.NOTI_REQUIRED;
 				}
 			}
-			log.debug("{}.determineNotificationPriority() noti == {}", this, noti);
+			else
+			{
+				String notifyDropbox = getDropboxNotificationsProperty();
+				if(ResourcesAction.DROPBOX_NOTIFICATIONS_ALWAYS.equals(notifyDropbox))
+				{
+					noti = NotificationService.NOTI_OPTIONAL;
+				}
+				else if(ResourcesAction.DROPBOX_NOTIFICATIONS_ALLOW.equals(notifyDropbox))
+				{
+					notification = params.getBoolean("notify_dropbox");
+	  				if(notification)
+	   				{
+	   					noti = NotificationService.NOTI_OPTIONAL;
+	   				}
+				}
+			}
+			logger.debug(this + ".doAddUrls() noti == " + noti);
 		}
 		else
 		{
@@ -1438,7 +1454,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 	
 	public void doUpload(RunData data)
 	{
-		log.debug("{}.doUpload()", this);
+		logger.debug(this + ".doUpload()");
 		SessionState state = ((JetspeedRunData)data).getPortletSessionState (((JetspeedRunData)data).getJs_peid ());
 		ParameterParser params = data.getParameters ();
 		ToolSession toolSession = SessionManager.getCurrentToolSession();
@@ -1449,7 +1465,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		MultiFileUploadPipe mfp = (MultiFileUploadPipe) toolSession.getAttribute(ResourceToolAction.ACTION_PIPE);
 		if(mfp == null)
 		{
-			log.debug("{}.doUpload() mfp is null", this);
+			logger.debug(this + ".doUpload() mfp is null");
 			return;
 		}
 		
@@ -1463,13 +1479,13 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			mfp.setActionCanceled(false);
 			mfp.setErrorEncountered(true);
 			mfp.setActionCompleted(false);
-			log.debug("{}.doUpload() setting error on pipe", this);
+			logger.debug(this + ".doUpload() setting error on pipe");
 			String uploadMax = ServerConfigurationService.getString(ResourcesConstants.SAK_PROP_MAX_UPLOAD_FILE_SIZE);
 			addAlert(state, rb.getFormattedMessage("alert.over-per-upload-quota", new Object[]{uploadMax}));
 			return;
 		}
 		
-		log.debug(" after doUpload() setting error on pipe");
+		logger.debug(" after doUpload() setting error on pipe");
 		int count = params.getInt("fileCount");
 		mfp.setFileCount(count);
 		if(count < 1)
@@ -1500,7 +1516,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		
 		List<ResourceToolActionPipe> pipes = mfp.getPipes();
 	
-		log.debug("{}.doUpload() iterating through pipes", this);
+		logger.debug(this + ".doUpload() iterating through pipes");
 
 		int uploadCount = 0;
 		
@@ -1521,7 +1537,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			}
 			catch(Exception e)
 			{
-				log.warn("Exception ", e);
+				logger.warn("Exception ", e);
 			}
 			
 			if(fileitem == null)
@@ -1596,7 +1612,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 				newFile.captureProperties(params, ListItem.DOT + i);
 				
 				// notification
-				int noti = determineNotificationPriority(params, newFile.isDropbox);
+				int noti = determineNotificationPriority(params, newFile.isDropbox, newFile.userIsMaintainer());
 				newFile.setNotification(noti);
 				// allAlerts.addAll(newFile.checkRequiredProperties());
 				
@@ -1630,22 +1646,22 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			c++;
 			
 		}
-		log.debug("{}.doUpload() checking upload count", this);
+		logger.debug(this + ".doUpload() checking upload count");
 		
 		if(uploadCount < 1 && state.getAttribute(ResourcesAction.STATE_MESSAGE) == null)
 		{
-			log.debug("{}.doUpload() no files uploaded", this);
+			logger.debug(this + ".doUpload() no files uploaded");
 
 			HttpServletRequest req = data.getRequest();
 			String status = (String) req.getAttribute("upload.status");
-			log.debug("Printing out upload.status: {}", status);
+			logger.debug("Printing out upload.status: " + status);
 			if(status == null)
 			{
-				log.warn("No files uploaded; upload.status == null");
+				logger.warn("No files uploaded; upload.status == null");
 			}
 			else if("ok".equals(status))
 			{
-				log.warn("No files uploaded; upload.status == ok");
+				logger.warn("No files uploaded; upload.status == ok");
 			}
 			else if("size_limit_exceeded".equals(status))
 			{
@@ -1669,11 +1685,11 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			}
 			else if("exception".equals(status))
 			{
-				log.warn("No files uploaded; upload.status == exception");
+				logger.warn("No files uploaded; upload.status == exception");
 				addAlert(state, rb.getString("choosefile7"));
 			}
 		}
-		log.debug("{}.doUpload() checking allAlerts", this);
+		logger.debug(this + ".doUpload() checking allAlerts");
 		if(! allAlerts.isEmpty())
 		{
 			for(String alert: allAlerts)
@@ -1682,14 +1698,14 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			}
 		}
 
-		log.debug("{}.doUpload() checking messages", this);
+		logger.debug(this + ".doUpload() checking messages");
 		if(state.getAttribute(ResourcesAction.STATE_MESSAGE) == null)
 		{
 			mfp.setActionCanceled(false);
 			mfp.setErrorEncountered(false);
 			mfp.setActionCompleted(true);
 
-			log.debug("{}.doUpload() no error messages", this);
+			logger.debug(this + ".doUpload() no error messages");
 
 			toolSession.setAttribute(ResourceToolAction.DONE, Boolean.TRUE);
 		}
@@ -1698,7 +1714,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 	
 	protected void initHelper(VelocityPortlet portlet, Context context, RunData rundata, SessionState state)
 	{
-		log.debug("{}.initHelper()", this);
+		logger.debug(this + ".initHelper()");
 		ToolSession toolSession = SessionManager.getCurrentToolSession();
 		//toolSession.setAttribute(ResourceToolAction.STARTED, Boolean.TRUE);
 		//state.setAttribute(ResourceToolAction.STATE_MODE, MODE_MAIN);
@@ -1846,7 +1862,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 	protected void toolModeDispatch(String methodBase, String methodExt, HttpServletRequest req, HttpServletResponse res)
 		throws ToolException
 	{
-		log.debug("{}.toolModeDispatch()", this);
+		logger.debug(this + ".toolModeDispatch()");
 		SessionState sstate = getState(req);
 		ToolSession toolSession = SessionManager.getCurrentToolSession();
 		
@@ -1860,7 +1876,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			Tool tool = ToolManager.getCurrentTool();
 		
 			String url = (String) SessionManager.getCurrentToolSession().getAttribute(tool.getId() + Tool.HELPER_DONE_URL);
-			log.debug("{}.toolModeDispatch() url == {}", this, url);
+			logger.debug(this + ".toolModeDispatch() url == " + url);
 		
 			SessionManager.getCurrentToolSession().removeAttribute(tool.getId() + Tool.HELPER_DONE_URL);
 		
@@ -1870,12 +1886,12 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			}
 			catch (IOException e)
 			{
-				log.warn("{}.toolModeDispatch() IOException {}", this, e);
+				logger.warn(this + ".toolModeDispatch() IOException", e);
 			}
-			log.debug("{}.toolModeDispatch() returning", this);
+			logger.debug(this + ".toolModeDispatch() returning");
 			return;
 		}
-		log.debug("{}.toolModeDispatch() calling super.toolModeDispatch({}, methodExt, , )", this, methodBase, req, res);
+		logger.debug(this + ".toolModeDispatch() calling super.toolModeDispatch(" + methodBase + ", " + "methodExt" + ", " + req + ", " + res+ ")");
 		
 		super.toolModeDispatch(methodBase, methodExt, req, res);
 	}
@@ -1885,7 +1901,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		String fullPath = request.getParameter("fullPath");
 		String action = request.getParameter("sakai_action");
 		boolean hidden = Boolean.valueOf(request.getParameter("hidden"));
-		log.debug("Received action: {} for file: {} with visibilty {}", action, fullPath, Boolean.toString(!hidden));
+		logger.debug("Received action: "+action+" for file: "+fullPath+" with visibilty "+Boolean.toString(!hidden));
 		
 		// set up rundata, in case we're called from RSF
 		checkRunData(request);
@@ -1903,7 +1919,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			}
 			catch( NumberFormatException ex )
 			{
-				log.debug( "sakai.property '{}' does not contain an integer {}", ResourcesConstants.SAK_PROP_MAX_UPLOAD_FILE_SIZE, ex);
+				logger.debug( "sakai.property '"+ ResourcesConstants.SAK_PROP_MAX_UPLOAD_FILE_SIZE + "' does not contain an integer", ex );
 				uploadMax = ResourcesConstants.DEFAULT_MAX_FILE_SIZE;
 			}
 			
@@ -1914,7 +1930,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			}
 			catch( NumberFormatException ex )
 			{
-				log.debug( "sakai.property '{}' does not contain an integer {}", ResourcesConstants.SAK_PROP_MASTER_SITE_QUOTA, ex);
+				logger.debug( "sakai.property '" + ResourcesConstants.SAK_PROP_MASTER_SITE_QUOTA + "' does not contain an integer", ex );
 				siteQuota = ResourcesConstants.DEFAULT_SITE_QUOTA;
 			}
 			
@@ -1929,11 +1945,11 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			}
 			catch( IdUnusedException ex )
 			{
-				log.warn( "Can't find site: ", ex );
+				logger.warn( "Can't find site: ", ex );
 			}
 			catch( NumberFormatException ex )
 			{
-				log.debug( "sakai.property '{}' does not contain an integer {}", siteTypeQuotaProp, ex);
+				logger.debug( "sakai.property '" + siteTypeQuotaProp + "' does not contain an integer", ex );
 			}
 			
 			// Determine which site quota to use (if the site specific quota is set, it over-rides the global one)
@@ -1982,7 +1998,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			else
 			{
 				//Action NULL - Here we have a folder uploaded in a browser that does not support it.
-				log.warn("Action null and file null in ResourcesHelperAction");
+				logger.warn("Action null and file null in ResourcesHelperAction");
 				
 				//RequestFilter throws an Exception when a folder is uploaded from a not valid browser (anyone but Chrome 21+):
 				//org.apache.commons.fileupload.FileUploadBase$IOFileUploadException: Processing of multipart/form-data request failed. Stream ended unexpectedly
@@ -2040,7 +2056,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		{
 			//Now upload the received file
 			//Test that file has been sent in request 
-			org.apache.commons.fileupload.FileItem uploadFile = (org.apache.commons.fileupload.FileItem) request.getAttribute("file");
+			DiskFileItem uploadFile = (DiskFileItem) request.getAttribute("file");
 			
 			if(uploadFile != null)
 			{
@@ -2078,7 +2094,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 					}
 					//if this is a new resource add to the collection.
 					catch(IdUnusedException idUnusedException) {
-						log.debug("Adding resource {} in collection {}", uploadFileName, collection.getId());
+						logger.debug("Adding resource "+uploadFileName+" in collection "+collection.getId());
 						resource = ContentHostingService.addResource(collection.getId(), Validator.escapeResourceName(basename),Validator.escapeResourceName(extension), ResourcesAction.MAXIMUM_ATTEMPTS_FOR_UNIQUENESS);
 					}
 				}
@@ -2104,7 +2120,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 					}
 					// if new resource then save
 					catch(IdUnusedException idUnusedException) {
-						log.debug("Adding resource {} in current folder ({})", uploadFileName, resourceGroup);
+						logger.debug("Adding resource "+uploadFileName+" in current folder ("+resourceGroup+")");
 						resource = ContentHostingService.addResource(resourceGroup, Validator.escapeResourceName(basename), Validator.escapeResourceName(extension), ResourcesAction.MAXIMUM_ATTEMPTS_FOR_UNIQUENESS);
 					}
 				}
@@ -2123,7 +2139,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 					if (collection != null){
 						collection.setAvailability(hidden, null, null);
 						ContentHostingService.commitCollection(collection);
-						log.debug("Collection commited: {}", collection.getId());
+						logger.debug("Collection commited: "+collection.getId());
 					}
 				}
 				else
@@ -2145,19 +2161,17 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		}
 		catch (OverQuotaException e) {
 			addAlert(state, rb.getString("alert.over-site-upload-quota"));
+			logger.warn("Drag and drop upload exceeded site quota: " + e, e);
 			return;
 		}
 		catch (ServerOverloadException e) {
 			addAlert(state,contentResourceBundle.getFormattedMessage("dragndrop.overload.error",new Object[]{uploadFileName}));
-			return;
-		}
-		catch (IdLengthException e) {
-			addAlert(state, contentResourceBundle.getFormattedMessage("dragndrop.length.error", e.getReference(), e.getLimit()));
+			logger.warn("Drag and drop upload overloaded the server: " + e, e);
 			return;
 		}
 		catch (Exception e) {
 			addAlert(state, contentResourceBundle.getFormattedMessage("dragndrop.upload.error",new Object[]{uploadFileName}));
-			log.warn("Drag and drop upload failed: {}", e);
+			logger.warn("Drag and drop upload failed: " + e, e);
 			return;
 		}
 		
@@ -2173,7 +2187,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		}
 		catch (Exception e)
 		{
-			log.error("Exception writing response in ResourcesHelperAction");
+			logger.error("Exception writing response in ResourcesHelperAction");
 			return;
 		}
 		
@@ -2190,18 +2204,18 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		ContentCollectionEdit cc = null;
 		try
 		{
-			log.debug("Looking for collection {}", collectionName+File.separator);
+			logger.debug("Looking for collection "+collectionName+File.separator);
 			if (ContentHostingService.getCollection(collectionName+File.separator)!=null)
 			{
 				//As Sakai usual behaviour in Resources tool, Collections internal ids do not use non-ASCII chars, so for example folder "Videos" and "Vídeos" are asigned to the same id.
 				//So id must be always used. Using collection's name can fail.
 				cc=ContentHostingService.editCollection(ContentHostingService.getCollection(collectionName+File.separator).getId());
-				log.debug("Editing collection found with id: {}", cc.getId());
+				logger.debug("Editing collection found with id: "+cc.getId());
 			}
 		}
 		catch (IdUnusedException e)
 		{
-			log.debug("Collection {} does not exist, proceed to create it.", collectionName+File.separator);
+			logger.debug("Collection "+collectionName+File.separator+" does not exist, proceed to create it.");
 
 			//It does not exist, so create the folder
 			String carpetaName = collectionName.substring(collectionName.lastIndexOf(File.separator)+1,collectionName.length()); //Deepest folder name
@@ -2217,12 +2231,12 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			}
 			catch (IdUsedException e2)
 			{ 
-				log.warn("IdUsedException {}", e2.toString());
+				logger.warn("IdUsedException "+e2.toString());
 				return null;
 			}
 			catch (Exception e2)
 			{
-				log.warn("Exception on exception: {}", e2.toString());
+				logger.warn("Exception on exception: "+e2.toString());
 				return null;
 			}
 		}
@@ -2230,16 +2244,16 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		{
 			//This exception can be thrown for concurrence issues with multiple parallel uploads.
 			//Synchronizing doDragDropUpload method avoids it
-			log.warn("InUseException: {}", e.toString());
-			log.error(e.getMessage(), e);
+			logger.warn("InUseException: "+e.toString());
+			e.printStackTrace();
 			return null;
 		}
 		catch (Exception e)
 		{
-			log.warn("Exception: {}", e.toString());
+			logger.warn("Exception: "+e.toString());
 			return null;
 		}
-		log.debug("Returning collection: {}", cc.getId());
+		logger.debug("Returning collection: "+cc.getId());
 		return cc;
 	}
 	
@@ -2262,7 +2276,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 		ResourceToolActionPipe pipe = (ResourceToolActionPipe) toolSession.getAttribute(ResourceToolAction.ACTION_PIPE);
 		ListItem item = new ListItem(pipe.getContentEntity());
 		
-		int notificationPriority = determineNotificationPriority(params, item.isDropbox());
+		int notificationPriority = determineNotificationPriority(params, item.isDropbox(), item.userIsMaintainer());
 		
 		SessionState state = getState(request);
 		
@@ -2296,7 +2310,7 @@ public class ResourcesHelperAction extends VelocityPortletPaneledAction
 			state.setAttribute(DRAGNDROP_FILENAME_REFERENCE_LIST, null);
 			sendnd.setFileList(null);
 		} catch (IdUnusedException e) {
-			log.warn("Somehow we couldn't find the site.", e);
+			logger.warn("Somehow we couldn't find the site.", e);
 		}
 	}
 

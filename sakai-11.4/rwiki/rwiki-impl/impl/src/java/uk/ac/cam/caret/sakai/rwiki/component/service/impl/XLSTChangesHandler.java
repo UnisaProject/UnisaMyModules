@@ -32,17 +32,15 @@ import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.AttributesImpl;
-
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.entity.cover.EntityManager;
 import org.sakaiproject.site.api.Site;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.AttributesImpl;
 
 import uk.ac.cam.caret.sakai.rwiki.component.Messages;
 import uk.ac.cam.caret.sakai.rwiki.service.api.RWikiObjectService;
@@ -60,7 +58,6 @@ import uk.ac.cam.caret.sakai.rwiki.utils.UserDisplayHelper;
  * 
  * @author ieb
  */
-@Slf4j
 public class XLSTChangesHandler extends XSLTEntityHandler
 {
 
@@ -263,7 +260,7 @@ public class XLSTChangesHandler extends XSLTEntityHandler
 		}
 		catch (Exception ex)
 		{
-			log.error(ex.getMessage(), ex);
+			ex.printStackTrace();
 			throw new RuntimeException("Failed to serialise " //$NON-NLS-1$
 					+ ex.getLocalizedMessage(), ex);
 		}

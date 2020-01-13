@@ -21,16 +21,18 @@
 
 package uk.ac.cam.caret.sakai.rwiki.utils;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A really simple coverage utility, prints a record of the calling method
  * 
  * @author ieb
  */
-@Slf4j
 public class SimpleCoverage
 {
+	private static Logger logger = LoggerFactory.getLogger(SimpleCoverage.class);
+
 	private static long last = System.currentTimeMillis();
 
 	public static void cover(String message)
@@ -44,7 +46,7 @@ public class SimpleCoverage
 		String file = ste[1].getFileName();
 		int line = ste[1].getLineNumber();
 		String className = ste[1].getClassName();
-		log.info("###### " + elapsed + " " + message + " SimpleCoverage at "
+		logger.info("###### " + elapsed + " " + message + " SimpleCoverage at "
 				+ className + "." + method + " (" + file + ":" + line + ") ");
 	}
 
@@ -58,7 +60,7 @@ public class SimpleCoverage
 		String file = ste[1].getFileName();
 		int line = ste[1].getLineNumber();
 		String className = ste[1].getClassName();
-		log.info("###### " + elapsed + " SimpleCoverage at " + className
+		logger.info("###### " + elapsed + " SimpleCoverage at " + className
 				+ "." + method + " (" + file + ":" + line + ") ");
 	}
 

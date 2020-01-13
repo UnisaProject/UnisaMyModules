@@ -4,7 +4,6 @@
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
 <%-- Sakai JSF tag library --%>
 <%@ taglib uri="http://sakaiproject.org/jsf/sakai" prefix="sakai" %>
-<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 
 <f:view>
 	<sakai:view_container title="Preferences">
@@ -20,9 +19,9 @@
 				
 				<br>
 
-				<t:div rendered="#{UserPrefsTool.refreshUpdated}">
+				<h:panelGroup rendered="#{UserPrefsTool.refreshUpdated}">
 					<jsp:include page="prefUpdatedMsg.jsp"/>	
-				</t:div>
+				</h:panelGroup>
 				
 				<sakai:messages />
 				

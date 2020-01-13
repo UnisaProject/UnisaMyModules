@@ -30,7 +30,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.entity.api.ResourcePropertiesEdit;
 import org.sakaiproject.exception.IdInvalidException;
@@ -44,9 +45,9 @@ import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.cover.UserDirectoryService;
 
-@Slf4j
 public class AttachmentHelper {
-
+	private static Logger log = LoggerFactory.getLogger(AttachmentHelper.class);
+	
 	public ContentResource createContentResource(String fullFilePath, String filename, String mimeType) {
 		ContentResource contentResource = null;
 		int BUFFER_SIZE = 2048;
@@ -64,6 +65,7 @@ public class AttachmentHelper {
 				filename = URLDecoder.decode(filename, "UTF-8");
 			} catch (UnsupportedEncodingException e) {
 				log.error(e.getMessage());
+				e.printStackTrace();
 			}
 			
 			if (mimeType.equalsIgnoreCase("text/url")) {

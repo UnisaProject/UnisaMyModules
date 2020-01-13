@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.sakaiproject.clog.api.ClogManager;
 import org.sakaiproject.clog.api.SakaiProxy;
@@ -102,12 +101,9 @@ public class ClogTool extends HttpServlet {
             language += "_" + country;
         }
 
-        String displayName = sakaiProxy.getDisplayNameForTheUser(userId);
-
         request.setAttribute("sakaiHtmlHead", (String) request.getAttribute("sakai.html.head"));
         
         request.setAttribute("userId", userId);
-        request.setAttribute("userDisplayName", StringEscapeUtils.escapeJavaScript(displayName));
         request.setAttribute("siteId", siteId);
         request.setAttribute("state", state);
 

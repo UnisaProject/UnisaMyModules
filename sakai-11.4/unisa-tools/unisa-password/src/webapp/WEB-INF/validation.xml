@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE form-validation PUBLIC
+          "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1.3//EN"
+          "http://jakarta.apache.org/commons/dtds/validator_1_1_3.dtd">
+
+<form-validation>
+   <formset>   
+		<form name="forgetPasswordForm">
+					<field property="surname" depends="required,maxlength">
+				<arg0 key="forget.pers.surname"/>
+			    <arg1 name="maxlength" key="${var:maxlength}" resource="false"/>			    
+			    <var>
+			    	<var-name>maxlength</var-name>
+			    	<var-value>28</var-value>
+			    </var>
+			</field>			
+			
+			<field property="fullNames" depends="required,maxlength">
+				<arg0 key="forget.pers.fullnames"/>
+			    <arg1 name="maxlength" key="${var:maxlength}" resource="false"/>			    
+			    <var>
+			    	<var-name>maxlength</var-name>
+			    	<var-value>60</var-value>
+			    </var>
+			</field>
+			
+			<field property="birthYear" depends="required,maxlength,minlength,integer">
+				<arg0 key="forget.pers.birthyear"/>
+			    <arg1 name="maxlength" key="${var:maxlength}" resource="false"/>		
+			    <arg1 name="minlength" key="${var:minlength}" resource="false"/>	    
+			    <var>
+			    	<var-name>maxlength</var-name>
+			    	<var-value>4</var-value>
+			    </var>
+			    <var>
+			    	<var-name>minlength</var-name>
+			    	<var-value>4</var-value>
+			    </var>
+			</field>
+
+			<field property="birthMonth" depends="required,integer,intRange">
+				<arg0 key="forget.pers.birthmonth"/>
+				<arg1 name="intRange" key="${var:min}" resource="false"/>
+			    <arg2 name="intRange" key="${var:max}" resource="false"/>
+			    <var>
+			        <var-name>min</var-name>
+			        <var-value>1</var-value>
+			    </var>
+			    <var>
+			        <var-name>max</var-name>
+			        <var-value>12</var-value>
+			    </var>
+			</field>
+			
+			<field property="birthDay" depends="required,integer,intRange">
+				<arg0 key="forget.pers.birthday"/>
+				<arg1 name="intRange" key="${var:min}" resource="false"/>
+			    <arg2 name="intRange" key="${var:max}" resource="false"/>
+			    <var>
+			        <var-name>min</var-name>
+			        <var-value>1</var-value>
+			    </var>
+			    <var>
+			        <var-name>max</var-name>
+			        <var-value>31</var-value>
+			    </var>
+			</field>	
+		</form>
+	</formset>
+</form-validation>
+

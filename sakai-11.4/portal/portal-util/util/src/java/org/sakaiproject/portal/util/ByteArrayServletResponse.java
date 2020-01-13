@@ -29,8 +29,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * ServletResponse instance used to buffer content. This buffering allows for
  * the portlets title to be captured prior to rendering and other similar
@@ -41,7 +39,6 @@ import lombok.extern.slf4j.Slf4j;
  * @since Sakai 2.2.4
  * @version $Rev$
  */
-@Slf4j
 public class ByteArrayServletResponse extends HttpServletResponseWrapper
 {
 	/**
@@ -69,7 +66,7 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper
 	public ByteArrayServletResponse(HttpServletResponse response)
 	{
 		super(response);
-		log.debug("ByteArrayServletResponse {}", response);
+		// System.out.println("ByteArrayServletResponse "+response);
 		reset();
 	}
 
@@ -77,21 +74,21 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper
 	public boolean isCommitted()
 	{
 		boolean retval = isCommitted || super.isCommitted();
-		log.debug("isCommitted = {} retval = {}", isCommitted, retval);
+		// System.out.println("isCommitted ="+isCommitted+" retval="+retval);
 		return retval;
 	}
 
 	@Override
 	public String getContentType()
 	{
-		log.debug("contentType = {}", contentType);
+		// System.out.println("contentType = "+contentType);
 		return contentType;
 	}
 
 	@Override
 	public void setContentType(String newType)
 	{
-		log.debug("setContentType = {}", contentType);
+		// System.out.println("setContentType = "+contentType);
 		super.setContentType(newType);
 		contentType = newType;
 	}
@@ -105,7 +102,7 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper
 	public void sendRedirect(String redirectUrl)
         throws java.io.IOException
 	{
-		log.debug("sendRedirect = {}", redirectUrl);
+		// System.out.println("sendRedirect = "+redirectUrl);
 		isCommitted = true;
 		redirect = redirectUrl;
 	}
@@ -113,7 +110,7 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper
 	@Override
 	public PrintWriter getWriter()
 	{
-		log.debug("getWriter()");
+		// System.out.println("getWriter()");
 		isCommitted = true;
 		return writer;
 	}
@@ -121,7 +118,7 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper
 	@Override
 	public ServletOutputStream getOutputStream() throws java.io.IOException
 	{
-		log.debug("getOutputStream()");
+		// System.out.println("getOutputStream()");
 		isCommitted = true;
 		return outStream;
 	}
@@ -146,7 +143,7 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper
 	@Override
 	public void reset()
 	{
-		log.debug("reset()");
+		// System.out.println("reset()");
 		outStream = new ServletByteOutputStream();
 		writer = new PrintWriter(outStream);
 	}
@@ -158,7 +155,7 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper
 	public void forwardResponse()
 		throws IOException
 	{
-		log.debug("Forwarding request CT={} CL={}", contentType, contentLength);
+		// System.out.println("Forwarding request CT="+contentType+" CL="+contentLength);
 		if ( contentType != null ) super.setContentType(contentType);
 		// need to add header. Using setContentLength fails for lengths > 32 bits
 		if ( contentLength > 0L ) super.setHeader("Content-Length", Long.toString(contentLength));
@@ -174,11 +171,9 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper
 	 */
 	public String getInternalBuffer()
 	{
-		if (log.isDebugEnabled()) {
-			log.debug("---- baStream -----");
-			log.debug(outStream.getContent().toString());
-			log.debug("---- baStream -----");
-		}
+		// System.out.println("---- baStream -----");
+		// System.out.println(outStream.getContent().toString());
+		// System.out.println("---- baStream -----");
 
 		// TODO: Should we fall back to regular encoding or freak out?
 		try
@@ -192,14 +187,13 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper
 	}
 }
 
-@Slf4j
 class ServletByteOutputStream extends ServletOutputStream
 {
 	private ByteArrayOutputStream baStream;
 
 	public ServletByteOutputStream()
 	{
-		log.debug("Making a ServletByteOutputStream");
+		// System.out.println("Making a ServletByteOutputStream");
 		baStream = new ByteArrayOutputStream();
 	}
 
@@ -210,7 +204,7 @@ class ServletByteOutputStream extends ServletOutputStream
 
 	public void write(int i) throws java.io.IOException
 	{
-		log.debug("Writing an int");
+		// System.out.println("Writing an int");
 		baStream.write(i);
 	}
 
@@ -221,17 +215,17 @@ class ServletByteOutputStream extends ServletOutputStream
 
 	public void write(byte[] data, int start, int end) throws java.io.IOException
 	{
-		log.debug("Writing an array");
+		// System.out.println("Writing an array");
 		baStream.write(data, start, end);
 	}
 
 	public void close() throws java.io.IOException
 	{
-		log.debug("Close");
+		// System.out.println("Close");
 	}
 
 	public void flush() throws java.io.IOException
 	{
-		log.debug("Flush");
+		// System.out.println("Flush");
 	}
 }

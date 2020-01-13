@@ -21,22 +21,27 @@
 
 package org.sakaiproject.hikaricp.jdbc.pool;
 
-import com.zaxxer.hikari.HikariDataSource;
-
+import java.lang.management.ManagementFactory;
+import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * <p>
  * SakaiBasicDataSource extends hikari CP's DataSource for compatibility with prior settings...
  * </p>
  */
-@Slf4j
 public class SakaiBasicDataSource extends HikariDataSource
 {
+    /** Our logger. */
+    private static Logger M_log = LoggerFactory.getLogger(SakaiBasicDataSource.class);
+
     /** Configuration: to rollback each connection when returned to the pool. */
     //TODO: Is this a data source property?
     protected boolean m_rollbackOnReturn = false;
@@ -53,12 +58,12 @@ public class SakaiBasicDataSource extends HikariDataSource
     private String driverClassName;
 
     public void setMaxOpenPreparedStatements(int maxOpenPreparedStatements) {
-        log.info("MaxOpenPreparedStatments not used");
+        M_log.info("MaxOpenPreparedStatments not used");
         this.maxOpenPreparedStatements = maxOpenPreparedStatements;
     }
 
     public void setPoolPreparedStatements(boolean poolPreparedStatements) {
-        log.info("PoolPreparedStatements not used");
+        M_log.info("PoolPreparedStatements not used");
         this.poolPreparedStatements = poolPreparedStatements;
     }
 
@@ -100,7 +105,7 @@ public class SakaiBasicDataSource extends HikariDataSource
         else
         {
             setDefaultTransactionIsolation(null);
-            log.warn("invalid transaction isolation level: " + defaultTransactionIsolation);
+            M_log.warn("invalid transaction isolation level: " + defaultTransactionIsolation);
         }
     }
 
@@ -146,15 +151,15 @@ public class SakaiBasicDataSource extends HikariDataSource
      */
     protected void init() throws SQLException
     {
-        log.info("init()");
+        M_log.info("init()");
 
         //Do some quick validation
         if (getUsername() == null) {
-            log.warn("Hikari DataSource configured without a 'username'");
+            M_log.warn("Hikari DataSource configured without a 'username'");
         }
         
         if (getPassword() == null) {
-            log.warn("Hikari DataSource configured without a 'password'");
+            M_log.warn("Hikari DataSource configured without a 'password'");
         }
 
         //For backward compatibility with old methods
@@ -170,7 +175,7 @@ public class SakaiBasicDataSource extends HikariDataSource
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                     // TODO Auto-generated catch block
                     String message = "driverClass not specified, might not be able to load the driver'";
-                    log.info(message, e);
+                    M_log.info(message, e);
                 }
             }
         }
@@ -184,7 +189,7 @@ public class SakaiBasicDataSource extends HikariDataSource
         catch (Exception t)
         {
             String message = "Cannot load JDBC driver class '" + driverClassName + "'";
-            log.error(message, t);
+            M_log.error(message, t);
             throw new SQLException(message,t);
         }
     }

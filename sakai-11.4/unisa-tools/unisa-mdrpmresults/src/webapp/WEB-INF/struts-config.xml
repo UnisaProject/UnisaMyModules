@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	<form-bean name="mdRPMResultsForm" type="za.ac.unisa.lms.tools.mdrpmresults.forms.MdRPMResultsForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.mdrpmresults.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/displaymdrpmresults.do?action=enterstudent"
+				contextRelative="true" />
+		</action>
+		
+		<action
+			attribute="mdRPMResultsForm"
+    	 	name="mdRPMResultsForm"
+			parameter="action"
+			path="/displaymdrpmresults"
+			type="za.ac.unisa.lms.tools.mdrpmresults.actions.MdRPMResultsAction"
+			validate="false">
+			<forward
+				name="enterstudentforward"
+				path="/WEB-INF/jsp/enterstudent.jsp"
+				contextRelative="true" />
+			<forward
+				name="displayforward"
+				path="/WEB-INF/jsp/displayrpmresults.jsp"
+				contextRelative="true" />
+	       	<forward
+	       		 name="cancelforward"
+	       		 path="/WEB-INF/jsp/enterstudent.jsp"
+	       		 contextRelative="true" />
+	       	<forward
+	       		 name="home"
+	       		 path="/displaymdrpmresults.do?action=enterstudent"
+	       		 contextRelative="true" />
+		</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.mdrpmresults.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

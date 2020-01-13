@@ -25,8 +25,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.accountvalidator.logic.ValidationException;
 import org.sakaiproject.accountvalidator.logic.ValidationLogic;
 import org.sakaiproject.accountvalidator.model.ValidationAccount;
@@ -47,9 +47,9 @@ import uk.org.ponder.beanutil.BeanLocator;
 import uk.org.ponder.messageutil.TargettedMessage;
 import uk.org.ponder.messageutil.TargettedMessageList;
 
-@Slf4j
 public class ClaimLocator implements BeanLocator {
-
+	private static Logger log = LoggerFactory.getLogger(ClaimLocator.class);
+	
 	private ValidationLogic validationLogic;
 	public void setValidationLogic(ValidationLogic vl) {
 		validationLogic = vl;
@@ -174,14 +174,19 @@ public class ClaimLocator implements BeanLocator {
 			authenticateUser(vc, oldUserRef);
 			return "success";
 		} catch (ValidationException e2) {
-			log.error(e2.getMessage(), e2);
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
 		}
+		
+		
 		return "error";
 	}
 
+
+
 	private void authenticateUser(ValidationClaim vc, String oldUserRef) {
 		//log the user in
-		Evidence e = new IdPwEvidence(vc.getUserEid(), vc.getPassword1(), httpServletRequest.getRemoteAddr());
+		Evidence e = new IdPwEvidence(vc.getUserEid(), vc.getPassword1());
 		try {
 			Authentication a = authenticationManager.authenticate(e);
 			log.debug("authenticated " + a.getEid() + "(" + a.getUid() + ")");
@@ -195,7 +200,8 @@ public class ClaimLocator implements BeanLocator {
 			developerHelperService.fireEvent("accountvalidation.merge", oldUserRef);
 	
 		} catch (AuthenticationException e1) {
-			log.error(e1.getMessage(), e1);
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 	}
 }

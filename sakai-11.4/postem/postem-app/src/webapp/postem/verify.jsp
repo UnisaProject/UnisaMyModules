@@ -15,7 +15,6 @@
 </jsp:useBean>
 <f:view>
 	<sakai:view title="#{msgs.title_verify}">
-		<script src="/library/js/spinner.js" type="text/javascript"></script>
 		<sakai:view_content>
 			<h:form>
 			
@@ -39,12 +38,10 @@
 				<sakai:button_bar>					
 					<sakai:button_bar_item
 						action="#{PostemTool.processCreateOk}"
-						value="#{msgs.bar_save}"
-						onclick="SPNR.disableControlsAndSpin(this, null);" />
+						value="#{msgs.bar_save}" />
 					<sakai:button_bar_item
 						action="#{PostemTool.processCreateBack}"
-						value="#{msgs.back}"
-						onclick="SPNR.disableControlsAndSpin(this, null);" />
+						value="#{msgs.back}" />
 				</sakai:button_bar>		  	
 
 			</h:form>

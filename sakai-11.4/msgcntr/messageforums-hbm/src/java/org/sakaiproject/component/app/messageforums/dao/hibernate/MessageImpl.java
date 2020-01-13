@@ -26,15 +26,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.messageforums.Attachment;
 import org.sakaiproject.api.app.messageforums.Message;
 import org.sakaiproject.api.app.messageforums.Topic;
 
-@Slf4j
 public class MessageImpl extends MutableEntityImpl implements Message
 {
+
+	private static final Logger LOG = LoggerFactory.getLogger(MessageImpl.class);
 
 	private String title;
 	private String body;
@@ -232,9 +233,9 @@ public class MessageImpl extends MutableEntityImpl implements Message
 
 	public void addAttachment(Attachment attachment)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("addAttachment(Attachment " + attachment + ")");
+			LOG.debug("addAttachment(Attachment " + attachment + ")");
 		}
 
 		if (attachment == null)
@@ -253,9 +254,9 @@ public class MessageImpl extends MutableEntityImpl implements Message
 
 	public void removeAttachment(Attachment attachment)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("removeAttachment(Attachment " + attachment + ")");
+			LOG.debug("removeAttachment(Attachment " + attachment + ")");
 		}
 
 		if (attachment == null)

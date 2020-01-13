@@ -21,21 +21,9 @@
 
 package org.sakaiproject.util;
 
-import java.text.MessageFormat;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang3.StringUtils;
-
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.i18n.InternationalizedMessages;
@@ -44,6 +32,10 @@ import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.user.api.PreferencesService;
 
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * ResourceLoader provides an alternate implementation of org.util.ResourceBundle, dynamically selecting the prefered locale from either the user's session or from the user's sakai preferences
  * 
@@ -51,9 +43,10 @@ import org.sakaiproject.user.api.PreferencesService;
  * @author Aaron Zeckoski (azeckoski @ unicon.net)
  */
 @SuppressWarnings("rawtypes")
-@Slf4j
 public class ResourceLoader extends DummyMap implements InternationalizedMessages
 {
+	protected static final Logger M_log = LoggerFactory.getLogger(ResourceLoader.class);
+
 	// name of ResourceBundle
 	protected String baseName = null;
     public String getBaseName() {
@@ -207,8 +200,8 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 			return formatDebugPropertiesString( key );
 			
 		String pattern = (String) get(key);
-		if (log.isDebugEnabled()) {
-			log.debug("getFormattedMessage(key,args) bundle name=" +
+		if (M_log.isDebugEnabled()) {
+			M_log.debug("getFormattedMessage(key,args) bundle name=" +
 			this.baseName + ", locale=" + getLocale().toString() +
 			", key=" + key + ", pattern=" + pattern);
 		}
@@ -237,7 +230,7 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 			value = value.trim();
 			if (originalLength != value.length())
 			{
-				log.warn("getInt(key, dflt) bundle name=" + this.baseName +
+				M_log.warn("getInt(key, dflt) bundle name=" + this.baseName +
 						", locale=" + getLocale() + ", key=" +
 						key + ", dflt=" + dflt+ ", Trailing whitespace trimmed.");
 			}
@@ -245,8 +238,8 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 		}
 		catch (NumberFormatException e)
 		{
-			if (log.isDebugEnabled()) {
-				log.debug("getInt(key, dflt) bundle name=" + this.baseName +
+			if (M_log.isDebugEnabled()) {
+				M_log.debug("getInt(key, dflt) bundle name=" + this.baseName +
 						", locale=" + getLocale() + ", key=" +
 						key + ", dflt=" + dflt+ ", NumberFormatException");
 			}
@@ -323,13 +316,14 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 	        	//get current sessionId to use as the key.
 	        	//this allows the anon user to also have locale settings 
 	        	String sessionId = getSessionManager().getCurrentSession().getId();
-	        	log.debug("Retrieving locale for sessionId: " + sessionId);
+	        	M_log.debug("Retrieving locale for sessionId: " + sessionId);
 	            loc = (Locale) getSessionManager().getCurrentSession().getAttribute(LOCALE_SESSION_KEY+sessionId);
 	        
 	        } catch (NullPointerException e) {
                 loc = null;
-	            if (log.isWarnEnabled()) {
-	                log.warn("getLocale() swallowing NPE - caused by a null sessionmanager or null session, OK for tests, problem if production");
+	            if (M_log.isWarnEnabled()) {
+	                M_log.warn("getLocale() swallowing NPE - caused by a null sessionmanager or null session, OK for tests, problem if production");
+	                //e.printStackTrace();
 	            }
 	        }
 	        	
@@ -340,11 +334,11 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 	    }
 
 	    if (loc == null) {
-	        log.info("getLocale() Locale not found in preferences or session, returning default");
+	        M_log.info("getLocale() Locale not found in preferences or session, returning default");
 	        loc = Locale.getDefault();
 	    } 
 	    	
-	    log.debug("Locale: " + loc.toString());
+	    M_log.debug("Locale: " + loc.toString());
 
 	    return loc;
 	}
@@ -389,15 +383,16 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 			{
 				String userId = getSessionManager().getCurrentSessionUserId();
 				
-				if (log.isDebugEnabled()) {
-					log.debug("setContextLocale(Locale), checking user preferences for userId: " + userId);
+				if (M_log.isDebugEnabled()) {
+					M_log.debug("setContextLocale(Locale), checking user preferences for userId: " + userId);
 				}
 				loc = getLocale(userId);
 			}
 			catch (Exception e)
 			{
-				if (log.isWarnEnabled()) {
-					log.warn("setContextLocale(Locale) swallowing Exception");
+				if (M_log.isWarnEnabled()) {
+					M_log.warn("setContextLocale(Locale) swallowing Exception");
+					e.printStackTrace();
 				}
 			} // ignore and continue
 		}
@@ -407,16 +402,17 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 		{
 			try
 			{
-				if (log.isDebugEnabled()) {
-					log.debug("setContextLocale(Locale), checking browser session.");
+				if (M_log.isDebugEnabled()) {
+					M_log.debug("setContextLocale(Locale), checking browser session.");
 				}
 				loc = (Locale) getSessionManager().getCurrentSession().getAttribute("locale");
 				
 			}
 			catch (NullPointerException e)
 			{
-				if (log.isWarnEnabled()) {
-					log.warn("setContextLocale(Locale) swallowing NPE");
+				if (M_log.isWarnEnabled()) {
+					M_log.warn("setContextLocale(Locale) swallowing NPE");
+					e.printStackTrace();
 				}
 			} // ignore and continue
 		}
@@ -426,21 +422,21 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 		{
 			// fallback to default.
 			loc = Locale.getDefault();
-			if (log.isDebugEnabled()) {
-				log.debug("setContextLocale(Locale), using default locale");
+			if (M_log.isDebugEnabled()) {
+				M_log.debug("setContextLocale(Locale), using default locale");
 			}
 		}
 		else if (!Locale.getDefault().getLanguage().equals("en") && loc.getLanguage().equals("en") && !loc.toString().equals(DEBUG_LOCALE))
 		{
 			// Tweak for English: en is default locale. It has no suffix in filename.
 			loc = new Locale("");
-			if (log.isDebugEnabled()) {
-				log.debug("setContextLocale(Locale), Tweak for English");
+			if (M_log.isDebugEnabled()) {
+				M_log.debug("setContextLocale(Locale), Tweak for English");
 			}
 		}
 		
-		if (log.isDebugEnabled()) {
-			log.debug("Locale is: "+ loc.toString());
+		if (M_log.isDebugEnabled()) {
+			M_log.debug("Locale is: "+ loc.toString());
 		}
 		
 
@@ -451,16 +447,17 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 		{
 			String sessionId = getSessionManager().getCurrentSession().getId();
 
-			if (log.isDebugEnabled()) {
-				log.debug("Setting locale into session: " + sessionId);
+			if (M_log.isDebugEnabled()) {
+				M_log.debug("Setting locale into session: " + sessionId);
 			}
 			
 			getSessionManager().getCurrentSession().setAttribute(LOCALE_SESSION_KEY+sessionId,loc);
 		}
 		catch (Exception e) 
 		{
-			if (log.isWarnEnabled()) {
-				log.warn("setContextLocale(Locale) swallowing Exception");
+			if (M_log.isWarnEnabled()) {
+				M_log.warn("setContextLocale(Locale) swallowing Exception");
+				//e.printStackTrace();
 			}
 		} //Ignore and continue
 		
@@ -507,8 +504,8 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 	    try
 	    {
 	        String value = getBundle().getString(key);
-	        if (log.isDebugEnabled()) {
-	            log.debug("getString(key) bundle name=" + this.baseName +
+	        if (M_log.isDebugEnabled()) {
+	            M_log.debug("getString(key) bundle name=" + this.baseName +
 	                    ", locale=" + getLocale().toString() + ", key=" +
 	                    key + ", value=" + value);
 	        }
@@ -517,24 +514,24 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 	    }
 	    catch (MissingResourceException e)
 	    {
-	        if (log.isWarnEnabled()) {
-	            log.warn("bundle \'"+baseName +"\'  missing key: \'" + key 
+	        if (M_log.isWarnEnabled()) {
+	            M_log.warn("bundle \'"+baseName +"\'  missing key: \'" + key 
 	                    + "\'  from: " + e.getStackTrace()[3] ); // 3-deep gets us out of ResourceLoader
 	        }
 	        return "[missing key (mre): " + baseName + " " + key + "]";
 	    }
 	    catch (NullPointerException e)
 	    {
-	        if (log.isWarnEnabled()) {
-	            log.warn("bundle \'"+baseName +"\'  null pointer exception: \'" + key 
+	        if (M_log.isWarnEnabled()) {
+	            M_log.warn("bundle \'"+baseName +"\'  null pointer exception: \'" + key 
 	                    + "\'  from: " + e.getStackTrace()[3] ); // 3-deep gets us out of ResourceLoader
 	        }
 	        return "[missing key (npe): " + baseName + " " + key + "]";			
 	    }
 	    catch (ClassCastException e)
 	    {
-	        if (log.isWarnEnabled()) {
-	            log.warn("bundle \'"+baseName +"\'  class cast exception: \'" + key 
+	        if (M_log.isWarnEnabled()) {
+	            M_log.warn("bundle \'"+baseName +"\'  class cast exception: \'" + key 
 	                    + "\'  from: " + e.getStackTrace()[3] ); // 3-deep gets us out of ResourceLoader
 	        }
 	        return "[missing key (clc): " + baseName + " " + key + "]";						
@@ -603,8 +600,9 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 				}
 				catch (MissingResourceException e)
 				{
-					if (log.isWarnEnabled()) {
-						log.warn("getStrings(" + key + ") swallowing MissingResourceException for String " + i);
+					if (M_log.isWarnEnabled()) {
+						M_log.warn("getStrings(" + key + ") swallowing MissingResourceException for String " + i);
+						e.printStackTrace();
 					}
 					// ignore the exception
 				}
@@ -631,7 +629,7 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 	public void purgeCache()
 	{
 		this.bundles = new ConcurrentHashMap<Locale, ResourceBundle>();
-		log.debug("purge bundle cache");
+		M_log.debug("purge bundle cache");
 	}
 
 	/**
@@ -642,8 +640,8 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 	 */
 	public void setBaseName(String name)
 	{
-		if (log.isDebugEnabled()) {
-			log.debug("set baseName=" + name);
+		if (M_log.isDebugEnabled()) {
+			M_log.debug("set baseName=" + name);
 		}
 		this.baseName = name;
 	}
@@ -676,7 +674,7 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
 		Locale loc = getLocale();
 		String context = (String) getThreadLocalManager().get(org.sakaiproject.util.RequestFilter.CURRENT_CONTEXT);
 
-        if (log.isDebugEnabled()) log.debug("Request for bundle " + baseName + "/" + context + "/" + loc.toString());
+        if (M_log.isDebugEnabled()) M_log.debug("Request for bundle " + baseName + "/" + context + "/" + loc.toString());
 
 		ResourceBundle bundle = this.bundles.get(loc);
 		if (bundle == null)
@@ -693,8 +691,8 @@ public class ResourceLoader extends DummyMap implements InternationalizedMessage
                 bundleMap.putAll(bundleFromDbMap);
                 bundle = new MapResourceBundle(bundleMap, baseName, loc);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Bundle from db added " + bundleFromDbMap.size() +
+            if (M_log.isDebugEnabled()) { 
+                M_log.debug("Bundle from db added " + bundleFromDbMap.size() + 
                         " properties to " + baseName + "/" + context + "/" + loc.toString());
             }
         }

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	 <form-bean name="tutorAppointmentsForm" type="za.ac.unisa.lms.toolstutorappointments.forms.TutorAppointmentsForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.tutorappointments.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/tutorAppointments.do?action=mainview"
+				contextRelative="true" />
+		</action>
+
+		<action attribute="tutorAppointmentsForm" name="tutorAppointmentsForm" parameter="action" path="/tutorAppointments"		
+		type="za.ac.unisa.lms.tools.tutorappointments.actions.TutorAppointmentsAction"
+		scope="session" validate="false">
+        
+		<forward name="mainview" path="/WEB-INF/jsp/selectTutoringDetails.jsp" contextRelative="true"/>		
+	   </action>
+	  </action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.tutorappointments.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

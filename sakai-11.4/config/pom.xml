@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.sakaiproject</groupId>
         <artifactId>master</artifactId>
-        <version>12.6</version>
+        <version>11.4</version>
         <relativePath>../master/pom.xml</relativePath>
     </parent>
 	<name>Sakai Config Project</name>
@@ -35,7 +35,9 @@
 	<modules>
 		<module>configuration/bundles</module>
 		<module>localization/bundles</module>
+		<module>localization/pack</module>
 		<module>sharedI18n/bundles</module>
+		<module>sharedI18n/pack</module>
 	</modules>
 	<build>
 	    <pluginManagement>

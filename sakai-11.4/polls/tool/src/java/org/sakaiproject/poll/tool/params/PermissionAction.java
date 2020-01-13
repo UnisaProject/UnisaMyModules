@@ -23,13 +23,13 @@ package org.sakaiproject.poll.tool.params;
 
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.poll.logic.ExternalLogic;
 
-@Slf4j
 public class PermissionAction {
 
+	private static final Logger LOG = LoggerFactory.getLogger(PermissionAction.class);
 	public Map perms = null;
 	public String submissionStatus;
 	
@@ -49,30 +49,34 @@ public class PermissionAction {
 		  if ("cancel".equals(submissionStatus))
 			  return "cancel";
 		  
-		  log.info("Seting permissions");
+		  LOG.info("Seting permissions");
 			if (perms == null)
-				log.error("My perms Map is null");
+				LOG.error("My perms Map is null");
 			else
 			{
 				try {
 					externalLogic.setToolPermissions(perms, externalLogic.getCurrentLocationReference());
 				}
 				catch (SecurityException e) {
-					log.error(e.getMessage(), e);
+					e.printStackTrace();
 					return "error";
 				}
 				catch (IllegalArgumentException e) {
-					log.error(e.getMessage(), e);
+					e.printStackTrace();
 					return "error";
 				}
 	  
 			}
 			return "Success";
 	}
+	
 
 			
 	  public String cancel() {
 		  return "cancel";
 	  }
-
+	  		 
+		
+	
+	
 }

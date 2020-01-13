@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.studentregistration"
+		title="Application for Admission"
+		description="Unisa Student Registration">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

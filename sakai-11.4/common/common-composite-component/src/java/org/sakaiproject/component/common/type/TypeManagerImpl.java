@@ -21,25 +21,28 @@
 
 package org.sakaiproject.component.common.type;
 
-import lombok.extern.slf4j.Slf4j;
+import java.sql.SQLException;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.common.type.Type;
 import org.sakaiproject.api.common.type.TypeManager;
 import org.sakaiproject.component.common.manager.PersistableHelper;
 import org.sakaiproject.id.cover.IdManager;
-import org.springframework.orm.hibernate4.HibernateCallback;
-import org.springframework.orm.hibernate4.support.HibernateDaoSupport;
+import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 /**
  * @author <a href="mailto:lance@indiana.edu">Lance Speelmon </a>
  */
-@Slf4j
 public class TypeManagerImpl extends HibernateDaoSupport implements TypeManager
 {
+	private static final Logger LOG = LoggerFactory.getLogger(TypeManagerImpl.class);
+
 	private static final String ID = "id";
 
 	private static final String FINDTYPEBYID = "findTypeById";
@@ -64,14 +67,37 @@ public class TypeManagerImpl extends HibernateDaoSupport implements TypeManager
 
 	private PersistableHelper persistableHelper; // dep inj
 
+	// public Type getType(final Long id)
+	// {
+	// if (LOG.isDebugEnabled())
+	// {
+	// LOG.debug("getType(Long " + id + ")");
+	// }
+	// if (id == null) throw new IllegalArgumentException();
+	//
+	// final HibernateCallback hcb = new HibernateCallback()
+	// {
+	// public Object doInHibernate(Session session) throws HibernateException,
+	// SQLException
+	// {
+	// Query q = session.getNamedQuery(FINDTYPEBYID);
+	// q.setLong(ID, id.longValue());
+	// q.setCacheable(cacheFindTypeById);
+	// return q.uniqueResult();
+	// }
+	// };
+	// Type type = (Type) getHibernateTemplate().execute(hcb);
+	// return type;
+	// }
+
 	/**
 	 * @see org.sakaiproject.api.type.TypeManager#createType(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	public Type createType(String authority, String domain, String keyword, String displayName, String description)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("createType(String " + authority + ", String " + domain + ", String " + keyword + ", String " + displayName
+			LOG.debug("createType(String " + authority + ", String " + domain + ", String " + keyword + ", String " + displayName
 					+ ", String " + description + ")");
 		}
 		// validation
@@ -94,9 +120,9 @@ public class TypeManagerImpl extends HibernateDaoSupport implements TypeManager
 
 	public void saveType(Type type)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("saveType(Type " + type + ")");
+			LOG.debug("saveType(Type " + type + ")");
 		}
 		if (type == null) throw new IllegalArgumentException("type");
 
@@ -117,9 +143,9 @@ public class TypeManagerImpl extends HibernateDaoSupport implements TypeManager
 	 */
 	public Type getType(final String uuid)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("getType(String " + uuid + ")");
+			LOG.debug("getType(String " + uuid + ")");
 		}
 		if (uuid == null || uuid.length() < 1)
 		{
@@ -128,7 +154,7 @@ public class TypeManagerImpl extends HibernateDaoSupport implements TypeManager
 
 		final HibernateCallback hcb = new HibernateCallback()
 		{
-			public Object doInHibernate(Session session) throws HibernateException
+			public Object doInHibernate(Session session) throws HibernateException, SQLException
 			{
 				Query q = session.getNamedQuery(FINDTYPEBYUUID);
 				q.setString(UUID, uuid);
@@ -146,9 +172,9 @@ public class TypeManagerImpl extends HibernateDaoSupport implements TypeManager
 	 */
 	public Type getType(final String authority, final String domain, final String keyword)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("getType(String " + authority + ", String " + domain + ", String " + keyword + ")");
+			LOG.debug("getType(String " + authority + ", String " + domain + ", String " + keyword + ")");
 		}
 		// validation
 		if (authority == null || authority.length() < 1) throw new IllegalArgumentException("authority");
@@ -157,7 +183,7 @@ public class TypeManagerImpl extends HibernateDaoSupport implements TypeManager
 
 		final HibernateCallback hcb = new HibernateCallback()
 		{
-			public Object doInHibernate(Session session) throws HibernateException
+			public Object doInHibernate(Session session) throws HibernateException, SQLException
 			{
 				Query q = session.getNamedQuery(FINDTYPEBYTUPLE);
 				q.setString(AUTHORITY, authority);
@@ -178,9 +204,9 @@ public class TypeManagerImpl extends HibernateDaoSupport implements TypeManager
 	 */
 	public void setCacheFindTypeByTuple(boolean cacheFindTypeByTuple)
 	{
-		if (log.isInfoEnabled())
+		if (LOG.isInfoEnabled())
 		{
-			log.info("setCacheFindTypeByTuple(boolean " + cacheFindTypeByTuple + ")");
+			LOG.info("setCacheFindTypeByTuple(boolean " + cacheFindTypeByTuple + ")");
 		}
 
 		this.cacheFindTypeByTuple = cacheFindTypeByTuple;
@@ -192,9 +218,9 @@ public class TypeManagerImpl extends HibernateDaoSupport implements TypeManager
 	 */
 	public void setCacheFindTypeByUuid(boolean cacheFindTypeByUuid)
 	{
-		if (log.isInfoEnabled())
+		if (LOG.isInfoEnabled())
 		{
-			log.info("setCacheFindTypeByUuid(boolean " + cacheFindTypeByUuid + ")");
+			LOG.info("setCacheFindTypeByUuid(boolean " + cacheFindTypeByUuid + ")");
 		}
 
 		this.cacheFindTypeByUuid = cacheFindTypeByUuid;
@@ -206,9 +232,9 @@ public class TypeManagerImpl extends HibernateDaoSupport implements TypeManager
 	 */
 	public void setCacheFindTypeById(boolean cacheFindTypeById)
 	{
-		if (log.isInfoEnabled())
+		if (LOG.isInfoEnabled())
 		{
-			log.info("setCacheFindTypeById(boolean " + cacheFindTypeById + ")");
+			LOG.info("setCacheFindTypeById(boolean " + cacheFindTypeById + ")");
 		}
 
 		this.cacheFindTypeById = cacheFindTypeById;
@@ -216,9 +242,9 @@ public class TypeManagerImpl extends HibernateDaoSupport implements TypeManager
 
 	public void deleteType(Type type)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("deleteType(Type " + type + ")");
+			LOG.debug("deleteType(Type " + type + ")");
 		}
 
 		throw new UnsupportedOperationException("Types should never be deleted!");

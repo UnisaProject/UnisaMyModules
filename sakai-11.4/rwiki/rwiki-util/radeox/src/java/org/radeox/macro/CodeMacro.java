@@ -31,7 +31,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.radeox.Messages;
 import org.radeox.api.engine.context.InitialRenderContext;
 import org.radeox.api.engine.context.RenderContext;
@@ -49,9 +50,10 @@ import org.radeox.util.Service;
  * 
  * @version $Id$
  */
-@Slf4j
+
 public class CodeMacro extends LocalePreserved
 {
+	private static Logger log = LoggerFactory.getLogger(CodeMacro.class);
 
 	private Map formatters;
 
@@ -143,7 +145,7 @@ public class CodeMacro extends LocalePreserved
 					.get(RenderContext.DEFAULT_FORMATTER));
 			if (null == formatter)
 			{
-				log.error("Formatter not found."); //$NON-NLS-1$
+				System.err.println("Formatter not found."); //$NON-NLS-1$
 				formatter = (SourceCodeFormatter) formatters.get("java"); //$NON-NLS-1$
 			}
 		}

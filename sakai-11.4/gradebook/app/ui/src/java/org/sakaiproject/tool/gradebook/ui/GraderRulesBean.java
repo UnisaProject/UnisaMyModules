@@ -23,6 +23,7 @@ package org.sakaiproject.tool.gradebook.ui;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Iterator;
 import java.util.HashMap;
@@ -32,23 +33,24 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.lang.StringUtils;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.tool.gradebook.Category;
+import org.sakaiproject.tool.gradebook.jsf.FacesUtil;
+import org.sakaiproject.tool.gradebook.Permission;
 import org.sakaiproject.section.api.coursemanagement.CourseSection;
 import org.sakaiproject.section.api.coursemanagement.ParticipationRecord;
 import org.sakaiproject.section.api.coursemanagement.User;
 import org.sakaiproject.section.api.facade.Role;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.service.gradebook.shared.GraderPermission;
-import org.sakaiproject.tool.gradebook.Category;
-import org.sakaiproject.tool.gradebook.jsf.FacesUtil;
-import org.sakaiproject.tool.gradebook.Permission;
 
-@Slf4j
+
 public class GraderRulesBean extends GradebookDependentBean implements Serializable
 {
+	private static final Logger logger = LoggerFactory.getLogger(GraderRulesBean.class);
+	
 	private List graderList;
 	private String selectedGraderId;
 	private Grader selectedGrader;
@@ -323,7 +325,7 @@ public class GraderRulesBean extends GradebookDependentBean implements Serializa
 			
 			if ((sectionUuid != null && !sectionUuidNameMap.containsKey(sectionUuid)) || 
 					(categoryId != null && !categoryIdNameMap.containsKey(categoryId))) {
-				log.info("unknown category or section. Permission " + permission.getId() + " was deleted");
+				logger.info("unknown category or section. Permission " + permission.getId() + " was deleted");
 				getGradebookManager().deletePermission(permission);
 			} else {
 				
@@ -491,6 +493,8 @@ public class GraderRulesBean extends GradebookDependentBean implements Serializa
 		}
 		public List getGraderRules() {
 			return graderRules;
-		}	
+		}
+		
 	}
+
 }

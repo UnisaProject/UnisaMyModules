@@ -34,12 +34,8 @@ import java.util.Stack;
 import java.util.UUID;
 import java.util.Vector;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.EntityTransferrer;
@@ -59,11 +55,18 @@ import org.sakaiproject.poll.model.Poll;
 import org.sakaiproject.poll.model.Vote;
 import org.sakaiproject.poll.util.PollUtil;
 import org.sakaiproject.site.api.SiteService;
+import org.springframework.dao.DataAccessException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
-@Slf4j
+
 public class PollListManagerImpl implements PollListManager,EntityTransferrer {
 
+    // use commons logger
+    private static Logger log = LoggerFactory.getLogger(PollListManagerImpl.class);
     public static final String REFERENCE_ROOT = Entity.SEPARATOR + "poll";
+
 
     private EntityManager entityManager;
     public void setEntityManager(EntityManager em) {
@@ -124,16 +127,16 @@ public class PollListManagerImpl implements PollListManager,EntityTransferrer {
         List<Poll> polls = null;
         // get all allowed sites for this user
         List<String> allowedSites = externalLogic.getSitesForUser(userId, permissionConstant);
-        if (allowedSites.isEmpty()) {
+
+        if(siteIds!=null && siteIds.length>0 && !allowedSites.isEmpty()){
+            List<String> requestedSiteIds = Arrays.asList(siteIds);
+            // filter down to just the requested ones
+            allowedSites.retainAll(requestedSiteIds);
+            if(allowedSites.isEmpty()){
                 // no sites to search so EXIT here
-            return new ArrayList<>();
-        } else {
-            if (siteIds != null && siteIds.length > 0) {
-                List<String> requestedSiteIds = Arrays.asList(siteIds);
-                // filter down to just the requested ones
-                allowedSites.retainAll(requestedSiteIds);
+                return new ArrayList<Poll>();
             }
-            String[] siteIdsToSearch = allowedSites.toArray(new String[0]);
+            String[] siteIdsToSearch = allowedSites.toArray(new String[allowedSites.size()]);
             Search search = new Search();
             if (siteIdsToSearch.length > 0) {
                 search.addRestriction(new Restriction("siteId", siteIdsToSearch));
@@ -169,7 +172,7 @@ public class PollListManagerImpl implements PollListManager,EntityTransferrer {
         	throw new SecurityException();
         }
         
-        if (t.getPollId() == null) {
+        if (t.getId() == null) {
             newPoll = true;
             t.setId(idManager.createUuid());
         }
@@ -178,7 +181,8 @@ public class PollListManagerImpl implements PollListManager,EntityTransferrer {
             dao.save(t);
 
         } catch (DataAccessException e) {
-            log.error("Hibernate could not save: " + e.toString(), e);
+            log.error("Hibernate could not save: " + e.toString());
+            e.printStackTrace();
             return false;
         }
         log.debug(" Poll  " + t.toString() + "successfuly saved");
@@ -349,7 +353,8 @@ public class PollListManagerImpl implements PollListManager,EntityTransferrer {
         try {
             dao.delete(option);
         } catch (DataAccessException e) {
-            log.error("Hibernate could not delete: " + e.toString(), e);
+            log.error("Hibernate could not delete: " + e.toString());
+            e.printStackTrace();
             return;
         }
         log.info("Option id " + option.getId() + " deleted");
@@ -380,7 +385,8 @@ public class PollListManagerImpl implements PollListManager,EntityTransferrer {
         try {
             dao.save(t);
         } catch (DataAccessException e) {
-            log.error("Hibernate could not save: " + e.toString(), e);
+            log.error("Hibernate could not save: " + e.toString());
+            e.printStackTrace();
             return false;
         }
         log.info("Option  " + t.toString() + "successfuly saved");
@@ -423,27 +429,28 @@ public class PollListManagerImpl implements PollListManager,EntityTransferrer {
         return true;
     }
 
-    @Override
-    public String archive(String siteId, Document doc, Stack<Element> stack, String archivePath,
-            List<Reference> attachments) {
+    @SuppressWarnings("unchecked")
+    public String archive(String siteId, Document doc, Stack stack, String archivePath,
+            List attachments) {
         log.debug("archive: poll " + siteId);
         // prepare the buffer for the results log
         StringBuilder results = new StringBuilder();
 
         // String assignRef = assignmentReference(siteId, SiteService.MAIN_CONTAINER);
-        results.append("archiving " + getLabel() + " context " + Entity.SEPARATOR
-                       + siteId + Entity.SEPARATOR + SiteService.MAIN_CONTAINER
+        results.append("archiving " + getLabel() + " context " + Entity.SEPARATOR 
+                       + siteId + Entity.SEPARATOR + SiteService.MAIN_CONTAINER 
                        + ".\n");
 
         // start with an element with our very own (service) name
         Element element = doc.createElement(PollListManager.class.getName());
-        stack.peek().appendChild(element);
+        ((Element) stack.peek()).appendChild(element);
         stack.push(element);
 
-        List<Poll> pollsList = findAllPolls(siteId);
+        List pollsList = findAllPolls(siteId);
         log.debug("got list of " + pollsList.size() + " polls");
-        for (Poll poll : pollsList) {
+        for (int i = 0; pollsList.size() > i; i++) {
             try {
+                Poll poll = (Poll) pollsList.get(i);
                 log.info("got poll " + poll.getId());
 
                 // archive this assignment
@@ -451,16 +458,17 @@ public class PollListManagerImpl implements PollListManager,EntityTransferrer {
 
                 // since we aren't archiving votes too, don't worry about archiving the
                 // soft-deleted options -- only "visible".
-                List<Option> options = getVisibleOptionsForPoll(poll.getPollId());
+                List options = getVisibleOptionsForPoll(poll.getPollId());
 
-                for (Option option : options) {
-                    Element el2 = PollUtil.optionToXml(option, doc, stack);
+                for (int q = 0; options.size() > q; q++) {
+                    Option opt = (Option) options.get(q);
+                    Element el2 = PollUtil.optionToXml(opt, doc, stack);
                     el.appendChild(el2);
                 }
 
                 element.appendChild(el);
             } catch (Exception e) {
-                log.error("Failed to archive {} in site {}", poll.getId(), siteId, e);
+                e.printStackTrace();
             }
 
         } // while
@@ -619,7 +627,7 @@ public class PollListManagerImpl implements PollListManager,EntityTransferrer {
 			        savePoll(toPoll);
 				}
 			}catch(Exception e){
-				log.error(e.getMessage(), e);
+				e.printStackTrace();
 			}
 		}
 
@@ -677,7 +685,7 @@ public class PollListManagerImpl implements PollListManager,EntityTransferrer {
 	        search.addRestriction(new Restriction("userId", userId));
 	        
 	        List<Vote> votes = dao.findBySearch(Vote.class, search);		
-	        //log.info("got " + pollCollection.size() + "votes for this poll");
+	        //System.out.println("got " + pollCollection.size() + "votes for this poll");
 	        if (votes.size() > 0)
 	        	return true;
 		}

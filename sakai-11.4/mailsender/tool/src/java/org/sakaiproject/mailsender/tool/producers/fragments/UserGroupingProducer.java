@@ -18,7 +18,16 @@ package org.sakaiproject.mailsender.tool.producers.fragments;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.authz.api.GroupNotDefinedException;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.mailsender.logic.ComposeLogic;
+import org.sakaiproject.mailsender.logic.ConfigLogic;
+import org.sakaiproject.mailsender.model.ConfigEntry;
+import org.sakaiproject.mailsender.model.EmailRole;
+import org.sakaiproject.mailsender.tool.params.UserGroupViewParameters;
+import org.sakaiproject.mailsender.tool.params.UsersViewParameters;
 
 import uk.org.ponder.messageutil.TargettedMessage;
 import uk.org.ponder.messageutil.TargettedMessageList;
@@ -40,21 +49,12 @@ import uk.org.ponder.rsf.viewstate.ViewParameters;
 import uk.org.ponder.rsf.viewstate.ViewParamsReporter;
 import uk.org.ponder.rsf.viewstate.ViewStateHandler;
 
-import org.sakaiproject.authz.api.GroupNotDefinedException;
-import org.sakaiproject.exception.IdUnusedException;
-import org.sakaiproject.mailsender.logic.ComposeLogic;
-import org.sakaiproject.mailsender.logic.ConfigLogic;
-import org.sakaiproject.mailsender.model.ConfigEntry;
-import org.sakaiproject.mailsender.model.EmailRole;
-import org.sakaiproject.mailsender.tool.params.UserGroupViewParameters;
-import org.sakaiproject.mailsender.tool.params.UsersViewParameters;
-
-@Slf4j
 public class UserGroupingProducer implements ViewComponentProducer, ViewParamsReporter,
 		ContentTypeReporter
 {
 	public static final String VIEW_ID = "userGroup";
 
+	private final Logger log = LoggerFactory.getLogger(UserGroupingProducer.class);
 	private ComposeLogic composeLogic;
 	private TargettedMessageList messages;
 	private ViewStateHandler viewStateHandler;

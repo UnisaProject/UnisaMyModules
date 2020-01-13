@@ -45,6 +45,20 @@
 		</h:panelGrid>
 
 		<%@ include file="/inc/globalMessages.jspf"%>
+		
+		<h:panelGroup rendered="#{overviewBean.isLetterGrade}" styleClass="validation">
+		  <h:outputText value="#{msgs.overview_lettergrade1}" rendered="#{overviewBean.isLetterGrade}"/>
+	  	<h:outputLink value="http://kb.iu.edu/data/awsj.html" rendered="#{overviewBean.isLetterGrade}" target="support_window1">
+	  		<h:outputText value="#{msgs.overview_lettergrade2}" rendered="#{overviewBean.isLetterGrade}"/>
+		  </h:outputLink>
+		  <h:outputText value=" " rendered="#{overviewBean.isLetterGrade}"/>
+		  <h:outputText value="#{msgs.overview_lettergrade3}" rendered="#{overviewBean.isLetterGrade}"/>
+	  	<h:outputLink value="http://kb.iu.edu/data/aitz.html" rendered="#{overviewBean.isLetterGrade}" target="support_window2">
+	  		<h:outputText value="#{msgs.overview_lettergrade4}" rendered="#{overviewBean.isLetterGrade}"/>
+		  </h:outputLink>
+		  <h:outputText value=" " rendered="#{overviewBean.isLetterGrade}"/>
+		  <h:outputText value="#{msgs.overview_lettergrade5}" rendered="#{overviewBean.isLetterGrade}"/>
+		</h:panelGroup>
 
 		<h4><h:outputText value="#{msgs.overview_assignments_title}"/></h4>
         <div style="width: 100%;">
@@ -67,7 +81,7 @@
 			styleClass="listHier lines nolines"
 			expanded="true"
 			rowClasses="#{overviewBean.rowStyles}"
-			headerClasses="categoryIcon,left,center,center,center,center,center,center,center,external,center">
+			headerClasses="attach,left,center,center,center,center,center,center,center,external,center">
 			
 			<h:column id="_toggle" rendered="#{overviewBean.categoriesEnabled}">
 				<f:facet name="header">
@@ -103,19 +117,19 @@
 				
 				<h:outputText value="#{gradebookItem.name}" styleClass="categoryHeading" rendered="#{gradebookItem.isCategory}" />
 				<h:outputText value=" (#{msgs.extra_credit})" rendered="#{gradebookItem.isCategory && gradebookItem.isExtraCredit}"/>
-				<h:outputText value=" (" rendered="#{gradebookItem.isCategory && (gradebookItem.dropHighest != 0 || gradebookItem.dropLowest != 0 || gradebookItem.keepHighest != 0)}" />
+				<h:outputText value=" (" rendered="#{gradebookItem.isCategory && (gradebookItem.dropHighest != 0 || gradebookItem.drop_lowest != 0 || gradebookItem.keepHighest != 0)}" />
             <h:outputFormat value="#{msgs.cat_drop_highest_display}" rendered="#{gradebookItem.isCategory && gradebookItem.dropHighest != 0}" >
                 <f:param value="#{gradebookItem.dropHighest}"/>
             </h:outputFormat>
-            <h:outputText value="; " rendered="#{gradebookItem.isCategory && (gradebookItem.dropHighest != 0 && gradebookItem.dropLowest != 0)}" />
-            <h:outputFormat value="#{msgs.cat_drop_lowest_display}" rendered="#{gradebookItem.isCategory && gradebookItem.dropLowest != 0}" >
-                <f:param value="#{gradebookItem.dropLowest}"/>
+            <h:outputText value="; " rendered="#{gradebookItem.isCategory && (gradebookItem.dropHighest != 0 && gradebookItem.drop_lowest != 0)}" />
+            <h:outputFormat value="#{msgs.cat_drop_lowest_display}" rendered="#{gradebookItem.isCategory && gradebookItem.drop_lowest != 0}" >
+                <f:param value="#{gradebookItem.drop_lowest}"/>
             </h:outputFormat>
             
             <h:outputFormat value="#{msgs.cat_keep_highest_display}" rendered="#{gradebookItem.isCategory && gradebookItem.keepHighest != 0}" >
                 <f:param value="#{gradebookItem.keepHighest}"/>
             </h:outputFormat>
-            <h:outputText value=")" rendered="#{gradebookItem.isCategory && (gradebookItem.dropHighest != 0 || gradebookItem.dropLowest != 0 || gradebookItem.keepHighest != 0)}" />
+            <h:outputText value=")" rendered="#{gradebookItem.isCategory && (gradebookItem.dropHighest != 0 || gradebookItem.drop_lowest != 0 || gradebookItem.keepHighest != 0)}" />
 				
 
 			</h:column>

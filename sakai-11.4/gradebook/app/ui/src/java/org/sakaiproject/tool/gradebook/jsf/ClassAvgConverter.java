@@ -25,18 +25,18 @@ package org.sakaiproject.tool.gradebook.jsf;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.sakaiproject.component.api.ServerConfigurationService;
-import org.sakaiproject.service.gradebook.shared.GradebookService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.tool.gradebook.ui.AssignmentGradeRow;
+import org.sakaiproject.tool.gradebook.ui.GradebookBean;
+import org.sakaiproject.tool.gradebook.Assignment;
 import org.sakaiproject.tool.gradebook.Category;
 import org.sakaiproject.tool.gradebook.CourseGrade;
 import org.sakaiproject.tool.gradebook.CourseGradeRecord;
 import org.sakaiproject.tool.gradebook.Gradebook;
-import org.sakaiproject.tool.gradebook.GradebookAssignment;
 import org.sakaiproject.tool.gradebook.LetterGradePercentMapping;
-import org.sakaiproject.tool.gradebook.ui.AssignmentGradeRow;
-import org.sakaiproject.tool.gradebook.ui.GradebookBean;
+import org.sakaiproject.component.api.ServerConfigurationService;
+import org.sakaiproject.service.gradebook.shared.GradebookService;
 
 /**
  * This formatting-only converter consolidates the rather complex formatting
@@ -46,8 +46,9 @@ import org.sakaiproject.tool.gradebook.ui.GradebookBean;
  * displayed in a special way with a tooltip "title" attribute. The display
  * also changes based upon the grade entry method.
  */
-@Slf4j
 public class ClassAvgConverter extends PointsConverter {
+	private static final Logger log = LoggerFactory.getLogger(ClassAvgConverter.class);
+
     private int averageDecimalPlaces = 0;
 
     public ClassAvgConverter() {
@@ -84,8 +85,8 @@ public class ClassAvgConverter extends PointsConverter {
 		GradebookBean gbb = (GradebookBean)FacesUtil.resolveVariable("gradebookBean");
 
 		if (value != null) {
-			if (value instanceof GradebookAssignment) {
-				GradebookAssignment assignment = (GradebookAssignment)value;
+			if (value instanceof Assignment) {
+				Assignment assignment = (Assignment)value;
 				gradebook = assignment.getGradebook();
 				pointsPossible = assignment.getPointsPossible();
 

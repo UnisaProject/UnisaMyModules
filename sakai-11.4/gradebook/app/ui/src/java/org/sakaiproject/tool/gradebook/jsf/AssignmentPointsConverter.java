@@ -25,12 +25,12 @@ package org.sakaiproject.tool.gradebook.jsf;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.tool.gradebook.AbstractGradeRecord;
-import org.sakaiproject.tool.gradebook.GradebookAssignment;
+import org.sakaiproject.tool.gradebook.Assignment;
 import org.sakaiproject.tool.gradebook.AssignmentGradeRecord;
 import org.sakaiproject.tool.gradebook.CourseGradeRecord;
 import org.sakaiproject.tool.gradebook.GradableObject;
@@ -43,8 +43,9 @@ import org.sakaiproject.tool.gradebook.Gradebook;
  * assignment which doesn't count toward the final grade, they should be
  * displayed in a special way with a tooltip "title" attribute.
  */
-@Slf4j
 public class AssignmentPointsConverter extends PointsConverter {
+	private static final Logger log = LoggerFactory.getLogger(AssignmentPointsConverter.class);
+
 	public String getAsString(FacesContext context, UIComponent component, Object value) {
 		if (log.isDebugEnabled()) log.debug("getAsString(" + context + ", " + component + ", " + value + ")");
 
@@ -54,8 +55,8 @@ public class AssignmentPointsConverter extends PointsConverter {
 		boolean percentage = false;
 		
 		if (value != null) {
-			if (value instanceof GradebookAssignment) {
-				GradebookAssignment assignment = (GradebookAssignment)value;
+			if (value instanceof Assignment) {
+				Assignment assignment = (Assignment)value;
 				workingValue = assignment.getPointsPossible();
 				notCounted = assignment.isNotCounted();
 				// if weighting enabled, item is not counted if not assigned
@@ -82,7 +83,7 @@ public class AssignmentPointsConverter extends PointsConverter {
 					workingValue = " ";
 				}
 
-				GradebookAssignment assignment = agr.getAssignment();
+				Assignment assignment = agr.getAssignment();
 				notCounted = assignment.isNotCounted();
 				// if weighting enabled, item is only counted if assigned
 				// a category

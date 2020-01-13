@@ -34,8 +34,9 @@ import java.util.zip.ZipEntry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.portal.util.URLUtils;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Handler to process static content with an internal, in memory cache.
@@ -48,7 +49,6 @@ import lombok.extern.slf4j.Slf4j;
  * @version $Rev$
  * 
  */
-@Slf4j
 public abstract class StaticHandler extends BasePortalHandler
 {
 
@@ -56,6 +56,8 @@ public abstract class StaticHandler extends BasePortalHandler
 	private Properties contentTypes = null;
 
 	private static final ThreadLocal<StaticCache[]> staticCacheHolder = new ThreadLocal<>();
+
+	private static final Logger log = LoggerFactory.getLogger(StaticHandler.class);
 
 	public StaticHandler()
 	{
@@ -203,7 +205,9 @@ public abstract class StaticHandler extends BasePortalHandler
 		catch (IOException ex)
 		{
 			log.info("Failed to send portal content");
-			log.debug("Full detail of exception is: {}", ex);
+			if(log.isDebugEnabled()) {
+				log.debug("Full detail of exception is:", ex);
+			}
 			res.sendError(404, URLUtils.getSafePathInfo(req));
 		}
 

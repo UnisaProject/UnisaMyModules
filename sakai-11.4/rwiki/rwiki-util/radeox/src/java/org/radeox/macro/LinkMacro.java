@@ -86,8 +86,9 @@ public class LinkMacro extends BaseLocaleMacro
 		if (params.getLength() == 1)
 		{
 			url = text;
+			text = Encoder.toEntity(text.charAt(0))
+					+ Encoder.escape(text.substring(1));
 		}
-		text = Encoder.toEntity(text.charAt(0)) + Encoder.escape(text.substring(1));
 
 		if (url != null && text != null)
 		{
@@ -121,7 +122,7 @@ public class LinkMacro extends BaseLocaleMacro
 			if (!"none".equals(target)) //$NON-NLS-1$
 			{
 				writer.write(" target=\""); //$NON-NLS-1$
-				writer.write(Encoder.escape(target));
+				writer.write(target);
 				writer.write("\" "); //$NON-NLS-1$
 			}
 			writer.write(">"); //$NON-NLS-1$

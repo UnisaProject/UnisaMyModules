@@ -1,18 +1,24 @@
-/**
- * Copyright (c) 2003-2016 The Apereo Foundation
+/**********************************************************************************
+*
+* $Id$
+*
+***********************************************************************************
+*
+ * Copyright (c) 2005, 2006, 2007, 2008 The Sakai Foundation, The MIT Corporation
  *
  * Licensed under the Educational Community License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *             http://opensource.org/licenses/ecl2
+ *       http://www.opensource.org/licenses/ECL-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*
+**********************************************************************************/
 
 package org.sakaiproject.tool.gradebook.ui;
 
@@ -27,13 +33,15 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.gradebook.facades.Authn;
 import org.sakaiproject.tool.gradebook.facades.Authz;
+import org.sakaiproject.tool.gradebook.facades.ContextManagement;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 
-import lombok.extern.slf4j.Slf4j;
+import org.sakaiproject.component.cover.ServerConfigurationService;
 
 /**
  * A role-based authorization filter which takes four parameters:
@@ -54,38 +62,35 @@ import lombok.extern.slf4j.Slf4j;
  * In this case, we guard all pages at the top of the servlet path but let
  * other URLs (e.g., "/test/login.jsf") pass through.
  */
-@Slf4j
 public class RoleFilter implements Filter {
+	private static Logger logger = LoggerFactory.getLogger(RoleFilter.class);
+
 	private String authnServiceBeanName;
 	private String authzServiceBeanName;
+	private String contextManagementServiceBeanName;
 	private String authorizationFilterConfigurationBeanName;
 	private String selectGradebookRedirect;
 
-	private ApplicationContext ac;
+    private ApplicationContext ac;
 
-	@Override
-	public void init(final FilterConfig filterConfig) throws ServletException {
-		if(log.isInfoEnabled()) {
-			log.info("Initializing gradebook role filter");
-		}
+	public void init(FilterConfig filterConfig) throws ServletException {
+        if(logger.isInfoEnabled()) logger.info("Initializing gradebook role filter");
 
-		this.ac = (ApplicationContext)filterConfig.getServletContext().getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+        ac = (ApplicationContext)filterConfig.getServletContext().getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 
-		this.authnServiceBeanName = filterConfig.getInitParameter("authnServiceBean");
-		this.authzServiceBeanName = filterConfig.getInitParameter("authzServiceBean");
-		this.authorizationFilterConfigurationBeanName = filterConfig.getInitParameter("authorizationFilterConfigurationBean");
-		this.selectGradebookRedirect = filterConfig.getInitParameter("selectGradebookRedirect");
-	}
+        authnServiceBeanName = filterConfig.getInitParameter("authnServiceBean");
+		authzServiceBeanName = filterConfig.getInitParameter("authzServiceBean");
+		contextManagementServiceBeanName = filterConfig.getInitParameter("contextManagementServiceBean");
+		authorizationFilterConfigurationBeanName = filterConfig.getInitParameter("authorizationFilterConfigurationBean");
+		selectGradebookRedirect = filterConfig.getInitParameter("selectGradebookRedirect");
+    }
 
-	@Override
-	public void doFilter(final ServletRequest servletRequest, final ServletResponse response, final FilterChain chain)
+	public void doFilter(ServletRequest servletRequest, ServletResponse response, FilterChain chain)
 		throws IOException, ServletException {
 
-		final HttpServletRequest request = (HttpServletRequest)servletRequest;
+		HttpServletRequest request = (HttpServletRequest)servletRequest;
 		String servletPath = request.getServletPath();
-		if (log.isDebugEnabled()) {
-			log.debug("Filtering request for servletPath=" + servletPath);
-		}
+		if (logger.isDebugEnabled()) logger.debug("Filtering request for servletPath=" + servletPath);
 		servletPath = servletPath.replaceFirst("^/", "");
 		if (servletPath.indexOf("/") >= 0) {
 			// Only protect the top-level folder, to allow for login through
@@ -94,38 +99,31 @@ public class RoleFilter implements Filter {
 			return;
 		}
 
-		final Authn authnService = (Authn)this.ac.getBean(this.authnServiceBeanName);
-		final Authz authzService = (Authz)this.ac.getBean(this.authzServiceBeanName);
-		final AuthorizationFilterConfigurationBean authorizationFilterConfigurationBean = (AuthorizationFilterConfigurationBean)this.ac.getBean(this.authorizationFilterConfigurationBeanName);
+		Authn authnService = (Authn)ac.getBean(authnServiceBeanName);
+		Authz authzService = (Authz)ac.getBean(authzServiceBeanName);
+		ContextManagement contextManagementService = (ContextManagement)ac.getBean(contextManagementServiceBeanName);
+		AuthorizationFilterConfigurationBean authorizationFilterConfigurationBean = (AuthorizationFilterConfigurationBean)ac.getBean(authorizationFilterConfigurationBeanName);
 		authnService.setAuthnContext(request);
-		final String userUid = authnService.getUserUid();
+		String userUid = authnService.getUserUid();
 
-        if (log.isDebugEnabled()) {
-			log.debug("Filtering request for user " + userUid + ", pathInfo=" + request.getPathInfo());
-		}
+        if (logger.isDebugEnabled()) logger.debug("Filtering request for user " + userUid + ", pathInfo=" + request.getPathInfo());
 
 		// Try to get the currently selected gradebook UID, if any
 		// First check the context management service.
 		// Then check for a locally maintained value.
-		String gradebookUid = GradebookBean.getGradebookUid(request);
-        if(log.isDebugEnabled()) {
-			log.debug("contextManagementService.getGradebookUid=" + gradebookUid);
-		}
+		String gradebookUid = contextManagementService.getGradebookUid(request);
+        if(logger.isDebugEnabled()) logger.debug("contextManagementService.getGradebookUid=" + gradebookUid);
 		if (gradebookUid == null) {
 			gradebookUid = GradebookBean.getGradebookUidFromRequest(request);
-	        if (log.isDebugEnabled()) {
-				log.debug("GradebookBean.getGradebookUidFromRequest=" + gradebookUid);
-			}
+	        if (logger.isDebugEnabled()) logger.debug("GradebookBean.getGradebookUidFromRequest=" + gradebookUid);
 		}
 
 		if (gradebookUid != null) {
-			if(log.isDebugEnabled()) {
-				log.debug("gradebookUid=" + gradebookUid + ", userUid=" + userUid);
-			}
+			if(logger.isDebugEnabled()) logger.debug("gradebookUid=" + gradebookUid + ", userUid=" + userUid);
 
 			// Get the name of the page from the servlet path.
-			final String[] splitPath = servletPath.split("[./]");
-			final String pageName = splitPath[0];
+			String[] splitPath = servletPath.split("[./]");
+			String pageName = splitPath[0];
 
 			boolean isAuthorized;
 			if (authzService.isUserAbleToGrade(gradebookUid) &&
@@ -146,12 +144,12 @@ public class RoleFilter implements Filter {
 			} else if ( !"websphere".equals(ServerConfigurationService.getString("servlet.container")) && isAuthorized) {
 				chain.doFilter(request, response);
 			} else {
-				log.error("AUTHORIZATION FAILURE: User " + userUid + " in gradebook " + gradebookUid + " attempted to reach URL " + request.getRequestURL());
+				logger.error("AUTHORIZATION FAILURE: User " + userUid + " in gradebook " + gradebookUid + " attempted to reach URL " + request.getRequestURL());
 				((HttpServletResponse)response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
 			}
 		} else {
-			if (this.selectGradebookRedirect != null) {
-				((HttpServletResponse)response).sendRedirect(this.selectGradebookRedirect);
+			if (selectGradebookRedirect != null) {
+				((HttpServletResponse)response).sendRedirect(selectGradebookRedirect);
 			} else {
 				// TODO Any better status code for this?
 				((HttpServletResponse)response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
@@ -159,7 +157,9 @@ public class RoleFilter implements Filter {
 		}
 	}
 
-	@Override
 	public void destroy() {
 	}
 }
+
+
+

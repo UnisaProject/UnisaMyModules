@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.adobedownload"
+		title="Adobe Software Download"
+		description="Adobe Software Download">
+		<category name="project" />
+		<category name="unisa.tools" />
+	</tool>
+</registration>

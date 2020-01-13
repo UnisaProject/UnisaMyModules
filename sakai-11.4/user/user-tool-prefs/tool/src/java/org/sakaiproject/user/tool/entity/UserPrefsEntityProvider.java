@@ -30,8 +30,8 @@ import java.util.HashMap;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.entity.api.ResourcePropertiesEdit;
 import org.sakaiproject.entity.api.Entity;
@@ -57,9 +57,10 @@ import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.exception.InUseException;
 import org.sakaiproject.exception.PermissionException;
 
-@Slf4j
+
 public class UserPrefsEntityProvider extends AbstractEntityProvider implements CoreEntityProvider, RESTful, RequestStorable {
 
+	private static Logger log = LoggerFactory.getLogger(UserPrefsEntityProvider.class);
 	public static String PREFIX = "userPrefs";
 	private PreferencesService preferencesService;
 	private SessionManager sessionManager;
@@ -314,16 +315,8 @@ public class UserPrefsEntityProvider extends AbstractEntityProvider implements C
 			for (Iterator<String> iNames = p.getPropertyNames(); iNames.hasNext();)
 			{
 				String name = iNames.next();
-				List<String> values = p.getPropertyList(name);
-
-				if (values.size() == 1) {
-					rv.put(name, values.get(0));
-				} else if (values.size() > 1) {
-					rv.put(name, values);
-				} else {
-					rv.put(name, null);
-					log.info("No value for property '%s'. Setting null ...", name);
-				}
+				String value = p.getProperty(name);
+				rv.put(name, value);
 			}
 		}
 		return rv;
@@ -344,23 +337,25 @@ public class UserPrefsEntityProvider extends AbstractEntityProvider implements C
 		String key = view.getPathSegment(3);
 		Map<String, Object> params = requestStorage.getStorageMapCopy();
 	
-		log.debug("updateKeyProperties for userId={} key={}", userId, key);
+		if(log.isDebugEnabled()) {
+			log.debug(this + " updateKeyProperties for userId=" + userId + " key=" + key);
+		}
 		
 		String queryString = (String) params.get("queryString");
-		log.debug("queryString = {}", queryString);
 		if (queryString != null)
 		{
 			// queryString is of type name1=val1&name2=val2&name3=val3...
-			String[] pairs = queryString.split("&");
+			String[] parts0 = queryString.split("&");
 
-			if (pairs != null && pairs.length> 0)
+			if (parts0 != null && parts0.length> 0)
 			{
 				// get the edit object
 				PreferencesEdit m_edit = getPreferencesEdit(userId);
 				ResourcePropertiesEdit props = m_edit.getPropertiesEdit(key);
-				for (String pair : pairs)
+				for (int i=0; i< parts0.length;i++)
 				{
-					String[] parts = pair.split("=");
+					String part0=parts0[i];
+					String[] parts = part0.split("=");
 					if (parts != null && parts.length==2)
 					{
 						String name = parts[0];
@@ -371,6 +366,7 @@ public class UserPrefsEntityProvider extends AbstractEntityProvider implements C
 				
 				preferencesService.commit(m_edit);
 			}
+			
 		}
 	}
 }

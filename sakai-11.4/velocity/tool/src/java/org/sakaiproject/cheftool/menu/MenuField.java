@@ -21,8 +21,8 @@
 
 package org.sakaiproject.cheftool.menu;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import org.sakaiproject.cheftool.api.MenuItem;
 
@@ -186,9 +186,9 @@ public class MenuField implements MenuItem
 	 * 
 	 * @return The sub-items of the item.
 	 */
-	public List<MenuItem> getItems()
+	public List getItems()
 	{
-		return new ArrayList<>();
+		return new Vector();
 
 	} // getItems
 
@@ -249,11 +249,6 @@ public class MenuField implements MenuItem
 		return true;
 
 	} // getIsField
-
-	public boolean getIsCurrent()
-	{
-		return false;
-	}
 	
 	@Override
 	public String getAccessibilityLabel() {

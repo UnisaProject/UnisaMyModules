@@ -16,19 +16,19 @@ CREATE TABLE IF NOT EXISTS `pasystem_popup_content` (
 
 CREATE TABLE IF NOT EXISTS `pasystem_popup_assign` (
   `uuid` char(36),
-  `user_id` varchar(99) DEFAULT NULL,
+  `user_eid` varchar(255) DEFAULT NULL,
    FOREIGN KEY (uuid) REFERENCES pasystem_popup_screens(uuid),
-   INDEX `user_id` (`user_id`)
+   INDEX `user_eid` (`user_eid`)
 );
 
 CREATE TABLE IF NOT EXISTS `pasystem_popup_dismissed` (
   `uuid` char(36),
-  `user_id` varchar(99) DEFAULT NULL,
+  `user_eid` varchar(255) DEFAULT NULL,
   `state` varchar(50) DEFAULT NULL,
   `dismiss_time` BIGINT,
-   UNIQUE KEY `unique_popup_dismissed` (`user_id`,`state`, `uuid`),
+   UNIQUE KEY `unique_popup_dismissed` (`user_eid`,`state`, `uuid`),
    FOREIGN KEY (uuid) REFERENCES pasystem_popup_screens(uuid),
-   INDEX `user_id` (`user_id`),
+   INDEX `user_eid` (`user_eid`),
    INDEX `state` (`state`)
 );
 
@@ -47,12 +47,12 @@ INSERT IGNORE INTO SAKAI_REALM_FUNCTION (FUNCTION_NAME) VALUES ('pasystem.manage
 
 CREATE TABLE IF NOT EXISTS `pasystem_banner_dismissed` (
   `uuid` char(36),
-  `user_id` varchar(99) DEFAULT NULL,
+  `user_eid` varchar(255) DEFAULT NULL,
   `state` varchar(50) DEFAULT NULL,
   `dismiss_time` BIGINT,
-   UNIQUE KEY `unique_banner_dismissed` (`user_id`,`state`, `uuid`),
+   UNIQUE KEY `unique_banner_dismissed` (`user_eid`,`state`, `uuid`),
    FOREIGN KEY (uuid) REFERENCES pasystem_banner_alert(uuid),
-   INDEX `user_id` (`user_id`),
+   INDEX `user_eid` (`user_eid`),
    INDEX `state` (`state`)
 );
 

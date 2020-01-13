@@ -33,8 +33,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tsugi.basiclti.BasicLTIConstants;
 import org.tsugi.basiclti.BasicLTIUtil;
 import org.tsugi.json.IMSJSONRequest;
@@ -77,10 +77,10 @@ import com.fasterxml.jackson.databind.ObjectWriter;
  */
 
 @SuppressWarnings("deprecation")
-@Slf4j
 public class LTI2Servlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
+	private static Logger M_log = LoggerFactory.getLogger(LTI2Servlet.class);
 
 	protected Service_offered LTI2ResultItem = null;
 	protected Service_offered LTI2LtiLinkSettings = null;
@@ -125,8 +125,8 @@ public class LTI2Servlet extends HttpServlet {
 		} catch (Exception e) {
 			String ipAddress = request.getRemoteAddr();
 			String uri = request.getRequestURI();
-			log.warn("General LTI2 Failure URI={} IP={}", uri, ipAddress);
-			log.error(e.getMessage(), e);
+			M_log.warn("General LTI2 Failure URI="+uri+" IP=" + ipAddress);
+			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); 
 			doErrorJSON(request, response, null, "General failure", e);
 		}
@@ -136,10 +136,10 @@ public class LTI2Servlet extends HttpServlet {
 	protected void doRequest(HttpServletRequest request, HttpServletResponse response) 
 		throws ServletException, IOException 
 	{
-		log.debug("getServiceURL={}", getServiceURL(request));
+		System.out.println("getServiceURL="+getServiceURL(request));
 
 		String ipAddress = request.getRemoteAddr();
-		log.debug("LTI Service request from IP={}", ipAddress);
+		System.out.println("LTI Service request from IP=" + ipAddress);
 
 		String rpi = request.getPathInfo();
 		String uri = request.getRequestURI();
@@ -175,11 +175,11 @@ public class LTI2Servlet extends HttpServlet {
 
 		IMSJSONRequest jsonRequest = new IMSJSONRequest(request);
 		if ( jsonRequest.valid ) {
-			log.debug(jsonRequest.getPostBody());
+			System.out.println(jsonRequest.getPostBody());
 		}
 
 		response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED); 
-		log.warn("Unknown request={}", uri);
+		M_log.warn("Unknown request="+uri);
 		doErrorJSON(request, response, null, "Unknown request="+uri, null);
 	}
 
@@ -202,9 +202,9 @@ public class LTI2Servlet extends HttpServlet {
 			String serverUrl = getServiceURL(request);
 			ltiProps.setProperty(LTI2Constants.TC_PROFILE_URL,serverUrl + SVC_tc_profile + "/" + TEST_KEY);
 			ltiProps.setProperty(BasicLTIConstants.LAUNCH_PRESENTATION_RETURN_URL, serverUrl + "launch");
-			log.debug("ltiProps={}", ltiProps);
+			System.out.println("ltiProps="+ltiProps);
 
-			boolean dodebug = log.isDebugEnabled();
+			boolean dodebug = M_log.isDebugEnabled();
 			// TODO: Internationalize this
 			// String launchtext = getRB(rb, "launch.button", "Press to Launch External Tool");
 			String launchtext = "Press to Launch External Tool";
@@ -219,7 +219,7 @@ public class LTI2Servlet extends HttpServlet {
 			out.println(output);
 		}
 		catch (Exception e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 	}
 
@@ -251,8 +251,8 @@ public class LTI2Servlet extends HttpServlet {
 			JSONObject security_contract = toolProxy.getSecurityContract();
 
 			String shared_secret = (String) security_contract.get(LTI2Constants.SHARED_SECRET);
-			log.debug("launch={}", launch);
-			log.debug("shared_secret={}", shared_secret);
+			System.out.println("launch="+launch);
+			System.out.println("shared_secret="+shared_secret);
 
 			Properties ltiProps = LTI2SampleData.getLaunch();
 			ltiProps.setProperty(BasicLTIConstants.LTI_VERSION,BasicLTIConstants.LTI_VERSION_2);
@@ -280,7 +280,7 @@ public class LTI2Servlet extends HttpServlet {
 			ltiProps = BasicLTIUtil.signProperties(ltiProps, launch, "POST",
 				TEST_KEY, shared_secret, null, null, null, extra);
 
-			boolean dodebug = log.isDebugEnabled();
+			boolean dodebug = M_log.isDebugEnabled();
 			// TODO: Internationalize this
 			// String launchtext = getRB(rb, "launch.button", "Press to Launch External Tool");
 			String launchtext = "Press to Launch External Tool";
@@ -292,7 +292,7 @@ public class LTI2Servlet extends HttpServlet {
 			out.println(output);
 		}
 		catch (Exception e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 	}
 
@@ -310,13 +310,14 @@ public class LTI2Servlet extends HttpServlet {
 			ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
 			// ***IMPORTANT!!!*** for Jackson 2.x use the line below instead of the one above: 
 			// ObjectWriter writer = mapper.writer().withDefaultPrettyPrinter();
+			// System.out.println(mapper.writeValueAsString(consumer));
 			response.setContentType(APPLICATION_JSON);
 			PrintWriter out = response.getWriter();
 			out.println(writer.writeValueAsString(consumer));
-			log.debug(writer.writeValueAsString(consumer));
+			// System.out.println(writer.writeValueAsString(consumer));
 		}
 		catch (Exception e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 	}
 
@@ -374,7 +375,7 @@ public class LTI2Servlet extends HttpServlet {
 			return;
 		}
 
-		log.debug(jsonRequest.getPostBody());
+		System.out.println(jsonRequest.getPostBody());
 
 		// Lets check the signature
 		if ( key == null || secret == null ) {
@@ -393,9 +394,9 @@ public class LTI2Servlet extends HttpServlet {
 		ToolProxy toolProxy = null;
 		try {
 			toolProxy = new ToolProxy(jsonRequest.getPostBody());
-			log.debug("OBJ:{}", toolProxy);
+			// System.out.println("OBJ:"+toolProxy);
 		} catch (Throwable t ) {
-			log.error(t.getMessage(), t);
+			t.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			doErrorJSON(request, response, jsonRequest, "JSON parse failed", null);
 			return;
@@ -411,7 +412,7 @@ public class LTI2Servlet extends HttpServlet {
 		}
 
 		String shared_secret = (String) security_contract.get(LTI2Constants.SHARED_SECRET);
-		log.debug("shared_secret={}", shared_secret);
+		System.out.println("shared_secret="+shared_secret);
 		if ( shared_secret == null  ) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			doErrorJSON(request, response, jsonRequest, "JSON missing shared_secret", null);
@@ -446,12 +447,11 @@ public class LTI2Servlet extends HttpServlet {
 		jsonResponse.put(LTI2Constants.TYPE, StandardServices.TOOLPROXY_ID_TYPE);
 		jsonResponse.put(LTI2Constants.JSONLD_ID, getServiceURL(request) + SVC_tc_registration + "/" +profile_id);
 		jsonResponse.put(LTI2Constants.TOOL_PROXY_GUID, profile_id);
-		// Check if this is needed for 2.1
-		// jsonResponse.put(LTI2Constants.CUSTOM_URL, getServiceURL(request) + SVC_Settings + "/" + LTI2Util.SCOPE_ToolProxy + "/" +profile_id);
+		jsonResponse.put(LTI2Constants.CUSTOM_URL, getServiceURL(request) + SVC_Settings + "/" + LTI2Util.SCOPE_ToolProxy + "/" +profile_id);
 		response.setContentType(StandardServices.TOOLPROXY_ID_FORMAT);
 		response.setStatus(HttpServletResponse.SC_CREATED);
 		String jsonText = JSONValue.toJSONString(jsonResponse);
-		log.debug(jsonText);
+		M_log.debug(jsonText);
 		PrintWriter out = response.getWriter();
 		out.println(jsonText);
 	}
@@ -488,7 +488,7 @@ public class LTI2Servlet extends HttpServlet {
 			response.setContentType(StandardServices.RESULT_FORMAT);
 			response.setStatus(HttpServletResponse.SC_OK);
 			String jsonText = JSONValue.toJSONString(jsonResponse);
-			log.debug(jsonText);
+			M_log.debug(jsonText);
 			PrintWriter out = response.getWriter();
 			out.println(jsonText);
 			return;
@@ -496,7 +496,7 @@ public class LTI2Servlet extends HttpServlet {
 			retval = "Error parsing input data";
 			try {
 				jsonRequest = new IMSJSONRequest(request);
-				log.debug(jsonRequest.getPostBody());
+				// System.out.println(jsonRequest.getPostBody());
 				JSONObject requestData = (JSONObject) JSONValue.parse(jsonRequest.getPostBody());
 				String comment = (String) requestData.get(LTI2Constants.COMMENT);
 				JSONObject resultScore = (JSONObject) requestData.get(LTI2Constants.RESULTSCORE);
@@ -528,15 +528,15 @@ public class LTI2Servlet extends HttpServlet {
 	{
 
 		String URL = request.getRequestURL().toString();
-		log.debug("URL={}", URL);
+System.out.println("URL="+URL);
 		String scope = parts[4];
-		log.debug("scope={}", scope);
+System.out.println("scope="+scope);
 
 		String acceptHdr = request.getHeader("Accept");
 		String contentHdr = request.getContentType();
 		boolean acceptComplex = acceptHdr == null || acceptHdr.indexOf(StandardServices.TOOLSETTINGS_FORMAT) >= 0 ;
 
-		log.debug("accept={} ac={}", acceptHdr, acceptComplex);
+System.out.println("accept="+acceptHdr+" ac="+acceptComplex);
 
 		// Check the JSON on PUT and check the oauth_body_hash
 		IMSJSONRequest jsonRequest = null;
@@ -598,7 +598,7 @@ public class LTI2Servlet extends HttpServlet {
 			JSONObject jsonResponse = (JSONObject) obj;
 			response.setStatus(HttpServletResponse.SC_OK); 
 			PrintWriter out = response.getWriter();
-			log.debug("jsonResponse={}", jsonResponse);
+System.out.println("jsonResponse="+jsonResponse);
 			out.println(jsonResponse.toString());
 			return;
 		} else if ( "PUT".equals(request.getMethod()) ) {
@@ -620,8 +620,8 @@ public class LTI2Servlet extends HttpServlet {
 				settings = jsonRequest.getPostBody();
 			}
 			PERSIST.put(scope,settings);
-			log.debug("Stored settings scope={}", scope);
-			log.debug("settings={}", settings);
+System.out.println("Stored settings scope="+scope);
+System.out.println("settings="+settings);
 			response.setStatus(HttpServletResponse.SC_OK);
 		} else {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -635,11 +635,11 @@ public class LTI2Servlet extends HttpServlet {
 		throws java.io.IOException 
 	{
 		if (e != null) {
-			log.error(e.getLocalizedMessage(), e);
+			M_log.error(e.getLocalizedMessage(), e);
 		}
-		log.info(message);
+        M_log.info(message);
 		String output = IMSJSONRequest.doErrorJSON(request, response, json, message, e);
-		log.debug(output);
+System.out.println(output);
     }
 
 	public void destroy() {

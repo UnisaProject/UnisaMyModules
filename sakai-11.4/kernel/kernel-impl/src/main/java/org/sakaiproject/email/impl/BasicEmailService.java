@@ -52,12 +52,11 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.email.api.AddressValidationException;
 import org.sakaiproject.email.api.Attachment;
@@ -76,9 +75,11 @@ import org.sakaiproject.user.api.User;
  * BasicEmailService implements the EmailService.
  * </p>
  */
-@Slf4j
 public class BasicEmailService implements EmailService
 {
+	/** Our logger. */
+	private static Logger M_log = LoggerFactory.getLogger(BasicEmailService.class);
+
 	protected static final String PROTOCOL_SMTP = "smtp";
 	protected static final String PROTOCOL_SMTPS = "smtps";
 
@@ -140,7 +141,6 @@ public class BasicEmailService implements EmailService
 	public static final String MAIL_SENDFROMSAKAI = "mail.sendfromsakai";
 	public static final String MAIL_SENDFROMSAKAI_EXCEPTIONS = "mail.sendfromsakai.exceptions";
 	public static final String MAIL_SENDFROMSAKAI_FROMTEXT = "mail.sendfromsakai.fromtext";
-	public static final String MAIL_SENDFROMSAKAI_MAXSIZE = "mail.sendfromsakai.maxsize";
 
 	protected static final String CONTENT_TYPE = ContentType.TEXT_PLAIN;
 
@@ -401,7 +401,7 @@ public class BasicEmailService implements EmailService
 		if (m_smtpConnectionTimeout != null) System.setProperty(propName(MAIL_CONNECTIONTIMEOUT_T), m_smtpConnectionTimeout);
 		if (m_smtpTimeout != null) System.setProperty(propName(MAIL_TIMEOUT_T), m_smtpTimeout);
 
-		log.info("init(): smtp: " + m_smtp + ((m_smtpPort != null) ? (":" + m_smtpPort) : "") + " bounces to: " + m_smtpFrom
+		M_log.info("init(): smtp: " + m_smtp + ((m_smtpPort != null) ? (":" + m_smtpPort) : "") + " bounces to: " + m_smtpFrom
 				+ " maxRecipients: " + m_maxRecipients + " testMode: " + m_testMode
 				+ ((m_smtpConnectionTimeout != null) ? (" smtpConnectionTimeout: " + m_smtpConnectionTimeout) : "")
 				+ ((m_smtpTimeout != null) ? (" smtpTimeout: " + m_smtpTimeout) : ""));
@@ -412,7 +412,7 @@ public class BasicEmailService implements EmailService
 	 */
 	public void destroy()
 	{
-		log.info("destroy()");
+		M_log.info("destroy()");
 	}
 
 	/**********************************************************************************************************************************************************************************************************************************************************
@@ -445,7 +445,7 @@ public class BasicEmailService implements EmailService
 		}
 		catch (MessagingException e)
 		{
-			log.error("Email.sendMail: exception: " + e.getMessage(), e);
+			M_log.error("Email.sendMail: exception: " + e.getMessage(), e);
 		}
 	}
 
@@ -455,7 +455,7 @@ public class BasicEmailService implements EmailService
 			{
 		// some timing for debug
 		long start = 0;
-		if (log.isDebugEnabled()) start = System.currentTimeMillis();
+		if (M_log.isDebugEnabled()) start = System.currentTimeMillis();
 
 		// if in test mode, use the test method
 		if (m_testMode)
@@ -466,25 +466,25 @@ public class BasicEmailService implements EmailService
 
 		if (m_smtp == null)
 		{
-			log.error("Unable to send mail as no smtp server is defined. Please set smtp@org.sakaiproject.email.api.EmailService value in sakai.properties");
+			M_log.error("Unable to send mail as no smtp server is defined. Please set smtp@org.sakaiproject.email.api.EmailService value in sakai.properties");
 			return;
 		}
 
 		if (from == null)
 		{
-			log.warn("sendMail: null from");
+			M_log.warn("sendMail: null from");
 			return;
 		}
 
 		if (to == null)
 		{
-			log.warn("sendMail: null to");
+			M_log.warn("sendMail: null to");
 			return;
 		}
 
 		if (content == null)
 		{
-			log.warn("sendMail: null content");
+			M_log.warn("sendMail: null content");
 			return;
 		}
 
@@ -617,15 +617,15 @@ public class BasicEmailService implements EmailService
 			msg.addHeaderLine(EmailHeaders.CONTENT_TRANSFER_ENCODING + ": quoted-printable");
 		}
 
-		if (log.isDebugEnabled()) {
-			log.debug("HeaderLines received were: ");
+		if (M_log.isDebugEnabled()) {
+			M_log.debug("HeaderLines received were: ");
 			Enumeration<String> allHeaders = msg.getAllHeaderLines();
 			while(allHeaders.hasMoreElements()) {
-				log.debug((String)allHeaders.nextElement());
+				M_log.debug((String)allHeaders.nextElement());
 			}
 		}
 
-		sendMessageAndLog(to, start, msg, session);
+		sendMessageAndLog(from, to, subject, headerTo, start, msg, session);
 			}
 
 
@@ -643,15 +643,15 @@ public class BasicEmailService implements EmailService
 	    try {
 		Address[] fromA = msg.getFrom();
 		if (fromA == null || fromA.length == 0) {
-		    log.info("message from missing");
+		    M_log.info("message from missing");
 		    return;
 		} else if (fromA.length > 1) {
-		    log.info("message from more than 1");
+		    M_log.info("message from more than 1");
 		    return;
 		} else if (fromA instanceof InternetAddress[]) {
 		    from = (InternetAddress) fromA[0];
 		} else {
-		    log.info("message from not InternetAddress");
+		    M_log.info("message from not InternetAddress");
 		    return;
 		}
 		
@@ -661,7 +661,7 @@ public class BasicEmailService implements EmailService
 		else if (replyToA instanceof InternetAddress[])
 		    replyTo = (InternetAddress[]) replyToA;
 		else {
-		    log.info("message replyto isn't internet address");
+		    M_log.info("message replyto isn't internet address");
 		    return;
 		}
 		
@@ -711,9 +711,9 @@ public class BasicEmailService implements EmailService
 		    }
 		}
 	    } catch (javax.mail.internet.AddressException e) {
-		log.info("checkfrom address exception " + e);
+		M_log.info("checkfrom address exception " + e);
 	    } catch (javax.mail.MessagingException e) {
-		log.info("checkfrom messaging exception " + e);
+		M_log.info("checkfrom messaging exception " + e);
 	    }
 
 	}
@@ -735,19 +735,19 @@ public class BasicEmailService implements EmailService
 		// email should not be sent if from/to/content is empty or null
 		if (StringUtils.isBlank(fromStr))
 		{
-			log.warn("send: null/empty fromStr");
+			M_log.warn("send: null/empty fromStr");
 			return;
 		}
 
 		if (StringUtils.isBlank(toStr))
 		{
-			log.warn("send: null/empty toStr");
+			M_log.warn("send: null/empty toStr");
 			return;
 		}
 
 		if (StringUtils.isBlank(content))
 		{
-			log.warn("send: null/empty content");
+			M_log.warn("send: null/empty content");
 			return;
 		}
 
@@ -773,7 +773,7 @@ public class BasicEmailService implements EmailService
 		}
 		catch (AddressException e)
 		{
-			log.warn("send: " + e);
+			M_log.warn("send: " + e);
 		}
 	}
 
@@ -784,31 +784,31 @@ public class BasicEmailService implements EmailService
 	{
 		if (headers == null)
 		{
-			log.warn("sendToUsers: null headers");
+			M_log.warn("sendToUsers: null headers");
 			return;
 		}
 
 		if (m_testMode)
 		{
-			log.info("sendToUsers: users: " + usersToStr(users) + " headers: " + listToStr(headers) + " message:\n" + message);
+			M_log.info("sendToUsers: users: " + usersToStr(users) + " headers: " + listToStr(headers) + " message:\n" + message);
 			return;
 		}
 
 		if (m_smtp == null)
 		{
-			log.warn("sendToUsers: smtp not set");
+			M_log.warn("sendToUsers: smtp not set");
 			return;
 		}
 
 		if (users == null)
 		{
-			log.warn("sendToUsers: null users");
+			M_log.warn("sendToUsers: null users");
 			return;
 		}
 
 		if (message == null)
 		{
-			log.warn("sendToUsers: null message");
+			M_log.warn("sendToUsers: null message");
 			return;
 		}
 
@@ -825,7 +825,7 @@ public class BasicEmailService implements EmailService
 				}
 				catch (AddressException e)
 				{
-					if (log.isDebugEnabled()) log.debug("sendToUsers: " + e);
+					if (M_log.isDebugEnabled()) M_log.debug("sendToUsers: " + e);
 				}
 			}
 		}
@@ -897,19 +897,19 @@ public class BasicEmailService implements EmailService
 		int numConnects = 1;
 		try
 		{
-			if (log.isDebugEnabled()) time1 = System.currentTimeMillis();
+			if (M_log.isDebugEnabled()) time1 = System.currentTimeMillis();
 			Transport transport = session.getTransport(protocol);
 
-			if (log.isDebugEnabled()) time2 = System.currentTimeMillis();
+			if (M_log.isDebugEnabled()) time2 = System.currentTimeMillis();
 			msg.saveChanges();
 
-			if (log.isDebugEnabled()) time3 = System.currentTimeMillis();
+			if (M_log.isDebugEnabled()) time3 = System.currentTimeMillis();
 			if(m_smtpUser != null && m_smtpPassword != null)
 				transport.connect(m_smtp,m_smtpUser,m_smtpPassword);
 			else
 				transport.connect();
 
-			if (log.isDebugEnabled()) time4 = System.currentTimeMillis();
+			if (M_log.isDebugEnabled()) time4 = System.currentTimeMillis();
 
 			// loop the send for each message set
 			for (Iterator<Address[]> i = messageSets.iterator(); i.hasNext();)
@@ -923,13 +923,13 @@ public class BasicEmailService implements EmailService
 					// if we need to use the connection for just one send, and we have more, close and re-open
 					if ((m_oneMessagePerConnection) && (i.hasNext()))
 					{
-						if (log.isDebugEnabled()) timeTmp = System.currentTimeMillis();
+						if (M_log.isDebugEnabled()) timeTmp = System.currentTimeMillis();
 						transport.close();
-						if (log.isDebugEnabled()) timeExtraClose += (System.currentTimeMillis() - timeTmp);
+						if (M_log.isDebugEnabled()) timeExtraClose += (System.currentTimeMillis() - timeTmp);
 
-						if (log.isDebugEnabled()) timeTmp = System.currentTimeMillis();
+						if (M_log.isDebugEnabled()) timeTmp = System.currentTimeMillis();
 						transport.connect();
-						if (log.isDebugEnabled())
+						if (M_log.isDebugEnabled())
 						{
 							timeExtraConnect += (System.currentTimeMillis() - timeTmp);
 							numConnects++;
@@ -938,26 +938,26 @@ public class BasicEmailService implements EmailService
 				}
 				catch (SendFailedException e)
 				{
-					if (log.isDebugEnabled()) log.debug("transportMessage: " + e);
+					if (M_log.isDebugEnabled()) M_log.debug("transportMessage: " + e);
 				}
 				catch (MessagingException e)
 				{
-					log.warn("transportMessage: " + e);
+					M_log.warn("transportMessage: " + e);
 				}
 			}
 
-			if (log.isDebugEnabled()) time5 = System.currentTimeMillis();
+			if (M_log.isDebugEnabled()) time5 = System.currentTimeMillis();
 			transport.close();
 
-			if (log.isDebugEnabled()) time6 = System.currentTimeMillis();
+			if (M_log.isDebugEnabled()) time6 = System.currentTimeMillis();
 		}
 		catch (MessagingException e)
 		{
-			log.warn("transportMessage:" + e);
+			M_log.warn("transportMessage:" + e);
 		}
 
 		// log
-		if (log.isInfoEnabled())
+		if (M_log.isInfoEnabled())
 		{
 			StringBuilder buf = new StringBuilder();
 			buf.append("transportMessage: headers[");
@@ -978,7 +978,7 @@ public class BasicEmailService implements EmailService
 				buf.append("]");
 			}
 
-			if (log.isDebugEnabled())
+			if (M_log.isDebugEnabled())
 			{
 				buf.append(" times[ ");
 				buf.append(" getransport:" + (time2 - time1) + " savechanges:" + (time3 - time2) + " connect(#" + numConnects + "):"
@@ -986,7 +986,7 @@ public class BasicEmailService implements EmailService
 						+ " close:" + ((time6 - time5) + timeExtraClose) + " total: " + (time6 - time1) + " ]");
 			}
 
-			log.info(buf.toString());
+			M_log.info(buf.toString());
 		}
 	}
 
@@ -1037,7 +1037,7 @@ public class BasicEmailService implements EmailService
 			addresses = send(msg,true);
 		}
 		catch (MessagingException e) {
-			log.error("Email.sendMail: exception: " + e.getMessage(), e);
+			M_log.error("Email.sendMail: exception: " + e.getMessage(), e);
 		}
 		return addresses;
 	}
@@ -1149,7 +1149,7 @@ public class BasicEmailService implements EmailService
 		} catch (MessagingException e) {
 			// Just log it, if user doesn't want it thrown
 			if (messagingException == false) {
-				log.error("Email.sendMail: exception: " + e.getMessage(), e);
+				M_log.error("Email.sendMail: exception: " + e.getMessage(), e);
 			} else {
 				throw e;
 			}
@@ -1316,24 +1316,11 @@ public class BasicEmailService implements EmailService
 		ArrayList<MimeBodyPart> embeddedAttachments = new ArrayList<MimeBodyPart>();
 		if (attachments != null && attachments.size() > 0)
 		{
-			int maxAttachmentSize = serverConfigurationService.getInt(MAIL_SENDFROMSAKAI_MAXSIZE, 25000000);
-			int attachmentRunningTotal = 0;
-
 			// Add attachments to messages
 			for (Attachment attachment : attachments)
 			{
 				// attach the file to the message
-				MimeBodyPart mbp = createAttachmentPart(attachment);
-				int mbpSize = mbp.getSize();
-				if ( (attachmentRunningTotal + mbpSize) < maxAttachmentSize )
-				{
-					embeddedAttachments.add(mbp);
-					attachmentRunningTotal = attachmentRunningTotal + mbpSize;
-				}
-				else
-				{
-					log.debug("Removed attachment from mail message because it was too large: " + mbpSize);
-				}
+				embeddedAttachments.add(createAttachmentPart(attachment));
 			}
 		}
 
@@ -1404,7 +1391,7 @@ public class BasicEmailService implements EmailService
 	protected void testSendMail(InternetAddress from, InternetAddress[] to, String subject, String content,
 			Map<RecipientType, InternetAddress[]> headerTo, InternetAddress[] replyTo, List<String> additionalHeaders, List<Attachment> attachments)
 	{
-		log.info("sendMail: from: {} to: {} subject: {} headerTo: {} replyTo: {} content: {} additionalHeaders: {}",
+		M_log.info("sendMail: from: {} to: {} subject: {} headerTo: {} replyTo: {} content: {} additionalHeaders: {}",
 				   from, arrayToStr(to), subject, mapToStr(headerTo), arrayToStr(replyTo), content, listToStr(additionalHeaders));
 		//If the attachments isn't empty do something with them
 		if (CollectionUtils.isNotEmpty(attachments)){
@@ -1416,11 +1403,11 @@ public class BasicEmailService implements EmailService
 						attachmentContent = IOUtils.toString(attachment.getDataSource().getInputStream(), "UTF-8"); 
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
-						log.debug("sendMail: error accessing attachment content",e);
+						M_log.debug("sendMail: error accessing attachment content",e);
 					}
 				}
 
-				log.info("sendMail: attachment name: {} type header: {} body:{}{}",
+				M_log.info("sendMail: attachment name: {} type header: {} body:{}{}",
 							attachment.getFilename(),attachment.getContentTypeHeader(),  System.lineSeparator(), attachmentContent);
 			}
 		}
@@ -1432,7 +1419,7 @@ public class BasicEmailService implements EmailService
 	protected void testSend(String fromStr, String toStr, String subject, String content, String headerToStr, String replyToStr,
 			List<String> additionalHeaders)
 	{
-		log.info("send: from: " + fromStr + " to: " + toStr + " subject: " + subject + " headerTo: " + headerToStr + " replyTo: "
+		M_log.info("send: from: " + fromStr + " to: " + toStr + " subject: " + subject + " headerTo: " + headerToStr + " replyTo: "
 				+ replyToStr + " content: " + content + " additionalHeaders: " + listToStr(additionalHeaders));
 	}
 
@@ -1449,35 +1436,69 @@ public class BasicEmailService implements EmailService
 		}
 	}
 
-	protected void sendMessageAndLog(InternetAddress[] to, long start, MimeMessage msg, Session session)
+	protected void sendMessageAndLog(InternetAddress from, InternetAddress[] to, String subject,
+			Map<RecipientType, InternetAddress[]> headerTo, long start, MimeMessage msg,Session session)
 			throws MessagingException
 	{
 		long preSend = 0;
-		if (log.isDebugEnabled()) preSend = System.currentTimeMillis();
+		if (M_log.isDebugEnabled()) preSend = System.currentTimeMillis();
 
 		if (allowTransport)
 		{
 			msg.saveChanges();
 
-			transportMessage(session, getMessageSets(new ArrayList<>(Arrays.asList(to))), new ArrayList<>(), msg);
+			transportMessage(session, getMessageSets(new ArrayList<InternetAddress>(Arrays.asList(to))), new ArrayList<String>(), msg);
 		}
 
 		long end = 0;
-		if (log.isDebugEnabled()) end = System.currentTimeMillis();
+		if (M_log.isDebugEnabled()) end = System.currentTimeMillis();
 
-		if (log.isInfoEnabled())
+		if (M_log.isInfoEnabled())
 		{
 			StringBuilder buf = new StringBuilder();
-			buf.append("Email.sendMail:");
-			appendAddresses(buf, msg.getFrom(), " from:");
-			buf.append("subject: ");
-			buf.append(msg.getSubject());
-			appendAddresses(buf, to, " to:");
-			appendAddresses(buf, msg.getRecipients(Message.RecipientType.TO), " headerTo{to}:");
-			appendAddresses(buf, msg.getRecipients(Message.RecipientType.CC), " headerTo{cc}:");
-			appendAddresses(buf, msg.getRecipients(Message.RecipientType.BCC), " headerTo{bcc}:");
-			appendAddresses(buf, msg.getReplyTo(), " replyTo:");
-
+			buf.append("Email.sendMail: from: ");
+			buf.append(from);
+			buf.append(" subject: ");
+			buf.append(subject);
+			buf.append(" to:");
+			for (int i = 0; i < to.length; i++)
+			{
+				buf.append(" ");
+				buf.append(to[i]);
+			}
+			if (headerTo != null)
+			{
+				if (headerTo.containsKey(RecipientType.TO))
+				{
+					buf.append(" headerTo{to}:");
+					InternetAddress[] headerToTo = headerTo.get(RecipientType.TO);
+					for (int i = 0; i < headerToTo.length; i++)
+					{
+						buf.append(" ");
+						buf.append(headerToTo[i]);
+					}
+				}
+				if (headerTo.containsKey(RecipientType.CC))
+				{
+					buf.append(" headerTo{cc}:");
+					InternetAddress[] headerToCc = headerTo.get(RecipientType.CC);
+					for (int i = 0; i < headerToCc.length; i++)
+					{
+						buf.append(" ");
+						buf.append(headerToCc[i]);
+					}
+				}
+				if (headerTo.containsKey(RecipientType.BCC))
+				{
+					buf.append(" headerTo{bcc}:");
+					InternetAddress[] headerToBcc = headerTo.get(RecipientType.BCC);
+					for (int i = 0; i < headerToBcc.length; i++)
+					{
+						buf.append(" ");
+						buf.append(headerToBcc[i]);
+					}
+				}
+			}
 			try
 			{
 				if (msg.getContent() instanceof Multipart)
@@ -1488,7 +1509,7 @@ public class BasicEmailService implements EmailService
 			}
 			catch (IOException ioe) {}
 
-			if (log.isDebugEnabled())
+			if (M_log.isDebugEnabled())
 			{
 				buf.append(" time: ");
 				buf.append("" + (end - start));
@@ -1496,45 +1517,9 @@ public class BasicEmailService implements EmailService
 				buf.append("" + (end - preSend));
 			}
 
-			log.info(buf.toString());
+			M_log.info(buf.toString());
 		}
 	}
-
-
-	/**
-	 * Utility method to append addresses to a StringBuilder.
-	 * @param buffer The string builder to append to.
-	 * @param addresses The addresses to append.
-	 * @param label The label for these addresses.
-	 */
-	private void appendAddresses(StringBuilder buffer, Address[] addresses, String label) {
-		if (addresses != null)
-		{
-			buffer.append(label);
-			for (Address address : addresses)
-			{
-				buffer.append(" ");
-				buffer.append(toEmail(address));
-			}
-		}
-	}
-
-	/**
-	 * @param address The address, hopefully an {@link InternetAddress}
-	 * @return The email address if it can, otherwise the whole address.
-	 */
-	private String toEmail(Address address)
-	{
-		if (address instanceof InternetAddress)
-		{
-			return ((InternetAddress) address).getAddress();
-		}
-		else
-		{
-			return address.toString();
-		}
-	}
-
 
 	protected void setRecipients(Map<RecipientType, InternetAddress[]> headerTo, MimeMessage msg)
 			throws MessagingException
@@ -1638,7 +1623,7 @@ public class BasicEmailService implements EmailService
 							}
 							catch (MessagingException e)
 							{
-								log.warn("Email.MyMessage: exception: " + e.getMessage(), e);
+								M_log.warn("Email.MyMessage: exception: " + e.getMessage(), e);
 							}
 						}
 					}
@@ -1740,7 +1725,7 @@ public class BasicEmailService implements EmailService
 			}
 			catch (MessagingException e)
 			{
-				log.warn("Email.MyMessage: exception: " + e.getMessage(), e);
+				M_log.warn("Email.MyMessage: exception: " + e.getMessage(), e);
 			}
 		}
 
@@ -1794,12 +1779,12 @@ public class BasicEmailService implements EmailService
 			 } 
 			 catch (MessagingException e) 
 			 {
-				  log.error("Email.MyMessage: exception: " + e, e);
+				  M_log.error("Email.MyMessage: exception: " + e, e);
 				  addHeaderLine(header);
 			 } 
 			 catch (UnsupportedEncodingException e)
 			 {
-				  log.error("Email.MyMessage: exception: " + e, e);
+				  M_log.error("Email.MyMessage: exception: " + e, e);
 				  addHeaderLine(header);
 			 }
 		} 

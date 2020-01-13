@@ -87,7 +87,7 @@ public interface SiteService extends EntityProducer
 	/** Name for the event of creating a site from a sakai archive (KNL-1210) */
 	static final String SECURE_IMPORT_ARCHIVE = "site.import.archive";
 	
-	/** Name for the event of adding a user's Home site. */
+	/** Name for the event of adding a user's My Workspace site. */
 	static final String SECURE_ADD_USER_SITE = "site.add.usersite";
 
 	/** Name for the event of removing a site. */
@@ -948,23 +948,6 @@ public interface SiteService extends EntityProducer
 	 * @return A List<Site> of those sites the current user can access.
 	 */
 	List<Site> getUserSites(boolean requireDescription, boolean includeUnpublishedSites);
-	
-	/**
-	 * Access a list of sites that the current user can visit, sorted by title, optionally requiring descriptions.
-	 *
-	 * This is a convenience and performance wrapper for getSites, because there are many places that need
-	 * the complete list of sites for the current user, and getSites is unnecessarily verbose in that case.
-	 * Because the semantics of this call are specific, it can also be optimized by the implementation.
-	 *
-	 * The sites returned follow the same semantics as those from
-	 * {@link #getSites(SelectionType, Object, String, Map, SortType, PagingPosition) getSites}.
-	 *
-	 * @param requireDescription when true, full descriptions will be included; when false, full descriptions may be omitted.
-	 * @param includeUnpublishedSites when true, unpublished sites will be included; when false, unpublished sites will be omitted.
-	 * @param excludedSites list with siteIDs to be excluded from being loaded. If no exclusions are required, set to NULL or empty list.
-	 * @return A List<Site> of those sites the current user can access.
-	 */
-	List<Site> getUserSites(boolean requireDescription, boolean includeUnpublishedSites, List excludedSites);
 
 	/**
 	 * Access a list of sites that the specified user can visit, sorted by title, optionally requiring descriptions.
@@ -997,24 +980,6 @@ public interface SiteService extends EntityProducer
 	 * @return A List<Site> of those sites the current user can access.
 	 */
 	List<Site> getUserSites(boolean requireDescription, String userID, boolean includeUnpublishedSites);
-	
-	/**
-	 * Access a list of sites that the specified user can visit, sorted by title, optionally requiring descriptions.
-	 *
-	 * This is a convenience and performance wrapper for getSites.
-	 * 
-	 * Unpublished sites are not included; use getSites(String, boolean) to control if unpublished sites are included or not.
-	 *
-	 * The sites returned follow the same semantics as those from
-	 * {@link #getSites(SelectionType, Object, String, Map, SortType, PagingPosition, boolean, String) getSites}.
-	 *
-	 * @param requireDescription when true, full descriptions will be included; when false, full descriptions may be omitted.
-	 * @param userID the returned sites will be those which can be accessed by the user with this internal ID. Uses the current user if null.
-	 * @param includeUnpublishedSites when true, unpublished sites will be included; when false, unpublished sites will be omitted.
-	 * @param excludedSites list with siteIDs to be excluded from being loaded. If no exclusions are required, set to NULL or empty list.
-	 * @return A List<Site> of those sites the current user can access.
-	 */
-	List<Site> getUserSites(boolean requireDescription, String userID, boolean includeUnpublishedSites, List excludedSites);
 
 	/**
 	 * Access a list of Site objects that meet specified criteria.
@@ -1292,35 +1257,4 @@ public interface SiteService extends EntityProducer
 	 * @return the site or section title
 	 */
 	public String getUserSpecificSiteTitle( Site site, String userID );
-
-	/**
-	 * Similar to getUserSpecificSiteTitle(Site site, String userId), but consumes the specified siteProviders (for performance savings)
-	 *
-	 * @see getUserSpecificSiteTitle(Site site, String userId)
-	 * @param siteProviders the site providers corresponding to the specified site; if null, they will be looked up
-	 */
-	public String getUserSpecificSiteTitle(Site site, String userID, List<String> siteProviders);
-
-	/**
-	 * Defines the maximum character length of a site title.
-	 */
-	public static final int SITE_TITLE_MAX_LENGTH = 99;
-
-	/**
-	 * Defines the possible results which can be returned from the {@link validateSiteTitle()} method.
-	 */
-	public enum SiteTitleValidationStatus {
-		OK,
-		TOO_LONG,
-		EMPTY,
-		STRIPPED_TO_EMPTY
-	}
-
-	/**
-	 * Given the original and stripped site titles, determine that validation status of the stripped string.
-	 * @param orig the original, unaltered text as input by the user
-	 * @param stripped the HTML stripped text, produced by passing the original text through FormattedText.stripHtmlFromText(text, true, true).
-	 * @return {@link SiteTitleValidationStatus}
-	 */
-	public SiteTitleValidationStatus validateSiteTitle(String orig, String stripped);
-}
+} 

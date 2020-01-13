@@ -21,7 +21,6 @@
 package org.sakaiproject.content.impl;
 
 import java.io.InputStream;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Set;
 import java.util.Stack;
@@ -182,16 +181,6 @@ public class AbstractContentResource implements ContentResource{
 
 	public InputStream streamContent() throws ServerOverloadException {
 		return wrapped.streamContent();
-	}
-
-	@Override
-	public Instant getReleaseInstant() {
-		return wrapped.getReleaseInstant();
-	}
-
-	@Override
-	public Instant getRetractInstant() {
-		return wrapped.getRetractInstant();
 	}
 
 }

@@ -9,11 +9,12 @@
 	</organization>
 	<inceptionYear>2007</inceptionYear>
 	<packaging>pom</packaging>
+	<version>11.4</version>
   
 	<parent>
 		<groupId>org.sakaiproject</groupId>
 		<artifactId>master</artifactId>
-		<version>12.6</version>
+		<version>11.4</version>
 		<relativePath>../master/pom.xml</relativePath>
 	</parent>
 	<modules>
@@ -34,12 +35,12 @@
 			<dependency>
 				<groupId>org.sakaiproject.qna</groupId>
 				<artifactId>qna-api</artifactId>
-				<version>${project.version}</version>
+				<version>11.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sakaiproject.qna</groupId>
 				<artifactId>qna-impl</artifactId>
-				<version>${project.version}</version>
+				<version>11.4</version>
 			</dependency>
 			<!--<dependency>
 				<groupId>org.sakaiproject.search</groupId>
@@ -50,7 +51,7 @@
 			<dependency>
 				<groupId>org.sakaiproject.sms</groupId>
 				<artifactId>sms-api</artifactId>
-				<version>${project.version}</version>
+				<version>11.4</version>
 				<scope>provided</scope>
 			</dependency>
 			<!--<dependency>
@@ -60,7 +61,28 @@
 			</dependency>-->
 		</dependencies>
 	</dependencyManagement>
-
+	<distributionManagement>
+	  <downloadUrl>http://source.sakaiproject.org/maven2/</downloadUrl>
+		<snapshotRepository>
+			<uniqueVersion>false</uniqueVersion>
+			<id>sakai-maven-snapshots-scp</id>
+			<name>Sakai snapshot Repo</name>
+			<url>scp://source.sakaiproject.org/var/www/html/maven2-snapshots</url>
+			<layout>default</layout>
+		</snapshotRepository>
+		<repository>
+			<uniqueVersion>false</uniqueVersion>
+			<id>sakai-maven2-scp</id>
+			<name>Sakai maven2 repository</name>
+			<url>scp://source.sakaiproject.org/var/www/html/maven2</url>
+			<layout>default</layout>
+		</repository>
+		<site>
+			<id>sakai-site</id>
+			<name>Sakai release Site</name>
+			<url>${url.localsite}</url>
+		</site>
+	</distributionManagement>
 	<!-- define source code repository location -->
 	<scm>
 		<connection>scm:svn:https://source.sakaiproject.org/contrib/qna/trunk</connection>
@@ -71,8 +93,22 @@
 		<system>jira</system>
 		<url>http://jira.sakaiproject.org/browse/QNA</url>
 	</issueManagement>
-
-    
+	<ciManagement>
+		<system>Continuum</system>
+		<url>http://arabica.cet.uct.ac.za:8080/continuum</url>
+		<notifiers>
+			<notifier>
+				<type>mail</type>
+				<sendOnError>true</sendOnError>
+				<sendOnFailure>true</sendOnFailure>
+				<sendOnSuccess>false</sendOnSuccess>
+				<sendOnWarning>false</sendOnWarning>
+				<configuration>
+					<address>david.horwitz@uct.ac.za</address>
+				</configuration>
+			</notifier>
+		</notifiers>
+	</ciManagement>
 	<pluginRepositories>
 		<pluginRepository>
 			<id>mc-release</id>
@@ -87,5 +123,120 @@
 		</pluginRepository>
 	</pluginRepositories>
 	<!-- Build -->
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<!--<plugin>
+				<groupId>com.google.code.maven-license-plugin</groupId>
+				<artifactId>maven-license-plugin</artifactId>
+				<version>1.4.0</version>
+				<configuration>
+					<basedir>${basedir}</basedir>
+					<header>https://source.sakaiproject.org/svn/sakai/branches/sakai-trunk-experimental/ECLv2-header-template.txt</header>
+                    
+					<quiet>false</quiet>
+					<failIfMissing>true</failIfMissing>
+					<aggregate>false</aggregate>
+					<includes>
+						<include>src/**/*.java</include>
+						<include>**/test/**/*.java</include>
+						<include>src/webapp/**/*.css</include>
+						<include>src/webapp/**/*.html</include>
+						<include>src/webapp/**/*.js</include>
+						<include>src/webapp/**/*.jsp</include>
+					</includes>
+					<excludes>
+						<exclude>target/**</exclude>
+						<exclude>m2-target/**</exclude>
+						<exclude>**/*.properties</exclude>
+						<exclude>**/*.sql</exclude>
+						<exclude>**/*.TXT</exclude>
+						<exclude>**/*.xml</exclude>
+						<include>src/webapp/**/jquery*.js</include>
+					</excludes>
+					<useDefaultExcludes>true</useDefaultExcludes>
+					<useDefaultMapping>true</useDefaultMapping>
+					<properties>
+                        
+						<year>${project.inceptionYear}-2009</year>
+						<holder>The Sakai Foundation</holder>
+                        
+					</properties>
+					<encoding>UTF-8</encoding>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>-->
+			<plugin>
+			  <groupId>org.apache.maven.plugins</groupId>
+			  <artifactId>maven-gpg-plugin</artifactId>
+			  <configuration>
+			    <skip>true</skip>
+			  </configuration>
+			</plugin>
+		</plugins>
+	</build>
 
+    <!-- Reporting (mvn site) -->
+	<reporting>
+		<plugins>
+            <!-- JavaDocs: mvn javadoc:javadoc -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<aggregate>true</aggregate>
+					<source>1.5</source>
+					<links>
+						<link>http://java.sun.com/j2se/1.5.0/docs/api</link>
+						<link>http://java.sun.com/products/servlet/2.3/javadoc/</link>
+					</links>
+					<breakiterator>true</breakiterator>
+					<verbose>false</verbose>
+					<maxmemory>512m</maxmemory>
+				</configuration>
+			</plugin>
+            <!-- FindBugs: mvn findbugs:findbugs -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>1.2</version>
+				<configuration>
+					<findbugsXmlOutput>true</findbugsXmlOutput>
+					<findbugsXmlWithMessages>true</findbugsXmlWithMessages>
+					<xmlOutput>true</xmlOutput>
+				</configuration>
+			</plugin>
+            <!-- CheckStyle: mvn checkstyle:checkstyle -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<outputFileFormat>xml</outputFileFormat>
+				</configuration>
+			</plugin>
+            <!-- Cobertura: mvn cobertura:cobertura -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<configuration>
+					<formats>
+						<format>html</format>
+						<format>xml</format>
+					</formats>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>

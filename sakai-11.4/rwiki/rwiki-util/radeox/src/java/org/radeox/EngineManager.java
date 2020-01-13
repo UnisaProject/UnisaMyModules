@@ -27,7 +27,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.radeox.api.engine.RenderEngine;
 import org.radeox.engine.BaseRenderEngine;
 import org.radeox.util.Service;
@@ -40,9 +41,11 @@ import org.radeox.util.Service;
  * @version $Id: EngineManager.java 7707 2006-04-12 17:30:19Z
  *          ian@caret.cam.ac.uk $
  */
-@Slf4j
+
 public class EngineManager
 {
+	private static Logger log = LoggerFactory.getLogger(EngineManager.class);
+
 	public static final String DEFAULT = "radeox";
 
 	private static Map availableEngines = new HashMap();

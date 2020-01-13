@@ -24,8 +24,6 @@ package uk.ac.cam.caret.sakai.rwiki.model;
 import java.security.MessageDigest;
 import java.util.Date;
 
-import lombok.extern.slf4j.Slf4j;
-
 import uk.ac.cam.caret.sakai.rwiki.service.api.dao.RWikiObjectContentDao;
 import uk.ac.cam.caret.sakai.rwiki.service.api.model.RWikiObject;
 import uk.ac.cam.caret.sakai.rwiki.service.api.model.RWikiObjectContent;
@@ -39,7 +37,6 @@ import uk.ac.cam.caret.sakai.rwiki.service.api.model.RWikiPermissions;
  * @author University of Michigan, CHEF Software Development Team
  * @version $Revision$
  */
-@Slf4j
 public abstract class RWikiObjectImpl implements RWikiObject
 {
 
@@ -659,9 +656,9 @@ public abstract class RWikiObjectImpl implements RWikiObject
 		{
 			// Exception ex = new RuntimeException("TRACE: Content Object DAO is
 			// null");
-			// log.info("Problem with loading Lazy Content, this is
+			// System.err.println("Problem with loading Lazy Content, this is
 			// Ok, just means lazyLoadContent was called by Hibernate");
-			// log.error(ex.getMessage(), ex);
+			// ex.printStackTrace();
 			return;
 		}
 		if (co == null)
@@ -743,7 +740,8 @@ public abstract class RWikiObjectImpl implements RWikiObject
 		}
 		catch (Exception ex)
 		{
-			log.error("Unable to create SHA hash of content", ex);
+			System.err.println("Unable to create SHA hash of content");
+			ex.printStackTrace();
 		}
 		return digest;
 	}

@@ -30,8 +30,8 @@ import java.sql.Types;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.content.impl.serialize.impl.Type1BaseContentResourceSerializer;
 import org.sakaiproject.util.conversion.SchemaConversionHandler;
 
@@ -40,9 +40,11 @@ import org.sakaiproject.util.conversion.SchemaConversionHandler;
  * 
  * @author ieb
  */
-@Slf4j
 public class FileSizeResourcesConversionHandler implements SchemaConversionHandler
 {
+
+	private static final Logger log = LoggerFactory.getLogger(FileSizeResourcesConversionHandler.class);
+
 	private Pattern contextPattern =  Pattern.compile("\\A/(group/|user/|~)(.+?)/");
 
 	/*
@@ -142,4 +144,6 @@ public class FileSizeResourcesConversionHandler implements SchemaConversionHandl
 	{
 		return rs.getString(1);
 	}
+
+
 }

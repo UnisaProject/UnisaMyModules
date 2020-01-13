@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		<form-bean name="assMarkerReallocationForm" 
+		 	type="za.ac.unisa.lms.tools.assmarkerreallocation.forms.AssMarkerReallocationForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.assmarkerreallocation.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/assMarkerReallocation.do?action=initial"
+				contextRelative="true" />
+		</action>
+		<action
+			name="assMarkerReallocationForm"
+			attribute="assMarkerReallocationForm"
+			parameter="action"
+			path="/assMarkerReallocation"
+			type="za.ac.unisa.lms.tools.assmarkerreallocation.actions.AssMarkerReallocationAction"
+			validate="false">
+			<forward
+				name="input"
+				path="/WEB-INF/jsp/input.jsp"
+				contextRelative="true" />
+			<forward
+				name="assMarkerDetail"
+				path="/WEB-INF/jsp/assMarkerDetail.jsp"
+				contextRelative="true" />
+			<forward
+				name="assessmentlist"
+				path="/WEB-INF/jsp/assessmentList.jsp"
+				contextRelative="true" />
+			<forward
+				name="userUnknown"
+				path="/WEB-INF/jsp/userunknown.jsp"
+				contextRelative="true" />
+								
+		</action>  
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.assmarkerreallocation.ApplicationResources" />
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

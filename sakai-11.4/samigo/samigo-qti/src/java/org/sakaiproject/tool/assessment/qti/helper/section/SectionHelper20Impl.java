@@ -19,9 +19,12 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.qti.helper.section;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.tool.assessment.qti.constants.QTIVersion;
 
@@ -34,9 +37,9 @@ import org.sakaiproject.tool.assessment.qti.constants.QTIVersion;
  */
 
 // Note sections for QTI 1.2 and 2.0 are nearly identical
-@Slf4j
 public class SectionHelper20Impl extends SectionHelperBase
 {
+  private static Logger log = LoggerFactory.getLogger(SectionHelper20Impl.class);
 
   public SectionHelper20Impl()
   {

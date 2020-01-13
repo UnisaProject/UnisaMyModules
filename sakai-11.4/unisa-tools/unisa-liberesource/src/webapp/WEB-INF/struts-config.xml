@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	<form-bean name="libmainForm" type="za.ac.unisa.lms.tools.liberesource.forms.LibmainForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.liberesource.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/resource.do?act=libmainDisplay"
+				contextRelative="true" />
+		</action>
+		<action
+		attribute="libmainForm"
+		input="/WEB-INF/jsp/libmainform.jsp"
+		name="libmainForm"
+		parameter="act"
+		path="/resource"
+		scope="session"
+		type="za.ac.unisa.lms.tools.liberesource.actions.ResourceAction"
+		validate="false">
+		<forward name="libmainDisplay" path="/WEB-INF/jsp/libmainform.jsp" contextRelative="true"/>
+		<forward name="subjectDisplay" path="/WEB-INF/jsp/resourcebysubject.jsp" contextRelative="true"/>
+		<forward name="vendorDisplay" path="/WEB-INF/jsp/resourcebyvendors.jsp" contextRelative="true"/>
+		<forward name="eresourceDisplay" path="/WEB-INF/jsp/eresource.jsp" contextRelative="true"/>
+		</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.liberesource.ApplicationResources" />
+
+</struts-config>

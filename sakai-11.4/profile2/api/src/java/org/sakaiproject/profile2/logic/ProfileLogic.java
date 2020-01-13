@@ -148,8 +148,8 @@ public interface ProfileLogic {
 	
 	/**
 	 * Get a Person
-	 * @param userUuid The user to lookup
-	 * @return The found person or <code>null</code> if the person can't be found.
+	 * @param userUuid
+	 * @return
 	 */
 	public Person getPerson(String userUuid);
 	

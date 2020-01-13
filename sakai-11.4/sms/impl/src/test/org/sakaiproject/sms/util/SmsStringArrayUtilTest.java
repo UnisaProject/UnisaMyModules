@@ -17,8 +17,6 @@
  **********************************************************************************/
 package org.sakaiproject.sms.util;
 
-import org.junit.Assert;
-
 import junit.framework.TestCase;
 
 public class SmsStringArrayUtilTest extends TestCase {
@@ -26,34 +24,34 @@ public class SmsStringArrayUtilTest extends TestCase {
 	public void testToUppercase() {
 		String[] arr = new String[] {"aa", "bBB ", "cc-cc"};
 		String[] returned = SmsStringArrayUtil.upperCaseArray(arr);
-		Assert.assertTrue("AA".equals(returned[0]));
-		Assert.assertTrue("BBB ".equals(returned[1]));
-		Assert.assertTrue("CC-CC".equals(returned[2]));
+		assertTrue("AA".equals(returned[0]));
+		assertTrue("BBB ".equals(returned[1]));
+		assertTrue("CC-CC".equals(returned[2]));
 	}
 	
 	public void testFindInArray() {
 		String returned = SmsStringArrayUtil.findInArray(new String[] {"AA", "BB", "CC"}, "aA");
-		Assert.assertEquals("AA", returned);
+		assertEquals("AA", returned);
 		
 		returned = SmsStringArrayUtil.findInArray(new String[] {"AA", "BB", "CC"}, null);
-		Assert.assertEquals(null, returned);
+		assertEquals(null, returned);
 		
 		returned = SmsStringArrayUtil.findInArray(null, "AA");
-		Assert.assertEquals(null, returned);
+		assertEquals(null, returned);
 		
 		returned = SmsStringArrayUtil.findInArray(new String[] {"AA", "BB", "CC"}, "BB");
-		Assert.assertEquals("BB", returned);
+		assertEquals("BB", returned);
 	}
 	
 	public void testCopyOf() {
 		String[] copy = SmsStringArrayUtil.copyOf(new String[]{"A", "B"}, 3);
-		Assert.assertEquals(3, copy.length);
-		Assert.assertEquals("A", copy[0]);
-		Assert.assertEquals("B", copy[1]);
-		Assert.assertEquals(null, copy[2]);
+		assertEquals(3, copy.length);
+		assertEquals("A", copy[0]);
+		assertEquals("B", copy[1]);
+		assertEquals(null, copy[2]);
 		
 		copy = SmsStringArrayUtil.copyOf(new String[]{"A", "B", "C", "D"}, 3);
-		Assert.assertEquals(3, copy.length);
+		assertEquals(3, copy.length);
 		
 	}
 }

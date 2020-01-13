@@ -31,7 +31,8 @@ import java.util.Set;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.content.api.FilePickerHelper;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.tool.api.ToolSession;
@@ -44,12 +45,12 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 import org.sakaiproject.tool.assessment.util.AttachmentUtil;
 import org.sakaiproject.tool.cover.SessionManager;
 
+
 /**
  * A set of information for an agent.  This contains both totalScores
  * and questionScores information.
 */
 
-@Slf4j
 public class AgentResults
     implements Serializable
 {
@@ -57,6 +58,7 @@ public class AgentResults
 	 * 
 	 */
 	private static final long serialVersionUID = 2820488402465439395L;
+	private static Logger log = LoggerFactory.getLogger(AgentResults.class);
 	
   private Long assessmentGradingId;
   private Long itemGradingId;
@@ -85,10 +87,10 @@ public class AgentResults
   private String gradedBy;
   private Date gradedDate;
   private Set itemGradingSet;
-  private List itemGradingArrayList;
+  private ArrayList itemGradingArrayList;
   private String rationale="";
   private boolean retakeAllowed;
-  private Boolean isAutoSubmitted;
+  private boolean isAutoSubmitted;
   private boolean isAttemptDateAfterDueDate;
   private ItemGradingData itemGrading;
   private AssessmentGradingData assessmentGrading;
@@ -228,7 +230,7 @@ public class AgentResults
     this.forGrade = forGrade;
   }
   public String getTotalAutoScore() {
-    return getExactTotalAutoScore();
+    return getRoundedTotalAutoScore();
   }
   
   public String getExactTotalAutoScore() {
@@ -236,10 +238,10 @@ public class AgentResults
   }
 
   public String getRoundedTotalAutoScore() {
-   if (totalAutoScore!= null){
+   if (totalAutoScore!= null){	  
 	   try {
 		   String newscore = ContextUtil.getRoundedValue(totalAutoScore.replace(',', '.'), 2);
-		   return Validator.check(newscore, "N/A");
+		   return Validator.check(newscore, "N/A").replace(',', '.');
 	   }
 	   catch (Exception e) {
 		   // encountered some weird number format/locale
@@ -269,7 +271,7 @@ public class AgentResults
 			try {
 				String newscore = ContextUtil.getRoundedValue(
 						totalOverrideScore.replace(',', '.'), 2);
-				return Validator.check(newscore, "N/A");
+				return Validator.check(newscore, "N/A").replace(',', '.');
 			} catch (Exception e) {
 				// encountered some weird number format/locale
 				return Validator.check(totalOverrideScore, "0").replace(',', '.');
@@ -294,7 +296,7 @@ public class AgentResults
 	  if (finalScore!= null){
 		  try {
 			  String newscore = ContextUtil.getRoundedValue(finalScore.replace(',', '.'), 2);
-			  return Validator.check(newscore, "N/A");
+			  return Validator.check(newscore, "N/A").replace(',', '.');
 		  }
 		  catch (Exception e) {
 			  // encountered some weird number format/locale
@@ -369,11 +371,11 @@ public class AgentResults
   }
 
   // added by daisy to support to display answers to file upload question
-  public List getItemGradingArrayList() {
+  public ArrayList getItemGradingArrayList() {
     return itemGradingArrayList;
   }
 
-  public void setItemGradingArrayList(List itemGradingArrayList) {
+  public void setItemGradingArrayList(ArrayList itemGradingArrayList) {
     this.itemGradingArrayList = itemGradingArrayList;
   }
 
@@ -402,11 +404,11 @@ public class AgentResults
 		this.retakeAllowed = retakeAllowed;
 	}
 	
-	public Boolean getIsAutoSubmitted() {
+	public boolean getIsAutoSubmitted() {
 		return this.isAutoSubmitted;
 	}
 	
-	public void setIsAutoSubmitted(Boolean isAutoSubmitted) {
+	public void setIsAutoSubmitted(boolean isAutoSubmitted) {
 		this.isAutoSubmitted = isAutoSubmitted;
 	}
 	
@@ -516,9 +518,9 @@ public class AgentResults
 	
 	public String getFormatedTimeElapsed() {
 	    String timeElapsedInString = "n/a";
-	    if (this.timeElapsed!=null && this.timeElapsed >0)
+	    if (this.timeElapsed!=null && this.timeElapsed.intValue() >0)
 	    {
-	      int totalSec = this.timeElapsed;
+	      int totalSec = this.timeElapsed.intValue();
 	      int hr = totalSec / 3600;
 	      int min = (totalSec % 3600)/60;
 	      int sec = (totalSec % 3600)%60;

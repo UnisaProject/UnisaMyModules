@@ -19,6 +19,8 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.ui.bean.delivery;
 
 import java.io.Serializable;
@@ -32,12 +34,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.IntStream;
 
 import javax.faces.model.SelectItem;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.math3.util.Precision;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -54,14 +56,17 @@ import org.sakaiproject.util.ResourceLoader;
  * <p>This bean represents a Part in an assessment </p>
  */
 
-@Slf4j
 public class SectionContentsBean
   implements Serializable
 {
+  /**
+	 * 
+	 */
 	private static final long serialVersionUID = 5959692528847396966L;
+	private static Logger log = LoggerFactory.getLogger(SectionContentsBean.class);
 	private String text;
 	private String nonDefaultText;
-  private List<ItemContentsBean> itemContents;
+  private java.util.ArrayList itemContents;
   private String sectionId;
   private String number;
   private double maxPoints;
@@ -71,7 +76,7 @@ public class SectionContentsBean
   private String numParts;
   private String description;
   private int unansweredQuestions; // ItemContentsBeans
-  private List questionNumbers = new ArrayList();
+  private ArrayList questionNumbers = new ArrayList();
 
   // added section Type , question ordering
   private Integer sectionAuthorType;
@@ -142,7 +147,17 @@ public class SectionContentsBean
    */
   public int getUnansweredQuestions()
   {
-    return (int) itemContents.stream().filter(ItemContentsBean::isUnanswered).count();
+    Iterator i = itemContents.iterator();
+    int num = 0;
+    while (i.hasNext())
+    {
+      ItemContentsBean next = (ItemContentsBean) i.next();
+      if (next.isUnanswered())
+      {
+        num++;
+      }
+    }
+    return num;
   }
 
   /**
@@ -219,26 +234,34 @@ public class SectionContentsBean
    * Contents of part.
    * @return item contents of part.
    */
-  public List<ItemContentsBean> getItemContents()
+  public java.util.ArrayList getItemContents()
   {
+    /*
+        if( (sectionAuthorType!= null) && (sectionAuthorType.equals(SectionDataIfc.RANDOM_DRAW_FROM_QUESTIONPOOL) ))
+          return getItemContentsForRandomDraw();
+        else if( (sectionAuthorType!= null) && (questionOrdering!=null ) && (sectionAuthorType.equals(SectionDataIfc.QUESTIONS_AUTHORED_ONE_BY_ONE)) && (questionOrdering.equals(SectionDataIfc.RANDOM_WITHIN_PART)))
+          return getItemContentsForRandomQuestionOrdering();
+        else
+          return itemContents;
+     */
     return itemContents;
   }
 
-  public int getItemContentsCount() {
-    return itemContents.size();
-  }
-
-  public List<ItemContentsBean> getItemContentsForRandomDraw()
+  public java.util.ArrayList getItemContentsForRandomDraw()
   {
     // same ordering for each student
-    List<ItemContentsBean> randomsample = new ArrayList<>();
+    ArrayList randomsample = new ArrayList();
     long seed = (long) AgentFacade.getAgentString().hashCode();
     Collections.shuffle(itemContents, new Random(seed));
-    IntStream.range(0, numberToBeDrawn).forEach(n -> randomsample.add(itemContents.get(n)));
+    int samplesize = numberToBeDrawn.intValue();
+    for (int i = 0; i < samplesize; i++)
+    {
+      randomsample.add(itemContents.get(i));
+    }
     return randomsample;
   }
 
-  public List getItemContentsForRandomQuestionOrdering()
+  public java.util.ArrayList getItemContentsForRandomQuestionOrdering()
   {
     // same ordering for each student
     long seed = (long) AgentFacade.getAgentString().hashCode();
@@ -250,7 +273,7 @@ public class SectionContentsBean
    * Contents of part.
    * @param itemContents item contents of part.
    */
-  public void setItemContents(List<ItemContentsBean> itemContents)
+  public void setItemContents(java.util.ArrayList itemContents)
   {
     this.itemContents = itemContents;
   }
@@ -316,7 +339,7 @@ public class SectionContentsBean
     this.title = title;
   }
 
-  public List getQuestionNumbers()
+  public ArrayList getQuestionNumbers()
   {
     return questionNumbers;
   }
@@ -334,7 +357,7 @@ public class SectionContentsBean
   {
     try
     {
-      this.itemContents = new ArrayList<>();
+      this.itemContents = new ArrayList();
       setSectionId(section.getSectionId().toString());
       setTitle(section.getTitle());
       setDescription(section.getDescription());
@@ -349,11 +372,14 @@ public class SectionContentsBean
       }
       setNumber(section.getSequence().toString());
       // do teh rest later
-      Set<ItemDataIfc> itemSet = section.getItemSet();
+      Set itemSet = section.getItemSet();
       if (itemSet != null)
       {
         setQuestions(itemSet.size());
-        for (ItemDataIfc item : itemSet) {
+        Iterator i = itemSet.iterator();
+        while (i.hasNext())
+        {
+          ItemDataIfc item = (ItemDataIfc) i.next();
           ItemContentsBean itemBean = new ItemContentsBean(item);
           this.itemContents.add(itemBean);
         }
@@ -367,7 +393,7 @@ public class SectionContentsBean
     }
     catch (Exception e)
     {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
       throw new RuntimeException(e);
     }
   }

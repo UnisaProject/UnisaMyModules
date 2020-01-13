@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		<form-bean name="honsAdmissionForm" 
+		 	type="za.ac.unisa.lms.tools.honsadmission.forms.HonsAdmissionForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.honsadmission.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/honsAdmission.do?act=initial"
+				contextRelative="true" />
+		</action>	
+		<action
+				name="honsAdmissionForm"
+				attribute="honsAdmissionForm"
+				parameter="act"
+				path="/honsAdmission"
+				type="za.ac.unisa.lms.tools.honsadmission.actions.HonsAdmissionAction"
+				validate="false">
+				<forward
+					name="input"
+					path="/WEB-INF/jsp/input.jsp"
+					contextRelative="true" />
+				<forward
+					name="notAuthorised"
+					path="/WEB-INF/jsp/notAuthorised.jsp"
+					contextRelative="true" />
+				<forward
+					name="reviewApplication"
+					path="/WEB-INF/jsp/reviewApplication.jsp"
+					contextRelative="true" />
+				<forward
+					name="viewRecommendation"
+					path="/WEB-INF/jsp/viewRecommendation.jsp"
+					contextRelative="true" />
+				<forward
+					name="displayStudentReferrals"
+					path="/WEB-INF/jsp/displayStudentReferrals.jsp"
+					contextRelative="true" />	
+				<forward
+					name="viewApplication"
+					path="/WEB-INF/jsp/viewApplication.jsp"
+					contextRelative="true" />
+				<forward
+					name="home"
+					path="/honsAdmission.do?act=initial"
+					contextRelative="true" />	
+			</action>
+	</action-mappings>
+	
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.honsadmission.ApplicationResources" />
+	
+</struts-config>

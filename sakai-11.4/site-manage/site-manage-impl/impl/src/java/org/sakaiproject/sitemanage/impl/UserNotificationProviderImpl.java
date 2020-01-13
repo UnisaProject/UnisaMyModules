@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2003-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.sitemanage.impl;
 
 import java.text.DateFormat;
@@ -22,9 +7,9 @@ import java.util.Locale;
 import java.util.Date;
 import java.util.HashMap;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.coursemanagement.api.AcademicSession;
 import org.sakaiproject.email.api.EmailService;
@@ -36,9 +21,12 @@ import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.util.ResourceLoader;
 
-@Slf4j
-public class UserNotificationProviderImpl implements UserNotificationProvider {
 
+
+
+public class UserNotificationProviderImpl implements UserNotificationProvider {
+	
+	private static Logger M_log = LoggerFactory.getLogger(UserNotificationProviderImpl.class);
 	private EmailService emailService; 
 	
 	public void setEmailService(EmailService es) {
@@ -66,7 +54,7 @@ public class UserNotificationProviderImpl implements UserNotificationProvider {
 
 	public void init() {
 		//nothing realy to do
-		log.info("init()");
+		M_log.info("init()");
 	}
 	
 	/**
@@ -351,13 +339,13 @@ public class UserNotificationProviderImpl implements UserNotificationProvider {
 			}
 			catch (Exception ee)
 			{
-				log.warn(this + " problem occurs with sending course request email to authorizer " + instructorId );
+				M_log.warn(this + " problem occurs with sending course request email to authorizer " + instructorId );
 				return false;
 			}
 		}
 		catch (Exception e)
 		{
-			log.warn(this + " cannot find user " + instructorId);
+			M_log.warn(this + " cannot find user " + instructorId);
 			return false;
 		}
 	}
@@ -453,7 +441,7 @@ public class UserNotificationProviderImpl implements UserNotificationProvider {
 		}
 		catch (Exception e)
 		{
-			log.warn(this + " problem in send site request email to support for " + currentUserDisplayName );
+			M_log.warn(this + " problem in send site request email to support for " + currentUserDisplayName );
 			return "";
 		}
 	}
@@ -506,12 +494,12 @@ public class UserNotificationProviderImpl implements UserNotificationProvider {
 		if (from == null) {
 			from = "postmaster@".concat(serverConfigurationService
 					.getServerName());
-			log.warn(this + " - no 'setup.request' in configuration, using: "+ from);
+			M_log.warn(this + " - no 'setup.request' in configuration, using: "+ from);
 		}
 		return from;
 	}
 	
-	public void notifySiteImportCompleted(String toEmail, Locale locale, String siteId, String siteTitle){
+	public void notifySiteImportCompleted(String toEmail, String siteId, String siteTitle){
 		if(toEmail != null && !"".equals(toEmail)){
 			String headerTo = toEmail;
 			String replyTo = toEmail;

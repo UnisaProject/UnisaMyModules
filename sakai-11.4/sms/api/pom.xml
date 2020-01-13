@@ -19,27 +19,27 @@
     <parent>
         <groupId>org.sakaiproject.sms</groupId>
         <artifactId>sms</artifactId>
-        <version>12.6</version>
+        <version>11.4</version><!--Sms.version-->
     </parent>
 	
 
 	
     <dependencies>
     	<dependency>
-            <groupId>org.sakaiproject.kernel</groupId>
-            <artifactId>sakai-kernel-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-        </dependency>
-       <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-      </dependency>
+			<groupId>org.sakaiproject.kernel</groupId>
+			<artifactId>sakai-kernel-api</artifactId>
+		</dependency>
+		<dependency>
+		  <groupId>org.hibernate</groupId>
+		  <artifactId>hibernate-core</artifactId>
+		</dependency>
+		<dependency>
+        	<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+       	</dependency>
     	<dependency>
-            <groupId>org.sakaiproject.entitybroker</groupId>
-            <artifactId>entitybroker-api</artifactId>
+    		<groupId>org.sakaiproject.entitybroker</groupId>
+    		<artifactId>entitybroker-api</artifactId>
     	</dependency>
 	</dependencies>
 
@@ -55,6 +55,26 @@
 				</includes>
 			</resource>
 		</resources>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>**</exclude>
+					</excludes>
+				</configuration>
+
+			</plugin>
+
+		</plugins>
 	</build>
 
 </project>

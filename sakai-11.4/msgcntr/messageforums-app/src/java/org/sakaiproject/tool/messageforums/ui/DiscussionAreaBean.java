@@ -26,38 +26,31 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.faces.context.FacesContext;
-
-import lombok.extern.slf4j.Slf4j;
+ 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.sakaiproject.api.app.messageforums.Area;
-import org.sakaiproject.api.app.messageforums.UserPreferencesManager;
-import org.sakaiproject.component.cover.ComponentManager;
 
 /**
  * 
  * @author <a href="mailto:wagnermr@iupui.edu">Michelle Wagner</a>
  *
  */
-@Slf4j
 public class DiscussionAreaBean 
 {
-	 private static UserPreferencesManager userPreferencesManager = ComponentManager.get(UserPreferencesManager.class);
-
+	 private static final Logger LOG = LoggerFactory.getLogger(DiscussionAreaBean.class);
+	 
 	 private Area area;
 	 private int numPendingMsgs;
-	 private SimpleDateFormat datetimeFormat = ourDateFormat();
-
-	 private SimpleDateFormat ourDateFormat() {
-	     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	     df.setTimeZone(userPreferencesManager.getTimeZone());
-	     return df;
-	 }
-
+	 private SimpleDateFormat datetimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	 
 	 public DiscussionAreaBean(Area area)
 	 {
-	    if(log.isDebugEnabled())
+	    if(LOG.isDebugEnabled())
 	    {
-	      log.debug("DiscussionAreaBean(DiscussionArea " + area + ")");
+	      LOG.debug("DiscussionAreaBean(DiscussionArea " + area + ")");
 	    }
 	    
 		this.area = area;
@@ -69,7 +62,7 @@ public class DiscussionAreaBean
 	   */
 	  public String getModerated()
 	  {
-		  log.debug("getModerated()");
+		  LOG.debug("getModerated()");
 		  if (area == null || area.getModerated() == null || 
 			  area.getModerated().booleanValue() == false)
 		  {
@@ -85,7 +78,7 @@ public class DiscussionAreaBean
 	   */
 	  public void setModerated(String moderated)
 	  {
-		  log.debug("setModerated()");
+		  LOG.debug("setModerated()");
 		  if (moderated.equals(Boolean.TRUE.toString()))
 		  {
 			  area.setModerated(Boolean.valueOf(true));
@@ -102,7 +95,7 @@ public class DiscussionAreaBean
 	   */
 	  public String getPostFirst()
 	  {
-		  log.debug("getPostFirst()");
+		  LOG.debug("getPostFirst()");
 		  if (area == null || area.getPostFirst() == null || 
 			  area.getPostFirst().booleanValue() == false)
 		  {
@@ -118,7 +111,7 @@ public class DiscussionAreaBean
 	   */
 	  public void setPostFirst(String postFirst)
 	  {
-		  log.debug("setPostFirst()");
+		  LOG.debug("setPostFirst()");
 		  if (postFirst.equals(Boolean.TRUE.toString()))
 		  {
 			  area.setPostFirst(Boolean.valueOf(true));
@@ -133,7 +126,7 @@ public class DiscussionAreaBean
 	   * Returns whether or not the forum automatically marks messages in topics as read.
 	   */
 	  public String getAutoMarkThreadsRead() {
-		  log.debug("getAutoMarkThreadsRead()");
+		  LOG.debug("getAutoMarkThreadsRead()");
 		  if (area == null || area.getAutoMarkThreadsRead() == null || !area.getAutoMarkThreadsRead())
 		  {
 			  return Boolean.FALSE.toString();
@@ -148,7 +141,7 @@ public class DiscussionAreaBean
 	   * Set the automatically mark topics as read value on the forum.
 	   */
 	  public void setAutoMarkThreadsRead(String autoMarkThreadsRead) {
-		  log.debug("setMarkThreadsRead(String)");
+		  LOG.debug("setMarkThreadsRead(String)");
 		  if (autoMarkThreadsRead.equals(Boolean.TRUE.toString()))
 		  {
 			  area.setAutoMarkThreadsRead(Boolean.valueOf(true));
@@ -198,7 +191,7 @@ public class DiscussionAreaBean
 	  
 	  public String getAvailabilityRestricted()
 	  {
-		  log.debug("getAvailabilityRestricted()");
+		  LOG.debug("getAvailabilityRestricted()");
 		  if (area == null || area.getAvailabilityRestricted() == null || 
 			  area.getAvailabilityRestricted().booleanValue() == false)
 		  {
@@ -214,7 +207,7 @@ public class DiscussionAreaBean
 	   */
 	  public void setAvailabilityRestricted(String restricted)
 	  {
-		  log.debug("setAvailabilityRestricted()");
+		  LOG.debug("setAvailabilityRestricted()");
 		  if (restricted.equals(Boolean.TRUE.toString()))
 		  {
 			  area.setAvailabilityRestricted(Boolean.valueOf(true));
@@ -227,7 +220,7 @@ public class DiscussionAreaBean
 	  
 	  public String getAvailability()
 	  {
-		  log.debug("getAvailability()");
+		  LOG.debug("getAvailability()");
 		  if (area == null || area.getAvailability() == null || 
 			  area.getAvailability().booleanValue() == false)
 		  {
@@ -243,7 +236,7 @@ public class DiscussionAreaBean
 	   */
 	  public void setAvailability(String restricted)
 	  {
-		  log.debug("setAvailability()");
+		  LOG.debug("setAvailability()");
 		  if (restricted.equals(Boolean.TRUE.toString()))
 		  {
 			  area.setAvailability(Boolean.valueOf(true));
@@ -271,7 +264,7 @@ public class DiscussionAreaBean
 				  Date openDate = (Date) datetimeFormat.parse(hiddenOpenDate);				
 				  area.setOpenDate(openDate);
 			  }catch (ParseException e) {
-				  log.error("Couldn't convert open date", e);
+				  LOG.error("Couldn't convert open date", e);
 			}
 		  }else{
 			  area.setOpenDate(null);
@@ -294,7 +287,7 @@ public class DiscussionAreaBean
 				  Date CloseDate = (Date) datetimeFormat.parse(hiddenCloseDate);
 				  area.setCloseDate(CloseDate);
 			  }catch (ParseException e) {
-				  log.error("Couldn't convert Close date", e);
+				  LOG.error("Couldn't convert Close date", e);
 			}
 		  }else{
 			  area.setCloseDate(null);

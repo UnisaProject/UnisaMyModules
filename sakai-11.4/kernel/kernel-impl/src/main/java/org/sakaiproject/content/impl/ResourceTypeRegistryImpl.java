@@ -31,14 +31,16 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.content.api.ResourceToolAction;
 import org.sakaiproject.content.api.ResourceToolActionPipe;
 import org.sakaiproject.content.api.ResourceType;
 import org.sakaiproject.content.api.ResourceTypeRegistry;
 import org.sakaiproject.content.api.ServiceLevelAction;
 import org.sakaiproject.content.api.SiteSpecificResourceType;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.content.api.*;
 import org.sakaiproject.content.api.ResourceToolAction.ActionType;
 import org.sakaiproject.javax.Filter;
@@ -47,9 +49,11 @@ import org.sakaiproject.javax.Filter;
  * 
  *
  */
-@Slf4j
 public class ResourceTypeRegistryImpl implements ResourceTypeRegistry 
 {
+	/** Our logger. */
+	protected static final Logger M_log = LoggerFactory.getLogger(ResourceTypeRegistryImpl.class);
+
 	/** Map of ResourceType objects indexed by typeId */
 	protected Map<String, ResourceType> typeIndex = new HashMap<String, ResourceType>();
 	
@@ -77,7 +81,7 @@ public class ResourceTypeRegistryImpl implements ResourceTypeRegistry
 	{
 		try
 		{
-			log.info("init()");
+			M_log.info("init()");
 		}
 		catch (Exception t)
 		{
@@ -89,7 +93,7 @@ public class ResourceTypeRegistryImpl implements ResourceTypeRegistry
 	 */
 	public void destroy()
 	{
-		log.info("destroy()");
+		M_log.info("destroy()");
 	}
 
 	/**
@@ -150,6 +154,15 @@ public class ResourceTypeRegistryImpl implements ResourceTypeRegistry
 		{
 			return;
 		}
+//		System.out.println("----------> ResourceTypeRegistry.register(" + type.getId() + ", " + type.getLabel() + ")");
+//		List actions = type.getActions(null);
+//		Iterator it = actions.iterator();
+//		while(it.hasNext())
+//		{
+//			ResourceToolAction action = (ResourceToolAction) it.next();
+//			System.out.println("          > " + action.getId() + " ==> " + action.getLabel() );
+//			
+//		}
 		typeIndex.put(type.getId(), type);
 		typeIdToHandler.put(type.getId(), cch);
 

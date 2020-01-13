@@ -15,7 +15,8 @@
  */
 package org.sakaiproject.profile2.tool.pages;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.feedback.FeedbackMessage;
@@ -28,7 +29,6 @@ import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.GridView;
 import org.apache.wicket.markup.repeater.data.IDataProvider;
 import org.apache.wicket.model.StringResourceModel;
-
 import org.sakaiproject.profile2.model.GalleryImage;
 import org.sakaiproject.profile2.tool.components.ErrorLevelsFeedbackMessageFilter;
 import org.sakaiproject.profile2.tool.components.GalleryImageRenderer;
@@ -38,9 +38,10 @@ import org.sakaiproject.profile2.util.ProfileConstants;
 /**
  * Gallery component for viewing another user's pictures.
  */
-@Slf4j
 public class ViewPictures extends BasePage {
 
+	private static final Logger log = LoggerFactory.getLogger(ViewPictures.class);
+	
 	private GridView gridView;
 	
 	public ViewPictures(String userUuid) {

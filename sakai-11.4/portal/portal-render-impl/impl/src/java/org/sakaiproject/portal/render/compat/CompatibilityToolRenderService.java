@@ -29,12 +29,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.portal.api.Portal;
 import org.sakaiproject.portal.render.api.RenderResult;
 import org.sakaiproject.portal.render.api.ToolRenderException;
 import org.sakaiproject.portal.render.api.ToolRenderService;
 import org.sakaiproject.site.api.ToolConfiguration;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Render serivice used to support both Portlet and iframe based tools.
@@ -43,9 +44,11 @@ import lombok.extern.slf4j.Slf4j;
  * @since Sakai 2.4
  * @version $Rev$
  */
-@Slf4j
 public class CompatibilityToolRenderService implements ToolRenderService
 {
+
+	private static final Logger LOG = LoggerFactory.getLogger(CompatibilityToolRenderService.class);
+
 	private List renderServices = null;
 
 	/**
@@ -63,7 +66,7 @@ public class CompatibilityToolRenderService implements ToolRenderService
 		for (Iterator i = renderServices.iterator(); i.hasNext();)
 		{
 			ToolRenderService trs = (ToolRenderService) i.next();
-			log.debug("Preprocessing with " + trs);
+			LOG.debug("Preprocessing with " + trs);
 			continueProcessing = continueProcessing
 					&& trs.preprocess(portal, request, response, context);
 		}
@@ -80,7 +83,7 @@ public class CompatibilityToolRenderService implements ToolRenderService
 			ToolRenderService trs = (ToolRenderService) i.next();
 			if (trs.accept(portal, configuration, request, response, context))
 			{
-				log.debug("Rendering with " + trs);
+				LOG.debug("Rendering with " + trs);
 				return trs.render(portal, configuration, request, response, context);
 			}
 		}

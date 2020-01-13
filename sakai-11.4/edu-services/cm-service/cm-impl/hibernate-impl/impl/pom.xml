@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>course-management</artifactId>
 		<groupId>org.sakaiproject.edu-services.course-management</groupId>
-		<version>12.6</version><!-- ProjectVersion -->
+		<version>11.4</version><!-- ProjectVersion -->
 		<relativePath>../../../pom.xml</relativePath>
 	</parent>
 	<name>coursemanagement-hibernate-impl</name>
@@ -92,6 +92,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
 		</dependency>
@@ -102,12 +107,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>commons-collections</groupId>
-			<artifactId>commons-collections</artifactId>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
 		</dependency>
 	</dependencies>
 	<reports />

@@ -279,12 +279,8 @@ table#bbb_meeting_info_table td h5  {
 
 /* Time picker: */
 .time-picker-field {
-	/* Unisa-changes:2018-11-21:Change the width and min-width to be the same as .date-picker field
     width:40px !important;
-    min-width:40px !important; */
-    width:80px !important;
-    min-width:80px !important;
-    /* End Unisa-changes:2018-11-21 */
+    min-width:40px !important;
     text-align:center;
 }
 .time-picker {
@@ -296,10 +292,7 @@ table#bbb_meeting_info_table td h5  {
     height:200px;
     overflow:auto;
     position:absolute; 
-    /* Unisa-Changes:2018-11-21:increase width of time-picker drop-down to fit time width 
-    width:4em; */
-    width:6em;
-    /* End Unisa-Changes:2018-11-21 */
+    width:4em;
 }
 .time-picker-12hours {
 	width:6em;
@@ -312,7 +305,6 @@ table#bbb_meeting_info_table td h5  {
 .time-picker li {
 	cursor:pointer;
 	padding:1px;
-	list-style-type:none; 	/* Unisa-Changes:2018-11-21:Remove bullets from date picker lists */
 }
 .time-picker li.selected {
 	-moz-background-clip:border;

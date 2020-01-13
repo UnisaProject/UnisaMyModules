@@ -56,8 +56,9 @@
         <tr>          			
             #foreach($u in [0..6])                    
                 #set ($mu = $monthArray.getDay($xn,$u))		
-                #set($eventsn = $mu.getEvents())
                 #if ($mu.getFlag() == 1) ## today
+                    #set($eventsn = $mu.getEvents())   
+                    #set($eventsn = $eventsn1)
                     #set($flag = "false")
 
                     #foreach ($m in $eventsn)                       
@@ -70,9 +71,12 @@
                     #end
                                                  
                 #elseif ($mu.getFlag() == 0)  ## days dropping out of the current month
+                    #set ($eventsn = $mu.getEvents())
                     <td align="right"  valign= "top" bgcolor="#cccccc" height="51"  class="borderGrayMonth">
                                 
                 #else ## days in the current month, but not today
+                    #set ($eventsn = $mu.getEvents())   
+                    #set($eventsn = $eventsn1)
                     #set($flag = "false")
 
                     #foreach ($m in $eventsn)                       
@@ -95,7 +99,7 @@
                        title="$validator.escapeHtml($m.getDisplayName()) - $validator.escapeHtml($m.getSiteName())" 
                        style="	text-decoration: none !important">
                     #set($size = $m.getDisplayName().length())
-                    <span class="icon $eventIconMap.get($m.getType())" title="$localizedEventTypes.get($m.getType())"></span>
+						  #iconImage($m.getType())
                     #set($size = $m.getDisplayName().length())                            
                     #if ($size > 8)
                         #set($stringa = $m.getDisplayName().substring(0,8))
@@ -112,12 +116,6 @@
     #end  ## -- end of foreach
 </table>
 
-<h4>$tlang.getString('view.legend')</h4>
-<ul class="calendarLegend">
-    #foreach ($key in $iconsAndLocalizedEventTypes.keySet())
-        <li><span class="icon $iconsAndLocalizedEventTypes.get($key)"></span> $key</li>
-    #end
-</ul>
-<div class="clear"></div>
+#eventLegend($tlang)
 
 </div>

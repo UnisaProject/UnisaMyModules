@@ -52,20 +52,20 @@ public class AcknowledgementStorage {
     /**
      * Record the fact that a user has acknowledged a particular popup/banner.
      */
-    public void acknowledge(final String uuid, final String userId, final AcknowledgementType acknowledgementType) {
+    public void acknowledge(final String uuid, final String userEid, final AcknowledgementType acknowledgementType) {
         DB.transaction
                 ("Acknowledge a notification on behalf of a user",
                         new DBAction<Void>() {
                             @Override
                             public Void call(DBConnection db) throws SQLException {
-                                db.run("DELETE FROM " + tableName + " where uuid = ? AND user_id = ?")
+                                db.run("DELETE FROM " + tableName + " where uuid = ? AND user_eid = ?")
                                         .param(uuid)
-                                        .param(userId)
+                                        .param(userEid.toLowerCase())
                                         .executeUpdate();
 
-                                db.run("INSERT INTO " + tableName + " (uuid, user_id, state, dismiss_time) values (?, ?, ?, ?)")
+                                db.run("INSERT INTO " + tableName + " (uuid, user_eid, state, dismiss_time) values (?, ?, ?, ?)")
                                         .param(uuid)
-                                        .param(userId)
+                                        .param(userEid.toLowerCase())
                                         .param(acknowledgementType.dbValue())
                                         .param(System.currentTimeMillis())
                                         .executeUpdate();
@@ -80,15 +80,15 @@ public class AcknowledgementStorage {
     /**
      * Forget all temporary acknowledgements created by a user.
      */
-    public void clearTemporaryDismissedForUser(String userId) {
+    public void clearTemporaryDismissedForUser(String userEid) {
         DB.transaction
                 ("Delete all temporarily dismissed banners for a user",
                         new DBAction<Void>() {
                             @Override
                             public Void call(DBConnection db) throws SQLException {
-                                db.run("DELETE FROM " + tableName + " WHERE state = ? AND user_id = ?")
+                                db.run("DELETE FROM " + tableName + " WHERE state = ? AND user_eid = ?")
                                         .param(AcknowledgementType.TEMPORARY.dbValue())
-                                        .param(userId)
+                                        .param(userEid)
                                         .executeUpdate();
 
                                 db.commit();

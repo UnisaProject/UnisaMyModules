@@ -1,32 +1,35 @@
-/**
- * Copyright (c) 2003-2017 The Apereo Foundation
+/**********************************************************************************
+* $URL$
+* $Id$
+***********************************************************************************
+*
+ * Copyright (c) 2007, 2008 The Sakai Foundation
  *
  * Licensed under the Educational Community License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *             http://opensource.org/licenses/ecl2
+ *       http://www.opensource.org/licenses/ECL-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*
+**********************************************************************************/
 
+/**
+ * 
+ */
 package org.sakaiproject.chat2.model.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -35,14 +38,8 @@ import java.util.Stack;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.chat2.model.ChatChannel;
 import org.sakaiproject.chat2.model.ChatManager;
 import org.sakaiproject.chat2.model.ChatMessage;
@@ -61,17 +58,23 @@ import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.site.cover.SiteService;
+import org.sakaiproject.time.cover.TimeService;
 import org.sakaiproject.user.cover.UserDirectoryService;
-import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * @author chrismaurer
  *
  */
-@Slf4j
 public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
+
+   protected final Logger logger = LoggerFactory.getLogger(getClass());
    private EntityManager entityManager;
    private ChatManager chatManager;
    
@@ -91,13 +94,13 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
    
    
    protected void init() throws Exception {
-      log.info("init()");
+      logger.info("init()");
       
       try {
          getEntityManager().registerEntityProducer(this, ChatManager.REFERENCE_ROOT);
       }
       catch (Exception e) {
-         log.warn("Error registering Chat Entity Producer", e);
+         logger.warn("Error registering Chat Entity Producer", e);
       }
    }
    
@@ -106,7 +109,7 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
     */
    protected void destroy()
    {
-      log.info("destroy()");
+      logger.info("destroy()");
    }
 
    
@@ -185,7 +188,7 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
       }
       catch (Exception any)
       {
-         log.warn("archive: exception archiving service: " + serviceName());
+         logger.warn("archive: exception archiving service: " + serviceName());
       }
 
       stack.pop();
@@ -228,7 +231,7 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
       }
       catch (Exception e)
       {
-         log.warn("archive: exception archiving synoptic options for service: " + serviceName());
+         logger.warn("archive: exception archiving synoptic options for service: " + serviceName());
       }
    }
 
@@ -257,15 +260,15 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
 
          // else try {throw new Exception();} catch (Exception e) {M_log.warn("getResource(): unknown message ref subtype: " + m_subType + " in ref: " + m_reference, e);}
          else
-            log.warn("getEntity(): unknown message ref subtype: " + ref.getSubType() + " in ref: " + ref.getReference());
+            logger.warn("getEntity(): unknown message ref subtype: " + ref.getSubType() + " in ref: " + ref.getReference());
       }
       catch (NullPointerException e)
       {
-         log.warn("getEntity(): " + e);
+         logger.warn("getEntity(): " + e);
       } catch (IdUnusedException e) {
-         log.warn("getEntity(): " + e);
+         logger.warn("getEntity(): " + e);
       } catch (PermissionException e) {
-         log.warn("getEntity(): " + e);
+         logger.warn("getEntity(): " + e);
       }
       
 
@@ -346,19 +349,19 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
          }
 
          else
-            log.warn("getUrl(): unknown message ref subtype: " + ref.getSubType() + " in ref: " + ref.getReference());
+            logger.warn("getUrl(): unknown message ref subtype: " + ref.getSubType() + " in ref: " + ref.getReference());
       }
       catch (PermissionException e)
       {
-         log.warn("getUrl(): " + e);
+         logger.warn("getUrl(): " + e);
       }
       catch (IdUnusedException e)
       {
-         log.warn("getUrl(): " + e);
+         logger.warn("getUrl(): " + e);
       }
       catch (NullPointerException e)
       {
-         log.warn("getUrl(): " + e);
+         logger.warn("getUrl(): " + e);
       }
 
       return url;
@@ -391,11 +394,8 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
                ChatMessage message = getMessage(ref);
                String title = ref.getDescription();
                //MessageHeader messageHead = message.getHeader();
-               ResourceLoader rl = new ResourceLoader();
-               Locale locale = rl.getLocale();       		
-               ZonedDateTime ldt = ZonedDateTime.ofInstant(message.getMessageDate().toInstant(), ZoneId.of(chatManager.getUserTimeZone()));
-               String date = ldt.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.LONG).withLocale(locale));
-               
+               //String date = messageHead.getDate().toStringLocalFullZ();
+               String date = TimeService.newTime(message.getMessageDate().getTime()).toStringLocalFullZ();
                String from = UserDirectoryService.getUser(message.getOwner()).getDisplayName();
                //String from = messageHead.getFrom().getDisplayName();
                String groups = "";
@@ -407,8 +407,8 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
                String body = Web.escapeHtml(message.getBody());
 
                sw
-                     .write("<!DOCTYPE html>\n"
-                           + "<html>\n"
+                     .write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n"
+                           + "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">\n"
                            + "<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
                            + "<link href=\"");
                sw.write(skinRepo);
@@ -501,7 +501,7 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
    public String merge(String siteId, Element root, String archivePath, String fromSiteId, Map attachmentNames, Map userIdTrans,
          Set userListAllowImport)
    {
-      log.debug("trying to merge chat");
+      logger.debug("trying to merge chat");
 
       // buffer for the results log
       StringBuilder results = new StringBuilder();
@@ -591,13 +591,13 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
          }
          catch (DOMException e)
          {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             results.append("merging " + getLabel()
                   + " failed during xml parsing.\n");
          }
          catch (Exception e)
          {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             results.append("merging " + getLabel() + " failed.\n");
          }
       }
@@ -650,7 +650,7 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
                }
             }
             else
-               log.warn("parse(): unknown message subtype: " + subType + " in ref: " + reference);
+               logger.warn("parse(): unknown message subtype: " + subType + " in ref: " + reference);
          }
 
          ref.set(ChatManager.APPLICATION_ID, subType, id, container, context);
@@ -697,7 +697,7 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
                } 
                catch (Exception e) 
                {
-                  log.warn("Exception while creating channel: " + newChannel.getTitle() + ": " + e);
+                  logger.warn("Exception while creating channel: " + newChannel.getTitle() + ": " + e);
                }
 
             }
@@ -708,7 +708,7 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
 
       catch (Exception any)
       {
-         log.warn(".transferCopyEntities(): exception in handling " + serviceName() + " : ", any);
+         logger.warn(".transferCopyEntities(): exception in handling " + serviceName() + " : ", any);
       }
    }
    
@@ -750,15 +750,15 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
       }
       catch (PermissionException pe)
       {
-         log.warn("PermissionException transferring synoptic options for " + serviceName() + ':', pe);
+         logger.warn("PermissionException transferring synoptic options for " + serviceName() + ':', pe);
       }
       catch (IdUnusedException e)
       {
-         log.warn("Channel " + fromContext + " cannot be found. ");
+         logger.warn("Channel " + fromContext + " cannot be found. ");
       }
       catch (Exception e)
       {
-         log.warn("transferSynopticOptions(): exception in handling " + serviceName() + " : ", e);
+         logger.warn("transferSynopticOptions(): exception in handling " + serviceName() + " : ", e);
       }
    }
    
@@ -800,7 +800,7 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
 					   } 
 					   catch (Exception e) 
 					   {
-						   log.debug("Exception while removing chat channel: " + e);
+						   logger.debug("Exception while removing chat channel: " + e);
 					   }
 
 				   }
@@ -811,7 +811,7 @@ public class ChatEntityProducer implements EntityProducer, EntityTransferrer {
 
 	   catch (Exception e)
 	   {
-	       log.debug("Chat transferCopyEntities(): exception in handling " + e);
+	       logger.debug("Chat transferCopyEntities(): exception in handling " + e);
 	   }
 	}
 

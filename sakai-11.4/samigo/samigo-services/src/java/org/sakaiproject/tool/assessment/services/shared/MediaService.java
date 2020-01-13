@@ -19,9 +19,14 @@
  *
  **********************************************************************************/
 
+
 package org.sakaiproject.tool.assessment.services.shared;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.sakaiproject.tool.assessment.services.PersistenceService;
+
 
 /**
  * The QuestionPoolService calls the service locator to reach the
@@ -30,6 +35,8 @@ import org.sakaiproject.tool.assessment.services.PersistenceService;
  */
 public class MediaService
 {
+  private Logger log = LoggerFactory.getLogger(MediaService.class);
+
   /**
    * Creates a new QuestionPoolService object.
    */
@@ -47,4 +54,5 @@ public class MediaService
      PersistenceService.getInstance().getAssessmentGradingFacadeQueries().
        removeMediaById(new Long(mediaId), itemGradingId);
   }
+
 }

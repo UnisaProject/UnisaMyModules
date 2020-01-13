@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.mdregistrations"
+		title="M and D Registrations"
+		description="M and D Registrations">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

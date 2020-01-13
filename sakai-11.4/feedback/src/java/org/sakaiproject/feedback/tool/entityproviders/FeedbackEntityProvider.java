@@ -23,21 +23,10 @@ package org.sakaiproject.feedback.tool.entityproviders;
 
 import java.sql.SQLException;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-
-import lombok.extern.slf4j.Slf4j;
-
-import net.tanesha.recaptcha.ReCaptcha;
-import net.tanesha.recaptcha.ReCaptchaFactory;
-import net.tanesha.recaptcha.ReCaptchaResponse;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.fileupload.FileItem;
 
 import org.sakaiproject.entitybroker.EntityView;
@@ -59,7 +48,13 @@ import org.sakaiproject.site.api.Site;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.util.RequestFilter;
 
-@Slf4j
+import net.tanesha.recaptcha.ReCaptcha;
+import net.tanesha.recaptcha.ReCaptchaFactory;
+import net.tanesha.recaptcha.ReCaptchaResponse;
+
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
 public class FeedbackEntityProvider extends AbstractEntityProvider implements AutoRegisterEntityProvider, Outputable, Describeable, ActionsExecutable, RequestAware {
 	
 	public final static String ENTITY_PREFIX = "feedback";
@@ -76,6 +71,8 @@ public class FeedbackEntityProvider extends AbstractEntityProvider implements Au
     private final static String RECAPTCHA_FAILURE = "RECAPTCHA_FAILURE";
     private final static String SUCCESS = "SUCCESS";
     // Error codes end
+
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private SakaiProxy sakaiProxy = null;
     public void setSakaiProxy(SakaiProxy sakaiProxy) {
@@ -95,8 +92,8 @@ public class FeedbackEntityProvider extends AbstractEntityProvider implements Au
 
         maxAttachmentsBytes = sakaiProxy.getAttachmentLimit() * 1024 * 1024;
 
-        if (log.isDebugEnabled()) {
-            log.debug("maxAttachmentsBytes = " + maxAttachmentsBytes);
+        if (logger.isDebugEnabled()) {
+            logger.debug("maxAttachmentsBytes = " + maxAttachmentsBytes);
         }
     }
 
@@ -160,7 +157,7 @@ public class FeedbackEntityProvider extends AbstractEntityProvider implements Au
         // TODO Doesn't this have a possible NPE?
         final String siteId = view.getPathSegment(1).replaceAll(FeedbackTool.FORWARD_SLASH, "/");
 
-        if (log.isDebugEnabled()) log.debug("Site ID: " + siteId);
+        if (logger.isDebugEnabled()) logger.debug("Site ID: " + siteId);
 
         final String title = (String) params.get("title");
         final String description = (String) params.get("description");
@@ -182,16 +179,16 @@ public class FeedbackEntityProvider extends AbstractEntityProvider implements Au
         final String currentTime = format.format(new Date());
 
         if (title == null || title.isEmpty()) {
-			log.debug("Subject incorrect. Returning " + BAD_TITLE + " ...");
+			logger.debug("Subject incorrect. Returning " + BAD_TITLE + " ...");
             return BAD_TITLE;
         }
 
         if (description == null || description.isEmpty()) {
-			log.debug("No summary. Returning " + BAD_DESCRIPTION + " ...");
+			logger.debug("No summary. Returning " + BAD_DESCRIPTION + " ...");
             return BAD_DESCRIPTION;
         }
 
-        if (log.isDebugEnabled()) log.debug("title: " + title + ". description: " + description);
+        if (logger.isDebugEnabled()) logger.debug("title: " + title + ". description: " + description);
 
         String toAddress = null;
 
@@ -219,7 +216,7 @@ public class FeedbackEntityProvider extends AbstractEntityProvider implements Au
                         emailAddr.validate();
                         toAddress = alternativeRecipientId;
                     } catch (AddressException ex) {
-                        log.error("Incorrectly formed site contact email address. Returning BADLY_FORMED_RECIPIENT...");
+                        logger.error("Incorrectly formed site contact email address. Returning BADLY_FORMED_RECIPIENT...");
                         return BADLY_FORMED_RECIPIENT;
                     }
                 }
@@ -240,14 +237,14 @@ public class FeedbackEntityProvider extends AbstractEntityProvider implements Au
                 String remoteAddress = requestGetter.getRequest().getRemoteAddr();
                 ReCaptchaResponse response = captcha.checkAnswer(remoteAddress, challengeField, responseField);
                 if (!response.isValid()) {
-                    log.warn("Recaptcha failed with this message: " + response.getErrorMessage());
+                    logger.warn("Recaptcha failed with this message: " + response.getErrorMessage());
                     return RECAPTCHA_FAILURE;
                 }
             }
 
             senderAddress = (String) params.get("senderaddress");
             if (senderAddress == null || senderAddress.length() == 0) {
-                log.error("No sender email address for non logged in user. Returning BAD REQUEST ...");
+                logger.error("No sender email address for non logged in user. Returning BAD REQUEST ...");
                 return BAD_REQUEST;
             }
 
@@ -255,7 +252,7 @@ public class FeedbackEntityProvider extends AbstractEntityProvider implements Au
         }
 
         if (toAddress == null || toAddress.isEmpty()) {
-            log.error("No recipient. Returning BAD REQUEST ...");
+            logger.error("No recipient. Returning BAD REQUEST ...");
             return BAD_REQUEST;
         }
 
@@ -269,17 +266,17 @@ public class FeedbackEntityProvider extends AbstractEntityProvider implements Au
                 db.logReport(userId, senderAddress, siteId, type, title, description);
                 return SUCCESS;
             } catch (AttachmentsTooBigException atbe) {
-                log.error("The total size of the attachments exceeded the permitted limit of " + maxAttachmentsBytes + ". '" + ATTACHMENTS_TOO_BIG + "' will be returned to the client.");
+                logger.error("The total size of the attachments exceeded the permitted limit of " + maxAttachmentsBytes + ". '" + ATTACHMENTS_TOO_BIG + "' will be returned to the client.");
                 return ATTACHMENTS_TOO_BIG;
             } catch (SQLException sqlException) {
-                log.error("Caught exception while generating report. '" + Database.DB_ERROR + "' will be returned to the client.", sqlException);
+                logger.error("Caught exception while generating report. '" + Database.DB_ERROR + "' will be returned to the client.", sqlException);
                 return Database.DB_ERROR;
             } catch (Exception e) {
-                log.error("Caught exception while sending email or generating report. '" + ERROR + "' will be returned to the client.", e);
+                logger.error("Caught exception while sending email or generating report. '" + ERROR + "' will be returned to the client.", e);
                 return ERROR;
             }
         } else {
-            log.error("Failed to determine a sender address No email or report will be generated. '"  + NO_SENDER_ADDRESS + "' will be returned to the client.");
+            logger.error("Failed to determine a sender address No email or report will be generated. '"  + NO_SENDER_ADDRESS + "' will be returned to the client.");
             return NO_SENDER_ADDRESS;
         }
     }
@@ -312,7 +309,7 @@ public class FeedbackEntityProvider extends AbstractEntityProvider implements Au
 		final String uploadsDone = (String) params.get(RequestFilter.ATTR_UPLOADS_DONE);
 
 		if (uploadsDone != null && uploadsDone.equals(RequestFilter.ATTR_UPLOADS_DONE)) {
-			log.debug("UPLOAD STATUS: " + params.get("upload.status"));
+			logger.debug("UPLOAD STATUS: " + params.get("upload.status"));
 
             FileItem attachment1 = (FileItem) params.get("attachment_0");
             if (attachment1 != null && attachment1.getSize() > 0) {

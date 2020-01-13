@@ -11,19 +11,6 @@
     vertical-align: middle !important;
     text-align:left !important;
   }
-  .table .attach {
-    width:1%;
-    white-space:nowrap;
-  }
-  .selectPageSize {
-    margin-right: 0.7em;
-  }
-  .truncate{
-    width: 180px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 </style>
 
 #javascript("/sakai-content-tool/js/content.js")
@@ -94,7 +81,7 @@
 		</ul>
 		</ul>
 	#if ($alertMessage)
-                 <br /><div class="messageWarning">$alertMessage</div><div class="clear"></div>
+                 <br /><div class="messageValidation">$alertMessage</div><div class="clear"></div>
 	#end
 	## display print success message
 	#if ($content_print_status_success)
@@ -129,11 +116,11 @@
             <div class="navigatePanelControls">
               <span class="expand_collapse">
                 <button id="navigatePanelInnerCollapse" style="display:none" class="btn btn-link btn-xs" title="$clang.getString('collapseall')">
-                  <span class="fa fa-chevron-up" aria-hidden="true"></span>
+                  <span class="glyphicon glyphicon-chevron-up"></span>
                   <span class="sr-only">$clang.getString('collapseall')</span>
                 </button> 
               </span>
-              <button id="navigatePanelInnerExpand" class="btn btn-link btn-xs" onclick="$('#navigatePanelInner').jstree('open_all')" title="$slang.getString('label.expand.all')"><span class="fa fa-chevron-down" aria-hidden="true"></span><span class="sr-only">$slang.getString('label.expand.all')</span></button></span>
+              <button id="navigatePanelInnerExpand" class="btn btn-link btn-xs" onclick="$('#navigatePanelInner').jstree('open_all')" title="$slang.getString('label.expand.all')"><span class="glyphicon glyphicon-chevron-down"></span><span class="sr-only">$slang.getString('label.expand.all')</span></button></span>
               <label for="navigatePanelSearch" class="sr-only">$clang.getString('list.nav.search')</label>
               <input placeholder="$clang.getString('list.nav.search')" type="text" id="navigatePanelSearch"/>
               <p class="close">&times;</p>
@@ -195,40 +182,34 @@
 
     <div class="container-fluid">
       <div class="row">
-            #if($listActions || $showHotDropboxWidget)
-                    <div class="col-lg-6 col-md-8 col-sm-8 col-xs-12 btn-group btn-group-sm" role="group" style="padding-left:0;">
-                        #if($listActions)
-                                #set ($itemsOnLine = 0)
-                                #foreach($key in $listActions.keySet())
-                                    #set($action = $listActions.get("$key"))
-                                        <button style="margin:0" title="$!action.label ($tlang.getString("sakai_resources_list.messageActivateActions"))" class="btn btn-default" id="${action.id}-button"
-                                        onclick="document.getElementById('sakai_action').value='doMultiItemDispatch';document.getElementById('rt_action').value='$action.id';document.getElementById('showForm').submit();"
-                                        disabled="disabled" >$!action.label
-                                        </button>
-                                #end
+    		#if($listActions || $showHotDropboxWidget)
+    				<div class="col-lg-6 col-md-8 col-sm-8 col-xs-12 btn-group btn-group-sm" role="group" style="padding-left:0;">
+    					#if($listActions)
+    							#set ($itemsOnLine = 0)
+    							#foreach($key in $listActions.keySet())
+    								#set($action = $listActions.get("$key"))
+    								<button style="margin:0" class="btn btn-default" id="${action.id}-button"
+    									onclick="document.getElementById('sakai_action').value='doMultiItemDispatch';document.getElementById('rt_action').value='$action.id';document.getElementById('showForm').submit();"
+    									disabled="disabled" >$!action.label
+                                    </button>
+    							#end
 
                                 ####### begin SAK-23304, add Show and Hide
                                 ####### Show/Hide can not be part of listActions because it was not a multipleItemAction for an item.
                                 ####### listActions are a list of multipleItemAction that you can do on individual resource/collection items.
                                 #if (!$dropboxMode)
                                     #if($canShowHide)
-                                        <button style="margin:0" title="$tlang.getString('avail.show') ($tlang.getString("sakai_resources_list.messageActivateActions"))" class="btn btn-default" id="show-button" type="button"
-                                            onclick="document.getElementById('sakai_action').value='doMultiItemDispatch';document.getElementById('rt_action').value='show';document.getElementById('showForm').submit();"
-                                            disabled="disabled">$tlang.getString('avail.show')
-                                        </button>
-                                        <button style="margin:0" title="$tlang.getString('avail.hide') ($tlang.getString("sakai_resources_list.messageActivateActions"))" class="btn btn-default" id="hide-button" type="button"
-                                            onclick="document.getElementById('sakai_action').value='doMultiItemDispatch';document.getElementById('rt_action').value='hide';document.getElementById('showForm').submit();"
-                                            disabled="disabled">$tlang.getString('avail.hide')
-                                        </button>
+                                            <button  style="margin:0" class="btn btn-default" id="show-button" type="button"
+                                                onclick="document.getElementById('sakai_action').value='doMultiItemDispatch';document.getElementById('rt_action').value='show';document.getElementById('showForm').submit();"
+                                                disabled="disabled">$tlang.getString('avail.show')
+                                            </button>
+                                            <button  style="margin:0" class="btn btn-default" id="hide-button" type="button"
+                                                onclick="document.getElementById('sakai_action').value='doMultiItemDispatch';document.getElementById('rt_action').value='hide';document.getElementById('showForm').submit();"
+                                                disabled="disabled">$tlang.getString('avail.hide')
+                                            </button>
                                     #end
                                  #end
                                  ####### end SAK-23304, add Show and Hide
-                                 #if ($canZipDownload)
-                                     <button  style="margin:0" class="btn btn-default" id="zipdownload-button" type="button"
-                                         onclick="document.getElementById('sakai_action').value='doMultiItemDispatch';document.getElementById('rt_action').value='zipDownload';document.getElementById('showForm').submit();"
-                                         disabled="disabled">$tlang.getString('avail.zipdownload')
-                                    </button>
-                                 #end
 
     					#end
     				</div>
@@ -277,14 +258,18 @@
 			<tr class="hidden-sm hidden-xs"> 
 				<th id="expansion" class="attach" scope="col">
 					#if ($expandallflag && "$expandallflag" == "$TRUE")
-						<a href="#" class="fa fa-compress" onclick="document.getElementById('sakai_action').value='doUnexpandall';document.getElementById('collectionId').value='$collectionId';document.getElementById('showForm').submit();"
+						<a href="#" onclick="document.getElementById('sakai_action').value='doUnexpandall';document.getElementById('collectionId').value='$collectionId';document.getElementById('showForm').submit();"
 							title= "$clang.getString('collapseall')">
 							<span class="sr-only">$clang.getString('collapseall')</span>
+                            <span class="glyphicon glyphicon-chevron-up"></span>
+                            ##<img src = "#imageLink("sakai/collapse-expand.gif")" border="0" title="$clang.getString('collapseall')" alt="$clang.getString('collapseall')" hspace="0" />
 						</a>								 
 					#else
-						<a href="#" class="fa fa-expand" onclick="document.getElementById('sakai_action').value='doExpandall';document.getElementById('collectionId').value='$collectionId';document.getElementById('showForm').submit();"
+						<a href="#" onclick="document.getElementById('sakai_action').value='doExpandall';document.getElementById('collectionId').value='$collectionId';document.getElementById('showForm').submit();"
 							title= "$slang.getString('label.expand.all')">
-							<span class="sr-only">$slang.getString('label.expand.all')</span>
+                            <span class="sr-only">$slang.getString('label.expand.all')</span>
+                            <span class="glyphicon glyphicon-chevron-down"></span>
+							##<img src = "#imageLink("sakai/expand-collapse.gif")" border="0" title="$slang.getString('label.expand.all')" alt="$slang.getString('label.expand.all')" hspace="0" />
 						</a>								 
 					#end
 				</th>
@@ -299,11 +284,9 @@
 						$clang.getString("gen.title1")
 						#if ($currentSortedBy.equals($resourceProperties.NamePropDisplayName)) 
 							#if ($currentSortAsc.equals("true")) 
-								<span class="fa fa-chevron-up" aria-hidden="true"></span>
-								<span class="sr-only">$clang.getString('sh.sorttitas')</span>
+								<img src = "#imageLink("sakai/sortascending.gif")" border="0" title ="$clang.getString('sh.sorttitas')" alt ="$clang.getString('sh.sorttitas')" /> 
 							#else 
-								<span class="fa fa-chevron-down" aria-hidden="true"></span>
-								<span class="sr-only">$clang.getString('sh.sorttitdesc')</span>
+								<img src = "#imageLink("sakai/sortdescending.gif")" border="0" title ="$clang.getString('sh.sorttitdesc')" alt ="$clang.getString('sh.sorttitdesc')" /> 
 							#end 
 						#end 
 					</a>
@@ -323,11 +306,9 @@
 						$clang.getString("gen.created")
 						#if ($currentSortedBy.equals($resourceProperties.NamePropCreator)) 
 							#if ($currentSortAsc.equals("true")) 
-								<span class="fa fa-chevron-up" aria-hidden="true"></span>
-								<span class="sr-only">$clang.getString('sh.sortautas')</span>
+								<img src = "#imageLink("sakai/sortascending.gif")" border="0"  title ="$clang.getString('sh.sortautas')"  alt ="$clang.getString('sh.sortautas')" /> 
 							#else 
-								<span class="fa fa-chevron-down" aria-hidden="true"></span>
-								<span class="sr-only">$clang.getString('sh.sortautdesc')</span>
+								<img src = "#imageLink("sakai/sortdescending.gif")" border="0" title ="$clang.getString('sh.sortautdesc')"  alt ="$clang.getString('sh.sortautdesc')" /> 
 							#end 
 						#end 
 					</a>
@@ -338,11 +319,9 @@
 						$clang.getString("gen.last1")
 						#if ($currentSortedBy.equals($resourceProperties.NamePropModifiedDate)) 
 							#if ($currentSortAsc.equals("true")) 
-								<span class="fa fa-chevron-up" aria-hidden="true"></span>
-								<span class="sr-only">$clang.getString('sh.sortdateas')</span>
+								<img src = "#imageLink("sakai/sortascending.gif")" border="0"  title ="$clang.getString('sh.sortdateas')"  alt ="$clang.getString('sh.sortdateas')" /> 
 							#else 
-								<span class="fa fa-chevron-down" aria-hidden="true"></span>
-								<span class="sr-only">$clang.getString('sh.sortdatedesc')</span>
+								<img src = "#imageLink("sakai/sortdescending.gif")" border="0" title ="$clang.getString('sh.sortdatedesc')"  alt ="$clang.getString('sh.sortdatedesc')" /> 
 							#end 
 						#end 
 					</a>
@@ -353,11 +332,9 @@
 						$clang.getString("gen.size")
 						#if ($currentSortedBy.equals($resourceProperties.NamePropContentLength)) 
 							#if ($currentSortAsc.equals("true")) 
-								<span class="fa fa-chevron-up" aria-hidden="true"></span>
-								<span class="sr-only">$clang.getString('sh.sortsizeas')</span>
+								<img src = "#imageLink("sakai/sortascending.gif")" border="0"  title ="$clang.getString('sh.sortsizeas')"  alt ="$clang.getString('sh.sortsizeas')" /> 
 							#else 
-								<span class="fa fa-chevron-down" aria-hidden="true"></span>
-								<span class="sr-only">$clang.getString('sh.sortsizedesc')</span>
+								<img src = "#imageLink("sakai/sortdescending.gif")" border="0" title ="$clang.getString('sh.sortsizedesc')"  alt ="$clang.getString('sh.sortsizedesc')" /> 
 							#end 
 						#end 
 					</a>
@@ -393,49 +370,55 @@
 						#if($item.depth > 0 && $item.hasMultipleItemActions())
 							<input type="checkbox" name="selectedMembers" id="list$num" 
 									#if($selectedItems.contains($item.id))checked="checked"#end
-									onclick="#foreach($key in $item.multipleItemActions.keySet())adjustCount(this, '$key');#end;adjustShowHideCount(this);adjustCount(this,'zipdownload');"
+									onclick="#foreach($key in $item.multipleItemActions.keySet())adjustCount(this, '$key');#end;adjustShowHideCount(this)"
  									value="$dqid" /><label for="list$num" class="skip">$clang.getString("att.select"): $validator.escapeHtml($item.name)</label>
 							#foreach($key in $item.multipleItemActions.keySet())$counter.increment("$key") $counter.increment("selectall")#if($selectedItems.contains($item.id))$counter.increment("${key}selected")#end#end
-							$counter.increment("zipdownload") $counter.increment("selectall")#if($selectedItems.contains($item.id))$counter.increment("zipdownloadselected")#end
 							<input type="hidden" name="itemHidden" id="itemHidden" value="$item.hidden" />
 							<input type="hidden" name="itemCanRevise" id="itemCanRevise" value="$item.canRevise" />
 						#end
 					</td>
 					<td style="text-indent:$width" class="specialLink title" scope="row">
 					#if($item.isHot("$!dropboxHighlight")) #set($iconDecor="recentItem") #set($newNote="new") #else  #set($iconDecor="nil")  #set($newNote="")#end 
+              #if($validator.escapeHtml($item.name).length() > 25)
+                #set($trimmed = $validator.escapeHtml($item.name).substring(0,25))
+                #set($trimmedTitle = "$trimmed ...")
+              #else
+                #set($trimmedTitle = $validator.escapeHtml($item.name))
+              #end
 
               #if ($item.canRead())
 								#if($item.isCollection()) 
 									<span class="skip">$newNote</span>
 									#if($item.isEmpty() || $item.isTooBig() || $item.depth < 1 || $item.isTooBigNav())
-										<span class="$iconDecor $item.iconClass" aria-hidden="true"></span>
-										<span class="sr-only">$!item.hoverText</span>
+										<span class="$iconDecor">
+										<img src="#imageLink($item.iconLocation)" border= "0" alt="$item.hoverText" hspace="0" /></span>
 									#else
-										<span class="sr-only">$!item.hoverText</span>
-										<a class="$iconDecor $item.iconClass" href="#$qid" name="$qid"
+										<span class="$iconDecor visible-sm-inline visible-xs-inline">
+										<img src="#imageLink($item.expandIconLocation)" border= "0" alt="$item.hoverText" hspace="0" /></span>
+										<a class="hidden-sm hidden-xs $iconDecor" href="#"
 											#if($item.isExpanded())
-												onclick="document.getElementById('sakai_action').value='doCollapse_collection';document.getElementById('collectionId').value='$qid';thisForm=document.getElementById('showForm');thisForm.action+='#$qid';thisForm.submit();"
+												onclick="document.getElementById('sakai_action').value='doCollapse_collection';document.getElementById('collectionId').value='$qid';document.getElementById('showForm').submit();"
 											#else
-												onclick="document.getElementById('sakai_action').value='doExpand_collection';document.getElementById('collectionId').value='$qid';thisForm=document.getElementById('showForm');thisForm.action+='#$qid';thisForm.submit();""
+												onclick="document.getElementById('sakai_action').value='doExpand_collection';document.getElementById('collectionId').value='$qid';document.getElementById('showForm').submit();"
 											#end
-											title= "$item.expandLabel"><span class="sr-only">$item.expandLabel: $validator.escapeHtml($item.name)</span></a>
+											title= "$item.expandLabel"><img src="#imageLink($item.expandIconLocation)" border= "0" alt="$item.expandLabel"  /><span class="sr-only">$item.expandLabel: $validator.escapeHtml($item.name)</span></a></span>
 									#end
 									
 								#else
 									#if ($item.hasCopyrightAlert())
 										## if there is a copyright alert, show the alert page first
-										<a class="$item.iconClass" href="#" 
+										<a href="#" 
 											title="$tlang.getString('gen.copycomf') $tlang.getString('gen.type'): $item.hoverText  [$tlang.getString('gen.newwin')]"	
 											onclick="openCopyrightWindow('${item.accessUrl}','copyrightAlertWindow','scrollbars=yes,menubar=yes,height=600,width=800,resizable=yes,toolbar=yes,location=yes,status=yes');return false"
 										>
 									#else
-										<a class="$item.iconClass" href="${item.accessUrl}" target="${item.target}">
+										<a href="${item.accessUrl}" target="${item.target}">
 									#end
+										<img src="#imageLink($item.iconLocation)" border= "0" alt="$item.hoverText" hspace="0" />
 									</a>
 								#end
 								#if($item.isLocked())
- 									<span class="fa fa-lock" aria-hidden="true"></span>
-									<span class="sr-only">$clang.getString('locked')</span>
+ 									<img src = "#imageLink("sakai/lock.gif")" border="0"  alt="$tlang.getString('locked')" />
 								#end
 								#if ($item.hasCopyrightAlert())
 									## if there is a copyright alert, show the alert page first
@@ -447,50 +430,50 @@
 									&#169;
 								#elseif($item.isCollection())
     								#if($item.isTooBigNav())
-                      <span class="visible-sm-inline-block visible-xs-inline-block truncate">$validator.escapeHtml($item.name)</span>
+                      <span class="visible-sm-inline visible-xs-inline">$trimmedTitle</span>
                       <span class="hidden-sm hidden-xs">$validator.escapeHtml($item.name)</span>
 									#else
 										<a href="#"
     										onclick="document.getElementById('sakai_action').value='doNavigate';document.getElementById('collectionId').value='$qid';document.getElementById('navRoot').value='$validator.escapeUrl($item.root)';document.getElementById('showForm').submit();"
     										title= "$item.hoverText">
-                        <span class="visible-sm-inline-block visible-xs-inline-block truncate">$validator.escapeHtml($item.name)</span>
+                        <span class="visible-sm-inline visible-xs-inline">$trimmedTitle</span>
                         <span class="hidden-sm hidden-xs">$validator.escapeHtml($item.name)</span>
     									</a>
 									#end	
 								#else
 									#if($item.isTooBigNav())
-                        <span class="visible-sm-inline-block visible-xs-inline-block truncate">$validator.escapeHtml($item.name)</span>
+                        <span class="visible-sm-inline visible-xs-inline">$trimmedTitle</span>
                         <span class="hidden-sm hidden-xs">$validator.escapeHtml($item.name)</span>
 									#else
 										<a href="$item.accessUrl" target="$item.target" title="$item.hoverText">
-                        <span class="visible-sm-inline-block visible-xs-inline-block truncate">$validator.escapeHtml($item.name)</span>
+                        <span class="visible-sm-inline visible-xs-inline">$trimmedTitle</span>
                         <span class="hidden-sm hidden-xs">$validator.escapeHtml($item.name)</span>
     									</a>
 									#end
 								#end
 							#else
-								 <span class="$item.iconClass" aria-hidden="true"></span>
-								 <span class="sr-only">$!item.hoverText</span>
+								 <img src="#imageLink($item.iconLocation)" border="0" alt ="$item.hoverText" hspace="0" />
 								#if($item.isLocked())
-									<span class="fa fa-lock" aria-hidden="true"></span>
-									<span class="sr-only">$clang.getString('locked')</span>
+ 									<img src = "#imageLink("sakai/lock.gif")" border="0"  alt="$tlang.getString('locked')" />
 								#end
-                <span class="visible-sm-inline-block visible-xs-inline-block truncate">$validator.escapeHtml($item.name)</span>
+                <span class="visible-sm-inline visible-xs-inline">$trimmedTitle</span>
                 <span class="hidden-sm hidden-xs">$validator.escapeHtml($item.name)</span>
 								#if ($item.hasCopyrightAlert())
 									&#169;
 								#end
 							#end 
-							#if ($item.description !="" && $item.description)
-								<a class="fa fa-info-circle" tabindex="0" data-placement="bottom" role="button" data-toggle="popover" data-trigger="focus" data-content="$validator.escapeHtmlTextarea($item.description)"></a>
-							#end
+              #if ($item.description !="" && $item.description)
+                <a tabindex="0" data-placement="bottom" role="button" data-toggle="popover" data-trigger="focus" data-content="$validator.escapeHtml($item.description)">
+                   <img src="#imageLink("/silk/information.png")" alt="$tlang.getString("list.description.link")"/>
+                </a>
+              #end
 					</td>
 					<td headers="actions1"  style="white-space:nowrap;vertical-align:middle"  class="attach">
 						#if($item.pasteActions && !$item.pasteActions.isEmpty())
 							#set ($itemsOnLine = 0)
 							#foreach($action in $item.pasteActions)
 								#if($itemsOnLine > 0)|#end
-								<a href="#" class=" highlightlink" title="$labeler.getLabel($action) $tlang.getString("paste.here")" onclick="document.getElementById('selectedItemId').value='$qid';document.getElementById('rt_action').value='${action.typeId}${ACTION_DELIMITER}$action.id';document.getElementById('sakai_action').value='doDispatchAction';submitform('showForm');"><span class="fa fa-clipboard" aria-hidden="true"></span><span class="sr-only">$labeler.getLabel($action)</span></a> 
+								<a href="#" class=" highlightlink" title="$labeler.getLabel($action) $tlang.getString("paste.here")" onclick="document.getElementById('selectedItemId').value='$qid';document.getElementById('rt_action').value='${action.typeId}${ACTION_DELIMITER}$action.id';document.getElementById('sakai_action').value='doDispatchAction';submitform('showForm');"><img src = "#imageLink("silk/page_paste.gif")" border="0"  alt="$labeler.getLabel($action)"/></a> 
 								#set ($itemsOnLine = $itemsOnLine + 1)
 							#end
 						#end
@@ -499,7 +482,7 @@
 					
 					<td headers="actions2" class="attach actions2">
                         <div class="btn-group  pull-right">
-                            <button type="button" class="btn resources-dropdown btn-xs dropdown-toggle" aria-expanded="false" data-toggle="dropdown" title="$clang.getString('gen.actions')">
+                            <button type="button" class="btn resources-dropdown btn-xs" aria-expanded="false" data-toggle="dropdown" title="$clang.getString('gen.actions')">
                                 <span class="sr-only">$validator.escapeHtml($item.name) $clang.getString('gen.actions')</span>
                                 <span class="hidden-xs hidden-sm">$clang.getString('gen.actions')</span>
                                 <span class="caret"></span>
@@ -570,7 +553,7 @@
 						<h3>
 							<a href="#" onclick="document.getElementById('sakai_action').value='doHideOtherSites';document.getElementById('showForm').submit();"
 								title= "$clang.getString('list.copycontent')">
-								<span class="fa fa-caret-down" aria-hidden="true"></span>
+								<img src="#imageLink("sakai/collapse.gif")" alt="$clang.getString('list.copycontent')" border="0" align="top" />
 								$validator.escapeHtml("$clang.getString('list.copycontent')")
 							</a>
 						</h3>
@@ -604,7 +587,7 @@
     										#end
     									#end
     									<!-- $pagesize  "$pagesize" -->
-    									<select name="selectPageSize" class="selectPageSize" onchange="document.getElementById('sakai_action').value='doChange_pagesize';document.getElementById('showForm').submit();">
+    									<select name="selectPageSize" onchange="document.getElementById('sakai_action').value='doChange_pagesize';document.getElementById('showForm').submit();">
     										<option value="5"#if("$pagesize" == "5") selected="selected"#end>$tlang.getString("lis.show5")</option>
     										<option value="10"#if("$pagesize" == "10") selected="selected"#end>$tlang.getString("lis.show10")</option>
     										<option value="20"#if("$pagesize" == "20") selected="selected"#end>$tlang.getString("lis.show20")</option>
@@ -672,18 +655,17 @@
 										#if($item.isCollection())
 										<span class="skip">$newNote</span><span class="$iconDecor">	
 											#if($item.isEmpty() || $item.isTooBig())
-												<span class="$item.iconClass" aria-hidden="true"></span>
-												<span class="sr-only">$!item.hoverText</span>
+												<img src="#imageLink($item.iconLocation)" border= "0" alt="$item.hoverText" hspace="0" /></span>
 											#else
-												<a href="#" class="$item.iconClass"
+												<a href="#"
 													#if($item.isExpanded())
 														onclick="document.getElementById('sakai_action').value='doCollapse_collection';document.getElementById('collectionId').value='$qid';document.getElementById('showForm').submit();"
 													#else
 														onclick="document.getElementById('sakai_action').value='doExpand_collection';document.getElementById('collectionId').value='$qid';document.getElementById('showForm').submit();"
 													#end
-													title= "$item.expandLabel"></a>
+													title= "$item.expandLabel"><img src="#imageLink($item.expandIconLocation)" border= "0" alt="$item.expandLabel" hspace="0" /></a></span>
 											#end
-											</span>
+											
 										#else
 											#if ($item.hasCopyrightAlert())
 												## if there is a copyright alert, show the alert page first
@@ -694,13 +676,11 @@
 											#else
 												<a href="${item.accessUrl}" target="${item.target}">
 											#end
-												<span class="$item.iconClass" aria-hidden="true"></span>
-												<span class="sr-only">$!item.hoverText</span>
+												<img src="#imageLink($item.iconLocation)" border= "0" alt="$item.hoverText" hspace="0" />
 											</a>
 										#end
 										#if($item.isLocked())
-											<span class="fa fa-lock" aria-hidden="true"></span>
-											<span class="sr-only">$clang.getString('locked')</span>
+ 											<img src = "#imageLink("sakai/lock.gif")" border="0"  alt="$tlang.getString('locked')" />
 										#end
 										#if ($item.hasCopyrightAlert())
 											## if there is a copyright alert, show the alert page first
@@ -730,11 +710,9 @@
 											#end
 										#end
 									#else
-										<span class="$item.iconClass" aria-hidden="true"></span>
-										<span class="sr-only">$!item.hoverText</span>
+										 <img src="#imageLink($item.iconLocation)" border="0" alt ="$item.hoverText" hspace="0" />
 										#if($item.isLocked())
-											<span class="fa fa-lock" aria-hidden="true"></span>
-											<span class="sr-only">$clang.getString('locked')</span>
+ 											<img src = "#imageLink("sakai/lock.gif")" border="0"  alt="$tlang.getString('locked')" />
 										#end
 										$validator.escapeHtml($item.name)
 										#if ($item.hasCopyrightAlert())
@@ -742,8 +720,10 @@
 										#end
 									#end
 									#if ($item.description !="" && $item.description)
-										<a class="fa fa-info-circle" tabindex="0" data-placement="bottom" role="button" data-toggle="popover" data-trigger="focus" data-content="$validator.escapeHtml($item.description)"></a>
-									#end
+                    <a tabindex="0" data-placement="bottom" role="button" data-toggle="popover" data-trigger="focus" data-content="$validator.escapeHtml($item.description)">
+                     <img src="#imageLink("/silk/information.png")" alt="$tlang.getString("list.description.link")"/>
+                    </a>
+                  #end
 							</th>
 							
 							#set ($actionCount=($actionCount - 1))
@@ -776,13 +756,12 @@
 					#end ## foreach $root in $other_sites
 	
 				#else
-					<tr>
+					<tr class="hidden-xs">
 						<th colspan="10">
 						<h3>
 							<a href="#" onclick="document.getElementById('sakai_action').value='doShowOtherSites';document.getElementById('showForm').submit();"
 								title= "$clang.getString('list.copycontent')">
-								<span class="fa fa-caret-right" aria-hidden="true"></span>
-								<span class="sr-only">$clang.getString('list.copycontent')</span>
+								<img src="#imageLink("sakai/expand.gif")" alt="$clang.getString('list.copycontent')" border="0" align="top" />
 								$validator.escapeHtml("$clang.getString('list.copycontent')")
 							</a>
 						</h3>
@@ -804,7 +783,6 @@
 		<input type="hidden" id="hide-count" value="$counter.getValue("hideselected")" /> 
 		## copy for other sites
 		<input type="hidden" id="copy-count-other" value="0" />
-		<input type="hidden" id="zipdownload-count" value="$counter.getValue("zipdownloadselected")" />
 	</form>						
 </div>
 <script type="text/JavaScript">
@@ -815,9 +793,6 @@
 				document.getElementById("show-button").disabled = false;
 				document.getElementById("hide-button").disabled = false;
 			#end
-		#end
-		#if($counter.getValue("$zipdownloadselected") > 0)
-			document.getElementById("zipdownload-button").disabled = false;
 		#end
 		#if($counter.getValue("selectall") > 0)
 			document.getElementById("selectall").disabled = false;
@@ -858,12 +833,7 @@
 				},
 			error: function (xhr, ajaxOptions, thrownError) {
 				window.console && console.log("Error from GET request"+thrownError);
-				//If its a URL match it might be denied by CORS, just try to post it, it's should have already passed copyright
-				if (url.match(/\.URL$/)) {
-					var form = jQuery('<form method="GET" action="' + url + '" target="_blank">');
-					jQuery('body').append(form);
-					form.submit();
-				}
+				
 			}
 			});
 		};
@@ -907,12 +877,6 @@
                 }
                 document.getElementById("hide-count").value = "$counter.getValue("hide")";
 #### end SAK-23304
-				var zipdownload_button = document.getElementById("zipdownload-button");
-				if(zipdownload_button)
-				{
-					zipdownload_button.disabled = false;
-				}
-				document.getElementById("zipdownload-count").value = "$counter.getValue("zipdownload")";
 			}
 			else
 			{
@@ -942,12 +906,6 @@
                 }
                 document.getElementById("hide-count").value = "0";
 #### end SAK-23304
-				var zipdownload_button = document.getElementById("zipdownload-button");
-				if(zipdownload_button)
-				{
-					zipdownload_button.disabled = true;
-				}
-				document.getElementById("zipdownload-count").value = "0";
 			}
 		}
 		

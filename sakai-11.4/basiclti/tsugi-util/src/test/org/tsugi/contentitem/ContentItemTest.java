@@ -7,9 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Properties;
-
-import lombok.extern.slf4j.Slf4j;
-
 import org.tsugi.jackson.JacksonUtil;
 
 import org.tsugi.contentitem.objects.Icon;
@@ -17,7 +14,6 @@ import org.tsugi.contentitem.objects.PlacementAdvice;
 import org.tsugi.contentitem.objects.LtiLinkItem;
 import org.tsugi.contentitem.objects.ContentItemResponse;
 
-@Slf4j
 public class ContentItemTest {
 
 	@Before
@@ -57,7 +53,8 @@ public class ContentItemTest {
 		assertTrue(output.contains("64"));
 		assertTrue(output.contains("cool"));
 
-		log.debug("output={}", output);		
+System.out.println("output="+output);
+		
 	}
 
 }

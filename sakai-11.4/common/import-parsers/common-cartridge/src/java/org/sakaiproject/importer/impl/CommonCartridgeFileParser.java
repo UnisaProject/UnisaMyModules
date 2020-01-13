@@ -36,13 +36,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-
-import org.xml.sax.SAXException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.archive.api.ImportMetadata;
 import org.sakaiproject.importer.api.ImportFileParser;
 import org.sakaiproject.importer.api.Importable;
@@ -52,10 +47,15 @@ import org.sakaiproject.importer.impl.translators.CCDiscussionTopicTranslator;
 import org.sakaiproject.importer.impl.translators.CCLearningApplicationResourceTranslator;
 import org.sakaiproject.importer.impl.translators.CCWebContentTranslator;
 import org.sakaiproject.importer.impl.translators.CCWebLinkTranslator;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
-@Slf4j
 public class CommonCartridgeFileParser extends IMSFileParser {
 	private static final String CC_NAMESPACE_URI = "http://www.imsglobal.org/xsd/imscc/imscp_v1p1";
+	
+	/** Our logger. */
+	private static Logger M_log = LoggerFactory.getLogger(CommonCartridgeFileParser.class);
 	
 	public CommonCartridgeFileParser() {
 		// add resource translators here
@@ -175,14 +175,14 @@ public class CommonCartridgeFileParser extends IMSFileParser {
 				docBuilder = builderFactory.newDocumentBuilder();
 			    doc = (Document) docBuilder.parse(fis);
 			} catch (FileNotFoundException e) {
-                log.warn("getDescriptor() file not found: " + pathToData + File.separator + descriptorFilename);
+                M_log.warn("getDescriptor() file not found: " + pathToData + File.separator + descriptorFilename);
             } catch (ParserConfigurationException e) {
-            	log.warn("getDescriptor() parser config error: " + e.getMessage()); 
+            	M_log.warn("getDescriptor() parser config error: " + e.getMessage()); 
             } catch (SAXException e) {
-            	log.warn("getDescriptor() SAX parse error on file " + pathToData + File.separator + 
+            	M_log.warn("getDescriptor() SAX parse error on file " + pathToData + File.separator + 
             			descriptorFilename + ": " + e.getMessage()); 
             } catch (IOException e) {
-            	log.warn("getDescriptor() file IO exception", e);
+            	M_log.warn("getDescriptor() file IO exception", e);
             } finally {
                 if (fis != null) {
     			    try {

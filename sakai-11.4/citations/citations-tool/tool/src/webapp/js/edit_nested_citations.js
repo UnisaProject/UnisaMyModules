@@ -312,7 +312,7 @@
                         } else if (key === 'secondsBetweenSaveciteRefreshes') {
                             citations_new_resource.secondsBetweenSaveciteRefreshes = value;
                         } else if ($.isArray(value)) {
-                            reportError(key + value);
+                            reportError('result for key ' + key + ' is an array: ' + value);
                         } else {
                             $('input[name=' + key + ']').val(value);
                         }
@@ -531,23 +531,13 @@
                 onDrop: function (item, container, _super) {
 
                     // put the editor's value in the link data-value
-                    $('li[id^="link"]').each(function(index) {
+                    $('li[id^="link"]').each(function( ) {
                         var editorId = $(this).attr('id').replace('link', 'sectionInlineEditor');
                         var outerHTML = '';
                         if ($('#' + editorId).html()!=null){
                             outerHTML = $('#' + editorId).html().trim();
                         }
                         $(this).data('value', outerHTML);
-
-                        var sectiontype = $(this).data('sectiontype');
-                        if (sectiontype=='CITATION'){
-                            $(this).find('a').each(function(){
-                                var href = $(this).attr('href');
-                                if (href.indexOf("location=0")!=-1){
-                                    $(this).attr('href', href.replace("location=0", "location=" + index));
-                                }
-                            });
-                        }
                     });
 
                     // if it's a citation dropped into nest then increase page height

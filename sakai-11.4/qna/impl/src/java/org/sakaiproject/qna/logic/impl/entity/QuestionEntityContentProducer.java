@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.entitybroker.EntityBroker;
@@ -37,8 +39,6 @@ import org.sakaiproject.search.api.SearchService;
 import org.sakaiproject.search.model.SearchBuilderItem;
 import org.sakaiproject.util.FormattedText;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * | event                | ref                                            |
 +----------------------+------------------------------------------------+
@@ -50,9 +50,10 @@ import lombok.extern.slf4j.Slf4j;
  * @author dhorwitz
  *
  */
-@Slf4j
 public class QuestionEntityContentProducer implements EntityContentProducer {
 
+	private static Log log = LogFactory.getLog(QuestionEntityContentProducer.class);
+	
 	// runtime dependency
 	private List<String> addEvents = null;
 

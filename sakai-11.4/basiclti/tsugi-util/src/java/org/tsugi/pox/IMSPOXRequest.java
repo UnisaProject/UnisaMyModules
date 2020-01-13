@@ -19,8 +19,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 import net.oauth.OAuthMessage;
@@ -30,14 +28,17 @@ import net.oauth.server.OAuthServlet;
 import net.oauth.signature.OAuthSignatureMethod;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tsugi.basiclti.Base64;
 import org.tsugi.basiclti.XMLMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-@Slf4j
 public class IMSPOXRequest {
+
+	private final static Logger logger = LoggerFactory.getLogger(IMSPOXRequest.class);
 
 	public final static String MAJOR_SUCCESS = "success";
 	public final static String MAJOR_FAILURE = "failure";
@@ -92,7 +93,6 @@ public class IMSPOXRequest {
 	private String header = null;
 	private String oauth_body_hash = null;
 	private String oauth_consumer_key = null;
-	private String oauth_signature_method = null;
 
 	public boolean valid = false;
 	private String operation = null;
@@ -176,7 +176,7 @@ public class IMSPOXRequest {
 		String contentType = request.getContentType();
 		if ( ! "application/xml".equals(contentType) ) {
 			errorMessage = "Content Type must be application/xml";
-		 	log.info("{}\n{}", errorMessage, contentType);
+		 	logger.info(errorMessage+"\n"+contentType);
 			return;
 		}
 
@@ -195,21 +195,16 @@ public class IMSPOXRequest {
 					String [] pieces = parm.split("\"");
 					oauth_consumer_key = URLDecoder.decode(pieces[1]);
 				}
-				if ( parm.startsWith("oauth_signature_method=") ) {
-					String [] pieces = parm.split("\"");
-					oauth_signature_method = URLDecoder.decode(pieces[1]);
-				}
 			}
 		}		
 
 		if ( oauth_body_hash == null ) {
 			errorMessage = "Did not find oauth_body_hash";
-			log.info("{}\n{}", errorMessage, header);
+		 logger.info(errorMessage+"\n"+header);
 			return;
 		}
 
-		log.debug("OBH={}", oauth_body_hash);
-		log.debug("OSM={}", oauth_signature_method);
+		// System.out.println("OBH="+oauth_body_hash);
 		final char[] buffer = new char[0x10000];
 		try {
 			StringBuilder out = new StringBuilder();
@@ -228,14 +223,11 @@ public class IMSPOXRequest {
 		}
 
 		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-1");
-			if ( "HMAC-SHA256".equals(oauth_signature_method) ) {
-				md = MessageDigest.getInstance("SHA-256");
-			}
+			MessageDigest md = MessageDigest.getInstance("SHA1");
 			md.update(postBody.getBytes()); 
 			byte[] output = Base64.encode(md.digest());
 			String hash = new String(output);
-			log.debug("HASH={}", hash);
+			// System.out.println("HASH="+hash);
 			if ( ! hash.equals(oauth_body_hash) ) {
 				errorMessage = "Body hash does not match header";
 				return;
@@ -305,7 +297,6 @@ public class IMSPOXRequest {
 
 		try {
 			base_string = OAuthSignatureMethod.getBaseString(oam);
-			log.debug("POX base_string={}",base_string);
 		} catch (Exception e) {
 			base_string = null;
 		}
@@ -331,7 +322,8 @@ public class IMSPOXRequest {
 				}
 			}
 		} catch (Throwable t) {
-		 	log.warn(t.getMessage(), t);
+		 	logger.warn(t.getMessage());
+			// t.printStackTrace();
 		}
 		return null;
 	}
@@ -467,7 +459,7 @@ public class IMSPOXRequest {
 
 		if ( internalError.length() > 0 ) {
 			description = description + " (Internal error: " + internalError.toString() + ")";
-		 	log.warn(internalError.toString());
+		 	logger.warn(internalError.toString());
 		}
 
 		if ( bodyString == null ) bodyString = "";
@@ -518,30 +510,30 @@ public class IMSPOXRequest {
 		"</imsx_POXEnvelopeRequest>";
 
 	public static void runTest() {
-		log.debug("Runnig test.");
+		System.out.println("Runnig test.");
 		IMSPOXRequest pox = new IMSPOXRequest(inputTestData);
-		log.debug("Version = {}", pox.getHeaderVersion());
-		log.debug("Operation = {}", pox.getOperation());
+		System.out.println("Version = "+pox.getHeaderVersion());
+		System.out.println("Operation = "+pox.getOperation());
 		Map<String,String> bodyMap = pox.getBodyMap();
 		String guid = bodyMap.get("/resultRecord/sourcedGUID/sourcedId");
-		log.debug("guid={}", guid);
+		System.out.println("guid="+guid);
 		String grade = bodyMap.get("/resultRecord/result/resultScore/textString");
-		log.debug("grade={}", grade);
+		System.out.println("grade="+grade);
 
 		String desc = "Message received and validated operation="+pox.getOperation()+
 			" guid="+guid+" grade="+grade;
 
 		String output = pox.getResponseUnsupported(desc);
-		log.debug("---- Unsupported ----");
-		log.debug(output);
+		System.out.println("---- Unsupported ----");
+		System.out.println(output);
 
 		Properties props = new Properties();
 		props.setProperty("fred","zap");
 		props.setProperty("sam",IMSPOXRequest.MINOR_IDALLOC);
-		log.debug("---- Generate logger Error ----");
+		System.out.println("---- Generate logger Error ----");
 		output = pox.getResponseFailure(desc,props);
-		log.debug("---- Failure ----");
-		log.debug(output);
+		System.out.println("---- Failure ----");
+		System.out.println(output);
 
 
 
@@ -561,10 +553,10 @@ public class IMSPOXRequest {
 		theMap.put("/readMembershipResponse/membershipRecord/membership/member", lm);
 
 		String theXml = XMLMap.getXMLFragment(theMap, true);
-		log.debug("th={}", theXml);
+		// System.out.println("th="+theXml);
 		output = pox.getResponseSuccess(desc,theXml);
-		log.debug("---- Success String ----");
-		log.debug(output);
+		System.out.println("---- Success String ----");
+		System.out.println(output);
 	}
 
 	/*

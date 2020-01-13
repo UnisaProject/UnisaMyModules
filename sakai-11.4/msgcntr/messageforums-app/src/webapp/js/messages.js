@@ -87,7 +87,7 @@ function changeSelect(obj) {
 
 function addTagSelector(obj) {
   	if (obj) {
-	  	$(obj).select2({formatNoMatches:function(){return'';},placeholder: obj.getAttribute('title')});
+	  	$(obj).select2({formatNoMatches:function(){return'';},placeholder: "Click here to select recipients"});
 	  	$(obj).on('change',function(){resize();});
   	}
 }

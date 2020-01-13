@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.sakaiproject.template</groupId>
         <artifactId>template</artifactId>
-        <version>12.6</version>
+        <version>11.4</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     
@@ -36,7 +36,10 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>sakai-template-api</artifactId>
         </dependency>
-      
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sakai-template-util</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.sakaiproject.courier</groupId>
             <artifactId>sakai-courier-util</artifactId>

@@ -20,7 +20,15 @@
 
 package org.sakaiproject.emailtemplateservice.tool.producers;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.emailtemplateservice.model.EmailTemplate;
+import org.sakaiproject.emailtemplateservice.service.EmailTemplateService;
+import org.sakaiproject.emailtemplateservice.service.external.ExternalLogic;
+import org.sakaiproject.emailtemplateservice.tool.locators.EmailTemplateLocator;
+import org.sakaiproject.emailtemplateservice.tool.handler.ModifyEmailHandler;
+import org.sakaiproject.emailtemplateservice.tool.params.EmailTemplateViewParams;
+import org.sakaiproject.user.api.UserDirectoryService;
 
 import uk.org.ponder.messageutil.TargettedMessage;
 import uk.org.ponder.messageutil.TargettedMessageList;
@@ -39,22 +47,14 @@ import uk.org.ponder.rsf.viewstate.SimpleViewParameters;
 import uk.org.ponder.rsf.viewstate.ViewParameters;
 import uk.org.ponder.rsf.viewstate.ViewParamsReporter;
 
-import org.sakaiproject.emailtemplateservice.model.EmailTemplate;
-import org.sakaiproject.emailtemplateservice.service.EmailTemplateService;
-import org.sakaiproject.emailtemplateservice.service.external.ExternalLogic;
-import org.sakaiproject.emailtemplateservice.tool.locators.EmailTemplateLocator;
-import org.sakaiproject.emailtemplateservice.tool.handler.ModifyEmailHandler;
-import org.sakaiproject.emailtemplateservice.tool.params.EmailTemplateViewParams;
-import org.sakaiproject.user.api.UserDirectoryService;
-
 /**
  * Page for Modifying Email templates
  * 
  * @author Aaron Zeckoski (aaronz@vt.edu)
  */
-@Slf4j
 public class ModifyEmailProducer implements ViewComponentProducer, ViewParamsReporter, ActionResultInterceptor {
 
+	private static Logger log = LoggerFactory.getLogger(ModifyEmailProducer.class);
 	public static final String VIEW_ID = "modify_email";
 	public String getViewID() {
 		return VIEW_ID;

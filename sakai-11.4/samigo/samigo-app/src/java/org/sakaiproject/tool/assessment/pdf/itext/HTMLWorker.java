@@ -57,7 +57,11 @@ import java.util.HashMap;
 import java.util.Stack;
 import java.util.StringTokenizer;
 
-import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.content.api.ContentResource;
+import org.sakaiproject.content.cover.ContentHostingService;
+
 import com.lowagie.text.Chunk;
 import com.lowagie.text.DocListener;
 import com.lowagie.text.DocumentException;
@@ -85,13 +89,7 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.xml.simpleparser.SimpleXMLDocHandler;
 import com.lowagie.text.xml.simpleparser.SimpleXMLParser;
-import org.apache.commons.lang.StringUtils;
 
-import org.sakaiproject.component.cover.ServerConfigurationService;
-import org.sakaiproject.content.api.ContentResource;
-import org.sakaiproject.content.cover.ContentHostingService;
-
-@Slf4j
 public class HTMLWorker implements SimpleXMLDocHandler, DocListener {
 
 	protected ArrayList objectList;
@@ -312,7 +310,7 @@ public class HTMLWorker implements SimpleXMLDocHandler, DocListener {
 						img.setBorder(Image.BOX);
 					}
 					catch (Exception e) {
-						log.error(e.getMessage(), e);
+						e.printStackTrace();
 					}
 				}
 				// horizonatal space
@@ -322,7 +320,7 @@ public class HTMLWorker implements SimpleXMLDocHandler, DocListener {
 						img.setSpacingBefore(Float.parseFloat(hspace));
 					}
 					catch (Exception e) {
-						log.error(e.getMessage(), e);
+						e.printStackTrace();
 					}
 				}
 
@@ -501,7 +499,8 @@ public class HTMLWorker implements SimpleXMLDocHandler, DocListener {
 			}
 		}
 		catch (Exception e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
+			//throw new ExceptionConverter(e);
 		}
 	}
 

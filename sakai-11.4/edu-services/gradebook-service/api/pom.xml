@@ -5,7 +5,7 @@
     <parent>
         <artifactId>edu-services</artifactId>
         <groupId>org.sakaiproject.edu-services</groupId>
-        <version>12.6</version><!-- ProjectVersion -->
+        <version>11.4</version><!-- ProjectVersion -->
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -18,15 +18,10 @@
         <deploy.target>shared</deploy.target>
     </properties>
     
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.sakaiproject.edu-services.sections</groupId>
-      <artifactId>sections-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
+    <dependencies>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+		</dependency>
+    </dependencies>
 </project>

@@ -1,7 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h" %>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f" %>
-<%@ taglib uri="http://www.sakaiproject.org/samigo" prefix="samigo" %>
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%@ taglib uri="http://www.sakaiproject.org/samigo" prefix="samigo" %>
 <!DOCTYPE html
      PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -95,7 +95,7 @@ function disableLinks(clickedLink){
       <h:outputText value="#{selectIndexMessages.take_assessment}" />
     </h2>
 
-    <div class="info-text">
+    <div>
       <h:outputText rendered="#{select.isThereAssessmentToTake eq 'true'}" value="#{selectIndexMessages.take_assessment_notes}" />
       <h:outputText rendered="#{select.isThereAssessmentToTake eq 'false'}" value="#{selectIndexMessages.take_assessment_notAvailable}" />
     </div>
@@ -108,7 +108,7 @@ sorting actions for table:
 --%>
   <!-- SELECT TABLE -->
   <div class="tier2">
-  <h:dataTable id="selectTable" rendered="#{select.isThereAssessmentToTake eq 'true'}" value="#{select.takeableAssessments}" var="takeable" styleClass="table table-striped" summary="#{selectIndexMessages.sum_availableAssessment}">
+  <h:dataTable id="selectTable" value="#{select.takeableAssessments}" rendered="#{select.isThereAssessmentToTake eq 'true'}" var="takeable" styleClass="table table-striped" summary="#{selectIndexMessages.sum_availableAssessment}">
     <h:column headerClass="assessmentTitleHeader">
       <f:facet name="header">
           <h:outputText  value="#{selectIndexMessages.title} " />
@@ -162,7 +162,7 @@ sorting actions for table:
 <t:div rendered="#{select.isThereAssessmentToReview eq 'true'}" styleClass="panel panel-default sam-submittedPanel">
 	<t:div rendered="#{select.displayAllAssessments == 2}" styleClass="panel-heading sam-reviewHeaderTabs"> <%-- on the all submissions/score tab --%>
 		<span><h:outputText value="#{selectIndexMessages.review_assessment_all}" rendered="#{select.displayAllAssessments == 2}" /></span>
-		<h:commandLink 
+		<h:commandLink
 			id="some"
 			value="#{selectIndexMessages.review_assessment_recorded}"
 			rendered="#{select.displayAllAssessments == 2}" styleClass="sam-leftSep"
@@ -193,7 +193,7 @@ sorting actions for table:
 * Sort by: Title
 --%>
   <div class="table-responsive">
-    <h:dataTable styleClass="table table-striped" id="reviewTable" value="#{select.reviewableAssessments}" var="reviewable" summary="#{selectIndexMessages.sum_submittedAssessment}">
+  <h:dataTable styleClass="table table-striped" id="reviewTable" value="#{select.reviewableAssessments}" var="reviewable" summary="#{selectIndexMessages.sum_submittedAssessment}">
 
 <%-- TITLE --%>
     <h:column>
@@ -218,7 +218,7 @@ sorting actions for table:
 	  </f:facet> 
 	  <h:panelGroup>
 	    <h:commandLink title="#{selectIndexMessages.t_histogram}" id="histogram"  action="#{delivery.getOutcome}" immediate="true"  
-	        rendered="#{reviewable.feedback eq 'show' && reviewable.feedbackComponentOption == '2' && reviewable.statistics && !reviewable.isAssessmentRetractForEdit && reviewable.isRecordedAssessment}" onmouseup="disableLinks(this);">
+	        rendered="#{reviewable.feedback eq 'show' && reviewable.feedbackComponentOption == '2' && reviewable.statistics && !reviewable.hasRandomDrawPart && !reviewable.isAssessmentRetractForEdit && reviewable.isRecordedAssessment}" onmouseup="disableLinks(this);">
           <f:param name="publishedAssessmentId" value="#{reviewable.assessmentId}" />
           <f:param name="hasNav" value="false"/>
           <f:param name="allSubmissions" value="true" />
@@ -240,7 +240,7 @@ sorting actions for table:
 	    </h:panelGroup>
 	  </f:facet>
 	  
-	  <h:outputText value="#{reviewable.roundedRawScoreToDisplay} " styleClass="currentSort" rendered="#{reviewable.showScore eq 'show' && reviewable.isRecordedAssessment && !reviewable.isAssessmentRetractForEdit}" />
+	  <h:outputText value="#{reviewable.roundedRawScore} " styleClass="currentSort" rendered="#{reviewable.showScore eq 'show' && reviewable.isRecordedAssessment && !reviewable.isAssessmentRetractForEdit}" />
 	  <h:outputText value="" rendered="#{!reviewable.isRecordedAssessment && reviewable.showScore eq 'show' && !reviewable.isAssessmentRetractForEdit}"/>   
 	  <h:outputText value="#{selectIndexMessages.highest_score}" rendered="#{(reviewable.multipleSubmissions eq 'true' && reviewable.isRecordedAssessment && reviewable.scoringOption eq '1' && (reviewable.showScore eq 'show' || reviewable.showScore eq 'blank')) && !reviewable.isAssessmentRetractForEdit}"/> 
 	  <h:outputText value="#{selectIndexMessages.last_score}" rendered="#{(reviewable.multipleSubmissions eq 'true' && reviewable.isRecordedAssessment && reviewable.scoringOption eq '2' && (reviewable.showScore eq 'show' || reviewable.showScore eq 'blank')) && !reviewable.isAssessmentRetractForEdit}"/>
@@ -283,7 +283,7 @@ sorting actions for table:
         </h:panelGroup>
       </f:facet>
 
-      <h:outputText value="#{reviewable.roundedRawScoreToDisplay} " rendered="#{(reviewable.showScore eq 'show' && !reviewable.isAssessmentRetractForEdit) && !reviewable.isRecordedAssessment}" />
+	  <h:outputText value="#{reviewable.roundedRawScore} " rendered="#{(reviewable.showScore eq 'show' && !reviewable.isAssessmentRetractForEdit) && !reviewable.isRecordedAssessment}" />             
       <h:outputText value="#{selectIndexMessages.not_applicable}" rendered="#{(reviewable.showScore eq 'na' || reviewable.isAssessmentRetractForEdit) && !reviewable.isRecordedAssessment}" />
     </h:column>
 
@@ -315,10 +315,12 @@ sorting actions for table:
 	    
   </h:dataTable>
 
-  <t:div styleClass="sam-asterisks-row" rendered="#{(select.hasAnyAssessmentBeenModified && select.warnUserOfModification) || select.hasAnyAssessmentRetractForEdit}">
-  <h:outputText value="#{selectIndexMessages.asterisk} #{selectIndexMessages.has_been_modified}" rendered="#{select.hasAnyAssessmentBeenModified && select.warnUserOfModification}" styleClass="validate"/>
+  <br/>
+  
+  <h:panelGrid>
+  <h:outputText value="#{selectIndexMessages.asterisk} #{selectIndexMessages.has_been_modified}" rendered="#{select.hasAnyAssessmentBeenModified && select.warnUserOfModification}" styleClass="validate"/> 
   <h:outputText value="#{selectIndexMessages.asterisk_2} #{selectIndexMessages.currently_being_edited}" rendered="#{select.hasAnyAssessmentRetractForEdit}" styleClass="validate"/>
-  </t:div>
+  </h:panelGrid>
 
   </div></t:div>
   </h:form>

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.tpustudentplacement"
+		title="Teaching Practice Unit Student placement"
+		description="Teaching Practice Unit Student placement">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

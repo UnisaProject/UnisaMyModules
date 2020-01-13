@@ -59,14 +59,6 @@ public class ProfileLinkLogicImpl implements ProfileLinkLogic {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getInternalDirectUrlToUserProfile(final String viewerUuid, final String viewedUuid) {
-		return this.sakaiProxy.getDirectUrlToProfileComponent(viewerUuid, viewedUuid, "viewprofile", null);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public String getInternalDirectUrlToUserWall(final String userUuid, final String wallItemId) {
 		final String currentUserUuid = this.sakaiProxy.getCurrentUserId();
 		if (currentUserUuid == null) {
@@ -114,27 +106,18 @@ public class ProfileLinkLogicImpl implements ProfileLinkLogic {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getInternalDirectUrlToUserConnections(String userId) {
-
-		// link direct to connections page, no extra params needed
-		String extraParams = null;
-		if (this.sakaiProxy.isUsingNormalPortal()) {
-			extraParams = getFormattedStateParamForWicketTool(ProfileConstants.WICKET_PAGE_CONNECTIONS, null);
-		}
-		return this.sakaiProxy.getDirectUrlToUserProfile(userId, extraParams);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public String getInternalDirectUrlToUserConnections() {
 		final String currentUserUuid = this.sakaiProxy.getCurrentUserId();
 		if (currentUserUuid == null) {
 			throw new SecurityException("Must be logged in.");
 		}
 
-		return this.getInternalDirectUrlToUserConnections(currentUserUuid);
+		// link direct to connections page, no extra params needed
+		String extraParams = null;
+		if (this.sakaiProxy.isUsingNormalPortal()) {
+			extraParams = getFormattedStateParamForWicketTool(ProfileConstants.WICKET_PAGE_CONNECTIONS, null);
+		}
+		return this.sakaiProxy.getDirectUrlToUserProfile(currentUserUuid, extraParams);
 	}
 
 	/**

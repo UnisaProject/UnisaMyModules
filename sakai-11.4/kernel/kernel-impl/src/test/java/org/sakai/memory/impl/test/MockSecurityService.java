@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
-import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.user.api.User;
 
 /**
@@ -155,18 +154,6 @@ public class MockSecurityService implements SecurityService
 	public SecurityAdvisor popAdvisor(SecurityAdvisor advisor) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public boolean isUserRoleSwapped() throws IdUnusedException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isUserRoleSwapped(String siteId) throws IdUnusedException {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 

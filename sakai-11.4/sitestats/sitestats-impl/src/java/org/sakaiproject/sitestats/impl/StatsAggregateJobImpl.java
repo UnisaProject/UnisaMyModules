@@ -28,20 +28,22 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.SchedulerException;
 import org.quartz.StatefulJob;
-
 import org.sakaiproject.component.app.scheduler.jobs.SpringJobBeanWrapper;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.Event;
 import org.sakaiproject.sitestats.api.JobRun;
 import org.sakaiproject.sitestats.api.StatsUpdateManager;
 
-@Slf4j
+
 public class StatsAggregateJobImpl implements StatefulJob {
+	private Logger					LOG					= LoggerFactory.getLogger(StatsAggregateJobImpl.class);
+
 	// Spring fields
 	private int					maxEventsPerRun		= 0;
 	private int					sqlBlockSize		= 1000;
@@ -97,7 +99,7 @@ public class StatsAggregateJobImpl implements StatefulJob {
 
 	public void init(){
 		doInitialCheck();
-		log.info("StatsAggregateJobImpl.init()");		
+		LOG.info("StatsAggregateJobImpl.init()");		
 	}
 	
 	private void doInitialCheck() {
@@ -105,7 +107,7 @@ public class StatsAggregateJobImpl implements StatefulJob {
 		try{
 			lastJobRun = getLastJobRun();
 		}catch(Exception e){
-			log.error("Make sure SST_JOB_RUN table is created before running the StatsAggregateJob job.");
+			LOG.error("Make sure SST_JOB_RUN table is created before running the StatsAggregateJob job.");
 		}
 		if(lastJobRun == null && !statsUpdateManager.isCollectThreadEnabled()){
 			if(getStartEventId() < 0){
@@ -113,11 +115,11 @@ public class StatsAggregateJobImpl implements StatefulJob {
 				try{
 					lastEventIdInTable = getLastEventIdInTable();
 				}catch(SQLException e){
-					log.warn("Unable to check last eventId in table SAKAI_EVENT --> assuming 0.", e);
+					LOG.warn("Unable to check last eventId in table SAKAI_EVENT --> assuming 0.", e);
 				}
-				log.warn("First StatsAggregateJob job run will use last SAKAI_EVENT.EVENT_ID (id = "+lastEventIdInTable+"). To override this, please specify a new eventId in sakai.properties (property: startEventId@org.sakaiproject.sitestats.api.StatsAggregateJob=n, where n>=0). This value is for the first job run only.");
+				LOG.warn("First StatsAggregateJob job run will use last SAKAI_EVENT.EVENT_ID (id = "+lastEventIdInTable+"). To override this, please specify a new eventId in sakai.properties (property: startEventId@org.sakaiproject.sitestats.api.StatsAggregateJob=n, where n>=0). This value is for the first job run only.");
 			}else{
-				log.warn("First StatsAggregateJob job run will use 'startEventId' ("+getStartEventId()+") specified in sakai.properties. This value is for the first job run only.");
+				LOG.warn("First StatsAggregateJob job run will use 'startEventId' ("+getStartEventId()+") specified in sakai.properties. This value is for the first job run only.");
 			}
 		}
 		
@@ -136,22 +138,22 @@ public class StatsAggregateJobImpl implements StatefulJob {
 		try{
 			while(isJobCurrentlyRunning(context)) {
 				String beanId = context.getJobDetail().getJobDataMap().getString(SpringJobBeanWrapper.SPRING_BEAN_NAME);
-				log.warn("Another instance of "+beanId+" is currently running - Execution aborted.");
+				LOG.warn("Another instance of "+beanId+" is currently running - Execution aborted.");
 				return;
 			}
 		}catch(SchedulerException e){
-			log.error("Aborting job execution due to "+e.toString(), e);
+			LOG.error("Aborting job execution due to "+e.toString(), e);
 			return;
 		}
 		
-		log.info("Starting job: " + jobName);
+		LOG.info("Starting job: " + jobName);
 		
 		// check for SAKAI_EVENT.CONTEXT column
 		try{
 			checkForContextColumn();
-			log.debug("SAKAI_EVENT.CONTEXT exists? "+isEventContextSupported);
+			LOG.debug("SAKAI_EVENT.CONTEXT exists? "+isEventContextSupported);
 		}catch(SQLException e1){
-			log.warn("Unable to check existence of SAKAI_EVENT.CONTEXT", e1);
+			LOG.warn("Unable to check existence of SAKAI_EVENT.CONTEXT", e1);
 		}
 
 		// configure job
@@ -159,7 +161,7 @@ public class StatsAggregateJobImpl implements StatefulJob {
 		try{
 			lastJobRun = getLastJobRun();
 		}catch(Exception e){
-			log.error("Error accessing SST_JOB_RUN table. Does this table exists? Aborting job...");
+			LOG.error("Error accessing SST_JOB_RUN table. Does this table exists? Aborting job...");
 			return;
 		}
 		jobRun = new JobRunImpl();
@@ -167,29 +169,29 @@ public class StatsAggregateJobImpl implements StatefulJob {
 		if(lastJobRun != null){
 			jobRun.setStartEventId(lastJobRun.getEndEventId() + 1);
 		}else if(getStartEventId() >= 0){
-			log.info("First job run: using 'startEventId' ("+getStartEventId()+") specified in sakai.properties. This value is for the first job run only.");
+			LOG.info("First job run: using 'startEventId' ("+getStartEventId()+") specified in sakai.properties. This value is for the first job run only.");
 			jobRun.setStartEventId(getStartEventId());
 		}else{
 			long lastEventIdInTable = 0;
 			try{
 				lastEventIdInTable = getLastEventIdInTable();
 			}catch(SQLException e){
-				log.warn("Unable to check last eventId in table SAKAI_EVENT --> assuming 0.", e);
+				LOG.warn("Unable to check last eventId in table SAKAI_EVENT --> assuming 0.", e);
 			}
-			log.info("First job run: no 'startEventId' specified in sakai.properties; using last SAKAI_EVENT.EVENT_ID (id = "+lastEventIdInTable+"). This value is for the first job run only.");
+			LOG.info("First job run: no 'startEventId' specified in sakai.properties; using last SAKAI_EVENT.EVENT_ID (id = "+lastEventIdInTable+"). This value is for the first job run only.");
 			jobRun.setStartEventId(lastEventIdInTable);
 		}
 
 		// start job
 		try{
 			result = startJob();
-			log.info("Summary: " + result);
+			LOG.info("Summary: " + result);
 		}catch(SQLException e){
-			log.error("Summary: job run failed", e);
+			LOG.error("Summary: job run failed", e);
 		}
 
 		// finish		
-		log.info("Finishing job: " + jobName);
+		LOG.info("Finishing job: " + jobName);
 	}
 
 	private boolean isJobCurrentlyRunning(JobExecutionContext context) throws SchedulerException {
@@ -219,7 +221,7 @@ public class StatsAggregateJobImpl implements StatefulJob {
 					lastEventIdInTable = rs.getLong("LAST_ID");
 				}
 			}catch(SQLException e){
-				log.error("Unable to retrieve events", e); 
+				LOG.error("Unable to retrieve events", e); 
 			}finally{
 				try{
 					if(rs != null)
@@ -290,7 +292,7 @@ public class StatsAggregateJobImpl implements StatefulJob {
 							context = rs.getString("CONTEXT");
 						eventsQueue.add( statsUpdateManager.buildEvent(date, event, ref, context, sessionUser, sessionId) );
 						
-						lastProcessedEventId = rs.getLong("EVENT_ID");
+						lastProcessedEventId = rs.getInt("EVENT_ID");
 						lastEventDate = date;
 						if(firstEventIdProcessed == -1)
 							firstEventIdProcessed = jobRun.getStartEventId(); //was: lastProcessedEventId;
@@ -298,8 +300,8 @@ public class StatsAggregateJobImpl implements StatefulJob {
 							firstEventIdProcessedInBlock = lastProcessedEventId;
 						processedCounter++;
 					}catch(Exception e){
-						if(log.isDebugEnabled())
-							log.debug("Ignoring "+event+", "+ref+", "+date+", "+sessionUser+", "+sessionId+" due to: "+e.toString());
+						if(LOG.isDebugEnabled())
+							LOG.debug("Ignoring "+event+", "+ref+", "+date+", "+sessionUser+", "+sessionId+" due to: "+e.toString());
 					}
 					counter++;
 				}
@@ -324,7 +326,7 @@ public class StatsAggregateJobImpl implements StatefulJob {
 						saveJobRun(jobRun);
 					}else{
 						returnMessage = "An error occurred while processing/persisting events to db. Please check your logs, fix possible problems and re-run this job (will start after last successful processed event).";
-						log.error(returnMessage);
+						LOG.error(returnMessage);
 						throw new Exception(returnMessage);
 					}
 				}
@@ -341,13 +343,13 @@ public class StatsAggregateJobImpl implements StatefulJob {
 			sqlError = true;
 			if(returnMessage == null) {
 				returnMessage = "Unable to retrieve events due to: " + e.getMessage();
-				log.error("Unable to retrieve events", e);
+				LOG.error("Unable to retrieve events", e);
 			}
 		}catch(Exception e){
 			sqlError = true;
 			if(returnMessage == null) {
 				returnMessage = "Unable to retrieve events due to: " + e.getMessage(); 
-				log.error("Unable to retrieve events due to an unknown cause", e);
+				LOG.error("Unable to retrieve events due to an unknown cause", e);
 			}
 		}finally{
 			try{
@@ -403,7 +405,7 @@ public class StatsAggregateJobImpl implements StatefulJob {
 		try{
 			ok = statsUpdateManager.saveJobRun(jobRun);
 		}catch(Exception e){
-			log.error("Unable to persist last job information to db.", e);
+			LOG.error("Unable to persist last job information to db.", e);
 		}
 		return ok;
 	}
@@ -442,8 +444,8 @@ public class StatsAggregateJobImpl implements StatefulJob {
 					eventsQueue.add( statsUpdateManager.buildEvent(date, event, ref, context, sessionUser, sessionId) );					
 					count++;				
 				}catch(Exception e){
-					if(log.isDebugEnabled())
-						log.debug("Ignoring "+event+", "+ref+", "+date+", "+sessionUser+", "+sessionId+" due to: "+e.toString());
+					if(LOG.isDebugEnabled())
+						LOG.debug("Ignoring "+event+", "+ref+", "+date+", "+sessionUser+", "+sessionId+" due to: "+e.toString());
 				}
 			}
 			
@@ -452,14 +454,14 @@ public class StatsAggregateJobImpl implements StatefulJob {
 			eventsQueue.clear();
 			if(!processedOk){
 				String returnMessage = "An error occurred while processing/persisting events to db - please check your logs.";
-				log.error(returnMessage);
+				LOG.error(returnMessage);
 				throw new Exception(returnMessage);
 			}
 			
 		}catch(SQLException e){
-			log.error("Unable to collect past site events", e);
+			LOG.error("Unable to collect past site events", e);
 		}catch(Exception e){
-			log.error("Unable to collect past site due to an unknown cause", e);
+			LOG.error("Unable to collect past site due to an unknown cause", e);
 		}finally{
 			try{
 				if(rs != null)
@@ -479,7 +481,7 @@ public class StatsAggregateJobImpl implements StatefulJob {
 		}
 		
 		long opEnd = System.currentTimeMillis();
-		log.info("Collected "+count+" past events for site "+siteId+" in "+(opEnd-opStart)/1000+" seconds.");
+		LOG.info("Collected "+count+" past events for site "+siteId+" in "+(opEnd-opStart)/1000+" seconds.");
 		return count;
 	}
 
@@ -514,10 +516,10 @@ public class StatsAggregateJobImpl implements StatefulJob {
 					sqlPastSiteEvents = MYSQL_PAST_SITE_EVENTS;
 				}
 			}catch(SQLException e){
-				log.error("Unable to connect Sakai Db", e);
+				LOG.error("Unable to connect Sakai Db", e);
 				return null;
 			}catch(Exception e){
-				log.error("Unable to connect to Sakai Db", e);
+				LOG.error("Unable to connect to Sakai Db", e);
 				return null;
 			}
 		}else{
@@ -541,10 +543,10 @@ public class StatsAggregateJobImpl implements StatefulJob {
 				}
 				connection = DriverManager.getConnection(getUrl(), getUsername(), getPassword());
 			}catch(SQLException e){
-				log.error("Unable to connect to " + getUrl(), e);
+				LOG.error("Unable to connect to " + getUrl(), e);
 				return null;
 			}catch(Exception e){
-				log.error("Unable to connect to " + getUrl(), e);
+				LOG.error("Unable to connect to " + getUrl(), e);
 				return null;
 			}
 		}
@@ -562,7 +564,7 @@ public class StatsAggregateJobImpl implements StatefulJob {
 					connection.close();
 				}
 			}catch(SQLException e){
-				log.error("Unable to close connection " + getUrl(), e);
+				LOG.error("Unable to close connection " + getUrl(), e);
 			}
 		}
 	}
@@ -582,14 +584,14 @@ public class StatsAggregateJobImpl implements StatefulJob {
 			st = connection.prepareStatement(sqlCheckForContext);
 			rs = st.executeQuery();			
 			if(rs.next()){
-				log.debug("SAKAI_EVENT.CONTEXT IS present.");
+				LOG.debug("SAKAI_EVENT.CONTEXT IS present.");
 				isEventContextSupported = true;
 			} else {
-				log.debug("SAKAI_EVENT.CONTEXT is NOT present.");
+				LOG.debug("SAKAI_EVENT.CONTEXT is NOT present.");
 				isEventContextSupported = false;
 			}
 		}catch(SQLException e){
-			log.error("Unable to determine if SAKAI_EVENT.CONTEXT is present", e);
+			LOG.error("Unable to determine if SAKAI_EVENT.CONTEXT is present", e);
 			isEventContextSupported = false;
 		}finally{
 			try{

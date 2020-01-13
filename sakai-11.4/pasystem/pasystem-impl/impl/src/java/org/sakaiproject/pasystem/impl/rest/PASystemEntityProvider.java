@@ -27,11 +27,8 @@ package org.sakaiproject.pasystem.impl.rest;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
-
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
-
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.entitybroker.DeveloperHelperService;
 import org.sakaiproject.entitybroker.EntityView;
@@ -53,13 +50,15 @@ import org.sakaiproject.time.cover.TimeService;
 import org.sakaiproject.tool.cover.SessionManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.cover.UserDirectoryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Web services supporting AJAX requests from the PA System end user display.
  */
-@Slf4j
 public class PASystemEntityProvider implements EntityProvider, AutoRegisterEntityProvider, ActionsExecutable, Outputable, Describeable {
 
+    private static final Logger LOG = LoggerFactory.getLogger(PASystemEntityProvider.class);
     protected DeveloperHelperService developerHelperService;
     private EntityProviderManager entityProviderManager;
 
@@ -89,7 +88,7 @@ public class PASystemEntityProvider implements EntityProvider, AutoRegisterEntit
         Object sessionToken = SessionManager.getCurrentSession().getAttribute("sakai.csrf.token");
 
         if (sessionToken == null || !sessionToken.equals(params.get("sakai_csrf_token"))) {
-            log.warn("CSRF token validation failed");
+            LOG.warn("CSRF token validation failed");
             return false;
         }
 
@@ -108,17 +107,17 @@ public class PASystemEntityProvider implements EntityProvider, AutoRegisterEntit
         User currentUser = UserDirectoryService.getCurrentUser();
         String uuid = (String) params.get("uuid");
         String acknowledgement = (String) params.get("acknowledgement");
-        String userId = currentUser.getId();
+        String eid = currentUser.getEid();
 
-        if (uuid == null || userId == null) {
-            log.warn("Parameter mismatch: {}", params);
+        if (uuid == null || eid == null) {
+            LOG.warn("Parameter mismatch: {}", params);
             return result.toJSONString();
         }
 
         if (acknowledgement == null) {
-            acknowledger.acknowledge(uuid, userId);
+            acknowledger.acknowledge(uuid, eid);
         } else {
-            acknowledger.acknowledge(uuid, userId, AcknowledgementType.of(acknowledgement));
+            acknowledger.acknowledge(uuid, eid, AcknowledgementType.of(acknowledgement));
         }
                 
         result.put("status", "SUCCESS");
@@ -139,14 +138,14 @@ public class PASystemEntityProvider implements EntityProvider, AutoRegisterEntit
         }
 
         User currentUser = UserDirectoryService.getCurrentUser();
-        String userId = currentUser.getId();
+        String eid = currentUser.getEid();
 
-        if (userId == null) {
-            log.warn("Parameter mismatch: {}", params);
+        if (eid == null) {
+            LOG.warn("Parameter mismatch: {}", params);
             return result.toJSONString();
         }
 
-        paSystem.getBanners().clearTemporaryDismissedForUser(userId);
+        paSystem.getBanners().clearTemporaryDismissedForUser(eid);
         result.put("status", "SUCCESS");
 
         return result.toJSONString();
@@ -195,7 +194,7 @@ public class PASystemEntityProvider implements EntityProvider, AutoRegisterEntit
                 ToolConfiguration preferences = userSite.getToolForCommonId("sakai.preferences");
                 return String.format("/portal/site/~%s/tool/%s/timezone", userid, preferences.getId());
             } catch (Exception e) {
-                log.warn("Couldn't find a timezone tool for user {}", userid, e);
+                LOG.warn("Couldn't find a timezone tool for user {}", userid, e);
                 return null;
             }
         }

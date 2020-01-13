@@ -31,9 +31,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import lombok.extern.slf4j.Slf4j;
-
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.pasystem.api.Acknowledger;
 import org.sakaiproject.pasystem.api.AcknowledgementType;
@@ -46,12 +43,15 @@ import org.sakaiproject.pasystem.impl.common.DB;
 import org.sakaiproject.pasystem.impl.common.DBAction;
 import org.sakaiproject.pasystem.impl.common.DBConnection;
 import org.sakaiproject.pasystem.impl.common.DBResults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Query and store Banner objects in the database.
  */
-@Slf4j
 public class BannerStorage implements Banners, Acknowledger {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BannerStorage.class);
 
     @Override
     public List<Banner> getAll() {
@@ -108,11 +108,11 @@ public class BannerStorage implements Banners, Acknowledger {
     }
 
     @Override
-    public List<Banner> getRelevantBanners(final String serverId, final String userId) {
+    public List<Banner> getRelevantBanners(final String serverId, final String userEid) {
         final String sql = ("SELECT alert.*, dismissed.state as dismissed_state, dismissed.dismiss_time as dismissed_time" +
                 " from pasystem_banner_alert alert" +
                 " LEFT OUTER JOIN pasystem_banner_dismissed dismissed on dismissed.uuid = alert.uuid" +
-                "  AND ((? = '') OR dismissed.user_id = ?)" +
+                "  AND ((? = '') OR dismissed.user_eid = ?)" +
                 " where ACTIVE = 1 AND" +
 
                 // And either hasn't been dismissed yet
@@ -130,8 +130,8 @@ public class BannerStorage implements Banners, Acknowledger {
                             public List<Banner> call(DBConnection db) throws SQLException {
                                 List<Banner> banners = new ArrayList<Banner>();
                                 try (DBResults results = db.run(sql)
-                                        .param((userId == null) ? "" : userId)
-                                        .param((userId == null) ? "" : userId)
+                                        .param((userEid == null) ? "" : userEid.toLowerCase())
+                                        .param((userEid == null) ? "" : userEid.toLowerCase())
                                         .param(AcknowledgementType.TEMPORARY.dbValue())
                                         .executeQuery()) {
                                     for (ResultSet result : results) {
@@ -245,13 +245,13 @@ public class BannerStorage implements Banners, Acknowledger {
     }
 
     @Override
-    public void acknowledge(final String uuid, final String userId) {
-        acknowledge(uuid, userId, calculateAcknowledgementType(uuid));
+    public void acknowledge(final String uuid, final String userEid) {
+        acknowledge(uuid, userEid, calculateAcknowledgementType(uuid));
     }
 
     @Override
-    public void acknowledge(final String uuid, final String userId, AcknowledgementType acknowledgementType) {
-        new AcknowledgementStorage(AcknowledgementStorage.NotificationType.BANNER).acknowledge(uuid, userId, acknowledgementType);
+    public void acknowledge(final String uuid, final String userEid, AcknowledgementType acknowledgementType) {
+        new AcknowledgementStorage(AcknowledgementStorage.NotificationType.BANNER).acknowledge(uuid, userEid, acknowledgementType);
     }
 
     private AcknowledgementType calculateAcknowledgementType(String uuid) {
@@ -265,7 +265,7 @@ public class BannerStorage implements Banners, Acknowledger {
     }
 
     @Override
-    public void clearTemporaryDismissedForUser(String userId) {
-        new AcknowledgementStorage(AcknowledgementStorage.NotificationType.BANNER).clearTemporaryDismissedForUser(userId);
+    public void clearTemporaryDismissedForUser(String userEid) {
+        new AcknowledgementStorage(AcknowledgementStorage.NotificationType.BANNER).clearTemporaryDismissedForUser(userEid);
     }
 }

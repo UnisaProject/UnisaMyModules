@@ -20,13 +20,13 @@
  **********************************************************************************/
 package org.sakaiproject.sms.logic.command;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.sms.logic.HibernateLogicLocator;
 import org.sakaiproject.sms.logic.incoming.ParsedMessage;
 import org.sakaiproject.sms.logic.incoming.ShortMessageCommand;
 import org.sakaiproject.sms.model.SmsAccount;
 import org.sakaiproject.sms.model.constants.SmsConstants;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * This is a example of an sms admin command. It can be used by administrators
@@ -37,9 +37,9 @@ import lombok.extern.slf4j.Slf4j;
  * @author etienne@psybergate.co.za
  * 
  */
-@Slf4j
 public class SmsAdminCommand implements ShortMessageCommand {
 
+	private static final Log LOG = LogFactory.getLog(SmsAdminCommand.class);
 
 	public HibernateLogicLocator getHibernateLogicLocator() {
 		return hibernateLogicLocator;
@@ -66,7 +66,7 @@ public class SmsAdminCommand implements ShortMessageCommand {
 		}
 		concatBody = sb.toString();
 		
-		log.debug(getCommandKey() + " command called with parameters: ("
+		LOG.debug(getCommandKey() + " command called with parameters: ("
 				+ msg.getSite() + ", " + msg.getIncomingUserId() + ", " + concatBody + ")");
 
 		if (body[0] == null || "".equals(body[0].trim())) {

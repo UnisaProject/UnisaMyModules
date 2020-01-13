@@ -23,30 +23,32 @@
 
 package org.sakaiproject.tool.assessment.ui.listener.evaluation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import lombok.extern.slf4j.Slf4j;
-import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
-import org.sakaiproject.tool.assessment.data.dao.grading.ItemGradingData;
-import org.sakaiproject.tool.assessment.facade.AgentFacade;
-import org.sakaiproject.tool.assessment.services.GradingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.ui.bean.delivery.DeliveryBean;
 import org.sakaiproject.tool.assessment.ui.bean.delivery.ItemContentsBean;
 import org.sakaiproject.tool.assessment.ui.bean.delivery.SectionContentsBean;
 import org.sakaiproject.tool.assessment.ui.bean.evaluation.StudentScoresBean;
 import org.sakaiproject.tool.assessment.ui.listener.delivery.DeliveryActionListener;
+import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
+import org.sakaiproject.tool.assessment.data.dao.grading.ItemGradingData;
+import org.sakaiproject.tool.assessment.services.GradingService;
 import org.sakaiproject.tool.assessment.ui.listener.evaluation.util.EvaluationListenerUtil;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 import org.sakaiproject.tool.assessment.util.BeanSort;
+import org.sakaiproject.tool.assessment.facade.AgentFacade;
 import org.sakaiproject.util.FormattedText;
+
+
 
 /**
  * <p>
@@ -59,10 +61,10 @@ import org.sakaiproject.util.FormattedText;
  * @version $Id$
  */
 
-@Slf4j
- public class StudentScoreListener
+public class StudentScoreListener
   implements ActionListener
 {
+  private static Logger log = LoggerFactory.getLogger(StudentScoreListener.class);
   private static EvaluationListenerUtil util;
   private static BeanSort bs;
 
@@ -125,14 +127,19 @@ import org.sakaiproject.util.FormattedText;
       
       // Added for SAK-13930
       DeliveryBean updatedDeliveryBean = (DeliveryBean) ContextUtil.lookupBean("delivery");
-      List<SectionContentsBean> parts = updatedDeliveryBean.getPageContents().getPartsContents();
-      for (SectionContentsBean part : parts) {
-        List<ItemContentsBean> items = part.getItemContents();
-        for (ItemContentsBean question : items) {
-          if (question.getGradingComment() != null && !question.getGradingComment().equals("")) {
-            question.setGradingComment(FormattedText.convertFormattedTextToPlaintext(question.getGradingComment()));
+      ArrayList parts = updatedDeliveryBean.getPageContents().getPartsContents();
+      Iterator iter = parts.iterator();
+      while (iter.hasNext())
+      {
+          ArrayList items = ((SectionContentsBean) iter.next()).getItemContents();
+          Iterator iter2 = items.iterator();
+          while (iter2.hasNext())
+          {
+        	  ItemContentsBean question = (ItemContentsBean) iter2.next();
+        	  if (question.getGradingComment() != null && !question.getGradingComment().equals("")) {
+        		  question.setGradingComment(FormattedText.convertFormattedTextToPlaintext(question.getGradingComment()));
+        	  }
           }
-        }
       } // End of SAK-13930
 
       GradingService service = new GradingService();
@@ -142,23 +149,35 @@ import org.sakaiproject.util.FormattedText;
 
       return true;
     } catch (Exception e) {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
       return false;
     }
   }
   
   private void buildItemContentsMap(DeliveryBean dbean) {
-	  Map<Long, ItemContentsBean> itemContentsMap = new HashMap<>();
-
-      dbean.getPageContents().getPartsContents().stream()
-              .filter(Objects::nonNull)
-              .forEach(p -> p.getItemContents().stream()
-                      .filter(Objects::nonNull)
-                      .forEach(i -> {
-                          i.getItemGradingDataArray()
-                                  .forEach(d -> itemContentsMap.put(d.getItemGradingId(), i));
-                      }));
-
+	  HashMap itemContentsMap = new HashMap();
+	  ArrayList partsContents = dbean.getPageContents().getPartsContents();
+	  if (partsContents != null) {
+		  Iterator iter = partsContents.iterator();
+		  while (iter.hasNext()) {
+			  SectionContentsBean sectionContentsBean = (SectionContentsBean) iter.next();
+			  if (sectionContentsBean != null) {
+				  ArrayList itemContents = sectionContentsBean.getItemContents();
+				  Iterator iter2 = itemContents.iterator();
+				  while (iter2.hasNext()) {
+					  ItemContentsBean itemContentsBean = (ItemContentsBean) iter2.next();
+					  if (itemContentsBean != null) {
+						  List<ItemGradingData> itemGradingDataArray = itemContentsBean.getItemGradingDataArray();
+						  Iterator<ItemGradingData> iter3 = itemGradingDataArray.iterator();
+						  while (iter3.hasNext()) {
+							  ItemGradingData itemGradingData = iter3.next();
+							  itemContentsMap.put(itemGradingData.getItemGradingId(), itemContentsBean);
+						  }
+					  }
+				  }
+			  }
+		  }  
+	  }
 	  dbean.setItemContentsMap(itemContentsMap);
   }
 }

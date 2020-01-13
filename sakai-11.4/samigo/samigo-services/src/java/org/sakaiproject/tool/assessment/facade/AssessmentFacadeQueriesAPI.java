@@ -21,6 +21,7 @@
 
 package org.sakaiproject.tool.assessment.facade;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -83,9 +84,9 @@ public interface AssessmentFacadeQueriesAPI {
 	public AssessmentTemplateFacade getAssessmentTemplate(
 			Long assessmentTemplateId);
 
-	public List<AssessmentTemplateFacade> getAllAssessmentTemplates();
+	public ArrayList getAllAssessmentTemplates();
 
-	public List<AssessmentTemplateFacade> getAllActiveAssessmentTemplates();
+	public ArrayList getAllActiveAssessmentTemplates();
 
 	/**
 	 * 
@@ -95,7 +96,7 @@ public interface AssessmentFacadeQueriesAPI {
 	 *         is used when a list of template titles is required for displaying
 	 *         purposes.
 	 */
-	public List<AssessmentTemplateFacade> getTitleOfAllActiveAssessmentTemplates();
+	public ArrayList getTitleOfAllActiveAssessmentTemplates();
 
 	/**
 	 * 
@@ -125,31 +126,29 @@ public interface AssessmentFacadeQueriesAPI {
 	public AssessmentFacade createAssessment(String title, String description,
 			Long typeId, Long templateId, String siteId) throws Exception;
 
-	public List<AssessmentFacade> getAllAssessments(String orderBy);
+	public ArrayList getAllAssessments(String orderBy);
 
-	public List<AssessmentFacade> getAllActiveAssessments(String orderBy);
+	public ArrayList getAllActiveAssessments(String orderBy);
 
-	public List<AssessmentFacade> getBasicInfoOfAllActiveAssessments(String orderBy,
-																	 boolean ascending);
+	public ArrayList getBasicInfoOfAllActiveAssessments(String orderBy,
+			boolean ascending);
 
-	public List<AssessmentFacade> getBasicInfoOfAllActiveAssessmentsByAgent(String orderBy,
-																			String siteAgentId, boolean ascending);
+	public ArrayList getBasicInfoOfAllActiveAssessmentsByAgent(String orderBy,
+			String siteAgentId, boolean ascending);
 
-	public List<AssessmentFacade> getBasicInfoOfAllActiveAssessmentsByAgent(String orderBy,
-																			String siteAgentId);
+	public ArrayList getBasicInfoOfAllActiveAssessmentsByAgent(String orderBy,
+			String siteAgentId);
 
 	public AssessmentFacade getBasicInfoOfAnAssessment(Long assessmentId);
 	
 	public AssessmentFacade getBasicInfoOfAnAssessmentFromSectionId(Long sectionId);
 
-	public List<AssessmentFacade> getSettingsOfAllActiveAssessments(String orderBy);
+	public ArrayList getSettingsOfAllActiveAssessments(String orderBy);
 
-	public List<AssessmentFacade> getAllAssessments(int pageSize, int pageNumber,
-                                                    String orderBy);
+	public ArrayList getAllAssessments(int pageSize, int pageNumber,
+			String orderBy);
 
 	public int getQuestionSize(final Long assessmentId);
-
-	public List getQuestionsIdList(final Long assessmentId);
 
 	public void deleteAllSecuredIP(AssessmentIfc assessment);
 
@@ -177,11 +176,12 @@ public interface AssessmentFacadeQueriesAPI {
 	 */
 	public void moveAllItems(Long sourceSectionId, Long destSectionId);
 
-	public List<AssessmentTemplateFacade> getBasicInfoOfAllActiveAssessmentTemplates(String orderBy);
+	public ArrayList getBasicInfoOfAllActiveAssessmentTemplates(String orderBy);
 
-	public void checkForQuestionPoolItem(AssessmentData assessment, Map qpItemHash);
+	public void checkForQuestionPoolItem(AssessmentData assessment,
+			HashMap qpItemHash);
 
-	public void checkForQuestionPoolItem(SectionData section, Map qpItemHash);
+	public void checkForQuestionPoolItem(SectionData section, HashMap qpItemHash);
 
 	public void removeAllItems(Long sourceSectionId);
 
@@ -197,8 +197,12 @@ public interface AssessmentFacadeQueriesAPI {
 	public ItemAttachmentIfc createItemAttachment(ItemDataIfc item,
 			String resourceId, String filename, String protocolboolean, boolean isEditPendingAssessmentFlow);
 
+	public void removeItemAttachment(Long itemAttachmentId);
+
 	public ItemTextAttachmentIfc createItemTextAttachment(ItemTextIfc itemText,
 			String resourceId, String filename, String protocolboolean, boolean isEditPendingAssessmentFlow);
+
+	public void removeItemTextAttachment(Long itemTextAttachmentId);
 	
 	public void updateAssessmentLastModifiedInfo(
 			AssessmentFacade assessment);
@@ -230,18 +234,5 @@ public interface AssessmentFacadeQueriesAPI {
 	public List getAllActiveAssessmentsByAgent(String fromContext);
 
 	public Set copyItemAttachmentSet(ItemData newItem, Set itemAttachmentSet);
-
-	public Set prepareItemSet(SectionData newSection, Set itemSet, String protocol, String toContext);
-
-	public Set prepareItemTextSet(ItemData newItem, Set itemTextSet, String protocol, String toContext);
-
-	public Set prepareItemMetaDataSet(ItemData newItem, Set itemMetaDataSet);
-
-	public Set prepareItemTagSet(ItemData newItem, Set itemTagSet);
-
-	public Set prepareItemFeedbackSet(ItemData newItem, Set itemFeedbackSet);
-
-	public Set prepareItemAttachmentSet(ItemData newItem,
-										Set itemAttachmentSet, String protocol, String toContext);
 
 }

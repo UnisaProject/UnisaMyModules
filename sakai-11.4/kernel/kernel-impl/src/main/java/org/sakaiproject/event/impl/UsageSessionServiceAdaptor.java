@@ -1,18 +1,23 @@
-/**
- * Copyright (c) 2003-2016 The Apereo Foundation
+/**********************************************************************************
+  * $URL$
+ * $Id$
+ ***********************************************************************************
+ *
+ * Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Sakai Foundation
  *
  * Licensed under the Educational Community License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *             http://opensource.org/licenses/ecl2
+ *       http://www.opensource.org/licenses/ECL-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *
+ **********************************************************************************/
 
 package org.sakaiproject.event.impl;
 
@@ -23,6 +28,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Formatter;
 import java.util.Iterator;
@@ -33,8 +39,8 @@ import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -62,12 +68,14 @@ import org.sakaiproject.user.api.UserDirectoryService;
  * entities are handled as was in the ClusterUsageSessionService.
  * </p>
  */
-@Slf4j
 public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 {
 	// see http://jira.sakaiproject.org/browse/SAK-3793 for more info about these numbers
 	private static final long WARNING_SAFE_SESSIONS_TABLE_SIZE = 1750000l;
 	private static final long MAX_SAFE_SESSIONS_TABLE_SIZE = 2000000l;
+
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(UsageSessionServiceAdaptor.class);
 
 	/** Storage manager for this service. */
 	protected Storage m_storage = null;
@@ -215,11 +223,11 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 
 			m_recentUserRefresh = memoryService().newCache("org.sakaiproject.event.api.UsageSessionService.recentUserRefresh");
 			
-			log.info("init()");
+			M_log.info("init()");
 		}
 		catch (Exception t)
 		{
-			log.error("init(): ", t);
+			M_log.error("init(): ", t);
 		}
 		setUsageSessionServiceSql(sqlService().getVendor());
 		
@@ -227,12 +235,12 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 		if (sessionsSizeCheck) {
 			long totalSessionsCount = getSessionsCount();
 			if (totalSessionsCount > WARNING_SAFE_SESSIONS_TABLE_SIZE) {
-				log.info("The SAKAI_SESSIONS table size ("+totalSessionsCount+") is approaching the point at which " +
+				M_log.info("The SAKAI_SESSIONS table size ("+totalSessionsCount+") is approaching the point at which " +
 						"performance will begin to degrade ("+MAX_SAFE_SESSIONS_TABLE_SIZE+
 						"), we recommend you archive older sessions over to another table, " +
 						"remove older rows, or truncate this table before it reaches a size of "+MAX_SAFE_SESSIONS_TABLE_SIZE);
 			} else if (totalSessionsCount > MAX_SAFE_SESSIONS_TABLE_SIZE) {
-				log.warn("The SAKAI_SESSIONS table size ("+totalSessionsCount+") has passed the point at which " +
+				M_log.warn("The SAKAI_SESSIONS table size ("+totalSessionsCount+") has passed the point at which " +
 						"performance will begin to degrade ("+MAX_SAFE_SESSIONS_TABLE_SIZE+
 						"), we recommend you archive older events over to another table, " +
 						"remove older rows, or truncate this table to ensure that performance is not affected negatively");
@@ -247,7 +255,7 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 	{
 		m_storage.close();
 
-		log.info("destroy()");
+		M_log.info("destroy()");
 	}
 
 	/*************************************************************************************************************************************************
@@ -274,7 +282,7 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 
 				// if it is for another user, we will create a new session, log a warning, and unbound/close the existing one
 				s.setAttribute(USAGE_SESSION_KEY, null);
-				log.warn("startSession: replacing existing UsageSession: " + session.getId() + " user: " + session.getUserId() + " for new user: "
+				M_log.warn("startSession: replacing existing UsageSession: " + session.getId() + " user: " + session.getUserId() + " for new user: "
 						+ userId);
 			}
 
@@ -290,7 +298,7 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 				}
 				catch (UnknownHostException e)
 				{
-					log.debug("Cannot resolve host address " + remoteAddress);
+					M_log.debug("Cannot resolve host address " + remoteAddress);
 				}
 			}
 			
@@ -313,9 +321,9 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 					String hashedSessionId = byteArray2Hex(digest);					
 					s.setAttribute(SAKAI_CSRF_SESSION_ATTRIBUTE, hashedSessionId);
 				} catch (NoSuchAlgorithmException e) {
-					log.error("Failed to create a hashed session id for use as CSRF token because no SHA-256 support", e);
+					M_log.error("Failed to create a hashed session id for use as CSRF token because no SHA-256 support", e);
 				} catch (UnsupportedEncodingException e) {
-					log.error("Failed to create a hashed session id for use as CSRF token because could not get UTF-8 bytes of session id", e);
+					M_log.error("Failed to create a hashed session id for use as CSRF token because could not get UTF-8 bytes of session id", e);
 				}
 				
 				// set as the current session
@@ -345,7 +353,7 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 
 		else
 		{
-			log.warn("getSession: no current SessionManager session!");
+			M_log.warn("getSession: no current SessionManager session!");
 		}
 
 		return rv;
@@ -394,7 +402,7 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 			return new SessionStateWrapper(s.getToolSession(key));
 		}
 
-		log.warn("getSessionState(): no session:  key: " + key);
+		M_log.warn("getSessionState(): no session:  key: " + key);
 		return null;
 	}
 
@@ -518,9 +526,9 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 		// update the user's externally provided realm definitions
 		if (m_recentUserRefresh != null && m_recentUserRefresh.get(uid) != null)
 		{
-			if (log.isDebugEnabled())
+			if (M_log.isDebugEnabled())
 			{
-				log.debug("User is still in cache of recent refreshes: "+ uid);
+				M_log.debug("User is still in cache of recent refreshes: "+ uid);
 			}
 		}
 		else
@@ -530,9 +538,9 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 			{
 				// Cache the refresh.
 				m_recentUserRefresh.put(uid, Boolean.TRUE);
-				if (log.isDebugEnabled())
+				if (M_log.isDebugEnabled())
 				{
-					log.debug("User is not in recent cache of refreshes: "+ uid);
+					M_log.debug("User is not in recent cache of refreshes: "+ uid);
 				}
 			}
 		}
@@ -761,7 +769,7 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 				}
 				catch (Exception e)
 				{
-					log.error("unBindAttributeValue: unbinding exception: ", e);
+					M_log.error("unBindAttributeValue: unbinding exception: ", e);
 				}
 			}
 		}
@@ -785,7 +793,7 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 				}
 				catch (Exception e)
 				{
-					log.error("bindAttributeValue: unbinding exception: ", e);
+					M_log.error("bindAttributeValue: unbinding exception: ", e);
 				}
 			}
 		}
@@ -851,7 +859,7 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 			});
 			if (!ok)
 			{
-				log.warn(".addSession(): dbWrite failed");
+				M_log.warn(".addSession(): dbWrite failed");
 				return false;
 			}
 
@@ -977,7 +985,7 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 			});
 			if (!ok)
 			{
-				log.warn(".closeSession(): dbWrite failed");
+				M_log.warn(".closeSession(): dbWrite failed");
 			}
 
 		} // closeSession
@@ -994,7 +1002,7 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 			});
 			if (!ok)
 			{
-				log.warn(".updateSessionServer(): dbWrite failed");
+				M_log.warn(".updateSessionServer(): dbWrite failed");
 			}
 		}
 
@@ -1043,7 +1051,7 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 					try {
 						value = result.getLong(1);
 					} catch (SQLException ignore) {
-						log.info("Could not get count of sessions table using SQL (" + sessionCountStmt + ")");
+						M_log.info("Could not get count of sessions table using SQL (" + sessionCountStmt + ")");
 					}
 					return new Long(value);
 				}
@@ -1052,7 +1060,7 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 				totalSessionsCount = counts.get(0);
 			}
 		} catch (Exception e) {
-			log.error("Could not get count of sessions.", e);
+			M_log.error("Could not get count of sessions.", e);
 		}
 		return totalSessionsCount;
 	}
@@ -1060,7 +1068,7 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 	@SuppressWarnings("unchecked")
 	public int closeSessionsOnInvalidServers(List<String> validServerIds) {
 		String statement = usageSessionServiceSql.getOpenSessionsOnInvalidServersSql(validServerIds);
-		if (log.isDebugEnabled()) log.debug("will get sessions with SQL=" + statement);
+		if (M_log.isDebugEnabled()) M_log.debug("will get sessions with SQL=" + statement);
 		List<BaseUsageSession> sessions = sqlService().dbRead(statement, null, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
@@ -1078,7 +1086,7 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
 		
 		for (BaseUsageSession session : sessions)
 		{
-			if (log.isDebugEnabled()) log.debug("invalidating session " + session.getId());
+			if (M_log.isDebugEnabled()) M_log.debug("invalidating session " + session.getId());
 			session.invalidate();
 		}
 		
@@ -1094,3 +1102,4 @@ public abstract class UsageSessionServiceAdaptor implements UsageSessionService
     }
 	
 }
+	

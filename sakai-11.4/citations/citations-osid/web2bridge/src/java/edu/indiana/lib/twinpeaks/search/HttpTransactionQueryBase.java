@@ -17,23 +17,14 @@
 **********************************************************************************/
 package edu.indiana.lib.twinpeaks.search;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
+import edu.indiana.lib.twinpeaks.net.*;
+import edu.indiana.lib.twinpeaks.util.*;
+
+import java.net.*;
+import java.util.*;
 
 import lombok.extern.slf4j.Slf4j;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import edu.indiana.lib.twinpeaks.net.HttpTransaction;
-import edu.indiana.lib.twinpeaks.util.CookieUtils;
-import edu.indiana.lib.twinpeaks.util.DomUtils;
-import edu.indiana.lib.twinpeaks.util.HttpTransactionUtils;
-import edu.indiana.lib.twinpeaks.util.SearchException;
-import edu.indiana.lib.twinpeaks.util.SessionContext;
-import edu.indiana.lib.twinpeaks.util.StringUtils;
+import org.w3c.dom.*;
 
 /**
  * Base class for HTTP search activities
@@ -66,7 +57,7 @@ public abstract class HttpTransactionQueryBase
   private String      		_searchString;
   private String      		_url;
   private String      		_searchResult;
-  private SessionContext	_session;
+	private SessionContext	_session;
 
 	/**
 	 * Constructor
@@ -437,7 +428,7 @@ public abstract class HttpTransactionQueryBase
 
     } catch (Exception exception) {
     	log.error("Exception seen, the current URL is \"" + getUrl() + "\"");
-    	log.error(exception.getMessage(), exception);
+    	exception.printStackTrace(System.out);
       throw new SearchException(exception.toString());
     }
   }

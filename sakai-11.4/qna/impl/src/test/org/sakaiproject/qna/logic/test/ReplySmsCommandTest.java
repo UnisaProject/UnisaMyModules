@@ -18,6 +18,8 @@ package org.sakaiproject.qna.logic.test;
 import static org.sakaiproject.qna.logic.test.TestDataPreload.LOCATION1_ID;
 import static org.sakaiproject.qna.logic.test.TestDataPreload.USER_UPDATE;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,8 +39,6 @@ import org.sakaiproject.qna.model.QnaOptions;
 import org.sakaiproject.qna.model.QnaQuestion;
 import org.sakaiproject.sms.logic.incoming.ParsedMessage;
 import org.sakaiproject.sms.logic.incoming.ShortMessageCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
@@ -65,7 +65,7 @@ public class ReplySmsCommandTest extends
 	
 	private final TestDataPreload tdp = new TestDataPreload();
 
-	private static Logger log = LoggerFactory.getLogger(ReplySmsCommandTest.class);
+	private static Log log = LogFactory.getLog(ReplySmsCommandTest.class);
 	
 	private static String CMD = "REPLY";
 

@@ -29,7 +29,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.radeox.api.engine.context.InitialRenderContext;
 import org.radeox.api.macro.Macro;
 
@@ -40,9 +41,11 @@ import org.radeox.api.macro.Macro;
  * @version $Id: MacroRepository.java 7707 2006-04-12 17:30:19Z
  *          ian@caret.cam.ac.uk $
  */
-@Slf4j
+
 public class MacroRepository extends PluginRepository
 {
+	private static Logger log = LoggerFactory.getLogger(MacroRepository.class);
+
 	private InitialRenderContext context;
 
 	protected static MacroRepository instance;

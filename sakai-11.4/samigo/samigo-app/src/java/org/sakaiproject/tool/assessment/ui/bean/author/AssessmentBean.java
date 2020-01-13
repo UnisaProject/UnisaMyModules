@@ -30,7 +30,8 @@ import java.util.List;
 
 import javax.faces.model.SelectItem;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionDataIfc;
@@ -53,8 +54,8 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
  *
  * Used to be org.navigoproject.ui.web.asi.author.assessment.AssessmentActionForm.java
  */
- @Slf4j
- public class AssessmentBean  implements Serializable {
+public class AssessmentBean  implements Serializable {
+    private static Logger log = LoggerFactory.getLogger(AssessmentBean.class);
 
   /** Use serialVersionUID for interoperability. */
   private final static long serialVersionUID = -630950053380808339L;
@@ -63,9 +64,9 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
   private String title;
   // ArrayList of SectionContentsBean
   private List<SectionContentsBean> sections = new ArrayList<SectionContentsBean>(); // this contains list of SectionFacde
-  private List<SelectItem> sectionList = new ArrayList<SelectItem>(); // this contains list of javax.faces.model.SelectItem
-  private List otherSectionList = new ArrayList(); // contains SectionItem of section except the current section
-  private List partNumbers = new ArrayList();
+  private ArrayList<SelectItem> sectionList = new ArrayList<SelectItem>(); // this contains list of javax.faces.model.SelectItem
+  private ArrayList otherSectionList = new ArrayList(); // contains SectionItem of section except the current section
+  private ArrayList partNumbers = new ArrayList();
   private int questionSize=0;
   private double totalScore=0;
   private String newQuestionTypeId;
@@ -110,7 +111,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
       setSectionList(sectionArray);
     }
     catch (Exception ex) {
-	log.error(ex.getMessage(), ex);
+	ex.printStackTrace();
     }
   }
 
@@ -135,11 +136,11 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
     return sections;
   }
 
-  public void setSections(List sections) {
+  public void setSections(ArrayList sections) {
     this.sections = sections;
   }
 
-  public List getPartNumbers() {
+  public ArrayList getPartNumbers() {
     return partNumbers;
   }
 
@@ -163,7 +164,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
    
    for(int i=0;i<this.sections.size();i++){
       SectionContentsBean sectionBean = (SectionContentsBean) sections.get(i);
-      List<ItemContentsBean> items = sectionBean.getItemContents();
+      ArrayList items = sectionBean.getItemContents();
 
       int itemsInThisSection =0;
       if (sectionBean.getSectionAuthorType().equals(SectionDataIfc.RANDOM_DRAW_FROM_QUESTIONPOOL)) {
@@ -177,7 +178,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 
       this.questionSize += itemsInThisSection;
       for (int j=0; j<itemsInThisSection; j++){
-          ItemContentsBean item = items.get(j);
+          ItemContentsBean item = (ItemContentsBean)items.get(j);
           if (item.getItemData().getScore()!=null){
             this.totalScore += item.getItemData().getScore().doubleValue();
           }
@@ -264,7 +265,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
     }
   }
 
-  public List<SelectItem> getSectionList(){
+  public ArrayList<SelectItem> getSectionList(){
     return sectionList;
   }
 
@@ -281,11 +282,11 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
     this.firstSectionId = firstSectionId;
   }
 
-  public List getOtherSectionList(){
+  public ArrayList getOtherSectionList(){
       return otherSectionList;
   }
 
-  public void setOtherSectionList(List list){
+  public void setOtherSectionList(ArrayList list){
       this.otherSectionList = list; // list contains javax.faces.model.SelectItem
   }
 

@@ -26,6 +26,8 @@ import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.authz.api.FunctionManager;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
@@ -46,15 +48,13 @@ import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class ExternalLogicImpl implements ExternalLogic {
 
 	private final static String PROP_SITE_CONTACT_EMAIL = "contact-email";
 
 	private final static String PROP_SITE_CONTACT_NAME = "contact-name";
 
+	private static Log log = LogFactory.getLog(ExternalLogicImpl.class);
 
 	private FunctionManager functionManager;
 

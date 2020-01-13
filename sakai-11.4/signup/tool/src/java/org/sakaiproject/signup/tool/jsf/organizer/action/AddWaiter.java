@@ -22,9 +22,6 @@ package org.sakaiproject.signup.tool.jsf.organizer.action;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.OptimisticLockingFailureException;
-
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.signup.logic.SignupEventTypes;
 import org.sakaiproject.signup.logic.SignupMeetingService;
@@ -36,14 +33,14 @@ import org.sakaiproject.signup.tool.util.SignupBeanConstants;
 import org.sakaiproject.signup.tool.util.Utilities;
 import org.sakaiproject.signup.util.SignupDateFormat;
 import org.sakaiproject.tool.cover.ToolManager;
+import org.springframework.dao.OptimisticLockingFailureException;
 
 /**
  * <p>
  * This class will provide business logic for 'add-waiter' action by user.
  * </P>
  */
-@Slf4j
- public class AddWaiter extends SignupAction implements SignupBeanConstants {
+public class AddWaiter extends SignupAction implements SignupBeanConstants {
 
 	private final String operationType;
 
@@ -90,7 +87,7 @@ import org.sakaiproject.tool.cover.ToolManager;
 						+ " meetingId:" + meeting.getId() + " -added to wlist on TS:"
 						+ SignupDateFormat.format_date_h_mm_a(timeSlot.getStartTime()));
 			}
-			log.debug("Meeting Name:" + meeting.getTitle() + " - UserId:" + userId + " - has added attendee("
+			logger.debug("Meeting Name:" + meeting.getTitle() + " - UserId:" + userId + " - has added attendee("
 					+ newWaiter.getAttendeeUserId() + ") into waiting list at timeslot started at:"
 					+ SignupDateFormat.format_date_h_mm_a(timeSlot.getStartTime()));
 		} catch (PermissionException pe) {

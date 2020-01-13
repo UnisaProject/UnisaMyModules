@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.nosite"
+		title="Inactive Sites"
+		description="Course codes with no Site in myUnisa">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

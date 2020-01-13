@@ -26,18 +26,22 @@ import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class FacesPhaseListener implements PhaseListener {
+	private static final Logger logger = LoggerFactory.getLogger(FacesPhaseListener.class);
+
 	public PhaseId getPhaseId() {
 		return PhaseId.ANY_PHASE;
 	}
 
 	public void beforePhase(PhaseEvent e) {
-		if (log.isDebugEnabled()) log.debug("BEFORE " + e.getPhaseId());
+		if (logger.isDebugEnabled()) logger.debug("BEFORE " + e.getPhaseId());
 	}
 	public void afterPhase(PhaseEvent e) {
-		if (log.isDebugEnabled()) log.debug("AFTER " + e.getPhaseId());
+		if (logger.isDebugEnabled()) logger.debug("AFTER " + e.getPhaseId());
 	}
 }
+
+

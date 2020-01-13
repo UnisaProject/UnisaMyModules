@@ -64,6 +64,16 @@ public class ToolUtils
 	public static final boolean PORTAL_INLINE_EXPERIMENTAL_DEFAULT = true;
 
 	/**
+	 * Determine if this is an inline request (only use in tool code)
+	 *
+	 * @return True if this is a request where a tool will be inlined.
+	 */
+	public static boolean isInlineRequest()
+	{
+		return (isInlineRequest());
+	}
+
+	/**
 	 * Determine if this is an inline request.
 	 *
 	 * @param <code>req</code>
@@ -173,7 +183,7 @@ public class ToolUtils
 	public static String getPageUrl(HttpServletRequest req, Site site, SitePage page, 
 		String portalPrefix, boolean reset, String effectiveSiteId, String pageAlias)
 	{
-		if(page == null) return "";
+		if ( page == null ) return "";
 		//If portal's CONFIG_AUTO_RESET is not set, check for Site's CONFIG_AUTO_RESET value
 		boolean resetSiteProperty = false;
 		if(!reset){
@@ -189,7 +199,6 @@ public class ToolUtils
 		if ( req == null ) req = getRequestFromThreadLocal();
 		if ( effectiveSiteId == null ) effectiveSiteId = site.getId();
 		if ( pageAlias == null ) pageAlias = page.getId();
-
 		// The normal URL
 		String pageUrl = Web.returnUrl(req, "/" + portalPrefix + "/"
 				+ Web.escapeUrl(effectiveSiteId) + "/page/");

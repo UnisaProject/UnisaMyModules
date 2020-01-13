@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.RoleProvider;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
@@ -20,8 +20,10 @@ import org.sakaiproject.util.ResourceLoader;
  * @author buckett
  *
  */
-@Slf4j
 public class UserAttributeRoleProvider implements RoleProvider {
+	
+	private static final Logger log = LoggerFactory.getLogger(UserAttributeRoleProvider.class);
+	
 	private String statusAttribute;
 	
 	private UserDirectoryService userDirectoryService;

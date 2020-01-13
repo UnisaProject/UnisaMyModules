@@ -119,7 +119,7 @@
                         <a href="#" 
                            onclick="location='#toolLinkParam("$action" "doDescription" "eventReference=$validator.escapeUrl($event.getReference())")';return false;" 
                            title="$validator.escapeHtml($event.getDisplayName()) - $validator.escapeHtml($event.getSiteName())">
-                        <span class="icon $eventIconMap.get($event.getType())" title="$localizedEventTypes.get($event.getType())"></span>
+                        #iconImage($event.Type)
                         $validator.escapeHtml($event.getDisplayName())</a></div></td>
 
                     #else   ## -> flag == true
@@ -276,7 +276,7 @@
                         <a href="#" 
                            onclick="location='#toolLinkParam("$action" "doDescription" "eventReference=$validator.escapeUrl($eventclass.getEvent().getReference())")';return false;" 
                            title="$validator.escapeHtml($event.getDisplayName()) - $validator.escapeHtml($event.getSiteName())">
-                        <span class="icon $eventIconMap.get($event.getType())" title="$localizedEventTypes.get($event.getType())"></span>
+                        #iconImage($event.Type)
                         $validator.escapeHtml($event.getDisplayName())</a></div></td>
             #else ## corresponding to if($eventD.getFlag()==false)
                     ## no cell to be rendered, because of the above rowspan. but column counter++
@@ -327,10 +327,7 @@
         #set ($startTime = $dStart.get($n))
 	#end
 
-    ## This is a fudged endtime it will not include work if the endtime is intended to be included
     #set ($endTime = $event.getRange().lastTime(0))
-    #set ($endTimeActual = $event.getRange().lastTime())
-
     #if ($endTime.after($dEnd.get($n)))
         ## use the page end time as event's first time temporarily
         #set ($endTime = $dEnd.get($n))
@@ -356,7 +353,6 @@
 
     #set ($rowspan = 1)
     #set ($startMinInt = $startTime.breakdownLocal().getMin())
-	## $event.getDisplayName():$startTime:$endTime:$startMinInt:$duMin<br>
     #if ($startMinInt <30)
     #set ($rowspan = $rowspan + (($duMin - (30 - $startMinInt))/30))
     #set ($oneMore = ($duMin - (30 - $startMinInt))%30)
@@ -367,13 +363,8 @@
     #end
     ###set ($oneMore = ($duMin - (30 - $startMinInt))%30)
     #if ($oneMore > 0)
-    	#set ($rowspan = $rowspan + 1)
+    #set ($rowspan = $rowspan + 1)
     #end
-    ## This endtime may have been fudged, if so it will need an extra row as it's being returned from getNewEvents
-    #if ($endTime == $endTimeActual)
-    	#set ($rowspan = $rowspan + 1)
-    #end
-    
 #end    ## endof macro-rowspan
 
 
@@ -622,7 +613,7 @@
                         <a href="#" 
                            onclick="location='#toolLinkParam("$action" "doDescription" "eventReference=$validator.escapeUrl($event.getReference())")';return false;" 
                            title="$validator.escapeHtml($event.getDisplayName()) - $validator.escapeHtml($event.getSiteName())">
-                        <span class="icon $eventIconMap.get($event.getType())" title="$localizedEventTypes.get($event.getType())"></span>
+                        #iconImage($event.Type)
                         $validator.escapeHtml($event.getDisplayName())</a></div></td>
 
                     #else   ## -> flag == true
@@ -779,7 +770,7 @@
 
                         <a href="#toolLinkParam("$action" "doDescription" "eventReference=$validator.escapeUrl($eventclass.getEvent().getReference())")" 
                            title="$validator.escapeHtml($eventclass.getEvent().getDisplayName()) - $validator.escapeHtml($eventclass.getEvent().getSiteName())">
-                        <span class="icon $eventIconMap.get($event.getType())" title="$localizedEventTypes.get($event.getType())"></span>
+                        #iconImage($event.Type)
                         $validator.escapeHtml($event.getDisplayName())</a></div></td>
             #else ## corresponding to if($eventD.getFlag()==false)
                     ## no cell to be rendered, because of the above rowspan. but column counter++
@@ -935,13 +926,6 @@
 		<a href="#" onclick="location='#toolLink("$action" "doNpagew")';return false;" title="$tlang.getString('vieww.gotol')">$tlang.getString("vieww.gotol")</a>
 </div>
 #end
-
-<h4>$tlang.getString('view.legend')</h4>
-<ul class="calendarLegend">
-    #foreach ($key in $iconsAndLocalizedEventTypes.keySet())
-        <li><span class="icon $iconsAndLocalizedEventTypes.get($key)"></span> $key</li>
-    #end
-</ul>
-<div class="clear"></div>
+#eventLegend($tlang)
 
 </div>

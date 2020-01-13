@@ -20,18 +20,19 @@
  **********************************************************************************/
 package org.sakaiproject.sms.logic.impl.hibernate;
 
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.type.IntegerType;
-import org.hibernate.type.StringType;
-import org.hibernate.type.TimestampType;
 import org.sakaiproject.genericdao.api.search.Order;
 import org.sakaiproject.genericdao.api.search.Restriction;
 import org.sakaiproject.genericdao.api.search.Search;
@@ -50,8 +51,6 @@ import org.sakaiproject.sms.model.constants.SmsConstants;
 import org.sakaiproject.sms.util.DateUtil;
 import org.sakaiproject.sms.util.GsmCharset;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * The data service will handle all sms task database transactions for the sms
  * tool in Sakai.
@@ -60,10 +59,10 @@ import lombok.extern.slf4j.Slf4j;
  * @version 1.0
  * @created 25-Nov-2008
  */
-@Slf4j
 @SuppressWarnings("unchecked")
 public class SmsTaskLogicImpl extends SmsLogic implements SmsTaskLogic {
 
+	private static final Log LOG = LogFactory.getLog(SmsTaskLogicImpl.class);
 
 	private ExternalLogic externalLogic;
 
@@ -145,7 +144,7 @@ public class SmsTaskLogicImpl extends SmsLogic implements SmsTaskLogic {
 		if (smsTask.getMessageBody() != null) {
 			GsmCharset charSet = new GsmCharset();
 			byte[] encoded = charSet.utfToGsm(smsTask.getMessageBody());
-			log.debug("message " + smsTask.getMessageBody() + " length is " + encoded.length);
+			LOG.debug("message " + smsTask.getMessageBody() + " length is " + encoded.length);
 			if (encoded.length > 160) {
 				throw new IllegalArgumentException("Message body can't be longer than 160 chars!");
 			}
@@ -178,16 +177,16 @@ public class SmsTaskLogicImpl extends SmsLogic implements SmsTaskLogic {
 		hql.append(" order by task.dateToSend, task.id");
 		final List<SmsTask> tasks = smsDao.runQuery(hql.toString(),
 				new QueryParameter("today", getDelayedCurrentDate(10),
-						TimestampType.INSTANCE), new QueryParameter(
+						Hibernate.TIMESTAMP), new QueryParameter(
 						"messageTypeId",
 						SmsConstants.MESSAGE_TYPE_SYSTEM_ORIGINATING,
-						IntegerType.INSTANCE), new QueryParameter("statusCodes",
+						Hibernate.INTEGER), new QueryParameter("statusCodes",
 						new Object[] { SmsConst_DeliveryStatus.STATUS_PENDING,
 								SmsConst_DeliveryStatus.STATUS_INCOMPLETE,
 								SmsConst_DeliveryStatus.STATUS_RETRY },
-						StringType.INSTANCE));
+						Hibernate.STRING));
 
-		log.debug("getNextSmsTask() HQL: " + hql);
+		LOG.debug("getNextSmsTask() HQL: " + hql);
 		
 		if (tasks != null && !tasks.isEmpty()) {
 			
@@ -218,7 +217,7 @@ public class SmsTaskLogicImpl extends SmsLogic implements SmsTaskLogic {
 						return smsTask;
 					}
 				} catch (HibernateException e) {
-					log.error("Error processing next task", e);
+					LOG.error("Error processing next task", e);
 					if (tx != null) {
 						tx.rollback();
 					}
@@ -460,16 +459,16 @@ public class SmsTaskLogicImpl extends SmsLogic implements SmsTaskLogic {
 		hql.append(" order by task.messageTypeId ,task.dateToSend");
 		List<SmsTask> tasks = smsDao.runQuery(hql.toString(),
 				new QueryParameter("today", getDelayedCurrentDate(10),
-						TimestampType.INSTANCE), new QueryParameter("statusCodes",
+						Hibernate.TIMESTAMP), new QueryParameter("statusCodes",
 						new Object[] {
 
 						SmsConst_DeliveryStatus.STATUS_RETRY },
 
-						StringType.INSTANCE), new QueryParameter("messageTypeId",
+						Hibernate.STRING), new QueryParameter("messageTypeId",
 						SmsConstants.MESSAGE_TYPE_MOBILE_ORIGINATING,
-						IntegerType.INSTANCE));
+						Hibernate.INTEGER));
 
-		log.debug("processMOTasks() HQL: " + hql);
+		LOG.debug("processMOTasks() HQL: " + hql);
 		if (tasks != null && !tasks.isEmpty()) {
 			// Gets the oldest dateToSend. I.e the first to be processed.
 			return tasks;
@@ -478,8 +477,7 @@ public class SmsTaskLogicImpl extends SmsLogic implements SmsTaskLogic {
 	}
 
 	public Session getNewHibernateSession() {
-		return smsDao.getTheHibernateTemplateSession();
-                        //getTheHibernateTemplate().getSessionFactory()
-			//	.openSession();
+		return smsDao.getTheHibernateTemplate().getSessionFactory()
+				.openSession();
 	}
 }

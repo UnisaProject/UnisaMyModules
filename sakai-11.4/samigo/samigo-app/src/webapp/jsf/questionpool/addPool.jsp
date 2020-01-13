@@ -77,7 +77,20 @@ function textCounter(field, maxlimit) {
     <div class="form-group row">
         <h:outputLabel for="descfield" value="#{questionPoolMessages.desc}" styleClass="form-control-label col-md-2"/>
         <div class="col-md-10">
-            <h:inputTextarea id="descfield" value="#{questionpool.currentPool.description}" cols="40" rows="6" />
+            <h:inputTextarea id="descfield" value="#{questionpool.currentPool.description}" cols="40" rows="6"
+                onblur="textCounter(this,255);"
+                onchange="textCounter(this,255);"
+                onclick="textCounter(this,255);"
+                ondblclick="textCounter(this,255);"
+                onfocus="textCounter(this,255);"
+                onkeydown="textCounter(this,255);"
+                onkeyup="textCounter(this,255);"
+                onkeypress="textCounter(this,255);"
+                onmouseup="textCounter(this,255);"
+                onmousemove="textCounter(this,255);"
+                onmouseout="textCounter(this,255);"
+                onmouseover="textCounter(this,255);"
+            />
         </div>
     </div>
 

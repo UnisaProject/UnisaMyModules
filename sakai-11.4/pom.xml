@@ -1,10 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>master</artifactId>
         <groupId>org.sakaiproject</groupId>
-        <version>12.6</version>
+        <version>11.4</version>
         <relativePath>master/pom.xml</relativePath>
     </parent>
 
@@ -33,6 +34,7 @@
         <url>http://issues.sakaiproject.org/jira/browse/SAK</url>
     </issueManagement>
 
+
     <profiles>
         <profile>
             <id>all</id>
@@ -41,18 +43,18 @@
             </activation>
             <modules>
                 <module>master</module>
-                <module>admin-tools</module>
                 <module>access</module>
+                <module>alias</module>
                 <module>announcement</module>
                 <module>archive</module>
                 <module>assignment</module>
+                <module>authz</module>
                 <module>basiclti</module>
                 <module>calendar</module>
                 <module>chat</module>
                 <module>citations</module>
                 <module>cmprovider</module>
                 <module>common</module>
-                <module>commons</module>
                 <module>config</module>
                 <module>cloud-content</module>
                 <module>content</module>
@@ -63,7 +65,6 @@
                 <module>deploy</module>
                 <module>edu-services</module>
                 <module>emailtemplateservice</module>
-                <module>endorsed</module>
                 <module>entitybroker</module>
                 <module>external-calendaring-service</module>
                 <module>feedback</module>
@@ -75,14 +76,12 @@
                 <module>jsf</module>
                 <module>kernel</module>
                 <module>lessonbuilder</module>
-                <module>library</module>
                 <module>login</module>
                 <module>mailarchive</module>
                 <module>mailsender</module>
+                <module>memory</module>
                 <module>message</module>
                 <module>msgcntr</module>
-                <module>mycalendar</module>
-                <module>myconnections</module>
                 <module>oauth</module>
                 <module>pasystem</module>
                 <module>podcasts</module>
@@ -92,12 +91,12 @@
                 <module>presence</module>
                 <module>profile2</module>
                 <module>providers</module>
+                <module>reference</module>
                 <module>reset-pass</module>
+                <module>rights</module>
                 <module>roster2</module>
                 <module>rsf</module>
-                <!--<module>rubrics</module>-->
                 <module>rwiki</module>
-                <module>tags</module>
                 <module>samigo</module>
                 <module>search</module>
                 <module>sections</module>
@@ -116,8 +115,25 @@
                 <module>usermembership</module>
                 <module>velocity</module>
                 <module>web</module>
-                <module>webjars</module>
                 <module>webservices</module>
+				<!-- UNISA CHANGES -->
+				<module>yaft</module> <!-- contrib tool -->
+				<module>struts</module>
+				<module>blogwow</module>
+				<!-- >module>sms</module--> 
+				<!-- module>qna</module-->
+				<module>clog</module> 
+    			<!-- >module>etudes-util</module> 
+				module>ltiContact</module> 
+				<module>melete</module-->
+				<module>bbb-tool</module> 
+				<module>permission</module>
+				<module>unisa-db</module>
+				<module>unisa-util</module>
+				<module>unisa-calendar</module>
+				<module>unisa-changes</module>
+				<module>unisa-tools</module>				
+				<!-- END OF UNISA CHANGES -->
             </modules>
         </profile>
         <profile>
@@ -125,22 +141,25 @@
             <modules>
                 <module>master</module>
                 <module>access</module>
+                <module>alias</module>
                 <module>announcement</module>
                 <module>archive</module>
                 <module>assignment</module>
                 <module>assignment2</module>
+                <module>authz</module>
                 <module>basiclti</module>
                 <module>calendar</module>
                 <module>chat</module>
                 <module>citations</module>
                 <module>clog</module>
+                <module>clogdashboardintegration</module>
                 <module>common</module>
-                <module>commons</module>
                 <module>config</module>
                 <module>cloud-content</module>
                 <module>content</module>
                 <module>content-review</module>
                 <module>courier</module>
+                <module>dashboard</module>
                 <module>dav</module>
                 <module>delegatedaccess</module>
                 <module>deploy</module>
@@ -158,15 +177,13 @@
                 <module>jsf</module>
                 <module>kernel</module>
                 <module>lessonbuilder</module>
-                <module>library</module>
                 <module>login</module>
                 <module>mailarchive</module>
                 <module>mailsender</module>
+                <module>memory</module>
                 <module>message</module>
                 <module>metaobj</module>
                 <module>msgcntr</module>
-                <module>mycalendar</module>
-                <module>myconnections</module>
                 <module>osp</module>
                 <module>podcasts</module>
                 <module>polls</module>
@@ -175,13 +192,13 @@
                 <module>presence</module>
                 <module>profile2</module>
                 <module>providers</module>
+                <module>reference</module>
                 <module>reports</module>
                 <module>reset-pass</module>
+                <module>rights</module>
                 <module>roster2</module>
                 <module>rss</module>
-                <!--<module>rubrics</module>-->
                 <module>rwiki</module>
-                <module>tags</module>
                 <module>samigo</module>
                 <module>search</module>
                 <module>sections</module>
@@ -200,12 +217,11 @@
                 <module>velocity</module>
                 <module>warehouse</module>
                 <module>web</module>
-                <module>webjars</module>
                 <module>webservices</module>
                 <module>yaft</module>
             </modules>
         </profile>
-
+        
         <!-- pack profiles for building release artifacts -->
         <profile>
             <id>pack</id>
@@ -221,7 +237,6 @@
                 <module>pack/pack-bin</module>
             </modules>
         </profile>
-        <!--
         <profile>
             <id>pack-demo</id>
             <modules>
@@ -229,7 +244,6 @@
                 <module>pack/pack-demo</module>
             </modules>
         </profile>
-        -->
         <profile>
             <id>pack-src</id>
             <modules>
@@ -237,5 +251,26 @@
                 <module>pack/pack-src</module>
             </modules>
         </profile>
+        
     </profiles>
+    <reporting>
+        <plugins>
+            <plugin>
+                <!-- javadocs -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.8.1</version>
+                <configuration>
+                    <debug>true</debug>
+                    <links>
+                        <link>http://download.oracle.com/javase/6/docs/api/</link>
+                    </links>
+                    <breakiterator>true</breakiterator>
+                    <verbose>false</verbose>
+                    <maxmemory>1024m</maxmemory>
+                    <additionalJOption>-J-Xms168m -J-Xmx1024m -J-XX:PermSize=128m -J-XX:NewSize=64m</additionalJOption>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>

@@ -31,8 +31,8 @@ import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.authz.api.GroupNotDefinedException;
 import org.sakaiproject.authz.api.Role;
@@ -72,7 +72,6 @@ import org.sakaiproject.user.cover.UserDirectoryService;
  * LinkAction allows site owners to link a site to a parent.
  * </p>
  */
-@Slf4j
 public class LinkAction extends VelocityPortletPaneledAction
 {
 	/** Resource bundle using current language locale */
@@ -80,6 +79,8 @@ public class LinkAction extends VelocityPortletPaneledAction
 
 	/** Name of state attribute for Site instance id */
 	private static final String STATE_SITE_INSTANCE_ID = "site.instance.id";
+
+	private static final Logger logger = LoggerFactory.getLogger(LinkAction.class);
 
 	/**
 	 * Get the current site page our current tool is placed on.

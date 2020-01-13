@@ -36,8 +36,6 @@ package org.sakaiproject.rsf.evolverimpl;
 
 import java.util.Iterator;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentHostingService;
 
@@ -50,7 +48,6 @@ import uk.org.ponder.rsf.components.decorators.UIDecorator;
 import uk.org.ponder.rsf.components.decorators.UIFreeAttributeDecorator;
 import uk.org.ponder.rsf.evolvers.TextInputEvolver;
 
-@Slf4j
 public class SakaiFCKTextEvolver implements TextInputEvolver {
 	public static final String COMPONENT_ID = "sakai-FCKEditor:";
 	private String context;
@@ -98,7 +95,7 @@ public class SakaiFCKTextEvolver implements TextInputEvolver {
 							// height isn't set to a string, show the developer
 							// a stack trace since
 							// he/she is lost...
-							log.error(e.getMessage(), e);
+							e.printStackTrace();
 						}
 					} else if (((UIFreeAttributeDecorator) decorator).attributes.get("width") != null) {
 						sizeset = true;
@@ -108,7 +105,7 @@ public class SakaiFCKTextEvolver implements TextInputEvolver {
 							// height isn't set to a string, show the developer
 							// a stack trace since
 							// he/she is lost...
-							log.error(e.getMessage(), e);
+							e.printStackTrace();
 						}
 					}
 				}

@@ -27,10 +27,14 @@ include file for displaying matching questions
 <h:dataTable value="#{question.itemTextArraySorted}" var="itemText">
  <h:column>
    <h:outputText value="#{itemText.sequence}#{evaluationMessages.dot} #{itemText.text}" escape="false" />
-   <h:dataTable value="#{itemText.answerArrayWithDistractorSorted}" var="answer">
+   <h:dataTable value="#{itemText.answerArraySorted}" var="answer">
      <h:column>
-       <h:outputText value="" rendered="#{answer.isCorrect}" title="#{evaluationMessages.alt_correct}" styleClass="icon-sakai--check feedBackCheck" />
-       <h:outputText value="" rendered="#{!answer.isCorrect}" title="#{evaluationMessages.alt_incorrect}" styleClass="icon-sakai--delete feedBackCross" />
+      <h:graphicImage alt="#{evaluationMessages.alt_correct}" id="image4" rendered="#{answer.isCorrect}"
+        url="/images/delivery/checkmark.gif" >
+       </h:graphicImage>
+      <h:graphicImage id="image5" rendered="#{!answer.isCorrect}"
+        alt=" " url="/images/crossmark.gif" >
+       </h:graphicImage>
      </h:column>
      <h:column>
        <h:outputText value="#{answer.text}" escape="false" />
@@ -38,5 +42,4 @@ include file for displaying matching questions
    </h:dataTable>
  </h:column>
 </h:dataTable>
-<%@ include file="/jsf/evaluation/item/displayTags.jsp" %>
 

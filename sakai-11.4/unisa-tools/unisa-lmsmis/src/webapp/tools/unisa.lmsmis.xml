@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.lmsmis"
+		title="myUnisa Management Information"
+		description="">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.discussionforums"
+		title="Discussion Forums"
+		description="The system to enable the students to discuss study related issues">
+		<category name="course" />
+		<category name="onlcourse" />
+		<category name="project" />
+		<category name="PostGraduate" />
+		
+	</tool>
+</registration>

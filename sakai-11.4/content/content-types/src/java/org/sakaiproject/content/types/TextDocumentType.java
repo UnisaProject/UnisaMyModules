@@ -198,12 +198,6 @@ public class TextDocumentType extends BaseResourceType
 		return null;
 	}
 	
-	public String getIconClass(ContentEntity entity) 
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 	public String getId() 
 	{
 		return typeId;

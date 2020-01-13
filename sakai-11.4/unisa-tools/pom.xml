@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>master</artifactId>
+    <groupId>org.sakaiproject</groupId>
+    <version>11.4</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <name>Unisa Tools Project</name>
+  <groupId>org.sakaiproject</groupId>
+  <artifactId>unisa-base</artifactId>
+  <packaging>pom</packaging>
+  <modules>  
+  
+	<module>unisa-auditview</module>
+	<module>unisa-acadhistory</module>
+	<module>unisa-assessmentcriteria</module>
+	<module>unisa-adobedownload</module>
+	<module>unisa-assessmentcriteriaauth</module>
+	<module>unisa-assmarkerreallocation</module>
+	<module>unisa-axis</module>
+	<module>unisa-biodetails</module>
+	<module>unisa-booklist</module>
+	<module>unisa-booklistadmin</module>
+	<module>unisa-browsertest</module>
+	<module>unisa-bulkemail</module>
+	<module>unisa-canceluser</module>
+	<module>unisa-changepassword</module>
+	<!-- >module>unisa-contactus</module-->
+	<module>unisa-creditcardpayment</module>
+	<module>unisa-cronjobs</module> <!-- this tool will only be deployed on node 10 on production -->
+	<module>unisa-discussionforums</module>
+	<module>unisa-ebookshop</module>
+	<module>unisa-exampapers</module>
+	<module>unisa-exampaperonline</module>
+	<module>unisa-examscriptstats</module>
+    <module>unisa-examtimetable</module>
+	<module>unisa-faqs</module>
+	<!-- >module>unisa-filemgrutil</module-->
+	<module>unisa-finalmarkconcession</module>
+	<module>unisa-findtool</module>
+	<module>unisa-graduationceremony</module>
+	<module>unisa-honsadmission</module>
+	<module>unisa-lmsmis</module>
+	<module>unisa-maintainstaff</module>
+	<module>unisa-mdactivity</module>
+	<module>unisa-mdadmission</module>
+	<module>unisa-mdapplications</module>
+	<module>unisa-monitor</module>
+	<module>unisa-mylife</module>
+	<module>unisa-mylifesupport</module>
+	<module>unisa-nosite</module>
+	<module>unisa-password</module>
+	<module>unisa-payments</module>
+	<module>unisa-pbooks</module>
+	<module>unisa-prescribedbooks</module>
+	<module>unisa-publicprescribedbooks</module>
+	<module>unisa-proxy</module>
+	<module>unisa-publicexamtimetable</module>
+	<module>unisa-regdetails</module>
+	<module>unisa-registrationstatus</module>
+	<module>unisa-results</module>
+	<module>unisa-satbook</module>
+	<module>unisa-signoff</module>
+	<module>unisa-smsbatch</module>
+	<module>unisa-smsenquiry</module>
+	<module>unisa-sitestatsexport</module>
+	<module>unisa-studentemail</module>
+	<module>unisa-studentlist</module>
+	<module>unisa-studentstatus</module>
+	<module>unisa-studentoffer</module>
+	<module>unisa-studentappeal</module>
+	<module>unisa-studentupload</module>
+	<module>unisa-studentregistration</module>
+	<module>unisa-studyquotation</module>
+    <module>unisa-studymaterial</module>
+    <module>unisa-uploadmanager</module>
+    <module>unisa-brochures</module>
+	<module>unisa-telecentre</module>
+	<module>unisa-trackandtrace</module>
+	<!--module>unisa-tutorappointment</module-->
+	<!--  module>unisa-tracking</module-->
+	<module>unisa-mdregistrations</module>
+	<module>unisa-studentnosearch</module>
+	<module>unisa-tpustudentplacement</module>
+	<module>unisa-tpstudymaterial</module>
+	<module>unisa-tutoringplan</module>
+	<module>unisa-tutoringplanAdministration</module>
+	<module>unisa-tutorstudentgrouping</module>
+	<module>unisa-unmarkassfollowup</module>
+	<module>unisa-welcome</module>
+ </modules>
+</project>
+

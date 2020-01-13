@@ -31,8 +31,10 @@ import java.text.Collator;
 import java.text.ParseException;
 import java.text.RuleBasedCollator;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DOCUMENTATION PENDING
@@ -40,10 +42,10 @@ import org.apache.commons.beanutils.BeanUtils;
  * @author $author$
  * @version $Id$
  */
-@Slf4j
- public class BeanSortComparator
+public class BeanSortComparator
   implements Comparator
 {
+  private static Logger log = LoggerFactory.getLogger(BeanSortComparator.class);
   private String propertyName;
 
   /**
@@ -146,6 +148,8 @@ import org.apache.commons.beanutils.BeanUtils;
     catch(Throwable t)
     {
       log.debug("Caught error in BeanUtils.describe(): " + t.getMessage());
+      t.printStackTrace();
+       
       throw new java.lang.UnsupportedOperationException(
         "Invalid describeBean. Objects may not be Java Beans.  " + t);
       

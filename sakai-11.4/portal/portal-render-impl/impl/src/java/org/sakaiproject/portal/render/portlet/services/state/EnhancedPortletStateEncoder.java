@@ -32,7 +32,9 @@ import java.util.StringTokenizer;
 
 import javax.portlet.PortletMode;
 import javax.portlet.WindowState;
-import lombok.extern.slf4j.Slf4j;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Enhanced version of the PortletStateEncoder. This implementation translates
@@ -46,9 +48,11 @@ import lombok.extern.slf4j.Slf4j;
  *          csev@umich.edu $
  * @since 2.2.3
  */
-@Slf4j
 public class EnhancedPortletStateEncoder implements PortletStateEncoder
 {
+
+	private static final Logger LOG = LoggerFactory.getLogger(EnhancedPortletStateEncoder.class);
+
 	//
 	// Implementation Note:
 	// - Map Keys below are qualified in order to prevent
@@ -81,7 +85,10 @@ public class EnhancedPortletStateEncoder implements PortletStateEncoder
 
 	public String encode(PortletState portletState)
 	{
-		log.debug("Encoding PortletState [action={}]", portletState.isAction());
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Encoding PortletState [action=" + portletState.isAction() + "]");
+		}
 
 		Properties p = new Properties();
 		p.setProperty(ID_PARAM, portletState.getId());
@@ -126,7 +133,11 @@ public class EnhancedPortletStateEncoder implements PortletStateEncoder
 			}
 		}
 
-		log.debug("Encoded PortletState to properties for Tool '{}'.", portletState.getId());
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Encoded PortletState to properties for Tool '"
+					+ portletState.getId() + "'.");
+		}
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try
@@ -190,7 +201,10 @@ public class EnhancedPortletStateEncoder implements PortletStateEncoder
 
 		state.setParameters(map);
 
-		log.debug("Decoded PortletState for Tool '{}'", state.getId());
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Decoded PortletState for Tool '" + state.getId() + "'");
+		}
 
 		return state;
 	}

@@ -32,8 +32,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger; 
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.cheftool.VmServlet;
@@ -71,9 +71,11 @@ import org.sakaiproject.util.Web;
  * 
  * @author Sakai Software Development Team
  */
-@Slf4j
 public class AccessServlet extends VmServlet
 {
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(AccessServlet.class);
+
 	/** Resource bundle using current language locale */
 	protected static ResourceLoader rb = new ResourceLoader("access");
 
@@ -348,7 +350,7 @@ public class AccessServlet extends VmServlet
 		catch (EntityNotDefinedException e)
 		{
 			// the request was not valid in some way
-			log.debug("dispatch(): ref: " + ref.getReference(), e);
+			M_log.debug("dispatch(): ref: " + ref.getReference(), e);
 			sendError(res, HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
@@ -366,13 +368,13 @@ public class AccessServlet extends VmServlet
 			}
 
 			// otherwise reject the request
-			log.debug("dispatch(): ref: " + ref.getReference(), e);
+			M_log.debug("dispatch(): ref: " + ref.getReference(), e);
 			sendError(res, HttpServletResponse.SC_FORBIDDEN);
 		}
 
 		catch (EntityAccessOverloadException e)
 		{
-			log.info("dispatch(): ref: " + ref.getReference(), e);
+			M_log.info("dispatch(): ref: " + ref.getReference(), e);
 			sendError(res, HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 		}
 
@@ -395,15 +397,15 @@ public class AccessServlet extends VmServlet
 
 		catch (Throwable e)
 		{
-			log.warn("dispatch(): exception: ", e);
+			M_log.warn("dispatch(): exception: ", e);
 			sendError(res, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 
 		finally
 		{
 			// log
-			if (log.isDebugEnabled())
-				log.debug("from:" + req.getRemoteAddr() + " path:" + params.getPath() + " options: " + info.optionsString()
+			if (M_log.isDebugEnabled())
+				M_log.debug("from:" + req.getRemoteAddr() + " path:" + params.getPath() + " options: " + info.optionsString()
 						+ " time: " + info.getElapsedTime());
 		}
 	}
@@ -456,7 +458,7 @@ public class AccessServlet extends VmServlet
 	{
 		// if basic auth is valid do that
 		if ( basicAuth.doAuth(req,res) ) {
-			log.info("BASIC Auth Request Sent to the Browser ");
+			//System.err.println("BASIC Auth Request Sent to the Browser ");
 			return;
 		} 
 		
@@ -480,7 +482,7 @@ public class AccessServlet extends VmServlet
 		// check that we have a return path set; might have been done earlier
 		if (session.getAttribute(Tool.HELPER_DONE_URL) == null)
 		{
-			log.warn("doLogin - proceeding with null HELPER_DONE_URL");
+			M_log.warn("doLogin - proceeding with null HELPER_DONE_URL");
 		}
 
 		// map the request to the helper, leaving the path after ".../options" for the helper
@@ -503,7 +505,7 @@ public class AccessServlet extends VmServlet
 		}
 		catch (Throwable t)
 		{
-			log.warn("sendError: " + t);
+			M_log.warn("sendError: " + t);
 		}
 	}
 

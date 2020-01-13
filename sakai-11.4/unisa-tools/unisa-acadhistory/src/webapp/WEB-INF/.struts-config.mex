@@ -1,0 +1,39 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="105,30" dimension="242,88" />
+  <StrutsActivity path="/displayAcadHistory.do" location="75,180" dimension="271,88" />
+  <StrutsActivity path="/WEB-INF/jsp/displayAcadHistory.jsp" location="15,345" dimension="207,49" />
+  <StrutsActivity path="/WEB-INF/jsp/displayAcadStudyUnit.jsp" location="315,345" dimension="220,49" />
+  <StrutsActivity path="/WEB-INF/jsp/acadHistoryInput.jsp" location="465,195" dimension="199,49" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="375,45" dimension="150,49" />
+  <StrutsTransition id="/displayAcadHistory.do,displayAcadHistory,/WEB-INF/jsp/displayAcadHistory.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="207,268" />
+      <AbsolutePoint location="207,345" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayAcadHistory.do,acadHistoryInput,/WEB-INF/jsp/acadHistoryInput.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="346,224" />
+      <AbsolutePoint location="465,224" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/WEB-INF/jsp/acadHistoryInput.jsp,null,/displayAcadHistory.do,2" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="564,244" />
+      <AbsolutePoint location="564,259" />
+      <AbsolutePoint location="346,259" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayAcadHistory.do,displayAcadStudyUnit,/WEB-INF/jsp/displayAcadStudyUnit.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="330,268" />
+      <AbsolutePoint location="330,345" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/displayAcadHistory.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="226,118" />
+      <AbsolutePoint location="226,180" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

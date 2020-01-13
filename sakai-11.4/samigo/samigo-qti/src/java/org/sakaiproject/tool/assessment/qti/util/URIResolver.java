@@ -19,16 +19,18 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.qti.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -37,9 +39,9 @@ import lombok.extern.slf4j.Slf4j;
  * @author palcasi
  * @version $Id$
  */
-@Slf4j
 public class URIResolver implements javax.xml.transform.URIResolver
 {
+  private static Logger log = LoggerFactory.getLogger(URIResolver.class);
 
     public URIResolver()
     {

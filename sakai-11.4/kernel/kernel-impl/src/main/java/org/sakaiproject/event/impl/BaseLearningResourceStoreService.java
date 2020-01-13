@@ -27,14 +27,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ConcurrentHashMap;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang3.StringUtils;
-
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-
+import org.apache.commons.lang.StringUtils;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.event.api.Event;
 import org.sakaiproject.event.api.EventTrackingService;
@@ -46,6 +39,11 @@ import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 /**
  * Core implementation of the LRS integration
@@ -63,11 +61,12 @@ import org.sakaiproject.user.api.UserNotDefinedException;
  * @author Aaron Zeckoski (azeckoski @ unicon.net) (azeckoski @ vt.edu)
  */
 //@Aspect
-@Slf4j
 public class BaseLearningResourceStoreService implements LearningResourceStoreService, ApplicationContextAware {
 
     private static final String ORIGIN_SAKAI_SYSTEM = "sakai.system";
     private static final String ORIGIN_SAKAI_CONTENT = "sakai.resources";
+
+    private static final Logger log = LoggerFactory.getLogger(BaseLearningResourceStoreService.class);
 
     /**
      * Stores the complete set of known LRSP providers (from the Spring AC or registered manually)
@@ -170,7 +169,8 @@ public class BaseLearningResourceStoreService implements LearningResourceStoreSe
                     } else if (statement.getRawMap() != null 
                             && !statement.getRawMap().isEmpty()) {
                         valid = true;
-                    } else if (StringUtils.isNotBlank(statement.getRawJSON())) {
+                    } else if (statement.getRawJSON() != null
+                            && !StringUtils.isNotBlank(statement.getRawJSON())) {
                         valid = true;
                     }
                     if (valid) {
@@ -286,7 +286,7 @@ public class BaseLearningResourceStoreService implements LearningResourceStoreSe
                 String origin = this.lrss.getEventOrigin(event);
                 // convert event into statement when possible
                 LRS_Statement statement = this.lrss.getEventStatement(event);
-                if (statement != null && statement.isPopulated()) {
+                if (statement != null) {
                     this.lrss.registerStatement(statement, origin);
                 }
             }
@@ -300,60 +300,53 @@ public class BaseLearningResourceStoreService implements LearningResourceStoreSe
      * @return a statement if one can be formed OR null if not
      */
     private LRS_Statement getEventStatement(Event event) {
-        //If the event already has the statement set, just use that
-        LRS_Statement statement=null;
-        LRS_Verb verb=null;
-        LRS_Actor actor=null;
-        LRS_Context context=null;
-        LRS_Object object=null;
-        LRS_Result result = null;
-        if (event.getLrsStatement() != null) {
-            statement =  event.getLrsStatement();
-            //If the statement is fully populated (with context) nothing left to do
-            if (statement.isPopulated() && statement.getContext() != null) {
-                return statement;
-            }
-            verb=statement.getVerb();
-            actor=statement.getActor();
-            context=statement.getContext();
-            object=statement.getObject();
-            result=statement.getResult();
-
-        }
+        LRS_Statement statement;
         try {
-            //If verb not set try to get it from the event
-            if (verb == null) {
-                verb = getEventVerb(event);
+            LRS_Verb verb = getEventVerb(event);
+            if (verb != null) {
+                LRS_Object object = getEventObject(event);
+                if (object != null) {
+                    LRS_Actor actor = getEventActor(event);
+                    statement = new LRS_Statement(actor, verb, object);
+                    LRS_Context c = getEventContext(event);
+                    if (c != null) {
+                        statement.setContext(c);
+                    }
+                } else {
+                    statement = null;
+                }
+            } else {
+                statement = null;
             }
-            // If object not set try to get it from the event
-            if (object == null) {
-                object = getEventObject(event);
-            }
-            //If actor is not null try to get it from the event
-            if (actor == null) {
-                actor = getEventActor(event);
-            }
-            //If context is not set get it from the event
-            if (context == null) {
-                context = getEventContext(event);
-            }
-            statement = new LRS_Statement(actor, verb, object,result,context);
         } catch (Exception e) {
             log.debug("LRS Unable to convert event ({}) into statement.", event, e);
             statement = null;
         }
         return statement;
     }
+
     /* (non-Javadoc)
-     * @see org.sakaiproject.event.api.LearningResourceStoreService#getActor(String)
+     * @see org.sakaiproject.event.api.LearningResourceStoreService#getEventActor(org.sakaiproject.event.api.Event)
      */
-    public LRS_Actor getActor(String userId) {
+    public LRS_Actor getEventActor(Event event) {
         LRS_Actor actor = null;
         User user = null;
-        try {
-            user = this.userDirectoryService.getUser(userId);
-        } catch (UserNotDefinedException e) {
-            user = null;
+        if (event.getUserId() != null) {
+            try {
+                user = this.userDirectoryService.getUser(event.getUserId());
+            } catch (UserNotDefinedException e) {
+                user = null;
+            }
+        }
+        if (user == null && event.getSessionId() != null) {
+            Session session = this.sessionManager.getSession(event.getSessionId());
+            if (session != null) {
+                try {
+                    user = this.userDirectoryService.getUser(session.getUserId());
+                } catch (UserNotDefinedException e) {
+                    user = null;
+                }
+            }
         }
         if (user != null) {
             String actorEmail;
@@ -379,30 +372,6 @@ public class BaseLearningResourceStoreService implements LearningResourceStoreSe
             // TODO implement OpenID support
         }
         return actor;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.sakaiproject.event.api.LearningResourceStoreService#getEventActor(org.sakaiproject.event.api.Event)
-     */
-    public LRS_Actor getEventActor(Event event) {
-    	return getActor(event);
-    }
-
-    /* (non-Javadoc)
-     * @see org.sakaiproject.event.api.LearningResourceStoreService#getActor(org.sakaiproject.event.api.Event)
-     */
-    public LRS_Actor getActor(Event event) {
-    	String userId = null;
-    	if (event != null) {
-    		userId = event.getUserId();
-    	}
-    	if (userId == null && event != null && event.getSessionId() != null) {
-    		Session session = this.sessionManager.getSession(event.getSessionId());
-    		if (session != null) {
-    			userId = session.getUserId();
-    		}
-    	}
-    	return getActor(userId);
     }
 
     /**
@@ -446,7 +415,7 @@ public class BaseLearningResourceStoreService implements LearningResourceStoreSe
                 verb = new LRS_Verb(SAKAI_VERB.shared);
             } else if ("gradebook.read".equals(e)) {
                 verb = new LRS_Verb(SAKAI_VERB.experienced);
-            } else if ("lessonbuilder.page.read".equals(e) || "lessonbuilder.item.read".equals(e)) {
+            } else if ("lessonbuilder.read".equals(e)) {
                 verb = new LRS_Verb(SAKAI_VERB.experienced);
             } else if ("news.read".equals(e)) {
                 verb = new LRS_Verb(SAKAI_VERB.experienced);
@@ -492,7 +461,7 @@ public class BaseLearningResourceStoreService implements LearningResourceStoreSe
                 object = new LRS_Object(serverConfigurationService.getAccessUrl() + event.getResource(), "edit-resource");
             } else if ("gradebook.read".equals(e)) {
                 object = new LRS_Object(serverConfigurationService.getPortalUrl() + event.getResource(), "view-grades");
-            } else if ("lessonbuilder.page.read".equals(e) || "lessonbuilder.item.read".equals(e)) {
+            } else if ("lessonbuilder.read".equals(e)) {
                 object = new LRS_Object(serverConfigurationService.getPortalUrl() + event.getResource(), "view-lesson");
             } else if ("news.read".equals(e)) {
                 object = new LRS_Object(serverConfigurationService.getPortalUrl() + event.getResource(), "view-news");
@@ -529,7 +498,7 @@ public class BaseLearningResourceStoreService implements LearningResourceStoreSe
                 origin = ORIGIN_SAKAI_CONTENT;
             } else if ("gradebook.read".equals(e)) {
                 origin = "gradebook";
-            } else if ("lessonbuilder.page.read".equals(e) || "lessonbuilder.item.read".equals(e)) {
+            } else if ("lessonbuilder.read".equals(e)) {
                 origin = "lessonbuilder";
             } else if ("news.read".equals(e)) {
                 origin = "news";

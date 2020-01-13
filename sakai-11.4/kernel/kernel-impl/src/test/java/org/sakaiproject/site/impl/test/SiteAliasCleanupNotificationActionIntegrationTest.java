@@ -20,16 +20,13 @@
  **********************************************************************************/
 package org.sakaiproject.site.impl.test;
 
-import java.util.List;
-
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.sakaiproject.alias.api.AliasService;
 import org.sakaiproject.event.api.UsageSessionService;
 import org.sakaiproject.exception.IdInvalidException;
@@ -43,8 +40,10 @@ import org.sakaiproject.test.SakaiKernelTestBase;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
 
-@Slf4j
+import java.util.List;
+
 public class SiteAliasCleanupNotificationActionIntegrationTest extends SakaiKernelTestBase {
+	private static Logger log = LoggerFactory.getLogger(SiteAliasCleanupNotificationActionIntegrationTest.class);
 	private Session session;
 
 	@BeforeClass
@@ -88,7 +87,8 @@ public class SiteAliasCleanupNotificationActionIntegrationTest extends SakaiKern
 			// Remove the deleted site.
 			siteService.removeSite(site);
 		} catch (IdUnusedException e) {
-			log.error(e.getMessage(), e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		List remainingSiteAliases = aliasService.getAliases(site.getReference());

@@ -23,8 +23,8 @@ package org.sakaiproject.presence.impl;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.UsageSession;
 
@@ -33,9 +33,10 @@ import org.sakaiproject.event.api.UsageSession;
  * ClusterPresenceService extends the BasePresenceService with a Storage model that keeps track of presence for a cluster of Sakai app servers, backed by a shared DB table.
  * </p>
  */
-@Slf4j
 public class ClusterPresenceService extends BasePresenceService
 {
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(ClusterPresenceService.class);
 
 	/**
 	 * Allocate a new storage object.
@@ -96,7 +97,7 @@ public class ClusterPresenceService extends BasePresenceService
 		}
 		catch (Exception t)
 		{
-			log.warn("init(): ", t);
+			M_log.warn("init(): ", t);
 		}
 	}
 
@@ -123,7 +124,7 @@ public class ClusterPresenceService extends BasePresenceService
 			boolean ok = m_sqlService.dbWrite(statement, fields);
 			if (!ok)
 			{
-				log.warn("setPresence(): dbWrite failed");
+				M_log.warn("setPresence(): dbWrite failed");
 			}
 		}
 
@@ -143,7 +144,7 @@ public class ClusterPresenceService extends BasePresenceService
 			boolean ok = m_sqlService.dbWrite(statement, fields, locationId);
 			if (!ok)
 			{
-				log.warn("removePresence(): dbWrite failed");
+				M_log.warn("removePresence(): dbWrite failed");
 			}
 		}
 
@@ -165,7 +166,7 @@ public class ClusterPresenceService extends BasePresenceService
 			boolean ok = m_sqlService.dbWrite(statement, fields);
 			if (!ok)
 			{
-				log.warn("run(): dbWrite failed: " + statement);
+				M_log.warn("run(): dbWrite failed: " + statement);
 			}
 	
 			return presence;

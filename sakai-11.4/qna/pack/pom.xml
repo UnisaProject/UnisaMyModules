@@ -19,7 +19,7 @@
    <parent>
       <groupId>org.sakaiproject</groupId>
       <artifactId>qna</artifactId>
-      <version>12.6</version>
+      <version>11.4</version>
       <relativePath>../pom.xml</relativePath>
    </parent>
 

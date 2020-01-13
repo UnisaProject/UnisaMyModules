@@ -34,11 +34,11 @@ public interface Popups extends Acknowledger {
 
     public String createCampaign(Popup popup,
                                  TemplateStream templateContent,
-                                 Optional<List<String>> assignToEids);
+                                 Optional<List<String>> assignToUsers);
 
     public void updateCampaign(Popup popup,
                                Optional<TemplateStream> templateInput,
-                               Optional<List<String>> assignToEids);
+                               Optional<List<String>> assignToUsers);
 
     public List<Popup> getAll();
 
@@ -46,7 +46,7 @@ public interface Popups extends Acknowledger {
 
     public Optional<Popup> getForId(final String uuid);
 
-    public List<String> getAssigneeEids(final String uuid);
+    public List<String> getAssignees(final String uuid);
 
     public boolean deleteCampaign(final String uuid);
 }

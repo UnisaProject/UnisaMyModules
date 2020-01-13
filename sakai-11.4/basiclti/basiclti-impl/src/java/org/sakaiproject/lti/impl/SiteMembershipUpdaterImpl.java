@@ -19,9 +19,11 @@
 
 package org.sakaiproject.lti.impl;
 
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.authz.api.Role;
 import org.sakaiproject.authz.api.SecurityAdvisor;
@@ -36,8 +38,10 @@ import org.sakaiproject.user.api.User;
 /**
  *  @author Adrian Fish <a.fish@lancaster.ac.uk>
  */
-@Slf4j
 public class SiteMembershipUpdaterImpl implements SiteMembershipUpdater {
+
+	private static Logger M_log = LoggerFactory.getLogger(SiteMembershipUpdaterImpl .class);
+
     /**
      *  Injected from Spring, see components.xml
      */
@@ -85,16 +89,16 @@ public class SiteMembershipUpdaterImpl implements SiteMembershipUpdater {
             if (!newRole.equals(currentRole)) {
                 site.addMember(user.getId(), newRole, true, false);
                 if (currentRole == null) {
-                    log.info("Added role={} user={} site={} LMS Role={}", newRole, user.getId(), site.getId(), userrole);
+                    M_log.info("Added role=" + newRole + " user=" + user.getId() + " site=" + site.getId() + " LMS Role=" + userrole);
                 } else {
-                    log.info("Old role={} New role={} user={} site={} LMS Role={}", currentRole, newRole, user.getId(), site.getId(), userrole);
+                    M_log.info("Old role=" + currentRole + " New role=" + newRole + " user=" + user.getId() + " site=" + site.getId()+ " LMS Role=" + userrole);
                 }
 
                 pushAdvisor();
                 String tool_id = (String) payload.get("tool_id");
                 try {
                     siteService.save(site);
-                    log.info("Site saved role={} user={} site={}", newRole, user.getId(), site.getId());
+                    M_log.info("Site saved role=" + newRole + " user="+ user.getId() + " site=" + site.getId());
 
                 } catch (Exception e) {
                     throw new LTIException("launch.site.save", "siteId="+ site.getId() + " tool_id=" + tool_id, e);
@@ -104,8 +108,8 @@ public class SiteMembershipUpdaterImpl implements SiteMembershipUpdater {
 
             }
         } catch (Exception e) {
-            log.warn("Could not add user to site role={} user={} site={}", userrole, user.getId(), site.getId());
-            log.warn(e.getLocalizedMessage(), e);
+            M_log.warn("Could not add user to site role=" + userrole + " user="+ user.getId() + " site=" + site.getId());
+            M_log.warn(e.getLocalizedMessage(), e);
             throw new LTIException( "launch.join.site", "siteId="+site.getId(), e);
 
         }

@@ -28,8 +28,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.citation.api.*;
 import org.sakaiproject.citation.api.Schema.Field;
 import org.sakaiproject.db.api.SqlReader;
@@ -42,7 +42,6 @@ import org.sakaiproject.time.cover.TimeService;
 /**
  *
  */
-@Slf4j
 public class DbCitationService extends BaseCitationService
 {
 	/**
@@ -244,28 +243,6 @@ public class DbCitationService extends BaseCitationService
 		}
 
 		@Override
-		public String getNextCitationCollectionOrderId(String collectionId) {
-			String statement = "SELECT MAX(LOCATION)+1 FROM " + m_collectionOrderTableName + " where COLLECTION_ID = ? AND SECTION_TYPE IS NOT NULL ";
-
-			Object fields[] = new Object[1];
-			fields[0] = collectionId;
-
-			List list = m_sqlService.dbRead(statement, fields, null);
-
-			String nextSeqForCollection = null;
-			if(!list.isEmpty())
-			{
-				nextSeqForCollection = (String) list.get(0);
-			}
-			return nextSeqForCollection==null ? "1" : nextSeqForCollection;
-		}
-
-		@Override
-		public CitationCollectionOrder getCitationCollectionOrder(String collectionId, int locationId) {
-			return this.getCitCollectionOrder(collectionId, locationId);
-		}
-
-		@Override
 		public void removeLocation(String collectionId, int locationId) {
 			this.removeNestedLocation(collectionId, locationId);
 		}
@@ -345,7 +322,7 @@ public class DbCitationService extends BaseCitationService
 				}
 				else
 				{
-					log.debug("DbCitationStorage.saveCitation value not List or String: " + value.getClass().getCanonicalName() + " " + value);
+					M_log.debug("DbCitationStorage.saveCitation value not List or String: " + value.getClass().getCanonicalName() + " " + value);
 					fields[1] = name;
 					fields[2] = value;
 
@@ -382,8 +359,6 @@ public class DbCitationService extends BaseCitationService
 		*/
 		protected void commitCitationCollectionOrder(CitationCollectionOrder citationCollectionOrder)
 		{
-			deleteCitationCollectionOrder(citationCollectionOrder);
-
 			String orderStatement = "insert into " + m_collectionOrderTableName + " (COLLECTION_ID, CITATION_ID, LOCATION, SECTION_TYPE, VALUE) VALUES(?,?,?,?,?)";
 
 			Object[] orderFields = new Object[5];
@@ -571,27 +546,6 @@ public class DbCitationService extends BaseCitationService
 		}
 
 		/* (non-Javadoc)
-		* @see org.sakaiproject.citation.impl.BaseCitationService.Storage#getCitCollectionOrder(java.lang.String, java.lang.String)
-		*/
-		public CitationCollectionOrder getCitCollectionOrder(String collectionId, int locationId)
-		{
-			String statement = "select COLLECTION_ID, CITATION_ID, LOCATION, SECTION_TYPE, VALUE FROM " + m_collectionOrderTableName + " where COLLECTION_ID = ? and LOCATION = ? ";
-
-			Object fields[] = new Object[2];
-			fields[0] = collectionId;
-			fields[1] = locationId;
-
-			List list = m_sqlService.dbRead(statement, fields, new CitationCollectionOrderReader());
-			CitationCollectionOrder c = null;
-			if(! list.isEmpty())
-			{
-				c = (CitationCollectionOrder) list.get(0);
-			}
-
-			return c;
-		}
-
-		/* (non-Javadoc)
 		* @see org.sakaiproject.citation.impl.BaseCitationService.Storage#getNestedCollection(java.lang.String)
 		*/
 		protected CitationCollectionOrder getNestedCollection(String citationCollectionId)
@@ -652,7 +606,7 @@ public class DbCitationService extends BaseCitationService
 		/* (non-Javadoc)
 		* @see org.sakaiproject.citation.impl.BaseCitationService.Storage#getNestedCollectionAsList(java.lang.String)
 		*/
-		public List<CitationCollectionOrder> getNestedCollectionAsList(String citationCollectionId)
+		protected List<CitationCollectionOrder> getNestedCollectionAsList(String citationCollectionId)
 		{
 			String statement = "select COLLECTION_ID, CITATION_ID, LOCATION, SECTION_TYPE, VALUE from " + m_collectionOrderTableName
 					+ " where (COLLECTION_ID = ? and SECTION_TYPE is not NULL) ORDER BY LOCATION ASC";
@@ -1154,23 +1108,6 @@ public class DbCitationService extends BaseCitationService
 				// process the insert
 				ok = m_sqlService.dbWrite(statement, fields);
 			}
-		}
-
-		/* (non-Javadoc)
-		* @see org.sakaiproject.citation.impl.BaseCitationService.Storage#deleteCitationCollectionOrder(rg.sakaiproject.citation.api.CitationCollectionOrder))
-		*/
-		protected void deleteCitationCollectionOrder(CitationCollectionOrder citationCollectionOrder)
-		{
-			String statement = "delete from " + m_collectionOrderTableName + " where (" + m_collectionTableId + " = ? AND " +
-					"LOCATION = ? AND SECTION_TYPE = ? AND VALUE = ? )";
-
-			Object fields[] = new Object[4];
-			fields[0] = citationCollectionOrder.getCollectionId();
-			fields[1] = citationCollectionOrder.getLocation();
-			fields[2] = citationCollectionOrder.getSectiontype();
-			fields[3] = citationCollectionOrder.getValue();
-
-			boolean ok = m_sqlService.dbWrite(statement, fields);
 		}
 
 		/* (non-Javadoc)
@@ -1814,7 +1751,7 @@ public class DbCitationService extends BaseCitationService
             }
             catch (SQLException e)
             {
-	            log.debug("TripleReader: problem reading triple from result: citationId(" + citationId + ") name(" + name + ") value(" + value + ")");
+	            M_log.debug("TripleReader: problem reading triple from result: citationId(" + citationId + ") name(" + name + ") value(" + value + ")");
 	            return null;
             }
 	        return triple;
@@ -1849,7 +1786,7 @@ public class DbCitationService extends BaseCitationService
 			}
 			catch (SQLException e)
 			{
-				log.warn("CitationCollectionOrderReader: problem reading CitationCollectionOrder from result: collectionId(" + collectionId + ") location(" + location
+				M_log.warn("CitationCollectionOrderReader: problem reading CitationCollectionOrder from result: collectionId(" + collectionId + ") location(" + location
 						+ ") sectionType(" + sectionType + ") value(" + value + ")");
 				return null;
 			}
@@ -1862,6 +1799,8 @@ public class DbCitationService extends BaseCitationService
 	private static final int AUTO_TRUE			= 2;
 	/* Connection management: Original auto-commit state (unknown, on, off) */
 	private static final int AUTO_UNKNOWN		= 1;
+	/** Our logger. */
+	private static Logger M_log = LoggerFactory.getLogger(DbCitationService.class);
 	protected static final Pattern MULTIVALUED_PATTERN = Pattern.compile("^(.*)\\t(\\d+)$");
 	
 	protected static final String PROP_SORT_ORDER = "sakai:sort_order";
@@ -1921,14 +1860,14 @@ public class DbCitationService extends BaseCitationService
 			if (m_autoDdl)
 			{
 				m_sqlService.ddl(this.getClass().getClassLoader(), "sakai_citation");
-				log.info("init(): tables: " + m_collectionTableName + ", " + m_citationTableName + ", " + m_schemaTableName + ", " + m_schemaFieldTableName);
+				M_log.info("init(): tables: " + m_collectionTableName + ", " + m_citationTableName + ", " + m_schemaTableName + ", " + m_schemaFieldTableName);
 			}
 
 			super.init();
 		}
 		catch (Throwable t)
 		{
-			log.warn("init(): ", t);
+			M_log.warn("init(): ", t);
 		}
 
 	}	// init
@@ -1999,7 +1938,7 @@ public class DbCitationService extends BaseCitationService
 		}
 		catch (SQLException exception)
 		{
-			log.warn("restoreAutoCommit: " + exception);
+			M_log.warn("restoreAutoCommit: " + exception);
 			return AUTO_UNKNOWN;
 		}
 	}
@@ -2028,13 +1967,13 @@ public class DbCitationService extends BaseCitationService
 					break;
 
 				default:
-					log.warn("restoreAutoCommit: unknown commit type: " + wasCommit);
+					M_log.warn("restoreAutoCommit: unknown commit type: " + wasCommit);
 					break;
 			}
 		}
 		catch (Throwable throwable)
 		{
-			log.warn("restoreAutoCommit: " + throwable);
+			M_log.warn("restoreAutoCommit: " + throwable);
 		}
 	}
 

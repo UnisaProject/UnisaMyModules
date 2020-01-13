@@ -40,8 +40,6 @@ import org.sakaiproject.user.api.UserNotDefinedException;
  */
 public class UserMetadataType extends MetadataType<User>
 {
-
-	private static final long serialVersionUID = 1L;
 	private static UserDirectoryService userDirectoryService;
 	private static SiteService siteService;
 

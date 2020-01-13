@@ -35,11 +35,11 @@
       <head><%= request.getAttribute("html.head") %>
       <title><h:outputText value="#{authorMessages.item_display_author}"/></title>
 	  
-	  <samigo:script path="/../library/webjars/jquery/1.12.4/jquery.min.js"/>
-	  <samigo:script path="/js/jquery.dynamiclist.author.js"/>
-	  <samigo:script path="/js/selection.author.js"/>
+	  <script type="text/javascript" src="/library/webjars/jquery/1.11.3/jquery.min.js"></script>
+	  <script language='javascript' src='/samigo-app/js/jquery.dynamiclist.author.js'></script>
+	  <script language='javascript' src='/samigo-app/js/selection.author.js'></script>
 	  
-	  <samigo:stylesheet path="/css/imageQuestion.author.css"/>
+	  <link href="/samigo-app/css/imageQuestion.author.css" type="text/css" rel="stylesheet" media="all" />
 <%--
 <script type="text/JavaScript">
 <!--
@@ -227,7 +227,7 @@
   
  
     <div onmousedown="return false" id="imageContainer" class='authorImageContainer'>
-        <img id='img' src='<h:outputText value="#{itemauthor.currentItem.imageMapSrc}" />' />
+        <img id='img' src='<h:outputText value="#{itemauthor.currentItem.imageMapSrc}" />' style='visibility:hidden' />
     </div>
 
     <!-- Match FEEDBACK -->
@@ -316,7 +316,7 @@
         </div>
     </h:panelGroup>
 
-    <%@ include file="/jsf/author/item/tags.jsp" %>
+
 
 
 <p class="act">

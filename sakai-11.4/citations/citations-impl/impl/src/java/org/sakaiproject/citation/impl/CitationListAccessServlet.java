@@ -25,19 +25,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.citation.api.Citation;
 import org.sakaiproject.citation.api.CitationCollection;
 import org.sakaiproject.citation.api.CitationCollectionOrder;
@@ -48,15 +42,7 @@ import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.content.cover.ContentHostingService;
-import org.sakaiproject.entity.api.EntityAccessOverloadException;
-import org.sakaiproject.entity.api.EntityCopyrightException;
-import org.sakaiproject.entity.api.EntityNotDefinedException;
-import org.sakaiproject.entity.api.EntityPermissionException;
-import org.sakaiproject.entity.api.EntityPropertyNotDefinedException;
-import org.sakaiproject.entity.api.EntityPropertyTypeException;
-import org.sakaiproject.entity.api.HttpAccess;
-import org.sakaiproject.entity.api.Reference;
-import org.sakaiproject.entity.api.ResourceProperties;
+import org.sakaiproject.entity.api.*;
 import org.sakaiproject.event.api.Event;
 import org.sakaiproject.event.cover.EventTrackingService;
 import org.sakaiproject.exception.IdUnusedException;
@@ -70,13 +56,15 @@ import org.sakaiproject.util.Validator;
 /**
  * 
  */
-@Slf4j
 public class CitationListAccessServlet implements HttpAccess
 {
 	public static final String LIST_TEMPLATE = "/vm/citationList.vm";
 	
 	/** Messages, for the http access. */
 	protected static ResourceLoader rb = new ResourceLoader("citations");
+	
+	/** Our logger. */
+	private static Logger m_log = LoggerFactory.getLogger(CitationListAccessServlet.class);
 
 	private static final Collection<String> specialKeys = new HashSet<String>();
 	static {
@@ -201,7 +189,7 @@ public class CitationListAccessServlet implements HttpAccess
 					try {
 						res.sendError(HttpServletResponse.SC_BAD_REQUEST, rb.getString("export.none_selected"));
 					} catch (IOException e) {
-						log.warn("export-selected request received with not citations selected. citationCollectionId: {}", citationCollectionId);
+						m_log.warn("export-selected request received with not citations selected. citationCollectionId: " + citationCollectionId);
 					}
 
 					return;
@@ -223,7 +211,7 @@ public class CitationListAccessServlet implements HttpAccess
 					try {
 						res.sendError(HttpServletResponse.SC_NO_CONTENT, rb.getString("export.empty_collection"));
 					} catch (IOException e) {
-						log.warn("export-all request received for empty citation collection. citationCollectionId: {}", citationCollectionId);
+						m_log.warn("export-all request received for empty citation collection. citationCollectionId: " + citationCollectionId);
 					}
 					
 					return;
@@ -335,7 +323,7 @@ public class CitationListAccessServlet implements HttpAccess
 					+ "<link href=\"/library/skin/tool_base.css\" type=\"text/css\" rel=\"stylesheet\" media=\"all\" />\n"
 					+ "<link href=\"/library/skin/" + ServerConfigurationService.getString("skin.default") + "/tool.css\" type=\"text/css\" rel=\"stylesheet\" media=\"all\" />\n"
 					+ "<link href=\"/sakai-citations-tool/css/citations.css\" type=\"text/css\" rel=\"stylesheet\" media=\"all\" />\n"
-					+ "<script type=\"text/javascript\" src=\"/library/webjars/jquery/1.12.4/jquery.min.js\"></script>\n"
+					+ "<script type=\"text/javascript\" src=\"/library/webjars/jquery/1.11.3/jquery.min.js\"></script>\n"
 					+ "<script type=\"text/javascript\" src=\"/sakai-citations-tool/js/citationscript.js\"></script>\n"
 					+ "<script type=\"text/javascript\" src=\"/sakai-citations-tool/js/view_nested_citations.js\"></script>\n"
 					+ "<script type=\"text/javascript\" src=\"/sakai-citations-tool/js/jquery.googlebooks.thumbnails.js\"></script>\n"
@@ -351,9 +339,9 @@ public class CitationListAccessServlet implements HttpAccess
     		try {
     			displayDate = new SimpleDateFormat("dd/MM/yyyy", rb.getLocale()).format(properties.getDateProperty(ResourceProperties.PROP_MODIFIED_DATE));
     		} catch (EntityPropertyNotDefinedException e) {
-    			log.warn("CitationListAccessServlet.handleViewRequest() : Property name requested is not defined - for contentCollectionId {}", contentCollectionId);
+    			m_log.warn("CitationListAccessServlet.handleViewRequest() : Property name requested is not defined - for contentCollectionId" + contentCollectionId);
     		} catch (EntityPropertyTypeException e) {
-    			log.warn("CitationListAccessServlet.handleViewRequest() : Named property found does not match the type of access requested - for contentCollectionId {}", contentCollectionId);
+    			m_log.warn("CitationListAccessServlet.handleViewRequest() : Named property found does not match the type of access requested - for contentCollectionId" + contentCollectionId);
     		}
 
 		out.println("<div class=\"portletBody\">\n\t<div class=\"listWidth citationList\">");
@@ -470,7 +458,7 @@ public class CitationListAccessServlet implements HttpAccess
 
 			Schema schema = citation.getSchema();
 			if(schema == null)	{
-				log.warn("CLAS.handleViewRequest() Schema is null: {}", citation);
+				m_log.warn("CLAS.handleViewRequest() Schema is null: " + citation);
 				continue;
 			}
 			List fields = schema.getFields();
@@ -544,13 +532,13 @@ public class CitationListAccessServlet implements HttpAccess
 							urlLabel = ( citation.getCustomUrlLabel( urlId ) == null ||
 									citation.getCustomUrlLabel( urlId ).trim().equals("") ) ? rb.getString( "nullUrlLabel.view" ) : Validator.escapeHtml(citation.getCustomUrlLabel(urlId));
 						} catch (IdUnusedException e) {
-							log.error(e.getMessage(), e);
+							e.printStackTrace();
 						}
 
 						try {
 							out.println("\t\t\t\t<a href=\"" + Validator.escapeHtml(citation.getCustomUrl( urlId )) + "\" target=\"_blank\">" + urlLabel + "</a>");
 						} catch (IdUnusedException e) {
-							log.error(e.getMessage(), e);
+							e.printStackTrace();
 						}
 						out.println("\t\t\t\t |");
 					}

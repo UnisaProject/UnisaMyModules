@@ -23,7 +23,6 @@ package org.sakaiproject.tool.assessment.ui.bean.delivery;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.tool.assessment.data.dao.grading.ItemGradingData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AnswerIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTextIfc;
@@ -32,8 +31,7 @@ import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTextIfc;
  * @author kimhuang@rutgers.edu
  * $Id$
  */
-@Slf4j
- public class MatrixSurveyBean
+public class MatrixSurveyBean
 {
 
 	private ItemContentsBean parent;
@@ -100,6 +98,9 @@ import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTextIfc;
   public void setResponseId(String newresp)
   {
 
+	//System.out.print("\nkim debug: MatrixSurveyBean:setResponse: newresp: " +newresp+"\n");
+	//System.out.print("\nkim debug: MatrixSurveyBean: setResponse: ItemText : " + itemText.getText());
+    //System.out.print("\nkim debug: MatrixSurveyBean:setResponse:setPublishedItemTextId:itemText.getId()\n"+itemText.getId()+"\n");
     responseId = newresp;
     if (newresp != null)
     {
@@ -112,8 +113,18 @@ import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTextIfc;
     			items.remove(i);
     		}
     	}
-
-		// 2. add the new selection to the list
+/*
+    	//debugging purpose
+    	Iterator iter = parent.getItemGradingDataArray().iterator();
+    	while(iter.hasNext())
+    	{
+    		ItemGradingData gradingData = (ItemGradingData) iter.next();
+    		System.out.print("\n kim debug: MatrixSurveyBean.java- traversing gradingData.ItemId:"+ 
+    				gradingData.getPublishedItemId()+" ItemTextId:"+ 
+    				gradingData.getPublishedItemTextId() +" AnswerId: "+ gradingData.getPublishedAnswerId()+"\n");
+    	}
+    	*/
+    	// 2. add the new selection to the list
     	if (data ==null)
             data = new ItemGradingData();
     	
@@ -121,12 +132,24 @@ import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTextIfc;
         data.setPublishedItemTextId(itemText.getId());
         data.setPublishedAnswerId(new Long(newresp));
         
-        log.debug("After setting the data>>ItemId>>itemTextId+newresp "+ data.getPublishedItemId()+data.getPublishedItemTextId()+data.getPublishedAnswerId()+"\n");
+        //System.out.print("\n matrixSurveyBean.java: after setting the data>>ItemId>>itemTextId+newresp "+ data.getPublishedItemId()+data.getPublishedItemTextId()+data.getPublishedAnswerId()+"\n");
     	items = parent.getItemGradingDataArray();
     	items.add(data);
     	parent.setItemGradingDataArray(items);
-
+    	
+//debugging purpose
+    	/*
+    	iter = parent.getItemGradingDataArray().iterator();
+    	while(iter.hasNext())
+    	{
+    		ItemGradingData gradingData = (ItemGradingData) iter.next();
+    		System.out.print("\n kim debug2: ItemGradingDataArray: gradingData.ItemId: " + gradingData.getPublishedItemId());
+    		System.out.print("\n kim debug2: ItemGradingDataArray: gradingData.ItemTextId: " + gradingData.getPublishedItemTextId());
+    		System.out.print("\n kim debug2: ItemGradingDataArray: gradingData.AnswerId: " + gradingData.getPublishedAnswerId());
+    	}
+    	*/
     }
+    	
     }
 
 public void setResponseFromCleanRadioButton() {

@@ -34,24 +34,21 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.Vector;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.entity.api.ResourcePropertiesEdit;
 import org.sakaiproject.event.cover.NotificationService;
 import org.sakaiproject.exception.IdUnusedException;
-import org.sakaiproject.portal.util.PortalUtils;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService.SelectionType;
 import org.sakaiproject.site.api.SiteService.SortType;
@@ -64,19 +61,23 @@ import org.sakaiproject.user.api.PreferencesService;
 import org.sakaiproject.user.api.UserNotificationPreferencesRegistration;
 import org.sakaiproject.user.api.UserNotificationPreferencesRegistrationService;
 import org.sakaiproject.user.cover.UserDirectoryService;
-import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.ResourceLoader;
+import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.Web;
 
 /**
  * UserPrefsTool is the Sakai end-user tool to view and edit one's preferences.
  */
-@Slf4j
 public class UserPrefsTool
 {
+	/** Our log (commons). */
+	private static final Logger LOG = LoggerFactory.getLogger(UserPrefsTool.class);
 
 	/** * Resource bundle messages */
 	ResourceLoader msgs = new ResourceLoader("user-tool-prefs");
+
+	/** The string that Charon uses for preferences. */
+	private static final String CHARON_PREFS = "sakai:portal:sitenav";
 
 	/** The string to get whether privacy status should be visible */
 	private static final String ENABLE_PRIVACY_STATUS = "enable.privacy.status";
@@ -225,7 +226,7 @@ public class UserPrefsTool
 
 	private List prefOrderItems = new ArrayList();
 
-	private List<SelectItem> prefTimeZones = new ArrayList<>();
+	private List prefTimeZones = new ArrayList();
 
 	private List<SelectItem> prefLocales = new ArrayList<SelectItem>();
 
@@ -242,7 +243,7 @@ public class UserPrefsTool
 
 	private String[] tablist;
 
-	private int noti_selection, tab_selection, timezone_selection, language_selection, privacy_selection, hidden_selection, editor_selection, j;
+	private int noti_selection, tab_selection, timezone_selection, language_selection, privacy_selection, hidden_selection, j;
 
 	private String hiddenSitesInput = null;
 
@@ -252,7 +253,6 @@ public class UserPrefsTool
 	private String Language="prefs_lang_title";
 	private String Privacy="prefs_privacy_title";
 	private String Hidden="prefs_hidden_title";
-	private String Editor="prefs_editor_title";
 	
 	private boolean refreshMode=false;
 
@@ -262,15 +262,10 @@ public class UserPrefsTool
 
 	protected final static String TAB_LABEL_PREF = "tab:label";
 
-	protected final static String EDITOR_TYPE = "editor:type";
-
 	protected boolean isNewUser = false;
 
 	// user's currently selected time zone
 	private TimeZone m_timeZone = null;
-
-	// user's currently selected editor type 
-	private String m_editorType = null;
 
 	// user's currently selected regional language locale
 	private Locale m_locale = null;
@@ -311,9 +306,9 @@ public class UserPrefsTool
 	 */
 	public void setPrefExcludeItems(List prefExcludeItems)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setPrefExcludeItems(List " + prefExcludeItems + ")");
+			LOG.debug("setPrefExcludeItems(List " + prefExcludeItems + ")");
 		}
 
 		this.prefExcludeItems = prefExcludeItems;
@@ -333,9 +328,9 @@ public class UserPrefsTool
 	 */
 	public void setPrefOrderItems(List prefOrderItems)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setPrefOrderItems(List " + prefOrderItems + ")");
+			LOG.debug("setPrefOrderItems(List " + prefOrderItems + ")");
 		}
 
 		this.prefOrderItems = prefOrderItems;
@@ -378,23 +373,14 @@ public class UserPrefsTool
 	/**
 	 * @return Returns the prefTimeZones.
 	 */
-	public List<SelectItem> getPrefTimeZones()
+	public List getPrefTimeZones()
 	{
 		if (prefTimeZones.size() == 0)
 		{
 			String[] timeZoneArray = TimeZone.getAvailableIDs();
 			Arrays.sort(timeZoneArray);
-			for (int i = 0; i < timeZoneArray.length; i++) {
-				String tzt = timeZoneArray[i];
-				if (StringUtils.contains(tzt, '/') && StringUtils.indexOf(tzt, "SystemV/") != 0) {
-					String id = tzt;
-					String name = tzt;
-					if (StringUtils.contains(tzt, '_')) {
-						name = StringUtils.replace(tzt, "_", " ");
-					}
-					prefTimeZones.add(new SelectItem(id, name));
-				}
-			}
+			for (int i = 0; i < timeZoneArray.length; i++)
+				prefTimeZones.add(new SelectItem(timeZoneArray[i], timeZoneArray[i]));
 		}
 
 		return prefTimeZones;
@@ -404,11 +390,11 @@ public class UserPrefsTool
 	 * @param prefTimeZones
 	 *        The prefTimeZones to set.
 	 */
-	public void setPrefTimeZones(List<SelectItem> prefTimeZones)
+	public void setPrefTimeZones(List prefTimeZones)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setPrefTimeZones(List " + prefTimeZones + ")");
+			LOG.debug("setPrefTimeZones(List " + prefTimeZones + ")");
 		}
 
 		this.prefTimeZones = prefTimeZones;
@@ -441,9 +427,9 @@ public class UserPrefsTool
 	 */
 	public void setPrefLocales(List prefLocales)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setPrefLocales(List " + prefLocales + ")");
+			LOG.debug("setPrefLocales(List " + prefLocales + ")");
 		}
 
 		this.prefLocales = prefLocales;
@@ -463,9 +449,9 @@ public class UserPrefsTool
 	 */
 	public void setSelectedExcludeItems(String[] selectedExcludeItems)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setSelectedExcludeItems(String[] " + Arrays.toString(selectedExcludeItems) + ")");
+			LOG.debug("setSelectedExcludeItems(String[] " + Arrays.toString(selectedExcludeItems) + ")");
 		}
 
 		this.selectedExcludeItems = selectedExcludeItems;
@@ -485,9 +471,9 @@ public class UserPrefsTool
 	 */
 	public void setSelectedOrderItems(String[] selectedOrderItems)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setSelectedOrderItems(String[] " + Arrays.toString(selectedOrderItems) + ")");
+			LOG.debug("setSelectedOrderItems(String[] " + Arrays.toString(selectedOrderItems) + ")");
 		}
 
 		this.selectedOrderItems = selectedOrderItems;
@@ -513,26 +499,6 @@ public class UserPrefsTool
 	}
 
 	/**
-	 * @return Returns the user's selected Editor Type
-	 */
-	public String getSelectedEditorType()
-	{
-		if (m_editorType != null) return m_editorType;
-
-		Preferences prefs = (PreferencesEdit) m_preferencesService.getPreferences(getUserId());
-		ResourceProperties props = prefs.getProperties(PreferencesService.EDITOR_PREFS_KEY);
-		String editorType = props.getProperty(PreferencesService.EDITOR_PREFS_TYPE);
-
-		if (hasValue(editorType))
-			m_editorType = editorType;
-		else
-			m_editorType = "auto";
-
-		return m_editorType;
-	}
-
-
-	/**
 	 * @param selectedTimeZone
 	 *        The selectedTimeZone to set.
 	 */
@@ -541,21 +507,8 @@ public class UserPrefsTool
 		if (selectedTimeZone != null)
 			m_timeZone = TimeZone.getTimeZone(selectedTimeZone);
 		else
-			log.warn(this + "setSelctedTimeZone() has null TimeZone");
+			LOG.warn(this + "setSelctedTimeZone() has null TimeZone");
 	}
-
-	/**
-	 * @param selectedTimeZone
-	 *        The selectedTimeZone to set.
-	 */
-	public void setSelectedEditorType(String selectedEditorType)
-	{
-		if (selectedEditorType != null)
-			m_editorType = selectedEditorType;
-		else
-			log.warn(this + "setSelectedEditorType() has null Editor");
-	}
-
 
 	/**
 	 * @return Returns the user's selected Locale ID
@@ -620,9 +573,9 @@ public class UserPrefsTool
 	 */
 	public void setUserId(String userId)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setUserId(String " + userId + ")");
+			LOG.debug("setUserId(String " + userId + ")");
 		}
 		this.userId = userId;
 	}
@@ -633,9 +586,9 @@ public class UserPrefsTool
 	 */
 	public void setPreferencesService(PreferencesService mgr)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setPreferencesService(PreferencesService " + mgr + ")");
+			LOG.debug("setPreferencesService(PreferencesService " + mgr + ")");
 		}
 
 		m_preferencesService = mgr;
@@ -643,9 +596,9 @@ public class UserPrefsTool
 
 	public void setUserNotificationPreferencesRegistrationService(
 			UserNotificationPreferencesRegistrationService userNotificationPreferencesRegistrationService) {
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setUserNotificationPreferencesRegistrationService(UserNotificationPreferencesRegistrationService " + userNotificationPreferencesRegistrationService + ")");
+			LOG.debug("setUserNotificationPreferencesRegistrationService(UserNotificationPreferencesRegistrationService " + userNotificationPreferencesRegistrationService + ")");
 		}
 		m_userNotificationPreferencesRegistrationService = userNotificationPreferencesRegistrationService;
 	}
@@ -656,9 +609,9 @@ public class UserPrefsTool
 	 */
 	public void setSessionManager(SessionManager mgr)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setSessionManager(SessionManager " + mgr + ")");
+			LOG.debug("setSessionManager(SessionManager " + mgr + ")");
 		}
 
 		m_sessionManager = mgr;
@@ -696,8 +649,8 @@ public class UserPrefsTool
 
 		//To indicate that it is in the refresh mode
 		refreshMode=true;
-		String tabOrder = ServerConfigurationService.getString("preference.pages", "prefs_noti_title, prefs_timezone_title, prefs_lang_title, prefs_hidden_title, prefs_hidden_title, prefs_editor_title");
-		log.debug("Setting preference.pages as " + tabOrder);
+		String tabOrder = ServerConfigurationService.getString("preference.pages", "prefs_noti_title, prefs_timezone_title, prefs_lang_title, prefs_hidden_title, prefs_hidden_title");
+		LOG.debug("Setting preference.pages as " + tabOrder);
 
 		tablist=tabOrder.split(",");
 
@@ -709,12 +662,11 @@ public class UserPrefsTool
 			else if (tablist[i].equals(Language)) language_selection=i+1;
 			else if (tablist[i].equals(Privacy)) privacy_selection=i+1;
 			else if (tablist[i].equals(Hidden)) hidden_selection=i+1;
-			else if (tablist[i].equals(Editor)) editor_selection=i+1;
-			else log.warn(tablist[i] + " is not valid!!! Please fix preference.pages property in sakai.properties");
+			else LOG.warn(tablist[i] + " is not valid!!! Please fix preference.pages property in sakai.properties");
 		}
 
 		initNotificationStructures();
-		log.debug("new UserPrefsTool()");
+		LOG.debug("new UserPrefsTool()");
 	}
 	
 	/**
@@ -783,17 +735,6 @@ public class UserPrefsTool
 		}
 		return hidden_selection;
 	}
-	
-
-	public int getEditor_selection()
-	{
-		//Loading the data for notification in the refresh mode
-		if (editor_selection==1 && refreshMode==true)
-		{
-			processActionHiddenFrmEdit();
-		}
-		return editor_selection;
-	}
 
 	public String getTabTitle()
 	{
@@ -808,20 +749,12 @@ public class UserPrefsTool
 	 * title (default behaviour)
 	 * 
 	 * @param site the site in question
-	 * @param truncate whether or not to truncate the site title for display purposes
 	 * @return the site or section title
 	 */
-	public static String getUserSpecificSiteTitle( Site site, boolean truncate )
+	public static String getUserSpecificSiteTitle( Site site )
 	{
 		String retVal = SiteService.getUserSpecificSiteTitle( site, UserDirectoryService.getCurrentUser().getId() );
-		if (truncate)
-		{
-			return Web.escapeHtml( FormattedText.makeShortenedText( retVal, null, null, null ) );
-		}
-		else
-		{
-			return Web.escapeHtml( retVal );
-		}
+		return Web.escapeHtml( FormattedText.makeShortenedText( retVal, null, null, null ) );
 	}
 
 	/**
@@ -831,7 +764,7 @@ public class UserPrefsTool
 	 */
 	public String processActionCancel()
 	{
-		log.debug("processActionCancel()");
+		LOG.debug("processActionCancel()");
 
 		prefTabLabel = null; // reset to retrieve original prefs
 
@@ -849,7 +782,7 @@ public class UserPrefsTool
 	 */
 	public String processActionNotiFrmEdit()
 	{
-		log.debug("processActionNotiFrmEdit()");
+		LOG.debug("processActionNotiFrmEdit()");
 		refreshMode=false;
 		cancelEdit();
 		// navigation page data are loaded through getter method as navigation is the default page for 'sakai.preferences' tool.
@@ -863,27 +796,12 @@ public class UserPrefsTool
 	 */
 	public String processActionTZFrmEdit()
 	{
-		log.debug("processActionTZFrmEdit()");
+		LOG.debug("processActionTZFrmEdit()");
 
 		refreshMode=false;
 		cancelEdit();
 		// navigation page data are loaded through getter method as navigation is the default page for 'sakai.preferences' tool.
 		return "timezone";
-	}
-	
-	/**
-	 * Process the cancel command from the edit view.
-	 * 
-	 * @return navigation outcome to editor page (list)
-	 */
-	public String processActionEditorFrmEdit()
-	{
-		log.debug("processActionEditorFrmEdit()");
-
-		refreshMode=false;
-		cancelEdit();
-		// navigation page data are loaded through getter method as navigation is the default page for 'sakai.preferences' tool.
-		return "editor";
 	}
 
 	/**
@@ -893,7 +811,7 @@ public class UserPrefsTool
 	 */
 	public String processActionLocFrmEdit()
 	{
-		log.debug("processActionLocFrmEdit()");
+		LOG.debug("processActionLocFrmEdit()");
 
 		refreshMode=false;
 		cancelEdit();
@@ -908,7 +826,7 @@ public class UserPrefsTool
 	 */
 	public String processActionPrivFrmEdit()
 	{
-		log.debug("processActionPrivFrmEdit()");
+		LOG.debug("processActionPrivFrmEdit()");
 
 		cancelEdit();
 		// navigation page data are loaded through getter method as navigation is the default page for 'sakai.preferences' tool.
@@ -917,7 +835,7 @@ public class UserPrefsTool
 
 	public String processActionHiddenFrmEdit()
 	{
-		log.debug("processActionHiddenFrmEdit()");
+		LOG.debug("processActionHiddenFrmEdit()");
 
 		cancelEdit();
 		// navigation page data are loaded through getter method as navigation is the default page for 'sakai.preferences' tool.
@@ -931,7 +849,7 @@ public class UserPrefsTool
 	 */
 	public String processActionRefreshFrmEdit()
 	{
-		log.debug("processActionRefreshFrmEdit()");
+		LOG.debug("processActionRefreshFrmEdit()");
 
 		// is required as user editing is set on while entering to tab customization page
 		cancelEdit();
@@ -945,7 +863,7 @@ public class UserPrefsTool
 	 */
 	protected void cancelEdit()
 	{
-		log.debug("cancelEdit()");
+		LOG.debug("cancelEdit()");
 
 		// cleanup
 		m_stuff = null;
@@ -959,7 +877,6 @@ public class UserPrefsTool
 		locUpdated = false;
 		refreshUpdated = false;
 		hiddenUpdated = false;
-		editorUpdated = false;
 	}
 
 	/**
@@ -969,9 +886,9 @@ public class UserPrefsTool
 	 */
 	private SelectItem removeItems(String value, List items, String addtype, String removetype)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("removeItems(String " + value + ", List " + items + ", String " + addtype + ", String " + removetype + ")");
+			LOG.debug("removeItems(String " + value + ", List " + items + ", String " + addtype + ", String " + removetype + ")");
 		}
 
 		SelectItem result = null;
@@ -992,7 +909,7 @@ public class UserPrefsTool
 	 */
 	protected void setUserEditingOn()
 	{
-		log.debug("setUserEditingOn()");
+		LOG.debug("setUserEditingOn()");
 
 		try
 		{
@@ -1021,7 +938,7 @@ public class UserPrefsTool
 	 */
 	protected void saveEdit()
 	{
-		log.debug("saveEdit()");
+		LOG.debug("saveEdit()");
 
 		// user editing is required as commit() disable isActive() flag
 		setUserEditingOn();
@@ -1068,9 +985,9 @@ public class UserPrefsTool
 	 */
 	protected boolean hasValue(String eval)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("hasValue(String " + eval + ")");
+			LOG.debug("hasValue(String " + eval + ")");
 		}
 
 		if (eval != null && !eval.trim().equals(""))
@@ -1095,9 +1012,9 @@ public class UserPrefsTool
 	 */
 	protected int indexOf(String value, List siteList)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("indexOf(String " + value + ", List " + siteList + ")");
+			LOG.debug("indexOf(String " + value + ", List " + siteList + ")");
 		}
 
 		for (int i = 0; i < siteList.size(); i++)
@@ -1115,20 +1032,83 @@ public class UserPrefsTool
 	
 	private DecoratedNotificationPreference currentDecoratedNotificationPreference = null;
 	
-	@Getter @Setter
 	protected boolean notiUpdated = false;
 
-	@Getter @Setter
 	protected boolean tzUpdated = false;
 
-	@Getter @Setter
 	protected boolean locUpdated = false;
 
-	@Getter @Setter
-	protected boolean hiddenUpdated = false;
+	// ///////////////////////////////// GETTER AND SETTER ///////////////////////////////////
+	// TODO chec for any preprocessor for handling request for first time. This can simplify getter() methods as below
 	
-	@Getter @Setter
-	protected boolean editorUpdated = false;
+	/**
+	 * @return Returns the notiUpdated.
+	 */
+	public boolean getNotiUpdated()
+	{
+		return notiUpdated;
+	}
+
+	/**
+	 * @param notiUpdated
+	 *        The notiUpdated to set.
+	 */
+	public void setNotiUpdated(boolean notiUpdated)
+	{
+		this.notiUpdated = notiUpdated;
+	}
+
+	/**
+	 * @return Returns the tzUpdated.
+	 */
+	public boolean getTzUpdated()
+	{
+		return tzUpdated;
+	}
+
+	/**
+	 * @param notiUpdated
+	 *        The tzUpdated to set.
+	 */
+	public void setTzUpdated(boolean tzUpdated)
+	{
+		this.tzUpdated = tzUpdated;
+	}
+
+	/**
+	 * @return Returns the tzUpdated.
+	 */
+	public boolean getLocUpdated()
+	{
+		return locUpdated;
+	}
+
+	/**
+	 * @param notiUpdated
+	 *        The locUpdated to set.
+	 */
+	public void setLocUpdated(boolean locUpdated)
+	{
+		this.locUpdated = locUpdated;
+	}
+
+	/**
+	 * @return Returns the hiddenUpdated.
+	 */
+	public boolean getHiddenUpdated()
+	{
+		return hiddenUpdated;
+	}
+
+	/**
+	 * @param hiddenUpdated
+	 *        The hiddenUpdated to set.
+	 */
+	public void setHiddenUpdated(boolean hiddenUpdated)
+	{
+		this.hiddenUpdated = hiddenUpdated;
+	}
+
 
 	// ///////////////////////////////////////NOTIFICATION ACTION - copied from NotificationprefsAction.java////////
 	// TODO - clean up method call. These are basically copied from legacy legacy implementations.
@@ -1139,7 +1119,7 @@ public class UserPrefsTool
 	 */
 	public String processActionNotiSave()
 	{
-		log.debug("processActionNotiSave()");
+		LOG.debug("processActionNotiSave()");
 
 		// get an edit
 		setUserEditingOn();
@@ -1171,7 +1151,7 @@ public class UserPrefsTool
 	 */
 	public String processActionNotiCancel()
 	{
-		log.debug("processActionNotiCancel()");
+		LOG.debug("processActionNotiCancel()");
 		initRegisteredNotificationItems();
 		return "noti";
 	}
@@ -1190,28 +1170,9 @@ public class UserPrefsTool
 
 		TimeService.clearLocalTimeZone(getUserId()); // clear user's cached timezone
 
-		tzUpdated = true; // set for display of text message
+		tzUpdated = true; // set for display of text massage
 		return "timezone";
 	}
-	/**
-	 * 
-	 * Processes the save command from the edit vieprefShowEditorLabelOptionw
-	 * @return navigation outcome to editor page
-	 */
-	
-	public String processActionEditorSave() 
-	{
-		setUserEditingOn();
-		ResourcePropertiesEdit props = m_edit.getPropertiesEdit(PreferencesService.EDITOR_PREFS_KEY);
-		props.addProperty(PreferencesService.EDITOR_PREFS_TYPE, m_editorType);
-		m_preferencesService.commit(m_edit);
-
-
-		
-		editorUpdated = true; // set for display of text message
-		return "editor";
-	}
-	
 
 	/**
 	 * process timezone cancel
@@ -1220,29 +1181,13 @@ public class UserPrefsTool
 	 */
 	public String processActionTzCancel()
 	{
-		log.debug("processActionTzCancel()");
+		LOG.debug("processActionTzCancel()");
 
 		// restore original time zone
 		m_timeZone = null;
 		getSelectedTimeZone();
 
 		return "timezone";
-	}
-	
-	/**
-	 * process editor cancel
-	 * 
-	 * @return navigation outcome to editor page
-	 */
-	public String processActionEditorCancel()
-	{
-		log.debug("processActionEditorCancel()");
-		
-		// restore original editor
-		m_editorType = null;
-		getSelectedEditorType();
-
-		return "editor";
 	}
 
 	/**
@@ -1266,7 +1211,7 @@ public class UserPrefsTool
 		// reset notification items with the locale
 		initRegisteredNotificationItems();
 
-		locUpdated = true; // set for display of text message
+		locUpdated = true; // set for display of text massage
 		return "locale";
 	}
 
@@ -1277,7 +1222,7 @@ public class UserPrefsTool
 	 */
 	public String processActionLocCancel()
 	{
-		log.debug("processActionLocCancel()");
+		LOG.debug("processActionLocCancel()");
 
 		// restore original locale
 		m_locale = null;
@@ -1293,7 +1238,7 @@ public class UserPrefsTool
 	 */
 	public String processActionRefreshFrmNoti()
 	{
-		log.debug("processActionRefreshFrmNoti()");
+		LOG.debug("processActionRefreshFrmNoti()");
 
 		loadRefreshData();
 		return "refresh";
@@ -1315,9 +1260,9 @@ public class UserPrefsTool
 	 */
 	protected void readTypePrefs(String type, String prefix, PreferencesEdit edit, String data)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("readTypePrefs(String " + type + ", String " + prefix + ", PreferencesEdit " + edit + ", String " + data
+			LOG.debug("readTypePrefs(String " + type + ", String " + prefix + ", PreferencesEdit " + edit + ", String " + data
 					+ ")");
 		}
 
@@ -1343,9 +1288,9 @@ public class UserPrefsTool
 	 */
 	protected void readOverrideTypePrefs(String type, String prefix, PreferencesEdit edit, List<SiteOverrideBean> data)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("readOverrideTypePrefs(String " + type + ", String " + prefix + ", PreferencesEdit " + edit + ", String " + data
+			LOG.debug("readOverrideTypePrefs(String " + type + ", String " + prefix + ", PreferencesEdit " + edit + ", String " + data
 					+ ")");
 		}
 		
@@ -1380,9 +1325,9 @@ public class UserPrefsTool
 	 */
 	protected void readOverrideTypePrefs(String type, PreferencesEdit edit, List<SiteOverrideBean> data)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("readOverrideTypePrefs(String " + type + ", PreferencesEdit " + edit + ", String " + data
+			LOG.debug("readOverrideTypePrefs(String " + type + ", PreferencesEdit " + edit + ", String " + data
 					+ ")");
 		}
 
@@ -1410,9 +1355,9 @@ public class UserPrefsTool
 	 */
 	protected void deleteOverrideTypePrefs(String type, String prefix, PreferencesEdit edit, List<String> data)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("deleteOverrideTypePrefs(String " + type + ", String " + prefix + ", PreferencesEdit " + edit + ", String " + data
+			LOG.debug("deleteOverrideTypePrefs(String " + type + ", String " + prefix + ", PreferencesEdit " + edit + ", String " + data
 					+ ")");
 		}
 
@@ -1439,9 +1384,9 @@ public class UserPrefsTool
 	 */
 	protected String buildTypePrefsContext(String type, String prefix, String context, Preferences prefs)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("buildTypePrefsContext(String " + type + ", String " + prefix + ", String " + context + ", Preferences "
+			LOG.debug("buildTypePrefsContext(String " + type + ", String " + prefix + ", String " + context + ", Preferences "
 					+ prefs + ")");
 		}
 
@@ -1465,9 +1410,9 @@ public class UserPrefsTool
 	 */
 	protected List<SiteOverrideBean> buildOverrideTypePrefsContext(String type, String prefix, String context, Preferences prefs)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("buildOverrideTypePrefsContext(String " + type + ", String " + prefix + ", String " + context + ", Preferences "
+			LOG.debug("buildOverrideTypePrefsContext(String " + type + ", String " + prefix + ", String " + context + ", Preferences "
 					+ prefs + ")");
 		}
 
@@ -1495,7 +1440,7 @@ public class UserPrefsTool
 	        return prefTabLabel;
 
 	    Preferences prefs = (PreferencesEdit) m_preferencesService.getPreferences(getUserId());
-	    ResourceProperties props = prefs.getProperties(PreferencesService.SITENAV_PREFS_KEY);
+	    ResourceProperties props = prefs.getProperties(CHARON_PREFS);
 	    prefTabLabel = props.getProperty(TAB_LABEL_PREF);
 
 	    if ( prefTabLabel == null )
@@ -1543,9 +1488,9 @@ public class UserPrefsTool
 	 */
 	public void setSelectedRefreshItem(String selectedRefreshItem)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setSelectedRefreshItem(String " + selectedRefreshItem + ")");
+			LOG.debug("setSelectedRefreshItem(String " + selectedRefreshItem + ")");
 		}
 
 		this.selectedRefreshItem = selectedRefreshItem;
@@ -1558,7 +1503,7 @@ public class UserPrefsTool
 	 */
 	public String processActionRefreshCancel()
 	{
-		log.debug("processActionRefreshCancel()");
+		LOG.debug("processActionRefreshCancel()");
 
 		loadRefreshData();
 		return "refresh";
@@ -1571,7 +1516,7 @@ public class UserPrefsTool
 	 */
 	public String processActionNotiFrmRefresh()
 	{
-		log.debug("processActionNotiFrmRefresh()");
+		LOG.debug("processActionNotiFrmRefresh()");
 
 		return "noti";
 		//return "tab";
@@ -1583,7 +1528,7 @@ public class UserPrefsTool
 	 */
 	protected void loadRefreshData()
 	{
-		log.debug("loadRefreshData()");
+		LOG.debug("loadRefreshData()");
 
 		selectedRefreshItem = "";
 		refreshUpdated = false;
@@ -1616,9 +1561,9 @@ public class UserPrefsTool
 	 */
 	protected void setStringPref(String pref_base, String type, PreferencesEdit edit, String newval)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setStringPref(String " + pref_base + ", String " + type + ", PreferencesEdit " + edit + ", String " + newval
+			LOG.debug("setStringPref(String " + pref_base + ", String " + type + ", PreferencesEdit " + edit + ", String " + newval
 					+ ")");
 		}
 
@@ -1639,9 +1584,9 @@ public class UserPrefsTool
 	 */
 	protected String getStringPref(String pref_base, String type, Preferences prefs)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("getStringPref(String " + pref_base + ", String " + type + ", PreferencesEdit " + prefs + ")");
+			LOG.debug("getStringPref(String " + pref_base + ", String " + type + ", PreferencesEdit " + prefs + ")");
 		}
 
 		ResourceProperties props = prefs.getProperties(pref_base);
@@ -1689,12 +1634,12 @@ public class UserPrefsTool
 	}
 	
 	public List<DecoratedNotificationPreference> getRegisteredNotificationItems() {
-		log.debug("getRegisteredNotificationItems()");
+		LOG.debug("getRegisteredNotificationItems()");
 		return m_registereddNotificationItems;
 	}
 	
 	public void initRegisteredNotificationItems() {
-		log.debug("initRegisteredNotificationItems()");
+		LOG.debug("initRegisteredNotificationItems()");
 		m_registereddNotificationItems.clear();
 		for (UserNotificationPreferencesRegistration upr : m_userNotificationPreferencesRegistrationService.getRegisteredItems()) {
 
@@ -1821,7 +1766,7 @@ public class UserPrefsTool
 	 * @return
 	 */
 	public List<DecoratedNotificationPreference> getRegisteredNotificationItems(UserNotificationPreferencesRegistration upr) {
-		log.debug("getRegisteredNotificationItems(UserNotificationPreferencesRegistration)");
+		LOG.debug("getRegisteredNotificationItems(UserNotificationPreferencesRegistration)");
 		List<DecoratedNotificationPreference> selNotiItems = new ArrayList<DecoratedNotificationPreference>();
 		Preferences prefs = m_preferencesService.getPreferences(getUserId());
 		List<SiteOverrideBean> siteOverrides = new ArrayList<SiteOverrideBean>();
@@ -1846,7 +1791,7 @@ public class UserPrefsTool
 	}
 		
 	public List<String> getSelectedNotificationItemIds(DecoratedNotificationPreference dnp) {
-		log.debug("getSelectedNotificationItemIds(DecoratedNotificationPreference)");
+		LOG.debug("getSelectedNotificationItemIds(DecoratedNotificationPreference)");
 		List<String> result = new ArrayList<String>();
 		for (SiteOverrideBean sob : dnp.getSiteOverrides()) {
 				result.add(sob.siteId);
@@ -1864,7 +1809,7 @@ public class UserPrefsTool
 	}
 
 	private DecoratedNotificationPreference getDecoItemByKey(String key, List<DecoratedNotificationPreference> decoPreferences) {
-		log.debug("getDecoItemByKey(" + key + ")");
+		LOG.debug("getDecoItemByKey(" + key + ")");
 		for (DecoratedNotificationPreference dnp : decoPreferences) {
 			if (dnp.getKey().equalsIgnoreCase(key)) {
 				return dnp;
@@ -1873,7 +1818,7 @@ public class UserPrefsTool
 		return null;
 	}
 	private String getSelectedNotificationItemByKey(String key, List<DecoratedNotificationPreference> decoPreferences) {
-		log.debug("getSelectedNotificationItemByKey(" + key + ")");
+		LOG.debug("getSelectedNotificationItemByKey(" + key + ")");
 		DecoratedNotificationPreference dnp = getDecoItemByKey(key, decoPreferences);
 		if (dnp != null) {
 			return dnp.getSelectedOption();
@@ -1934,11 +1879,11 @@ public class UserPrefsTool
 		private Boolean expandOverride = null;
 		
 		public DecoratedNotificationPreference() { 
-			log.debug("DecoratedNotificationPreference()");
+			LOG.debug("DecoratedNotificationPreference()");
 		}
 		
 		public DecoratedNotificationPreference(UserNotificationPreferencesRegistration userNotificationPreferencesRegistration, List<SiteOverrideBean> siteOverrides) {
-			log.debug("DecoratedNotificationPreference(...)");
+			LOG.debug("DecoratedNotificationPreference(...)");
 			this.userNotificationPreferencesRegistration = userNotificationPreferencesRegistration;
 			this.key = userNotificationPreferencesRegistration.getType();
 			this.siteOverrides = siteOverrides;
@@ -2114,7 +2059,7 @@ public class UserPrefsTool
 		 */
 		private List<DecoratedSiteTypeBean> getFullSiteOverrideList(Map<String, List<DecoratedSiteBean>> siteTypeMap, 
 				Map<String, String> siteTypeKeyMap, List<String> expandedTypes) {
-			log.debug("getFullSiteOverrideList()");
+			LOG.debug("getFullSiteOverrideList()");
 			List<DecoratedSiteTypeBean> list = new ArrayList<DecoratedSiteTypeBean>();
 			
 			for (String keyText : siteTypeMap.keySet()) {
@@ -2136,7 +2081,7 @@ public class UserPrefsTool
 		 * @return
 		 */
 		public String processActionSiteOverrideSave() {
-			log.debug("processActionSiteOverrideSave()");
+			LOG.debug("processActionSiteOverrideSave()");
 			
 			// get an edit
 			setUserEditingOn();
@@ -2148,12 +2093,12 @@ public class UserPrefsTool
 				/** previously saved choices */
 				List<String> existingList = convertToStringList(getSiteOverrides());
 				
-				log.debug("processActionSiteOverrideSave().existingList: " + convertListToString(existingList));
+				LOG.debug("processActionSiteOverrideSave().existingList: " + convertListToString(existingList));
 				
 				for (DecoratedSiteTypeBean dstb : siteList) {
 					for (DecoratedSiteBean dsb : dstb.getSites()) {
 						String siteId = dsb.getSite().getId();
-						log.debug("processActionSiteOverrideSave().selected?: " +siteId + ": " + dsb.selected);
+						LOG.debug("processActionSiteOverrideSave().selected?: " +siteId + ": " + dsb.selected);
 						SiteOverrideBean sob = new SiteOverrideBean(siteId, Integer.toString(NotificationService.PREF_NONE));
 						if (dsb.selected && !existingList.contains(siteId)) {
 							toAdd.add(sob);
@@ -2166,8 +2111,8 @@ public class UserPrefsTool
 					}
 				}
 
-				log.debug("processActionSiteOverrideSave().toAdd: " + convertListToString(toAdd));
-				log.debug("processActionSiteOverrideSave().toDel: " + convertListToString(toDel));
+				LOG.debug("processActionSiteOverrideSave().toAdd: " + convertListToString(toAdd));
+				LOG.debug("processActionSiteOverrideSave().toDel: " + convertListToString(toDel));
 				//adds
 				readOverrideTypePrefs(userNotificationPreferencesRegistration.getType() + NotificationService.NOTI_OVERRIDE_EXTENSION, 
 						m_edit, toAdd);
@@ -2232,19 +2177,20 @@ public class UserPrefsTool
 		 * @return
 		 */
 		public String processActionSiteOverrideCancel() {
-			log.debug("processActionSiteOverrideCancel()");
+			LOG.debug("processActionSiteOverrideCancel()");
 			processRegisteredNotificationItems();
 			return "noti";
 		}
 	}
 		
+	protected boolean hiddenUpdated = false;
 
 	public String processHiddenSites()
 	{
 		setUserEditingOn();
 		if (m_edit != null) {
 			// Remove existing property
-			ResourcePropertiesEdit props = m_edit.getPropertiesEdit(PreferencesService.SITENAV_PREFS_KEY);
+			ResourcePropertiesEdit props = m_edit.getPropertiesEdit(CHARON_PREFS);
 
 			List currentFavoriteSites = props.getPropertyList(ORDER_SITE_LISTS);
 
@@ -2261,7 +2207,12 @@ public class UserPrefsTool
 
 			// Set favorites and hidden sites
 			setUserEditingOn();
-			props = m_edit.getPropertiesEdit(PreferencesService.SITENAV_PREFS_KEY);
+			props = m_edit.getPropertiesEdit(CHARON_PREFS);
+
+			// Any site now hidden should also be removed from favorites
+			for (String siteId : hiddenSitesInput.split(",")) {
+				currentFavoriteSites.remove(siteId);
+			}
 
 			for (Object siteId : currentFavoriteSites) {
 				props.addPropertyToList(ORDER_SITE_LISTS, (String)siteId);
@@ -2295,19 +2246,19 @@ public class UserPrefsTool
 		private boolean remove = false;
 		
 		public SiteOverrideBean() {
-			log.debug("SiteOverrideBean()");
+			LOG.debug("SiteOverrideBean()");
 		}
 		
 		public SiteOverrideBean(String siteId, String option) {
-			log.debug("SiteOverrideBean(String, String)");
+			LOG.debug("SiteOverrideBean(String, String)");
 			this.siteId = siteId;
 			this.option = option;
 			
 			try {
 				Site site = SiteService.getSite(siteId);
-				this.siteTitle = getUserSpecificSiteTitle(site, true);
+				this.siteTitle =site.getTitle();
 			} catch (IdUnusedException e) {
-				log.warn("Unable to get Site object for id: " + siteId, e);
+				LOG.warn("Unable to get Site object for id: " + siteId, e);
 			}
 		}
 		
@@ -2348,11 +2299,11 @@ public class UserPrefsTool
 		private boolean defaultOpen = false;
 		
 		public DecoratedSiteTypeBean() {
-			log.debug("DecoratedSiteTypeBean()");
+			LOG.debug("DecoratedSiteTypeBean()");
 		}
 		
 		public DecoratedSiteTypeBean(String typeKey, String typeText, List<DecoratedSiteBean> sites, boolean defaultOpen) {
-			log.debug("DecoratedSiteTypeBean(...)");
+			LOG.debug("DecoratedSiteTypeBean(...)");
 			this.setTypeKey(typeKey);
 			this.typeText = typeText;
 			this.sites = sites;
@@ -2360,7 +2311,7 @@ public class UserPrefsTool
 			this.defaultOpen = defaultOpen;
 			
 			for (DecoratedSiteBean dsb : sites) {
-				sitesAsSelects.add(new SelectItem(dsb.getSite().getId(), getUserSpecificSiteTitle(dsb.getSite(), true)));
+				sitesAsSelects.add(new SelectItem(dsb.getSite().getId(), dsb.getSite().getTitle()));
 			}			
 		}
 		
@@ -2454,16 +2405,16 @@ public class UserPrefsTool
 		private boolean selected = false;
 		
 		public DecoratedSiteBean() {
-			log.debug("DecoratedSiteBean()");
+			LOG.debug("DecoratedSiteBean()");
 		}
 		
 		public DecoratedSiteBean(Site site) {
-			log.debug("DecoratedSiteBean(Site)");
+			LOG.debug("DecoratedSiteBean(Site)");
 			this.site = site;
 		}
 		
 		public DecoratedSiteBean(Site site, boolean selected) {
-			log.debug("DecoratedSiteBean(Site, boolean)");
+			LOG.debug("DecoratedSiteBean(Site, boolean)");
 			this.site = site;
 			this.selected = selected;
 		}
@@ -2485,7 +2436,7 @@ public class UserPrefsTool
 		}
 		
 		public void checkBoxChanged(ValueChangeEvent vce) {
-			log.debug("checkBoxChanged()" + site.getId() + ": " + vce.getOldValue().toString() + "-->" + vce.getNewValue().toString());
+			LOG.debug("checkBoxChanged()" + site.getId() + ": " + vce.getOldValue().toString() + "-->" + vce.getNewValue().toString());
 			Boolean tmpSelected = (Boolean)vce.getNewValue();
 			if (tmpSelected != null) {
 				selected = tmpSelected;
@@ -2562,12 +2513,11 @@ public class UserPrefsTool
 	public class TermSites
 	{
 		private List<Term> terms;
-		private List <String> termOrder;
 
 		public class Term implements Comparable<Term> {
 			private String label;
 			private List<Site> sites;
-			
+
 			public Term(String label, List<Site> sites) {
 				if (sites.isEmpty()) {
 					throw new RuntimeException("List of sites can't be empty");
@@ -2590,14 +2540,10 @@ public class UserPrefsTool
 			}
 
 			public int compareTo(Term other) {
-				if (termOrder != null && (termOrder.contains(this.label) || termOrder.contains(other.label))) {
-					return(NumberUtils.compare(termOrder.indexOf(this.label), termOrder.indexOf(other.label)));
-				}
-				
 				String myType = this.getType();
 				String theirType = other.getType();
 
-				// Otherwise if not found in a term course sites win out over non-course-sites
+				// Course sites win out over non-course-sites
 				if (myType == null) {
 					return 1;
 				} else if (theirType == null) {
@@ -2624,15 +2570,6 @@ public class UserPrefsTool
 					termsToSites.put(term, new ArrayList<Site>(1));
 				}
 
-				// This is being used to display the full site title in the tool tip.
-				// It's necessary to pack this into some random/unused field of the Site object
-				// because the tool is using an old JSF version, which does not support calling
-				// methods with parameters in a JSP file to a backing bean. So, as a hack, we stuff
-				// the untruncated site title into the 'infoUrl' String to accomplish this.
-				// The site object is never saved, so we don't have to worry about overwriting the 'infoUrl' value
-				site.setInfoUrl(getUserSpecificSiteTitle(site, false));
-
-				site.setTitle(getUserSpecificSiteTitle(site, true));
 				termsToSites.get(term).add(site);
 			}
 
@@ -2642,8 +2579,6 @@ public class UserPrefsTool
 			for (String name : termNames) {
 				terms.add(new Term(name, termsToSites.get(name)));
 			}
-
-			termOrder = PortalUtils.getPortalTermOrder(null);
 
 			Collections.sort(terms);
 		}
@@ -2708,7 +2643,7 @@ public class UserPrefsTool
 
 	public String getHiddenSites() {
 		Preferences prefs = m_preferencesService.getPreferences(getUserId());
-		ResourceProperties props = prefs.getProperties(PreferencesService.SITENAV_PREFS_KEY);
+		ResourceProperties props = prefs.getProperties(CHARON_PREFS);
 		List currentHiddenSites = props.getPropertyList(EXCLUDE_SITE_LISTS);
 
 		StringBuilder result = new StringBuilder();

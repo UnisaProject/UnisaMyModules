@@ -24,26 +24,31 @@
 package org.sakaiproject.lessonbuildertool.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.AuthzGroup;
-import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.Role;
 import org.sakaiproject.authz.api.RoleAlreadyDefinedException;
 import org.sakaiproject.authz.api.SecurityAdvisor;
-import org.sakaiproject.authz.api.SecurityService;
+import org.sakaiproject.authz.api.AuthzGroupService;
+import org.sakaiproject.authz.cover.SecurityService;
 import org.sakaiproject.component.cover.ComponentManager;
-import org.sakaiproject.db.cover.SqlService;
 import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.exception.InUseException;
 import org.sakaiproject.exception.PermissionException;
+import org.sakaiproject.lessonbuildertool.SimplePageItem;
 import org.sakaiproject.lessonbuildertool.tool.beans.SimplePageBean;
+import org.sakaiproject.lessonbuildertool.service.LessonEntity;
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.cover.SiteService;
+import org.sakaiproject.db.cover.SqlService;
+import org.sakaiproject.db.api.SqlReader;
 
 /**
  * Sets up and removes group permissions for assignments and tests. This is to be used so that
@@ -53,8 +58,9 @@ import org.sakaiproject.site.cover.SiteService;
  * @author Eric Jeney <jeney@rutgers.edu>
  * 
  */
-@Slf4j
 public class GroupPermissionsService {
+	private static Logger log = LoggerFactory.getLogger(GroupPermissionsService.class);
+
         static private LessonEntity forumEntity = null;
         public void setForumEntity(Object e) {
 	    forumEntity = (LessonEntity)e;
@@ -156,22 +162,16 @@ public class GroupPermissionsService {
 			log.warn("ID unused", e);
 		} catch (PermissionException e) {
 			log.warn("Permission Error", e);
+		} finally {
+			// SecurityService.popAdvisor();
 		}
 
 		return group.getId();
 	}
 
 	public static boolean addCurrentUser(String siteId, String userid, String groupId) throws IOException {
-		AuthzGroupService authzGroupService = ComponentManager.get(AuthzGroupService.class);
-		SecurityService securityService = ComponentManager.get(SecurityService.class);
-
-		SecurityAdvisor addUserAdvisor = new SecurityAdvisor() {
-			public SecurityAdvice isAllowed(String userId, String function, String reference) {
-				return SecurityAdvice.ALLOWED;
-			}
-		};
-
 		try {
+			AuthzGroupService authzGroupService = ComponentManager.get(AuthzGroupService.class);
 			// we want to use the same role in the group that the user
 			// has in the main site.
 			String realmId = SiteService.siteReference(siteId);
@@ -185,13 +185,19 @@ public class GroupPermissionsService {
 				return true;
 			}
 
-			securityService.pushAdvisor(addUserAdvisor);
+			SecurityService.pushAdvisor(new SecurityAdvisor() {
+				public SecurityAdvice isAllowed(String userId, String function, String reference) {
+					return SecurityAdvice.ALLOWED;
+				}
+			});
+
 			authzGroupService.joinGroup(groupId, rolename, Integer.MAX_VALUE);
+
 		} catch (Exception e) {
 			// Typically means group couldn't be found.
 			return false;
 		} finally {
-			securityService.popAdvisor(addUserAdvisor);
+			SecurityService.popAdvisor();
 		}
 
 		return true;
@@ -199,18 +205,17 @@ public class GroupPermissionsService {
 
 	public static boolean removeUser(String siteId, String userId, String groupId) throws IOException {
 		AuthzGroupService authzGroupService = ComponentManager.get(AuthzGroupService.class);
-		SecurityService securityService = ComponentManager.get(SecurityService.class);
 		groupId = "/site/" + siteId + "/group/" + groupId;
 
-		SecurityAdvisor unjoinAdvisor = new SecurityAdvisor() {
-			public SecurityAdvice isAllowed(String userId, String function, String reference) {
-				return SecurityAdvice.ALLOWED;
-			}
-		};
-
 		try {
-			securityService.pushAdvisor(unjoinAdvisor);
+			SecurityService.pushAdvisor(new SecurityAdvisor() {
+				public SecurityAdvice isAllowed(String userId, String function, String reference) {
+					return SecurityAdvice.ALLOWED;
+				}
+			});
+
 			authzGroupService.unjoinGroup(groupId);
+
 		} catch (Exception e) {
 		    // we've got a problem. unjoingroup can fail for maintain users
 		    // we don't want to return false, or the caller will recreate the group. 
@@ -233,7 +238,7 @@ public class GroupPermissionsService {
 		    }
 
 		} finally {
-			securityService.popAdvisor(unjoinAdvisor);
+			SecurityService.popAdvisor();
 		}
 
 		return true;
@@ -277,6 +282,7 @@ public class GroupPermissionsService {
 	// the code is here rather than components to avoid a possible dependency loop. It's not a good idea
 	// for tool components to refer to each other
 	void convertGroupsTable() {
+
 	    // find entries created without siteId
 	    // because this is only needed for old entries, don't need to update the code if we add providers
 	    // for additional tools. This query should be immediate if conversion is done
@@ -284,15 +290,13 @@ public class GroupPermissionsService {
 	    if (sakaiIds == null)
 		return;
 
-	    SecurityService securityService = ComponentManager.get(SecurityService.class);
-	    SecurityAdvisor convertGroupsAdvisor = new SecurityAdvisor() {
+	    SecurityService.pushAdvisor(new SecurityAdvisor() {
 		    public SecurityAdvice isAllowed(String userId, String function, String reference) {
 			return SecurityAdvice.ALLOWED;
 		    }
-	    };
+		});
 
 	    try {
-		securityService.pushAdvisor(convertGroupsAdvisor);
 		for (String sakaiId: sakaiIds) {
 		    String siteId = null;
 		    log.info("sakaiid " + sakaiId);
@@ -314,7 +318,7 @@ public class GroupPermissionsService {
 		    SqlService.dbWrite("update lesson_builder_groups set siteId = ? where itemId = ?", fields);
 		}		
 	    } finally {
-		securityService.popAdvisor(convertGroupsAdvisor);
+		SecurityService.popAdvisor();
 	    }
 	}
 

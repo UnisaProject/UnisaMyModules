@@ -36,21 +36,26 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
 import net.oauth.*;
 import net.oauth.server.OAuthServlet;
 import net.oauth.signature.OAuthSignatureMethod;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 
 import org.tsugi.basiclti.BasicLTIConstants;
 import org.tsugi.basiclti.BasicLTIUtil;
+import org.tsugi.basiclti.BasicLTIProviderUtil;
 
 import org.tsugi.casa.objects.Application;
 
 import org.tsugi.contentitem.objects.ContentItemResponse;
 
 import org.tsugi.jackson.JacksonUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.cover.SecurityService;
@@ -74,17 +79,16 @@ import org.sakaiproject.event.cover.UsageSessionService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SitePage;
-import static org.sakaiproject.site.api.SiteService.SITE_TITLE_MAX_LENGTH;
-import org.sakaiproject.site.api.SiteService.SiteTitleValidationStatus;
 import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.tool.cover.SessionManager;
 import org.sakaiproject.tool.cover.ToolManager;
+import org.sakaiproject.user.api.Preferences;
+import org.sakaiproject.user.api.PreferencesEdit;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.cover.UserDirectoryService;
-import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.ResourceLoader;
 
 import org.springframework.context.ApplicationContext;
@@ -112,10 +116,10 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  */
 
 @SuppressWarnings("deprecation")
-@Slf4j
 public class ProviderServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
+	private static Logger M_log = LoggerFactory.getLogger(ProviderServlet.class);
 	private static ResourceLoader rb = new ResourceLoader("basiclti");
 	private static final String BASICLTI_RESOURCE_LINK = "blti:resource_link_id";
     private static final String LTI_CONTEXT_ID = "lti_context_id";
@@ -159,9 +163,9 @@ public class ProviderServlet extends HttpServlet {
 
 	public void doError(HttpServletRequest request,HttpServletResponse response, String s, String message, Throwable e) throws java.io.IOException {
 		if (e != null) {
-			log.error(e.getLocalizedMessage(), e);
+			M_log.error(e.getLocalizedMessage(), e);
 		}
-		log.info("{}: {}", rb.getString(s), message);
+		M_log.info(rb.getString(s) + ": " + message);
 		String return_url = request.getParameter(BasicLTIConstants.LAUNCH_PRESENTATION_RETURN_URL);
 		if (return_url != null && return_url.length() > 1) {
 			if (return_url.indexOf('?') > 1) {
@@ -256,14 +260,14 @@ public class ProviderServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String ipAddress = request.getRemoteAddr();
 
-		if (log.isDebugEnabled()) {
-			log.debug("Basic LTI Provider request from IP={}", ipAddress);
+		if (M_log.isDebugEnabled()) {
+			M_log.debug("Basic LTI Provider request from IP=" + ipAddress);
 		}
 
 		String enabled = ServerConfigurationService.getString(
 				"basiclti.provider.enabled", null);
 		if (enabled == null || !("true".equals(enabled))) {
-			log.warn("Basic LTI Provider is Disabled IP={}", ipAddress);
+			M_log.warn("Basic LTI Provider is Disabled IP=" + ipAddress);
 			response.sendError(HttpServletResponse.SC_FORBIDDEN,
 					"Basic LTI Provider is Disabled");
 			return;
@@ -274,7 +278,7 @@ public class ProviderServlet extends HttpServlet {
 				handleCASAList(request, response);
 				return;
 			} else {
-				log.warn("CASA Provider is Disabled IP={}", ipAddress);
+				M_log.warn("CASA Provider is Disabled IP=" + ipAddress);
 				response.sendError(HttpServletResponse.SC_FORBIDDEN,
 						"CASA Provider is Disabled");
 				return;
@@ -286,7 +290,7 @@ public class ProviderServlet extends HttpServlet {
 				handleCanvasConfig(request, response);
 				return;
 			} else {
-				log.warn("Canvas config is Disabled IP={}", ipAddress);
+				M_log.warn("Canvas config is Disabled IP=" + ipAddress);
 				response.sendError(HttpServletResponse.SC_FORBIDDEN,
 						"Canvas config is Disabled");
 				return;
@@ -305,7 +309,7 @@ public class ProviderServlet extends HttpServlet {
 		// short-circuit to ContentItem
 		if ( "/content.item".equals(request.getPathInfo()) ) {
 			if ( ! ServerConfigurationService.getBoolean("contentitem.provider", true))  {
-				log.warn("ContentItem is Disabled IP={}", ipAddress);
+				M_log.warn("ContentItem is Disabled IP=" + ipAddress);
 				response.sendError(HttpServletResponse.SC_FORBIDDEN,
 						"ContentItem is Disabled");
 				return;
@@ -314,18 +318,18 @@ public class ProviderServlet extends HttpServlet {
 				Map session_payload = (Map) sess.getAttribute("payload");
 				if ( session_payload != null ) {
 					// Post-Login requests to content.item
-					log.debug("ContentItem already logged in {}", sess.getUserId());
+					M_log.debug("ContentItem already logged in "+sess.getUserId());
 					handleContentItem(request, response, session_payload);
 					return;
 				}
 			}
 		}
 
-		if (log.isDebugEnabled()) {
+		if (M_log.isDebugEnabled()) {
 			Map<String, String[]> params = (Map<String, String[]>) request
 					.getParameterMap();
 			for (Map.Entry<String, String[]> param : params.entrySet()) {
-				log.debug("{}:{}", param.getKey(), param.getValue()[0]);
+				M_log.debug(param.getKey() + ":" + param.getValue()[0]);
 			}
 		}
 
@@ -336,7 +340,7 @@ public class ProviderServlet extends HttpServlet {
 		// site_id as is,
 		// ie without prefixing them with the oauth_consumer_key first.
 		// We also don't both checking their roles in the site.
-		boolean isTrustedConsumer = SakaiLTIProviderUtil.isHighlyTrustedConsumer(payload);
+		boolean isTrustedConsumer = BasicLTIProviderUtil.isHighlyTrustedConsumer(payload);
 
 		/*
 		 * Get the list of email trusted consumers from sakai.properties. If the
@@ -346,14 +350,14 @@ public class ProviderServlet extends HttpServlet {
 		 * acting as TP and TC referring to same user and can be uniquely
 		 * identified by email address. more details SAK-29372
 		 */
-		boolean isEmailTrustedConsumer = SakaiLTIProviderUtil.isEmailTrustedConsumer(payload);
+		boolean isEmailTrustedConsumer = BasicLTIProviderUtil.isEmailTrustedConsumer(payload);
 
 		/*
 		 * Checking if the email trusted consumer property and trusted consumer
 		 * and not both enabled. the case would be an error condition
 		 */
 		if (isTrustedConsumer && isEmailTrustedConsumer) {
-			log.warn("Both Email Trusted and Trusted Consumer property is enabled, this is invalid  IP={}", ipAddress);
+			M_log.warn("Both Email Trusted and Trusted Consumer property is enabled, this is invalid  IP=" + ipAddress);
 			response.sendError(HttpServletResponse.SC_FORBIDDEN,
 					"Both Email Trusted and Trusted Consumer property is enabled, this is invalid ");
 			return;
@@ -380,7 +384,7 @@ public class ProviderServlet extends HttpServlet {
                 ext_sakai_server != null && ext_sakai_server.equals(serverUrl) &&
                 user.getId().equals(sess.getUserId()) ) {
 
-                log.debug("ContentItem looping back as {}", sess.getUserId());
+                M_log.debug("ContentItem looping back as "+sess.getUserId());
                 sess.setAttribute("payload", payload);
                 handleContentItem(request, response, payload);
                 return;
@@ -400,7 +404,7 @@ public class ProviderServlet extends HttpServlet {
 
             // The first launch of content.item - no site needed
             if ( "/content.item".equals(request.getPathInfo()) ) {
-                    log.debug("ContentItem inital external login {}", sess.getUserId());
+                    M_log.debug("ContentItem inital external login "+sess.getUserId());
                     sess.setAttribute("payload", payload);
 					handleContentItem(request, response, payload);
                     return;
@@ -430,8 +434,8 @@ public class ProviderServlet extends HttpServlet {
                 url.append(toolPlacementId);
                 url.append("?panel=Main");
 
-            if (log.isDebugEnabled()) {
-                log.debug("url={}", url.toString());
+            if (M_log.isDebugEnabled()) {
+                M_log.debug("url=" + url.toString());
             }
             //String toolLink = ServerConfigurationService.getPortalUrl()+ "/tool-reset/" + placement_id + "?panel=Main";
             // Compensate for bug in getPortalUrl()
@@ -513,7 +517,7 @@ public class ProviderServlet extends HttpServlet {
                         processor.beforeLaunch(payload, trustedConsumer, user, site, toolPlacementId);
                         break;
                     default:
-                        log.error("unknown processing state of {}", processingState);
+                        M_log.error("unknown processing state of " + processingState);
                 }
             }
         }
@@ -558,8 +562,8 @@ public class ProviderServlet extends HttpServlet {
               throw new LTIException( "launch.missing", "user_id", null);
 
           }
-          if (log.isDebugEnabled()) {
-              log.debug("user_id={}", user_id);
+          if (M_log.isDebugEnabled()) {
+              M_log.debug("user_id=" + user_id);
           }
 
           //check tool_id
@@ -570,8 +574,8 @@ public class ProviderServlet extends HttpServlet {
 
           // Trim off the leading slash and any trailing space
           tool_id = tool_id.substring(1).trim();
-          if (log.isDebugEnabled()) {
-              log.debug("tool_id={}", tool_id);
+          if (M_log.isDebugEnabled()) {
+              M_log.debug("tool_id=" + tool_id);
           }
           // store modified tool_id back in payload
           payload.put("tool_id", tool_id);
@@ -601,13 +605,13 @@ public class ProviderServlet extends HttpServlet {
               try {
                   user_id = UserDirectoryService.getUserId(ext_sakai_provider_eid);
               } catch (Exception e) {
-                  log.error(e.getLocalizedMessage(), e);
+                  M_log.error(e.getLocalizedMessage(), e);
                   throw new LTIException("launch.provided.eid.invalid", "ext_sakai_provider_eid="+ext_sakai_provider_eid, e);
               }
           }
 
-          if (log.isDebugEnabled()) {
-              log.debug("ext_sakai_provider_eid={}", ext_sakai_provider_eid);
+          if (M_log.isDebugEnabled()) {
+              M_log.debug("ext_sakai_provider_eid=" + ext_sakai_provider_eid);
           }
 
 
@@ -631,8 +635,8 @@ public class ProviderServlet extends HttpServlet {
                   try {
                       userSiteId = SiteService.getUserSiteId(user_id);
                   } catch (Exception e) {
-                      log.warn("Failed to get My Workspace site for user_id:{}", user_id);
-                      log.error(e.getLocalizedMessage(), e);
+                      M_log.warn("Failed to get My Workspace site for user_id:" + user_id);
+                      M_log.error(e.getLocalizedMessage(), e);
                       throw new LTIException( "launch.user.site.unknown", "user_id="+user_id, e);
                   }
                   context_id = userSiteId;
@@ -640,8 +644,8 @@ public class ProviderServlet extends HttpServlet {
               }
           }
 
-          if (log.isDebugEnabled()) {
-              log.debug("context_id={}", context_id);
+          if (M_log.isDebugEnabled()) {
+              M_log.debug("context_id=" + context_id);
           }
 
 
@@ -672,17 +676,17 @@ public class ProviderServlet extends HttpServlet {
           try {
               base_string = OAuthSignatureMethod.getBaseString(oam);
           } catch (Exception e) {
-              log.error(e.getLocalizedMessage(), e);
+              M_log.error(e.getLocalizedMessage(), e);
               base_string = null;
           }
 
           try {
               oav.validateMessage(oam, acc);
           } catch (Exception e) {
-              log.warn("Provider failed to validate message");
-              log.warn(e.getLocalizedMessage(), e);
+              M_log.warn("Provider failed to validate message");
+              M_log.warn(e.getLocalizedMessage(), e);
               if (base_string != null) {
-                  log.warn(base_string);
+                  M_log.warn(base_string);
               }
               throw new LTIException( "launch.no.validate", context_id, e);
           }
@@ -708,12 +712,12 @@ public class ProviderServlet extends HttpServlet {
                 toolPlacementId = toolConfig.getId();
             }
         } catch (Exception e) {
-            log.warn(e.getLocalizedMessage(), e);
+            M_log.warn(e.getLocalizedMessage(), e);
             throw new LTIException( "launch.tool.search", "tool_id="+tool_id, e);
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("toolPlacementId={}", toolPlacementId);
+        if (M_log.isDebugEnabled()) {
+            M_log.debug("toolPlacementId=" + toolPlacementId);
         }
 
         // If tool not in site, and we are a trusted consumer, error
@@ -734,7 +738,7 @@ public class ProviderServlet extends HttpServlet {
                 pushAdvisor();
                 try {
                     SiteService.save(site);
-                    log.info("Tool added, tool_id={}, siteId={}", tool_id, site.getId());
+                    M_log.info("Tool added, tool_id="+tool_id + ", siteId="+site.getId());
                 } catch (Exception e) {
                     throw new LTIException( "launch.site.save", "tool_id="+tool_id + ", siteId="+site.getId(), e);
                 } finally {
@@ -754,7 +758,7 @@ public class ProviderServlet extends HttpServlet {
 
         // Check user has access to this tool in this site
         if(!ToolManager.isVisible(site, toolConfig)) {
-            log.warn("Not allowed to access tool user_id={} site={} tool={}", user.getId(), site.getId(), tool_id);
+            M_log.warn("Not allowed to access tool user_id=" + user.getId() + " site="+ site.getId() + " tool=" + tool_id);
             throw new LTIException( "launch.site.tool.denied", "user_id=" + user.getId() + " site="+ site.getId() + " tool=" + tool_id, null);
 
         }
@@ -772,24 +776,12 @@ public class ProviderServlet extends HttpServlet {
         } else {
             siteId = LegacyShaUtil.sha1Hash(oauth_consumer_key + ":" + context_id);
         }
-        if (log.isDebugEnabled()) {
-            log.debug("siteId={}", siteId);
+        if (M_log.isDebugEnabled()) {
+            M_log.debug("siteId=" + siteId);
         }
 
-        final String context_title_orig = (String) payload.get(BasicLTIConstants.CONTEXT_TITLE);
+        final String context_title = (String) payload.get(BasicLTIConstants.CONTEXT_TITLE);
         final String context_label = (String) payload.get(BasicLTIConstants.CONTEXT_LABEL);
-
-        // Site title is editable; cannot but null/empty after HTML stripping, and cannot exceed max length
-        String context_title = FormattedText.stripHtmlFromText(context_title_orig, true, true);
-        SiteTitleValidationStatus status = SiteService.validateSiteTitle(context_title_orig, context_title);
-
-        if (SiteTitleValidationStatus.STRIPPED_TO_EMPTY.equals(status)) {
-            log.warn("Provided context_title is empty after HTML stripping: {}", context_title_orig);
-        } else if (SiteTitleValidationStatus.EMPTY.equals(status)) {
-            log.warn("Provided context_title is empty after trimming: {}", context_title_orig);
-        } else if (SiteTitleValidationStatus.TOO_LONG.equals(status)) {
-            log.warn("Provided context_title is longer than max site title length of {}: {}", SITE_TITLE_MAX_LENGTH, context_title_orig);
-        }
 
         Site site = null;
 
@@ -802,8 +794,8 @@ public class ProviderServlet extends HttpServlet {
                     return site;
                 }
             } catch (Exception e) {
-                if (log.isDebugEnabled()) {
-                    log.debug(e.getLocalizedMessage(), e);
+                if (M_log.isDebugEnabled()) {
+                    M_log.debug(e.getLocalizedMessage(), e);
                 }
             }
         } else {
@@ -812,8 +804,8 @@ public class ProviderServlet extends HttpServlet {
                 updateSiteDetailsIfChanged(site, context_title, context_label);
                 return site;
             } catch (Exception e) {
-                if (log.isDebugEnabled()) {
-                    log.debug(e.getLocalizedMessage(), e);
+                if (M_log.isDebugEnabled()) {
+                    M_log.debug(e.getLocalizedMessage(), e);
                 }
             }
         }
@@ -833,7 +825,7 @@ public class ProviderServlet extends HttpServlet {
                 boolean templateSiteExists = SiteService.siteExists(autoSiteTemplateId);
 
                 if(!templateSiteExists) {
-                    log.warn("A template site id was specced ({}) but no site with this id exists. A default lti site will be created instead.", autoSiteTemplateId);
+                    M_log.warn("A template site id was specced (" + autoSiteTemplateId + ") but no site with this id exists. A default lti site will be created instead.");
                 }
 
                 if(autoSiteTemplateId == null || !templateSiteExists) {
@@ -869,7 +861,7 @@ public class ProviderServlet extends HttpServlet {
 
                 try {
                     SiteService.save(site);
-                    log.info("Created  site={} label={} type={} title={}", siteId, context_label, sakai_type, context_title);
+                    M_log.info("Created  site=" + siteId + " label=" + context_label + " type=" + sakai_type + " title=" + context_title);
 
                 } catch (Exception e) {
                     throw new LTIException("launch.site.save", "siteId=" + siteId, e);
@@ -907,9 +899,9 @@ public class ProviderServlet extends HttpServlet {
         if(changed) {
             try {
                 SiteService.save(site);
-                log.info("Updated  site={} title={} label={}", site.getId(), context_title, context_label);
+                M_log.info("Updated  site=" + site.getId() + " title=" + context_title + " label=" + context_label);
             } catch (Exception e) {
-                log.warn("Failed to update site title and/or label");
+                M_log.warn("Failed to update site title and/or label");
             }
         }
     }
@@ -943,7 +935,7 @@ public class ProviderServlet extends HttpServlet {
                     String loadedExternalSiteId = (String) site.getProperties().get(LTI_CONTEXT_ID);
                     if (loadedExternalSiteId != null && loadedExternalSiteId.equals(externalOaeId)) {
                         // deeply load site, otherwise groups won't be loaded
-                        log.debug("found site: {} with lti_context_id:{}", site.getId(), externalOaeId);
+                        M_log.debug("found site: " + site.getId() + " with lti_context_id:" + externalOaeId);
                         return SiteService.getSite(site.getId());
                     }
                 }
@@ -957,26 +949,26 @@ public class ProviderServlet extends HttpServlet {
 
         if (isTrustedConsumer) return;
 
-        log.debug("synchSiteMembershipsOnceThenSchedule");
+        M_log.debug("synchSiteMembershipsOnceThenSchedule");
 
         if (!ServerConfigurationService.getBoolean(SakaiBLTIUtil.INCOMING_ROSTER_ENABLED, false)) {
-            log.info("LTI Memberships synchronization disabled.");
+            M_log.info("LTI Memberships synchronization disabled.");
             return;
         }
 
         final String membershipsUrl = (String) payload.get("ext_ims_lis_memberships_url");
 
-        if (BasicLTIUtil.isBlank(membershipsUrl)) {
-            log.info("LTI Memberships extension is not supported.");
+        if (!BasicLTIUtil.isNotBlank(membershipsUrl)) {
+            M_log.info("LTI Memberships extension is not supported.");
             return;
         }
 
-        if(log.isDebugEnabled()) log.debug("Memberships URL: {}", membershipsUrl);
+        if(M_log.isDebugEnabled()) M_log.debug("Memberships URL: " + membershipsUrl);
 
         final String membershipsId = (String) payload.get("ext_ims_lis_memberships_id");
 
-        if (BasicLTIUtil.isBlank(membershipsId)) {
-            log.info("No memberships id supplied. Memberships will NOT be synchronized.");
+        if (!BasicLTIUtil.isNotBlank(membershipsId)) {
+            M_log.info("No memberships id supplied. Memberships will NOT be synchronized.");
             return;
         }
 
@@ -984,8 +976,8 @@ public class ProviderServlet extends HttpServlet {
 
         // If this site has already been scheduled, then we do nothing.
         if (ltiService.getMembershipsJob(siteId) != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Site '{}' already scheduled for memberships sync. Doing nothing ...", siteId);
+            if (M_log.isDebugEnabled()) {
+                M_log.debug("Site '" + siteId + "' already scheduled for memberships sync. Doing nothing ...");
             }
             return;
         }
@@ -1008,16 +1000,16 @@ public class ProviderServlet extends HttpServlet {
 
                     long then = 0L;
 
-                    if (log.isDebugEnabled()) {
-                        log.debug("Starting memberships sync.");
+                    if (M_log.isDebugEnabled()) {
+                        M_log.debug("Starting memberships sync.");
                         then = (new Date()).getTime();
                     }
 
                     siteMembershipsSynchroniser.synchroniseSiteMemberships(siteId, membershipsId, membershipsUrl, oauth_consumer_key, isEmailTrustedConsumer,callbackType);
 
-                    if (log.isDebugEnabled()) {
+                    if (M_log.isDebugEnabled()) {
                         long now = (new Date()).getTime();
-                        log.debug("Memberships sync finished. It took {} seconds.", ((now - then)/1000));
+                        M_log.debug("Memberships sync finished. It took " + ((now - then)/1000) + " seconds.");
                     }
                 }
             }, "org.sakaiproject.blti.ProviderServlet.MembershipsSync")).start();
@@ -1036,7 +1028,7 @@ public class ProviderServlet extends HttpServlet {
 		for (String toolId : allowedToolsList) {
 			Application app = SakaiCASAUtil.getCASAEntry(toolId);
 			if ( app == null ) {
-				log.warn("Could not produce CASA entry for {}", toolId);
+				M_log.warn("Could not produce CASA entry for "+toolId);
 				continue;
 			}
 			apps.add(app);
@@ -1049,7 +1041,7 @@ public class ProviderServlet extends HttpServlet {
                         out.write(JacksonUtil.prettyPrint(apps));
                 }
                 catch (Exception e) {
-                        log.error(e.getMessage(), e);
+                        e.printStackTrace();
                 }
 	}
 
@@ -1102,9 +1094,9 @@ public class ProviderServlet extends HttpServlet {
 			ltiMap.put("content_items", content_items);
 			String data = (String) payload.get("data");
 			if ( data != null ) ltiMap.put("data", data);
-			log.debug("ltiMap={}", ltiMap);
+			M_log.debug("ltiMap="+ltiMap);
 
-			boolean dodebug = log.isDebugEnabled();
+			boolean dodebug = M_log.isDebugEnabled();
 			boolean autosubmit = false;
 			String launchtext = rb.getString("content_item.install.button");
 			String back_to_store = rb.getString("content_item.back.to.store");
@@ -1124,7 +1116,7 @@ public class ProviderServlet extends HttpServlet {
 			rd.forward(request, response);
 		}
 		catch (Exception e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 	}
 
@@ -1161,7 +1153,7 @@ public class ProviderServlet extends HttpServlet {
 			rd.forward(request, response);
 		}
 		catch (Exception e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 	}
 

@@ -24,8 +24,6 @@
 package org.sakaiproject.tool.assessment.ui.bean.delivery;
 
 import java.io.Serializable;
-import java.util.List;
-
 import org.apache.commons.math3.util.Precision;
 
 /**
@@ -38,8 +36,11 @@ import org.apache.commons.math3.util.Precision;
 public class ContentsDeliveryBean
   implements Serializable
 {
+  /**
+	 * 
+	 */
 	private static final long serialVersionUID = -4619361961662881387L;
-  private List<SectionContentsBean> partsContents;
+private java.util.ArrayList partsContents;
   private double currentScore;
   private double maxScore; // SectionContentsBean
   // for display/hide score
@@ -86,7 +87,7 @@ public class ContentsDeliveryBean
    * List of parts (SectionContentsBean) for entire contents.
    * @return parts for entire contents
    */
-  public List<SectionContentsBean> getPartsContents()
+  public java.util.ArrayList getPartsContents()
   {
     return partsContents;
   }
@@ -95,7 +96,7 @@ public class ContentsDeliveryBean
    * Set parts (SectionContentsBean) for entire contents
    * @param partsContents parts (SectionContentsBean) for entire contents
    */
-  public void setPartsContents(List<SectionContentsBean> partsContents)
+  public void setPartsContents(java.util.ArrayList partsContents)
   {
     this.partsContents = partsContents;
   }

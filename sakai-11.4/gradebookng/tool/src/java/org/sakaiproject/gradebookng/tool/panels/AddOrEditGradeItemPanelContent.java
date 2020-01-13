@@ -1,51 +1,35 @@
-/**
- * Copyright (c) 2003-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.gradebookng.tool.panels;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
+import org.apache.wicket.extensions.markup.html.form.DateTextField;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.ResourceModel;
+import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.apache.wicket.validation.IValidationError;
 import org.sakaiproject.gradebookng.business.GbCategoryType;
+import org.sakaiproject.gradebookng.business.GbGradingType;
+import org.sakaiproject.gradebookng.business.GradebookNgBusinessService;
 import org.sakaiproject.gradebookng.business.util.FormatHelper;
-import org.sakaiproject.gradebookng.tool.model.UiMode;
 import org.sakaiproject.service.gradebook.shared.Assignment;
 import org.sakaiproject.service.gradebook.shared.CategoryDefinition;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
-import org.sakaiproject.service.gradebook.shared.GradingType;
 import org.sakaiproject.tool.gradebook.Gradebook;
-import org.sakaiproject.util.DateFormatterUtil;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * The panel for the add grade item window
@@ -53,42 +37,30 @@ import lombok.extern.slf4j.Slf4j;
  * @author Steve Swinsburg (steve.swinsburg@gmail.com)
  *
  */
-@Slf4j
-public class AddOrEditGradeItemPanelContent extends BasePanel {
+public class AddOrEditGradeItemPanelContent extends Panel {
 
 	private static final long serialVersionUID = 1L;
 
-	private CheckBox counted;
-	private CheckBox released;
+	@SpringBean(name = "org.sakaiproject.gradebookng.business.GradebookNgBusinessService")
+	private GradebookNgBusinessService businessService;
+
+	private AjaxCheckBox counted;
+	private AjaxCheckBox released;
 
 	private boolean categoriesEnabled;
 
-	private static final String DATEPICKER_FORMAT = "yyyy-MM-dd";
-
-	private Double existingPoints = null;
-	private boolean scaleGradesTriggered = false;
-	private WebMarkupContainer scaleGradesContainer;
-
-	public AddOrEditGradeItemPanelContent(final String id, final Model<Assignment> assignmentModel, final UiMode mode) {
+	public AddOrEditGradeItemPanelContent(final String id, final Model<Assignment> assignmentModel) {
 		super(id, assignmentModel);
 
 		final Gradebook gradebook = this.businessService.getGradebook();
-		final GradingType gradingType = GradingType.valueOf(gradebook.getGrade_type());
+		final GbGradingType gradingType = GbGradingType.valueOf(gradebook.getGrade_type());
 
 		final Assignment assignment = assignmentModel.getObject();
-
-		String dueDateString = "";
-		if (assignment.getDueDate() != null) {
-			dueDateString = DateFormatterUtil.format(assignment.getDueDate(), DATEPICKER_FORMAT, getSession().getLocale());
-		}
 
 		this.categoriesEnabled = true;
 		if (gradebook.getCategory_type() == GbCategoryType.NO_CATEGORY.getValue()) {
 			this.categoriesEnabled = false;
 		}
-
-		// get existing points. Will be null for a new assignment
-		this.existingPoints = assignmentModel.getObject().getPoints();
 
 		// title
 		final TextField<String> title = new TextField<String>("title",
@@ -115,7 +87,7 @@ public class AddOrEditGradeItemPanelContent extends BasePanel {
 
 		// points
 		final Label pointsLabel = new Label("pointsLabel");
-		if (gradingType == GradingType.PERCENTAGE) {
+		if (gradingType == GbGradingType.PERCENTAGE) {
 			pointsLabel.setDefaultModel(new ResourceModel("label.addgradeitem.percentage"));
 		} else {
 			pointsLabel.setDefaultModel(new ResourceModel("label.addgradeitem.points"));
@@ -141,53 +113,12 @@ public class AddOrEditGradeItemPanelContent extends BasePanel {
 				error(getString("error.addgradeitem.points"));
 			}
 		};
-
-		// onchange, might want to scale
-		points.add(new OnChangeAjaxBehavior() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void onUpdate(final AjaxRequestTarget target) {
-
-				// conditional option to scale
-				if (gradingType == GradingType.POINTS) {
-
-					final Double existing = AddOrEditGradeItemPanelContent.this.existingPoints;
-					final Double current = points.getModelObject();
-
-					log.debug("existingPoints: " + existing);
-					log.debug("currentPoints: " + current);
-
-					AddOrEditGradeItemPanelContent.this.scaleGradesTriggered = false;
-					if (existing != null && existing != current) {
-						AddOrEditGradeItemPanelContent.this.scaleGradesTriggered = true;
-					}
-
-					log.debug("scaleGradesTriggered: " + AddOrEditGradeItemPanelContent.this.scaleGradesTriggered);
-
-					target.add(AddOrEditGradeItemPanelContent.this.scaleGradesContainer);
-				}
-			}
-		});
-
 		add(points);
-
-		// scale grades option
-		this.scaleGradesContainer = new WebMarkupContainer("scaleGradesContainer") {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public boolean isVisible() {
-				return AddOrEditGradeItemPanelContent.this.scaleGradesTriggered;
-			}
-		};
-		this.scaleGradesContainer.setOutputMarkupPlaceholderTag(true);
-		this.scaleGradesContainer.add(new CheckBox("scaleGrades", new PropertyModel<Boolean>(assignmentModel, "scaleGrades")));
-		add(this.scaleGradesContainer);
 
 		// due date
 		// TODO date format needs to come from i18n
-		final TextField dueDate = new TextField("duedate", Model.of(dueDateString)) {
+		final DateTextField dueDate = new DateTextField("duedate", new PropertyModel<Date>(assignmentModel, "dueDate"),
+				getString("format.date")) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -277,18 +208,36 @@ public class AddOrEditGradeItemPanelContent extends BasePanel {
 		add(extraCredit);
 
 		// released
-		this.released = new CheckBox("released", new PropertyModel<Boolean>(assignmentModel, "released"));
+		this.released = new AjaxCheckBox("released", new PropertyModel<Boolean>(assignmentModel, "released")) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void onUpdate(final AjaxRequestTarget target) {
+				if (!getModelObject()) {
+					AddOrEditGradeItemPanelContent.this.counted.setModelObject(false);
+					target.add(AddOrEditGradeItemPanelContent.this.counted);
+				}
+			}
+		};
 		this.released.setOutputMarkupId(true);
 		add(this.released);
 
 		// counted
-		this.counted = new CheckBox("counted", new PropertyModel<Boolean>(assignmentModel, "counted"));
-		this.counted.setOutputMarkupId(true);
+		// if checked, release must also be checked and then disabled
+		this.counted = new AjaxCheckBox("counted", new PropertyModel<Boolean>(assignmentModel, "counted")) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void onUpdate(final AjaxRequestTarget target) {
+				if (getModelObject()) {
+					AddOrEditGradeItemPanelContent.this.released.setModelObject(true);
+				}
+				target.add(AddOrEditGradeItemPanelContent.this.released);
+			}
+		};
+
 		if (this.businessService.categoriesAreEnabled()) {
 			this.counted.setEnabled(assignment.getCategoryId() != null);
-			if (assignment.getCategoryId() == null) {
-				this.counted.setModelObject(false);
-			}
 		}
 
 		add(this.counted);

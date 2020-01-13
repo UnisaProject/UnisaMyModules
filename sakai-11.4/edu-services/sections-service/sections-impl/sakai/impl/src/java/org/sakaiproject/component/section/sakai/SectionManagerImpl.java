@@ -33,30 +33,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Calendar;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang3.StringUtils;
-
-import org.sakaiproject.authz.api.AuthzGroup;
-import org.sakaiproject.authz.api.AuthzGroupService;
-import org.sakaiproject.authz.api.AuthzPermissionException;
-import org.sakaiproject.authz.api.GroupFullException;
-import org.sakaiproject.authz.api.GroupNotDefinedException;
-import org.sakaiproject.authz.api.GroupProvider;
-import org.sakaiproject.authz.api.Member;
-import org.sakaiproject.authz.api.SecurityService;
-import org.sakaiproject.component.cover.ComponentManager;
-import org.sakaiproject.component.section.sakai.facade.SakaiUtil;
-import org.sakaiproject.coursemanagement.api.CourseManagementService;
-import org.sakaiproject.coursemanagement.api.Section;
-import org.sakaiproject.coursemanagement.api.exception.IdNotFoundException;
-import org.sakaiproject.entity.api.EntityManager;
-import org.sakaiproject.entity.api.Reference;
-import org.sakaiproject.entity.api.ResourceProperties;
-import org.sakaiproject.event.api.Event;
-import org.sakaiproject.event.api.EventTrackingService;
-import org.sakaiproject.exception.IdUnusedException;
-import org.sakaiproject.exception.PermissionException;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.thread_local.api.ThreadLocalManager;
+import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.section.api.SectionAwareness;
 import org.sakaiproject.section.api.SectionManager;
 import org.sakaiproject.section.api.coursemanagement.Course;
@@ -70,12 +51,30 @@ import org.sakaiproject.section.api.exception.MembershipException;
 import org.sakaiproject.section.api.exception.RoleConfigurationException;
 import org.sakaiproject.section.api.exception.SectionFullException;
 import org.sakaiproject.section.api.facade.Role;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.component.section.sakai.facade.SakaiUtil;
+import org.sakaiproject.coursemanagement.api.CourseManagementService;
+import org.sakaiproject.coursemanagement.api.Section;
+import org.sakaiproject.coursemanagement.api.exception.IdNotFoundException;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.exception.PermissionException;
+import org.sakaiproject.authz.api.AuthzGroup;
+import org.sakaiproject.authz.api.AuthzGroupService;
+import org.sakaiproject.authz.api.AuthzPermissionException;
+import org.sakaiproject.authz.api.GroupFullException;
+import org.sakaiproject.authz.api.GroupNotDefinedException;
+import org.sakaiproject.authz.api.GroupProvider;
+import org.sakaiproject.authz.api.Member;
+import org.sakaiproject.entity.api.EntityManager;
+import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.entity.api.ResourceProperties;
+import org.sakaiproject.event.api.Event;
+import org.sakaiproject.event.api.EventTrackingService;
+import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteAdvisor;
 import org.sakaiproject.site.api.SiteService;
-import org.sakaiproject.thread_local.api.ThreadLocalManager;
-import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
 
@@ -86,9 +85,10 @@ import org.sakaiproject.user.api.UserNotDefinedException;
  * @author <a href="mailto:jholtzman@berkeley.edu">Josh Holtzman</a>
  *
  */
-@Slf4j
 public abstract class SectionManagerImpl implements SectionManager, SiteAdvisor {
 
+	private static final Logger log = LoggerFactory.getLogger(SectionManagerImpl.class);
+	
     // Sakai services set by method injection
     protected abstract SiteService siteService();
 
@@ -170,12 +170,7 @@ public abstract class SectionManagerImpl implements SectionManager, SiteAdvisor 
 				for(Iterator memberIter = members.iterator(); memberIter.hasNext();) {
 					Member member = (Member)memberIter.next();
 					if(member.isProvided()) {
-						try {
-							group.insertMember(member.getUserId(), member.getRole().getId(), member.isActive(), false);
-						} catch (IllegalStateException e) {
-							log.error(".update: User with id {} cannot be inserted in group with id {} because the group is locked", member.getUserId(), group.getId());
-							return;
-						}
+						group.addMember(member.getUserId(), member.getRole().getId(), member.isActive(), false);
 					}
 				}
 			}
@@ -688,26 +683,8 @@ public abstract class SectionManagerImpl implements SectionManager, SiteAdvisor 
 		// must be the same
 		List membershipInCategory = authzGroupService.getAuthzUserGroupIds(categorySections, userUid);
 		
-		List realMembershipInCategory=new ArrayList();
-		
-		for(String msic: (List <String>) membershipInCategory)
-		{
-			String realmGroup=msic;
-			Group group = findGroup(realmGroup);
-			Member member = group.getMember(userUid);
-			if(member == null) {
-				if (log.isDebugEnabled()) { 
-					log.debug("getAuthzUserGroupIds said {} is member of {} but getMember disagrees", userUid, group.getId());
-				}
-				continue;
-			}
-			else {
-				realMembershipInCategory.add(realmGroup);
-			}
-		}
-		
-		if (!realMembershipInCategory.isEmpty()) {
-			log.info("User {} can not enroll in section {}. This user is already in section {} ",userUid, sectionUuid, membershipInCategory.get(0));
+		if (!membershipInCategory.isEmpty()) {
+			log.info("User " + userUid + " can not enroll in section " + sectionUuid + ".  This user is already in section " + membershipInCategory.get(0));
 			return null;
 		}
 
@@ -899,13 +876,8 @@ public abstract class SectionManagerImpl implements SectionManager, SiteAdvisor 
 		// Add the membership to the framework
 		String role = getSectionTaRole(group);
 		
-		try {
-			group.insertMember(userUid, role, true, false);
-		} catch (IllegalStateException e) {
-			log.error(".addTaToSection: User with id {} cannot be inserted in group with id {} because the group is locked", userUid, group.getId());
-			return null;
-		}
-
+		group.addMember(userUid, role, true, false);
+		
 		try {
 			siteService().saveGroupMembership(group.getContainingSite());
 			postEvent("section.add.ta", sectionUuid);
@@ -942,12 +914,7 @@ public abstract class SectionManagerImpl implements SectionManager, SiteAdvisor 
 		if(studentRole == null) {
 			throw new RoleConfigurationException("Can't add a student to a section, since there is no student-flgagged role");
 		}
-		try {
-			group.insertMember(userUid, studentRole, true, false);
-		} catch (IllegalStateException e) {
-			log.error(".addStudentToSection: User with id {} cannot be inserted in group with id {} because the group is locked", userUid, group.getId());
-			return null;
-		}
+		group.addMember(userUid, studentRole, true, false);
 
 		try {
 			siteService().saveGroupMembership(group.getContainingSite());
@@ -1001,21 +968,13 @@ public abstract class SectionManagerImpl implements SectionManager, SiteAdvisor 
 		Set currentUserIds = group.getUsersHasRole(sakaiRoleString);
 		for(Iterator iter = currentUserIds.iterator(); iter.hasNext();) {
 			String userUid = (String)iter.next();
-			try {
-				group.deleteMember(userUid);
-			} catch (IllegalStateException e) {
-				log.error(".setSectionMemberships: User with id {} cannot be deleted from group with id {} because the group is locked", userUid, group.getId());
-			}
+			group.removeMember(userUid);
 		}
 		
 		// Add the new members (sure would be nice to have transactions here!)
 		for(Iterator iter = userUids.iterator(); iter.hasNext();) {
 			String userUid = (String)iter.next();
-			try {
-				group.insertMember(userUid, sakaiRoleString, true, false);
-			} catch (IllegalStateException e) {
-				log.error(".setSectionMemberships: User with id {} cannot be inserted in group with id {} because the group is locked", userUid, group.getId());
-			}
+			group.addMember(userUid, sakaiRoleString, true, false);
 		}
 
 		try {
@@ -1050,16 +1009,14 @@ public abstract class SectionManagerImpl implements SectionManager, SiteAdvisor 
 			ensureInternallyManaged(section.getCourse().getUuid());
 		}
 		
+		group.removeMember(userUid);
 		try {
-			group.deleteMember(userUid);
 			siteService().saveGroupMembership(group.getContainingSite());
 			postEvent("section.student.drop", sectionUuid);
 		} catch (IdUnusedException e) {
 			log.error("unable to find site: ", e);
 		} catch (PermissionException e) {
 			log.error("access denied while attempting to save site: ", e);
-		} catch (IllegalStateException e) {
-			log.error(".dropSectionMembership: User with id {} cannot be deleted from group with id {} because the group is locked", userUid, group.getId());
 		}
 	}
 
@@ -1093,12 +1050,7 @@ public abstract class SectionManagerImpl implements SectionManager, SiteAdvisor 
 				// even if the specified user is not a member, resulting in many
 				// unnecessary (and possibly unintended) updates.
 				if (group.getMember(studentUid) != null) {
-					try {
-						group.deleteMember(studentUid);
-					} catch (IllegalStateException e) {
-						log.error(".dropEnrollmentFromCategory: User with id {} cannot be deleted from group with id {} because the group is locked", studentUid, group.getId());
-						return;
-					}
+					group.removeMember(studentUid);
 				}
 			}
 		}
@@ -1437,12 +1389,9 @@ public abstract class SectionManagerImpl implements SectionManager, SiteAdvisor 
 			if(site == null) {
 				site = group.getContainingSite();
 			}
-			try {
-				site.deleteGroup(group);
-			} catch (IllegalStateException e) {
-				log.error(".disbandSections: Group with id {} cannot be removed because is locked", group.getId());
-			}
+			site.removeGroup(group);
 		}
+		
 
 		try {
 			siteService().save(site);

@@ -26,15 +26,9 @@ import java.util.Set;
  
 public interface Topic extends MutableEntity {
 
-    /**
-     * @return
-     */
-    public List<Attachment> getAttachments();
+    public List getAttachments();
 
-    /**
-     * @param attachments
-     */
-    public void setAttachments(List<Attachment> attachments);
+    public void setAttachments(List attachments);
 
     public String getExtendedDescription();
 
@@ -64,15 +58,9 @@ public interface Topic extends MutableEntity {
     
     public void setBaseForum(BaseForum forum);
     
-    /**
-     * @return List<Message>
-     */
-    public List<Message> getMessages();
+    public List getMessages();
     
-    /**
-     * @param messages
-     */
-    public void setMessages(List<Message> messages);
+    public void setMessages(List messages);
 
     public void addAttachment(Attachment attachment);
     

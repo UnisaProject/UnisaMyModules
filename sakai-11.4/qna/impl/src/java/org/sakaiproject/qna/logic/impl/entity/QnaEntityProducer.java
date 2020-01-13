@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.EntityProducer;
@@ -44,14 +46,12 @@ import org.sakaiproject.site.api.SiteService;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class QnaEntityProducer implements EntityProducer, EntityTransferrer
 {
 	
 	public static final String REFERENCE_ROOT = Entity.SEPARATOR + "qna";
 	
+	private static Log log = LogFactory.getLog(QnaEntityProducer.class);
 	private EntityManager entityManager;
 	private SiteService siteService;
 	private QnaDao dao;

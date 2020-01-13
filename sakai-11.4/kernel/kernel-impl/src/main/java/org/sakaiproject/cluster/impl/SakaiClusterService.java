@@ -25,8 +25,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.cluster.api.ClusterNode;
 import org.sakaiproject.cluster.api.ClusterService;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -45,9 +45,11 @@ import org.sakaiproject.thread_local.api.ThreadLocalManager;
  * This class is it just manages it's own row in the DB and events are used to pass notifications to a node.
  * </p>
  */
-@Slf4j
 public class SakaiClusterService implements ClusterService
 {
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(SakaiClusterService.class);
+
 	/** The maintenance. */
 	protected Maintenance m_maintenance = null;
 
@@ -250,11 +252,11 @@ public class SakaiClusterService implements ClusterService
 			m_maintenance = new Maintenance();
 			m_maintenance.start();
 
-			log.info("init: refresh: " + m_refresh + " expired: " + m_expired + " ghostingPercent: " + m_ghostingPercent);
+			M_log.info("init: refresh: " + m_refresh + " expired: " + m_expired + " ghostingPercent: " + m_ghostingPercent);
 		}
 		catch (Exception t)
 		{
-			log.warn("init(): ", t);
+			M_log.warn("init(): ", t);
 		}
 	}
 
@@ -267,7 +269,7 @@ public class SakaiClusterService implements ClusterService
 		m_maintenance.stop();
 		m_maintenance = null;
 
-		log.info("destroy()");
+		M_log.info("destroy()");
 	}
 
 
@@ -312,7 +314,7 @@ public class SakaiClusterService implements ClusterService
 				}
 				catch (SQLException e)
 				{
-					log.warn("Failed to read result.", e);
+					M_log.warn("Failed to read result.", e);
 				}
 				return null;
 			}
@@ -322,11 +324,11 @@ public class SakaiClusterService implements ClusterService
 				new ClusterNodeImpl(m_serverConfigurationService.getServerId(), status, new Date()));
 		if (dbStatus == null)
 		{
-			log.warn("Failed to find ourselves in the cluster: "+ m_serverConfigurationService.getServerIdInstance());
+			M_log.warn("Failed to find ourselves in the cluster: "+ m_serverConfigurationService.getServerIdInstance());
 		}
 		else if (!status.equals(dbStatus.getStatus()))
 		{
-			log.warn("In memory status ("+ status+ ") different to DB ("+ dbStatus.getStatus()+ ")");
+			M_log.warn("In memory status ("+ status+ ") different to DB ("+ dbStatus.getStatus()+ ")");
 		}
 		return servers;
 	}
@@ -350,7 +352,7 @@ public class SakaiClusterService implements ClusterService
 	{
 		if (status != null && !(this.status.equals(status)))
 		{
-			log.info("Switching status from "+ this.status+ " to "+ status);
+			M_log.info("Switching status from "+ this.status+ " to "+ status);
 			this.status = status;
 			if (m_maintenance != null)
 			{
@@ -398,7 +400,7 @@ public class SakaiClusterService implements ClusterService
 			boolean ok = m_sqlService.dbWrite(statement, fields);
 			if (!ok)
 			{
-				log.warn("start(): dbWrite failed");
+				M_log.warn("start(): dbWrite failed");
 			}
 
 			m_maintenanceChecker = new Thread(this, "SakaiClusterService.Maintenance");
@@ -434,7 +436,7 @@ public class SakaiClusterService implements ClusterService
 			boolean ok = m_sqlService.dbWrite(statement, fields);
 			if (!ok)
 			{
-				log.warn("stop(): dbWrite failed: " + statement);
+				M_log.warn("stop(): dbWrite failed: " + statement);
 			}
 		}
 
@@ -464,7 +466,7 @@ public class SakaiClusterService implements ClusterService
 			ComponentManager.waitTillConfigured();
 			// Component manager is up so now we update our status.
 			status = Status.RUNNING;
-			if (log.isDebugEnabled()) log.debug("run()");
+			if (M_log.isDebugEnabled()) M_log.debug("run()");
 
 			while (!m_maintenanceCheckerStop)
 			{
@@ -479,7 +481,7 @@ public class SakaiClusterService implements ClusterService
 				}
 				catch (Exception e)
 				{
-					log.warn("exception: ", e);
+					M_log.warn("exception: ", e);
 				}
 				finally
 				{
@@ -521,7 +523,7 @@ public class SakaiClusterService implements ClusterService
 				}
 			}
 
-			if (log.isDebugEnabled()) log.debug("done");
+			if (M_log.isDebugEnabled()) M_log.debug("done");
 		}
 
 		private void ghostCleanup(String serverIdInstance)
@@ -551,21 +553,21 @@ public class SakaiClusterService implements ClusterService
 					boolean ok = m_sqlService.dbWrite(statement, fields);
 					if (!ok)
 					{
-						log.warn("run(): dbWrite failed: " + statement);
+						M_log.warn("run(): dbWrite failed: " + statement);
 					}
 
-					log.warn("run(): ghost-busting server: " + serverId + " from : " + serverIdInstance);
+					M_log.warn("run(): ghost-busting server: " + serverId + " from : " + serverIdInstance);
 				}
 
 				// Close all sessions left over from deleted servers.
 				int nbrClosed = m_usageSessionService.closeSessionsOnInvalidServers(getServers());
-				if ((nbrClosed > 0) && log.isInfoEnabled()) log.info("Closed " + nbrClosed + " orphaned usage session records");
+				if ((nbrClosed > 0) && M_log.isInfoEnabled()) M_log.info("Closed " + nbrClosed + " orphaned usage session records");
 
 				// Delete any orphaned locks from closed or missing sessions.
 				statement = clusterServiceSql.getOrphanedLockSessionsSql();
 				List sessions =  m_sqlService.dbRead(statement);
 				if (sessions.size() > 0) {
-					if (log.isInfoEnabled()) log.info("Found " + sessions.size() + " closed or deleted sessions in lock table");
+					if (M_log.isInfoEnabled()) M_log.info("Found " + sessions.size() + " closed or deleted sessions in lock table");
 					statement = clusterServiceSql.getDeleteLocksSql();
 					for (Iterator iSessions = sessions.iterator(); iSessions.hasNext();)
 					{
@@ -573,7 +575,7 @@ public class SakaiClusterService implements ClusterService
 						boolean ok = m_sqlService.dbWrite(statement, fields);
 						if (!ok)
 						{
-							log.warn("run(): dbWrite failed: " + statement);
+							M_log.warn("run(): dbWrite failed: " + statement);
 						}
 					}
 				}
@@ -582,7 +584,7 @@ public class SakaiClusterService implements ClusterService
 
 		private void updateOurStatus(String serverIdInstance)
 		{
-			if (log.isDebugEnabled()) log.debug("checking...");
+			if (M_log.isDebugEnabled()) M_log.debug("checking...");
 
 			// if we have been closed, reopen!
 			String statement = clusterServiceSql.getReadServerSql();
@@ -591,7 +593,7 @@ public class SakaiClusterService implements ClusterService
 			List results = m_sqlService.dbRead(statement, fields, new StatusSqlReader());
 			if (results.isEmpty())
 			{
-				log.warn("run(): server has been closed in cluster table, reopened: " + serverIdInstance);
+				M_log.warn("run(): server has been closed in cluster table, reopened: " + serverIdInstance);
 
 				statement = clusterServiceSql.getInsertServerSql();
 				fields = new Object[3];
@@ -601,7 +603,7 @@ public class SakaiClusterService implements ClusterService
 				boolean ok = m_sqlService.dbWrite(statement, fields);
 				if (!ok)
 				{
-					log.warn("start(): dbWrite failed");
+					M_log.warn("start(): dbWrite failed");
 				}
 			}
 
@@ -617,7 +619,7 @@ public class SakaiClusterService implements ClusterService
 				boolean ok = m_sqlService.dbWrite(statement, fields);
 				if (!ok)
 				{
-					log.warn("run(): dbWrite failed: " + statement);
+					M_log.warn("run(): dbWrite failed: " + statement);
 				}
 			}
 		}
@@ -637,7 +639,7 @@ public class SakaiClusterService implements ClusterService
 				}
 				catch (SQLException sqlException)
 				{
-					log.warn("Failed to read STATUS.", sqlException);
+					M_log.warn("Failed to read STATUS.", sqlException);
 				}
 				return status;
 			}
@@ -655,7 +657,7 @@ public class SakaiClusterService implements ClusterService
 			}
 			catch (IllegalArgumentException iae)
 			{
-				log.debug("Failed to convert to a status: "+ statusString);
+				M_log.debug("Failed to convert to a status: "+ statusString);
 			}
 		}
 		return status;
@@ -687,7 +689,7 @@ public class SakaiClusterService implements ClusterService
 				}
 				else
 				{
-					log.debug("Ignoring message for other node.");
+					M_log.debug("Ignoring message for other node.");
 				}
 			}
 		}

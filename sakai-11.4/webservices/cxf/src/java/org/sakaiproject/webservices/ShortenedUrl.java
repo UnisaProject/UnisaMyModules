@@ -24,7 +24,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.api.Session;
 
 /**
@@ -35,8 +36,9 @@ import org.sakaiproject.tool.api.Session;
 
 @WebService
 @SOAPBinding(style = SOAPBinding.Style.RPC, use = SOAPBinding.Use.LITERAL)
-@Slf4j
 public class ShortenedUrl extends AbstractWebService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ShortenedUrl.class);
 
     /**
      * Shorten a URL. Optionally specify the secure property to get a longer key, 22 chars vs 6.
@@ -70,7 +72,7 @@ public class ShortenedUrl extends AbstractWebService {
                 )
 
         {
-            log.warn("WS shorten(): " + e.getClass().getName() + " : " + e.getMessage());
+            LOG.warn("WS shorten(): " + e.getClass().getName() + " : " + e.getMessage());
             return "";
         }
 

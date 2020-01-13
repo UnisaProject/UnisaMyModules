@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -46,15 +45,14 @@ import com.sun.syndication.io.XmlReader;
  * @author Steve Swinsburg (steve.swinsburg@anu.edu.au)
  *
  */
-@Slf4j
 public class FeedParser {
 
     private SyndFeedInput input;
-
+	
 	public FeedParser() {
 		input  = new SyndFeedInput();
 	}
-
+	
 	/**
 	 * Parse the given feed url and return the raw type
 	 * @param feedUrl
@@ -76,17 +74,18 @@ public class FeedParser {
 			return feed;
 			
 		} catch (MalformedURLException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		} catch (FeedException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		} catch (IOException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 		return null;
 	}
-
+	
+	
 	/**
 	 * Parses the entries contained in an RSS feed, extracts the enclosures, converts them to an {@link Attachment}
 	 * adds them to the map with the entry uri as key.
@@ -144,7 +143,8 @@ public class FeedParser {
 		
 		return attachments;
 	}
-
+	
+	
 	/**
 	 * Helper to format the length from bytes into a human readable format eg 126 kB
 	 * @param length
@@ -153,5 +153,7 @@ public class FeedParser {
 	private static String formatLength(long length){
 		return FileUtils.byteCountToDisplaySize(length);
 	}
-
+	
+	
+	
 }

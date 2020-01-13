@@ -25,10 +25,10 @@ package org.sakaiproject.tool.assessment.services;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.tool.assessment.data.dao.questionpool.QuestionPoolItemData;
@@ -39,32 +39,23 @@ import org.sakaiproject.tool.assessment.facade.ItemFacade;
 import org.sakaiproject.tool.assessment.facade.QuestionPoolFacade;
 import org.sakaiproject.tool.assessment.facade.QuestionPoolIteratorFacade;
 
+//import osid.assessment.Item;
+
+
 /**
  * The QuestionPoolService calls the service locator to reach the
  * manager on the back end.
  * @author Rachel Gollub <rgollub@stanford.edu>
  */
- @Slf4j
- public class QuestionPoolService
+public class QuestionPoolService
 {
+    private Logger log = LoggerFactory.getLogger(QuestionPoolService.class);
 
   /**
    * Creates a new QuestionPoolService object.
    */
   public QuestionPoolService()
   {
-  }
-
-  /**
-   * Get all pools from the back end.
-   */
-  public List getAllPools()
-  {
-    List results = null;
-      results =
-        (List) PersistenceService.getInstance().
-           getQuestionPoolFacadeQueries().getAllPools();
-    return results;
   }
 
   /**
@@ -91,9 +82,9 @@ import org.sakaiproject.tool.assessment.facade.QuestionPoolIteratorFacade;
   /**
    * Get basic info for pools(just id and  title)  for displaying in pulldown .
    */
-  public List getBasicInfoOfAllPools(String agentId)
+  public ArrayList getBasicInfoOfAllPools(String agentId)
   {
-    List results = null;
+    ArrayList results = null;
       results = PersistenceService.getInstance().
            getQuestionPoolFacadeQueries().getBasicInfoOfAllPools(agentId);
     return results;
@@ -207,12 +198,17 @@ import org.sakaiproject.tool.assessment.facade.QuestionPoolIteratorFacade;
   /**
    * Get the size of a subpool.
    */
-  public long getSubPoolSize(Long poolId)
+  public int getSubPoolSize(Long poolId)
   {
-    long poolSize;
-    try {
-      poolSize = PersistenceService.getInstance().getQuestionPoolFacadeQueries().getSubPoolSize(poolId);
-    } catch(Exception e) {
+    int poolSize = 0;
+    try
+    {
+      poolSize =
+	  PersistenceService.getInstance().getQuestionPoolFacadeQueries().
+            getSubPoolSize(poolId);
+    }
+    catch(Exception e)
+    {
       log.error(e.getMessage(), e);
       throw new RuntimeException(e);
     }
@@ -243,9 +239,9 @@ import org.sakaiproject.tool.assessment.facade.QuestionPoolIteratorFacade;
   /**
    * Get all scores for a published assessment from the back end.
    */
-  public List getAllItems(Long poolId)
+  public ArrayList getAllItems(Long poolId)
   {
-    List results = null;
+    ArrayList results = null;
     try {
       results =
         new ArrayList(PersistenceService.getInstance().
@@ -255,23 +251,6 @@ import org.sakaiproject.tool.assessment.facade.QuestionPoolIteratorFacade;
     }
     return results;
   }
-
-  /**
-   * Get all scores for a published assessment from the back end.
-   */
-  public ArrayList getAllItemsIds(Long poolId)
-  {
-    ArrayList results = null;
-    try {
-      results =
-              new ArrayList(PersistenceService.getInstance().
-                      getQuestionPoolFacadeQueries().getAllItemsIds(poolId));
-    } catch (Exception e) {
-        log.error(e.getMessage(), e);
-    }
-    return results;
-  }
-
 
 
   /**
@@ -488,7 +467,7 @@ import org.sakaiproject.tool.assessment.facade.QuestionPoolIteratorFacade;
     }
   }
 
-  public Map getQuestionPoolItemMap(){
+  public HashMap getQuestionPoolItemMap(){
     return PersistenceService.getInstance().getQuestionPoolFacadeQueries().
         getQuestionPoolItemMap();
   }
@@ -526,9 +505,9 @@ import org.sakaiproject.tool.assessment.facade.QuestionPoolIteratorFacade;
   /**
    * Get the count of items for all pools for one user
    */
-   public Map<Long, Integer> getCountItemsForUser(String agentId)
+   public HashMap<Long, Integer> getCountItemsForUser(String agentId)
    {
-      Map<Long, Integer> result = new HashMap<Long, Integer>();
+      HashMap<Long, Integer> result = new HashMap<Long, Integer>();
       try {
         result = PersistenceService.getInstance().getQuestionPoolFacadeQueries().getCountItemFacadesForUser(agentId);
       } catch (Exception e) {

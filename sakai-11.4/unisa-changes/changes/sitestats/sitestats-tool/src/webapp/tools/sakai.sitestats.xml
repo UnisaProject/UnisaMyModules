@@ -4,7 +4,7 @@
 	<tool id="sakai.sitestats"
     	title="Site Stats"
         description="For showing site statistics by user, event, or resource.">
-    	<!-- Unisa change to add more categories -->
+    	
     	<category name="course" />
 		<category name="project" />
 		<category name="PostGraduate" />

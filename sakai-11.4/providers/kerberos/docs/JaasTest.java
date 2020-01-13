@@ -22,9 +22,7 @@
 import javax.security.auth.*;
 import javax.security.auth.callback.*;
 import javax.security.auth.login.*;
-
 import com.sun.security.auth.callback.TextCallbackHandler;
-import lombok.extern.slf4j.Slf4j;
 
 /*
  * JaasTest -- attempts to authenticate a user and reports success or an error message
@@ -36,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
  *  (based on code from various contributors)
  *
  */
-@Slf4j
 public class JaasTest {
 
     public static void main(String[] args) {
@@ -49,8 +46,8 @@ public class JaasTest {
    
 	} else testcontext = args[0];
 
-	log.info("\nLoginContext for testing: " + testcontext);
-	log.info("Enter a username and password to test this LoginContext.\n");
+	System.out.println("\nLoginContext for testing: " + testcontext);
+	System.out.println("Enter a username and password to test this LoginContext.\n");
 
 	LoginContext lc = null;
 	try {
@@ -59,11 +56,11 @@ public class JaasTest {
 
 	} catch (LoginException le) {
             
-		log.error("Cannot create LoginContext. " + le.getMessage());
+		System.err.println("Cannot create LoginContext. " + le.getMessage());
 		System.exit(-1);
 
 	} catch (SecurityException se) {
-		log.error("Cannot create LoginContext. " + se.getMessage());
+		System.err.println("Cannot create LoginContext. " + se.getMessage());
 		System.exit(-1);
 	} 
 
@@ -75,10 +72,12 @@ public class JaasTest {
 
         } catch (LoginException le) {
 
-		log.error("\nAuthentication FAILED.");
-		log.error("Error message:\n --> " + le.getMessage());
+		System.err.println("\nAuthentication FAILED.");
+		System.err.println("Error message:\n --> " + le.getMessage());
 		System.exit(-1);
         }
-		log.info("Authentication SUCCEEDED.");
+		System.out.println("Authentication SUCCEEDED.");
     }
 }
+
+

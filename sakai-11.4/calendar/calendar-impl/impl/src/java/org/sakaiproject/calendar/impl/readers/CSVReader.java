@@ -24,11 +24,9 @@ package org.sakaiproject.calendar.impl.readers;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +34,7 @@ import java.util.Map;
 
 import org.sakaiproject.calendar.impl.GenericCalendarImporter;
 import org.sakaiproject.exception.ImportException;
+import org.sakaiproject.time.api.TimeBreakdown;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
@@ -74,9 +73,8 @@ public class CSVReader extends Reader
 	 * Import a CSV file from a stream and callback on each row.
 	 * @param stream Stream of CSV (or other delimited data)
 	 * @param handler Callback for each row.
-	 * @return tzid of calendar (returns null if it does not exist) 
 	 */
-	public String importStreamFromDelimitedFile(
+	public void importStreamFromDelimitedFile(
 		InputStream stream,
 		ReaderImportRowHandler handler) throws ImportException
 	{
@@ -139,9 +137,6 @@ public class CSVReader extends Reader
 			// If we get this far, increment the line counter.
 			lineNumber++;
 		}
-		
-		// tzid of calendar
-		return null;
 	}
 
 	/**
@@ -193,9 +188,9 @@ public class CSVReader extends Reader
 	/**
 	 * Get the default column map for CSV files.
 	 */
-	public Map<String, String> getDefaultColumnMap()
+	public Map getDefaultColumnMap()
 	{
-		Map<String, String> columnMap = new HashMap<>();
+		Map columnMap = new HashMap();
 
 		columnMap.put(GenericCalendarImporter.LOCATION_DEFAULT_COLUMN_HEADER, GenericCalendarImporter.LOCATION_PROPERTY_NAME);
 		columnMap.put(GenericCalendarImporter.ITEM_TYPE_DEFAULT_COLUMN_HEADER, GenericCalendarImporter.ITEM_TYPE_PROPERTY_NAME);
@@ -213,18 +208,10 @@ public class CSVReader extends Reader
 	}
 
 	/* (non-Javadoc)
-	 * @see org.sakaiproject.tool.calendar.schedimportreaders.Reader#filterEvents(java.util.List, java.lang.String[], String)
+	 * @see org.sakaiproject.tool.calendar.schedimportreaders.Reader#filterEvents(java.util.List, java.lang.String[])
 	 */
-	public List filterEvents(List events, String[] customFieldNames, String tzid) throws ImportException
+	public List filterEvents(List events, String[] customFieldNames) throws ImportException
 	{
-		ZoneId dstZoneId = ZoneId.of(getTimeService().getLocalTimeZone().getID());		
-		ZoneId srcZoneId;
-		if (tzid != null) {
-			srcZoneId = ZoneId.of(tzid);
-		} else {
-			srcZoneId = dstZoneId;
-		}
-		
 		setColumnDelimiter(",");
 		
 		Map augmentedMapping = getDefaultColumnMap();
@@ -253,39 +240,87 @@ public class CSVReader extends Reader
 		{
 			Map eventProperties = (Map)it.next();
 
-			Date startDate = (Date) eventProperties.get(defaultHeaderMap.get(GenericCalendarImporter.DATE_DEFAULT_COLUMN_HEADER));
 			Date startTime = (Date) eventProperties.get(defaultHeaderMap.get(GenericCalendarImporter.START_TIME_DEFAULT_COLUMN_HEADER));
+			TimeBreakdown startTimeBreakdown = null;
+			
+			if ( startTime != null )
+			{
+            // if the source time zone were known, this would be
+            // a good place to set it: startCal.setTimeZone()
+            GregorianCalendar startCal = new GregorianCalendar();
+            startCal.setTimeInMillis( startTime.getTime() );
+            startTimeBreakdown = 
+                    getTimeService().newTimeBreakdown( 0, 0, 0, 
+                       startCal.get(Calendar.HOUR_OF_DAY),
+                       startCal.get(Calendar.MINUTE),
+                       startCal.get(Calendar.SECOND),
+                        0 );
+			}
+			
 			Integer durationInMinutes = (Integer)eventProperties.get(defaultHeaderMap.get(GenericCalendarImporter.DURATION_DEFAULT_COLUMN_HEADER));
 
-			if (startTime == null ) {
-				Integer line = Integer.valueOf(lineNumber);
-				String msg = (String)rb.getFormattedMessage("err_no_stime_on", new Object[]{line});
-				throw new ImportException( msg );
-			}
-			if (startDate == null) {
-	            Integer line = Integer.valueOf(lineNumber);
-				String msg = (String)rb.getFormattedMessage("err_no_start", new Object[]{line});
-				throw new ImportException( msg );
-			}
-			if (durationInMinutes == null) {
-				Integer line = Integer.valueOf(lineNumber);
-				String msg = (String)rb.getFormattedMessage("err_no_dur", new Object[]{line});
+			if ( durationInMinutes == null )
+			{
+            Integer line = Integer.valueOf(lineNumber);
+				String msg = (String)rb.getFormattedMessage("err_no_dur", 
+                                                        new Object[]{line});
 				throw new ImportException( msg );
 			}
 			
-			// Raw date + raw time
-			Instant startInstant = startDate.toInstant().plusMillis(startTime.getTime());
+			Date endTime =
+				new Date(
+					startTime.getTime()
+						+ (durationInMinutes.longValue() * 60 * 1000));
 
-			// Raw + calendar/owner TZ's offset
-			ZonedDateTime srcZonedDateTime = startInstant.atZone(srcZoneId);
-			long millis = startInstant.plusMillis(srcZonedDateTime.getOffset().getTotalSeconds() * 1000).toEpochMilli();
+			TimeBreakdown endTimeBreakdown = null;
+
+			if ( endTime != null )
+			{
+            // if the source time zone were known, this would be
+            // a good place to set it: endCal.setTimeZone()
+            GregorianCalendar endCal = new GregorianCalendar();
+            endCal.setTimeInMillis( endTime.getTime() );
+            endTimeBreakdown = 
+                    getTimeService().newTimeBreakdown( 0, 0, 0, 
+                       endCal.get(Calendar.HOUR_OF_DAY),
+                       endCal.get(Calendar.MINUTE),
+                       endCal.get(Calendar.SECOND),
+                       0 );
+			}
+
+			Date startDate = (Date) eventProperties.get(defaultHeaderMap.get(GenericCalendarImporter.DATE_DEFAULT_COLUMN_HEADER));
+			TimeBreakdown startDateBreakdown = null;
 			
-			// Duration of event
-			Duration gapMinutes = Duration.ofMinutes(durationInMinutes);
+			if ( startDate != null )
+			{
+            // if the source time zone were known, this would be
+            // a good place to set it: endCal.setTimeZone()
+            GregorianCalendar startCal = new GregorianCalendar();
+            startCal.setTimeInMillis( startDate.getTime() );
+            
+            startTimeBreakdown.setYear( startCal.get(Calendar.YEAR) );
+            startTimeBreakdown.setMonth( startCal.get(Calendar.MONTH)+1 );
+            startTimeBreakdown.setDay( startCal.get(Calendar.DAY_OF_MONTH) );
+            
+            endTimeBreakdown.setYear( startCal.get(Calendar.YEAR) );
+            endTimeBreakdown.setMonth( startCal.get(Calendar.MONTH)+1 );
+            endTimeBreakdown.setDay( startCal.get(Calendar.DAY_OF_MONTH) );
+			}
+			else
+			{
+            Integer line = Integer.valueOf(lineNumber);
+				String msg = (String)rb.getFormattedMessage("err_no_start", 
+                                                        new Object[]{line});
+				throw new ImportException( msg );
+			}
 			
-			// Time Service will ajust to current user's TZ
-			eventProperties.put(GenericCalendarImporter.ACTUAL_TIMERANGE,
-				getTimeService().newTimeRange(millis, gapMinutes.toMillis()));
+			eventProperties.put(
+				GenericCalendarImporter.ACTUAL_TIMERANGE,
+				getTimeService().newTimeRange(
+               getTimeService().newTimeLocal(startTimeBreakdown),
+               getTimeService().newTimeLocal(endTimeBreakdown),
+					true,
+					false));
 					
 			lineNumber++;
 		}

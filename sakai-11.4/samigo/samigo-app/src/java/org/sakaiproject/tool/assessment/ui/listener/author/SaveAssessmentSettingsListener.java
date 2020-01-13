@@ -19,12 +19,13 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.ui.listener.author;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
@@ -32,8 +33,8 @@ import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.api.SamigoApiFactory;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentAccessControl;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentAccessControlIfc;
@@ -53,10 +54,11 @@ import org.sakaiproject.util.FormattedText;
  * @author Ed Smiley
  * @version $Id$
  */
-@Slf4j
+
 public class SaveAssessmentSettingsListener
     implements ActionListener
 {
+  private static Logger log = LoggerFactory.getLogger(SaveAssessmentSettingsListener.class);
   //private static final GradebookServiceHelper gbsHelper = IntegrationContextFactory.getInstance().getGradebookServiceHelper();
   //private static final boolean integrated = IntegrationContextFactory.getInstance().isIntegrated();
 
@@ -74,7 +76,7 @@ public class SaveAssessmentSettingsListener
     String assessmentId=String.valueOf(assessmentSettings.getAssessmentId()); 
     AssessmentService assessmentService = new AssessmentService();
     SaveAssessmentSettings s = new SaveAssessmentSettings();
-    String assessmentName = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(assessmentSettings.getTitle());
+    String assessmentName = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(log, assessmentSettings.getTitle());
  
     // check if name is empty
     if(assessmentName!=null &&(assessmentName.trim()).equals("")){
@@ -102,13 +104,6 @@ public class SaveAssessmentSettingsListener
     	context.addMessage(null,new FacesMessage(dueDateErr));
     	error=true;
     }
-
-    if(assessmentSettings.getDueDate() == null && assessmentSettings.getRetractDate() != null && AssessmentAccessControlIfc.ACCEPT_LATE_SUBMISSION.toString().equals(assessmentSettings.getLateHandling())){
-        String dueDateErr = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages", "due_null_with_retract_date");
-        context.addMessage(null,new FacesMessage(dueDateErr));
-        error = true;
-    }
-
     // check if late submission date is valid
     if(!assessmentSettings.getIsValidRetractDate()){
     	String retractDateErr = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","invalid_retrack_date");
@@ -259,7 +254,7 @@ public class SaveAssessmentSettingsListener
     s.save(assessmentSettings, false);
 
     // reset the core listing in case assessment title changes
-    List<AssessmentFacade> assessmentList = assessmentService.getBasicInfoOfAllActiveAssessments(
+    ArrayList assessmentList = assessmentService.getBasicInfoOfAllActiveAssessments(
     		author.getCoreAssessmentOrderBy(),author.isCoreAscending());
     Iterator iter = assessmentList.iterator();
 	while (iter.hasNext()) {

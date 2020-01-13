@@ -28,12 +28,11 @@ Headings for delivery pages, needs to have msg=DeliveryMessages.properties, etc.
    <h:outputText value="#{delivery.assessmentTitle}" escape="false"/>
 </h1>
 <%-- NAV BAR --%>
-  <ul class="navIntraTool actionToolbar" role="menu">
+<p class="navIntraTool">
   <h:panelGroup rendered="#{(delivery.feedbackComponent.showImmediate || delivery.feedbackOnDate) 
                          && (delivery.actionString=='previewAssessment'
                              || delivery.actionString=='takeAssessment'
                              || delivery.actionString=='takeAssessmentViaUrl')}">
-    <li role="menuitem" class="firstToolBarItem"><span>
 
 <!-- SHOW FEEDBACK LINK FOR TAKE ASSESSMENT AND TAKE ASSESSMENT VIA URL -->
     <h:commandLink title="#{commonMessages.feedback}" action="#{delivery.getOutcome}" 
@@ -46,15 +45,22 @@ Headings for delivery pages, needs to have msg=DeliveryMessages.properties, etc.
     </h:commandLink>
 
 <!-- SHOW FEEDBACK LINK FOR PREVIEW ASSESSMENT -->
-    <h:outputText value="#{deliveryMessages.show_feedback_preview}" 
-         rendered="#{delivery.actionString=='previewAssessment' && !(delivery.pageContents.isNoParts && delivery.navigation eq '1')}" />
+    <h:commandLink title="#{commonMessages.feedback}" action="takeAssessment" onmouseup="saveTime();" 
+       rendered="#{delivery.actionString=='previewAssessment' && !(delivery.pageContents.isNoParts && delivery.navigation eq '1')}" >
+     <h:outputText value="#{deliveryMessages.show_feedback}" />
+     <f:param name="showfeedbacknow" value="true" />
+     <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.delivery.DeliveryActionListener" />
+    </h:commandLink>
 
-  </span></li>
+    <h:outputText value=" #{deliveryMessages.separator} "
+      rendered="#{(delivery.actionString=='previewAssessment'
+                   || delivery.actionString=='takeAssessment'
+                   || delivery.actionString=='takeAssessmentViaUrl')
+                && delivery.navigation ne '1'}"/>
   </h:panelGroup >
 
 
 <!-- TABLE OF CONTENT LINK FOR TAKE ASSESSMENT AND TAKE ASSESSMENT VIA URL -->
-  <li role="menuitem"><span>
   <h:commandLink title="#{deliveryMessages.t_tableOfContents}" action="#{delivery.getOutcome}" 
      id="showTOC" onmouseup="saveTime(); serializeImagePoints();"
      rendered="#{(delivery.actionString=='takeAssessment'
@@ -81,8 +87,7 @@ Headings for delivery pages, needs to have msg=DeliveryMessages.properties, etc.
     <f:actionListener type="org.sakaiproject.tool.assessment.ui.listener.select.SelectActionListener" />
     <h:outputText value="#{deliveryMessages.button_return_select}" />
   </h:commandLink>
-  </span></li>
-</ul>
+</p>
 
 <!-- GRADER COMMENT FOR REVIEW ASSESSMENT -->
 <f:verbatim><br /></f:verbatim> 

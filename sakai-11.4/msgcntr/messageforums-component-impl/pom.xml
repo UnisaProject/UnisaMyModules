@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.sakaiproject.msgcntr</groupId>
     <artifactId>msgcntr</artifactId>
-    <version>12.6</version>
+    <version>11.4</version>
   </parent>
   <name>Sakai Message Forums Component Implementation</name>
   <groupId>org.sakaiproject.msgcntr</groupId>
@@ -14,9 +14,9 @@
     <url>http://sakaiproject.org/</url>
   </organization>
   <inceptionYear>2005</inceptionYear>
-  <packaging>sakai-component</packaging>
+  <packaging>jar</packaging>
   <properties>
-    <deploy.target>components</deploy.target>
+    <deploy.target />
   </properties>
   <dependencies>
     <dependency>
@@ -73,19 +73,19 @@
     </dependency>
     <dependency>
       <groupId>org.sakaiproject.common</groupId>
-      <artifactId>sakai-common-api</artifactId>
+      <artifactId>sakai-common-type-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.sakaiproject.common</groupId>
+      <artifactId>sakai-common-manager-api</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>com.sun.mail</groupId>
-        <artifactId>javax.mail</artifactId>
+        <groupId>javax.mail</groupId>
+        <artifactId>mail</artifactId>
     </dependency>
     <dependency>
     	<groupId>org.sakaiproject.search</groupId>
@@ -98,11 +98,6 @@
     <dependency>
         <groupId>org.sakaiproject.scheduler</groupId>
         <artifactId>scheduler-api</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.sakaiproject.kernel</groupId>
-        <artifactId>sakai-kernel-private</artifactId>
-        <scope>compile</scope>
     </dependency>
   </dependencies>
   <build>

@@ -32,7 +32,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
 import javax.faces.render.Renderer;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.tool.assessment.services.assessment.AssessmentService;
@@ -43,6 +44,8 @@ import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.Web;
 
+
+
 /**
  *
  * <p>Copyright: Copyright (c) 2004 Sakai</p>
@@ -52,9 +55,9 @@ import org.sakaiproject.util.Web;
  * @author Joshua Ryan joshua.ryan@asu.edu (added FCKEditor)
  * @version $Id$
  */
-@Slf4j
 public class RichTextEditArea extends Renderer
 {
+  private static Logger log = LoggerFactory.getLogger(RichTextEditArea.class);	
 
   String editor = ServerConfigurationService.getString("wysiwyg.editor");
   
@@ -264,7 +267,7 @@ public class RichTextEditArea extends Renderer
     
     // if use hid the FCK editor, we treat it as text editor
 	if ("firsttime".equals(current_status)) {
-		finalValue = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(newValue);
+		finalValue = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(log, newValue);
 	}
 	else {
 		StringBuilder alertMsg = new StringBuilder();

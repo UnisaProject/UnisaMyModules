@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.pbooks"
+		title="Booklist Management"
+		description="Booklist Management">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

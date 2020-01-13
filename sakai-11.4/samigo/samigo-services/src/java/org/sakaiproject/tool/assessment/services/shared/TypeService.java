@@ -19,11 +19,13 @@
  *
  **********************************************************************************/
 
+
 package org.sakaiproject.tool.assessment.services.shared;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.tool.assessment.facade.TypeFacade;
 import org.sakaiproject.tool.assessment.services.PersistenceService;
@@ -34,9 +36,9 @@ import org.sakaiproject.tool.assessment.services.PersistenceService;
  * manager on the back end.
  * @author Rachel Gollub <rgollub@stanford.edu>
  */
-@Slf4j
 public class TypeService
 {
+  private Logger log = LoggerFactory.getLogger(TypeService.class);
 
   /**
    * Creates a new QuestionPoolService object.

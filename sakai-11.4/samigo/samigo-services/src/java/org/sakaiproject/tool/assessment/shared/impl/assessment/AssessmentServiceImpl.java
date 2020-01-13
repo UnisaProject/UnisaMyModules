@@ -23,6 +23,9 @@ package org.sakaiproject.tool.assessment.shared.impl.assessment;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentTemplateData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentTemplateIfc;
@@ -40,6 +43,7 @@ import org.sakaiproject.tool.assessment.services.assessment.AssessmentServiceExc
  */
 public class AssessmentServiceImpl implements AssessmentServiceAPI
 {
+  private Logger log = LoggerFactory.getLogger(AssessmentServiceImpl.class);
 
   /**
    * Get assessment template from id string.

@@ -20,15 +20,17 @@
  **********************************************************************************/
 
 package org.sakaiproject.tool.assessment.data.dao.assessment;
-
 import java.io.IOException;
 import java.io.Serializable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentBaseIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.SecuredIPAddressIfc;
 
 public class PublishedSecuredIPAddress
     implements Serializable, SecuredIPAddressIfc{
+  static Logger errorLogger = LoggerFactory.getLogger("errorLogger");
 
   private static final long serialVersionUID = 7526471155622776147L;
 
@@ -85,4 +87,5 @@ public class PublishedSecuredIPAddress
       ClassNotFoundException {
     in.defaultReadObject();
   }
+
 }

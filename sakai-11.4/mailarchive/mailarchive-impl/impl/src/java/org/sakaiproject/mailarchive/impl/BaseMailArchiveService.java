@@ -25,18 +25,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
-
 import javax.mail.internet.MimeUtility;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang.StringUtils;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.alias.api.AliasService;
 import org.sakaiproject.authz.cover.FunctionManager;
 import org.sakaiproject.authz.cover.SecurityService;
@@ -71,17 +63,24 @@ import org.sakaiproject.time.cover.TimeService;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.util.BaseResourcePropertiesEdit;
 import org.sakaiproject.util.FormattedText;
+import org.apache.commons.lang.StringUtils;
 import org.sakaiproject.util.Xml;
 import org.sakaiproject.util.Web;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * <p>
  * BaseMailArchiveService extends the BaseMessage for the specifics of MailArchive.
  * </p>
  */
-@Slf4j
 public abstract class BaseMailArchiveService extends BaseMessage implements MailArchiveService, ContextObserver
 {
+	/** Our logger. */
+	private static Logger M_log = LoggerFactory.getLogger(BaseMailArchiveService.class);
+
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Constructors, Dependencies and their setter methods
 	 *********************************************************************************************************************************************************************************************************************************************************/
@@ -147,11 +146,11 @@ public abstract class BaseMailArchiveService extends BaseMessage implements Mail
 			// entity producer registration
 			m_entityManager.registerEntityProducer(this, REFERENCE_ROOT);
 
-			log.info("init()");
+			M_log.info("init()");
 		}
 		catch (Throwable t)
 		{
-			log.warn("init(): ", t);
+			M_log.warn("init(): ", t);
 		}
 
 	} // init
@@ -503,7 +502,7 @@ public abstract class BaseMailArchiveService extends BaseMessage implements Mail
 					}
 				}
 				else
-					log.warn("parse(): unknown message subtype: " + subType + " in ref: " + reference);
+					M_log.warn("parse(): unknown message subtype: " + subType + " in ref: " + reference);
 			}
 
 			ref.set(APPLICATION_ID, subType, id, container, context);
@@ -1157,7 +1156,7 @@ public abstract class BaseMailArchiveService extends BaseMessage implements Mail
 		 */
 		public String getHtmlBody()
 		{
-			return FormattedText.getHtmlBody(m_html_body);
+			return m_html_body;
 		} // getHtmlBody
 
 		/**
@@ -1168,7 +1167,7 @@ public abstract class BaseMailArchiveService extends BaseMessage implements Mail
 		public String getFormattedBody()
 		{
 			if ( getHtmlBody() != null && getHtmlBody().length() > 0 )
-				return getHtmlBody();
+				return m_html_body;
 			else 
 				return Web.encodeUrlsAsHtml( FormattedText.convertPlaintextToFormattedText(m_body) );
 				
@@ -1334,7 +1333,7 @@ public abstract class BaseMailArchiveService extends BaseMessage implements Mail
 			catch (UnsupportedEncodingException e)
 			{
 				// if unable to decode RFC address, just return address as is
-				log.debug(this+".getFromAddress "+e.toString());
+				M_log.debug(this+".getFromAddress "+e.toString());
 			}
 			
 			return fromAddress;
@@ -1441,3 +1440,4 @@ public abstract class BaseMailArchiveService extends BaseMessage implements Mail
 	}
 
 } // BaseMailArchiveService
+

@@ -15,11 +15,8 @@
 		<category name="project" />
         <category name="portfolio" />
 		<category name="myworkspace" />
-			<!-- unisa change -->
 		<category name="onlcourse" />
 		<category name="group" />
-			<!--end unisa change -->
-		
 
 		<!-- Allow this to be set -->
 		<configuration name="functions.require" /> 
@@ -78,10 +75,10 @@
 
 
 	</tool>
-  <!-- unisa change: change title -->
+
     <tool
             id="sakai.iframe.site"
-              title="Site Information Display"
+            title="Site Information Display"
             description="For displaying Site information.">
 
         <configuration name="height" value="600px" />

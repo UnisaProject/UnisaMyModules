@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.studentlist"
+		title="Student List"
+		description="Provides a lecturer with a list of student details">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

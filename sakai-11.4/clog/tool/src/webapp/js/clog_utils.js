@@ -84,7 +84,19 @@ clog.utils = {
         return false;
     },
     attachProfilePopup: function () {
-        profile.attachPopups($('.profile'));
+
+        $('a.profile').cluetip({
+            width: '620px',
+            cluetipClass: 'clog',
+            sticky: true,
+            dropShadow: false,
+            arrows: true,
+            mouseOutClose: true,
+            closeText: '<img src="/library/image/silk/cross.png" alt="close" />',
+            closePosition: 'top',
+            showTitle: false,
+            hoverIntent: true
+        });
     },
     formatDate: function (millis) {
 
@@ -201,7 +213,7 @@ clog.utils = {
             'content': content,
             'groups': groups,
             'siteId': clog.siteId,
-            'mode': isPublish
+            'mode': isPublish ? "publish" : null
         };
                 
         jQuery.ajax( {
@@ -241,27 +253,26 @@ clog.utils = {
     },
     saveComment: function (wysiwygEditor) {
         
-		var comment = {
- 			'id': $('#clog_comment_id_field').val(),
-			'postId': clog.currentPost.id,
-			'content': clog.sakai.getEditorData(wysiwygEditor,'clog_content_editor'),
-			'siteId': clog.siteId,
-			'fromSamepage': true
-		};
+        var comment = {
+                'id': $('#clog_comment_id_field').val(),
+                'postId': clog.currentPost.id,
+                'content': clog.sakai.getEditorData(wysiwygEditor,'clog_content_editor'),
+                'siteId': clog.siteId
+                };
 
-		jQuery.ajax( {
-			url: "/direct/clog-comment/new",
-			type: 'POST',
-			data: comment,
-			dataType: 'text',
-			timeout: clog.AJAX_TIMEOUT,
-			success: function (id) {
-				clog.switchState('post',comment);
-			},
-			error : function (xmlHttpRequest, textStatus, error) {
-				alert("Failed to save comment. Status: " + textStatus + '. Error: ' + error);
-			}
-		});
+        jQuery.ajax( {
+            url: "/direct/clog-comment/new",
+            type: 'POST',
+            data: comment,
+            dataType: 'text',
+            timeout: clog.AJAX_TIMEOUT,
+            success: function (id) {
+                clog.switchState('viewAllPosts');
+            },
+            error : function (xmlHttpRequest, textStatus, error) {
+                alert("Failed to save comment. Status: " + textStatus + '. Error: ' + error);
+            }
+        });
 
         return false;
     },
@@ -366,11 +377,12 @@ clog.utils = {
 
         return false;
     },
-    findPost: function (postId, callback, fromSamepage) {
+    findPost: function (postId, callback) {
+        
+        if (!clog.currentPosts) {
 
-        if (!clog.currentPosts || fromSamepage) {
-            jQuery.ajax({
-                url: "/direct/clog/post/" + postId + ".json",
+            jQuery.ajax( {
+                url: "/direct/clog-post/" + postId + ".json",
                 dataType: "json",
                 cache: false,
                 timeout: clog.AJAX_TIMEOUT,
@@ -394,7 +406,7 @@ clog.utils = {
         if (!confirm(clog.i18n.delete_comment_message)) {
             return false;
         }
-
+        
         jQuery.ajax( {
             url: "/direct/clog-comment/" + commentId + "?siteId=" + clog.siteId,
             type:'DELETE',
@@ -421,8 +433,6 @@ clog.utils = {
                         || (clog.currentUserPermissions.postUpdateOwn && p.creatorId === clog.userId);
         p.isModified = p.modifiedDate > p.createdDate;
 
-        p.totalComments = p.comments.length;
-
         p.comments.forEach(function (c) {
 
             c.modified = c.modifiedDate > c.createdDate;
@@ -437,31 +447,12 @@ clog.utils = {
     renderTemplate: function (name, data, output) {
 
         var template = Handlebars.templates[name];
-        var el = document.getElementById(output);
-
-        if (el) {
-          el.innerHTML = template(data);
-        } else {
-          if (console) console.log('No element for id: ' + output);
-        }
+        document.getElementById(output).innerHTML = template(data);
     },
     renderPost: function (post, output) {
 
         this.decoratePost(post);
         this.renderTemplate('post', post, output);
-        $('#clog-comments-show-' + post.id).click(function (e) {
-
-            $('#clog-comments-' + post.id).show();
-            $(this).hide();
-            $('#clog-comments-hide-' + post.id).show();
-        });
-
-        $('#clog-comments-hide-' + post.id).click(function (e) {
-
-            $('#clog-comments-' + post.id).hide();
-            $(this).hide();
-            $('#clog-comments-show-' + post.id).show();
-        });
         if (typeof MathJax !== 'undefined') { MathJax.Hub.Queue(["Typeset",MathJax.Hub]); }
     },
     renderPageOfPosts: function (args) {
@@ -527,7 +518,7 @@ clog.utils = {
                     });
 
                     if (!clog.settings.showBody) {
-                        $('.clog-body').hide();
+                        $('.clog_body').hide();
                     }
 
                     loadImage.hide();
@@ -548,7 +539,7 @@ clog.utils = {
             $('#clog-authors').html('');
         }
 
-        var url = '/direct/clog-author/authors.json?siteId=' + clog.siteId + '&page=' + clog.page;
+        var url = '/direct/clog-author/authors.json?siteId=' + clog.siteId;
 
         if (args && args.sort) {
             url += '&sort=' + args.sort;
@@ -560,17 +551,6 @@ clog.utils = {
             cache: false,
             timeout: clog.AJAX_TIMEOUT,
             success: function (data) {
-
-                if (data.status === 'END') {
-                    $(window).off('scroll.clog');
-                    loadImage.hide();
-                } else {
-                    $(window).off('scroll.clog').on('scroll.clog', clog.utils.getScrollFunction(args, clog.utils.renderPageOfMembers));
-                }
-
-                if (clog.page == 0) {
-                    $('#clog-authors-total').html(data.authorsTotal);
-                }
 
                 var authors = data.authors;
 
@@ -585,9 +565,16 @@ clog.utils = {
 
                     clog.utils.attachProfilePopup();
                     loadImage.hide();
+                    
+                    $("#clog_author_table")
+						.tablesorter({widthFixed: true, widgets: ['zebra']})
+						.tablesorterPager({ container: $("#clogAuthorPager"), positionFixed: false });
+					
+                    $('.pagedisplay').prop('disabled', true);                    
+                    $(".pagesize").append('<option value="' + authors.length  + '">All</option>');
+                    
                 });
 
-                clog.page += 1;
             },
             error : function (xmlHttpRequest, status, errorThrown) {
                 alert("Failed to get authors. Reason: " + errorThrown);
@@ -628,8 +615,4 @@ clog.utils = {
 
 Handlebars.registerHelper('translate', function (key) {
     return clog.i18n[key];
-});
-
-Handlebars.registerHelper('escapequote', function(variable) {
-  return variable.replace(/\'/g, "\\'");
 });

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans >
+    <form-bean name="mylifesupportform" type="za.ac.unisa.lms.tools.mylifesupport.forms.MyLifeSupportForm" />
+ 
+    
+  </form-beans>
+  
+   <global-exceptions />
+  <global-forwards />
+  <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.mylifesupport.actions.DefaultAction">
+       <forward
+        name="default"
+        path="/myLifeSupport.do?action=input"
+        contextRelative="true" />
+        
+    </action>
+    
+     <action
+      attribute="mylifesupportform"
+          name="mylifesupportform"
+      parameter="action"
+      path="/myLifeSupport"
+      scope="session"
+      type="za.ac.unisa.lms.tools.mylifesupport.actions.MyLifeSupportAction"
+      validate="false">
+        
+      <forward name="myLifeSupportInput" path="/WEB-INF/jsp/MyLifeSupportInput.jsp" contextRelative="true"/>
+      <forward name="displayforward" path="/WEB-INF/jsp/MyLifeSupportDisplay.jsp" contextRelative="true"/>
+       
+      </action>
+      
+      </action-mappings>
+      	<message-resources parameter="za.ac.unisa.lms.tools.mylifesupport.ApplicationResources"/>
+      </struts-config>

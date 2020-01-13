@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2010-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 /*
 * Licensed to The Apereo Foundation under one or more contributor license
 * agreements. See the NOTICE file distributed with this work for
@@ -62,7 +47,6 @@ public interface SakaiProxy {
 	public final static Boolean DEFAULT_VIEW_EMAIL = true;
 	public final static Boolean DEFAULT_VIEW_CONNECTIONS = true;
 	public final static Boolean DEFAULT_VIEW_USER_DISPLAY_ID = true;
-	public final static Boolean DEFAULT_VIEW_USER_PROPERTIES = true;
 	public final static Integer DEFAULT_ROSTER_STATE = 0;
 	
 	/**
@@ -161,33 +145,11 @@ public interface SakaiProxy {
 	public Boolean getViewUserDisplayId();
 
 	/**
-	 * Returns the value of the <code>roster_view_user_properties</code> Sakai property.
-	 *
-	 * @return the value of the <code>roster_view_user_properties</code> Sakai property.
-	 */
-	public Boolean getViewUserProperty();
-
-	/**
-	 * Returns the value of the <code>roster_view_user_properties</code> Sakai property.
-	 *
-	 * @param siteId a site
-	 * @return the value of the <code>roster_view_user_properties</code> Sakai property.
-	 */
-	public Boolean getViewUserProperty(String siteId);
-
-	/**
 	 * Returns the value of the <code>roster.display.officialPicturesByDefault</code> Sakai property.
 	 * 
 	 * @return the value of the <code>roster.display.officialPicturesByDefault</code> Sakai property.
 	 */
     public Boolean getOfficialPicturesByDefault();
-	
-	/**
-	 * Returns the value of the <code>roster.display.pageSize</code> Sakai property.
-	 * 
-	 * @return the value of the <code>roster.display.pageSize</code> Sakai property.
-	 */
-	public int getPageSize();
 
 	public Site getSite(String siteId);
 		
@@ -250,15 +212,12 @@ public interface SakaiProxy {
 	//public String getSakaiSkin();
 
 	/**
-	 * Returns whether or not the current user can access the 'Permissions' tab.
-	 * Takes into account sakai.property 'roster.showPermsToMaintainers' (default true).
-	 * If property is true and user is site maintainer, they can access the tab.
-	 * If property is false, only admins can access the tab.
+	 * Returns whether or not the current user is a super user.
 	 * 
-	 * @return <code>true</code> if property is true and user is site maintainer or if user is admin,
-	 * returns <code>false</code> if property is false and user is not site maintainer or user is not admin.
+	 * @return <code>true</code> if the current user is a super user, else
+	 *         returns <code>false</code>.
 	 */
-	public boolean showPermsToMaintainers();
+	public boolean isSuperUser();
 	
 	/**
 	 * Checks if the user has site.upd in the given site
@@ -268,7 +227,7 @@ public interface SakaiProxy {
 	/**
 	 * Attempts to retrieve the search index for the specified site.
 	 */
-    public Map<String, String> getSearchIndex(String siteId, String userId, String groupId, String roleId, String enrollmentSetId, String enrollmentStatus);
+    public Map<String, String> getSearchIndex(String siteId);
 
     public Map<String, SitePresenceTotal> getPresenceTotalsForSite(String siteId);
 

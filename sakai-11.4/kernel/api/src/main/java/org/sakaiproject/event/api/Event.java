@@ -24,8 +24,6 @@ package org.sakaiproject.event.api;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.sakaiproject.event.api.LearningResourceStoreService.LRS_Statement;
-
 /**
  * <p>
  * Event represents a single significant activity by the end-user.
@@ -46,13 +44,6 @@ public interface Event extends Serializable
 	 * @return The resource reference string.
 	 */
 	String getResource();
-
-    /**
-	 * Access the LRSStatement.
-	 * 
-	 * @return The LRSStatement.
-	 */
-	LRS_Statement getLrsStatement();
 
 	/**
 	 * Access the event context

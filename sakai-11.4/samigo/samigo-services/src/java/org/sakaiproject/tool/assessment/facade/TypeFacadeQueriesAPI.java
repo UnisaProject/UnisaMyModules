@@ -22,8 +22,9 @@
 
 package org.sakaiproject.tool.assessment.facade;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.osid.shared.Type;
 
@@ -38,7 +39,7 @@ public interface TypeFacadeQueriesAPI
   /**
    * get the typeFacadeMap
    */
-  public Map<Long, TypeFacade> getTypeFacadeMap();
+  public HashMap getTypeFacadeMap();
 
   /**
    * This method returns the TypeFacade with the specified typeId found
@@ -63,7 +64,7 @@ public interface TypeFacadeQueriesAPI
    * @param domain
    * @return ArrayList
    */
-  public List getArrayListByAuthorityDomain(String authority, String domain);
+  public ArrayList getArrayListByAuthorityDomain(String authority, String domain);
 
   /**
    * This method returns a Hashmap (Long typeId, TypeFacade typeFacade)
@@ -72,7 +73,7 @@ public interface TypeFacadeQueriesAPI
    * @param domain
    * @return HashMap
    */
-  public Map getHashMapByAuthorityDomain(String authority, String domain);
+  public HashMap getHashMapByAuthorityDomain(String authority, String domain);
 
   /**
    * This method return a List of TypeD from DB or cache (Hibernate decides)

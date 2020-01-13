@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	<form-bean name="assessmentCriteriaForm" 
+		 	type="za.ac.unisa.lms.tools.assessmentcriteria.forms.AssessmentCriteriaForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>	
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.assessmentcriteria.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/assessmentCriteria.do?act=initial"
+				contextRelative="true" />
+		</action>      
+		<action
+			name="assessmentCriteriaForm"
+			attribute="assessmentCriteriaForm"
+			parameter="act"
+			path="/assessmentCriteria"
+			type="za.ac.unisa.lms.tools.assessmentcriteria.actions.AssessmentCriteriaAction"
+			validate="false">
+			<forward
+				name="input"
+				path="/WEB-INF/jsp/inputCourse.jsp"
+				contextRelative="true" />
+			<forward
+				name="displayAssessmentCriteria"
+				path="/WEB-INF/jsp/assessmentCriteria.jsp"
+				contextRelative="true" />
+			<forward
+				name="displayAssignment"
+				path="/WEB-INF/jsp/displayAssignment.jsp"
+				contextRelative="true" />						
+			<forward
+				name="displayMCQMarkingDetails"
+				path="/WEB-INF/jsp/displayMCQMarkingDetails.jsp"
+				contextRelative="true" />	
+			<forward
+				name="displayWrittenMarkingDetails"
+				path="/WEB-INF/jsp/displayWrittenMarkingDetails.jsp"
+				contextRelative="true" />	
+			<forward
+				name="displayNoMarkingDetails"
+				path="/WEB-INF/jsp/displayNoMarkingDetails.jsp"
+				contextRelative="true" />	
+			<forward
+				name="displayOnscreenMarking"
+				path="/WEB-INF/jsp/displayOnscreenMarking.jsp"
+				contextRelative="true" />				
+			<forward
+				name="displayMCQMemorandum"
+				path="/WEB-INF/jsp/displayMCQMemorandum.jsp"
+				contextRelative="true" />
+			<forward
+				name="requestAuthorisation"
+				path="/WEB-INF/jsp/requestAuthorisation.jsp"
+				contextRelative="true" />
+			<forward
+				name="cancelAuthorisationRequest"
+				path="/WEB-INF/jsp/cancelAuthorisationRequest.jsp"
+				contextRelative="true" />
+			<forward
+				name="invalidCall"
+				path="/WEB-INF/jsp/invalidAssessmentPlanCall.jsp"
+				contextRelative="true" />
+			<forward
+				name="cancel"
+				path="/assessmentCriteria.do?act=initial"
+				contextRelative="true" />
+			<forward
+	        	name="home"
+	        	path="/assessmentCriteria.do?act=initial"
+	        	contextRelative="true" />
+		</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.assessmentcriteria.ApplicationResources" />
+	
+</struts-config>

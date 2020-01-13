@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Query;
-import org.hibernate.Session;
 import org.sakaiproject.genericdao.hibernate.HibernateGeneralGenericDao;
 import org.sakaiproject.sms.logic.QueryParameter;
+import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -81,8 +81,7 @@ public class SmsDaoImpl extends HibernateGeneralGenericDao implements SmsDao {
 
 	@SuppressWarnings("unused")
 	private Query buildQuery(String hql, QueryParameter... queryParameters) {
-		Session session = getSessionFactory().getCurrentSession();
-		Query query = session.createQuery(hql);
+		Query query = getSession().createQuery(hql);
 
 		for (QueryParameter queryParameter : queryParameters) {
 			if (queryParameter.val instanceof Object[]) {
@@ -109,8 +108,9 @@ public class SmsDaoImpl extends HibernateGeneralGenericDao implements SmsDao {
 
 	}
 
-	public Session getTheHibernateTemplateSession() {
-                return getHibernateTemplate().getSessionFactory().openSession();
+	public HibernateTemplate getTheHibernateTemplate() {
+		return getHibernateTemplate();
+
 	}
 
 }

@@ -21,14 +21,11 @@
 
 package org.sakaiproject.content.tool;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.content.api.ResourceToolAction;
 import org.sakaiproject.content.api.ResourceType;
 import org.sakaiproject.content.api.ResourceTypeRegistry;
 
-@Slf4j
 public class ResourceTypeLabeler
 {
 	public String getLabel(ResourceToolAction action)
@@ -36,7 +33,7 @@ public class ResourceTypeLabeler
 		String label = null;
 		if(action == null)
 		{
-			log.info("Null action passed to labeler ");
+			ResourcesAction.logger.info("Null action passed to labeler ");
 			label = "";
 		}
 		else
@@ -102,7 +99,7 @@ public class ResourceTypeLabeler
 					label = ResourcesAction.trb.getString("action.makesitepage");
 					break;
 				default:
-					log.info("No label provided for ResourceToolAction: " + action.getTypeId() + ResourceToolAction.ACTION_DELIMITER + action.getId());
+					ResourcesAction.logger.info("No label provided for ResourceToolAction: " + action.getTypeId() + ResourceToolAction.ACTION_DELIMITER + action.getId());
 					label = action.getId();
 					break;
 			}

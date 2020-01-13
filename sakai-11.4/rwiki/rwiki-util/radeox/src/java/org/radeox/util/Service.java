@@ -35,8 +35,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * After the Service class from Sun and the Apache project. With help from
  * Frdric Miserey.
@@ -45,7 +43,6 @@ import lombok.extern.slf4j.Slf4j;
  * @author Matthias L. Jugel
  * @version $id$
  */
-@Slf4j
 public class Service
 {
 
@@ -102,6 +99,7 @@ public class Service
 					}
 					catch (Exception ex)
 					{
+						// ex.printStackTrace();
 						// Just try the next file...
 					}
 				}
@@ -125,6 +123,7 @@ public class Service
 		}
 		catch (IOException ioe)
 		{
+			// ioe.printStackTrace();
 			// ignore exception
 		}
 		return providers.iterator();
@@ -159,6 +158,7 @@ public class Service
 			}
 			catch (Exception ex)
 			{
+				// ex.printStackTrace();
 				// Just try the next line
 			}
 			line = reader.readLine();
@@ -183,11 +183,11 @@ public class Service
 			}
 			catch (InstantiationException e)
 			{
-				log.error(e.getMessage(), e);
+				e.printStackTrace();
 			}
 			catch (IllegalAccessException e)
 			{
-				log.error(e.getMessage(), e);
+				e.printStackTrace();
 			}
 			// Logger.debug("Service: loaded "+ obj.getClass().getName());
 		}

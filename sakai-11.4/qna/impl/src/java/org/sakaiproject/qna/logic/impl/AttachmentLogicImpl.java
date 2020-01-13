@@ -17,6 +17,8 @@ package org.sakaiproject.qna.logic.impl;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.qna.logic.AttachmentLogic;
@@ -24,11 +26,9 @@ import org.sakaiproject.qna.logic.exceptions.AttachmentException;
 import org.sakaiproject.qna.model.QnaAttachment;
 import org.sakaiproject.qna.model.QnaQuestion;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class AttachmentLogicImpl implements AttachmentLogic {
 
+	private static Log log = LogFactory.getLog(AttachmentLogicImpl.class);
 
 	private ContentHostingService chs;
 

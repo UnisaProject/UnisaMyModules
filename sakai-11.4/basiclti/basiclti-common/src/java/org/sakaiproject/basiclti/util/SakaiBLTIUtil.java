@@ -33,10 +33,11 @@ import java.net.URLEncoder;
 
 import javax.servlet.http.HttpServletRequest;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.tsugi.basiclti.BasicLTIUtil;
 import org.tsugi.basiclti.BasicLTIConstants;
@@ -111,8 +112,9 @@ import org.apache.commons.math3.util.Precision;
  * making and launching BLTI resources within Sakai.
  */
 @SuppressWarnings("deprecation")
-@Slf4j
 public class SakaiBLTIUtil {
+
+	private static Logger M_log = LoggerFactory.getLogger(SakaiBLTIUtil.class);
 
 	public static final boolean verbosePrint = false;
 
@@ -161,6 +163,11 @@ public class SakaiBLTIUtil {
 	public static final String CANVAS_PLACEMENTS_LINKSELECTION = "Canvas.placements.linkSelection";
 	public static final String CANVAS_PLACEMENTS_CONTENTIMPORT = "Canvas.placements.contentImport";
 
+	public static void dPrint(String str)
+	{
+		if ( verbosePrint ) System.out.println(str);
+	}
+
 	// Retrieve the property from the configuration unless it
 	// is overridden by the server configurtation (i.e. sakai.properties)
 	public static String getCorrectProperty(Properties config,
@@ -180,7 +187,7 @@ public class SakaiBLTIUtil {
 		String propertyName = placement.getToolId() + "." + propName;
 		String propValue = ServerConfigurationService.getString(propertyName,null);
 		if ( propValue != null && propValue.trim().length() > 0 ) {
-			log.debug("Sakai.home {}={}", propName, propValue);
+			// System.out.println("Sakai.home "+propName+"="+propValue);
 			return propValue;
 		}
 
@@ -193,7 +200,7 @@ public class SakaiBLTIUtil {
 	public static boolean loadFromPlacement(Properties info, Properties launch, Placement placement)
 	{
 		Properties config = placement.getConfig();
-		log.debug("Sakai properties={}", config);
+		dPrint("Sakai properties=" + config);
 		String launch_url = toNull(getCorrectProperty(config,LTIService.LTI_LAUNCH, placement));
 		setProperty(info, "launch_url", launch_url);
 		if ( launch_url == null ) {
@@ -322,17 +329,17 @@ public class SakaiBLTIUtil {
 			String newsecret = SimpleEncryption.decrypt(encryptionKey, orig);
 			return newsecret;
 		} catch (RuntimeException re) {
-			log.error("Exception when decrypting secret - this is normal if the secret is unencrypted");
+			dPrint("Exception when decrypting secret - this is normal if the secret is unencrypted");
 			return orig;
 		}
 	}
 
 	public static boolean sakaiInfo(Properties props, Placement placement, ResourceLoader rb)
 	{
-		log.debug("placement={}", placement.getId());
-		log.debug("placement title={}", placement.getTitle());
+		dPrint("placement="+ placement.getId());
+		dPrint("placement title=" + placement.getTitle());
 		String context = placement.getContext();
-		log.debug("ContextID={}", context);
+		dPrint("ContextID="+context);
 
 		return sakaiInfo(props, context, placement.getId(), rb);
 	}
@@ -373,14 +380,6 @@ public class SakaiBLTIUtil {
 				setProperty(lti2subst,LTI2Vars.COURSESECTION_SOURCEDID,site.getId());
 				setProperty(lti2subst,LTI2Vars.COURSEOFFERING_SOURCEDID,site.getId());
 			}
-
-			// SAK-31282 - Add the Academic Session (ext_sakai_academic_session) to LTI launches
-			String termPropertyName = ServerConfigurationService.getString("irubric.termPropertyName", "");
-			if ( termPropertyName.length() > 0 ) {
-				String academicSessionId = site.getProperties().getProperty(termPropertyName);
-				if ((academicSessionId == "") || (academicSessionId == null)) academicSessionId = "OTHER";
-				setProperty(props,"ext_sakai_academic_session", academicSessionId);
-			}
 		}
 
 		// Fix up the return Url
@@ -400,7 +399,6 @@ public class SakaiBLTIUtil {
 		}
 
 		setProperty(props, BasicLTIConstants.LAUNCH_PRESENTATION_RETURN_URL, returnUrl);
-
 	}
 
 	public static void addUserInfo(Properties ltiProps, Properties lti2subst, Map<String, Object> tool)
@@ -475,7 +473,7 @@ public class SakaiBLTIUtil {
 				}
 			}
 		} catch (GroupNotDefinedException e) {
-			log.error("SiteParticipantHelper.getExternalRealmId: site realm not found {}", e.getMessage());
+			dPrint("SiteParticipantHelper.getExternalRealmId: site realm not found"+e.getMessage());
 		}
 
 		// Check if there are sections the user is part of (may be more than one)
@@ -511,7 +509,7 @@ public class SakaiBLTIUtil {
 		try {
 			site = SiteService.getSite(context);
 		} catch (Exception e) {
-			log.error("No site/page associated with Launch context={}", context);
+			dPrint("No site/page associated with Launch context="+context);
 			return false;
 		}
 
@@ -545,18 +543,10 @@ public class SakaiBLTIUtil {
 		if ( tooltitle == null ) tooltitle = pagetitle;
 
 		if ( pagetitle != null ) setProperty(props,BasicLTIConstants.RESOURCE_LINK_TITLE,pagetitle);
-		else setProperty(props,BasicLTIConstants.RESOURCE_LINK_TITLE,placement.getTitle());
 		if ( tooltitle != null ) setProperty(props,BasicLTIConstants.RESOURCE_LINK_DESCRIPTION,tooltitle);
-		else setProperty(props,BasicLTIConstants.RESOURCE_LINK_DESCRIPTION,placement.getTitle());
 
 		String releasename = toNull(getCorrectProperty(config,"releasename", placement));
 		String releaseemail = toNull(getCorrectProperty(config,"releaseemail", placement));
-
-		// Use SHA256 if requested (SAK-33898)
-		String sha256 = toNull(getCorrectProperty(config,"sha256", placement));
-		if ( "on".equals(sha256) ) {
-			setProperty(props, OAuth.OAUTH_SIGNATURE_METHOD,"HMAC-SHA256");
-		}
 
 		User user = UserDirectoryService.getCurrentUser();
 
@@ -706,8 +696,7 @@ public class SakaiBLTIUtil {
 
 		// Get the organizational information
 		setProperty(props,BasicLTIConstants.TOOL_CONSUMER_INSTANCE_GUID, 
-				ServerConfigurationService.getString("basiclti.consumer_instance_guid",
-				ServerConfigurationService.getString("serverName", null)));
+				ServerConfigurationService.getString("basiclti.consumer_instance_guid",null));
 		setProperty(props,BasicLTIConstants.TOOL_CONSUMER_INSTANCE_NAME, 
 				ServerConfigurationService.getString("basiclti.consumer_instance_name",null));
 		setProperty(props,BasicLTIConstants.TOOL_CONSUMER_INSTANCE_DESCRIPTION, 
@@ -715,8 +704,7 @@ public class SakaiBLTIUtil {
 		setProperty(props,BasicLTIConstants.TOOL_CONSUMER_INSTANCE_CONTACT_EMAIL, 
 				ServerConfigurationService.getString("basiclti.consumer_instance_contact_email",null));
 		setProperty(props,BasicLTIConstants.TOOL_CONSUMER_INSTANCE_URL, 
-				ServerConfigurationService.getString("basiclti.consumer_instance_url",
-				ServerConfigurationService.getString("serverUrl", null)));
+				ServerConfigurationService.getString("basiclti.consumer_instance_url",null));
 
 		// Send along the CSS URL
 		String tool_css = ServerConfigurationService.getString("basiclti.consumer.launch_presentation_css_url",null);
@@ -792,7 +780,7 @@ public class SakaiBLTIUtil {
 		try {
 			site = SiteService.getSite(context);
 		} catch (Exception e) {
-			log.error("No site/page associated with Launch context={}", context);
+			dPrint("No site/page associated with Launch context="+context);
 			return postError("<p>" + getRB(rb, "error.site.missing" ,"Cannot load site.")+context+"</p>" ); 
 		}
 
@@ -811,7 +799,7 @@ public class SakaiBLTIUtil {
 		Long toolVersion = getLongNull(tool.get(LTIService.LTI_VERSION));
 		boolean isLTI1 = toolVersion == null || (!toolVersion.equals(LTIService.LTI_VERSION_2));
 		boolean isLTI2 = ! isLTI1;  // In case there is an LTI 3
-		log.debug("toolVersion={} isLTI1={}", toolVersion, isLTI1);
+		M_log.debug("toolVersion="+toolVersion+" isLTI1="+isLTI1);
 
 		// If we are doing LTI2, We will need a ToolProxyBinding
 		ToolProxyBinding toolProxyBinding = null;
@@ -824,13 +812,7 @@ public class SakaiBLTIUtil {
 			}
 		}
 
-/*              As of 2017-03-25, The LTI 2.0 test has morphed into the LTI 2.1 test in many ways 
-                even though LTI 2.1 is not yet approved.  Bummer that things morph under your feet
-                but the 2017 version is probably better than the 2016 version - but tool folks will 
-                feel a "stinging sensation" as fields vanish when LMS's re-certify the same spec 
-                a while later.
-
-		// As of 2016-02, LTI 2.0 certification fails these: 
+		// LTI 2.0 certification fails these:
 		//    5.8: Send a lis_person_sourcedid
 		//    6.9: Send a lis_course_offering_sourcedid
 		//    6.10: Send a lis_course_section_sourcedid
@@ -846,8 +828,7 @@ public class SakaiBLTIUtil {
 		if ( enabledCapabilities != null && ! checkStrictVersion("02.01.00","02.01.00") ) {
 			addEnabledCapability(enabledCapabilities, LTI2Vars.PERSON_SOURCEDID);
 			addEnabledCapability(enabledCapabilities, LTI2Vars.RESULT_SOURCEDID);
-			// It looks like as of 2017-03-25, LTI 2.0 finds this distasteful
-			// addEnabledCapability(enabledCapabilities, LTI2Vars.BASICOUTCOME_SOURCEDID);
+			addEnabledCapability(enabledCapabilities, LTI2Vars.BASICOUTCOME_SOURCEDID);
 			addEnabledCapability(enabledCapabilities, LTI2Vars.COURSEOFFERING_SOURCEDID);
 			addEnabledCapability(enabledCapabilities, LTI2Vars.COURSESECTION_SOURCEDID);
 
@@ -860,7 +841,6 @@ public class SakaiBLTIUtil {
 			addEnabledCapability(enabledCapabilities, BasicLTIConstants.LIS_COURSE_OFFERING_SOURCEDID);
 			addEnabledCapability(enabledCapabilities, BasicLTIConstants.LIS_COURSE_SECTION_SOURCEDID);
 		}
-*/
 
 		// Start building up the properties
 		Properties ltiProps = new Properties();
@@ -1005,40 +985,32 @@ public class SakaiBLTIUtil {
 		LTI2Util.mergeLTI1Custom(custom, toolCustom);
 
 		if ( isLTI2 ) {
-			log.debug("before ltiProps={}", ltiProps);
-			log.debug("enabledCapabilities={}", enabledCapabilities);
+			M_log.debug("before ltiProps="+ltiProps);
+			M_log.debug("enabledCapabilities="+enabledCapabilities);
 			boolean allowExt = enabledCapabilities.contains(SAKAI_EXTENSIONS_ALL);
 			LTI2Util.filterLTI1LaunchProperties(ltiProps, enabledCapabilities, allowExt);
 		}
 
-		// See if there are any locally deployed substitutions
-		ltiService.filterCustomSubstitutions(lti2subst, tool, site);
-
-		log.debug("ltiProps={}", ltiProps);
-		log.debug("lti2subst={}", lti2subst);
-		log.debug("before custom={}", custom);
+		M_log.debug("ltiProps="+ltiProps);
+		M_log.debug("lti2subst="+lti2subst);
+		M_log.debug("before custom="+custom);
 		LTI2Util.substituteCustom(custom, lti2subst);
-		log.debug("after custom={}", custom);
+		M_log.debug("after custom="+custom);
 
 		// Place the custom values into the launch
 		LTI2Util.addCustomToLaunch(ltiProps, custom, isLTI1);
 
 		// Check which kind of signing we are supposed to do
-		Long toolSHA256 = getLong(tool.get(LTIService.LTI_SHA256));
-		Long contentSHA256 = getLong(content.get(LTIService.LTI_SHA256));
-		if ( toolSHA256.equals(1L) || (toolSHA256.equals(2L) && contentSHA256.equals(1L)) ) {
-			ltiProps.put(OAuth.OAUTH_SIGNATURE_METHOD,"HMAC-SHA256");
-			log.debug("Launching with SHA256 Signing");
-		} else if ( toolProxyBinding != null ) {
-			if ( toolProxyBinding.enabledCapability( LTI2Messages.BASIC_LTI_LAUNCH_REQUEST,
+		if ( toolProxyBinding != null ) {
+			if ( toolProxyBinding.enabledCapability( LTI2Messages.BASIC_LTI_LAUNCH_REQUEST, 
 				LTI2Caps.OAUTH_HMAC256) ) {
 
 				ltiProps.put(OAuth.OAUTH_SIGNATURE_METHOD,"HMAC-SHA256");
-				log.debug("Launching with SHA256 Signing");
+				M_log.debug("Launching with SHA256 Signing");
 			}
 		}
 
-		log.debug("LAUNCH TYPE {}", (isLTI1 ? "LTI 1" : "LTI 2"));
+		// System.out.println("LAUNCH TYPE "+ (isLTI1 ? "LTI 1" : "LTI 2") );
 		return postLaunchHTML(toolProps, ltiProps, rb);
 	}
 
@@ -1085,10 +1057,10 @@ public class SakaiBLTIUtil {
 
 		int debug = getInt(tool.get(LTIService.LTI_DEBUG));
 
-		log.debug("ltiProps={}", ltiProps);
+		M_log.debug("ltiProps="+ltiProps);
 
 		boolean dodebug = debug == 1;
-		if ( log.isDebugEnabled() ) dodebug = true;
+		if ( M_log.isDebugEnabled() ) dodebug = true;
 		String launchtext = getRB(rb, "launch.button", "Press to Launch External Tool");
 		String postData = BasicLTIUtil.postLaunchHTML(ltiProps, launch_url, launchtext, dodebug, null);
 
@@ -1152,7 +1124,7 @@ public class SakaiBLTIUtil {
 
 		int debug = getInt(deploy.get(LTIService.LTI_DEBUG));
 
-		// Handle any substution variables from the message
+		// Handle any subsisution variables from the message
 		Properties lti2subst = new Properties();
 		addGlobalData(null, ltiProps, lti2subst, rb);
 		if ( deploy != null ) {
@@ -1165,10 +1137,10 @@ public class SakaiBLTIUtil {
 		JSONArray parameter = toolProxy.getParameterFromMessage(proxy_message);
 		if ( parameter != null ) {
 			LTI2Util.mergeLTI2Parameters(custom, parameter.toString());
-			log.debug("lti2subst={}", lti2subst);
-			log.debug("before custom={}", custom);
+			M_log.debug("lti2subst="+lti2subst);
+			M_log.debug("before custom="+custom);
 			LTI2Util.substituteCustom(custom, lti2subst);
-			log.debug("after custom={}", custom);
+			M_log.debug("after custom="+custom);
 			// Merge the custom values into the launch
 			LTI2Util.addCustomToLaunch(ltiProps, custom, false);
 		}
@@ -1177,10 +1149,10 @@ public class SakaiBLTIUtil {
 		ltiProps = BasicLTIUtil.signProperties(ltiProps, launch_url, "POST", 
 				consumerkey, secret, null, null, null, extra);
 
-		log.debug("signed ltiProps={}", ltiProps);
+		M_log.debug("signed ltiProps="+ltiProps);
 
 		boolean dodebug = debug == 1;
-		if ( log.isDebugEnabled() ) dodebug = true;
+		if ( M_log.isDebugEnabled() ) dodebug = true;
 		String launchtext = getRB(rb, "launch.button", "Press to Launch External Tool");
 		String postData = BasicLTIUtil.postLaunchHTML(ltiProps, launch_url, launchtext, dodebug, extra);
 
@@ -1222,8 +1194,8 @@ public class SakaiBLTIUtil {
 
 		String lti_log = req.getParameter("lti_log");
 		String lti_errorlog = req.getParameter("lti_errorlog");
-		if ( lti_log != null ) log.debug(lti_log);
-		if ( lti_errorlog != null ) log.warn(lti_errorlog);
+		if ( lti_log != null ) M_log.debug(lti_log);
+		if ( lti_errorlog != null ) M_log.warn(lti_errorlog);
 
 		ContentItem contentItem = new ContentItem(req);
 
@@ -1233,9 +1205,9 @@ public class SakaiBLTIUtil {
 
 		String URL = getOurServletPath(req);
 		if ( ! contentItem.validate(oauth_consumer_key, oauth_secret, URL) ) {
-			log.warn("Provider failed to validate message: {}", contentItem.getErrorMessage());
+			M_log.warn("Provider failed to validate message: "+contentItem.getErrorMessage());
 			String base_string = contentItem.getBaseString();
-			if ( base_string != null ) log.warn("base_string={}", base_string);
+			if ( base_string != null ) M_log.warn("base_string="+base_string);
 			throw new RuntimeException("Failed OAuth validation");
 		}
 		return contentItem;
@@ -1328,7 +1300,7 @@ public class SakaiBLTIUtil {
 		try {
 			site = SiteService.getSite(context);
 		} catch (Exception e) {
-			log.error("No site/page associated with Launch context={}", context);
+			dPrint("No site/page associated with Launch context="+context);
 			return postError("<p>" + getRB(rb, "error.site.missing" ,"Cannot load site.")+context+"</p>" );
 		}
 
@@ -1349,36 +1321,6 @@ public class SakaiBLTIUtil {
 			ltiProps.remove(BasicLTIConstants.LAUNCH_PRESENTATION_RETURN_URL);
 		}
 
-		Long toolVersion = getLongNull(tool.get(LTIService.LTI_VERSION));
-		boolean isLTI1 = toolVersion == null || (!toolVersion.equals(LTIService.LTI_VERSION_2));
-		boolean isLTI2 = ! isLTI1;  // In case there is an LTI 3
-		log.debug("toolVersion={} isLTI1={}", toolVersion, isLTI1);
-
-		// If we are doing LTI2, We will need a ToolProxyBinding
-		ToolProxyBinding toolProxyBinding = null;
-		JSONArray enabledCapabilities = null;
-		if ( isLTI2 ) {
-			String tool_proxy_binding = (String) tool.get(LTI2Constants.TOOL_PROXY_BINDING);
-			if ( tool_proxy_binding != null && tool_proxy_binding.trim().length() > 0 ) {
-				toolProxyBinding = new ToolProxyBinding(tool_proxy_binding);
-				enabledCapabilities = toolProxyBinding.enabledCapabilities(LTI2Messages.CONTENT_ITEM_SELECTION_REQUEST);
-			}
-		}
-
-		// Check which kind of signing we are supposed to do
-		Long toolSHA256 = getLong(tool.get(LTIService.LTI_SHA256));
-		if ( toolSHA256.equals(1L) ) {
-			ltiProps.put(OAuth.OAUTH_SIGNATURE_METHOD,"HMAC-SHA256");
-			log.debug("Launching with SHA256 Signing");
-		} else if ( toolProxyBinding != null ) {
-			if ( toolProxyBinding.enabledCapability( LTI2Messages.BASIC_LTI_LAUNCH_REQUEST,
-				LTI2Caps.OAUTH_HMAC256) ) {
-
-				ltiProps.put(OAuth.OAUTH_SIGNATURE_METHOD,"HMAC-SHA256");
-				log.debug("Launching with SHA256 Signing");
-			}
-		}
-
 		String customstr = toNull((String) tool.get(LTIService.LTI_CUSTOM) );
 		parseCustom(ltiProps, customstr);
 
@@ -1386,10 +1328,10 @@ public class SakaiBLTIUtil {
 		ltiProps = BasicLTIUtil.signProperties(ltiProps, launch_url, "POST", 
 				consumerkey, secret, null, null, null, extra);
 
-		log.debug("signed ltiProps={}", ltiProps);
+		M_log.debug("signed ltiProps="+ltiProps);
 
 		boolean dodebug = getInt(tool.get(LTIService.LTI_DEBUG)) == 1;
-		if ( log.isDebugEnabled() ) dodebug = true;
+		if ( M_log.isDebugEnabled() ) dodebug = true;
 
 		String launchtext = getRB(rb, "launch.button", "Press to Launch External Tool");
 		String postData = BasicLTIUtil.postLaunchHTML(ltiProps, launch_url, launchtext, dodebug, extra);
@@ -1428,11 +1370,9 @@ public class SakaiBLTIUtil {
 		if ( launch_url == null ) launch_url = toolProps.getProperty("launch_url");
 		if ( launch_url == null ) return postError("<p>" + getRB(rb, "error.missing" ,"Not configured")+"</p>");
 
-		String org_guid = ServerConfigurationService.getString("basiclti.consumer_instance_guid",
-			ServerConfigurationService.getString("serverName", null));
+		String org_guid = ServerConfigurationService.getString("basiclti.consumer_instance_guid",null);
 		String org_desc = ServerConfigurationService.getString("basiclti.consumer_instance_description",null);
-		String org_url = ServerConfigurationService.getString("basiclti.consumer_instance_url",
-			ServerConfigurationService.getString("serverUrl", null));
+		String org_url = ServerConfigurationService.getString("basiclti.consumer_instance_url",null);
 
 		// Look up the LMS-wide secret and key - default key is guid
 		String key = getToolConsumerInfo(launch_url,"key");
@@ -1483,11 +1423,11 @@ public class SakaiBLTIUtil {
 				key, secret, org_guid, org_desc, org_url, extra);
 
 		if ( ltiProps == null ) return postError("<p>" + getRB(rb, "error.sign", "Error signing message.")+"</p>");
-		log.debug("LAUNCH III={}", ltiProps);
+		dPrint("LAUNCH III="+ltiProps);
 
 		String debugProperty = toolProps.getProperty(LTIService.LTI_DEBUG);
 		boolean dodebug = "on".equals(debugProperty) || "1".equals(debugProperty);
-		if ( log.isDebugEnabled() ) dodebug = true;
+		if ( M_log.isDebugEnabled() ) dodebug = true;
 
 		String launchtext = getRB(rb, "launch.button", "Press to Launch External Tool");
 		String postData = BasicLTIUtil.postLaunchHTML(ltiProps, launch_url, launchtext, dodebug, extra);
@@ -1540,7 +1480,7 @@ public class SakaiBLTIUtil {
 			AuthzGroup realm = ComponentManager.get(AuthzGroupService.class).getAuthzGroup(realmId);
 			rv = realm.getProviderGroupId();
 		} catch (GroupNotDefinedException e) {
-			log.error("SiteParticipantHelper.getExternalRealmId: site realm not found {}", e.getMessage());
+			dPrint("SiteParticipantHelper.getExternalRealmId: site realm not found"+e.getMessage());
 		}
 		return rv;
 	} // getExternalRealmId
@@ -1549,7 +1489,7 @@ public class SakaiBLTIUtil {
 	private static String getToolConsumerInfo(String launchUrl, String data)
 	{
 		String default_secret = ServerConfigurationService.getString("basiclti.consumer_instance_"+data,null);
-		log.debug("launchUrl = {}", launchUrl);
+		dPrint("launchUrl = "+launchUrl);
 		URL url = null;
 		try {
 			url = new URL(launchUrl);
@@ -1559,7 +1499,7 @@ public class SakaiBLTIUtil {
 		}
 		if ( url == null ) return default_secret;
 		String hostName = url.getHost();
-		log.debug("host = {}", hostName);
+		dPrint("host = "+hostName);
 		if ( hostName == null || hostName.length() < 1 ) return default_secret;
 		// Look for the property starting with the full name
 		String org_info = ServerConfigurationService.getString("basiclti.consumer_instance_"+data+"."+hostName,null);
@@ -1639,9 +1579,9 @@ public class SakaiBLTIUtil {
 			return "Unable to decrypt result_sourcedid=" + sourcedid;
 		}
 
-		log.debug("signature={}", signature);
-		log.debug("user_id={}", user_id);
-		log.debug("placement_id={}", placement_id);
+		M_log.debug("signature="+signature);
+		M_log.debug("user_id="+user_id);
+		M_log.debug("placement_id="+placement_id);
 
 		Properties pitch = getPropertiesFromPlacement(placement_id, ltiService);
 		if ( pitch == null ) {
@@ -1658,12 +1598,12 @@ public class SakaiBLTIUtil {
 
 		// Check the message signature using OAuth
 		String oauth_secret = pitch.getProperty(LTIService.LTI_SECRET);
-		log.debug("oauth_secret: {}", oauth_secret);
+		M_log.debug("oauth_secret: "+oauth_secret);
 		oauth_secret = decryptSecret(oauth_secret);
-		log.debug("oauth_secret (decrypted): {}", oauth_secret);
+		M_log.debug("oauth_secret (decrypted): "+oauth_secret);
 
 		String oauth_consumer_key = pitch.getProperty(LTIService.LTI_CONSUMERKEY);
-		log.debug("oauth_consumer_key: {}", oauth_consumer_key);
+		M_log.debug("oauth_consumer_key: "+oauth_consumer_key);
 
 		String URL = getOurServletPath(request);
 
@@ -1679,14 +1619,14 @@ public class SakaiBLTIUtil {
 
 		String pre_hash = placement_secret + ":::" + user_id + ":::" + placement_id;
 		String received_signature = LegacyShaUtil.sha256Hash(pre_hash);
-		log.debug("Received signature={} received={}", signature, received_signature);
+		M_log.debug("Received signature="+signature+" received="+received_signature);
 		boolean matched = signature.equals(received_signature);
 
 		String old_placement_secret  = pitch.getProperty(LTIService.LTI_OLDPLACEMENTSECRET);
 		if ( old_placement_secret != null && ! matched ) {
 			pre_hash = placement_secret + ":::" + user_id + ":::" + placement_id;
 			received_signature = LegacyShaUtil.sha256Hash(pre_hash);
-			log.debug("Received signature II={} received={}", signature, received_signature);
+			M_log.debug("Received signature II="+signature+" received="+received_signature);
 			matched = signature.equals(received_signature);
 		}
 
@@ -1706,13 +1646,13 @@ public class SakaiBLTIUtil {
 			Member member = site.getMember(user_id);
 			if(member != null ) userExistsInSite = true;
 		} catch (Exception e) {
-			log.warn("{} siteId={}, {}", e.getLocalizedMessage(), siteId, e);
+			M_log.warn(e.getLocalizedMessage() + " siteId="+siteId, e);
 			return "User not found in site";
 		}
 
 		// Make sure the placement is configured to receive grades
 		String assignment = pitch.getProperty("assignment");
-		log.debug("ASSN={}", assignment);
+		M_log.debug("ASSN="+assignment);
 		if ( assignment == null ) {
 			return "Assignment not set in placement";
 		}
@@ -1732,13 +1672,10 @@ public class SakaiBLTIUtil {
 			}
 		} catch (Exception e) {
 			assignmentObject = null; // Just to make double sure
-		} finally {
-			popAdvisor();
 		}
 
 		// Attempt to add assignment to grade book
 		if ( assignmentObject == null && g.isGradebookDefined(siteId) ) {
-			pushAdvisor();
 			try {
 				assignmentObject = new Assignment();
 				assignmentObject.setPoints(Double.valueOf(100));
@@ -1748,21 +1685,19 @@ public class SakaiBLTIUtil {
 				assignmentObject.setUngraded(false);
 				Long assignmentId = g.addAssignment(siteId, assignmentObject);
 				assignmentObject.setId(assignmentId);
-				log.info("Added assignment: {} with Id: {}", assignment, assignmentId);
+				M_log.info("Added assignment: " +assignment + " with Id: " + assignmentId);
 			}
 			catch (ConflictingAssignmentNameException e) {
-				log.warn("ConflictingAssignmentNameException while adding assignment {}", e.getMessage());
+				M_log.warn("ConflictingAssignmentNameException while adding assignment" + e.getMessage());
 				assignmentObject = null; // Just to make sure
 			}
 			catch (Exception e) {
-				log.warn("GradebookNotFoundException (may be because GradeBook has not yet been added to the Site) {}", e.getMessage());
+				M_log.warn("GradebookNotFoundException (may be because GradeBook has not yet been added to the Site) " + e.getMessage());
 				assignmentObject = null; // Just to make double sure
-			} finally {
-				popAdvisor();
 			}
 		}
 		if (assignmentObject == null || assignmentObject.getId() == null) {
-			log.warn("assignmentObject or Id is null, cannot proceed with grading.");
+			M_log.warn("assignmentObject or Id is null, cannot proceed with grading.");
 			return "Grade failure siteId="+siteId;
 		}
 		// Now read, set, or delete the grade...
@@ -1794,7 +1729,7 @@ public class SakaiBLTIUtil {
 				retval = retMap;
 			} else if ( isDelete ) {
 				g.setAssignmentScoreString(siteId, assignmentObject.getId(), user_id, null, "External Outcome");
-				log.info("Delete Score site={} assignment={} user_id={}", siteId, assignment, user_id);
+				M_log.info("Delete Score site=" + siteId + " assignment="+ assignment + " user_id=" + user_id);
 				message = "Result deleted";
 				retval = Boolean.TRUE;
 			} else {
@@ -1802,15 +1737,16 @@ public class SakaiBLTIUtil {
 				g.setAssignmentScoreComment(siteId, assignmentObject.getId(), user_id, comment);
 
 
-				log.info("Stored Score={} assignment={} user_id={} score={}", siteId, assignment, user_id, theGrade);
+				M_log.info("Stored Score=" + siteId + " assignment="+ assignment + " user_id=" + user_id + " score="+ theGrade);
 				message = "Result replaced";
 				retval = Boolean.TRUE;
 			}
 		} catch (Exception e) {
 			retval = "Grade failure "+e.getMessage()+" siteId="+siteId;
-			log.warn("handleGradebook Grade failure in site: {}, error: {}", siteId, e);
+			M_log.warn("handleGradebook Grade failure in site:" + siteId,e);
 		} finally {
 			sess.invalidate(); // Make sure to leave no traces
+			popAdvisor();
 		}
 
 		return retval;
@@ -1848,7 +1784,7 @@ public class SakaiBLTIUtil {
 				config = placement.getConfig();
 				siteId = placement.getSiteId();
 			} catch (Exception e) {
-				log.debug("Error getPropertiesFromPlacement: {}, error: {}", e.getLocalizedMessage(), e);
+				M_log.debug("Error getPropertiesFromPlacement: "+e.getLocalizedMessage(), e);
 				return null;
 			}
 			retval.setProperty("placementId",placement_id);

@@ -30,13 +30,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
-
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.validator.routines.UrlValidator;
-
 import org.w3c.dom.Element;
 
 import org.owasp.validator.html.AntiSamy;
@@ -44,7 +42,6 @@ import org.owasp.validator.html.CleanResults;
 import org.owasp.validator.html.Policy;
 import org.owasp.validator.html.PolicyException;
 import org.owasp.validator.html.ScanException;
-
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
@@ -53,12 +50,15 @@ import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.Xml;
 import org.sakaiproject.util.api.FormattedText;
 
+
 /**
  * FormattedText provides support for user entry of formatted text; the formatted text is HTML. This includes text formatting in user input such as bold, underline, and fonts.
  */
-@Slf4j
 public class FormattedTextImpl implements FormattedText
 {
+    /** Our log (commons). */
+    private static final Logger M_log = LoggerFactory.getLogger(FormattedTextImpl.class);
+
     private ServerConfigurationService serverConfigurationService = null;
     public void setServerConfigurationService(ServerConfigurationService serverConfigurationService) {
         this.serverConfigurationService = serverConfigurationService;
@@ -131,12 +131,12 @@ public class FormattedTextImpl implements FormattedText
             } else {
                 // probably the none case, but maybe also a case of invalid config....
                 if (!"none".equalsIgnoreCase(errorsHandling)) {
-                    log.warn("FormattedText error handling option invalid: "+errorsHandling+", defaulting to 'none'");
+                    M_log.warn("FormattedText error handling option invalid: "+errorsHandling+", defaulting to 'none'");
                 }
             }
             // allow one extra option to control logging if desired
             logErrors = serverConfigurationService.getBoolean("content.cleaner.errors.logged", logErrors);
-            log.info("FormattedText error handling: "+errorsHandling+
+            M_log.info("FormattedText error handling: "+errorsHandling+
                     "; log errors=" + logErrors + 
                     "; return to tool=" + returnErrorToTool + 
                     "; notify user=" + showErrorToUser + 
@@ -145,7 +145,7 @@ public class FormattedTextImpl implements FormattedText
             referrerPolicy = serverConfigurationService.getString(SAK_PROP_REFERRER_POLICY, SAKAI_REFERRER_POLICY_DEFAULT);
         }
         if (useLegacy) {
-            log.error(
+            M_log.error(
                      "**************************************************\n"
                     +"* -----------<<<   WARNING   >>>---------------- *\n"
                     +"* The LEGACY Sakai content scanner is no longer  *\n"
@@ -169,19 +169,19 @@ public class FormattedTextImpl implements FormattedText
             File lowFile = new File(sakaiHomePath, "antisamy"+File.separator+"low-security-policy.xml");
             if (lowFile.canRead()) {
                 lowPolicyURL = lowFile.toURI().toURL();
-                log.info("AntiSamy found override for low policy file at: "+lowPolicyURL);
+                M_log.info("AntiSamy found override for low policy file at: "+lowPolicyURL);
             }
             File highFile = new File(sakaiHomePath, "antisamy"+File.separator+"high-security-policy.xml");
             if (highFile.canRead()) {
                 highPolicyURL = highFile.toURI().toURL();
-                log.info("AntiSamy found override for high policy file at: "+highPolicyURL);
+                M_log.info("AntiSamy found override for high policy file at: "+highPolicyURL);
             }
             Policy policyHigh = Policy.getInstance(highPolicyURL);
             antiSamyHigh = new AntiSamy(policyHigh);
             Policy policyLow = Policy.getInstance(lowPolicyURL);
             antiSamyLow = new AntiSamy(policyLow);
             // TODO should we attempt to fallback to internal files if the parsing/init fails of external ones?
-            log.info("AntiSamy INIT default security level ("+(defaultLowSecurity()?"LOW":"high")+"), policy files: high="+highPolicyURL+", low="+lowPolicyURL);
+            M_log.info("AntiSamy INIT default security level ("+(defaultLowSecurity()?"LOW":"high")+"), policy files: high="+highPolicyURL+", low="+lowPolicyURL);
         } catch (Exception e) {
             throw new IllegalStateException("Unable to startup the antisamy html code cleanup handler (cannot complete startup): " + e, e);
         }
@@ -424,7 +424,7 @@ public class FormattedTextImpl implements FormattedText
                 } catch (ScanException e) {
                     // this will match the legacy behavior
                     val = "";
-                    log.error("processFormattedText: Failure during scan of input html: " + e, e);
+                    M_log.error("processFormattedText: Failure during scan of input html: " + e, e);
                 } catch (PolicyException e) {
                     // this is an unrecoverable failure
                     throw new RuntimeException("Unable to access the antiSamy policy file: "+e, e);
@@ -440,7 +440,7 @@ public class FormattedTextImpl implements FormattedText
             // We catch all exceptions here because doing so will usually give the user the
             // opportunity to work around the issue, rather than causing a tool stack trace
 
-            log.error("Unexpected error processing text", e);
+            M_log.error("Unexpected error processing text", e);
             formattedTextErrors.append(getResourceLoader().getString("unknown_error_markup") + "\n");
             val = null;
         }
@@ -457,7 +457,7 @@ public class FormattedTextImpl implements FormattedText
                     session.setAttribute("userWarning", getResourceLoader().getString("content_has_been_cleaned"));
                 }
             }
-            if (logErrors && log.isInfoEnabled()) {
+            if (logErrors && M_log.isInfoEnabled()) {
                 // KNL-1075 - Logger errors if desired so they can be easily found
                 String user = "UNKNOWN";
                 try {
@@ -469,7 +469,7 @@ public class FormattedTextImpl implements FormattedText
                         // nothing to do in this case
                     }
                 }
-                log.info("FormattedText Error: user=" + user + " : " + formattedTextErrors.toString()
+                M_log.info("FormattedText Error: user=" + user + " : " + formattedTextErrors.toString()
                         +"\n  -- processing input:\n"+strFromBrowser
                         +"\n  -- resulting output:\n"+val
                         );
@@ -650,7 +650,7 @@ public class FormattedTextImpl implements FormattedText
         }
         catch (Exception e)
         {
-            log.error("Validator.escapeHtml: ", e);
+            M_log.error("Validator.escapeHtml: ", e);
             return "";
         }
     }
@@ -700,7 +700,7 @@ public class FormattedTextImpl implements FormattedText
                 hrefRel = matcher.group();
             }
         } catch (Exception e) {
-            log.error("FormattedText.processAnchor ", e);
+            M_log.error("FormattedText.processAnchor ", e);
         }
 
         if (hrefTarget != null) {
@@ -753,7 +753,7 @@ public class FormattedTextImpl implements FormattedText
             }
             newAnchor += ">";
         } else {
-            log.debug("FormattedText.processAnchor href == null");
+            M_log.debug("FormattedText.processAnchor href == null");
             newAnchor = anchor; // default to the original one so we don't lose the anchor
         }
         return newAnchor;
@@ -773,13 +773,13 @@ public class FormattedTextImpl implements FormattedText
             // TODO call encodeUnicode in other process routine
             html = encodeUnicode(source);
         } catch (Exception e) {
-            log.error("FormattedText.processEscapedHtml encodeUnicode(source):"+e, e);
+            M_log.error("FormattedText.processEscapedHtml encodeUnicode(source):"+e, e);
         }
         try {
             // to use the FormattedText functions
             html = unEscapeHtml(html);
         } catch (Exception e) {
-            log.error("FormattedText.processEscapedHtml unEscapeHtml(Html):"+e, e);
+            M_log.error("FormattedText.processEscapedHtml unEscapeHtml(Html):"+e, e);
         }
 
         return processFormattedText(html, new StringBuilder());
@@ -838,6 +838,7 @@ public class FormattedTextImpl implements FormattedText
             if (value.indexOf(ref) >= 0)
             {
                 val = M_htmlCharacterEntityReferencesUnicode[i];
+                // System.out.println("REPLACING "+ref+" WITH UNICODE CHARACTER #"+val+" WHICH IN JAVA IS "+Character.toString(val));
                 value = value.replaceAll(ref, Character.toString(val));
             }
         }
@@ -1085,7 +1086,7 @@ public class FormattedTextImpl implements FormattedText
         }
         catch (Exception e)
         {
-            log.error("escapeJavascript: ", e);
+            M_log.error("escapeJavascript: ", e);
             return value;
         }
     }
@@ -1145,7 +1146,7 @@ public class FormattedTextImpl implements FormattedText
         }
         catch (UnsupportedEncodingException e)
         {
-            log.error("Validator.escapeUrl: ", e);
+            M_log.error("Validator.escapeUrl: ", e);
             return "";
         }
     }
@@ -1242,10 +1243,10 @@ public class FormattedTextImpl implements FormattedText
             retval = retval.replace("%25","%");
             return retval;
         } catch ( java.net.URISyntaxException e ) {
-            log.info("Failure during encode of href url: " + e);
+            M_log.info("Failure during encode of href url: " + e);
             return null;
         } catch ( java.net.MalformedURLException e ) {
-            log.info("Failure during encode of href url: " + e);
+            M_log.info("Failure during encode of href url: " + e);
             return null;
         }
     }
@@ -1287,7 +1288,7 @@ public class FormattedTextImpl implements FormattedText
 		try {
 			nbFormat = NumberFormat.getNumberInstance(new ResourceLoader().getLocale());
 		} catch (Exception e) {
-			log.error("Error while retrieving local number format, using default ", e);
+			M_log.error("Error while retrieving local number format, using default ", e);
 		}
 		if (maxFractionDigits!=null) nbFormat.setMaximumFractionDigits(maxFractionDigits);
 		if (minFractionDigits!=null) nbFormat.setMinimumFractionDigits(minFractionDigits);
@@ -1298,20 +1299,11 @@ public class FormattedTextImpl implements FormattedText
     public NumberFormat getNumberFormat() {
     	return getNumberFormat(null,null,null);
     }
-
-    /* (non-Javadoc)
-     * @see org.sakaiproject.util.api.FormattedText#getHTMLBody(java.lang.String)
-     */
-    public String getHtmlBody(String text) {
-        if (StringUtils.isBlank(text)) return text;
-        org.jsoup.nodes.Document document = org.jsoup.Jsoup.parse(text);
-        document.outputSettings().prettyPrint(false);
-        return document.body().html();
-    }
     
     public String getDecimalSeparator() {
 		return ((DecimalFormat)getNumberFormat()).getDecimalFormatSymbols().getDecimalSeparator()+"";
     }
+    
     
     /**
      * SAK-23567 Gets the shortened version of the title

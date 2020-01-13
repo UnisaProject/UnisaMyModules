@@ -26,7 +26,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is critical for the interaction with AuthorizationManager.
@@ -36,9 +37,9 @@ import lombok.extern.slf4j.Slf4j;
  * @author <a href="mailto:lance@indiana.edu">Lance Speelmon</a>
  * @version $Id: PermissionsMask.java 632 2005-07-14 21:22:50 +0000 (Thu, 14 Jul 2005) janderse@umich.edu $
  */
-@Slf4j
 public class PermissionsMask implements Map
 {
+  private static final Logger LOG = LoggerFactory.getLogger(PermissionsMask.class);
 
   private Map map;
 
@@ -145,9 +146,9 @@ public class PermissionsMask implements Map
    */
   public Object put(Object key, Object value)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("put(Object " + key + ", Object " + value + ")");
+      LOG.debug("put(Object " + key + ", Object " + value + ")");
     }
     if (key == null || !(key instanceof String))
       throw new IllegalArgumentException("Illegal key argument passed!");
@@ -164,9 +165,9 @@ public class PermissionsMask implements Map
    */
   public void putAll(Map t)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("putAll(Map " + t + ")");
+      LOG.debug("putAll(Map " + t + ")");
     }
     if (t == null)
       throw new IllegalArgumentException("Illegal map argument passed!");

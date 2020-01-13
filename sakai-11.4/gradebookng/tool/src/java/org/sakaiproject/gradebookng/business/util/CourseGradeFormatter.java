@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2003-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 package org.sakaiproject.gradebookng.business.util;
 
@@ -126,19 +111,18 @@ public class CourseGradeFormatter {
 		}
 
 		if (StringUtils.isNotBlank(letterGrade)
-				&& (this.gradebook.isCourseLetterGradeDisplayed() || shouldDisplayFullCourseGrade())) {
+				&& (this.gradebook.isCourseLetterGradeDisplayed() || this.currentUserRole == GbRole.INSTRUCTOR)) {
 			parts.add(letterGrade);
 		}
 
 		// percentage
-		// not shown in final grade mode
 		final String calculatedGrade;
 		if (this.showOverride && StringUtils.isNotBlank(courseGrade.getEnteredGrade())) {
 
 			// if mapping doesn't exist for this grade override (mapping may have been changed!), map it to 0.
 			// TODO this should probably inform the instructor
 			Double mappedGrade = this.gradebook.getSelectedGradeMapping().getGradeMap().get(courseGrade.getEnteredGrade());
-			if (mappedGrade == null) {
+			if(mappedGrade == null) {
 				mappedGrade = new Double(0);
 			}
 			calculatedGrade = FormatHelper.formatDoubleAsPercentage(mappedGrade);
@@ -148,7 +132,7 @@ public class CourseGradeFormatter {
 		}
 
 		if (StringUtils.isNotBlank(calculatedGrade)
-				&& (this.gradebook.isCourseAverageDisplayed() || shouldDisplayFullCourseGrade())) {
+				&& (this.gradebook.isCourseAverageDisplayed() || this.currentUserRole == GbRole.INSTRUCTOR)) {
 			if (parts.isEmpty()) {
 				parts.add(new StringResourceModel("coursegrade.display.percentage-first", null,
 						new Object[] { calculatedGrade }).getString());
@@ -169,23 +153,19 @@ public class CourseGradeFormatter {
 				Double totalPointsPossible = courseGrade.getTotalPointsPossible();
 
 				// handle the special case in the gradebook service where totalPointsPossible = -1
-				if (totalPointsPossible != null && totalPointsPossible == -1) {
+				if(totalPointsPossible != null && totalPointsPossible == -1) {
 					pointsEarned = null;
 					totalPointsPossible = null;
 				}
 
 				// if instructor, show the points if requested
 				// otherwise check the settings
-				if (shouldDisplayFullCourseGrade() || this.gradebook.isCoursePointsDisplayed()) {
-					if (pointsEarned != null && totalPointsPossible != null) {
-						final String pointsEarnedDisplayString = FormatHelper.formatGradeForDisplay(pointsEarned);
-						final String totalPointsPossibleDisplayString = FormatHelper.formatGradeForDisplay(totalPointsPossible);
+				if (this.currentUserRole == GbRole.INSTRUCTOR || this.gradebook.isCoursePointsDisplayed()) {
+					if(pointsEarned != null && totalPointsPossible != null) {
 						if (parts.isEmpty()) {
-							parts.add(MessageHelper.getString("coursegrade.display.points-first", pointsEarnedDisplayString,
-									totalPointsPossibleDisplayString));
+							parts.add(MessageHelper.getString("coursegrade.display.points-first", pointsEarned, totalPointsPossible));
 						} else {
-							parts.add(MessageHelper.getString("coursegrade.display.points-second", pointsEarnedDisplayString,
-									totalPointsPossibleDisplayString));
+							parts.add(MessageHelper.getString("coursegrade.display.points-second", pointsEarned, totalPointsPossible));
 						}
 					}
 				}
@@ -200,7 +180,4 @@ public class CourseGradeFormatter {
 		return String.join(" ", parts);
 	}
 
-	private boolean shouldDisplayFullCourseGrade() {
-		return GbRole.INSTRUCTOR.equals(this.currentUserRole) || GbRole.TA.equals(this.currentUserRole);
-	}
 }

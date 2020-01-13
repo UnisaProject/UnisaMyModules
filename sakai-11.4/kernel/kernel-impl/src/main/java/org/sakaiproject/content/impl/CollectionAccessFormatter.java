@@ -30,10 +30,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang3.StringUtils;
-
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentCollection;
 import org.sakaiproject.content.api.ContentEntity;
@@ -41,6 +40,8 @@ import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.entity.api.ResourceProperties;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.api.FormattedText;
@@ -50,9 +51,10 @@ import org.sakaiproject.util.api.FormattedText;
  * CollectionAccessFormatter is formatter for collection access.
  * </p>
  */
-@Slf4j
 public class CollectionAccessFormatter
 {
+	private static final Logger M_log = LoggerFactory.getLogger(CollectionAccessFormatter.class);
+
 	private FormattedText formattedText;
 	private ServerConfigurationService serverConfigurationService;
 	private SiteService siteService;
@@ -151,7 +153,7 @@ public class CollectionAccessFormatter
 			if (parts.length > 2)
 			{
 				// go up a level
-				out.println("<li class=\"upfolder\"><a href=\"../\"><span class=\"faicon\"></span>" + rb.getString("colformat.uplevel") + "</a></li>");
+				out.println("<li class=\"upfolder\"><a href=\"../\"><img src=\"/library/image/sakai/folder-up.gif\" alt=\"" + rb.getString("colformat.uplevel.alttext") + "\"/>" + rb.getString("colformat.uplevel") + "</a></li>");
 			}
 
 			// Sort the collection items
@@ -231,7 +233,7 @@ public class CollectionAccessFormatter
 						StringBuilder li
 							= new StringBuilder("<li class=\"folder\"><a href=\"").append(contentUrl).append("\"");
 						li.append(" class=\""+hiddenClass+"\"");
-						li.append("><span class=\"faicon\"></span>")
+						li.append(">")
 							.append(formattedText.escapeHtml(displayName))
 							.append("</a>")
 							.append(desc)
@@ -253,7 +255,7 @@ public class CollectionAccessFormatter
 							= new StringBuilder("<li class=\"file" + hiddenClass +"\"><a href=\"").append(contentUrl).append("\" target=_blank class=\"");
 						li.append(resourceType);
 						li.append(hiddenClass);
-						li.append("\"><span class=\"faicon\"></span>");
+						li.append("\">");
 						li.append(formattedText.escapeHtml(displayName));
 						li.append("</a>").append(desc).append("</li>");
 
@@ -262,7 +264,7 @@ public class CollectionAccessFormatter
 				}
 				catch (Exception e)
 				{
-					log.info("Problem rendering item falling back to default rendering: "+ x.getId()+ ", "+ e.getMessage());
+					M_log.info("Problem rendering item falling back to default rendering: "+ x.getId()+ ", "+ e.getMessage());
 					out.println("<li class=\"file\"><a href=\"" + contentUrl + "\" target=_blank>" + formattedText.escapeHtml(xs)
 							+ "</a></li>");
 				}
@@ -271,7 +273,7 @@ public class CollectionAccessFormatter
 		}
 		catch (Exception e)
 		{
-			log.warn("Problem formatting HTML for collection: "+ x.getId(), e);
+			M_log.warn("Problem formatting HTML for collection: "+ x.getId(), e);
 		}
 
 		if (out != null && printedHeader)

@@ -4,7 +4,7 @@
   <parent>
     <artifactId>chat-base</artifactId>
     <groupId>org.sakaiproject</groupId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <name>sakai-chat-tool</name>
@@ -36,6 +36,22 @@
     <dependency>
       <groupId>org.sakaiproject</groupId>
       <artifactId>sakai-chat-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.sakaiproject.courier</groupId>
+      <artifactId>sakai-courier-api</artifactId>
+    </dependency>
+     <dependency>
+      <groupId>org.sakaiproject.presence</groupId>
+      <artifactId>sakai-presence-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.sakaiproject.presence</groupId>
+      <artifactId>sakai-presence-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.sakaiproject.courier</groupId>
+      <artifactId>sakai-courier-util</artifactId>
     </dependency>
     <dependency>
       <groupId>org.sakaiproject.site</groupId>
@@ -71,7 +87,7 @@
     <dependency>
       <groupId>org.apache.myfaces.tomahawk</groupId>
       <artifactId>tomahawk</artifactId>
-      <version>1.1.14</version>
+      <version>1.1.10</version>
       <scope>compile</scope>
     </dependency>
     <!-- Needed by MyFaces ExtensionsFilter -->
@@ -90,10 +106,6 @@
     <dependency>
       <groupId>commons-beanutils</groupId>
       <artifactId>commons-beanutils</artifactId>
-    </dependency>
-        <dependency>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
     </dependency>
     <dependency>
       <groupId>taglibs</groupId>

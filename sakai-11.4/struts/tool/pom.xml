@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <parent>
+    <artifactId>Struts-base</artifactId>
+    <groupId>org.sakaiproject</groupId>
+    <version>11.4</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.sakaiproject</groupId>
+  <artifactId>sakai-struts-tool</artifactId>
+  <packaging>jar</packaging>
+  <name>sakai-struts-tool</name>
+  <inceptionYear>2005</inceptionYear>
+  <organization>
+    <name>University of South Africa</name>
+    <url>http://www.unisa.ac.za</url>
+  </organization>
+  <build>
+    <resources>
+      <resource>
+        <directory>${basedir}/src/java</directory>
+      </resource>
+    </resources>
+  </build>
+  <dependencies>
+     <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.sakaiproject.kernel</groupId>
+      <artifactId>sakai-kernel-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.sakaiproject.kernel</groupId>
+      <artifactId>sakai-kernel-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.0.4</version>
+    </dependency>
+     
+  </dependencies>
+</project>

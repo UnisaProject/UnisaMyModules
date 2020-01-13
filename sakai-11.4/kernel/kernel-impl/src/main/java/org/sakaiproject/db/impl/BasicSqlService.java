@@ -30,7 +30,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,9 +37,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.sql.Types;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
@@ -49,8 +46,8 @@ import java.util.Vector;
 
 import javax.sql.DataSource;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlReaderFinishedException;
 import org.sakaiproject.db.api.SqlService;
@@ -66,9 +63,12 @@ import org.sakaiproject.time.api.Time;
  * BasicSqlService implements the SqlService.
  * </p>
  */
-@Slf4j
 public abstract class BasicSqlService implements SqlService
 {
+	private static final Logger LOG = LoggerFactory.getLogger(BasicSqlService.class);
+
+	private static final Logger SWC_LOG = LoggerFactory.getLogger(StreamWithConnection.class);
+
 	/** Key name in thread local to find the current transaction connection. */
 	protected static final String TRANSACTION_CONNECTION = "sqlService:transaction_connection";
 
@@ -107,9 +107,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public void setCommitAfterRead(String value)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setCommitAfterRead(String " + value + ")");
+			LOG.debug("setCommitAfterRead(String " + value + ")");
 		}
 
 		m_commitAfterRead = Boolean.valueOf(value).booleanValue();
@@ -126,9 +126,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public void setVendor(String value)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setVendor(String " + value + ")");
+			LOG.debug("setVendor(String " + value + ")");
 		}
 
 		m_vendor = (value != null) ? value.toLowerCase().trim() : null;
@@ -153,9 +153,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public void setShowSql(String value)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setShowSql(String " + value + ")");
+			LOG.debug("setShowSql(String " + value + ")");
 		}
 
 		m_showSql = Boolean.valueOf(value).booleanValue();
@@ -186,9 +186,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public void setAutoDdl(String value)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setAutoDdl(String " + value + ")");
+			LOG.debug("setAutoDdl(String " + value + ")");
 		}
 
 		m_autoDdl = Boolean.valueOf(value).booleanValue();
@@ -233,7 +233,7 @@ public abstract class BasicSqlService implements SqlService
 			ddl(getClass().getClassLoader(), "sakai_locks");
 		}
 
-		log.info("init(): vendor: " + m_vendor + " autoDDL: " + m_autoDdl + " deadlockRetries: " + m_deadlockRetries);
+		LOG.info("init(): vendor: " + m_vendor + " autoDDL: " + m_autoDdl + " deadlockRetries: " + m_deadlockRetries);
 	}
 
 	/**
@@ -241,7 +241,7 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public void destroy()
 	{
-		log.info("destroy()");
+		LOG.info("destroy()");
 	}
 
 	/*************************************************************************************************************************************************
@@ -253,7 +253,7 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public Connection borrowConnection() throws SQLException
 	{
-		log.debug("borrowConnection()");
+		LOG.debug("borrowConnection()");
 
 		if (defaultDataSource != null)
 		{
@@ -270,9 +270,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public void returnConnection(Connection conn)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("returnConnection(Connection " + conn + ")");
+			LOG.debug("returnConnection(Connection " + conn + ")");
 		}
 
 		if (conn != null)
@@ -307,7 +307,7 @@ public abstract class BasicSqlService implements SqlService
 			if (i > 0)
 			{
 				// make a little fuss
-				log.warn("transact: deadlock: retrying (" + i + " / " + m_deadlockRetries + "): " + tag);
+				LOG.warn("transact: deadlock: retrying (" + i + " / " + m_deadlockRetries + "): " + tag);
 
 				// do a little wait, longer for each retry
 				// TODO: randomize?
@@ -345,18 +345,18 @@ public abstract class BasicSqlService implements SqlService
 					try
 					{
 						connection.rollback();
-						log.warn("transact: deadlock: rolling back: " + tag);
+						LOG.warn("transact: deadlock: rolling back: " + tag);
 					}
 					catch (Exception ee)
 					{
-						log.warn("transact: (deadlock: rollback): " + tag + " : " + ee);
+						LOG.warn("transact: (deadlock: rollback): " + tag + " : " + ee);
 					}
 				}
 
 				// if this was the last attempt, throw to abort
 				if (i == m_deadlockRetries)
 				{
-					log.warn("transact: deadlock: retry failure: " + tag);
+					LOG.warn("transact: deadlock: retry failure: " + tag);
 					throw e;
 				}
 			}
@@ -368,14 +368,14 @@ public abstract class BasicSqlService implements SqlService
 					try
 					{
 						connection.rollback();
-						log.warn("transact: rolling back: " + tag);
+						LOG.warn("transact: rolling back: " + tag);
 					}
 					catch (Exception ee)
 					{
-						log.warn("transact: (rollback): " + tag + " : " + ee);
+						LOG.warn("transact: (rollback): " + tag + " : " + ee);
 					}
 				}
-				log.warn("transact: failure: " + e);
+				LOG.warn("transact: failure: " + e);
 				throw e;
 			}
 			catch (SQLException e)
@@ -386,14 +386,14 @@ public abstract class BasicSqlService implements SqlService
 					try
 					{
 						connection.rollback();
-						log.warn("transact: rolling back: " + tag);
+						LOG.warn("transact: rolling back: " + tag);
 					}
 					catch (Exception ee)
 					{
-						log.warn("transact: (rollback): " + tag + " : " + ee);
+						LOG.warn("transact: (rollback): " + tag + " : " + ee);
 					}
 				}
-				log.warn("transact: failure: " + e);
+				LOG.warn("transact: failure: " + e);
 				throw new RuntimeException("SqlService.transact failure", e);
 			}
 
@@ -410,7 +410,7 @@ public abstract class BasicSqlService implements SqlService
 					}
 					catch (Exception e)
 					{
-						log.warn("transact: (setAutoCommit): " + tag + " : " + e);
+						LOG.warn("transact: (setAutoCommit): " + tag + " : " + e);
 					}
 					returnConnection(connection);
 				}
@@ -441,9 +441,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public List<String> dbRead(String sql)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbRead(String " + sql + ")");
+			LOG.debug("dbRead(String " + sql + ")");
 		}
 
 		return dbRead(sql, null, null);
@@ -463,9 +463,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public List dbRead(String sql, Object[] fields, SqlReader reader)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbRead(String " + sql + ", Object[] " + Arrays.toString(fields) + ", SqlReader " + reader + ")");
+			LOG.debug("dbRead(String " + sql + ", Object[] " + Arrays.toString(fields) + ", SqlReader " + reader + ")");
 		}
 
 		return dbRead(null, sql, fields, reader);
@@ -493,9 +493,9 @@ public abstract class BasicSqlService implements SqlService
 			callerConn = (Connection) threadLocalManager().get(TRANSACTION_CONNECTION);
 		}
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbRead(Connection " + callerConn + ", String " + sql + ", Object[] " + Arrays.toString(fields) + ", SqlReader " + reader + ")");
+			LOG.debug("dbRead(Connection " + callerConn + ", String " + sql + ", Object[] " + Arrays.toString(fields) + ", SqlReader " + reader + ")");
 		}
 
 		// for DEBUG
@@ -506,7 +506,7 @@ public abstract class BasicSqlService implements SqlService
 		long resultsTime = 0;
 		int count = 0;
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
 			String userId = usageSessionService().getSessionId();
 			StringBuilder buf = new StringBuilder();
@@ -519,7 +519,7 @@ public abstract class BasicSqlService implements SqlService
 					buf.append(fields[i]);
 				}
 			}
-			log.debug("Sql.dbRead: " + userId + "\n" + sql + "\n" + buf);
+			LOG.debug("Sql.dbRead: " + userId + "\n" + sql + "\n" + buf);
 		}
 
 		Connection conn = null;
@@ -566,15 +566,7 @@ public abstract class BasicSqlService implements SqlService
 
                 // without a reader, we read the first String from each record
                 if (reader == null) {
-                    String s;
-                    ResultSetMetaData metadataResult = result.getMetaData();
-                	
-                    if (metadataResult != null && Types.CLOB == metadataResult.getColumnType(1)) {
-                        Clob clobResult = result.getClob(1);
-                        s = clobResult.getSubString(1, (int) clobResult.length());
-                    } else {
-                        s = result.getString(1);
-                    }
+                    String s = result.getString(1);
                     if (s != null) {
                         rv.add(s);
                     }
@@ -591,9 +583,9 @@ public abstract class BasicSqlService implements SqlService
 
             }
         } catch (SQLException e) {
-            log.warn("Sql.dbRead: sql: " + sql + debugFields(fields), e);
+            LOG.warn("Sql.dbRead: sql: " + sql + debugFields(fields), e);
         } catch (UnsupportedEncodingException e) {
-            log.warn("Sql.dbRead: sql: " + sql + debugFields(fields), e);
+            LOG.warn("Sql.dbRead: sql: " + sql + debugFields(fields), e);
         } finally {
             if (m_showSql) {
                 resultsTime = System.currentTimeMillis() - start;
@@ -602,14 +594,14 @@ public abstract class BasicSqlService implements SqlService
                 try {
                     result.close();
                 } catch (SQLException e) {
-                    log.warn("Sql.dbRead: sql: " + sql + debugFields(fields), e);
+                    LOG.warn("Sql.dbRead: sql: " + sql + debugFields(fields), e);
                 }
             }
             if (null != pstmt) {
                 try {
                     pstmt.close();
                 } catch (SQLException e) {
-                    log.warn("Sql.dbRead: sql: " + sql + debugFields(fields), e);
+                    LOG.warn("Sql.dbRead: sql: " + sql + debugFields(fields), e);
                 }
             }
 
@@ -621,7 +613,7 @@ public abstract class BasicSqlService implements SqlService
                         try {
                             conn.commit();
                         } catch (SQLException e) {
-                            log.warn("Sql.dbRead: sql: " + sql + debugFields(fields), e);
+                            LOG.warn("Sql.dbRead: sql: " + sql + debugFields(fields), e);
                         }
                     }
                     returnConnection(conn);
@@ -647,9 +639,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public void dbReadBinary(String sql, Object[] fields, byte[] value)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbReadBinary(String " + sql + ", Object[] " + Arrays.toString(fields) + ")");
+			LOG.debug("dbReadBinary(String " + sql + ", Object[] " + Arrays.toString(fields) + ")");
 		}
 
 		dbReadBinary(null, sql, fields, value);
@@ -675,9 +667,9 @@ public abstract class BasicSqlService implements SqlService
 			callerConn = (Connection) threadLocalManager().get(TRANSACTION_CONNECTION);
 		}
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbReadBinary(Connection " + callerConn + ", String " + sql + ", Object[] " + Arrays.toString(fields) + ")");
+			LOG.debug("dbReadBinary(Connection " + callerConn + ", String " + sql + ", Object[] " + Arrays.toString(fields) + ")");
 		}
 
 		// for DEBUG
@@ -685,10 +677,10 @@ public abstract class BasicSqlService implements SqlService
 		long connectionTime = 0;
 		int lenRead = 0;
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
 			String userId = usageSessionService().getSessionId();
-			log.debug("Sql.dbReadBinary(): " + userId + "\n" + sql);
+			LOG.debug("Sql.dbReadBinary(): " + userId + "\n" + sql);
 		}
 
 		Connection conn = null;
@@ -727,20 +719,20 @@ public abstract class BasicSqlService implements SqlService
 				if (m_showSql) lenRead += len;
 			}
         } catch (Exception e) {
-            log.warn("Sql.dbReadBinary(): " + e);
+            LOG.warn("Sql.dbReadBinary(): " + e);
         } finally {
             if (null != result) {
                 try {
                     result.close();
                 } catch (SQLException e) {
-                    log.warn("Sql.dbReadBinary(): result close fail: " + e);
+                    LOG.warn("Sql.dbReadBinary(): result close fail: " + e);
                 }
             }
             if (null != pstmt) {
                 try {
                     pstmt.close();
                 } catch (SQLException e) {
-                    log.warn("Sql.dbReadBinary(): pstmt close fail: " + e);
+                    LOG.warn("Sql.dbReadBinary(): pstmt close fail: " + e);
                 }
             }
             // return the connection only if we have borrowed a new one for this call
@@ -751,7 +743,7 @@ public abstract class BasicSqlService implements SqlService
                         try {
                             conn.commit();
                         } catch (SQLException e) {
-                            log.warn("Sql.dbReadBinary(): conn commit fail: " + e);
+                            LOG.warn("Sql.dbReadBinary(): conn commit fail: " + e);
                         }
                     }
                     returnConnection(conn);
@@ -781,9 +773,9 @@ public abstract class BasicSqlService implements SqlService
 	{
 		// Note: does not support TRANSACTION_CONNECTION -ggolden
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbReadBinary(String " + sql + ", Object[] " + Arrays.toString(fields) + ", boolean " + big + ")");
+			LOG.debug("dbReadBinary(String " + sql + ", Object[] " + Arrays.toString(fields) + ", boolean " + big + ")");
 		}
 
 		InputStream rv = null;
@@ -793,9 +785,9 @@ public abstract class BasicSqlService implements SqlService
 		long connectionTime = 0;
 		int lenRead = 0;
 
-        if (log.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             String userId = usageSessionService().getSessionId();
-            log.debug("Sql.dbReadBinary(): " + userId + "\n" + sql);
+            LOG.debug("Sql.dbReadBinary(): " + userId + "\n" + sql);
         }
 
 		Connection conn = null;
@@ -833,9 +825,9 @@ public abstract class BasicSqlService implements SqlService
         } catch (ServerOverloadException e) {
             throw e;
         } catch (SQLException e) {
-            log.warn("Sql.dbReadBinary(): " + e);
+            LOG.warn("Sql.dbReadBinary(): " + e);
         } catch (UnsupportedEncodingException e) {
-            log.warn("Sql.dbReadBinary(): " + e);
+            LOG.warn("Sql.dbReadBinary(): " + e);
         } finally {
             // ONLY if we didn't make the rv - else let the rv hold these OPEN!
             if (rv == null) {
@@ -843,14 +835,14 @@ public abstract class BasicSqlService implements SqlService
                     try {
                         result.close();
                     } catch (SQLException e) {
-                        log.warn("Sql.dbReadBinary(): " + e);
+                        LOG.warn("Sql.dbReadBinary(): " + e);
                     }
                 }
                 if (null != pstmt) {
                     try {
                         pstmt.close();
                     } catch (SQLException e) {
-                        log.warn("Sql.dbReadBinary(): " + e);
+                        LOG.warn("Sql.dbReadBinary(): " + e);
                     }
                 }
                 if (null != conn) {
@@ -859,13 +851,13 @@ public abstract class BasicSqlService implements SqlService
                         try {
                             conn.commit();
                         } catch (SQLException e) {
-                            log.warn("Sql.dbReadBinary(): " + e);
+                            LOG.warn("Sql.dbReadBinary(): " + e);
                         }
                     }
                     returnConnection(conn);
                 }
             }
-            // log.warn("Sql.dbReadBinary(): " + e);
+            // LOG.warn("Sql.dbReadBinary(): " + e);
         }
 
 		if (m_showSql) {
@@ -883,9 +875,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public boolean dbWrite(String sql)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbWrite(String " + sql + ")");
+			LOG.debug("dbWrite(String " + sql + ")");
 		}
 
 		return dbWrite(sql, null, null, null, false);
@@ -903,9 +895,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public boolean dbWrite(String sql, String var)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbWrite(String " + sql + ", String " + var + ")");
+			LOG.debug("dbWrite(String " + sql + ", String " + var + ")");
 		}
 
 		return dbWrite(sql, null, var, null, false);
@@ -930,19 +922,19 @@ public abstract class BasicSqlService implements SqlService
 	{
 		// Note: does not support TRANSACTION_CONNECTION -ggolden
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbWriteBinary(String " + sql + ", Object[] " + Arrays.toString(fields) + ", byte[] " + Arrays.toString(var) + ", int " + offset + ", int " + len + ")");
+			LOG.debug("dbWriteBinary(String " + sql + ", Object[] " + Arrays.toString(fields) + ", byte[] " + Arrays.toString(var) + ", int " + offset + ", int " + len + ")");
 		}
 
 		// for DEBUG
 		long start = 0;
 		long connectionTime = 0;
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
 			String userId = usageSessionService().getSessionId();
-			log.debug("Sql.dbWriteBinary(): " + userId + "\n" + sql + "  size:" + var.length);
+			LOG.debug("Sql.dbWriteBinary(): " + userId + "\n" + sql + "  size:" + var.length);
 		}
 
 		Connection conn = null;
@@ -992,14 +984,14 @@ public abstract class BasicSqlService implements SqlService
 			// 1105 max_allowed_packet too small
 			// 1118 redo log size not at least 10 times max_allowed_packet
 			if ( "mysql".equals(m_vendor) && (e.getErrorCode() == 1105 || e.getErrorCode() == 1118) ) {
-				log.warn("SQL '{}' failed, consider useServerPrepStmts=true on JDBC connection.", sql, e);
+				LOG.warn("SQL '{}' failed, consider useServerPrepStmts=true on JDBC connection.", sql, e);
 			}
 			// this is likely due to a key constraint problem...
 			return false;
 		}
 		catch (Exception e)
 		{
-			log.warn("Sql.dbWriteBinary(): " + e);
+			LOG.warn("Sql.dbWriteBinary(): " + e);
 			return false;
 		}
 		finally
@@ -1011,7 +1003,7 @@ public abstract class BasicSqlService implements SqlService
 				try {
 					pstmt.close();
 				} catch (SQLException e) {
-					log.warn("Sql.dbWriteBinary(): " + e);
+					LOG.warn("Sql.dbWriteBinary(): " + e);
 				}
 			}
 			if (null != varStream)
@@ -1019,7 +1011,7 @@ public abstract class BasicSqlService implements SqlService
 				try {
 					varStream.close();
 				} catch (IOException e) {
-					log.warn("Sql.dbWriteBinary(): " + e);
+					LOG.warn("Sql.dbWriteBinary(): " + e);
 				}
 			}
 
@@ -1031,7 +1023,7 @@ public abstract class BasicSqlService implements SqlService
 					try {
 						conn.rollback();
 					} catch (SQLException e) {
-						log.warn("Sql.dbWriteBinary(): " + e);
+						LOG.warn("Sql.dbWriteBinary(): " + e);
 					}
 				}
 
@@ -1041,7 +1033,7 @@ public abstract class BasicSqlService implements SqlService
 					try {
 						conn.setAutoCommit(autoCommit);
 					} catch (SQLException e) {
-						log.warn("Sql.dbWriteBinary(): " + e);
+						LOG.warn("Sql.dbWriteBinary(): " + e);
 					}
 				}
 				returnConnection(conn);
@@ -1066,9 +1058,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public boolean dbWrite(String sql, Object[] fields)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbWrite(String " + sql + ", Object[] " + Arrays.toString(fields) + ")");
+			LOG.debug("dbWrite(String " + sql + ", Object[] " + Arrays.toString(fields) + ")");
 		}
 
 		return dbWrite(sql, fields, null, null, false);
@@ -1087,9 +1079,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public boolean dbWrite(Connection connection, String sql, Object[] fields)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbWrite(Connection " + connection + ", String " + sql + ", Object[] " + Arrays.toString(fields) + ")");
+			LOG.debug("dbWrite(Connection " + connection + ", String " + sql + ", Object[] " + Arrays.toString(fields) + ")");
 		}
 
 		return dbWrite(sql, fields, null, connection, false);
@@ -1108,9 +1100,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public boolean dbWriteFailQuiet(Connection connection, String sql, Object[] fields)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbWriteFailQuiet(Connection " + connection + ", String " + sql + ", Object[] " + Arrays.toString(fields) + ")");
+			LOG.debug("dbWriteFailQuiet(Connection " + connection + ", String " + sql + ", Object[] " + Arrays.toString(fields) + ")");
 		}
 
 		return dbWrite(sql, fields, null, connection, true);
@@ -1129,9 +1121,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public boolean dbWrite(String sql, Object[] fields, String lastField)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbWrite(String " + sql + ", Object[] " + Arrays.toString(fields) + ", String " + lastField + ")");
+			LOG.debug("dbWrite(String " + sql + ", Object[] " + Arrays.toString(fields) + ", String " + lastField + ")");
 		}
 
 		return dbWrite(sql, fields, lastField, null, false);
@@ -1161,49 +1153,6 @@ public abstract class BasicSqlService implements SqlService
 	}
 
 	/**
-	 * @see org.sakaiproject.db.api.SqlService#dbWriteBatch(Connection, String, List<Object[]>)
-	 */
-	public boolean dbWriteBatch(Connection callerConnection, String sql, List<Object[]> fieldsList)
-	{
-		boolean success = false;
-		PreparedStatement pstmt = null;
-
-		try
-		{
-			pstmt = callerConnection.prepareStatement(sql);
-			for (Object[] fields : fieldsList)
-			{
-			    prepareStatement(pstmt, fields);
-			    pstmt.addBatch();
-			}
-			pstmt.executeBatch();
-			success = true;
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			log.warn("Sql.dbWriteBatch()", e);
-		}
-		catch (SQLException e)
-		{
-			log.warn("Sql.dbWriteBatch(): error code: " + e.getErrorCode() + " sql: " + sql + " " + e);
-		}
-		finally
-		{
-			try
-			{
-				pstmt.close();
-			}
-			catch (Exception e)
-			{
-				log.warn("Sql.dbWriteBatch(): " + e);
-				throw new RuntimeException("SqlService.dbWriteBatch failure", e);
-			}
-		}
-
-		return success;
-	}
-
-	/**
 	 * @see org.sakaiproject.db.api.SqlService#dbWriteCount(String, Object[], String, Connection, int)
 	 */
 	public int dbWriteCount(String sql, Object[] fields, String lastField, Connection callerConnection, int failQuiet)
@@ -1215,9 +1164,9 @@ public abstract class BasicSqlService implements SqlService
 			callerConnection = (Connection) threadLocalManager().get(TRANSACTION_CONNECTION);
 		}
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbWrite(String " + sql + ", Object[] " + Arrays.toString(fields) + ", String " + lastField + ", Connection " + callerConnection + ", boolean "
+			LOG.debug("dbWrite(String " + sql + ", Object[] " + Arrays.toString(fields) + ", String " + lastField + ", Connection " + callerConnection + ", boolean "
 					+ failQuiet + ")");
 		}
 
@@ -1225,7 +1174,7 @@ public abstract class BasicSqlService implements SqlService
 		long start = 0;
 		long connectionTime = 0;
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
 			String userId = usageSessionService().getSessionId();
 			StringBuilder buf = new StringBuilder();
@@ -1247,7 +1196,7 @@ public abstract class BasicSqlService implements SqlService
 			{
 				buf.append(lastField);
 			}
-			log.debug("Sql.dbWrite(): " + userId + "\n" + sql + "\n" + buf);
+			LOG.debug("Sql.dbWrite(): " + userId + "\n" + sql + "\n" + buf);
 		}
 
 		Connection conn = null;
@@ -1309,14 +1258,14 @@ public abstract class BasicSqlService implements SqlService
 
 			if (m_showSql)
 			{
-				log.warn("Sql.dbWrite(): error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields) + " " + e);
+				LOG.warn("Sql.dbWrite(): error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields) + " " + e);
 			}
 
 			// if asked to fail quietly, just return -1 if we find this error.
 			if (recordAlreadyExists || failQuiet!=0) {
 				//If failQuiet is 1 then print this, otherwise it's in ddl mode so just ignore
 				if (failQuiet == 1) {
-					log.warn("Sql.dbWrite(): recordAlreadyExists: " +  recordAlreadyExists + ", failQuiet: " + failQuiet + ", : error code: " 
+					LOG.warn("Sql.dbWrite(): recordAlreadyExists: " +  recordAlreadyExists + ", failQuiet: " + failQuiet + ", : error code: " 
 					+ e.getErrorCode() + ", " + "sql: " + sql + ", binds: " + debugFields(fields) + ", error: " + e.toString());
 				}
 				return -1;
@@ -1326,26 +1275,26 @@ public abstract class BasicSqlService implements SqlService
 			if (sqlServiceSql.isDeadLockError(e.getErrorCode()))
 			{
 				// just a little fuss
-				log.warn("Sql.dbWrite(): deadlock: error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields) + " " + e.toString());
+				LOG.warn("Sql.dbWrite(): deadlock: error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields) + " " + e.toString());
 				throw new SqlServiceDeadlockException(e);
 			}
 
 			else if (recordAlreadyExists)
 			{
 				// just a little fuss
-				log.warn("Sql.dbWrite(): unique violation: error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields) + " " + e.toString());
+				LOG.warn("Sql.dbWrite(): unique violation: error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields) + " " + e.toString());
 				throw new SqlServiceUniqueViolationException(e);
 			}
 			else
 			{
 				// something ELSE went wrong, so lest make a fuss
-				log.warn("Sql.dbWrite(): error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields) + " ", e);
+				LOG.warn("Sql.dbWrite(): error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields) + " ", e);
 				throw new RuntimeException("SqlService.dbWrite failure", e);
 			}
 		}
 		catch (Exception e)
 		{
-			log.warn("Sql.dbWrite(): " + e);
+			LOG.warn("Sql.dbWrite(): " + e);
 			throw new RuntimeException("SqlService.dbWrite failure", e);
 		}
 		finally
@@ -1371,7 +1320,7 @@ public abstract class BasicSqlService implements SqlService
 			}
 			catch (Exception e)
 			{
-				log.warn("Sql.dbWrite(): " + e);
+				LOG.warn("Sql.dbWrite(): " + e);
 				throw new RuntimeException("SqlService.dbWrite failure", e);
 			}
 		}
@@ -1418,22 +1367,30 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public Long dbInsert(Connection callerConnection, String sql, Object[] fields, String autoColumn, InputStream last, int lastLength)
 	{
-		// check for a transaction connection
+		boolean connFromThreadLocal = false;
+		
+		// check for a transaction conncetion
 		if (callerConnection == null)
 		{
 			callerConnection = (Connection) threadLocalManager().get(TRANSACTION_CONNECTION);
+			
+			if(callerConnection != null)
+			{
+				// KNL-492 We set this so we can avoid returning a connection that is being managed elsewhere
+				connFromThreadLocal = true;
+			}
 		}
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbInsert(String " + sql + ", Object[] " + Arrays.toString(fields) + ", Connection " + callerConnection + ")");
+			LOG.debug("dbInsert(String " + sql + ", Object[] " + Arrays.toString(fields) + ", Connection " + callerConnection + ")");
 		}
 
 		// for DEBUG
 		long start = 0;
 		long connectionTime = 0;
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
 			String userId = usageSessionService().getSessionId();
 			StringBuilder buf = new StringBuilder();
@@ -1446,7 +1403,7 @@ public abstract class BasicSqlService implements SqlService
 					buf.append(fields[i]);
 				}
 			}
-			log.debug("Sql.dbInsert(): " + userId + "\n" + sql + "\n" + buf);
+			LOG.debug("Sql.dbInsert(): " + userId + "\n" + sql + "\n" + buf);
 		}
 
 		Connection conn = null;
@@ -1511,7 +1468,7 @@ public abstract class BasicSqlService implements SqlService
 
 			if (m_showSql)
 			{
-				log.warn("Sql.dbInsert(): error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields) + " " + e);
+				LOG.warn("Sql.dbInsert(): error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields) + " " + e);
 			}
 
 			if (recordAlreadyExists) return null;
@@ -1520,7 +1477,7 @@ public abstract class BasicSqlService implements SqlService
 			if (("mysql".equals(m_vendor)) && (e.getErrorCode() == 1213))
 			{
 				// just a little fuss
-				log.warn("Sql.dbInsert(): deadlock: error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields) + " "
+				LOG.warn("Sql.dbInsert(): deadlock: error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields) + " "
 						+ e.toString());
 				throw new SqlServiceDeadlockException(e);
 			}
@@ -1528,7 +1485,7 @@ public abstract class BasicSqlService implements SqlService
 			else if (recordAlreadyExists)
 			{
 				// just a little fuss
-				log.warn("Sql.dbInsert(): unique violation: error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields)
+				LOG.warn("Sql.dbInsert(): unique violation: error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields)
 						+ " " + e.toString());
 				throw new SqlServiceUniqueViolationException(e);
 			}
@@ -1536,13 +1493,13 @@ public abstract class BasicSqlService implements SqlService
 			else
 			{
 				// something ELSE went wrong, so lest make a fuss
-				log.warn("Sql.dbInsert(): error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields) + " ", e);
+				LOG.warn("Sql.dbInsert(): error code: " + e.getErrorCode() + " sql: " + sql + " binds: " + debugFields(fields) + " ", e);
 				throw new RuntimeException("SqlService.dbInsert failure", e);
 			}
 		}
 		catch (Exception e)
 		{
-			log.warn("Sql.dbInsert(): " + e);
+			LOG.warn("Sql.dbInsert(): " + e);
 			throw new RuntimeException("SqlService.dbInsert failure", e);
 		}
 		finally
@@ -1563,14 +1520,22 @@ public abstract class BasicSqlService implements SqlService
 					{
 						conn.setAutoCommit(autoCommit);
 					}
-					returnConnection(conn);
+
 				}
 			}
 			catch (Exception e)
 			{
-				log.warn("Sql.dbInsert(): " + e);
+				LOG.warn("Sql.dbInsert(): " + e);
 				throw new RuntimeException("SqlService.dbInsert failure", e);
 			}
+			//make sure we return the connection even if the rollback etc above
+			// KNL-492 connFromThreadLocal is tested so we can avoid returning a
+			// connection that is being managed elsewhere
+			if (conn != null && !connFromThreadLocal)
+			{
+				returnConnection(conn);
+			}
+
 		}
 
 		if (m_showSql) debug("Sql.dbWrite(): len: " + "  time: " + connectionTime + " /  " + (System.currentTimeMillis() - start), sql, fields);
@@ -1590,9 +1555,9 @@ public abstract class BasicSqlService implements SqlService
 	{
 		// Note: does not support TRANSACTION_CONNECTION -ggolden
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbReadBlobAndUpdate(String " + sql + ", byte[] " + Arrays.toString(content) + ")");
+			LOG.debug("dbReadBlobAndUpdate(String " + sql + ", byte[] " + Arrays.toString(content) + ")");
 		}
 
 		if (!sqlServiceSql.canReadAndUpdateBlob())
@@ -1605,10 +1570,10 @@ public abstract class BasicSqlService implements SqlService
 		long connectionTime = 0;
 		int lenRead = 0;
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
 			String userId = usageSessionService().getSessionId();
-			log.debug("Sql.dbReadBlobAndUpdate(): " + userId + "\n" + sql);
+			LOG.debug("Sql.dbReadBlobAndUpdate(): " + userId + "\n" + sql);
 		}
 
 		Connection conn = null;
@@ -1646,23 +1611,23 @@ public abstract class BasicSqlService implements SqlService
 				}
 				catch (NoSuchMethodException ex)
 				{
-					log.warn("Oracle driver error: " + ex);
+					LOG.warn("Oracle driver error: " + ex);
 				}
 				catch (IllegalAccessException ex)
 				{
-					log.warn("Oracle driver error: " + ex);
+					LOG.warn("Oracle driver error: " + ex);
 				}
 				catch (InvocationTargetException ex)
 				{
-					log.warn("Oracle driver error: " + ex);
+					LOG.warn("Oracle driver error: " + ex);
 				} catch (IOException e) {
-					log.warn("Oracle driver error: " + e);
+					LOG.warn("Oracle driver error: " + e);
 				}
 			}
 		}
 		catch (SQLException e)
 		{
-			log.warn("Sql.dbReadBlobAndUpdate(): " + e);
+			LOG.warn("Sql.dbReadBlobAndUpdate(): " + e);
 		}
 		finally
 		{
@@ -1670,7 +1635,7 @@ public abstract class BasicSqlService implements SqlService
 				try {
 					os.close();
 				} catch (IOException e) {
-					log.warn("Sql.dbRead(): " + e);
+					LOG.warn("Sql.dbRead(): " + e);
 				}
 			}
 			if (null != result)
@@ -1678,7 +1643,7 @@ public abstract class BasicSqlService implements SqlService
 				try {
 					result.close();
 				} catch (SQLException e) {
-					log.warn("Sql.dbRead(): " + e);
+					LOG.warn("Sql.dbRead(): " + e);
 				}
 			}
 			if (null != stmt)
@@ -1686,7 +1651,7 @@ public abstract class BasicSqlService implements SqlService
 				try {
 					stmt.close();
 				} catch (SQLException e) {
-					log.warn("Sql.dbRead(): " + e);
+					LOG.warn("Sql.dbRead(): " + e);
 				}
 			}
 			if (null != conn)
@@ -1697,7 +1662,7 @@ public abstract class BasicSqlService implements SqlService
 					try {
 						conn.commit();
 					} catch (SQLException e) {
-						log.warn("Sql.dbRead(): " + e);
+						LOG.warn("Sql.dbRead(): " + e);
 					}
 				}
 
@@ -1723,9 +1688,9 @@ public abstract class BasicSqlService implements SqlService
 	{
 		// Note: does not support TRANSACTION_CONNECTION -ggolden
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbReadLock(String " + sql + ", StringBuilder " + field + ")");
+			LOG.debug("dbReadLock(String " + sql + ", StringBuilder " + field + ")");
 		}
 
 		Connection conn = null;
@@ -1748,7 +1713,7 @@ public abstract class BasicSqlService implements SqlService
 				resetAutoCommit = true;
 			}
 
-			if (log.isDebugEnabled()) log.debug("Sql.dbReadLock():\n" + sql);
+			if (LOG.isDebugEnabled()) LOG.debug("Sql.dbReadLock():\n" + sql);
 
 			// create a statement and execute
 			stmt = conn.createStatement();
@@ -1773,7 +1738,7 @@ public abstract class BasicSqlService implements SqlService
 		catch (SQLException e)
 		{
 			// Note: ORA-00054 gives an e.getErrorCode() of 54, if anyone cares...
-			log.warn("Sql.dbUpdateLock(): " + e.getErrorCode() + " - " + e);
+			LOG.warn("Sql.dbUpdateLock(): " + e.getErrorCode() + " - " + e);
 			closeConn = true;
 		}
 		finally
@@ -1783,14 +1748,14 @@ public abstract class BasicSqlService implements SqlService
 				try {
 					result.close();
 				} catch (SQLException e) {
-					log.warn("Sql.dbReadBinary(): " + e);
+					LOG.warn("Sql.dbReadBinary(): " + e);
 				}
 			}
 			if (null != stmt) {
 				try {
 					stmt.close();
 				} catch (SQLException e) {
-					log.warn("Sql.dbReadBinary(): " + e);
+					LOG.warn("Sql.dbReadBinary(): " + e);
 				}
 			}
 
@@ -1801,13 +1766,13 @@ public abstract class BasicSqlService implements SqlService
 				try {
 					conn.rollback();
 				} catch (SQLException e) {
-					log.warn("Sql.dbReadBinary(): " + e);
+					LOG.warn("Sql.dbReadBinary(): " + e);
 				}
 				if (resetAutoCommit)
 					try {
 						conn.setAutoCommit(autoCommit);
 					} catch (SQLException e) {
-						log.warn("Sql.dbReadBinary(): " + e);
+						LOG.warn("Sql.dbReadBinary(): " + e);
 					}
 
 			}
@@ -1836,9 +1801,9 @@ public abstract class BasicSqlService implements SqlService
 	{
 		// Note: does not support TRANSACTION_CONNECTION -ggolden
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbReadLock(String " + sql + ")");
+			LOG.debug("dbReadLock(String " + sql + ")");
 		}
 
 		Connection conn = null;
@@ -1861,7 +1826,7 @@ public abstract class BasicSqlService implements SqlService
 				resetAutoCommit = true;
 			}
 
-			if (log.isDebugEnabled()) log.debug("Sql.dbReadLock():\n" + sql);
+			if (LOG.isDebugEnabled()) LOG.debug("Sql.dbReadLock():\n" + sql);
 
 			// create a statement and execute
 			stmt = conn.createStatement();
@@ -1884,11 +1849,11 @@ public abstract class BasicSqlService implements SqlService
 		catch (SQLException e)
 		{
 			// Note: ORA-00054 gives an e.getErrorCode() of 54, if anyone cares...
-			// log.warn("Sql.dbUpdateLock(): " + e.getErrorCode() + " - " + e);
+			// LOG.warn("Sql.dbUpdateLock(): " + e.getErrorCode() + " - " + e);
 			closeConn = true;
 		}
 		catch (SqlReaderFinishedException e) {
-			log.warn("Sql.dbReadLock(): " + e);
+			LOG.warn("Sql.dbReadLock(): " + e);
 			closeConn = true;
 		}
 
@@ -1899,14 +1864,14 @@ public abstract class BasicSqlService implements SqlService
 				try {
 					result.close();
 				} catch (SQLException e) {
-					log.warn("Sql.dbReadBinary(): " + e);
+					LOG.warn("Sql.dbReadBinary(): " + e);
 				}
 			}
 			if (null != stmt) {
 				try {
 					stmt.close();
 				} catch (SQLException e) {
-					log.warn("Sql.dbReadBinary(): " + e);
+					LOG.warn("Sql.dbReadBinary(): " + e);
 				}
 			}
 
@@ -1917,17 +1882,17 @@ public abstract class BasicSqlService implements SqlService
 				try {
 					conn.rollback();
 				} catch (SQLException e) {
-					log.warn("Sql.dbReadBinary(): " + e);
+					LOG.warn("Sql.dbReadBinary(): " + e);
 				}
 				if (resetAutoCommit)
 					try {
 						conn.setAutoCommit(autoCommit);
 					} catch (SQLException e) {
-						log.warn("Sql.dbReadBinary(): " + e);
+						LOG.warn("Sql.dbReadBinary(): " + e);
 					}
 
 			}
-			//	log.warn("Sql.dbReadLock(): " + e);
+			//	LOG.warn("Sql.dbReadLock(): " + e);
 
 			if (conn != null) 
 			{
@@ -1954,16 +1919,16 @@ public abstract class BasicSqlService implements SqlService
 	{
 		// Note: does not support TRANSACTION_CONNECTION -ggolden
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbUpdateCommit(String " + sql + ", Object[] " + Arrays.toString(fields) + ", String " + var + ", Connection " + conn + ")");
+			LOG.debug("dbUpdateCommit(String " + sql + ", Object[] " + Arrays.toString(fields) + ", String " + var + ", Connection " + conn + ")");
 		}
 
 		PreparedStatement pstmt = null;
 
 		try
 		{
-			if (log.isDebugEnabled()) log.debug("Sql.dbUpdateCommit():\n" + sql);
+			if (LOG.isDebugEnabled()) LOG.debug("Sql.dbUpdateCommit():\n" + sql);
 
 			pstmt = conn.prepareStatement(sql);
 
@@ -1987,9 +1952,9 @@ public abstract class BasicSqlService implements SqlService
 		}
 		catch (SQLException e)
 		{
-			log.warn("Sql.dbUpdateCommit(): " + e);
+			LOG.warn("Sql.dbUpdateCommit(): " + e);
 		} catch (UnsupportedEncodingException e) {
-			log.warn("Sql.dbUpdateCommit(): " + e);
+			LOG.warn("Sql.dbUpdateCommit(): " + e);
 		}
 		finally
 		{
@@ -2006,7 +1971,7 @@ public abstract class BasicSqlService implements SqlService
 			}
 			catch (Exception e)
 			{
-				log.warn("Sql.dbUpdateCommit(): " + e);
+				LOG.warn("Sql.dbUpdateCommit(): " + e);
 			}
 		}
 	}
@@ -2021,9 +1986,9 @@ public abstract class BasicSqlService implements SqlService
 	{
 		// Note: does not support TRANSACTION_CONNECTION -ggolden
 
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("dbCancel(Connection " + conn + ")");
+			LOG.debug("dbCancel(Connection " + conn + ")");
 		}
 
 		try
@@ -2037,7 +2002,7 @@ public abstract class BasicSqlService implements SqlService
 		}
 		catch (Exception e)
 		{
-			log.warn("Sql.dbCancel(): " + e);
+			LOG.warn("Sql.dbCancel(): " + e);
 		}
 	}
 
@@ -2046,9 +2011,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public void ddl(ClassLoader loader, String resource)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("ddl(ClassLoader " + loader + ", String " + resource + ")");
+			LOG.debug("ddl(ClassLoader " + loader + ", String " + resource + ")");
 		}
 
 		// add the vender string path, and extension
@@ -2058,7 +2023,7 @@ public abstract class BasicSqlService implements SqlService
 		InputStream in = loader.getResourceAsStream(resource);
 		if (in == null)
 		{
-			log.warn("Sql.ddl: missing resource: " + resource);
+			LOG.warn("Sql.ddl: missing resource: " + resource);
 			return;
 		}
 
@@ -2110,7 +2075,7 @@ public abstract class BasicSqlService implements SqlService
 			}
 			catch (IOException any)
 			{
-				log.warn("Sql.ddl: resource: " + resource + " : " + any);
+				LOG.warn("Sql.ddl: resource: " + resource + " : " + any);
 			}
 			finally
 			{
@@ -2120,7 +2085,7 @@ public abstract class BasicSqlService implements SqlService
 				}
 				catch (IOException any)
 				{
-					log.warn("Sql.ddl: resource: " + resource + " : " + any);
+					LOG.warn("Sql.ddl: resource: " + resource + " : " + any);
 				}
 			}
 		}
@@ -2132,7 +2097,7 @@ public abstract class BasicSqlService implements SqlService
 			}
 			catch (IOException any)
 			{
-				log.warn("Sql.ddl: resource: " + resource + " : " + any);
+				LOG.warn("Sql.ddl: resource: " + resource + " : " + any);
 			}
 		}
 	}
@@ -2149,61 +2114,76 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	protected int prepareStatement(PreparedStatement pstmt, Object[] fields) throws SQLException, UnsupportedEncodingException
 	{
-		if (log.isDebugEnabled()) {
-			log.debug("pstmt = {}, fields = {}", pstmt, Arrays.toString(fields));
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("prepareStatement(PreparedStatement " + pstmt + ", Object[] " + Arrays.toString(fields) + ")");
 		}
 
 		// put in all the fields
 		int pos = 1;
-		if ((fields != null) && (fields.length > 0)) {
-			for (Object field : fields) {
-				if (field == null) {
-					// Treat a Java null as an SQL null.
-					// This makes sure that Oracle vs MySQL use the same value for null.
+		if ((fields != null) && (fields.length > 0))
+		{
+			for (int i = 0; i < fields.length; i++)
+			{
+				if (fields[i] == null || (fields[i] instanceof String && ((String) fields[i]).length() == 0))
+				{
+					// treat a Java null as an SQL null,
+					// and ALSO treat a zero-length Java string as an SQL null
+					// This makes sure that Oracle vs MySQL use the same value
+					// for null.
 					sqlServiceSql.setNull(pstmt, pos);
+
+					pos++;
 				}
-				else if (field instanceof String) {
-					String s = (String) field;
-					if (s.isEmpty()) {
-						// Treat a zero-length Java string as an SQL null
-						sqlServiceSql.setNull(pstmt, pos);
-					}
-					else {
-						pstmt.setString(pos, s);
-					}
-				}
-				else if (field instanceof Time) {
-					Time t = (Time) field;
+				else if (fields[i] instanceof Time)
+				{
+					Time t = (Time) fields[i];
 					sqlServiceSql.setTimestamp(pstmt, new Timestamp(t.getTime()), m_cal, pos);
+					pos++;
 				}
-				else if (field instanceof Date) {
-					Date d = (Date) field;
+				//KNL-558 an obvious one
+				else if (fields[i] instanceof java.util.Date)
+				{
+					java.util.Date d = (java.util.Date) fields[i];
 					sqlServiceSql.setTimestamp(pstmt, new Timestamp(d.getTime()), m_cal, pos);
+					pos++;
 				}
-				else if (field instanceof Long) {
-					long l = (Long) field;
+				else if (fields[i] instanceof Long)
+				{
+					long l = ((Long) fields[i]).longValue();
 					pstmt.setLong(pos, l);
+					pos++;
 				}
-				else if (field instanceof Integer) {
-					int n = (Integer) field;
+				else if (fields[i] instanceof Integer)
+				{
+					int n = ((Integer) fields[i]).intValue();
 					pstmt.setInt(pos, n);
+					pos++;
 				}
-				else if (field instanceof Float) {
-					float f = (Float) field;
+				else if (fields[i] instanceof Float)
+				{
+					float f = ((Float) fields[i]).floatValue();
 					pstmt.setFloat(pos, f);
+					pos++;
 				}
-				else if (field instanceof Boolean) {
-					pstmt.setBoolean(pos, (Boolean) field);
+				else if (fields[i] instanceof Boolean)
+				{
+					pstmt.setBoolean(pos, ((Boolean) fields[i]).booleanValue());
+					pos++;
 				}
-				else if (field instanceof byte[]) {
-					sqlServiceSql.setBytes(pstmt, (byte[]) field, pos);
+				else if ( fields[i] instanceof byte[] ) 
+				{
+					sqlServiceSql.setBytes(pstmt, (byte[])fields[i], pos);
+					pos++;
 				}
-				else {
-					// %%% support any other types specially?
-					String value = field.toString();
+
+				// %%% support any other types specially?
+				else
+				{
+					String value = fields[i].toString();
 					sqlServiceSql.setBytes(pstmt, value, pos);
+					pos++;
 				}
-				pos++;
 			}
 		}
 
@@ -2238,13 +2218,13 @@ public abstract class BasicSqlService implements SqlService
 			buf.append(" sql: ");
 			buf.append(sql);
 
-			log.info(buf.toString());
+			LOG.info(buf.toString());
 		}
 		catch (Exception ignore)
 		{
-			if (log.isDebugEnabled())
+			if (LOG.isDebugEnabled())
 			{
-				log.debug("Ignored Exception: " + ignore.getMessage(), ignore);
+				LOG.debug("Ignored Exception: " + ignore.getMessage(), ignore);
 			}
 		}
 	}
@@ -2287,8 +2267,8 @@ public abstract class BasicSqlService implements SqlService
 
         public StreamWithConnection(InputStream stream, ResultSet result, PreparedStatement pstmt,
                 Connection conn) {
-            if (log.isDebugEnabled()) {
-                log.debug("new StreamWithConnection(InputStream " + stream + ", ResultSet "
+            if (SWC_LOG.isDebugEnabled()) {
+                SWC_LOG.debug("new StreamWithConnection(InputStream " + stream + ", ResultSet "
                         + result + ", PreparedStatement " + pstmt + ", Connection " + conn + ")");
             }
 
@@ -2302,8 +2282,8 @@ public abstract class BasicSqlService implements SqlService
          * @see java.io.InputStream#close()
          */
         public void close() throws IOException {
-            if (log.isDebugEnabled()) {
-                log.debug("close()");
+            if (SWC_LOG.isDebugEnabled()) {
+                SWC_LOG.debug("close()");
             }
             try {
                 if (m_stream != null) {
@@ -2336,13 +2316,13 @@ public abstract class BasicSqlService implements SqlService
          * @see java.lang.Object#finalize()
          */
         protected void finalize() {
-            if (log.isDebugEnabled()) {
-                log.debug("finalize()");
+            if (SWC_LOG.isDebugEnabled()) {
+                SWC_LOG.debug("finalize()");
             }
             try {
                 close();
             } catch (IOException any) {
-                log.error(any.getMessage(), any);
+                LOG.error(any.getMessage(), any);
             }
         }
 
@@ -2351,8 +2331,8 @@ public abstract class BasicSqlService implements SqlService
 		 */
 		public int read() throws IOException
 		{
-            if (log.isDebugEnabled()) {
-                log.debug("read()");
+            if (SWC_LOG.isDebugEnabled()) {
+                SWC_LOG.debug("read()");
             }
 			return m_stream.read();
 		}
@@ -2362,8 +2342,8 @@ public abstract class BasicSqlService implements SqlService
 		 */
 		public int read(byte b[]) throws IOException
 		{
-			if (log.isDebugEnabled()) {
-				log.debug("read(byte " + Arrays.toString(b) + ")");
+			if (SWC_LOG.isDebugEnabled()) {
+				SWC_LOG.debug("read(byte " + Arrays.toString(b) + ")");
 			}
 
 			return m_stream.read(b);
@@ -2374,8 +2354,8 @@ public abstract class BasicSqlService implements SqlService
 		 */
 		public int read(byte b[], int off, int len) throws IOException
 		{
-			if (log.isDebugEnabled()) {
-				log.debug("read(byte " + Arrays.toString(b) + ", int " + off + ", int " + len + ")");
+			if (SWC_LOG.isDebugEnabled()) {
+				SWC_LOG.debug("read(byte " + Arrays.toString(b) + ", int " + off + ", int " + len + ")");
 			}
 
 			return m_stream.read(b, off, len);
@@ -2386,8 +2366,8 @@ public abstract class BasicSqlService implements SqlService
 		 */
 		public long skip(long n) throws IOException
 		{
-			if (log.isDebugEnabled()) {
-				log.debug("skip(long " + n + ")");
+			if (SWC_LOG.isDebugEnabled()) {
+				SWC_LOG.debug("skip(long " + n + ")");
 			}
 
 			return m_stream.skip(n);
@@ -2398,8 +2378,8 @@ public abstract class BasicSqlService implements SqlService
 		 */
 		public int available() throws IOException
 		{
-            if (log.isDebugEnabled()) {
-                log.debug("available()");
+            if (SWC_LOG.isDebugEnabled()) {
+                SWC_LOG.debug("available()");
             }
 			return m_stream.available();
 		}
@@ -2409,8 +2389,8 @@ public abstract class BasicSqlService implements SqlService
 		 */
 		public synchronized void mark(int readlimit)
 		{
-			if (log.isDebugEnabled()) {
-				log.debug("mark(int " + readlimit + ")");
+			if (SWC_LOG.isDebugEnabled()) {
+				SWC_LOG.debug("mark(int " + readlimit + ")");
 			}
 
 			m_stream.mark(readlimit);
@@ -2421,8 +2401,8 @@ public abstract class BasicSqlService implements SqlService
 		 */
 		public synchronized void reset() throws IOException
 		{
-            if (log.isDebugEnabled()) {
-                log.debug("reset()");
+            if (SWC_LOG.isDebugEnabled()) {
+                SWC_LOG.debug("reset()");
             }
 			m_stream.reset();
 		}
@@ -2432,8 +2412,8 @@ public abstract class BasicSqlService implements SqlService
 		 */
 		public boolean markSupported()
 		{
-            if (log.isDebugEnabled()) {
-                log.debug("markSupported()");
+            if (SWC_LOG.isDebugEnabled()) {
+                SWC_LOG.debug("markSupported()");
             }
 			return m_stream.markSupported();
 		}
@@ -2445,9 +2425,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public void setDefaultDataSource(DataSource defaultDataSource)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setDefaultDataSource(DataSource " + defaultDataSource + ")");
+			LOG.debug("setDefaultDataSource(DataSource " + defaultDataSource + ")");
 		}
 
 		this.defaultDataSource = defaultDataSource;
@@ -2459,9 +2439,9 @@ public abstract class BasicSqlService implements SqlService
 	 */
 	public void setLongDataSource(DataSource slowDataSource)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setLongDataSource(DataSource " + slowDataSource + ")");
+			LOG.debug("setLongDataSource(DataSource " + slowDataSource + ")");
 		}
 
 		this.longDataSource = slowDataSource;

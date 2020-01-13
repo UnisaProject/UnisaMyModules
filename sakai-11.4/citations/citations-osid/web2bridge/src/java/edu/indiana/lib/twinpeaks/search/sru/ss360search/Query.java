@@ -696,7 +696,7 @@ public class Query extends SruQueryBase implements Constants
 
 		try
 		{
-			log.debug("{}", xmlObject);
+			LogUtils.displayXml(log, xmlObject);
 		}
 		catch (Exception ignore) { }
 	}

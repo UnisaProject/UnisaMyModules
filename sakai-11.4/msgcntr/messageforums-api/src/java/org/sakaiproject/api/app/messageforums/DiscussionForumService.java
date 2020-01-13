@@ -59,8 +59,6 @@ public interface DiscussionForumService extends EntityProducer
 
 	public static final String EVENT_FORUMS_READ = "forums.read";
 
-	public static final String EVENT_FORUMS_TOPIC_READ = "forums.topic.read";
-
 	public static final String EVENT_FORUMS_RESPONSE = "forums.response";
 
 	public static final String EVENT_FORUMS_REMOVE = "forums.delete";

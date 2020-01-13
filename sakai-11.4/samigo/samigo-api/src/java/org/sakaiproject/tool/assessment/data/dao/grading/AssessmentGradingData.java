@@ -179,10 +179,6 @@ public class AssessmentGradingData implements java.io.Serializable
 		this.timeElapsed = timeElapsed;
 	}
 
-	public AssessmentGradingData(Long publishedAssessmentId, Long totalSubmitted) {
-		this(publishedAssessmentId, totalSubmitted.intValue());
-	}
-
 	public AssessmentGradingData(Long publishedAssessmentId, int totalSubmitted) {
 		this.publishedAssessmentId = publishedAssessmentId;
 		this.totalSubmitted = totalSubmitted;

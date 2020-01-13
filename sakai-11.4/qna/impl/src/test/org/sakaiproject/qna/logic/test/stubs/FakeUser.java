@@ -84,17 +84,13 @@ public class FakeUser implements User {
 		return null;
 	}
 
-	public String getDisplayId(String context) {
-		// TODO Auto-generated method stub
-		return null;
+	//needed for UCT build please don't remove
+	public String getDisplayName(String context) {
+	    return null;
 	}
 
 	public String getDisplayName() {
 		return this.displayName;
-	}
-
-	public String getDisplayName(String context) {
-	    return this.displayName;
 	}
 
 	public String getEid() {

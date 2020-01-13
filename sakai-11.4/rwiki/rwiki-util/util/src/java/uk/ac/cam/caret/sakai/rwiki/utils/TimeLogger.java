@@ -21,14 +21,16 @@
 
 package uk.ac.cam.caret.sakai.rwiki.utils;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author ieb
  */
-@Slf4j
 public class TimeLogger
 {
+	private static Logger log = LoggerFactory.getLogger(TimeLogger.class);
+
 	private TimeLogger()
 	{
 	}

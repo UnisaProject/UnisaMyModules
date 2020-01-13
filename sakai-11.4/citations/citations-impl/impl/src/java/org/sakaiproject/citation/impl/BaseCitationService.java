@@ -23,25 +23,23 @@ package org.sakaiproject.citation.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.net.URLEncoder;
 
 import javax.servlet.http.HttpServletRequest;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang.StringUtils;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osid.repository.Asset;
 import org.osid.repository.Part;
 import org.osid.repository.PartIterator;
 import org.osid.repository.Record;
 import org.osid.repository.RecordIterator;
 import org.osid.repository.RepositoryException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import org.sakaiproject.citation.api.*;
 import org.sakaiproject.citation.api.Schema.Field;
 import org.sakaiproject.citation.impl.openurl.ContextObject;
@@ -52,13 +50,20 @@ import org.sakaiproject.content.api.ContentEntity;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.content.api.ContentResourceEdit;
+import org.sakaiproject.content.api.InteractionAction;
+import org.sakaiproject.content.api.ResourceType;
 import org.sakaiproject.content.api.ResourceTypeRegistry;
 import org.sakaiproject.content.api.ResourceToolAction;
+import org.sakaiproject.content.api.ServiceLevelAction;
+import org.sakaiproject.content.api.ResourceToolAction.ActionType;
 import org.sakaiproject.content.util.BaseInteractionAction;
 import org.sakaiproject.content.util.BaseResourceAction;
 import org.sakaiproject.content.util.BasicSiteSelectableResourceType;
+//import org.sakaiproject.content.util.BaseResourceAction.Localizer;
 import org.sakaiproject.content.util.BaseServiceLevelAction;
 import org.sakaiproject.content.util.BasicResourceType;
+//import org.sakaiproject.content.util.BasicResourceType.Localizer;
+
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.HttpAccess;
@@ -75,13 +80,17 @@ import org.sakaiproject.id.api.IdManager;
 import org.sakaiproject.javax.Filter;
 import org.sakaiproject.time.cover.TimeService;
 import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.user.api.User;
+import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.util.ResourceLoader;
+import org.apache.commons.lang.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  *
  *
  */
-@Slf4j
 public abstract class BaseCitationService implements CitationService
 {
 	protected boolean attemptToMatchSchema = false;
@@ -336,34 +345,34 @@ public abstract class BaseCitationService implements CitationService
 										}
 										catch (RepositoryException e)
 										{
-											log.warn("BasicCitation(" + asset + ") ", e);
+											M_log.warn("BasicCitation(" + asset + ") ", e);
 										}
 									}
 								}
 								catch (RepositoryException e)
 								{
-									log.warn("BasicCitation(" + asset + ") ", e);
+									M_log.warn("BasicCitation(" + asset + ") ", e);
 								}
 							}
 							catch (RepositoryException e1)
 							{
-								log.warn("BasicCitation(" + asset + ") ", e1);
+								M_log.warn("BasicCitation(" + asset + ") ", e1);
 							}
 						}
 						catch (RepositoryException e2)
 						{
-							log.warn("BasicCitation(" + asset + ") ", e2);
+							M_log.warn("BasicCitation(" + asset + ") ", e2);
 						}
 					}
 				}
 				catch (RepositoryException e)
 				{
-					log.warn("BasicCitation(" + asset + ") ", e);
+					M_log.warn("BasicCitation(" + asset + ") ", e);
 				}
 			}
 			catch (RepositoryException e)
 			{
-				log.warn("BasicCitation(" + asset + ") ", e);
+				M_log.warn("BasicCitation(" + asset + ") ", e);
 			}
 
 			if(unknownSchema && attemptToMatchSchema)
@@ -572,7 +581,7 @@ public abstract class BaseCitationService implements CitationService
       if (!Citation.ADD_PREFIX_TEXT.equals(prefixRequest)
       &&  !Citation.OMIT_PREFIX_TEXT.equals(prefixRequest))
       {
-        log.debug("Unexpected \"add prefix\" request: " + prefixRequest);
+        M_log.debug("Unexpected \"add prefix\" request: " + prefixRequest);
       }
       return Citation.ADD_PREFIX_TEXT.equals(prefixRequest);
     }
@@ -653,7 +662,7 @@ public abstract class BaseCitationService implements CitationService
 					}
 					else
 					{
-						log.debug("BasicCitation copy constructor: property is not String or List: "
+						M_log.debug("BasicCitation copy constructor: property is not String or List: "
 						                + name + " (" + obj.getClass().getName() + ") == " + obj);
 						this.m_citationProperties.put(name, obj);
 					}
@@ -1152,7 +1161,7 @@ public abstract class BaseCitationService implements CitationService
   			}
         catch (IdUnusedException exception)
         {
-          log.warn("No matching URL for ID: "
+          M_log.warn("No matching URL for ID: "
                   +  id
                   +  ", returning an OpenURL");
         }
@@ -1533,6 +1542,7 @@ public abstract class BaseCitationService implements CitationService
 		 */
 		public boolean importFromRisList(List risImportList)
 		{
+		 Logger logger = LoggerFactory.getLogger(BasicCitation.class);
 			String currentLine = null; // The active line being parsed from the list (e.g. "TY - BOOK")
 			String RIScode = null; // The RIS Code (e.g. "TY" for "TY - BOOK")
 			String RISvalue = null; // The RIS Value (e.g. "BOOK" for "TY - BOOK")
@@ -1549,7 +1559,7 @@ public abstract class BaseCitationService implements CitationService
 			String continueTag = null; // used to track EndNote continuation lines.
 			int delimiterIndex  = 0; // used to find the index of the hyphen to separate RIScode from RISvalue
 
-			log.debug("importFromRisList: In importFromRisList. List size is " + risImportList.size());
+			logger.debug("importFromRisList: In importFromRisList. List size is " + risImportList.size());
 
 			// process loop that iterates list size many times
 			for(int i=0; i< risImportList.size(); i++)
@@ -1558,7 +1568,7 @@ public abstract class BaseCitationService implements CitationService
 				String dirtyString = (String) risImportList.get(i);
 				currentLine = dirtyString.replaceAll("[\uFEFF-\uFFFF]", "");
 				currentLine = currentLine.trim();
-				log.debug("importFromRisList: currentLine = " + currentLine);
+				logger.debug("importFromRisList: currentLine = " + currentLine);
 
 				// If the RIS line is less than 4, it isn't really a valid line. Set some default values
 				// that we know won't be processed for this line.
@@ -1604,7 +1614,7 @@ public abstract class BaseCitationService implements CitationService
 						RISvalue = "";
 					}
 
-					log.debug("importFromRisList: substr value = " + RISvalue);
+					logger.debug("importFromRisList: substr value = " + RISvalue);
 				}
 
 				// Trim the value
@@ -1615,7 +1625,7 @@ public abstract class BaseCitationService implements CitationService
 				{
 					if (! RIScode.equalsIgnoreCase("TY"))
 					{
-					   	log.debug("importFromRisList: FALSE - 1st entry in RIS must be TY. It isn't it is " + RISvalue);
+					   	logger.debug("importFromRisList: FALSE - 1st entry in RIS must be TY. It isn't it is " + RISvalue);
 					   	return false; // TY MUST be the first entry in a RIS citation
 					}
 					else // process the schema
@@ -1624,13 +1634,13 @@ public abstract class BaseCitationService implements CitationService
 
 						if (RISvalue.equalsIgnoreCase("NEWS") || RISvalue.equalsIgnoreCase("MGZN"))
 						{
-						   	log.debug("importFromRisList: force mapping NEWS or MGZN resource type to JOUR");
+						   	logger.debug("importFromRisList: force mapping NEWS or MGZN resource type to JOUR");
 							RISvalue = "JOUR";
 						}
 
 
-					   	log.debug("importFromRisList: size of m_RISTypeInverse = " + m_RISTypeInverse.size());
-					 	log.debug("importFromRisList: RISvalue before schemaName = " + RISvalue);
+					   	logger.debug("importFromRisList: size of m_RISTypeInverse = " + m_RISTypeInverse.size());
+					 	logger.debug("importFromRisList: RISvalue before schemaName = " + RISvalue);
 
 					 	// get the Schema String name that we need to use for Schema look up from
 					 	// the map m_RISTypeInverse using the RISvalue for RIScode "TY";
@@ -1639,15 +1649,15 @@ public abstract class BaseCitationService implements CitationService
 				    	// If we couldn't find a valid schema name mapping, set the name to "unknown"
 					    if (schemaName == null)
 					    {
-						   	log.debug("importFromRisList: Unknown Schema Name = " + RISvalue +
+						   	logger.debug("importFromRisList: Unknown Schema Name = " + RISvalue +
 						    			     ". Setting schemeName to 'unknown'");
 					    		schemaName = "unknown";
 					    }
-					    	log.debug("importFromRisList: Schema Name = " + schemaName);
+					    	logger.debug("importFromRisList: Schema Name = " + schemaName);
 
 					    	// Lookup the Schema based on the Schema string gotten from the reverse map
 							schema = BaseCitationService.this.getSchema(schemaName);
-					    	log.debug("importFromRisList: Retrieved Schema Name = " + schema.getIdentifier());
+					    	logger.debug("importFromRisList: Retrieved Schema Name = " + schema.getIdentifier());
 							setSchema(schema);
 					} // end else (else processes RIScode == "TY")
 				} // end if i == 0
@@ -1655,7 +1665,7 @@ public abstract class BaseCitationService implements CitationService
 				{
 				   	if (RIScode.equalsIgnoreCase("ER")) // RIScode "ER" signifies the end of a citation record
 					{
-					   	log.debug("importFromRisList: Read an ER. End of citation.");
+					   	logger.debug("importFromRisList: Read an ER. End of citation.");
 
 						return true; // ER signals end of citation
 					} // end of citation
@@ -1681,14 +1691,14 @@ public abstract class BaseCitationService implements CitationService
 							{
 								noFieldMapping = false;
 								continueTag = null;
-								log.debug("importFromRisList: Found field mapping");
+								logger.debug("importFromRisList: Found field mapping");
 							}
 						} // end for j (loop through complex RIS codes)
 					} // end while
 
 					if (noFieldMapping) // couldn't find the field mapping
 					{
-						  log.debug("importFromRisList: Cannot find field mapping for RIScode " +
+						  logger.debug("importFromRisList: Cannot find field mapping for RIScode " +
 		                               RIScode + " for Schema = " + schema);
 
 						  // recompute hyphen location for KWTag check. Computation earlier may have gotten mangled
@@ -1709,11 +1719,11 @@ public abstract class BaseCitationService implements CitationService
 							urlId = addCustomUrl("", RISvalue);
 							setPreferredUrl(urlId);
 							continueTag = RIScode.toUpperCase();
-							log.debug("importFromRisList: set preferred url to " + urlId + " which is " + RISvalue);
+							logger.debug("importFromRisList: set preferred url to " + urlId + " which is " + RISvalue);
 						  }
 						  else if (continueTag != null && (RIScode.length() != 2) ) // continuation and not a possible RIScode
 						  {
-							  log.debug("importFromRisList: continuation of tag found (EndNote oddity). Hacking tag and resending line through the import system");
+							  logger.debug("importFromRisList: continuation of tag found (EndNote oddity). Hacking tag and resending line through the import system");
 							  risImportList.set(i, continueTag + " - " + currentLine);
 							  i = i-1;
 						  }
@@ -1721,7 +1731,7 @@ public abstract class BaseCitationService implements CitationService
 					} // end if noFieldMapping (field not found)
 					else // ! noFieldMapping. We found a field in the Schema
 					{
-						log.debug("importFromRisList: Field mapping is " + tempField.getIdentifier() +
+						logger.debug("importFromRisList: Field mapping is " + tempField.getIdentifier() +
 								     " => " + RISvalue);
 
 						if (RIScode.equalsIgnoreCase("KW"))
@@ -1749,7 +1759,7 @@ public abstract class BaseCitationService implements CitationService
 			} // end for i
 
 			// if we got here, the record wasn't properly formatted with an "ER" record (or other issues).
-	    	log.debug("importFromRisList: FALSE - End of Input. Citation not added.");
+	    	logger.debug("importFromRisList: FALSE - End of Input. Citation not added.");
 			return false;
 
 		}  // end ImportFromRisList
@@ -2726,7 +2736,7 @@ public abstract class BaseCitationService implements CitationService
 				}
 				catch (IdUnusedException e)
 				{
-					log.debug("BasicCitationCollection.addAll citationId (" + key
+					M_log.debug("BasicCitationCollection.addAll citationId (" + key
 					                + ") in m_order but not in m_citations; collectionId: "
 					                + other.getId());
 				}
@@ -3193,7 +3203,6 @@ public abstract class BaseCitationService implements CitationService
 				this.m_citations = new Hashtable<String, Citation>();
 			}
 			this.m_citations.clear();
-			this.m_nestedCitationCollectionOrders.clear();
 			if(this.m_order == null)
 			{
 				this.m_order = new TreeSet<String>(this.m_comparator);
@@ -3215,7 +3224,7 @@ public abstract class BaseCitationService implements CitationService
 				}
 				catch(Exception e)
 				{
-					log.warn("copy(" + oldCitation.getId() + ") ==> " + newCitation.getId(), e);
+					M_log.warn("copy(" + oldCitation.getId() + ") ==> " + newCitation.getId(), e);
 				}
 			}
 
@@ -3230,26 +3239,20 @@ public abstract class BaseCitationService implements CitationService
 						BasicCitation newCitation = new BasicCitation();
 						newCitation.copy(oldCitation);
 						newCitation.m_temporary = isTemporary;
-						if (isTemporary) { // save the citation if it's not saved yet
-							this.saveCitation(newCitation);
-						}
+						this.saveCitation(newCitation);
 
 						// copy the citation's citationCollectionOrder
 						CitationCollectionOrder newCitationCollectionOrder = citationCollectionOrder.copy(this.getId(), newCitation.getId());
-						if (isTemporary){ // save the citationCollectionOrder if it's not saved yet
-							this.saveCitationCollectionOrder(newCitationCollectionOrder);
-						}
+						this.saveCitationCollectionOrder(newCitationCollectionOrder);
 
 					} catch (IdUnusedException e) {
-						log.warn("copying citationcollectionorder(" + citationCollectionOrder.getCitationid() + ") ==> " + citationCollectionOrder.getValue(), e);
+						M_log.warn("copying citationcollectionorder(" + citationCollectionOrder.getCitationid() + ") ==> " + citationCollectionOrder.getValue(), e);
 					}
 				}
 				else {
 					// copy the citationCollectionOrder
 					CitationCollectionOrder newCitationCollectionOrder = citationCollectionOrder.copy(this.getId());
-					if (isTemporary){ // save the citationCollectionOrder if it's not saved yet
-						this.saveCitationCollectionOrder(newCitationCollectionOrder);
-					}
+					this.saveCitationCollectionOrder(newCitationCollectionOrder);
 				}
 			}
 
@@ -3905,12 +3908,6 @@ public abstract class BaseCitationService implements CitationService
 
 		public CitationCollection getUnnestedCitationCollection(String citationCollectionId);
 
-		public List<CitationCollectionOrder> getNestedCollectionAsList(String citationCollectionId);
-
-		public String getNextCitationCollectionOrderId(String collectionId);
-
-		public CitationCollectionOrder getCitationCollectionOrder(String collectionId, int locationId);
-
 		public void removeLocation(String collectionId, int locationId);
 
 		public void updateSchema(Schema schema);
@@ -4002,6 +3999,9 @@ public abstract class BaseCitationService implements CitationService
 	}
 
 	public static ResourceLoader rb;
+
+	/** Our logger. */
+	private static Logger M_log = LoggerFactory.getLogger(BaseCitationService.class);
 
 	protected static final String PROPERTY_DEFAULTVALUE = "sakai:defaultValue";
 
@@ -4127,7 +4127,7 @@ public abstract class BaseCitationService implements CitationService
 		}
 		catch (Exception e)
 		{
-			log.warn("BaseCitationService.escapeFieldName: ", e);
+			M_log.warn("BaseCitationService.escapeFieldName: ", e);
 			return original;
 		}
 
@@ -4440,15 +4440,15 @@ public abstract class BaseCitationService implements CitationService
 					}
 					catch (PermissionException e)
 					{
-						log.warn("getEntity(" + id + ") ", e);
+						M_log.warn("getEntity(" + id + ") ", e);
 					}
 					catch (IdUnusedException e)
 					{
-						log.warn("getEntity(" + id + ") ", e);
+						M_log.warn("getEntity(" + id + ") ", e);
 					}
 					catch (TypeException e)
 					{
-						log.warn("getEntity(" + id + ") ", e);
+						M_log.warn("getEntity(" + id + ") ", e);
 					}
 				}
 			}
@@ -5228,11 +5228,11 @@ public abstract class BaseCitationService implements CitationService
 			}
 			catch(IdUnusedException e)
 			{
-				log.warn("IdUnusedException ", e);
+				M_log.warn("IdUnusedException ", e);
 			}
 			catch(ServerOverloadException e)
 			{
-				log.warn("ServerOverloadException ", e);
+				M_log.warn("ServerOverloadException ", e);
 			}
 		}
 	}
@@ -5293,7 +5293,7 @@ public abstract class BaseCitationService implements CitationService
 					{
 						citationCollectionId = collectionId.toString();
 					}
-					log.warn("Unable to determine size of CitationCollection for entity: entityId == " + entity.getId() + " citationCollectionId == " + collectionId + " exception == " + e.toString());
+					M_log.warn("Unable to determine size of CitationCollection for entity: entityId == " + entity.getId() + " citationCollectionId == " + collectionId + " exception == " + e.toString());
 				}
 			}
 			return label;
@@ -5451,7 +5451,7 @@ public abstract class BaseCitationService implements CitationService
 					        .length());
 					Reference wrapped = m_entityManager.newReference(wrappedRef);
 					if(ref == null) {
-						log.warn("CitationService.parseEntityReference called with null Reference object", new Throwable());
+						M_log.warn("CitationService.parseEntityReference called with null Reference object", new Throwable());
 					} else {
 						ref.set(APPLICATION_ID, REF_TYPE_VIEW_LIST, wrapped.getId(), wrapped
 						        .getContainer(), wrapped.getContext());
@@ -5459,7 +5459,7 @@ public abstract class BaseCitationService implements CitationService
 				}
 				else
 				{
-					log.warn(".parseEntityReference(): unknown citation subtype: " + subType
+					M_log.warn(".parseEntityReference(): unknown citation subtype: " + subType
 					        + " in ref: " + reference);
 					citationEntity = false;
 				}
@@ -5580,33 +5580,6 @@ public abstract class BaseCitationService implements CitationService
 	public CitationCollection getUnnestedCitationCollection(String citationCollectionId)
 	{
 		return this.m_storage.getUnnestedCitationCollection(citationCollectionId);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.sakaiproject.citation.api.CitationService#getNestedCollectionAsList(java.lang.String)
-	 */
-	public List<CitationCollectionOrder> getNestedCollectionAsList(String citationCollectionId) {
-		return this.m_storage.getNestedCollectionAsList(citationCollectionId);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.sakaiproject.citation.api.CitationService#getNextCitationCollectionOrderId(java.lang.String)
-	 */
-	public String getNextCitationCollectionOrderId(String collectionId) {
-		return this.m_storage.getNextCitationCollectionOrderId(collectionId);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.sakaiproject.citation.api.CitationService#getCitationCollectionOrder(java.lang.String, java.lang.String)
-	 */
-	public CitationCollectionOrder getCitationCollectionOrder(String collectionId, int locationId) {
-		return this.m_storage.getCitationCollectionOrder(collectionId, locationId);
 	}
 
 	/*
@@ -5748,27 +5721,27 @@ public abstract class BaseCitationService implements CitationService
 		}
 		catch(IdUnusedException e)
 		{
-			log.warn("IdUnusedException ", e);
+			M_log.warn("IdUnusedException ", e);
 		}
 		catch(ServerOverloadException e)
 		{
-			log.warn("ServerOverloadException ", e);
+			M_log.warn("ServerOverloadException ", e);
 		}
 		catch (PermissionException e)
 		{
-			log.warn("PermissionException ", e);
+			M_log.warn("PermissionException ", e);
 		}
 		catch (TypeException e)
 		{
-			log.warn("TypeException ", e);
+			M_log.warn("TypeException ", e);
 		}
 		catch (InUseException e)
 		{
-			log.warn("InUseException ", e);
+			M_log.warn("InUseException ", e);
 		}
 		catch (OverQuotaException e)
 		{
-			log.warn("OverQuotaException ", e);
+			M_log.warn("OverQuotaException ", e);
 		}
     }
     public Citation addCitation(HttpServletRequest request) {
@@ -5779,13 +5752,8 @@ public abstract class BaseCitationService implements CitationService
         }
         return citation;
     }
-    
-    @Override    
-    public Citation copyCitation(Citation citation) {
-    	BasicCitation c = new BasicCitation();
-    	c.copy(citation);
-    	return c;
-    }
+
+
 
 } // BaseCitationService
 

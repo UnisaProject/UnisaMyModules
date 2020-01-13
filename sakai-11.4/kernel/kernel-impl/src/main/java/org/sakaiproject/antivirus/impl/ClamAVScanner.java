@@ -37,8 +37,8 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.antivirus.api.VirusFoundException;
 import org.sakaiproject.antivirus.api.VirusScanIncompleteException;
 import org.sakaiproject.antivirus.api.VirusScanner;
@@ -50,6 +50,7 @@ import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.exception.ServerOverloadException;
 import org.sakaiproject.exception.TypeException;
+
 
 /**
  * Provide virus scanning to email msgs & byte arrays using ClamAV software
@@ -67,8 +68,8 @@ import org.sakaiproject.exception.TypeException;
  * @author John Bush
  * @version $Revision$
  */
-@Slf4j
 public class ClamAVScanner implements VirusScanner {
+	private static final Logger logger = LoggerFactory.getLogger(ClamAVScanner.class);
 	private final String STREAM_PORT_STRING = "PORT ";
 	private final String FOUND_STRING = "FOUND";
 	private final String SCAN_INCOMPLETE_MSG = "Virus scan could not finish due to an internal error";
@@ -88,7 +89,7 @@ public class ClamAVScanner implements VirusScanner {
 	}
 
 	public void init(){
-		log.info("init()");
+		logger.info("init()");
 		port = serverConfigurationService.getInt("virusScan.port", 3310);
 		host = serverConfigurationService.getString("virusScan.host", "localhost");
 		enabled = serverConfigurationService.getBoolean("virusScan.enabled", false);
@@ -96,7 +97,7 @@ public class ClamAVScanner implements VirusScanner {
 
 	public void scan(byte[] bytes) throws VirusScanIncompleteException, VirusFoundException {
 		if(!enabled) {
-			log.debug("Virus scanning not enabled.  Skipping scan");
+			logger.debug("Virus scanning not enabled.  Skipping scan");
 			return;
 		}
 
@@ -107,7 +108,7 @@ public class ClamAVScanner implements VirusScanner {
 
 	public void scan(InputStream inputStream) throws VirusFoundException, VirusScanIncompleteException {
 		if(!enabled) {
-			log.debug("Virus scanning not enabled.  Skipping scan");
+			logger.debug("Virus scanning not enabled.  Skipping scan");
 			return;
 		}
 
@@ -115,7 +116,7 @@ public class ClamAVScanner implements VirusScanner {
 	}
 
 	protected void doScan(InputStream in) throws VirusScanIncompleteException, VirusFoundException {
-		log.debug("doingScan!");
+		logger.debug("doingScan!");
 		Socket socket = null;
 		String virus = null;
 		long start = System.currentTimeMillis();
@@ -127,11 +128,11 @@ public class ClamAVScanner implements VirusScanner {
 		try {
 			socket = getClamdSocket();
 		} catch (UnknownHostException e) {
-			log.error("could not connect to host for virus check: " + e);
+			logger.error("could not connect to host for virus check: " + e);
 			throw new VirusScanIncompleteException(SCAN_INCOMPLETE_MSG);
 		}
 		if(socket == null || !socket.isConnected()) {
-			log.warn("scan is inclomplete!");
+			logger.warn("scan is inclomplete!");
 			throw new VirusScanIncompleteException(SCAN_INCOMPLETE_MSG);
 		}
 		BufferedReader reader = null;
@@ -179,26 +180,26 @@ public class ClamAVScanner implements VirusScanner {
 						logMessage = answer + " (by virus scanner)";
 						//virus = answer.substring(answer.indexOf(":" + 1));
 						virus = answer.substring(0, answer.indexOf(FOUND_STRING)).trim();
-						log.debug(logMessage);
+						logger.debug(logMessage);
 					} else {
-						log.debug("no virus found: " + answer);
+						logger.debug("no virus found: " + answer);
 					}
 				} else {
 					break;
 				}
 			}
 			long finish = System.currentTimeMillis();
-			log.debug("Content scanned in " + (finish - start));
+			logger.debug("Content scanned in " + (finish - start));
 		} catch (UnsupportedEncodingException e) {
-			log.error("Exception caught calling CLAMD on " + socket.getInetAddress() + ": " + e.getMessage());
+			logger.error("Exception caught calling CLAMD on " + socket.getInetAddress() + ": " + e.getMessage());
 			throw new VirusScanIncompleteException(SCAN_INCOMPLETE_MSG, e);
 		} catch (IOException e) {
 			//we expect a connection reset if we tried to send too much data to clamd
 			if ("Connection reset".equals(e.getMessage())) {
-				log.warn("Clamd reset the connection maybe due to the file being too large");
+				logger.warn("Clamd reset the connection maybe due to the file being too large");
 				return;
 			}
-			log.error("Exception caught calling CLAMD on " + socket.getInetAddress() + ": " + e.getMessage());
+			logger.error("Exception caught calling CLAMD on " + socket.getInetAddress() + ": " + e.getMessage());
 			throw new VirusScanIncompleteException(SCAN_INCOMPLETE_MSG, e);
 			
 		} 
@@ -230,7 +231,7 @@ public class ClamAVScanner implements VirusScanner {
 
 		}
 		if(virusFound) {
-			log.info("Virus detected!: " + virus);
+			logger.info("Virus detected!: " + virus);
 			throw new VirusFoundException(virus);
 		}
 
@@ -256,16 +257,16 @@ public class ClamAVScanner implements VirusScanner {
 			}
 			return socket;
 		} catch (IOException ioe) {
-			log.error("Exception caught acquiring main socket to CLAMD on "
+			logger.error("Exception caught acquiring main socket to CLAMD on "
 					+ address + " on port " + getPort() + ": " + ioe.getMessage());
 		}
 		return socket;
 	}
 
 	public void scanContent(String resourceReference) throws VirusFoundException, VirusScanIncompleteException {
-		log.debug("scanContent(" + resourceReference + ")");
+		logger.debug("scanContent(" + resourceReference + ")");
 		if (contentHostingService.isCollection(resourceReference)) {
-			log.debug("this is a folder no need to scan");
+			logger.debug("this is a folder no need to scan");
 			return;
 		}
 
@@ -275,22 +276,22 @@ public class ClamAVScanner implements VirusScanner {
 				scan(resource.streamContent());
 			}
 		} catch (PermissionException e) {
-			log.warn("no permission to read: " + resourceReference);
-			if (log.isDebugEnabled()) {
-				log.warn("PermissionException", e);
+			logger.warn("no permission to read: " + resourceReference);
+			if (logger.isDebugEnabled()) {
+				logger.warn("PermissionException", e);
 			}
 			
 		} catch (IdUnusedException e) {
-			log.warn("no such resource: " + resourceReference);
+			logger.warn("no such resource: " + resourceReference);
 		} catch (TypeException e) {
-			log.warn("TypeException: " + resourceReference);
-			if (log.isDebugEnabled()) {
-				log.warn("TypeException", e);
+			logger.warn("TypeException: " + resourceReference);
+			if (logger.isDebugEnabled()) {
+				logger.warn("TypeException", e);
 			}
 		} catch (ServerOverloadException e) {
-			log.warn("ServerOverloadException: " + resourceReference);
-			if (log.isDebugEnabled()) {
-				log.warn("ServerOverloadException", e);
+			logger.warn("ServerOverloadException: " + resourceReference);
+			if (logger.isDebugEnabled()) {
+				logger.warn("ServerOverloadException", e);
 			}
 		} catch (VirusFoundException e) {
 			//we should log an event for this is we likely have CHS events before and after this

@@ -19,11 +19,8 @@ function GradebookCategorySettings($container) {
   this.$container = $container;
   this.$table = this.$container.find("table");
 
-  // only if categories are enabled
-  if (this.$table.length > 0) {
-    this.setupSortableCategories();
-    this.setupKeyboardSupport();
-  }
+  this.setupSortableCategories();
+  this.setupKeyboardSupport();
 }
 
 
@@ -61,6 +58,10 @@ GradebookCategorySettings.prototype.setupKeyboardSupport = function() {
 
 
 GradebookCategorySettings.prototype.focusLastRow = function() {
+  console.log("focusLastRow");
+  console.log(this.$table);
+  console.log(this.$table.find(".gb-category-row:last :text:first"));
+  console.log(this.$table.find(".gb-category-row:last :text:first").is(":visible"));
   // get the first input#text in the last row of the table
   var $input = this.$table.find(".gb-category-row:last :text:first");
   // attempt to set focus
@@ -78,11 +79,10 @@ GradebookCategorySettings.prototype.updateCategoryOrders = function() {
 };
 
 /**************************************************************************************
- * Initialise
+ * Let's initialize our GradebookSettings 
  */
 $(function() {
   sakai.gradebookng = {
     settings: new GradebookSettings($("#gradebookSettings"))
   };
-      
 });

@@ -19,21 +19,22 @@
  *
  **********************************************************************************/
 
+
 package org.sakaiproject.tool.assessment.shared.impl.grading;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
 import org.sakaiproject.tool.assessment.data.dao.grading.ItemGradingData;
 import org.sakaiproject.tool.assessment.data.dao.grading.MediaData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.PublishedAssessmentIfc;
-import org.sakaiproject.tool.assessment.shared.api.grading.GradingServiceAPI;
 import org.sakaiproject.tool.assessment.services.GradingService;
 import org.sakaiproject.tool.assessment.services.GradingServiceException;
+import org.sakaiproject.tool.assessment.shared.api.grading.GradingServiceAPI;
 
 /**
  *
@@ -43,6 +44,7 @@ import org.sakaiproject.tool.assessment.services.GradingServiceException;
 
 public class GradingServiceImpl implements GradingServiceAPI
 {
+  private Logger log = LoggerFactory.getLogger(GradingServiceImpl.class);
 
   /**
    * Get all scores for a published assessment from the back end.
@@ -438,5 +440,6 @@ public class GradingServiceImpl implements GradingServiceAPI
 	  {
 		  throw new GradingServiceException(e);
 	  }
+
   }
 }

@@ -19,19 +19,19 @@
  *
  **********************************************************************************/
 
-package org.sakaiproject.tool.assessment.ui.listener.author;
 
+
+package org.sakaiproject.tool.assessment.ui.listener.author;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
@@ -49,10 +49,11 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
  * <p>Description: Sakai Assessment Manager</p>
  * @version $Id$
  */
-@Slf4j
+
 public class ResetPartAttachmentListener
     implements ActionListener
 {
+  private static Logger log = LoggerFactory.getLogger(ResetPartAttachmentListener.class);
 
   public ResetPartAttachmentListener()
   {
@@ -79,7 +80,7 @@ public class ResetPartAttachmentListener
     }
   }
 
-  private void resetSectionAttachment(AssessmentService assessmentService, Map resourceHash, List attachmentList){
+  private void resetSectionAttachment(AssessmentService assessmentService, HashMap resourceHash, List attachmentList){
 
 	  // 1. we need to make sure that attachment removed/added by file picker 
 	  //    will be restored/remove when user cancels the entire modification

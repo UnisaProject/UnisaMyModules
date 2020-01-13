@@ -23,7 +23,7 @@ package org.sakaiproject.sms.logic.impl.hibernate;
 
 import java.util.List;
 
-import org.hibernate.type.StringType;
+import org.hibernate.Hibernate;
 import org.sakaiproject.sms.logic.QueryParameter;
 import org.sakaiproject.sms.logic.SmsConfigLogic;
 import org.sakaiproject.sms.logic.SmsLogic;
@@ -53,7 +53,7 @@ public class SmsConfigLogicImpl extends SmsLogic implements SmsConfigLogic {
 	 * 
 	 * @param Long
 	 *            sms configuration id
-	 * @return sms configuration
+	 * @return sms congiguration
 	 */
 	public SmsConfig getSmsConfig(Long smsConfigId) {
 		return (SmsConfig) findById(SmsConfig.class, smsConfigId);
@@ -94,7 +94,7 @@ public class SmsConfigLogicImpl extends SmsLogic implements SmsConfigLogic {
 		
 		final List<SmsConfig> configs = smsDao.runQuery(
 				"from SmsConfig conf where conf.sakaiSiteId = :id",
-				new QueryParameter("id", sakaiSiteId, StringType.INSTANCE));
+				new QueryParameter("id", sakaiSiteId, Hibernate.STRING));
 		SmsConfig config = null;
 		if (configs.size() == 1) {
 			config = configs.get(0);
@@ -156,7 +156,7 @@ public class SmsConfigLogicImpl extends SmsLogic implements SmsConfigLogic {
 		final String hql = "from SmsConfig conf where conf.sakaiToolId = :id";
 
 		final List<SmsConfig> configs = smsDao.runQuery(hql,
-				new QueryParameter("id", id, StringType.INSTANCE));
+				new QueryParameter("id", id, Hibernate.STRING));
 		SmsConfig config = null;
 
 		if (configs.size() == 1) {

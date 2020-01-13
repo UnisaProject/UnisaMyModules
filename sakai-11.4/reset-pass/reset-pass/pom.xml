@@ -4,7 +4,7 @@
   <parent>
     <artifactId>reset-pass</artifactId>
     <groupId>org.sakaiproject.reset-pass</groupId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Reset pass</name>
@@ -69,8 +69,8 @@
     </dependency>
 <!-- Commons JARS put in shared/lib by Sakai -->
     <dependency>
-       <groupId>org.apache.commons</groupId>
-       <artifactId>commons-lang3</artifactId>
-       </dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
   </dependencies>
 </project>

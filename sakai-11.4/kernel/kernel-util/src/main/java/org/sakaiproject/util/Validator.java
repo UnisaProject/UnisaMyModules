@@ -27,8 +27,8 @@ import java.util.Enumeration;
 
 import javax.servlet.http.HttpServletRequest;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.exception.IdInvalidException;
 
@@ -39,9 +39,11 @@ import org.sakaiproject.exception.IdInvalidException;
  * @deprecated use apache commons utils or {@link org.sakaiproject.util.api.FormattedText}, this will be removed after 2.9 - Dec 2011
  */
 @Deprecated 
-@Slf4j
 public class Validator
 {
+	/** Our logger. */
+	private static Logger M_log = LoggerFactory.getLogger(Validator.class);
+
 	/** These characters are not allowed in a resource id */
 	public static final String INVALID_CHARS_IN_RESOURCE_ID = "^/\\{}[]()%*?#&=\n\r\t\b\f";
 
@@ -95,8 +97,6 @@ public class Validator
 
 	/** Valid special email local id characters (- those that are invalid resource ids) */
 	protected static final String VALID_EMAIL = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ!#$&'*+-=?^_`{|}~.";
-
-	protected static final String INVALID_CHARS_IN_FILENAME = "[\\/:\"*?<>|]+";
 
 	/**
 	 * Escape a plaintext string so that it can be output as part of an HTML document. Amperstand, greater-than, less-than, newlines, etc, will be escaped so that they display (instead of being interpreted as formatting).
@@ -182,7 +182,7 @@ public class Validator
         }
         catch (Exception e)
         {
-            log.warn("Validator.escapeJavascript: ", e);
+            M_log.warn("Validator.escapeJavascript: ", e);
             return "";
         }
 
@@ -241,7 +241,7 @@ public class Validator
 		}
 		catch (UnsupportedEncodingException e)
 		{
-			log.warn("Validator.escapeUrl: ", e);
+			M_log.warn("Validator.escapeUrl: ", e);
 			return "";
 		}
 
@@ -344,7 +344,7 @@ public class Validator
 		}
 		catch (Exception e)
 		{
-			log.warn("Validator.escapeResourceName: ", e);
+			M_log.warn("Validator.escapeResourceName: ", e);
 			return "";
 		}
 
@@ -381,7 +381,7 @@ public class Validator
 		}
 		catch (Exception e)
 		{
-			log.warn("Validator.escapeQuestionMark: ", e);
+			M_log.warn("Validator.escapeQuestionMark: ", e);
 			return "";
 		}
 
@@ -418,7 +418,7 @@ public class Validator
 		}
 		catch (Exception e)
 		{
-			log.warn("Validator.escapeZipEntry: ", e);
+			M_log.warn("Validator.escapeZipEntry: ", e);
 			return "";
 		}
 
@@ -920,35 +920,9 @@ public class Validator
 			}
 		}
 		} catch ( UnsupportedEncodingException ex) {
-			log.error("No UTF-8 Encoding on this JVM, !!!!");
+			M_log.error("No UTF-8 Encoding on this JVM, !!!!");
 		}
 		if ( sb.length() < 1 ) return null;
 		return sb.substring(0, sb.length()-1);
-	}
-
-	/**
-	 * Return a safe filename by replacing all whitespace and invalid characters
-	 *
-	 * @param filename
-	 *        The string to clean
-	 * @return safe filename string
-	 */
-	public static String cleanFilename(String filename) {
-		// replace all whitespace
-		String cleanFilename = filename.replaceAll("\\s", "_");
-
-		// replace all invalid characters
-		final int len = cleanFilename.length();
-		StringBuilder buf = new StringBuilder();
-		for (int i = 0; i < len; i++) {
-			char c = cleanFilename.charAt(i);
-			if (INVALID_CHARS_IN_FILENAME.indexOf(c) != -1) {
-				buf.append("_");
-			} else {
-				buf.append(c);
-			}
-		}
-
-		return buf.toString();
 	}
 }

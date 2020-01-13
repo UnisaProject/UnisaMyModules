@@ -31,17 +31,19 @@ import java.sql.Types;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.sakaiproject.content.impl.serialize.impl.Type1BaseContentResourceSerializer;
 import org.sakaiproject.util.conversion.SchemaConversionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author ieb
  */
-@Slf4j
 public class Type1BlobResourcesConversionHandler implements SchemaConversionHandler
 {
+
+	private static final Logger log = LoggerFactory.getLogger(Type1BlobResourcesConversionHandler.class);
+
 	private Pattern contextPattern = Pattern.compile("\\A/(group/|user/|~)(.+?)/");
 
 
@@ -84,6 +86,7 @@ public class Type1BlobResourcesConversionHandler implements SchemaConversionHand
 			}
 			break;
 		}
+		//System.out.println("getSource(" + id + ") \n" + rv + "\n");
 		return rv;
 	}
 
@@ -179,6 +182,7 @@ public class Type1BlobResourcesConversionHandler implements SchemaConversionHand
 			Blob blob = rs.getBlob(1);
 			if(blob != null)
 			{
+				//System.out.println("getValidateSource(" + id + ") blob == " + blob + " blob.length == " + blob.length());
 				rv = blob.getBytes(1L, (int) blob.length());
 			}
 			else
@@ -204,8 +208,12 @@ public class Type1BlobResourcesConversionHandler implements SchemaConversionHand
 			rv = rs.getBytes(1);
 			break;
 		}
+		// System.out.println("getValidateSource(" + id + ") \n" + rv + "\n");
 		return rv;
 
 		//return rs.getBytes(1);
 	}
+
+
+
 }

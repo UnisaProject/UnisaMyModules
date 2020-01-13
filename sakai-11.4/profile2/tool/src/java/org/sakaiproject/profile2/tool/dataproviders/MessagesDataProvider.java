@@ -19,12 +19,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.wicket.injection.Injector;
 import org.apache.wicket.markup.repeater.data.IDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
-
 import org.sakaiproject.profile2.logic.ProfileMessagingLogic;
 import org.sakaiproject.profile2.model.Message;
 import org.sakaiproject.profile2.tool.models.DetachableMessageModel;
@@ -35,12 +33,12 @@ import org.sakaiproject.profile2.tool.models.DetachableMessageModel;
  * @author Steve Swinsburg (steve.swinsburg@gmail.com)
  * 
  */
-@Slf4j
+
 public class MessagesDataProvider implements IDataProvider<Message> {
     
 	private static final long serialVersionUID = 1L;
 	private final String threadId;
-
+	
 	@SpringBean(name="org.sakaiproject.profile2.logic.ProfileMessagingLogic")
 	protected ProfileMessagingLogic messagingLogic;
 	
@@ -49,7 +47,7 @@ public class MessagesDataProvider implements IDataProvider<Message> {
 		
 		Injector.get().inject(this);
 	}
-
+	
 	/**
 	 * retrieves messages from database, gets the sublist and returns an iterator for that sublist
 	 * 
@@ -60,14 +58,14 @@ public class MessagesDataProvider implements IDataProvider<Message> {
 		//deference for backwards compatibility
 		//should really check bounds here 
 		int f = (int) first;
-		int c = (int) count;
+		int c = (int) count;	
 		
 		try {
 			List<Message> slice = messagingLogic.getMessagesInThread(threadId).subList(f, f + c);
 			return slice.iterator();
 		}
 		catch (Exception e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 			return Collections.EMPTY_LIST.iterator();
 		}
 	}
@@ -95,5 +93,7 @@ public class MessagesDataProvider implements IDataProvider<Message> {
 	 */
 	public void detach(){
 	}
+      
+	
 
   }

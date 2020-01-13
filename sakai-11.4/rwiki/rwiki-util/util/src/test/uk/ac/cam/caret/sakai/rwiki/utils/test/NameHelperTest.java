@@ -28,11 +28,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import lombok.extern.slf4j.Slf4j;
 import junit.framework.TestCase;
 import uk.ac.cam.caret.sakai.rwiki.utils.NameHelper;
 
-@Slf4j
 public class NameHelperTest extends TestCase
 {
 
@@ -181,7 +179,7 @@ public class NameHelperTest extends TestCase
 				+ "\")  should equal " + localizedName + " but equals "
 				+ testLocalName, localizedName.equals(testLocalName));
 		testLocalName = NameHelper.localizeName(similarGlobalName, space);
-		log.info(testLocalName);
+		System.out.println(testLocalName);
 		assertTrue("LocalizeName(\"" + similarGlobalName + "\", \"" + space
 				+ "\")  should not equal " + similarLocalName + " but equals "
 				+ testLocalName, !similarLocalName.equals(testLocalName));

@@ -21,29 +21,32 @@ package org.sakaiproject.accountvalidator.impl.jobs;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
 import org.sakaiproject.accountvalidator.logic.ValidationLogic;
 import org.sakaiproject.accountvalidator.model.ValidationAccount;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 
-@Slf4j
 public class CheckAccountsJob implements Job {
 
+	private static Logger log = LoggerFactory.getLogger(CheckAccountsJob.class);
+	
 	private UserDirectoryService userDirectoryService;
 	public void setUserDirectoryService(UserDirectoryService uds) {
 		userDirectoryService = uds;
 	}
-
+	
 	private ValidationLogic validationLogic;
 	public void setValidationLogic(ValidationLogic vl) {
 		validationLogic = vl;
 	}
+	
 
+	
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
 		
 		try {
@@ -62,8 +65,10 @@ public class CheckAccountsJob implements Job {
 			}
 		}
 		catch (Exception e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
+		
+		
 	}
 
 }

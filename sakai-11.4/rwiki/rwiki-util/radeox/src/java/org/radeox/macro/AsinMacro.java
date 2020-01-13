@@ -26,7 +26,8 @@ package org.radeox.macro;
 import java.io.IOException;
 import java.io.Writer;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.radeox.Messages;
 import org.radeox.api.macro.MacroParameter;
 import org.radeox.macro.book.AsinServices;
@@ -39,9 +40,11 @@ import org.radeox.macro.book.AsinServices;
  * 
  * @version $Id$
  */
-@Slf4j
+
 public class AsinMacro extends BaseLocaleMacro
 {
+	private static Logger log = LoggerFactory.getLogger(AsinMacro.class);
+
 	private String[] paramDescription = { Messages.getString("AsinMacro.0") }; //$NON-NLS-1$
 
 	public String[] getParamDescription()
@@ -60,8 +63,7 @@ public class AsinMacro extends BaseLocaleMacro
 
 		if (params.getLength() == 1)
 		{
-			String asin = params.get("0").replaceAll("[^0-9A-Za-z]", "");
-			AsinServices.getInstance().appendUrl(writer, asin); //$NON-NLS-1$
+			AsinServices.getInstance().appendUrl(writer, params.get("0")); //$NON-NLS-1$
 			return;
 		}
 		else

@@ -17,8 +17,9 @@ package org.sakaiproject.profile2.tool.pages.panels;
 
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
@@ -33,22 +34,22 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
-import twitter4j.Twitter;
-import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.auth.AccessToken;
-import twitter4j.auth.RequestToken;
-
 import org.sakaiproject.profile2.logic.ProfileExternalIntegrationLogic;
 import org.sakaiproject.profile2.model.ExternalIntegrationInfo;
 import org.sakaiproject.profile2.tool.components.AjaxExternalLink;
 import org.sakaiproject.profile2.tool.models.StringModel;
 import org.sakaiproject.profile2.util.ProfileConstants;
 
-@Slf4j
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
+import twitter4j.auth.RequestToken;
+
 public class TwitterPrefsPane extends Panel {
 
 	private static final long serialVersionUID = 1L;
+	private static final Logger log = LoggerFactory.getLogger(TwitterPrefsPane.class);
 	private transient ExternalIntegrationInfo externalIntegrationInfo;
 	private transient RequestToken requestToken;
 	
@@ -158,7 +159,8 @@ public class TwitterPrefsPane extends Panel {
 		
 		return frag;
 	}
-
+	
+	
 	/**
 	 * Fragment which returns the components for the linked view
 	 * @return
@@ -206,7 +208,7 @@ public class TwitterPrefsPane extends Panel {
 		
 		return frag;
 	}
-
+	
 	/**
 	 * Helper to switch content fragments for us
 	 * 
@@ -240,11 +242,11 @@ public class TwitterPrefsPane extends Panel {
 	    try {
 			requestToken = twitter.getOAuthRequestToken();
 		} catch (TwitterException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 	   
 	}
-
+	
 	/**
 	 * Helper to get the user access token from the request token and supplied access code
 	 * @param accessCode
@@ -260,10 +262,12 @@ public class TwitterPrefsPane extends Panel {
 	    try {
 			return twitter.getOAuthAccessToken(requestToken, accessCode);
 		} catch (TwitterException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 		return null;
 	}
+	
+	
 
 	/**
 	 * Helper to get the Twitter auth url
@@ -276,5 +280,7 @@ public class TwitterPrefsPane extends Panel {
 		}
 		return requestToken.getAuthenticationURL();
 	}
+	
+	
 
 }

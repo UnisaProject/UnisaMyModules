@@ -21,8 +21,8 @@
 
 package org.sakaiproject.cheftool.menu;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import org.sakaiproject.cheftool.RunData;
 import org.sakaiproject.cheftool.VelocityPortlet;
@@ -46,7 +46,7 @@ public class MenuImpl implements Menu
 	protected boolean m_enabled = true;
 
 	/** The MenuItems, in order. */
-	protected List<MenuItem> m_items = new ArrayList<>();
+	protected List m_items = new Vector();
 
 	/** The form name string for the entry. */
 	protected String m_form = null;
@@ -221,7 +221,7 @@ public class MenuImpl implements Menu
 	 * 
 	 * @return The sub-items of the item.
 	 */
-	public List<MenuItem> getItems()
+	public List getItems()
 	{
 		return m_items;
 
@@ -291,11 +291,6 @@ public class MenuImpl implements Menu
 		return false;
 
 	} // getIsField
-
-	public boolean getIsCurrent()
-	{
-		return false;
-	}
 
 	/**
 	 * Adjust by removing any dividers at the start or end.

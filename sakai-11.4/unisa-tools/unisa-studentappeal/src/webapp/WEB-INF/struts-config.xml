@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans >
+    	<form-bean name="studentAppealForm" type="za.ac.unisa.lms.tools.studentappeal.forms.StudentAppealForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+	
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.studentappeal.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/studentAppeal.do?act=walkthrough"
+       	 		contextRelative="true" />
+       	 	<forward
+				name="studentAppeal"
+				path="/studentAppeal.do?act=walkthrough"
+       	 		contextRelative="true" />
+		</action>
+		
+    	<action
+     		attribute="studentAppealForm"
+     		name="studentAppealForm"
+     		parameter="act"
+     		scope="session"
+     		path="/studentAppeal"
+    		type="za.ac.unisa.lms.tools.studentappeal.actions.StudentAppealAction"
+     		validate="false">
+     		<forward
+				name="input"
+				path="/studentAppeal.do?act=walkthrough"
+       	 		contextRelative="true" />
+       	 	<forward
+				name="default"
+				path="/studentAppeal.do?act=walkthrough"
+       	 		contextRelative="true" />
+        	<forward
+      	  		name="applyLogin"
+       	 		path="/WEB-INF/jsp/applyLogin.jsp"
+        		contextRelative="true" />
+       	 	<forward
+       	 		name="applyAppeal"
+        		path="/WEB-INF/jsp/applyAppeal.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="appealSelect"
+        		path="/WEB-INF/jsp/appealSelect.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="appealDeclare"
+        		path="/WEB-INF/jsp/appealDeclare.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="appealConfirm"
+        		path="/WEB-INF/jsp/appealConfirm.jsp"
+       	 		contextRelative="true" />
+    	</action>
+
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.studentappeal.ApplicationResources" />
+
+</struts-config>
