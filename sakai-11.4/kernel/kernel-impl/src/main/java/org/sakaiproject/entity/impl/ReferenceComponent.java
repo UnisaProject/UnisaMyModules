@@ -24,8 +24,8 @@ package org.sakaiproject.entity.impl;
 import java.util.Collection;
 import java.util.Vector;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityProducer;
 import org.sakaiproject.entity.api.Reference;
@@ -41,9 +41,11 @@ import org.sakaiproject.user.api.UserDirectoryService;
  * Note: a Reference is immutable.
  * </p>
  */
-@Slf4j
 public class ReferenceComponent implements Reference
 {
+	/** Our logger. */
+	protected static final Logger M_log = LoggerFactory.getLogger(ReferenceComponent.class);
+
 	/** The reference string. */
 	protected String m_reference = null;
 
@@ -409,6 +411,6 @@ public class ReferenceComponent implements Reference
 			return;
 		}
 
-		if (log.isDebugEnabled()) log.debug("parse(): unhandled reference: " + m_reference);
+		if (M_log.isDebugEnabled()) M_log.debug("parse(): unhandled reference: " + m_reference);
 	}
 }

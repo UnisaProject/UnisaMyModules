@@ -28,16 +28,18 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.jsf.spreadsheet.SpreadsheetDataFileWriterCsv;
-import org.sakaiproject.jsf.spreadsheet.SpreadsheetDataFileWriterXlsx;
+import org.sakaiproject.jsf.spreadsheet.SpreadsheetDataFileWriterXls;
 import org.sakaiproject.jsf.spreadsheet.SpreadsheetUtil;
 import org.sakaiproject.util.ResourceLoader;
 
-@Slf4j
-public class Export {
 
+public class Export {
+	
+	/** Our log (commons). */
+	private static Logger						LOG		= LoggerFactory.getLogger(SiteListBean.class);
 	/** Resource bundle */
 	private static transient ResourceLoader	msgs	= new ResourceLoader("org.sakaiproject.umem.tool.bundle.Messages");
 
@@ -48,7 +50,7 @@ public class Export {
      * @param prefixFileName A filename prefix. This will be appended with unique data and the proper file extension.
      */
     public static void writeAsXls(List<List<Object>> content, String prefixFileName) {
-		SpreadsheetUtil.downloadSpreadsheetData(content, getFileName(prefixFileName), new SpreadsheetDataFileWriterXlsx());
+		SpreadsheetUtil.downloadSpreadsheetData(content, getFileName(prefixFileName), new SpreadsheetDataFileWriterXls());
     }
 
 	public static void writeAsCsv(List<List<Object>> content, String prefixFileName) {
@@ -60,7 +62,7 @@ public class Export {
 			;
 		}else if((toQuote.indexOf(',') >= 0) || (toQuote.indexOf('"') >= 0)){
 			String out = toQuote.replaceAll("\"", "\"\"");
-			if(log.isDebugEnabled()) log.debug("Turning '" + toQuote + "' to '" + out + "'");
+			if(LOG.isDebugEnabled()) LOG.debug("Turning '" + toQuote + "' to '" + out + "'");
 			sb.append("\"").append(out).append("\"");
 		}else{
 			sb.append(toQuote);

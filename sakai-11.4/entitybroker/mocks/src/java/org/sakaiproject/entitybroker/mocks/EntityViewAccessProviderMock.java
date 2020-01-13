@@ -25,8 +25,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.sakaiproject.entitybroker.EntityView;
 import org.sakaiproject.entitybroker.access.AccessFormats;
 import org.sakaiproject.entitybroker.access.EntityViewAccessProvider;
@@ -41,7 +39,6 @@ import org.sakaiproject.entitybroker.util.http.EntityHttpServletResponse;
  * 
  * @author Aaron Zeckoski (aaron@caret.cam.ac.uk)
  */
-@Slf4j
 public class EntityViewAccessProviderMock implements EntityViewAccessProvider, AccessFormats {
 
     private String prefix = null;
@@ -59,7 +56,8 @@ public class EntityViewAccessProviderMock implements EntityViewAccessProvider, A
             try {
                 res.getWriter().print(prefix + ": EntityViewAccessProviderMock");
             } catch (IOException e) {
-                log.error(e.getMessage(), e);
+                // nothing to do here
+                e.printStackTrace();
             }
             ((EntityHttpServletResponse) res).setStatus(HttpServletResponse.SC_OK);
         } else {

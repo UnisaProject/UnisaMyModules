@@ -35,7 +35,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.sakaiproject.velocity.util.SLF4JLogChute;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.runtime.RuntimeConstants;
@@ -46,7 +47,6 @@ import org.sakaiproject.portal.api.PortalService;
 import org.sakaiproject.portal.api.StyleAbleProvider;
 import org.sakaiproject.tool.api.Placement;
 import org.sakaiproject.tool.api.SessionManager;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * A velocity render engine adapter
@@ -56,9 +56,10 @@ import lombok.extern.slf4j.Slf4j;
  * @version $Rev$
  */
 
-@Slf4j
 public class VelocityPortalRenderEngine implements PortalRenderEngine
 {
+	private static final Logger log = LoggerFactory.getLogger(VelocityPortalRenderEngine.class);
+
 	private VelocityEngine vengine;
 
 	private boolean debug = false;
@@ -106,8 +107,10 @@ public class VelocityPortalRenderEngine implements PortalRenderEngine
 		vengine = new VelocityEngine();
 
 		vengine.setApplicationAttribute(ServletContext.class.getName(), context);
-		vengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, new SLF4JLogChute());
 
+		vengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+				"org.apache.velocity.runtime.log.SimpleLog4JLogSystem");
+		vengine.setProperty("runtime.log.logsystem.log4j.category", "ve.portal");
 		Properties p = new Properties();
 		InputStream in = null;
 		try {

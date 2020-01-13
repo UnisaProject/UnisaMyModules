@@ -30,7 +30,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.sakaiproject.site.api.ToolConfiguration;
-import org.sakaiproject.site.api.Site;
 import org.sakaiproject.tool.api.ActiveTool;
 import org.sakaiproject.tool.api.Placement;
 import org.sakaiproject.tool.api.Session;
@@ -97,11 +96,6 @@ public interface Portal
 	public static final String TOOLCONFIG_HELP_DOCUMENT_ID = "help.id";
 
 	public static final String TOOLCONFIG_HELP_DOCUMENT_URL = "help.url";
-
-	/*
-	* Configuration option for default number of site tabs to display to users
-	*/
-	public static final String CONFIG_DEFAULT_TABS = "portal.default.tabs";
 
 	/**
 	 * Tool property used to indicate if JSR_168 tools are to be pre-rendered
@@ -178,11 +172,10 @@ public interface Portal
 	 * @param title
 	 * @param skin
 	 * @param request
-	 * @param site
 	 * @return
 	 */
 	PortalRenderContext startPageContext(String siteType, String title, String skin,
-			HttpServletRequest request, Site site);
+			HttpServletRequest request);
 
 	/**
 	 * perform a redirect if logged out

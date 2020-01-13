@@ -34,7 +34,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.api.privacy.PrivacyManager;
@@ -44,7 +45,7 @@ import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.util.ResourceLoader;
 
-@Slf4j
+
 public class PrivacyBean {
 	
 	private final String VISIBLE = "privacy_visible";
@@ -77,6 +78,8 @@ public class PrivacyBean {
 
 	/** Inject PrivacyManager */
 	private PrivacyManager privacyManager;
+
+	private Logger LOG = LoggerFactory.getLogger(PrivacyBean.class);
 
 	public void setPrivacyManager(PrivacyManager privacyManager) {
 		this.privacyManager = privacyManager;
@@ -203,7 +206,7 @@ public class PrivacyBean {
 
 		final boolean where = SiteService.isUserSite(siteId);
 
-		log.debug("Result of determinig if My Workspace: " + where);
+		LOG.debug("Result of determinig if My Workspace: " + where);
 
 		return where;
 	}

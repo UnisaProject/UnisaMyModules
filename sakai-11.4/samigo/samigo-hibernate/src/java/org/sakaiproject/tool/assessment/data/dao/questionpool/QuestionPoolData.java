@@ -77,7 +77,7 @@ public class QuestionPoolData
   private Set questionPoolItems;
   private Collection items = new ArrayList();
 
-  private Long subPoolSize;
+  private Integer subPoolSize;
 
   public QuestionPoolData(){
   }
@@ -429,13 +429,13 @@ public class QuestionPoolData
   }
 
   // for JSF, sigh - daisyf
-  public void setSubPoolSize(Long subPoolSize)
+  public void setSubPoolSize(Integer subPoolSize)
   {
     this.subPoolSize = subPoolSize;
   }
 
   // for JSF, sigh - daisyf
-  public Long getSubPoolSize()
+  public Integer getSubPoolSize()
   {
     return subPoolSize;
   }

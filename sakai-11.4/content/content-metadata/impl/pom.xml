@@ -7,13 +7,16 @@
   <parent>
     <artifactId>content</artifactId>
     <groupId>org.sakaiproject.content</groupId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <name>content-metadata-impl</name>
   <groupId>org.sakaiproject.content</groupId>
   <artifactId>content-metadata-impl</artifactId>
-  <packaging>sakai-component</packaging>
+  <packaging>jar</packaging>
+  <properties>
+    <deploy.target/>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.sakaiproject.kernel</groupId>
@@ -39,5 +42,11 @@
 		  <groupId>commons-lang</groupId>
 		  <artifactId>commons-lang</artifactId>
 	  </dependency>
+    <dependency>
+    	<groupId>junit</groupId>
+    	<artifactId>junit</artifactId>
+    	<version>4.10</version>
+    	<scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

@@ -20,7 +20,6 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -55,7 +54,6 @@ import org.sakaiproject.profile2.logic.ProfileLogic;
 import org.sakaiproject.profile2.logic.ProfileMessagingLogic;
 import org.sakaiproject.profile2.logic.SakaiProxy;
 import org.sakaiproject.profile2.model.BasicConnection;
-import org.sakaiproject.profile2.model.BasicPerson;
 import org.sakaiproject.profile2.model.Person;
 import org.sakaiproject.profile2.model.ProfileImage;
 import org.sakaiproject.profile2.model.UserProfile;
@@ -179,7 +177,7 @@ public class ProfileEntityProvider extends AbstractEntityProvider implements Cor
 		if(bytes != null && bytes.length > 0) {
 			try {
 				out.write(bytes);
-				ActionReturn actionReturn = new ActionReturn("UTF-8", image.getMimeType(), out);
+				ActionReturn actionReturn = new ActionReturn("BASE64", image.getMimeType(), out);
 				
 				Map<String,String> headers = new HashMap<>();
 				headers.put("Expires", "Mon, 01 Jan 2001 00:00:00 GMT");
@@ -231,7 +229,8 @@ public class ProfileEntityProvider extends AbstractEntityProvider implements Cor
 		if(connections == null) {
 			throw new EntityException("Error retrieving connections for " + ref.getId(), ref.getReference());
 		}
-		return new ActionReturn(connections);
+		ActionReturn actionReturn = new ActionReturn(connections);
+		return actionReturn;
 	}
 		
 	@EntityCustomAction(action="friendStatus",viewKey=EntityView.VIEW_SHOW)
@@ -390,67 +389,26 @@ public class ProfileEntityProvider extends AbstractEntityProvider implements Cor
 
     @EntityCustomAction(action="incomingConnectionRequests", viewKey=EntityView.VIEW_SHOW)
 	public Object getIncomingConnectionRequests(EntityView view, EntityReference ref) {
-
+		
 		if(!sakaiProxy.isLoggedIn()) {
 			throw new SecurityException("You must be logged in to get the incoming connection list.");
 		}
-
+		
 		//convert input to uuid
 		String uuid = sakaiProxy.ensureUuid(ref.getId());
-		if (StringUtils.isBlank(uuid)) {
+		if(StringUtils.isBlank(uuid)) {
 			throw new EntityNotFoundException("Invalid user.", ref.getId());
 		}
 		
-		final List<BasicConnection> requests
-			= connectionsLogic.getConnectionRequestsForUser(uuid).stream().map(p -> {
-							BasicConnection bc = new BasicConnection();
-							bc.setUuid(p.getUuid());
-							bc.setDisplayName(p.getDisplayName());
-							bc.setEmail(p.getProfile().getEmail());
-                            bc.setProfileUrl(linkLogic.getInternalDirectUrlToUserProfile(p.getUuid()));
-							bc.setType(p.getType());
-							bc.setSocialNetworkingInfo(p.getProfile().getSocialInfo());
-							return bc;
-				}).collect(Collectors.toList());
-
-		if (requests == null) {
+		//get list of connection requests
+		List<Person> requests = connectionsLogic.getConnectionRequestsForUser(uuid);
+		if(requests == null) {
 			throw new EntityException("Error retrieving connection requests for " + ref.getId(), ref.getReference());
 		}
-		return new ActionReturn(requests);
+		ActionReturn actionReturn = new ActionReturn(requests);
+		return actionReturn;
 	}
-
-	@EntityCustomAction(action="outgoingConnectionRequests", viewKey=EntityView.VIEW_SHOW)
-	public Object getOutgoingConnectionRequests(EntityView view, EntityReference ref) {
-
-		if (!sakaiProxy.isLoggedIn()) {
-			throw new SecurityException("You must be logged in to get the outgoing connection list.");
-		}
-
-		//convert input to uuid
-		String uuid = sakaiProxy.ensureUuid(ref.getId());
-		if (StringUtils.isBlank(uuid)) {
-			throw new EntityNotFoundException("Invalid user.", ref.getId());
-		}
-
-		final List<BasicConnection> requests
-			= connectionsLogic.getOutgoingConnectionRequestsForUser(uuid).stream().map(p -> {
-							BasicConnection bc = new BasicConnection();
-							bc.setUuid(p.getUuid());
-							bc.setDisplayName(p.getDisplayName());
-							bc.setEmail(p.getProfile().getEmail());
-                            bc.setProfileUrl(linkLogic.getInternalDirectUrlToUserProfile(p.getUuid()));
-							bc.setType(p.getType());
-							bc.setSocialNetworkingInfo(p.getProfile().getSocialInfo());
-							return bc;
-				}).collect(Collectors.toList());
-
-		if (requests == null) {
-			throw new EntityException("Error retrieving outgoing connection requests for " + uuid, ref.getReference());
-		}
-
-		return new ActionReturn(requests);
-	}
-
+	
 	@EntityURLRedirect("/{prefix}/{id}/account")
 	public String redirectUserAccount(Map<String,String> vars) {
 		return "user/" + vars.get("id") + vars.get(TemplateParseUtil.DOT_EXTENSION);

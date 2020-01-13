@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2007-2016 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 /*
 * Licensed to The Apereo Foundation under one or more contributor license
 * agreements. See the NOTICE file distributed with this work for
@@ -34,7 +19,6 @@
 
 package org.sakaiproject.signup.logic;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -44,11 +28,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import lombok.extern.slf4j.Slf4j;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.dao.OptimisticLockingFailureException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.calendar.api.Calendar;
 import org.sakaiproject.calendar.api.CalendarEventEdit;
@@ -70,7 +54,7 @@ import org.sakaiproject.site.api.Site;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.api.TimeRange;
 import org.sakaiproject.time.api.TimeService;
-import org.sakaiproject.util.ResourceLoader;
+import org.springframework.dao.OptimisticLockingFailureException;
 
 /**
  * <p>
@@ -82,8 +66,9 @@ import org.sakaiproject.util.ResourceLoader;
  * 
  * </p>
  */
-@Slf4j
 public class SignupMeetingServiceImpl implements SignupMeetingService, Retry, MeetingTypes, SignupMessageTypes {
+
+	private static Logger log = LoggerFactory.getLogger(SignupMeetingServiceImpl.class);
 
 	@Getter @Setter
 	private SignupMeetingDao signupMeetingDao;
@@ -96,8 +81,6 @@ public class SignupMeetingServiceImpl implements SignupMeetingService, Retry, Me
 
 	@Getter @Setter
 	private SignupEmailFacade signupEmailFacade;
-	
-	protected static ResourceLoader rb = new ResourceLoader("emailMessage");
 
 	public void init() {
 		log.debug("init");
@@ -725,8 +708,7 @@ public class SignupMeetingServiceImpl implements SignupMeetingService, Retry, Me
 					/* new time frame */
 					String title_suffix = "";
 					if(hasMulptleBlock){
-						String partSequence = MessageFormat.format(rb.getString("signup.event.part") ,new Object[] { sequence });
-						title_suffix = " (" + partSequence + ")";
+						title_suffix = " (part " + sequence + ")";
 						sequence++;
 					}
 
@@ -794,7 +776,8 @@ public class SignupMeetingServiceImpl implements SignupMeetingService, Retry, Me
 		int num = 0;
 
         if(meeting.getSignupTimeSlots().size() > 0) {
-            attendeeNamesMarkup += "<br /><br /><span style=\"font-weight: bold\"><b>" + rb.getString("signup.event.attendees") + "</b></span><br />";
+            // TODO: 'Attendees' needs internationalising
+            attendeeNamesMarkup += "<br /><br /><span style=\"font-weight: bold\"><b>Attendees:</b></span><br />";
         }
 
         boolean displayAttendeeName = false;
@@ -813,15 +796,14 @@ public class SignupMeetingServiceImpl implements SignupMeetingService, Retry, Me
         }
         
         if(!displayAttendeeName || num < 1){
-        	String currentAttendees = MessageFormat.format(rb.getString("signup.event.currentattendees") ,new Object[] { num });
-        	attendeeNamesMarkup += ("<span style=\"font-weight: italic\"><i>" + currentAttendees + "</i></span><br />");
+        	 attendeeNamesMarkup += ("<span style=\"font-weight: italic\"><i> Currently, " +  num + " attendees have been signed up.</i></span><br />");
         }
          
 		String desc = meeting.getDescription() + attendeeNamesMarkup;
 		eventEdit.setDescription(PlainTextFormat.convertFormattedHtmlTextToPlaintext(desc));
 		eventEdit.setLocation(meeting.getLocation());
-		String eventTitleAttendees = MessageFormat.format(rb.getString("signup.event.attendeestitle") ,new Object[] { num });
-		eventEdit.setDisplayName(meeting.getTitle() + title_suffix + " (" + eventTitleAttendees + ")");			
+        // TODO: 'attendees' needs internationalising
+		eventEdit.setDisplayName(meeting.getTitle() + title_suffix + " (" + num + " attendees)");			
 		eventEdit.setRange(timeRange);
 	}
 	
@@ -1118,7 +1100,7 @@ public class SignupMeetingServiceImpl implements SignupMeetingService, Retry, Me
 	public void removeMeetings(List<SignupMeeting> meetings) throws Exception {
 		signupMeetingDao.removeMeetings(meetings);
 		Set<Long> sent = new HashSet<Long>();
-				
+
 		for(SignupMeeting m: meetings) {
 			if(!m.isMeetingExpired()) {
 				//Only send once per recurrenceid
@@ -1130,7 +1112,7 @@ public class SignupMeetingServiceImpl implements SignupMeetingService, Retry, Me
 					signupEmailFacade.sendEmailAllUsers(m, SignupMessageTypes.SIGNUP_CANCEL_MEETING);
 				}
 				else {
-					log.debug("Not sending email for duplicate reurrenceId: {}", m.getRecurrenceId());
+					log.debug("Not sending email for duplicate reurrenceId: "+ m.getRecurrenceId());
 				}
 			}
 		}

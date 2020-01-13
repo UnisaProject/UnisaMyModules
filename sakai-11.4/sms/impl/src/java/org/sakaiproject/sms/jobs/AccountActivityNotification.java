@@ -15,6 +15,8 @@ import java.util.Map;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -28,17 +30,14 @@ import org.sakaiproject.sms.logic.external.ExternalLogic;
 import org.sakaiproject.sms.model.SmsAccount;
 import org.sakaiproject.sms.model.SmsTransaction;
 import org.sakaiproject.sms.model.SmsUser;
-
-import lombok.extern.slf4j.Slf4j;
 /**
  * Notifies account owners of activity on their jobs
  * 
  * @author dhorwitz
  *
  */
-@Slf4j
 public class AccountActivityNotification implements Job {
-
+	private static final Log LOG = LogFactory.getLog(AccountActivityNotification.class);
 	
 	private SmsAccountLogic smsAccountLogic;
 	private ExternalLogic externalLogic;
@@ -90,7 +89,7 @@ public class AccountActivityNotification implements Job {
 			}
 			
 			if (userTo == null) {
-				log.warn("can't resolve owner of account " + account.getId().toString() );
+				LOG.warn("can't resolve owner of account " + account.getId().toString() );
 				continue;
 			}
 			
@@ -105,11 +104,11 @@ public class AccountActivityNotification implements Job {
 				csv.append("\"" + transaction.getTransactionCredits() + "\",");
 				csv.append("\"" + transaction.getCreditBalance() + "\"\r\n");
 			}
-			log.debug("going to send sms to: " + to);
-			log.debug(csv.toString());
+			LOG.debug("going to send sms to: " + to);
+			LOG.debug(csv.toString());
 			//we need a file for this
 			String filePath = System.getProperty("java.io.tmpdir") + File.separator + "accountstatement.csv";
-			log.info(filePath);
+			LOG.info(filePath);
 			File csvAttach = new File(filePath);
 			Writer output = null;
 			
@@ -117,11 +116,14 @@ public class AccountActivityNotification implements Job {
 				output = new BufferedWriter(new FileWriter(csvAttach));
 				output.write(csv.toString());
 			} catch (FileNotFoundException e1) {
-				log.warn(e1.getLocalizedMessage(), e1);
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			} catch (UnsupportedEncodingException e) {
-				log.warn(e.getLocalizedMessage(), e);
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			} catch (IOException e) {
-				log.warn(e.getLocalizedMessage(), e);
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			finally {
 				try {
@@ -129,11 +131,12 @@ public class AccountActivityNotification implements Job {
 						output.close();
 					}
 				} catch (IOException e) {
-					log.warn(e.getLocalizedMessage(), e);
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 				
 			}
-			log.debug("file of size: " + csvAttach.length());
+			LOG.debug("file of size: " + csvAttach.length());
 			
 			Map<String, String> repVals = new HashMap<String, String>();
 			repVals.put("recipientFirst", userTo.getFirstName());
@@ -152,11 +155,12 @@ public class AccountActivityNotification implements Job {
 				String subject = template.getSubject();
 				emailService.sendMail(inetFrom, inetTo, subject, template.getRenderedMessage(), null, null, headers, attachments);
 			} catch (AddressException e) {
-				log.warn(e.getLocalizedMessage(), e);
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			
 			if (!csvAttach.delete()) {
-				log.warn("couldn't delete temp file!");
+				LOG.warn("couldn't delete temp file!");
 			}
 			
 			

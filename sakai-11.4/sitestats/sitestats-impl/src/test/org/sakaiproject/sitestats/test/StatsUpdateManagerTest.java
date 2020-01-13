@@ -23,6 +23,7 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
+import static org.junit.runners.MethodSorters.NAME_ASCENDING;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,12 +33,10 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.sakaiproject.event.api.Event;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.exception.IdUnusedException;
@@ -63,23 +62,20 @@ import org.sakaiproject.sitestats.test.data.FakeData;
 import org.sakaiproject.sitestats.test.mocks.FakeEvent;
 import org.sakaiproject.sitestats.test.mocks.FakeEventRegistryService;
 import org.sakaiproject.sitestats.test.mocks.FakeSite;
-import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 
-import javax.annotation.Resource;
+@FixMethodOrder(NAME_ASCENDING)
+@ContextConfiguration(locations={
+		"/hbm-db.xml",
+		"/hibernate-test.xml"})
+public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests { 
 
-@ContextConfiguration(locations = {"/hibernate-test.xml"})
-@Slf4j
-public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
-
-	@Resource(name = "org.sakaiproject.sitestats.test.StatsManager")
-	private StatsManager					M_sm;
-	@Resource(name = "org.sakaiproject.sitestats.test.StatsUpdateManager")
-	private StatsUpdateManager				M_sum;
-    @Resource(name = "org.sakaiproject.sitestats.test.DB")
+	@Autowired
+	private StatsUpdateManager			M_sum;
+	private StatsManager				M_sm;
+	@Autowired
 	private DB							db;
 	private SiteService					M_ss;
 	@Autowired
@@ -93,12 +89,12 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 		// Site Service
 		M_ss = createMock(SiteService.class);		
 		// Site A has SiteStats
-		Site siteA = Mockito.spy(FakeSite.class).set(FakeData.SITE_A_ID, StatsManager.SITESTATS_TOOLID);
+		Site siteA = new FakeSite(FakeData.SITE_A_ID, StatsManager.SITESTATS_TOOLID);
 		expect(M_ss.getSite(FakeData.SITE_A_ID)).andStubReturn(siteA);
 		expect(M_ss.isUserSite(FakeData.SITE_A_ID)).andStubReturn(false);
 		expect(M_ss.isSpecialSite(FakeData.SITE_A_ID)).andStubReturn(false);		
 		// Site B don't have SiteStats
-		FakeSite siteB = Mockito.spy(FakeSite.class).set(FakeData.SITE_B_ID);
+		FakeSite siteB = new FakeSite(FakeData.SITE_B_ID);
 		expect(M_ss.getSite(FakeData.SITE_B_ID)).andStubReturn(siteB);
 		expect(M_ss.isUserSite(FakeData.SITE_B_ID)).andStubReturn(false);
 		expect(M_ss.isSpecialSite(FakeData.SITE_B_ID)).andStubReturn(false);		
@@ -108,8 +104,8 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 		expect(M_ss.isSpecialSite("non_existent_site")).andStubReturn(false);
 		// apply
 		replay(M_ss);
-		StatsUpdateManagerImpl sumi = (StatsUpdateManagerImpl) ((Advised) M_sum).getTargetSource().getTarget();
-		sumi.setSiteService(M_ss);
+		((StatsUpdateManagerImpl)M_sum).setSiteService(M_ss);
+		
 		// Stats Manager
 		M_sm = createMock(StatsManager.class);
 		// Default values
@@ -118,7 +114,7 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 		expect(M_sm.isEnableSitePresences()).andStubReturn(true);	
 		// apply
 		replay(M_sm);
-		sumi.setStatsManager(M_sm);
+		((StatsUpdateManagerImpl)M_sum).setStatsManager(M_sm);
 		// Setups fake dependencies.
 		M_ers.setStatsManager(M_sm);
 		// By default we don't enable the collection thread as it can interfere with tests.
@@ -132,7 +128,7 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCollectEvent() {
-		FakeEvent e1 = Mockito.spy(FakeEvent.class).set(FakeData.EVENT_CHATNEW, "/chat/msg/"+FakeData.SITE_A_ID, FakeData.SITE_A_ID, true, 0);
+		FakeEvent e1 = new FakeEvent(FakeData.EVENT_CHATNEW, "/chat/msg/"+FakeData.SITE_A_ID, true, 0);
 		Assert.assertTrue(M_sum.collectEvent(e1));
 		Event e2 = M_sum.buildEvent(new Date(), FakeData.EVENT_CHATNEW, "/chat/msg/"+FakeData.SITE_A_ID, FakeData.SITE_A_ID, "FakeData.USER_A_ID", "session-id-a");
 		Assert.assertTrue(M_sum.collectEvent(e2));
@@ -273,37 +269,6 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 		r4 = (List<ResourceStat>) db.getResultsForClass(ResourceStatImpl.class);
 		Assert.assertEquals(0, r4.size());	
 	}
-
-	@Test
-	public void testSitePresenceSplitUpdates() {
-	    // Start and end across collections.
-		{
-			List<Event> events = new ArrayList<>();
-			events.add(M_sum.buildEvent(new Date(), StatsManager.SITEVISIT_EVENTID, "/presence/" + FakeData.SITE_A_ID + "-presence", null, FakeData.USER_A_ID, "session-id"));
-			Assert.assertTrue(M_sum.collectEvents(events));
-		}
-		{
-			List<Event> events = new ArrayList<>();
-			events.add(M_sum.buildEvent(new Date(), StatsManager.SITEVISITEND_EVENTID, "/presence/" + FakeData.SITE_A_ID + "-presence", null, FakeData.USER_A_ID, "session-id"));
-			Assert.assertTrue(M_sum.collectEvents(events));
-		}
-
-		// Start and end in the same collection.
-		{
-			List<Event> events = new ArrayList<>();
-			events.add(M_sum.buildEvent(new Date(), StatsManager.SITEVISIT_EVENTID, "/presence/" + FakeData.SITE_A_ID + "-presence", null, FakeData.USER_A_ID, "session-id"));
-			events.add(M_sum.buildEvent(new Date(), StatsManager.SITEVISITEND_EVENTID, "/presence/" + FakeData.SITE_A_ID + "-presence", null, FakeData.USER_A_ID, "session-id"));
-			Assert.assertTrue(M_sum.collectEvents(events));
-		}
-		// Multiple end events in the same collection.
-		{
-			List<Event> events = new ArrayList<>();
-			events.add(M_sum.buildEvent(new Date(), StatsManager.SITEVISIT_EVENTID, "/presence/" + FakeData.SITE_A_ID + "-presence", null, FakeData.USER_A_ID, "session-id"));
-			events.add(M_sum.buildEvent(new Date(), StatsManager.SITEVISITEND_EVENTID, "/presence/" + FakeData.SITE_A_ID + "-presence", null, FakeData.USER_A_ID, "session-id"));
-			events.add(M_sum.buildEvent(new Date(), StatsManager.SITEVISITEND_EVENTID, "/presence/" + FakeData.SITE_A_ID + "-presence", null, FakeData.USER_A_ID, "session-id"));
-			Assert.assertTrue(M_sum.collectEvents(events));
-		}
-	}
 	
 	// Activity tests
 	@SuppressWarnings("unchecked")
@@ -424,7 +389,7 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSitePresences() {
-		//log.debug("--- testSitePresences() :: START ---");
+		//System.out.println("--- testSitePresences() :: START ---");
 		long minPresenceTime = 100;
 
 		// #1 Test : 2 site visit (different users)
@@ -484,7 +449,7 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 		
 		// #2 Test: 2 site visit (same users)
 		db.deleteAll();
-		//log.debug("--- testSitePresences() :: START II ---");
+		//System.out.println("--- testSitePresences() :: START II ---");
 		
 		// BEGIN SITE PRESENCE
 		now = new Date();
@@ -531,9 +496,9 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 		Assert.assertEquals(eSV1.getUserId(), es1.getUserId());
 		Assert.assertNull(es1.getLastVisitStartTime());
 		totalDuration = es1.getDuration();
-		//log.debug("1. totalDuration: "+totalDuration);
-		//log.debug("1.   firstDuration: "+firstDuration);
-		//log.debug("1.   secondDuration: "+secondDuration);
+		//System.out.println("1. totalDuration: "+totalDuration);
+		//System.out.println("1.   firstDuration: "+firstDuration);
+		//System.out.println("1.   secondDuration: "+secondDuration);
 		Assert.assertTrue(totalDuration == firstDuration + secondDuration);
 		
 		
@@ -568,11 +533,11 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 		Assert.assertEquals(eSV1.getUserId(), es1.getUserId());
 		Assert.assertNull(es1.getLastVisitStartTime());
 		totalDuration = es1.getDuration();
-		//log.debug("2. totalDuration: "+totalDuration);
-		//log.debug("2.   firstDuration: "+firstDuration);
-		//log.debug("2.   secondDuration: "+secondDuration);
+		//System.out.println("2. totalDuration: "+totalDuration);
+		//System.out.println("2.   firstDuration: "+firstDuration);
+		//System.out.println("2.   secondDuration: "+secondDuration);
 		Assert.assertTrue(totalDuration == firstDuration + secondDuration);
-		//log.debug("--- testSitePresences() :: END ---");
+		//System.out.println("--- testSitePresences() :: END ---");
 		
 		
 		// #4 Test: one pres.end (with one pres.begin already on db, with duration = 0)
@@ -605,11 +570,11 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 		Assert.assertEquals(eSV1.getUserId(), es1.getUserId());
 		Assert.assertNull(es1.getLastVisitStartTime());
 		totalDuration = es1.getDuration();
-		//log.debug("3. totalDuration: "+totalDuration);
-		//log.debug("3.   firstDuration: "+firstDuration);
-		//log.debug("3.   secondDuration: "+secondDuration);
+		//System.out.println("3. totalDuration: "+totalDuration);
+		//System.out.println("3.   firstDuration: "+firstDuration);
+		//System.out.println("3.   secondDuration: "+secondDuration);
 		Assert.assertTrue(totalDuration == firstDuration + secondDuration);
-		//log.debug("--- testSitePresences() :: END ---");
+		//System.out.println("--- testSitePresences() :: END ---");
 	}
 	
 	// Test (remaining) CustomEventImpl fields
@@ -624,8 +589,6 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 	// Basic configuration test
 	@SuppressWarnings("unchecked")
 	@Test
-	@Ignore   // TODO there is an issue with hsqldb looks like https://stackoverflow.com/questions/14001558/maven-hangs-while-running-test-case-eclipselink-hsqldb
-	          // however running the test individually it runs fine
 	public void testConfigIsCollectThreadEnabled() {
 		db.deleteAll();
 		M_sum.setCollectThreadUpdateInterval(50);
@@ -655,7 +618,7 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 		while(!M_sum.isIdle()) {
 			try{
 				// give it time to process event
-				Thread.sleep(300);
+				Thread.sleep(300);			
 			}catch(Exception e) {}
 		}
 		results = (List<EventStat>) db.getResultsForClass(EventStatImpl.class);
@@ -679,7 +642,7 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 			results = (List<EventStat>) db.getResultsForClass(EventStatImpl.class);
 			try{
 				// give it time to process event
-				Thread.sleep(500);
+				Thread.sleep(500);			
 			}catch(Exception e) {/* ignore */}
 		}
 		Assert.assertEquals(1, results.size());
@@ -761,12 +724,12 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testConfigIsShowAnonymousAccessEvents() throws Exception {
+	public void testConfigIsShowAnonymousAccessEvents() {
 		db.deleteAll();
 		// #3: ShowAnonymousAccessEvents
 		Assert.assertEquals(true, M_sm.isShowAnonymousAccessEvents());
 		// make sure it processes access events from anonymous
-		Event e1 = M_sum.buildEvent(new Date(), FakeData.EVENT_CONTENTNEW, "/content/group/"+FakeData.SITE_A_ID+"/resource_id", FakeData.SITE_A_ID, EventTrackingService.UNKNOWN_USER, "session-id-a");
+		Event e1 = M_sum.buildEvent(new Date(), FakeData.EVENT_CONTENTNEW, "/content/group/"+FakeData.SITE_A_ID+"/resource_id", FakeData.SITE_A_ID, "?", "session-id-a");
 		Event e2 = M_sum.buildEvent(new Date(), FakeData.EVENT_CONTENTNEW, "/content/group/"+FakeData.SITE_A_ID+"/resource_id", FakeData.SITE_A_ID, FakeData.USER_A_ID, "session-id-a");
 		M_sum.collectEvents(Arrays.asList(e1, e2));
 		List<ResourceStat> results = (List<ResourceStat>) db.getResultsForClass(ResourceStatImpl.class);
@@ -777,8 +740,7 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 		expect(M_sm.isShowAnonymousAccessEvents()).andReturn(false).anyTimes();
 		expect(M_sm.isEnableSitePresences()).andReturn(true).anyTimes();
 		replay(M_sm);
-        StatsUpdateManagerImpl sumi = (StatsUpdateManagerImpl) ((Advised) M_sum).getTargetSource().getTarget();
-		sumi.setStatsManager(M_sm);
+		((StatsUpdateManagerImpl)M_sum).setStatsManager(M_sm);		
 		Assert.assertEquals(false, M_sm.isShowAnonymousAccessEvents());
 		M_sum.collectEvents(Arrays.asList(e1, e2));
 		results = (List<ResourceStat>) db.getResultsForClass(ResourceStatImpl.class);
@@ -793,7 +755,7 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testConfigIsEventContextSupported() throws Exception {
+	public void testConfigIsEventContextSupported() {
 		db.deleteAll();
 		// #3: EventContextSupported
 		Assert.assertEquals(true, M_sm.isEventContextSupported());
@@ -809,8 +771,7 @@ public class StatsUpdateManagerTest extends AbstractJUnit4SpringContextTests {
 		expect(M_sm.isShowAnonymousAccessEvents()).andReturn(true).anyTimes();
 		expect(M_sm.isEnableSitePresences()).andReturn(true).anyTimes();
 		replay(M_sm);
-        StatsUpdateManagerImpl sumi = (StatsUpdateManagerImpl) ((Advised) M_sum).getTargetSource().getTarget();
-		sumi.setStatsManager(M_sm);
+		((StatsUpdateManagerImpl)M_sum).setStatsManager(M_sm);		
 		Assert.assertEquals(false, M_sm.isEventContextSupported());
 		e1 = M_sum.buildEvent(new Date(), FakeData.EVENT_CONTENTNEW, "/content/group/non_existent_site/resource_id", FakeData.SITE_A_ID, FakeData.USER_A_ID, "session-id-a");
 		e2 = M_sum.buildEvent(new Date(), FakeData.EVENT_CONTENTNEW, "/content/group/"+FakeData.SITE_B_ID+"/resource_id", null, FakeData.USER_B_ID, "session-id-a");

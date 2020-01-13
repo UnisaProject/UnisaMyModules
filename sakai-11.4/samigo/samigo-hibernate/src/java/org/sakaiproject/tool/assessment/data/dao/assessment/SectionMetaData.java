@@ -20,15 +20,18 @@
  **********************************************************************************/
 
 package org.sakaiproject.tool.assessment.data.dao.assessment;
-
 import java.io.IOException;
 import java.io.Serializable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionDataIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionMetaDataIfc;
 
 public class SectionMetaData
     implements Serializable, SectionMetaDataIfc {
+  static Logger errorLogger = LoggerFactory.getLogger("errorLogger");
 
   private static final long serialVersionUID = 7526471155622776147L;
 
@@ -92,4 +95,5 @@ public class SectionMetaData
       ClassNotFoundException {
     in.defaultReadObject();
   }
+
 }

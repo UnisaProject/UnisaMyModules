@@ -1,11 +1,15 @@
-/*
- * Copyright (c) 2016, The Apereo Foundation
+/**********************************************************************************
+ * $URL$
+ * $Id$
+ ***********************************************************************************
+ *
+ * Copyright (c) 2004, 2005, 2006, 2007, 2008, 2009 The Sakai Foundation
  *
  * Licensed under the Educational Community License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *             http://opensource.org/licenses/ecl2
+ *       http://www.opensource.org/licenses/ECL-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,29 +17,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- */
+ **********************************************************************************/
+
 
 package org.sakaiproject.tool.assessment.services.assessment;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.TreeMap;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentAccessControl;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAssessmentData;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAttachmentData;
-import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedFeedback;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedItemData;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedItemText;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedMetaData;
-import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedSectionData;
-import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AnswerIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentAccessControlIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentAttachmentIfc;
@@ -59,8 +62,8 @@ import org.sakaiproject.tool.assessment.services.PersistenceService;
  * manager on the back end.
  * @author Rachel Gollub <rgollub@stanford.edu>
  */
-@Slf4j
 public class PublishedAssessmentService extends AssessmentService{
+  private Logger log = LoggerFactory.getLogger(PublishedAssessmentService.class);
 
   /**
    * Creates a new QuestionPoolService object.
@@ -75,7 +78,8 @@ public class PublishedAssessmentService extends AssessmentService{
    * - quoted from IM on 1/31/05
    * Marc said some of teh assessment do not have any due date, e.g. survey
    */
-  public List<PublishedAssessmentFacade> getBasicInfoOfAllPublishedAssessments(String agentId, String orderBy, boolean ascending, String siteId) {
+  public ArrayList getBasicInfoOfAllPublishedAssessments(String agentId, String orderBy,
+							 boolean ascending, String siteId) {
 
     // 2. get all takeable assessment available
     return PersistenceService.getInstance().
@@ -83,7 +87,8 @@ public class PublishedAssessmentService extends AssessmentService{
         getBasicInfoOfAllPublishedAssessments(orderBy, ascending, siteId);
   }
   
-  public List<PublishedAssessmentFacade> getBasicInfoOfAllPublishedAssessments2(String orderBy, boolean ascending, String siteId) {
+  public ArrayList getBasicInfoOfAllPublishedAssessments2(String orderBy,
+		  boolean ascending, String siteId) {
 
 	  // 2. get all takeable assessment available
 	  return PersistenceService.getInstance().
@@ -91,27 +96,76 @@ public class PublishedAssessmentService extends AssessmentService{
 	  getBasicInfoOfAllPublishedAssessments2(orderBy, ascending, siteId);
   }
 
-  public List getAllActivePublishedAssessments(String orderBy) {
-      return getAllPublishedAssessments(orderBy, PublishedAssessmentFacade.ACTIVE_STATUS);
+/**
+  public ArrayList getAllReviewableAssessments(String agentId, String orderBy,
+                                               boolean ascending) {
+
+    // 1. get total no. of submission per assessment by the given agent
+    HashMap h = getTotalSubmissionPerAssessment(agentId);
+
+    ArrayList assessmentList = PersistenceService.getInstance().
+        getPublishedAssessmentFacadeQueries().
+        getAllReviewableAssessments(orderBy, ascending);
+             assessmentList.size());
+    ArrayList reviewableAssessmentList = new ArrayList();
+    for (int i = 0; i < assessmentList.size(); i++) {
+      AssessmentGradingFacade f = (AssessmentGradingFacade) assessmentList.get(
+          i);
+
+      Integer NumberOfSubmissions = (Integer) h.get(
+          f.getPublishedAssessment().getPublishedAssessmentId());
+      if (NumberOfSubmissions == null) {
+        NumberOfSubmissions = new Integer(0);
+      }
+      try {
+        if (!PersistenceService.getInstance().getAuthzQueriesFacade().isAuthorized(null, "VIEW_PUBLISHED_ASSESSMENT",
+                                              f.getPublishedAssessment().
+                                              getPublishedAssessmentId().
+                                              toString())) {
+          break;
+        }
+      }
+      catch (Exception e1) {
+        log.fatal("Wrapping Error around unhandled Exception: "
+                  + e1.getMessage());
+        throw new RuntimeException(e1.getMessage());
+      }
+      // for testing only
+      reviewableAssessmentList.add(f);
+    }
+    return reviewableAssessmentList;
+  }
+*/
+
+  public ArrayList getAllActivePublishedAssessments(String orderBy) {
+    return getAllPublishedAssessments(orderBy,
+                                      PublishedAssessmentFacade.ACTIVE_STATUS);
   }
 
-  public List getAllActivePublishedAssessments(int pageSize, int pageNumber, String orderBy) {
-      return getAllPublishedAssessments(pageSize, pageNumber, orderBy, PublishedAssessmentFacade.ACTIVE_STATUS);
+  public ArrayList getAllActivePublishedAssessments(
+      int pageSize, int pageNumber, String orderBy) {
+    return getAllPublishedAssessments(
+        pageSize, pageNumber, orderBy, PublishedAssessmentFacade.ACTIVE_STATUS);
   }
 
-  public List getAllInActivePublishedAssessments(String orderBy) {
-      return getAllPublishedAssessments(orderBy, PublishedAssessmentFacade.INACTIVE_STATUS);
+  public ArrayList getAllInActivePublishedAssessments(String orderBy) {
+    return getAllPublishedAssessments(orderBy,
+                                      PublishedAssessmentFacade.INACTIVE_STATUS);
   }
 
-  public List getAllInActivePublishedAssessments(int pageSize, int pageNumber, String orderBy) {
-      return getAllPublishedAssessments(pageSize, pageNumber, orderBy, PublishedAssessmentFacade.INACTIVE_STATUS);
+  public ArrayList getAllInActivePublishedAssessments(
+      int pageSize, int pageNumber, String orderBy) {
+    return getAllPublishedAssessments(
+        pageSize, pageNumber, orderBy,
+        PublishedAssessmentFacade.INACTIVE_STATUS);
   }
 
-  public List getAllPublishedAssessments(String orderBy, Integer status) {
-      return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().getAllPublishedAssessments(orderBy, status); // signalling all & no paging
+  public ArrayList getAllPublishedAssessments(String orderBy, Integer status) {
+    return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().
+        getAllPublishedAssessments(orderBy, status); // signalling all & no paging
   }
 
-  public List getAllPublishedAssessments(
+  public ArrayList getAllPublishedAssessments(
       int pageSize, int pageNumber, String orderBy, Integer status) {
     try {
       if (pageSize > 0 && pageNumber > 0) {
@@ -239,26 +293,16 @@ public class PublishedAssessmentService extends AssessmentService{
 	        removeAssessment(new Long(assessmentId), action);
   }
   
-  public List<PublishedAssessmentFacade> getBasicInfoOfAllActivePublishedAssessments(String orderBy,boolean ascending) {
+  public ArrayList getBasicInfoOfAllActivePublishedAssessments(String orderBy,boolean ascending) {
     String siteAgentId = AgentFacade.getCurrentSiteId();
     return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().
         getBasicInfoOfAllActivePublishedAssessments(orderBy, siteAgentId, ascending); // signalling all & no paging
   }
 
-  public List getBasicInfoOfAllActivePublishedAssessmentsByAgentId(String orderBy,boolean ascending,String siteAgentId ) {
-    return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().
-            getBasicInfoOfAllActivePublishedAssessments(orderBy, siteAgentId, ascending); // signalling all & no paging
-  }
-
-  public List getBasicInfoOfAllInActivePublishedAssessments(String orderBy,boolean ascending) {
+  public ArrayList getBasicInfoOfAllInActivePublishedAssessments(String orderBy,boolean ascending) {
     String siteAgentId = AgentFacade.getCurrentSiteId();
     return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().
         getBasicInfoOfAllInActivePublishedAssessments(orderBy, siteAgentId, ascending); // signalling all & no paging
-  }
-
-  public List getBasicInfoOfAllInActivePublishedAssessmentsByAgentId(String orderBy,boolean ascending, String siteAgentId) {
-    return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().
-            getBasicInfoOfAllInActivePublishedAssessments(orderBy, siteAgentId, ascending); // signalling all & no paging
   }
 
   public PublishedAssessmentFacade getSettingsOfPublishedAssessment(String
@@ -306,8 +350,8 @@ public class PublishedAssessmentService extends AssessmentService{
    * @param ascending
    * @return
    */
-  public List<AssessmentGradingData> getBasicInfoOfLastSubmittedAssessments(String agentId,
-                                                                            String orderBy, boolean ascending) {
+  public ArrayList getBasicInfoOfLastSubmittedAssessments(String agentId,
+      String orderBy, boolean ascending) {
     return PersistenceService.getInstance().
         getPublishedAssessmentFacadeQueries().
          getBasicInfoOfLastSubmittedAssessments(agentId, orderBy, ascending);
@@ -316,13 +360,13 @@ public class PublishedAssessmentService extends AssessmentService{
   /** total submitted for grade
    * returns HashMap (Long publishedAssessmentId, Integer totalSubmittedForGrade);
    */
-  public Map<Long, Integer> getTotalSubmissionPerAssessment(String agentId) {
+  public HashMap getTotalSubmissionPerAssessment(String agentId) {
     return PersistenceService.getInstance().
         getPublishedAssessmentFacadeQueries().
         getTotalSubmissionPerAssessment(agentId);
   }
 
-    public Map<Long, Integer> getTotalSubmissionPerAssessment(String agentId, String siteId) {
+    public HashMap getTotalSubmissionPerAssessment(String agentId, String siteId) {
     return PersistenceService.getInstance().
         getPublishedAssessmentFacadeQueries().
         getTotalSubmissionPerAssessment(agentId, siteId);
@@ -355,10 +399,11 @@ public class PublishedAssessmentService extends AssessmentService{
         saveOrUpdateMetaData(meta);
   }
 
-  public Map<Long, PublishedFeedback> getFeedbackHash(){
-    return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().getFeedbackHash();
+  public HashMap getFeedbackHash(){
+    return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().
+         getFeedbackHash();
   }
-  public Map<Long, PublishedAssessmentFacade> getAllAssessmentsReleasedToAuthenticatedUsers(){
+  public HashMap getAllAssessmentsReleasedToAuthenticatedUsers(){
     return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().
          getAllAssessmentsReleasedToAuthenticatedUsers();
   }
@@ -393,7 +438,7 @@ public class PublishedAssessmentService extends AssessmentService{
       getPublishedItemIds(new Long(publishedAssessmentId));
   }
   
-  public Set<PublishedItemData> getPublishedItemSet(Long publishedAssessmentId, Long sectionId){
+  public HashSet getPublishedItemSet(Long publishedAssessmentId, Long sectionId){
     return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().
     getPublishedItemSet(publishedAssessmentId, sectionId);
   }
@@ -403,8 +448,8 @@ public class PublishedAssessmentService extends AssessmentService{
       getItemType(new Long(publishedItemId));
   }
 
-  public Map<Long, ItemTextIfc> preparePublishedItemTextHash(PublishedAssessmentIfc publishedAssessment){
-    HashMap<Long, ItemTextIfc> map = new HashMap<>();
+  public HashMap<Long, ItemTextIfc> preparePublishedItemTextHash(PublishedAssessmentIfc publishedAssessment){
+    HashMap<Long, ItemTextIfc> map = new HashMap<Long, ItemTextIfc>();
     List<SectionDataIfc> sectionArray = publishedAssessment.getSectionArray();
     for (int i=0;i<sectionArray.size(); i++){
       SectionDataIfc section = sectionArray.get(i);
@@ -421,8 +466,8 @@ public class PublishedAssessmentService extends AssessmentService{
     return map;
   }
 
-  public Map<Long, ItemDataIfc> preparePublishedItemHash(PublishedAssessmentIfc publishedAssessment){
-    Map<Long, ItemDataIfc> map = new HashMap<>();
+  public HashMap<Long, ItemDataIfc> preparePublishedItemHash(PublishedAssessmentIfc publishedAssessment){
+    HashMap<Long, ItemDataIfc> map = new HashMap<Long, ItemDataIfc>();
     List<SectionDataIfc> sectionArray = publishedAssessment.getSectionArray();
     for (int i=0;i<sectionArray.size(); i++){
       SectionDataIfc section = sectionArray.get(i);
@@ -435,8 +480,8 @@ public class PublishedAssessmentService extends AssessmentService{
     return map;
   }
 
-  public Map<Long, AnswerIfc> preparePublishedAnswerHash(PublishedAssessmentIfc publishedAssessment){
-    Map<Long, AnswerIfc> map = new HashMap<>();
+  public HashMap<Long, AnswerIfc> preparePublishedAnswerHash(PublishedAssessmentIfc publishedAssessment){
+    HashMap<Long, AnswerIfc> map = new HashMap<Long, AnswerIfc>();
     ArrayList<SectionDataIfc> sectionArray = publishedAssessment.getSectionArray();
     for (int i=0;i<sectionArray.size(); i++){
      SectionDataIfc section = sectionArray.get(i);
@@ -466,8 +511,8 @@ public class PublishedAssessmentService extends AssessmentService{
     return map;
   }
 
-  public Map<Long, ItemDataIfc> prepareFIBItemHash(PublishedAssessmentIfc publishedAssessment){
-    HashMap<Long, ItemDataIfc> map = new HashMap<>();
+  public HashMap<Long, ItemDataIfc> prepareFIBItemHash(PublishedAssessmentIfc publishedAssessment){
+    HashMap<Long, ItemDataIfc> map = new HashMap<Long, ItemDataIfc>();
     ArrayList<SectionDataIfc> sectionArray = publishedAssessment.getSectionArray();
     for (int i=0;i<sectionArray.size(); i++){
       SectionDataIfc section = sectionArray.get(i);
@@ -481,8 +526,8 @@ public class PublishedAssessmentService extends AssessmentService{
     return map;
   }
 
-  public Map<Long, ItemDataIfc> prepareFINItemHash(PublishedAssessmentIfc publishedAssessment){
-	    Map<Long, ItemDataIfc> map = new HashMap<>();
+  public HashMap<Long, ItemDataIfc> prepareFINItemHash(PublishedAssessmentIfc publishedAssessment){
+	    HashMap<Long, ItemDataIfc> map = new HashMap<Long, ItemDataIfc>();
 	    ArrayList<SectionDataIfc> sectionArray = publishedAssessment.getSectionArray();
 	    for (int i=0;i<sectionArray.size(); i++){
 	      SectionDataIfc section = sectionArray.get(i);
@@ -503,7 +548,7 @@ public class PublishedAssessmentService extends AssessmentService{
    */
   public Map<Long, ItemDataIfc> prepareCalcQuestionItemHash(PublishedAssessmentIfc publishedAssessment){
       // CALCULATED_QUESTION
-      Map<Long, ItemDataIfc> map = new HashMap<>();
+      Map<Long, ItemDataIfc> map = new HashMap<Long, ItemDataIfc>();
       List<SectionDataIfc> sectionArray = publishedAssessment.getSectionArray();
       for (int i=0;i<sectionArray.size(); i++) {
           SectionDataIfc section = sectionArray.get(i);
@@ -525,7 +570,7 @@ public class PublishedAssessmentService extends AssessmentService{
    */
   public Map<Long, ItemDataIfc> prepareImagQuestionItemHash(PublishedAssessmentIfc publishedAssessment){
       // CALCULATED_QUESTION
-      Map<Long, ItemDataIfc> map = new HashMap<>();
+      Map<Long, ItemDataIfc> map = new HashMap<Long, ItemDataIfc>();
       List<SectionDataIfc> sectionArray = publishedAssessment.getSectionArray();
       for (int i=0;i<sectionArray.size(); i++) {
           SectionDataIfc section = sectionArray.get(i);
@@ -541,8 +586,8 @@ public class PublishedAssessmentService extends AssessmentService{
   }
   
   
-  public Map<Long, ItemDataIfc> prepareMCMRItemHash(PublishedAssessmentIfc publishedAssessment){
-    Map<Long, ItemDataIfc> map = new HashMap<>();
+  public HashMap<Long, ItemDataIfc> prepareMCMRItemHash(PublishedAssessmentIfc publishedAssessment){
+    HashMap<Long, ItemDataIfc> map = new HashMap<Long, ItemDataIfc>();
     ArrayList<SectionDataIfc> sectionArray = publishedAssessment.getSectionArray();
     for (int i=0;i<sectionArray.size(); i++){
       SectionDataIfc section = sectionArray.get(i);
@@ -556,8 +601,8 @@ public class PublishedAssessmentService extends AssessmentService{
     return map;
   }
   
-  public Map<Long, ItemDataIfc> prepareEMIItemHash(PublishedAssessmentIfc publishedAssessment){
-	    Map<Long, ItemDataIfc> map = new HashMap<>();
+  public HashMap prepareEMIItemHash(PublishedAssessmentIfc publishedAssessment){
+	    HashMap<Long, ItemDataIfc> map = new HashMap<Long, ItemDataIfc>();
 	    List<? extends SectionDataIfc> sectionArray = publishedAssessment.getSectionArray();
 	    for (int i=0;i<sectionArray.size(); i++){
 	      SectionDataIfc section = sectionArray.get(i);
@@ -571,12 +616,12 @@ public class PublishedAssessmentService extends AssessmentService{
 	    return map;
   }
   
-  public Set<PublishedSectionData> getSectionSetForAssessment(Long publishedAssessmentId){
+  public HashSet getSectionSetForAssessment(Long publishedAssessmentId){
 	    return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().
 	    getSectionSetForAssessment(publishedAssessmentId);
   }
   
-  public Set<PublishedSectionData> getSectionSetForAssessment(PublishedAssessmentIfc assessment){
+  public HashSet getSectionSetForAssessment(PublishedAssessmentIfc assessment){
 	    return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().
 	    getSectionSetForAssessment(assessment);
 }
@@ -625,6 +670,10 @@ public class PublishedAssessmentService extends AssessmentService{
    public void saveOrUpdateSection(SectionFacade section) {
 	   PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().saveOrUpdateSection(section);
 	}
+   
+   public void removeItemAttachment(String itemAttachmentId) {
+	   PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().removeItemAttachment(Long.valueOf(itemAttachmentId));
+	}
 
    public PublishedSectionFacade addSection(Long publishedAssessmentId) {
 	   return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().addSection(publishedAssessmentId);
@@ -651,7 +700,12 @@ public class PublishedAssessmentService extends AssessmentService{
 	   if (pub == null) {
 		   return false;
 	   }
-	   return pub.getAssessmentAccessControl().getReleaseTo().equals(AssessmentAccessControl.RELEASE_TO_SELECTED_GROUPS);
+	   if (pub.getAssessmentAccessControl().getReleaseTo().equals(AssessmentAccessControl.RELEASE_TO_SELECTED_GROUPS)) {
+		   return true;
+	   }
+	   else {
+		   return false;
+	   }
    }
 
    public Integer getPublishedAssessmentStatus(Long publishedAssessmentId) {
@@ -703,8 +757,9 @@ public class PublishedAssessmentService extends AssessmentService{
 				.saveOrUpdateAttachments(list);
    }
    
-   public Map getGroupsForSite() {
-	   return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries().getGroupsForSite();
+   public TreeMap getGroupsForSite() {
+	   return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries()
+	   .getGroupsForSite();
    }
 
    public PublishedAssessmentFacade getPublishedAssessmentInfoForRemove(Long publishedAssessmentId) {
@@ -712,18 +767,18 @@ public class PublishedAssessmentService extends AssessmentService{
 	   .getPublishedAssessmentInfoForRemove(publishedAssessmentId);
    }
    
-   public Map<Long, String> getToGradebookPublishedAssessmentSiteIdMap() {
+   public HashMap getToGradebookPublishedAssessmentSiteIdMap() {
 	   return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries()
 	   .getToGradebookPublishedAssessmentSiteIdMap();
    }
    
-   public List<AssessmentGradingData> getBasicInfoOfLastOrHighestOrAverageSubmittedAssessmentsByScoringOption(String agentId, String siteId,boolean allAssessments ){
+   public ArrayList getBasicInfoOfLastOrHighestOrAverageSubmittedAssessmentsByScoringOption(String agentId, String siteId,boolean allAssessments ){
 	   return PersistenceService.getInstance().
 	   getPublishedAssessmentFacadeQueries().
 	   getBasicInfoOfLastOrHighestOrAverageSubmittedAssessmentsByScoringOption(agentId, siteId, allAssessments);
    }
 
-	public List<AssessmentGradingData> getAllAssessmentsGradingDataByAgentAndSiteId(String agentId, String siteId) {
+	public List getAllAssessmentsGradingDataByAgentAndSiteId(String agentId, String siteId) {
 		return PersistenceService.getInstance().getPublishedAssessmentFacadeQueries()
 				.getAllAssessmentsGradingDataByAgentAndSiteId(agentId, siteId);
 	}

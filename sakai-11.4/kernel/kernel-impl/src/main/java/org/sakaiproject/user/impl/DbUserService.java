@@ -21,15 +21,9 @@
 
 package org.sakaiproject.user.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.Instant;
-import java.util.*;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang3.StringUtils;
-
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlReaderFinishedException;
 import org.sakaiproject.db.api.SqlService;
@@ -40,14 +34,21 @@ import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserEdit;
 import org.sakaiproject.util.BaseDbFlatStorage;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+
+
 /**
  * <p>
  * DbCachedUserService is an extension of the BaseUserService with a database storage backed up by an in-memory cache.
  * </p>
  */
-@Slf4j
 public abstract class DbUserService extends BaseUserDirectoryService
 {
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(DbUserService.class);
+
 	/** Table name for users. */
 	protected String m_tableName = "SAKAI_USER";
 
@@ -160,14 +161,14 @@ public abstract class DbUserService extends BaseUserDirectoryService
 			super.init();
 			setUserServiceSql(sqlService().getVendor());
 
-			log.info("init(): table: " + m_tableName + " external locks: " + m_useExternalLocks);
+			M_log.info("init(): table: " + m_tableName + " external locks: " + m_useExternalLocks);
 			cache = memoryService().getCache("org.sakaiproject.user.api.UserDirectoryService"); // user id/eid mapping cache
-			log.info("User ID/EID mapping Cache [" + cache.getName() +"]");
+			M_log.info("User ID/EID mapping Cache [" + cache.getName() +"]");
 
 		}
 		catch (Exception t)
 		{
-			log.warn("init(): ", t);
+			M_log.warn("init(): ", t);
 		}
 	}
 
@@ -210,6 +211,8 @@ public abstract class DbUserService extends BaseUserDirectoryService
 	 */
 	protected class DbStorage extends BaseDbFlatStorage implements Storage, SqlReader
 	{
+		private static final String EIDCACHE = "eid:";
+		private static final String IDCACHE = "id:";
 
 		/**
 		 * Construct.
@@ -417,8 +420,8 @@ public abstract class DbUserService extends BaseUserDirectoryService
 					rv[8] = rv[0];
 				}
 
-				rv[9] = edit.getCreatedDate();
-				rv[10] = edit.getModifiedDate();
+				rv[9] = edit.getCreatedTime();
+				rv[10] = edit.getModifiedTime();
 			}
 
 			return rv;
@@ -444,14 +447,14 @@ public abstract class DbUserService extends BaseUserDirectoryService
 				String pw = result.getString(7);
 				String createdBy = result.getString(8);
 				String modifiedBy = result.getString(9);
-				Instant createdOn = Instant.ofEpochMilli(result.getTimestamp(10, sqlService().getCal()).getTime());
-				Instant modifiedOn = Instant.ofEpochMilli(result.getTimestamp(11, sqlService().getCal()).getTime());
+				Time createdOn = timeService().newTime(result.getTimestamp(10, sqlService().getCal()).getTime());
+				Time modifiedOn = timeService().newTime(result.getTimestamp(11, sqlService().getCal()).getTime());
 
 				// find the eid from the mapping
 				String eid = checkMapForEid(id);
 				if (eid == null)
 				{
-					log.warn("readSqlResultRecord: null eid for id: " + id);
+					M_log.warn("readSqlResultRecord: null eid for id: " + id);
 				}
 
 				// create the Resource from these fields
@@ -459,7 +462,7 @@ public abstract class DbUserService extends BaseUserDirectoryService
 			}
 			catch (SQLException e)
 			{
-				log.warn("readSqlResultRecord: " + e);
+				M_log.warn("readSqlResultRecord: " + e);
 				return null;
 			}
 		}
@@ -548,7 +551,7 @@ public abstract class DbUserService extends BaseUserDirectoryService
 			if (!m_separateIdEid) return;
 
 			// clear both sides of the cache
-			String eid = (String) cache.get(EIDCACHE+id);
+            String eid = (String) cache.get(EIDCACHE+id);
 			if ( eid != null ) {
 				cache.remove(IDCACHE+eid);
 			}
@@ -847,8 +850,8 @@ public abstract class DbUserService extends BaseUserDirectoryService
 					String pw = result.getString(8);
 					String createdBy = result.getString(9);
 					String modifiedBy = result.getString(10);
-					Instant createdOn = (result.getObject(11) != null) ? Instant.ofEpochMilli(result.getTimestamp(11, sqlService().getCal()).getTime()) : null;
-					Instant modifiedOn = (result.getObject(12) != null) ? Instant.ofEpochMilli(result.getTimestamp(12, sqlService().getCal()).getTime()) : null;
+					Time createdOn = (result.getObject(11) != null) ? timeService().newTime(result.getTimestamp(11, sqlService().getCal()).getTime()) : null;
+					Time modifiedOn = (result.getObject(12) != null) ? timeService().newTime(result.getTimestamp(12, sqlService().getCal()).getTime()) : null;
 
 					// create the Resource from these fields
 					userEdit = new BaseUserEdit(idFromMap, eidFromMap, email, firstName, lastName, type, pw, createdBy, createdOn, modifiedBy, modifiedOn);
@@ -867,7 +870,7 @@ public abstract class DbUserService extends BaseUserDirectoryService
 				}
 				catch (SQLException e)
 				{
-					log.warn("readSqlResultRecord: " + e, e);
+					M_log.warn("readSqlResultRecord: " + e, e);
 				}
 				return userEdit;
 			}

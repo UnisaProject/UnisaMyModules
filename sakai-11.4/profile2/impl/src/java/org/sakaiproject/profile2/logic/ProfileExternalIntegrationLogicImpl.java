@@ -18,18 +18,19 @@ package org.sakaiproject.profile2.logic;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import twitter4j.Twitter;
-import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.auth.AccessToken;
-
 import org.sakaiproject.profile2.dao.ProfileDao;
 import org.sakaiproject.profile2.model.ExternalIntegrationInfo;
 import org.sakaiproject.profile2.util.ProfileConstants;
 import org.sakaiproject.profile2.util.ProfileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import lombok.Setter;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
 
 /**
  * Implementation of ProfileExternalIntegrationLogic API
@@ -37,8 +38,9 @@ import org.sakaiproject.profile2.util.ProfileUtils;
  * @author Steve Swinsburg (steve.swinsburg@gmail.com)
  *
  */
-@Slf4j
 public class ProfileExternalIntegrationLogicImpl implements ProfileExternalIntegrationLogic {
+
+	private static final Logger log = LoggerFactory.getLogger(ProfileExternalIntegrationLogicImpl.class);
 
 	/**
 	 * OAuth Consumer registration details for Profile2.

@@ -45,70 +45,19 @@
       <title><h:outputText value="#{assessmentSettingsMessages.sakai_assessment_manager} #{assessmentSettingsMessages.dash} #{assessmentSettingsMessages.settings}" /></title>
       <samigo:script path="/jsf/widget/hideDivision/hideDivision.js"/>
       <samigo:script path="/jsf/widget/colorpicker/colorpicker.js"/>
-      <samigo:script path="/../library/js/lang-datepicker/lang-datepicker.js"/>
+      <script type="text/javascript" src="/library/js/lang-datepicker/lang-datepicker.js"></script>
       <samigo:script path="/js/authoring.js"/>        
-
-      <script type="text/javascript">
-      if (needJQuery) {
-         document.write('\x3Clink href="/library/webjars/jquery-ui/1.12.1/jquery-ui.min.css?version=" rel="stylesheet">');
-      }
-      </script>
 
       <script type="text/javascript">
         $(document).ready(function() {
           // set up the accordion for settings
-          var accordionPanel = 1;
-          var itemName = "samigo_publishedsettings_" + <h:outputText value="#{publishedSettings.assessmentId}"/>;
-          if (window.sessionStorage && window.sessionStorage.getItem(itemName)) {
-              accordionPanel = parseInt(window.sessionStorage.getItem(itemName));
-          }
-          $("#jqueryui-accordion").accordion({
-              heightStyle: "content",
-              activate: function(event, ui) {
-                  if (window.sessionStorage) {
-                      window.sessionStorage.setItem(itemName, $("#jqueryui-accordion").accordion("option", "active"));
-                  }
-              },
-              active: accordionPanel,
-              collapsible: true
-          });
+          $("#jqueryui-accordion").accordion({ heightStyle: "content", collapsible: true, active: 1 });
           // This is a sub-accordion inside of the About the Assessment Panel
           $("#jqueryui-accordion-metadata").accordion({ heightStyle: "content",collapsible: true,active: false });
           // This is a sub-accordion inside of the Availability and Submission Panel
           $("#jqueryui-accordion-security").accordion({ heightStyle: "content",collapsible: true,active: false });
           // adjust the height of the iframe to accomodate the expansion from the accordion
           $("body").height($("body").outerHeight() + 900);
-
-          checkNav = function() {
-              QuesFormatRadios = ["assessmentSettingsAction\\:assessmentFormat\\:0", "assessmentSettingsAction\\:assessmentFormat\\:1", "assessmentSettingsAction\\:assessmentFormat\\:2"];
-
-              enabled = true;
-              if ($("#assessmentSettingsAction\\:itemNavigation\\:0").is(":checked")) {
-                enabled = false;
-              }
-
-              if (enabled) {
-                  $('#assessmentSettingsAction\\:markForReview1').removeAttr("disabled");
-                  $('#assessmentSettingsAction\\:markForReview1').parent().removeClass("placeholder");
-                  QuesFormatRadios.forEach( function(v, i, a) {
-                      $('label[for="' + v + '"]').removeClass("placeholder");
-                      $("#" + v).removeAttr("disabled");
-                  });
-              } else {
-                  $('#assessmentSettingsAction\\:markForReview1').attr("disabled", true);
-                  $('#assessmentSettingsAction\\:markForReview1').prop("checked", false);
-                  $('#assessmentSettingsAction\\:markForReview1').parent().addClass("placeholder");
-                  QuesFormatRadios.forEach( function(v, i, a) {
-                      $('#assessmentSettingsAction\\:assessmentFormat\\:0').click();
-                      $('label[for="' + v + '"]').addClass("placeholder");
-                      $("#" + v).attr("disabled", true);
-                  });
-              }
-          };
-
-          $('#assessmentSettingsAction\\:itemNavigation\\:0').change(checkNav);
-          $('#assessmentSettingsAction\\:itemNavigation\\:1').change(checkNav);
-          checkNav();
 
           // SAM-2323 jquery-UI datepicker
           localDatePicker({
@@ -143,31 +92,11 @@
               val: '<h:outputText value="#{publishedSettings.feedbackDate}"><f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"/></h:outputText>',
               ashidden: { iso8601: 'feedbackDateISO8601' }
           });
-          localDatePicker({
-              input: '#assessmentSettingsAction\\:newEntry-start_date',
-              useTime: 1,
-              parseFormat: 'YYYY-MM-DD HH:mm:ss',
-              allowEmptyDate: true,
-              val: '<h:outputText value="#{publishedSettings.extendedTimeStartString}"/>',
-              ashidden: { iso8601: 'newEntry-start_date-iso8601' }
-          });
-          localDatePicker({
-              input: '#assessmentSettingsAction\\:newEntry-due_date',
-              useTime: 1,
-              parseFormat: 'YYYY-MM-DD HH:mm:ss',
-              allowEmptyDate: true,
-              val: '<h:outputText value="#{publishedSettings.extendedTimeDueString}"/>',
-              ashidden: { iso8601: 'newEntry-due_date-iso8601' }
-          });
-          localDatePicker({
-              input: '#assessmentSettingsAction\\:newEntry-retract_date',
-              useTime: 1,
-              parseFormat: 'YYYY-MM-DD HH:mm:ss',
-              allowEmptyDate: true,
-              val: '<h:outputText value="#{publishedSettings.extendedTimeRetractString}"/>',
-              ashidden: { iso8601: 'newEntry-retract_date-iso8601' }
-          });
 
+          // SAM-2121: Lockdown the question layout and mark for review if necessary
+          var navVal = $('#assessmentSettingsAction\\:itemNavigation input:radio:checked').val();
+          lockdownQuestionLayout(navVal);
+          lockdownMarkForReview(navVal);
           showHideReleaseGroups();
           initTimedCheckBox();
           checkUncheckTimeBox();
@@ -423,7 +352,7 @@
       </div>
     </div>
   </h:panelGroup>
-
+  
   <!-- AUTOMATIC SUBMISSION -->
   <h:panelGroup styleClass="form-group row" layout="block" rendered="#{publishedSettings.valueMap.automaticSubmission_isInstructorEditable==true}">
     <h:outputLabel styleClass="col-md-2" value="#{assessmentSettingsMessages.auto_submit}" />
@@ -529,11 +458,6 @@
 </div><!-- This is the end of the sub-accordion -->
 
 </samigo:hideDivision><!-- END the Availabity and Submissions category -->
-
-<samigo:hideDivision title="#{assessmentSettingsMessages.heading_extended_time}" >
-  <!-- Extended Time -->
-  <%@ include file="inc/publishedExtendedTime.jspf"%>
-</samigo:hideDivision>
 
 <samigo:hideDivision title="#{assessmentSettingsMessages.heading_grading_feedback}" >
 
@@ -685,7 +609,7 @@
     <h:panelGroup styleClass="form-group row" layout="block" rendered="#{publishedSettings.valueMap.itemAccessType_isInstructorEditable==true}">
       <h:outputLabel styleClass="col-md-2" for="itemNavigation" value="#{assessmentSettingsMessages.navigation}" />
       <div class="col-md-10">
-        <t:selectOneRadio id="itemNavigation" value="#{publishedSettings.itemNavigation}"  layout="spread" onclick="setBlockDivs();updateItemNavigation(true);">
+        <t:selectOneRadio id="itemNavigation" value="#{publishedSettings.itemNavigation}"  layout="spread" onclick="setBlockDivs();updateItemNavigation(true);lockdownQuestionLayout(this.value);lockdownMarkForReview(this.value);">
           <f:selectItem itemValue="1" itemLabel="#{assessmentSettingsMessages.linear_access}"/>
           <f:selectItem itemValue="2" itemLabel="#{assessmentSettingsMessages.random_access}"/>
         </t:selectOneRadio>

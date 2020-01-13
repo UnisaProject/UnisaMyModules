@@ -1,0 +1,91 @@
+##
+## Standard Header used by all portal views
+## Don't put anything before the <!DOCTYPE or it breaks IE9
+## DOCTYPE detection and puts it in quirks mode.
+##
+
+<!DOCTYPE html>
+<html lang="$!{locale}" dir="$!{dir}" class="Mrphs-html">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        #parse("/vm/morpheus/snippets/title-snippet.vm")
+
+        #parse("/vm/morpheus/snippets/portalCSS-snippet.vm")
+        
+        <link href="${pageWebjarsPath}jquery-ui/1.11.3/jquery-ui.min.css$!{portalCDNQuery}" rel="stylesheet" />  
+        <link href="${pageScriptPath}jquery/cluetip/1.2.10/css/jquery.cluetip.css$!{portalCDNQuery}" rel="stylesheet">
+        <link href="${pageScriptPath}jquery/qtip/jquery.qtip-latest.min.css$!{portalCDNQuery}" rel="stylesheet">
+        <link href="${pageWebjarsPath}pnotify/2.1.0/pnotify.core.min.css$!{portalCDNQuery}" rel="stylesheet">
+        <script src="${pageSkinRepo}/${pageSkin}/js/lib/modernizr.js$!{portalCDNQuery}"></script>
+
+        <script> ## Include this at the top so tool markup and headscripts.js can use it
+            ## SAK-16484 Allow Javascript to easily get at user details.
+            ## SAK-13987, SAK-16162, SAK-19132 - Portal Logout Timer
+            var portal = {
+                "chat": {
+                    "enabled": $!{neoChat},
+                    "pollInterval": $!{portalChatPollInterval},
+            "video" : {
+            "enabled": $!{neoChatVideo}
+            }
+                },
+                "loggedIn": $!{loggedIn},
+                "portalPath": "$!{portalPath}",
+                "loggedOutUrl": "$!{loggedOutUrl}",
+                "siteId": "$!{siteId}",
+                "siteTitle": "$!{siteTitle}",
+                "shortDescription" : "$!{shortDescription}",
+                "locale": "$!{locale}",
+                "user": {
+                    "id": "$!{userId}",
+                    "eid": "$!{userEid}"
+                },
+                "timeoutDialog" : {
+                "enabled": $!{timeoutDialogEnabled},
+                "seconds": $!{timeoutDialogWarningSeconds}
+                },
+                "toggle" : {
+                    "allowauto": false,
+                    "tools": false,
+                    "sitenav": false // This is not allowed in morpheus
+                },
+                "pageScriptPath" : "$!{pageScriptPath}",
+                "portalCDNQuery" : "$!{portalCDNQuery}"
+            };
+        </script>
+        
+        <!-- inlined tool header contribution -->
+        ## if any of the tools requested an inline render, their header content gets aggregated here
+        #foreach ( $tool in $pageColumn0Tools )
+        	#if (${tool.hasRenderResult})
+        		${tool.toolRenderResult.getHead()}
+        	#end
+        #end
+        #foreach ( $tool in $pageColumn1Tools )
+        	#if (${tool.hasRenderResult})
+        		${tool.toolRenderResult.getHead()}
+        	#end
+        #end
+        <!-- end inlined tool header contribution -->
+		
+		        <!-- 
+					To collect end-user usage analytics about your application, 
+					insert the following script into each page you want to track.
+					Place this code immediately before the closing </head> tag,
+					and before any other scripts. Your first data will appear 
+					automatically in just a few seconds.
+				-->
+<script type="text/javascript">
+  var appInsights=window.appInsights||function(a){
+    function b(a){c[a]=function(){var b=arguments;c.queue.push(function(){c[a].apply(c,b)})}}var c={config:a},d=document,e=window;setTimeout(function(){var b=d.createElement("script");b.src=a.url||"https://az416426.vo.msecnd.net/scripts/a/ai.0.js",d.getElementsByTagName("script")[0].parentNode.appendChild(b)});try{c.cookie=d.cookie}catch(a){}c.queue=[];for(var f=["Event","Exception","Metric","PageView","Trace","Dependency"];f.length;)b("track"+f.pop());if(b("setAuthenticatedUserContext"),b("clearAuthenticatedUserContext"),b("startTrackEvent"),b("stopTrackEvent"),b("startTrackPage"),b("stopTrackPage"),b("flush"),!a.disableExceptionTracking){f="onerror",b("_"+f);var g=e[f];e[f]=function(a,b,d,e,h){var i=g&&g(a,b,d,e,h);return!0!==i&&c["_"+f](a,b,d,e,h),i}}return c
+    }({
+        instrumentationKey:"84fa0e8f-0a75-4b35-9c89-e1d368d42d04"
+    });
+    
+  window.appInsights=appInsights,appInsights.queue&&0===appInsights.queue.length&&appInsights.trackPageView();
+</script>
+
+    </head>

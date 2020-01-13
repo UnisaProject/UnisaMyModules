@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.honsadmission"
+		title="Honours &amp; PGD Admission"
+		description="Honours &amp; PGD Admission">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

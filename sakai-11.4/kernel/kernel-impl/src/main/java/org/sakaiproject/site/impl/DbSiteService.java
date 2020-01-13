@@ -35,8 +35,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlReaderFinishedException;
 import org.sakaiproject.db.api.SqlService;
@@ -56,9 +56,11 @@ import org.sakaiproject.util.StringUtil;
  * DbSiteService is an extension of the BaseSiteService with a database storage.
  * </p>
  */
-@Slf4j
 public abstract class DbSiteService extends BaseSiteService
 {
+	/** Our logger. */
+	private static Logger M_log = LoggerFactory.getLogger(DbSiteService.class);
+
 	/** Table name for sites. */
 	protected String m_siteTableName = "SAKAI_SITE";
 
@@ -167,11 +169,11 @@ public abstract class DbSiteService extends BaseSiteService
 			super.init();
 			setSiteServiceSql(sqlService().getVendor());
 
-			log.info("init(): site table: " + m_siteTableName + " external locks: " + m_useExternalLocks);
+			M_log.info("init(): site table: " + m_siteTableName + " external locks: " + m_useExternalLocks);
 		}
 		catch (Exception t)
 		{
-			log.warn("init(): ", t);
+			M_log.warn("init(): ", t);
 		}
 	}
 
@@ -507,12 +509,8 @@ public abstract class DbSiteService extends BaseSiteService
 		{
 			return super.countAllResources();
 		}
-		
-		private String getSitesWhere(SelectionType type, Object ofType, String criteria, Map propertyCriteria, SortType sort){
-			return getSitesWhere(type, ofType, criteria, propertyCriteria, sort, null);
-		}
 
-		private String getSitesWhere(SelectionType type, Object ofType, String criteria, Map propertyCriteria, SortType sort, List excludedSites)
+		private String getSitesWhere(SelectionType type, Object ofType, String criteria, Map propertyCriteria, SortType sort)
 		{
 			// Note: super users are not treated any differently - they get only those sites they have permission for,
 			// not based on super user status
@@ -617,11 +615,6 @@ public abstract class DbSiteService extends BaseSiteService
 				// sort by modifiedby
 				where.append(siteServiceSql.getSitesWhere15Sql());
 			}
-			
-			if(excludedSites != null && !excludedSites.isEmpty()){
-				// exclude selected IDs
-				where.append(siteServiceSql.getSitesWhere16Sql(excludedSites.size()));
-			}
 
 			// where has a trailing 'and ' to remove
 			if ((where.length() > 5) && (where.substring(where.length() - 5).equals(" and ")))
@@ -705,7 +698,7 @@ public abstract class DbSiteService extends BaseSiteService
 		}
 
 		
-		private Object[] getSitesFields(SelectionType type, Object ofType, String criteria, Map propertyCriteria, String userId, List excludedSites)
+		private Object[] getSitesFields(SelectionType type, Object ofType, String criteria, Map propertyCriteria, String userId)
 		{
 			int fieldCount = 0;
 			if (ofType != null)
@@ -732,7 +725,6 @@ public abstract class DbSiteService extends BaseSiteService
 			if (criteria != null) fieldCount += 1;
 			if ((type == SelectionType.JOINABLE) || (type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.INACTIVE_ONLY)) fieldCount++;
 			if (propertyCriteria != null) fieldCount += (2 * propertyCriteria.size());
-			if(excludedSites != null && !excludedSites.isEmpty()) { fieldCount += excludedSites.size(); }
 			Object fields[] = null;
 			if (fieldCount > 0)
 			{
@@ -793,11 +785,6 @@ public abstract class DbSiteService extends BaseSiteService
 						fields[pos++] = "%" + value + "%";
 					}
 				}
-				if(excludedSites != null && excludedSites.size() > 0) {
-					for(Object o : excludedSites){
-						fields[pos++] = o;
-					}
-				}
 			}
 
 			return fields;
@@ -815,12 +802,6 @@ public abstract class DbSiteService extends BaseSiteService
 		{
 			// getSitesFields with null userId returns the current user's site fields
 			return getSitesFields(type, ofType, criteria, propertyCriteria, null);
-		}
-		
-		private Object[] getSitesFields(SelectionType type, Object ofType, String criteria, Map propertyCriteria, String userId)
-		{
-			// no excluded sites
-			return getSitesFields(type, ofType, criteria, propertyCriteria, userId, null);
 		}
 		
 		private String getSitesJoin(SelectionType type, SortType sort )
@@ -958,7 +939,7 @@ public abstract class DbSiteService extends BaseSiteService
 			if (numParams == 0)
 			{
 				String msg = "Attempting to build a zero-length IN() clause for " + fieldName;
-				log.warn(msg);
+				M_log.warn(msg);
 				throw new IllegalArgumentException(msg);
 			}
 			StringBuilder params = new StringBuilder(fieldName + " IN (");
@@ -982,14 +963,14 @@ public abstract class DbSiteService extends BaseSiteService
 		/**
 		 * {@inheritDoc}
 		 */
-		public List<String> getSiteIds(SelectionType type, Object ofType, String criteria, Map<String, String> propertyCriteria, List<String> excludedSites, SortType sort, PagingPosition page, String userId)
+		public List<String> getSiteIds(SelectionType type, Object ofType, String criteria, Map<String, String> propertyCriteria, SortType sort, PagingPosition page, String userId)
 		{
 			userId = getCurrentUserIdIfNull(userId);
 
 			String join = getSitesJoin( type, sort );
 			String order = getSitesOrder( sort );
-			Object[] values = getSitesFields( type, ofType, criteria, propertyCriteria, userId, excludedSites );
-			String where = getSitesWhere(type, ofType, criteria, propertyCriteria, sort, excludedSites);
+			Object[] values = getSitesFields( type, ofType, criteria, propertyCriteria, userId );
+			String where = getSitesWhere(type, ofType, criteria, propertyCriteria, sort);
 
 			String sql;
 			if (page != null)
@@ -1016,24 +997,6 @@ public abstract class DbSiteService extends BaseSiteService
 		{
 			// getSiteIds with userId returns the current user's site Ids
 			return getSiteIds(type, ofType, criteria, propertyCriteria, sort, page, null);
-		}
-		
-		/**
-		 * {@inheritDoc}
-		 */
-		private List<String> getSiteIds(SelectionType type, Object ofType, String criteria, Map<String, String> propertyCriteria, SortType sort, PagingPosition page, String userId)
-		{
-			// no excluded sites
-			return getSiteIds(type, ofType, criteria, propertyCriteria, null, sort, page, userId);
-		}
-		
-		/**
-		 * {@inheritDoc}
-		 */
-		private List<String> getSiteIds(SelectionType type, Object ofType, String criteria, Map<String, String> propertyCriteria, List<String> excludedSites, SortType sort, PagingPosition page)
-		{
-			// no excluded sites
-			return getSiteIds(type, ofType, criteria, propertyCriteria, excludedSites, sort, page, null);
 		}
 
 		/**
@@ -1088,10 +1051,10 @@ public abstract class DbSiteService extends BaseSiteService
 		 * @inheritDoc
 		 */
 		@SuppressWarnings("unchecked")
-		public List getSites(SelectionType type, Object ofType, String criteria, Map propertyCriteria,  List excludedSites, SortType sort, PagingPosition page, boolean requireDescription, String userId)
+		public List getSites(SelectionType type, Object ofType, String criteria, Map propertyCriteria, SortType sort, PagingPosition page, boolean requireDescription, String userId)
 		{
 			userId = getCurrentUserIdIfNull(userId);
-			List<String> siteIds = getSiteIds(type, ofType, criteria, propertyCriteria, excludedSites, sort, page, userId);
+			List<String> siteIds = getSiteIds(type, ofType, criteria, propertyCriteria, sort, page, userId);
 			LinkedHashMap<String, Site> siteMap = getOrderedSiteMap(siteIds, requireDescription);
 
 			SqlReader reader = requireDescription ? fullSiteReader : lightSiteReader;
@@ -1145,26 +1108,6 @@ public abstract class DbSiteService extends BaseSiteService
 		{
 			// getSites with null userId returns the current user's sites
 			return getSites(type, ofType, criteria, propertyCriteria, sort, page, requireDescription, null);
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		@SuppressWarnings("unchecked")
-		public List getSites(SelectionType type, Object ofType, String criteria, Map propertyCriteria, SortType sort, PagingPosition page, boolean requireDescription, String userId) 
-		{
-			// no excluded sites
-			return getSites(type, ofType, criteria, propertyCriteria, null, sort, page, requireDescription, userId);
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		@SuppressWarnings("unchecked")
-		public List getSites(SelectionType type, Object ofType, String criteria, Map propertyCriteria, List excludedSites, SortType sort, PagingPosition page, boolean requireDescription)
-		{
-			// getSites with null userId returns the current user's sites
-			return getSites(type, ofType, criteria, propertyCriteria, excludedSites, sort, page, requireDescription, null);
 		}
 		
 		/**
@@ -1223,7 +1166,7 @@ public abstract class DbSiteService extends BaseSiteService
 					}
 					catch (SQLException e)
 					{
-						log.warn("getSiteSkin: " + siteId + " : " + e);
+						M_log.warn("getSiteSkin: " + siteId + " : " + e);
 						return null;
 					}
 				}
@@ -1479,7 +1422,7 @@ public abstract class DbSiteService extends BaseSiteService
 					}
 					catch (SQLException e)
 					{
-						log.warn("findTool: " + id + " : " + e);
+						M_log.warn("findTool: " + id + " : " + e);
 						return null;
 					}
 				}
@@ -1487,7 +1430,7 @@ public abstract class DbSiteService extends BaseSiteService
 
 			if (found.size() > 1)
 			{
-				log.warn("findTool: multiple results for tool id: " + id);
+				M_log.warn("findTool: multiple results for tool id: " + id);
 			}
 
 			ToolConfiguration rv = null;
@@ -1534,7 +1477,7 @@ public abstract class DbSiteService extends BaseSiteService
 					}
 					catch (SQLException e)
 					{
-						log.warn("findPage: " + id + " : " + e);
+						M_log.warn("findPage: " + id + " : " + e);
 						return null;
 					}
 				}
@@ -1542,7 +1485,7 @@ public abstract class DbSiteService extends BaseSiteService
 
 			if (found.size() > 1)
 			{
-				log.warn("findPage: multiple results for page id: " + id);
+				M_log.warn("findPage: multiple results for page id: " + id);
 			}
 
 			SitePage rv = null;
@@ -1571,7 +1514,7 @@ public abstract class DbSiteService extends BaseSiteService
 
 			if (found.size() > 1)
 			{
-				log.warn("findPageSiteId: multiple results for page id: " + id);
+				M_log.warn("findPageSiteId: multiple results for page id: " + id);
 			}
 
 			String rv = null;
@@ -1596,7 +1539,7 @@ public abstract class DbSiteService extends BaseSiteService
 
 			if (found.size() > 1)
 			{
-				log.warn("findGroupSiteId: multiple results for page id: " + id);
+				M_log.warn("findGroupSiteId: multiple results for page id: " + id);
 			}
 
 			String rv = null;
@@ -1625,7 +1568,7 @@ public abstract class DbSiteService extends BaseSiteService
 
 			if (found.size() > 1)
 			{
-				log.warn("findToolSiteId: multiple results for page id: " + id);
+				M_log.warn("findToolSiteId: multiple results for page id: " + id);
 			}
 
 			String rv = null;
@@ -1699,7 +1642,7 @@ public abstract class DbSiteService extends BaseSiteService
 						}
 						else
 						{
-							log.warn("setSiteSecurity: invalid permission " + permission + " site: " + siteId + " user: " + userId);
+							M_log.warn("setSiteSecurity: invalid permission " + permission + " site: " + siteId + " user: " + userId);
 						}
 					}
 					catch (Exception ignore)
@@ -1876,7 +1819,7 @@ public abstract class DbSiteService extends BaseSiteService
 						}
 						else
 						{
-							log.warn("setUserSecurity: invalid permission " + permission + " site: " + siteId + " user: " + userId);
+							M_log.warn("setUserSecurity: invalid permission " + permission + " site: " + siteId + " user: " + userId);
 						}
 					}
 					catch (Exception ignore)
@@ -2095,7 +2038,7 @@ public abstract class DbSiteService extends BaseSiteService
 						String name = result.getString(2);
 						String value = result.getString(3);
 						if (pageId == null) {
-							log.warn("query returned a null pageid for site: " + site.getId() + " probably a orphaned DB record");
+							M_log.warn("query returned a null pageid for site: " + site.getId() + " probably a orphaned DB record");
 							return null;
 						}
 						
@@ -2111,7 +2054,7 @@ public abstract class DbSiteService extends BaseSiteService
 					}
 					catch (SQLException e)
 					{
-						log.warn("readSitePageProperties: " + e);
+						M_log.warn("readSitePageProperties: " + e);
 						return null;
 					}
 				}
@@ -2154,7 +2097,7 @@ public abstract class DbSiteService extends BaseSiteService
 					}
 					catch (SQLException e)
 					{
-						log.warn("readSitePageProperties: " + e);
+						M_log.warn("readSitePageProperties: " + e);
 						return null;
 					}
 				}
@@ -2197,7 +2140,7 @@ public abstract class DbSiteService extends BaseSiteService
 					}
 					catch (SQLException e)
 					{
-						log.warn("readSiteGroupProperties: " + e);
+						M_log.warn("readSiteGroupProperties: " + e);
 						return null;
 					}
 				}
@@ -2407,7 +2350,7 @@ public abstract class DbSiteService extends BaseSiteService
 					}
 					catch (SQLException e)
 					{
-						log.warn("readSiteGroups: " + site.getId() + " : " + e);
+						M_log.warn("readSiteGroups: " + site.getId() + " : " + e);
 						return null;
 					}
 				}
@@ -2520,7 +2463,7 @@ public abstract class DbSiteService extends BaseSiteService
 			}
 			catch (SQLException e)
 			{
-				log.warn("getSites, ID retrieval: " + e);
+				M_log.warn("getSites, ID retrieval: " + e);
 				return null;
 			}
 		}
@@ -2600,7 +2543,7 @@ public abstract class DbSiteService extends BaseSiteService
 			}
 			catch (SQLException e)
 			{
-				log.warn("readSqlResultRecord: " + e);
+				M_log.warn("readSqlResultRecord: " + e);
 				return null;
 			}
 		}

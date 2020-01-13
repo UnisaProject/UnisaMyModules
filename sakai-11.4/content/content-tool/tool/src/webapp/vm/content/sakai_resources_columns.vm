@@ -56,14 +56,12 @@
 								<td #if($root.isSelected())bgcolor="yellow"#end onclick="selectItem('$root.id');" valign="top" title="$item.hoverText">
 									#if("$selectedItemId" == "$root.id")
 										<a href="$root.accessUrl" target="_blank">
-											<span class="$root.iconClass" aria-hidden="true"></span>
-											<span class="sr-only">$!root.label</span>
+											<img src="#imageLink($root.iconLocation)" alt="$root.label" />
 											&nbsp;
 											$root.name
 										</a>
 									#else
-										<span class="$root.iconClass" aria-hidden="true"></span>
-										<span class="sr-only">$!root.label</span>
+										<img src="#imageLink($root.iconLocation)" alt="$root.label" />
 										&nbsp;
 										$root.name
 									#end
@@ -86,14 +84,12 @@
 													<td #if($item.isSelected())bgcolor="yellow"#end onclick="selectItem('$item.id');" valign="top" title="$item.hoverText">
 														#if("$selectedItemId" == "$item.id")
 															<a href="$item.accessUrl" target="_blank">
-																<span class="$item.iconClass" aria-hidden="true"></span>
-																<span class="sr-only">$!item.label</span>
+																<img src="#imageLink($item.iconLocation)" alt="$item.label" />
 																&nbsp;
 																$item.name
 															</a>
 														#else
-															<span class="$item.iconClass" aria-hidden="true"></span>
-															<span class="sr-only">$!item.label</span>
+															<img src="#imageLink($item.iconLocation)" alt="$item.label" />
 															&nbsp;
 															$item.name
 														#end

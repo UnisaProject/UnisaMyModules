@@ -42,12 +42,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osid.OsidContext;
 import org.osid.OsidException;
 import org.osid.repository.Asset;
@@ -60,14 +56,6 @@ import org.osid.shared.ObjectIterator;
 import org.osid.shared.SharedException;
 import org.osid.shared.Type;
 import org.osid.shared.TypeIterator;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-
-import edu.indiana.lib.twinpeaks.util.SessionContext;
-
 import org.sakaibrary.xserver.session.MetasearchSessionManager;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityAdvisor.SecurityAdvice;
@@ -88,6 +76,7 @@ import org.sakaiproject.citation.api.SearchManager;
 import org.sakaiproject.citation.cover.CitationService;
 import org.sakaiproject.citation.util.api.SearchException;
 import org.sakaiproject.component.api.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.content.cover.ContentHostingService;
 import org.sakaiproject.entity.api.Entity;
@@ -104,10 +93,20 @@ import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.time.cover.TimeService;
 import org.sakaiproject.tool.api.SessionManager;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import edu.indiana.lib.twinpeaks.util.SessionContext;
+
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+
 /**
  *
  */
-@Slf4j
 public class BaseSearchManager implements SearchManager, Observer
 {
   /**
@@ -338,11 +337,11 @@ public class BaseSearchManager implements SearchManager, Observer
           /*
            * Determine the proper the "last page" setting.
            */
-          log.debug(">>> viewPage() new page is " + page
+          m_log.debug(">>> viewPage() new page is " + page
                   +   ", last page is " + m_lastPageViewed);
-          log.debug(">>> viewPage() was a search done? " + searchPerformed);
-          log.debug(">>> viewPage() did we find the last page? " + this.isLastPage());
-          log.debug(">>> viewPage() records found = " + getNumRecordsFetched()
+          m_log.debug(">>> viewPage() was a search done? " + searchPerformed);
+          m_log.debug(">>> viewPage() did we find the last page? " + this.isLastPage());
+          m_log.debug(">>> viewPage() records found = " + getNumRecordsFetched()
                   +   ", records rendered = " + m_pageOrder.size());
           /*
            * Step 1: Previous pages (and the first) are a special case
@@ -375,14 +374,14 @@ public class BaseSearchManager implements SearchManager, Observer
              *    o The number of results actually rendered is less than the
              *      current page size (we ran out)
              */
-         		log.debug(">>> viewPage() estimate ("
+         		m_log.debug(">>> viewPage() estimate ("
          		        +   estimatedHits
          		        +   ") <= page size (in hits) ("
          		        +   pageHits
          		        +   ") ? "
          		        +   (estimatedHits <= pageHits));
 
-         		log.debug(">>> viewPage() records rendered ("
+         		m_log.debug(">>> viewPage() records rendered ("
          		        +   hitsRendered
          		        +   ") < page size (in hits) ("
          		        +   pageHits
@@ -411,7 +410,7 @@ public class BaseSearchManager implements SearchManager, Observer
                 }
                 catch (IdUnusedException e)
                 {
-	                log.warn("BasicSearch.getPage() unable to retrieve ciataion: " + id);
+	                m_log.warn("BasicSearch.getPage() unable to retrieve ciataion: " + id);
                 }
         	}
         	m_lastPageViewed = page;
@@ -1040,7 +1039,7 @@ public class BaseSearchManager implements SearchManager, Observer
 				}
 				else
 				{
-					log.warn( "BasicSearchCategory.addSubCategory() was " +
+					m_log.warn( "BasicSearchCategory.addSubCategory() was " +
 							"passed a null subcategory to add" );
 				}
 			}
@@ -1057,7 +1056,7 @@ public class BaseSearchManager implements SearchManager, Observer
 				}
 				else
 				{
-					log.warn( "BasicSearchCategory.addDatabase() was " +
+					m_log.warn( "BasicSearchCategory.addDatabase() was " +
 							"passed a null databaseId to add" );
 				}
 			}
@@ -1086,7 +1085,7 @@ public class BaseSearchManager implements SearchManager, Observer
 				}
 				else
 				{
-					log.warn( "BasicSearchCategory.addRecommendedDatabase()" +
+					m_log.warn( "BasicSearchCategory.addRecommendedDatabase()" +
 							" was passed a null databaseId to add" );
 				}
 			}
@@ -1110,7 +1109,7 @@ public class BaseSearchManager implements SearchManager, Observer
 				}
 				else
 				{
-					log.warn( "BasicSearchCategory.addAlternateDatabase() " +
+					m_log.warn( "BasicSearchCategory.addAlternateDatabase() " +
 							"was passed a null SearchDatabase to add" );
 				}
 			}
@@ -1142,7 +1141,7 @@ public class BaseSearchManager implements SearchManager, Observer
 				// make sure this category has databases in it
 				if( !hasDatabases() )
 				{
-					log.warn( "Search Library Resources Category: '" +
+					m_log.warn( "Search Library Resources Category: '" +
 							displayName + "' contains no databases." );
 				}
 				else
@@ -1168,7 +1167,7 @@ public class BaseSearchManager implements SearchManager, Observer
 						if( database == null )
 						{
 							// database not found
-							log.warn( "Unidentified Search Libary Resources " +
+							m_log.warn( "Unidentified Search Libary Resources " +
 									"database: '" + databaseId +
 									"' in category: " + displayName );
 						}
@@ -1267,7 +1266,7 @@ public class BaseSearchManager implements SearchManager, Observer
 				}
 				else
 				{
-					log.warn( "BasicSearchDatabase.addGroup() " +
+					m_log.warn( "BasicSearchDatabase.addGroup() " +
 							"was passed a null groupId to add" );
 				}
 			}
@@ -1333,7 +1332,7 @@ public class BaseSearchManager implements SearchManager, Observer
 			// get a ConfigurationService instance
 			if( m_configService == null )
 			{
-				log.warn( "BasicSearchDatabaseHierarchy() m_configService is " +
+				m_log.warn( "BasicSearchDatabaseHierarchy() m_configService is " +
 						"null - components.xml injection did not work... getting instance from cover" );
 				m_configService = org.sakaiproject.citation.cover.ConfigurationService.getInstance();
 			}
@@ -1389,7 +1388,7 @@ public class BaseSearchManager implements SearchManager, Observer
 			}
 			catch (Exception exception)
 			{
-				log.warn("Exception seen in BasicSearchDatabaseHierarchy() constructor", exception);
+				m_log.warn("Exception seen in BasicSearchDatabaseHierarchy() constructor", exception);
 			}
   }
 
@@ -1403,7 +1402,7 @@ public class BaseSearchManager implements SearchManager, Observer
 	            // Parse the input
 	            SAXParser saxParser = factory.newSAXParser();
 	            saxParser.parse( source, this );
-              log.debug("After parse, categories found = " + categoryMap.size());
+              m_log.debug("After parse, categories found = " + categoryMap.size());
 	            isConfigured = (this.categoryMap.size() > 0) ? true : false;
 	        } catch (SAXParseException spe) {
 	            // Use the contained exception, if any
@@ -1414,7 +1413,7 @@ public class BaseSearchManager implements SearchManager, Observer
 	            }
 
 	            // Error generated by the parser
-	        	log.warn("parseXML() parsing exception: " +
+	        	m_log.warn("parseXML() parsing exception: " +
 	        			spe.getMessage() + " - xml line " + spe.getLineNumber()
 	        			+ ", uri " + spe.getSystemId(), x);
 
@@ -1429,25 +1428,25 @@ public class BaseSearchManager implements SearchManager, Observer
 	                x = sxe.getException();
 	            }
 
-	            log.warn( "parseXML() SAX exception: " +
+	            m_log.warn( "parseXML() SAX exception: " +
 	            		sxe.getMessage(), x );
 	            // unset configuration flag
 	        	isConfigured = false;
 	        } catch (ParserConfigurationException pce) {
 	            // Parser with specified options can't be built
-	        	log.warn( "parseXML() SAX parser cannot be built " +
+	        	m_log.warn( "parseXML() SAX parser cannot be built " +
 	        			"with specified options" );
 
 	        	// unset configuration flag
 	        	isConfigured = false;
 	        } catch (IOException ioe) {
 	            // I/O error
-	        	log.warn( "parseXML() IO exception", ioe );
+	        	m_log.warn( "parseXML() IO exception", ioe );
 
 	        	// unset configuration flag
 	        	isConfigured = false;
 	        } catch (Throwable t) {
-	        	log.warn( "parseXML() exception", t );
+	        	m_log.warn( "parseXML() exception", t );
 
 	        	// unset configuration flag
 	        	isConfigured = false;
@@ -1462,7 +1461,7 @@ public class BaseSearchManager implements SearchManager, Observer
 			}
 			else
 			{
-				log.warn( "BasicSearchDatabaseHierarchy.setDefaultCategory()"+
+				m_log.warn( "BasicSearchDatabaseHierarchy.setDefaultCategory()"+
 						" was passed a null SearchCategory to set" );
 			}
 		}
@@ -1481,7 +1480,7 @@ public class BaseSearchManager implements SearchManager, Observer
 			}
 			else
 			{
-				log.warn( "BasicSearchDatabaseHierarchy.addTopLevelCategory()"+
+				m_log.warn( "BasicSearchDatabaseHierarchy.addTopLevelCategory()"+
 						" was passed a null SearchCategory to add" );
 			}
 		}
@@ -1722,7 +1721,7 @@ public class BaseSearchManager implements SearchManager, Observer
 		{
 		  int number = m_configService.getSiteConfigMaximumSearchableDBs();
 
-		  log.debug("getNumMaxSearchableDb() returns " + number);
+		  m_log.debug("getNumMaxSearchableDb() returns " + number);
 			return number;
 		}
 
@@ -1774,7 +1773,7 @@ public class BaseSearchManager implements SearchManager, Observer
 				RepositoryIterator rit = null;
 				if( repositoryManager == null )
 				{
-					log.warn( "getRepository() failed getting RepositoryManager from SakaiOsidLoader" );
+					m_log.warn( "getRepository() failed getting RepositoryManager from SakaiOsidLoader" );
 				}
 				else
 				{
@@ -1784,7 +1783,7 @@ public class BaseSearchManager implements SearchManager, Observer
 				// get repositories of type sakaibrary/repository/metasearch
 				if( rit == null )
 				{
-					log.warn( "getRepository() failed getting RepositoryIterator of type sakaibrary/repository/metasearch from RepositoryManager" );
+					m_log.warn( "getRepository() failed getting RepositoryIterator of type sakaibrary/repository/metasearch from RepositoryManager" );
 					return null;
 				}
 				else
@@ -1797,7 +1796,7 @@ public class BaseSearchManager implements SearchManager, Observer
 					{
 						while (repository != null)
 						{
-							log.debug("Matching Repositories? "
+							m_log.debug("Matching Repositories? "
 									+ repository.getId().getIdString()
 									+ " VS "
 									+ extendedId);
@@ -1813,12 +1812,12 @@ public class BaseSearchManager implements SearchManager, Observer
 
 				if( repository == null )
 				{
-					log.warn( "getRepository() failed getting repository from RepositoryIterator" );
+					m_log.warn( "getRepository() failed getting repository from RepositoryIterator" );
 				}
 			}
 			catch( OsidException oe )
 			{
-				log.warn( "getRepository threw OsidException: ", oe );
+				m_log.warn( "getRepository threw OsidException: ", oe );
 			}
 
 			return repository;
@@ -1843,6 +1842,9 @@ public class BaseSearchManager implements SearchManager, Observer
 		}
 
 	}  // public class BasicSearchDatabaseHierarchy
+
+	/** Our logger. */
+	private static Logger m_log = LoggerFactory.getLogger(BaseSearchManager.class);
 
 	// our ConfigurationService (gets set in BaseSearchDatabaseHierarchy)
 
@@ -1896,7 +1898,7 @@ public class BaseSearchManager implements SearchManager, Observer
 
 	public void destroy()
 	{
-		log.info("BaseSearchManager.destroy()");
+		m_log.info("BaseSearchManager.destroy()");
 	}
 
 	/* (non-Javadoc)
@@ -1938,12 +1940,12 @@ public class BaseSearchManager implements SearchManager, Observer
 					                          ? citation.getPrimaryUrl()
 					                          : citation.getOpenurlParameters();
 
-			    log.debug("DUP CHECK: " + dupCheckCriteria);
+			    m_log.debug("DUP CHECK: " + dupCheckCriteria);
 
 					if (((BasicSearch) search).isDuplicateCheckEnabled() &&
 					      duplicateCheck.contains(dupCheckCriteria))
 					{
- 					  log.debug("Duplicate #" + (duplicateCount + 1) + " found");
+ 					  m_log.debug("Duplicate #" + (duplicateCount + 1) + " found");
 					  if (duplicateCount++ >= MAX_DUPLICATES)
 					  {
 					    ((BasicSearch) search).setDuplicateCheckEnabled(false);
@@ -1975,7 +1977,7 @@ public class BaseSearchManager implements SearchManager, Observer
 						// optionally check searchStatus Properties for further details or information to present in UI
 						search.setLastPage(true);
 
-						log.warn("doNextPage -- RepositoryException nextAsset(): " + re.getMessage());
+						m_log.warn("doNextPage -- RepositoryException nextAsset(): " + re.getMessage());
 
 						String message = getSearchStatusMessage(repository);
 						if(message == null)
@@ -1996,7 +1998,7 @@ public class BaseSearchManager implements SearchManager, Observer
 						{
 							search.setLastPage(true);
 
-							log.warn("doNextPage -- InterruptedException nextAsset(): ", ie);
+							m_log.warn("doNextPage -- InterruptedException nextAsset(): ", ie);
 
     						String message = getSearchStatusMessage(repository);
 
@@ -2017,7 +2019,7 @@ public class BaseSearchManager implements SearchManager, Observer
 
 				// search is over, all assets that have been retrieved have been
 				// optionally check searchStatus Properties for further details or information to present in UI
-				log.warn("doNextPage -- RepositoryException hasNextAsset(): " + re.getMessage());
+				m_log.warn("doNextPage -- RepositoryException hasNextAsset(): " + re.getMessage());
 
 				String message = getSearchStatusMessage(repository);
 
@@ -2130,7 +2132,7 @@ public class BaseSearchManager implements SearchManager, Observer
 			// get search criteria in CQL
 			cqlQuery = cqlSearch.getCQLSearchQueryString( search.getAdvancedQuery() );
 		}
-		log.debug( "CQL query: " + cqlQuery );
+		m_log.debug( "CQL query: " + cqlQuery );
 
 		// initiate the search
 		try
@@ -2201,12 +2203,12 @@ public class BaseSearchManager implements SearchManager, Observer
 		    		  	                          ? citation.getPrimaryUrl()
 				    	                            : citation.getOpenurlParameters();
 
-					    log.debug("DUP CHECK: " + dupCheckCriteria);
+					    m_log.debug("DUP CHECK: " + dupCheckCriteria);
 
 	    				if (((BasicSearch) search).isDuplicateCheckEnabled() &&
 	    						duplicateCheck.contains(dupCheckCriteria))
 	    				{
-	    					log.debug("Duplicate #" + (duplicateCount + 1) + " found");
+	    					m_log.debug("Duplicate #" + (duplicateCount + 1) + " found");
 	    					if (duplicateCount++ >= MAX_DUPLICATES)
 	    					{
 	    						((BasicSearch) search).setDuplicateCheckEnabled(false);
@@ -2247,7 +2249,7 @@ public class BaseSearchManager implements SearchManager, Observer
 
 	    					String message = getSearchStatusMessage(repository);
 
-	    					log.warn("doSearch -- RepositoryException nextAsset(): " + re.getMessage());
+	    					m_log.warn("doSearch -- RepositoryException nextAsset(): " + re.getMessage());
 	    					throw new SearchException( message );
 	    				}
 	    				else if( re.getMessage().equals( ASSET_NOT_FETCHED ) )
@@ -2279,7 +2281,7 @@ public class BaseSearchManager implements SearchManager, Observer
 	    			// optionally check searchStatus Properties for further details or information to present in UI
 	    			String message = getSearchStatusMessage(repository);
 
-	    			log.warn("doSearch -- RepositoryException hasNextAsset(): " + re.getMessage());
+	    			m_log.warn("doSearch -- RepositoryException hasNextAsset(): " + re.getMessage());
 	    			throw new SearchException( message );
 	    		}
 	    	}
@@ -2337,7 +2339,7 @@ public class BaseSearchManager implements SearchManager, Observer
 	    }
 	    catch( RepositoryException re )
 		{
-			log.warn("doSearch -- RepositoryException: " + re.getMessage());
+			m_log.warn("doSearch -- RepositoryException: " + re.getMessage());
 			throw new SearchException( re.getMessage() );
 		}
 	}
@@ -2353,7 +2355,7 @@ public class BaseSearchManager implements SearchManager, Observer
 		String sessionId = m_sessionManager.getCurrentSession().getId();
 		long number = m_generator.nextLong();
 		String hexString = Long.toHexString(number);
-		log.debug("getSearchId:  " + sessionId + hexString);
+		m_log.debug("getSearchId:  " + sessionId + hexString);
 		return sessionId + hexString;
 
 		 *************************************************************************/
@@ -2383,7 +2385,7 @@ public class BaseSearchManager implements SearchManager, Observer
 		}
 		catch( OsidException oe )
 		{
-			log.warn("getPropertyType -- OsidException: " + oe.getMessage());
+			m_log.warn("getPropertyType -- OsidException: " + oe.getMessage());
 			throw new SearchException( "ERROR in getting search types: " + oe.getMessage() );
 		}
 
@@ -2409,7 +2411,7 @@ public class BaseSearchManager implements SearchManager, Observer
 		}
 		catch( OsidException oe )
 		{
-			log.warn("getCategoryType -- OsidException: ", oe);
+			m_log.warn("getCategoryType -- OsidException: ", oe);
 			throw new SearchException( "ERROR in getting category type: " + oe.getMessage() );
 		}
 
@@ -2435,7 +2437,7 @@ public class BaseSearchManager implements SearchManager, Observer
 		}
 		catch( OsidException oe )
 		{
-			log.warn("getSearchType -- OsidException: ", oe);
+			m_log.warn("getSearchType -- OsidException: ", oe);
 			throw new SearchException( "ERROR in getting search types: " + oe.getMessage() );
 		}
 
@@ -2456,12 +2458,12 @@ public class BaseSearchManager implements SearchManager, Observer
 		catch(RepositoryException e)
 		{
 			// let the message remain null but log this exception
-			log.warn("getSearchStatusMessage RepositoryException getting properties " + e.getMessage());
+			m_log.warn("getSearchStatusMessage RepositoryException getting properties " + e.getMessage());
 		}
 		catch(SharedException e)
 		{
 			// let the message remain null but log this exception
-			log.warn("getSearchStatusMessage SharedException getting property " + e.getMessage());
+			m_log.warn("getSearchStatusMessage SharedException getting property " + e.getMessage());
 		}
 
 		return message;
@@ -2479,7 +2481,7 @@ public class BaseSearchManager implements SearchManager, Observer
 		MetasearchSessionManager.setCache(metasearchSessionManagerCache);
 
 
-		log.info("BaseSearchManager.init()");
+		m_log.info("BaseSearchManager.init()");
 
 		EventTrackingService.addObserver(this);
 
@@ -2527,7 +2529,7 @@ public class BaseSearchManager implements SearchManager, Observer
           /*
            * Look up the requested hierarchy
            */
-          log.debug("Looking for hierarchy: " + hierarchyRef);
+          m_log.debug("Looking for hierarchy: " + hierarchyRef);
           synchronized (this)
           {
     	    	if ((xmlContent = this.hierarchyMap.get(hierarchyRef)) == null)
@@ -2544,7 +2546,7 @@ public class BaseSearchManager implements SearchManager, Observer
       }
       catch (OsidConfigurationException exception)
       {
-        log.warn("Failed to get configuration details: " + exception);
+        m_log.warn("Failed to get configuration details: " + exception);
       }
      	return null;
     }
@@ -2562,7 +2564,7 @@ public class BaseSearchManager implements SearchManager, Observer
     }
     catch (Exception exception)
     {
-      log.warn("Failed to load "
+      m_log.warn("Failed to load "
               +  databaseXmlReference
               +  " (no changes made): "
               +  exception);
@@ -2617,7 +2619,7 @@ public class BaseSearchManager implements SearchManager, Observer
 		}
 		catch( Exception e )
 		{
-			log.warn( "getGoogleScholarUrl encoding failed", e );
+			m_log.warn( "getGoogleScholarUrl encoding failed", e );
 			return null;
 		}
     }
@@ -2687,7 +2689,7 @@ public class BaseSearchManager implements SearchManager, Observer
           {
     	    	if (this.updatableResources.contains(refstr))
     	    	{
-              log.debug("Updating configuration from " + refstr);
+              m_log.debug("Updating configuration from " + refstr);
     	    		this.updateHierarchy(refstr);
     	    	}
           }
@@ -2758,7 +2760,7 @@ public class BaseSearchManager implements SearchManager, Observer
 			content = getResourceContent(resource);
 		}
 	} catch(Exception e) {
-		log.warn("getReourceContent() " + e);
+		m_log.warn("getReourceContent() " + e);
 	} finally {
 		if(pushed != null) {
 			boolean found = false;

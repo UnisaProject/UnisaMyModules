@@ -381,7 +381,6 @@ function dropScoresAdjust() {
         var pointValue =  getTheElement(formName + ":categoriesTable:" + i + ":pointValue");
         var relativeWeight =  getTheElement(formName + ":categoriesTable:" + i + ":relativeWeight");
         var pointValueLabelAsterisk = getTheElement(formName + ":categoriesTable:" + i + ":pointValueLabelAsterisk");
-        var relativeWeightLabelAsterisk = getTheElement(formName + ":categoriesTable:" + i + ":relativeWeightLabelAsterisk");
         
         var dropHighestEnabled = true;
         var dropLowestEnabled = true;
@@ -439,8 +438,8 @@ function dropScoresAdjust() {
                 }
                 if(relativeWeight !== undefined) {
                     relativeWeight.disabled = true;
-                    if(relativeWeightLabelAsterisk !== undefined) {
-                        relativeWeightLabelAsterisk.style.visibility="hidden";
+                    if(pointValueLabelAsterisk !== undefined) {
+                        pointValueLabelAsterisk.style.visibility="hidden";
                     }
                 }
                 
@@ -470,8 +469,8 @@ function dropScoresAdjust() {
                 }
                 if(relativeWeight !== undefined) {
                     relativeWeight.disabled = false;
-                    if(relativeWeightLabelAsterisk !== undefined) {
-                        relativeWeightLabelAsterisk.style.visibility="visible";
+                    if(pointValueLabelAsterisk !== undefined) {
+                        pointValueLabelAsterisk.style.visibility="visible";
                     }
                 }
             } else {
@@ -483,8 +482,8 @@ function dropScoresAdjust() {
                 }
                 if(relativeWeight !== undefined) {
                     relativeWeight.disabled = true;
-                    if(relativeWeightLabelAsterisk !== undefined) {
-                        relativeWeightLabelAsterisk.style.visibility="hidden";
+                    if(pointValueLabelAsterisk !== undefined) {
+                        pointValueLabelAsterisk.style.visibility="hidden";
                     }
                 }
             }

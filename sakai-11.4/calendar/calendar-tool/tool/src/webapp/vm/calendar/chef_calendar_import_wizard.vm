@@ -4,7 +4,6 @@
   focus_path = [ "textfield" ];
 </script>
 <div class="portletBody"> 
-	#if($menu)#toolbar($menu)#end
 	<h3>
 		$tlang.getString("java.importcal")
 	</h3>
@@ -95,7 +94,7 @@
 					<td nowrap="nowrap" >$impEvent.getDisplayStartDate()</td>
 					<td nowrap="nowrap" >
 						<label for="eventSelected$impEvent.getLineNumber()">
-							<span class="icon $eventIconMap.get($impEvent.getType())" title="$localizedEventTypes.get($impEvent.getType())"></span>
+							#iconImage( $impEvent.getType() )
 							&nbsp;$validator.escapeHtml($impEvent.getDisplayName())&nbsp;
 							($impEvent.getDisplayStartTime()&nbsp;-&nbsp;$impEvent.getDisplayEndTime())
 						</label>

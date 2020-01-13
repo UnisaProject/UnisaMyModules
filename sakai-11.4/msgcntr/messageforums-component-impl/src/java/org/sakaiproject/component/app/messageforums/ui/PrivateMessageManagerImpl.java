@@ -20,6 +20,7 @@
  **********************************************************************************/
 package org.sakaiproject.component.app.messageforums.ui;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -32,15 +33,13 @@ import java.util.Map.Entry;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.hibernate.Hibernate;
+import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
-import org.hibernate.type.LongType;
-import org.hibernate.type.StringType;
-import org.springframework.orm.hibernate4.HibernateCallback;
-import org.springframework.orm.hibernate4.HibernateOptimisticLockingFailureException;
-import org.springframework.orm.hibernate4.support.HibernateDaoSupport;
-
+import org.hibernate.Session;
 import org.sakaiproject.api.app.messageforums.Area;
 import org.sakaiproject.api.app.messageforums.AreaManager;
 import org.sakaiproject.api.app.messageforums.Attachment;
@@ -59,7 +58,7 @@ import org.sakaiproject.api.app.messageforums.Topic;
 import org.sakaiproject.api.app.messageforums.UniqueArrayList;
 import org.sakaiproject.api.app.messageforums.cover.SynopticMsgcntrManagerCover;
 import org.sakaiproject.api.app.messageforums.ui.PrivateMessageManager;
-import org.sakaiproject.authz.api.SecurityService;
+import org.sakaiproject.authz.cover.SecurityService;
 import org.sakaiproject.component.app.messageforums.TestUtil;
 import org.sakaiproject.component.app.messageforums.dao.hibernate.PrivateMessageImpl;
 import org.sakaiproject.component.app.messageforums.dao.hibernate.PrivateMessageRecipientImpl;
@@ -67,21 +66,27 @@ import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.email.api.EmailService;
-import org.sakaiproject.event.api.EventTrackingService;
+import org.sakaiproject.event.cover.EventTrackingService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.id.api.IdManager;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.ToolConfiguration;
-import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolSession;
-import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.user.api.User;
-import org.sakaiproject.user.api.UserDirectoryService;
+import org.sakaiproject.user.cover.UserDirectoryService;
 import org.sakaiproject.util.ResourceLoader;
+import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
-@Slf4j
-public class PrivateMessageManagerImpl extends HibernateDaoSupport implements PrivateMessageManager {
+public class PrivateMessageManagerImpl extends HibernateDaoSupport implements
+    PrivateMessageManager
+{
+
+  private static final Logger LOG = LoggerFactory.getLogger(PrivateMessageManagerImpl.class);
 
   private static final String QUERY_AGGREGATE_COUNT = "findAggregatePvtMsgCntForUserInContext";  
   private static final String QUERY_MESSAGES_BY_USER_TYPE_AND_CONTEXT = "findPrvtMsgsByUserTypeContext";
@@ -97,11 +102,7 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
   private SessionManager sessionManager;  
   private EmailService emailService;
   private ContentHostingService contentHostingService;
-  private SecurityService securityService;
-  private EventTrackingService eventTrackingService;
-  private SiteService siteService;
-  private ToolManager toolManager;
-  private UserDirectoryService userDirectoryService;
+  
   
   private static final String MESSAGES_TITLE = "pvt_message_nav";// Mensajes-->Messages/need to be modified to support internationalization
   
@@ -118,40 +119,20 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
 
   public void init()
   {
-	log.info("init()");
+	LOG.info("init()");
     ;
   }
   
-	public void setSecurityService(SecurityService securityService) {
-		this.securityService = securityService;
-	}
-
-	public void setEventTrackingService(EventTrackingService eventTrackingService) {
-		this.eventTrackingService = eventTrackingService;
-	}
-
-	public void setSiteService(SiteService siteService) {
-		this.siteService = siteService;
-	}
-
-	public void setToolManager(ToolManager toolManager) {
-		this.toolManager = toolManager;
-	}
-
-	public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
-		this.userDirectoryService = userDirectoryService;
-	}
-
-	public void setContentHostingService(ContentHostingService contentHostingService) {
+  public void setContentHostingService(ContentHostingService contentHostingService) {
 		this.contentHostingService = contentHostingService;
 	}
 
   public boolean getPrivateAreaEnabled()
   {
 
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("getPrivateAreaEnabled()");
+      LOG.debug("getPrivateAreaEnabled()");
     }
         
     return areaManager.isPrivateAreaEnabled();
@@ -161,9 +142,9 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
   public void setPrivateAreaEnabled(boolean value)
   {
 
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("setPrivateAreaEnabled(value: " + value + ")");
+      LOG.debug("setPrivateAreaEnabled(value: " + value + ")");
     }
 
   }
@@ -386,7 +367,7 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
     }
     catch (Exception e)
     {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
       return null;
     }
   }
@@ -442,9 +423,9 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
 
   public void saveForumSettings(PrivateForum forum)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("saveForumSettings(forum: " + forum + ")");
+      LOG.debug("saveForumSettings(forum: " + forum + ")");
     }
 
     if (forum == null)
@@ -502,7 +483,7 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
         element.setModifiedBy(userId);
         element.setModified(new Date());
         
-        eventTrackingService.post(eventTrackingService.newEvent(DiscussionForumService.EVENT_MESSAGES_FOLDER_REVISE, getEventMessage(element), false));
+        EventTrackingService.post(EventTrackingService.newEvent(DiscussionForumService.EVENT_MESSAGES_FOLDER_REVISE, getEventMessage(element), false));
       }      
     }
     forumManager.savePrivateForum(pf);
@@ -518,7 +499,7 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
       {
         pf.removeTopic(element);
 
-        eventTrackingService.post(eventTrackingService.newEvent(DiscussionForumService.EVENT_MESSAGES_FOLDER_REMOVE, getEventMessage(element), false));
+        EventTrackingService.post(EventTrackingService.newEvent(DiscussionForumService.EVENT_MESSAGES_FOLDER_REMOVE, getEventMessage(element), false));
         break;
       }
     }
@@ -531,9 +512,9 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
    */
   public Topic getTopicByUuid(final String topicUuid)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("getTopicByIdWithMessages(final Long" + topicUuid + ")");
+      LOG.debug("getTopicByIdWithMessages(final Long" + topicUuid + ")");
     }
     return forumManager.getTopicByUuid(topicUuid);
   }
@@ -555,7 +536,7 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
     for (Iterator iter = recipients.iterator(); iter.hasNext();)
     {
       PrivateMessageRecipient element = (PrivateMessageRecipient) iter.next();
-      log.debug("element.getTypeUuid(): "+element.getTypeUuid()+", oldTopicTypeUuid: "+oldTopicTypeUuid+", element.getUserId(): "+element.getUserId()+ ", getCurrentUser(): "+getCurrentUser());
+      LOG.debug("element.getTypeUuid(): "+element.getTypeUuid()+", oldTopicTypeUuid: "+oldTopicTypeUuid+", element.getUserId(): "+element.getUserId()+ ", getCurrentUser(): "+getCurrentUser());
       if (element.getTypeUuid().equals(oldTopicTypeUuid) && (element.getUserId().equals(getCurrentUser())))
       {
         element.setTypeUuid(newTopicTypeUuid);
@@ -576,7 +557,7 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
     message.setCreated(new Date());
     message.setCreatedBy(getCurrentUser());
 
-    log.debug("message " + message.getUuid() + " created successfully");
+    LOG.debug("message " + message.getUuid() + " created successfully");
     return message;
   }
 
@@ -726,24 +707,60 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
       final String order)
   {
 
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("getMessagesByType(typeUuid:" + typeUuid + ", orderField: "
+      LOG.debug("getMessagesByType(typeUuid:" + typeUuid + ", orderField: "
           + orderField + ", order:" + order + ")");
     }
 
-    HibernateCallback<List> hcb = session -> {
-      Query q = session.getNamedQuery(QUERY_MESSAGES_BY_USER_TYPE_AND_CONTEXT);
-      Query qOrdered = session.createQuery(q.getQueryString() + " order by "
-          + orderField + " " + order);
+    //    HibernateCallback hcb = new HibernateCallback() {
+    //      public Object doInHibernate(Session session) throws HibernateException, SQLException {
+    //        Criteria messageCriteria = session.createCriteria(PrivateMessageImpl.class);
+    //        Criteria recipientCriteria = messageCriteria.createCriteria("recipients");
+    //        
+    //        Conjunction conjunction = Expression.conjunction();
+    //        conjunction.add(Expression.eq("userId", getCurrentUser()));
+    //        conjunction.add(Expression.eq("typeUuid", typeUuid));        
+    //        
+    //        recipientCriteria.add(conjunction);
+    //        
+    //        if ("asc".equalsIgnoreCase(order)){
+    //          messageCriteria.addOrder(Order.asc(orderField));
+    //        }
+    //        else if ("desc".equalsIgnoreCase(order)){
+    //          messageCriteria.addOrder(Order.desc(orderField));
+    //        }
+    //        else{
+    //          LOG.debug("getMessagesByType failed with (typeUuid:" + typeUuid + ", orderField: " + orderField +
+    //              ", order:" + order + ")");
+    //          throw new IllegalArgumentException("order must have value asc or desc");          
+    //        }
+    //        
+    //        //todo: parameterize fetch mode
+    //        messageCriteria.setFetchMode("recipients", FetchMode.EAGER);
+    //        messageCriteria.setFetchMode("attachments", FetchMode.EAGER);
+    //        
+    //        return messageCriteria.list();        
+    //      }
+    //    };
 
-      qOrdered.setParameter("userId", getCurrentUser(), StringType.INSTANCE);
-      qOrdered.setParameter("typeUuid", typeUuid, StringType.INSTANCE);
-      qOrdered.setParameter("contextId", getContextId(), StringType.INSTANCE);
-      return qOrdered.list();
+    HibernateCallback hcb = new HibernateCallback()
+    {
+      public Object doInHibernate(Session session) throws HibernateException,
+          SQLException
+      {
+        Query q = session.getNamedQuery(QUERY_MESSAGES_BY_USER_TYPE_AND_CONTEXT);
+        Query qOrdered = session.createQuery(q.getQueryString() + " order by "
+            + orderField + " " + order);
+
+        qOrdered.setParameter("userId", getCurrentUser(), Hibernate.STRING);
+        qOrdered.setParameter("typeUuid", typeUuid, Hibernate.STRING);
+        qOrdered.setParameter("contextId", getContextId(), Hibernate.STRING);
+        return qOrdered.list();
+      }
     };
 
-    return getHibernateTemplate().execute(hcb);
+    return (List) getHibernateTemplate().execute(hcb);        
   }
   
   /**
@@ -761,41 +778,51 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
   public List getMessagesByTypeByContext(final String typeUuid, final String contextId)
   {
 
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("getMessagesByTypeForASite(typeUuid:" + typeUuid + ")");
+      LOG.debug("getMessagesByTypeForASite(typeUuid:" + typeUuid + ")");
     }
 
-    HibernateCallback<List> hcb = session -> {
-      Query q = session.getNamedQuery(QUERY_MESSAGES_BY_USER_TYPE_AND_CONTEXT);
+    HibernateCallback hcb = new HibernateCallback()
+    {
+      public Object doInHibernate(Session session) throws HibernateException,
+          SQLException
+      {
+        Query q = session.getNamedQuery(QUERY_MESSAGES_BY_USER_TYPE_AND_CONTEXT);
 
-      q.setParameter("userId", getCurrentUser(), StringType.INSTANCE);
-      q.setParameter("typeUuid", typeUuid, StringType.INSTANCE);
-      q.setParameter("contextId", contextId, StringType.INSTANCE);
-      return q.list();
+        q.setParameter("userId", getCurrentUser(), Hibernate.STRING);
+        q.setParameter("typeUuid", typeUuid, Hibernate.STRING);
+        q.setParameter("contextId", contextId, Hibernate.STRING);
+        return q.list();
+      }
     };
 
-    return getHibernateTemplate().execute(hcb);
+    return (List) getHibernateTemplate().execute(hcb);        
   }
   
   public List getMessagesByTypeByContext(final String typeUuid, final String contextId, final String userId, final String orderField,
 	      final String order){
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("getMessagesByTypeForASite(typeUuid:" + typeUuid + ")");
+      LOG.debug("getMessagesByTypeForASite(typeUuid:" + typeUuid + ")");
     }
 
-    HibernateCallback<List> hcb = session -> {
-      Query q = session.getNamedQuery(QUERY_MESSAGES_BY_USER_TYPE_AND_CONTEXT);
-      Query qOrdered = session.createQuery(q.getQueryString() + " order by "
-              + orderField + " " + order);
-      qOrdered.setParameter("userId", userId, StringType.INSTANCE);
-      qOrdered.setParameter("typeUuid", typeUuid, StringType.INSTANCE);
-      qOrdered.setParameter("contextId", contextId, StringType.INSTANCE);
-      return qOrdered.list();
+    HibernateCallback hcb = new HibernateCallback()
+    {
+      public Object doInHibernate(Session session) throws HibernateException,
+          SQLException
+      {
+        Query q = session.getNamedQuery(QUERY_MESSAGES_BY_USER_TYPE_AND_CONTEXT);
+        Query qOrdered = session.createQuery(q.getQueryString() + " order by "
+                + orderField + " " + order);
+        qOrdered.setParameter("userId", userId, Hibernate.STRING);
+        qOrdered.setParameter("typeUuid", typeUuid, Hibernate.STRING);
+        qOrdered.setParameter("contextId", contextId, Hibernate.STRING);
+        return qOrdered.list();
+      }
     };
 
-    return getHibernateTemplate().execute(hcb);
+    return (List) getHibernateTemplate().execute(hcb);        
   }
 
 
@@ -804,20 +831,20 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
    */
   public int findMessageCount(String typeUuid, List aggregateList)
   {    
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("findMessageCount executing with typeUuid: " + typeUuid);
+      LOG.debug("findMessageCount executing with typeUuid: " + typeUuid);
     }
 
     if (typeUuid == null)
     {
-      log.error("findMessageCount failed with typeUuid: null");
+      LOG.error("findMessageCount failed with typeUuid: null");
       throw new IllegalArgumentException("Null Argument");
     }    
     
     if (aggregateList == null)
     {
-      log.error("findMessageCount failed with aggregateList: null");
+      LOG.error("findMessageCount failed with aggregateList: null");
       throw new IllegalStateException("aggregateList is null");
     }
     
@@ -839,20 +866,20 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
    */
   public int findUnreadMessageCount(String typeUuid, List aggregateList)
   {    
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("findUnreadMessageCount executing with typeUuid: " + typeUuid);
+      LOG.debug("findUnreadMessageCount executing with typeUuid: " + typeUuid);
     }
 
     if (typeUuid == null)
     {
-      log.error("findUnreadMessageCount failed with typeUuid: null");
+      LOG.error("findUnreadMessageCount failed with typeUuid: null");
       throw new IllegalArgumentException("Null Argument");
     }    
     
     if (aggregateList == null)
     {
-      log.error("findMessageCount failed with aggregateList: Null");
+      LOG.error("findMessageCount failed with aggregateList: Null");
       throw new IllegalStateException("aggregateList is null");
     }
     
@@ -875,19 +902,24 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
 
   private List initializeMessageCounts(final String userId, final String contextId)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("initializeMessageCounts executing");
+      LOG.debug("initializeMessageCounts executing");
     }
 
-    HibernateCallback<List> hcb = session -> {
-      Query q = session.getNamedQuery(QUERY_AGGREGATE_COUNT);
-      q.setParameter("contextId", contextId, StringType.INSTANCE);
-      q.setParameter("userId", userId, StringType.INSTANCE);
-      return q.list();
+    HibernateCallback hcb = new HibernateCallback()
+    {
+      public Object doInHibernate(Session session) throws HibernateException,
+          SQLException
+      {
+        Query q = session.getNamedQuery(QUERY_AGGREGATE_COUNT);        
+        q.setParameter("contextId", contextId, Hibernate.STRING);
+        q.setParameter("userId", userId, Hibernate.STRING);
+        return q.list();
+      }
     };
         
-    return getHibernateTemplate().execute(hcb);
+    return (List) getHibernateTemplate().execute(hcb);        
   }
 
 
@@ -900,13 +932,17 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
    * 	List of site id, count of unread message pairs
    */
   public List getPrivateMessageCountsForAllSites() {
-	  HibernateCallback<List> hcb = session -> {
-         Query q = session.getNamedQuery("findUnreadPvtMsgCntByUserForAllSites");
-         q.setParameter("userId", getCurrentUser(), StringType.INSTANCE);
-         return q.list();
-      };
+	  HibernateCallback hcb = new HibernateCallback() {
+		  public Object doInHibernate(Session session) throws HibernateException,
+	  	 	SQLException
+	  	 {
+			  Query q = session.getNamedQuery("findUnreadPvtMsgCntByUserForAllSites");
+			  q.setParameter("userId", getCurrentUser(), Hibernate.STRING);
+			  return q.list();
+	  	 }
+	  };
   
-	  return getHibernateTemplate().execute(hcb);
+	  return (List) getHibernateTemplate().execute(hcb);
 	  
   }
 
@@ -918,9 +954,9 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
 
     String userId = getCurrentUser();
 
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("deletePrivateMessage(message:" + message + ", typeUuid:"
+      LOG.debug("deletePrivateMessage(message:" + message + ", typeUuid:"
           + typeUuid + ")");
     }
 
@@ -951,7 +987,8 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
       }
       else
       {
-        log.error("deletePrivateMessage -- cannot find private message for user: "
+        LOG
+            .error("deletePrivateMessage -- cannot find private message for user: "
                 + userId + ", typeUuid: " + typeUuid);
       }
     }
@@ -1000,16 +1037,18 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
 			try {
 				Thread.sleep(SynopticMsgcntrManager.OPT_LOCK_WAIT);
 			} catch (InterruptedException e) {
-				log.error(e.getMessage(), e);
+				e.printStackTrace();
 			}
 
 			numOfAttempts--;
 
 			if (numOfAttempts <= 0) {
-				log.info("PrivateMessageManagerImpl: decrementMessagesSynopticToolInfo: HibernateOptimisticLockingFailureException no more retries left");
-				log.error(holfe.getMessage(), holfe);
+				System.out
+						.println("PrivateMessageManagerImpl: decrementMessagesSynopticToolInfo: HibernateOptimisticLockingFailureException no more retries left");
+				holfe.printStackTrace();
 			} else {
-				log.info("PrivateMessageManagerImpl: decrementMessagesSynopticToolInfo: HibernateOptimisticLockingFailureException: attempts left: "
+				System.out
+						.println("PrivateMessageManagerImpl: decrementMessagesSynopticToolInfo: HibernateOptimisticLockingFailureException: attempts left: "
 								+ numOfAttempts);
 				decrementMessagesSynopticToolInfo(userId, siteId, numOfAttempts);
 			}
@@ -1026,16 +1065,18 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
 			try {
 				Thread.sleep(SynopticMsgcntrManager.OPT_LOCK_WAIT);
 			} catch (InterruptedException e) {
-				log.error(e.getMessage(), e);
+				e.printStackTrace();
 			}
 
 			numOfAttempts--;
 
 			if (numOfAttempts <= 0) {
-				log.info("PrivateMessageManagerImpl: incrementMessagesSynopticToolInfo: HibernateOptimisticLockingFailureException no more retries left");
-				log.error(holfe.getMessage(), holfe);
+				System.out
+						.println("PrivateMessageManagerImpl: incrementMessagesSynopticToolInfo: HibernateOptimisticLockingFailureException no more retries left");
+				holfe.printStackTrace();
 			} else {
-				log.info("PrivateMessageManagerImpl: incrementMessagesSynopticToolInfo: HibernateOptimisticLockingFailureException: attempts left: "
+				System.out
+						.println("PrivateMessageManagerImpl: incrementMessagesSynopticToolInfo: HibernateOptimisticLockingFailureException: attempts left: "
 								+ numOfAttempts);
 				incrementMessagesSynopticToolInfo(userId, siteId, numOfAttempts);
 			}
@@ -1051,9 +1092,9 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
 
     try 
     {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("sendPrivateMessage(message: " + message + ", recipients: "
+      LOG.debug("sendPrivateMessage(message: " + message + ", recipients: "
           + recipients + ")");
     }
 
@@ -1071,7 +1112,7 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
     }
 
     String currentUserAsString = getCurrentUser();
-    User currentUser = userDirectoryService.getCurrentUser();
+    User currentUser = UserDirectoryService.getCurrentUser();
     List recipientList = new UniqueArrayList();
 
     /** test for draft message */
@@ -1211,7 +1252,7 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
   }
     catch (MessagingException e) 
     {
-    	log.warn("PrivateMessageManagerImpl.sendPrivateMessage: exception: " + e.getMessage(), e);
+    	LOG.warn("PrivateMessageManagerImpl.sendPrivateMessage: exception: " + e.getMessage(), e);
 	}
   }
 
@@ -1221,7 +1262,7 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
   
 
   private String buildMessageBody(PrivateMessage message) {
-	  User currentUser = userDirectoryService.getCurrentUser();
+	  User currentUser = UserDirectoryService.getCurrentUser();
 	  StringBuilder body = new StringBuilder(message.getBody());
 	  
 	  StringBuilder fromString = new StringBuilder();
@@ -1302,17 +1343,17 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
 
 	  String siteTitle = null;
 	  try{
-		  siteTitle = siteService.getSite(getContextId()).getTitle();
+		  siteTitle = SiteService.getSite(getContextId()).getTitle();
 	  }
 	  catch (IdUnusedException e){
-		  log.error(e.getMessage(), e);
+		  LOG.error(e.getMessage(), e);
 	  }
 
 	  String thisToolId = "";
 	  ToolSession ts = sessionManager.getCurrentToolSession();
 	  if (ts != null)
 	  {
-		  ToolConfiguration tool = siteService.findTool(ts.getPlacementId());
+		  ToolConfiguration tool = SiteService.findTool(ts.getPlacementId());
 		  if (tool != null)
 		  {
 			  thisToolId = tool.getId();
@@ -1326,14 +1367,14 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
 	  getResourceBundleString(EMAIL_FOOTER4) +
 	  " <a href=\"" +
 	  ServerConfigurationService.getPortalUrl() + 
-	  "/site/" + toolManager.getCurrentPlacement().getContext() +
+	  "/site/" + ToolManager.getCurrentPlacement().getContext() +
 	  "/tool/" + thisToolId+
 	  (message!=null?"/privateMsg/pvtMsgDirectAccess?current_msg_detail="+message.getId():"")+
 	  "\">";
 
 
-	  footer += siteTitle + "</a><br>----------------------</p>";
-	  body.insert(0, footer); // Put the footer at the top.
+	  footer += siteTitle + "</a>.</p>";                      
+	  body.append(footer);
 
 	  String bodyString = body.toString();
 	  return bodyString;
@@ -1354,16 +1395,16 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
    */
   public void markMessageAsReadForUser(final PrivateMessage message, final String contextId)
   {
-	  markMessageAsReadForUser(message, contextId, getCurrentUser(), toolManager.getCurrentTool().getId());
+	  markMessageAsReadForUser(message, contextId, getCurrentUser(), ToolManager.getCurrentTool().getId());
 	  
   }
   
   public void markMessageAsReadForUser(final PrivateMessage message, final String contextId, final String userId, String toolId)
   {
 
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("markMessageAsReadForUser(message: " + message + ")");
+      LOG.debug("markMessageAsReadForUser(message: " + message + ")");
     }
 
     if (message == null)
@@ -1384,7 +1425,7 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
 
     if (recipientList == null || recipientList.size() == 0)
     {
-      log.error("markMessageAsReadForUser(message: " + message
+      LOG.error("markMessageAsReadForUser(message: " + message
           + ") has empty recipient list");
       throw new RuntimeException("markMessageAsReadForUser(message: " + message
           + ") has empty recipient list");
@@ -1402,7 +1443,7 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
     
     if(recordIndex != -1){
 		decrementMessagesSynopticToolInfo(searchRecipient.getUserId(), contextId, SynopticMsgcntrManager.NUM_OF_ATTEMPTS);
-		eventTrackingService.post(eventTrackingService.newEvent(DiscussionForumService.EVENT_MESSAGES_READ, getEventMessage(pvtMessage, toolId, userId, contextId), false));
+		EventTrackingService.post(EventTrackingService.newEvent(DiscussionForumService.EVENT_MESSAGES_READ, getEventMessage(pvtMessage, toolId, userId, contextId), false));
     }
   }
 
@@ -1426,8 +1467,8 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
   public void markMessageAsUnreadForUser(final PrivateMessage message,
 		  final String contextId) {
 
-	  if (log.isDebugEnabled()) {
-		  log.debug("markMessageAsUnreadForUser(message: " + message + ")");
+	  if (LOG.isDebugEnabled()) {
+		  LOG.debug("markMessageAsUnreadForUser(message: " + message + ")");
 	  }
 
 	  if (message == null) {
@@ -1449,7 +1490,7 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
 
 	  if (recipientList == null || recipientList.size() == 0)
 	  {
-		  log.error("markMessageAsUnreadForUser(message: " + message
+		  LOG.error("markMessageAsUnreadForUser(message: " + message
 				  + ") has empty recipient list");
 		  throw new RuntimeException("markMessageAsUnreadForUser(message: " + message
 				  + ") has empty recipient list");
@@ -1471,15 +1512,15 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
 		  Site currentSite;
 		  try {
 			  //TODO is this only used to prevent increments if the site doesn't exit? DH
-			  currentSite = siteService.getSite(contextId);
+			  currentSite = SiteService.getSite(contextId);
 			  incrementMessagesSynopticToolInfo(searchRecipient
 					  .getUserId(), contextId,
 					  SynopticMsgcntrManager.NUM_OF_ATTEMPTS);
 		  } catch (IdUnusedException e) {
-			  log.error(e.getMessage(), e);
+			  e.printStackTrace();
 		  }
 		  
-		  eventTrackingService.post(eventTrackingService.newEvent(
+		  EventTrackingService.post(EventTrackingService.newEvent(
 				  DiscussionForumService.EVENT_MESSAGES_UNREAD,
 				  getEventMessage(pvtMessage), false));
 	  }
@@ -1504,9 +1545,9 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
       final PrivateMessage message)
   {
 
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("getPrivateMessageWithRecipients(message: " + message + ")");
+      LOG.debug("getPrivateMessageWithRecipients(message: " + message + ")");
     }
 
     if (message == null)
@@ -1514,17 +1555,23 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
       throw new IllegalArgumentException("Null Argument");
     }
 
-    HibernateCallback<PrivateMessage> hcb = session -> {
-      Query q = session.getNamedQuery(QUERY_MESSAGES_BY_ID_WITH_RECIPIENTS);
-      q.setParameter("id", message.getId(), LongType.INSTANCE);
-      return (PrivateMessage) q.uniqueResult();
+    HibernateCallback hcb = new HibernateCallback()
+    {
+      public Object doInHibernate(Session session) throws HibernateException,
+          SQLException
+      {
+        Query q = session.getNamedQuery(QUERY_MESSAGES_BY_ID_WITH_RECIPIENTS);
+        q.setParameter("id", message.getId(), Hibernate.LONG);
+        return q.uniqueResult();
+      }
     };
 
-    PrivateMessage pvtMessage = getHibernateTemplate().execute(hcb);
+    PrivateMessage pvtMessage = (PrivateMessage) getHibernateTemplate()
+        .execute(hcb);
 
     if (pvtMessage == null)
     {
-      log.error("getPrivateMessageWithRecipients(message: " + message
+      LOG.error("getPrivateMessageWithRecipients(message: " + message
           + ") could not find message");
       throw new RuntimeException("getPrivateMessageWithRecipients(message: " + message
           + ") could not find message");
@@ -1546,12 +1593,12 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
       
       try
       {
-        authorString = userDirectoryService.getUser(authorString).getSortName();
+        authorString = UserDirectoryService.getUser(authorString).getSortName();
 
       }
       catch(Exception e)
       {
-        log.error(e.getMessage(), e);
+        e.printStackTrace();
       }
       
       return authorString;
@@ -1614,14 +1661,14 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
   
   public boolean isInstructor()
   {
-    log.debug("isInstructor()");
-    return isInstructor(userDirectoryService.getCurrentUser());
+    LOG.debug("isInstructor()");
+    return isInstructor(UserDirectoryService.getCurrentUser());
   }
   
   public boolean isSectionTA()
   {
-    log.debug("isSectionTA()");
-    return isSectionTA(userDirectoryService.getCurrentUser());
+    LOG.debug("isSectionTA()");
+    return isSectionTA(UserDirectoryService.getCurrentUser());
   }
 
   /**
@@ -1632,175 +1679,161 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
    */
   private boolean isInstructor(User user)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("isInstructor(User " + user + ")");
+      LOG.debug("isInstructor(User " + user + ")");
     }
     if (user != null)
-      return securityService.unlock(user, "site.upd", getContextSiteId());
+      return SecurityService.unlock(user, "site.upd", getContextSiteId());
     else
       return false;
   }
   
   private boolean isSectionTA(User user) {
       if (user != null)
-          return securityService.unlock(user, "section.role.ta", getContextSiteId());
+          return SecurityService.unlock(user, "section.role.ta", getContextSiteId());
         else
           return false;
   }
   
   public boolean isEmailPermit() {
-	  log.debug("isEmailPermit()");
-	  return isEmailPermit(userDirectoryService.getCurrentUser());
+	  LOG.debug("isEmailPermit()");
+	  return isEmailPermit(UserDirectoryService.getCurrentUser());
   }
   
   private boolean isEmailPermit(User user)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("isEmailPermit(User " + user + ")");
+      LOG.debug("isEmailPermit(User " + user + ")");
     }
     if (user != null)
-      return securityService.unlock(user, "msg.emailout", getContextSiteId());
+      return SecurityService.unlock(user, "msg.emailout", getContextSiteId());
     else
       return false;
   }
   
   
   public boolean isAllowToFieldGroups() {
-	  log.debug("isAllowToFieldGroups()");
-	  return isAllowToFieldGroups(userDirectoryService.getCurrentUser());
+	  LOG.debug("isAllowToFieldGroups()");
+	  return isAllowToFieldGroups(UserDirectoryService.getCurrentUser());
   }
   
   private boolean isAllowToFieldGroups(User user)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("isAllowToFieldGroups(User " + user + ")");
+      LOG.debug("isAllowToFieldGroups(User " + user + ")");
     }
     if (user != null)
-      return securityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_ALLOW_TO_FIELD_GROUPS, getContextSiteId());
+      return SecurityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_ALLOW_TO_FIELD_GROUPS, getContextSiteId());
     else
       return false;
   }
   
   public boolean isAllowToFieldAllParticipants() {
-	  log.debug("isAllowToFieldAllParticipants()");
-	  return isAllowToFieldAllParticipants(userDirectoryService.getCurrentUser());
+	  LOG.debug("isAllowToFieldAllParticipants()");
+	  return isAllowToFieldAllParticipants(UserDirectoryService.getCurrentUser());
   }
   
   private boolean isAllowToFieldAllParticipants(User user)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("isAllowToFieldAllParticipants(User " + user + ")");
+      LOG.debug("isAllowToFieldAllParticipants(User " + user + ")");
     }
     if (user != null)
-      return securityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_ALLOW_TO_FIELD_ALL_PARTICIPANTS, getContextSiteId());
+      return SecurityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_ALLOW_TO_FIELD_ALL_PARTICIPANTS, getContextSiteId());
     else
       return false;
   }
   
   public boolean isAllowToFieldRoles() {
-	  log.debug("isAllowToFieldRoles()");
-	  return isAllowToFieldRoles(userDirectoryService.getCurrentUser());
+	  LOG.debug("isAllowToFieldRoles()");
+	  return isAllowToFieldRoles(UserDirectoryService.getCurrentUser());
   }
   
   private boolean isAllowToFieldRoles(User user)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("isAllowToFieldRoles(User " + user + ")");
+      LOG.debug("isAllowToFieldRoles(User " + user + ")");
     }
     if (user != null)
-      return securityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_ALLOW_TO_FIELD_ROLES, getContextSiteId());
+      return SecurityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_ALLOW_TO_FIELD_ROLES, getContextSiteId());
     else
       return false;
   }
   
   public boolean isAllowToViewHiddenGroups() {
-	  log.debug("isAllowToViewHiddenGroups()");
-	  return isAllowToViewHiddenGroups(userDirectoryService.getCurrentUser());
+	  LOG.debug("isAllowToViewHiddenGroups()");
+	  return isAllowToViewHiddenGroups(UserDirectoryService.getCurrentUser());
   }
   
   private boolean isAllowToViewHiddenGroups(User user)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("isAllowToViewHiddenGroups(User " + user + ")");
+      LOG.debug("isAllowToViewHiddenGroups(User " + user + ")");
     }
     if (user != null)
-      return securityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_VIEW_HIDDEN_GROUPS, getContextSiteId());
+      return SecurityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_VIEW_HIDDEN_GROUPS, getContextSiteId());
     else
       return false;
   } 
   
   @Override
   public boolean isAllowToFieldUsers() {
-	  log.debug("isAllowToFieldUsers()");
-	  return isAllowToFieldUsers(userDirectoryService.getCurrentUser());
+	  LOG.debug("isAllowToFieldUsers()");
+	  return isAllowToFieldUsers(UserDirectoryService.getCurrentUser());
   }
   
   private boolean isAllowToFieldUsers(User user)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("isAllowToFieldUsers(User " + user + ")");
+      LOG.debug("isAllowToFieldUsers(User " + user + ")");
     }
     if (user != null)
-      return securityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_ALLOW_TO_FIELD_USERS, getContextSiteId());
+      return SecurityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_ALLOW_TO_FIELD_USERS, getContextSiteId());
     else
       return false;
   }
   
   @Override
   public boolean isAllowToFieldMyGroups() {
-	  log.debug("isAllowToFieldMyGroups()");
-	  return isAllowToFieldMyGroups(userDirectoryService.getCurrentUser());
+	  LOG.debug("isAllowToFieldMyGroups()");
+	  return isAllowToFieldMyGroups(UserDirectoryService.getCurrentUser());
   }
 
   private boolean isAllowToFieldMyGroups(User user)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("isAllowToFieldMyGroups(User " + user + ")");
+      LOG.debug("isAllowToFieldMyGroups(User " + user + ")");
     }
     if (user != null)
-      return securityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_ALLOW_TO_FIELD_MYGROUPS, getContextSiteId());
+      return SecurityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_ALLOW_TO_FIELD_MYGROUPS, getContextSiteId());
     else
       return false;
   }
   
   @Override
   public boolean isAllowToFieldMyGroupMembers() {
-	  log.debug("isAllowToFieldMyGroupMembers()");
-	  return isAllowToFieldMyGroupMembers(userDirectoryService.getCurrentUser());
+	  LOG.debug("isAllowToFieldMyGroupMembers()");
+	  return isAllowToFieldMyGroupMembers(UserDirectoryService.getCurrentUser());
   }
 
   private boolean isAllowToFieldMyGroupMembers(User user)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("isAllowToFieldMyGroupMembers(User " + user + ")");
+      LOG.debug("isAllowToFieldMyGroupMembers(User " + user + ")");
     }
     if (user != null)
-      return securityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_ALLOW_TO_FIELD_MYGROUPMEMBERS, getContextSiteId());
+      return SecurityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_ALLOW_TO_FIELD_MYGROUPMEMBERS, getContextSiteId());
     else
       return false;
-  }
-  
-  @Override 
-  public boolean isAllowToFieldMyGroupRoles() {
-	  return isAllowToFieldMyGroupRoles(userDirectoryService.getCurrentUser());
-  }
-  
-  private boolean isAllowToFieldMyGroupRoles(User user)
-  {
-	  log.debug("isAllowToFieldMyGroupRoles(User {})",user);
-	  if (user != null)
-		  return securityService.unlock(user, DefaultPermissionsManager.MESSAGE_FUNCTION_ALLOW_TO_FIELD_MYGROUPROLES, getContextSiteId());
-	  else
-		  return false;
   }
 
   /**
@@ -1808,15 +1841,15 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
    */
   public String getContextSiteId()
   {
-    log.debug("getContextSiteId()");
+    LOG.debug("getContextSiteId()");
 
-    return ("/site/" + toolManager.getCurrentPlacement().getContext());
+    return ("/site/" + ToolManager.getCurrentPlacement().getContext());
   }
 
   public String getContextId()
   {
 
-    log.debug("getContextId()");
+    LOG.debug("getContextId()");
 
     if (TestUtil.isRunningTests())
     {
@@ -1825,7 +1858,7 @@ public class PrivateMessageManagerImpl extends HibernateDaoSupport implements Pr
     else
     {
     	//org.sakaiproject.tool.api.ToolManager manager = getInstance();
-      return toolManager.getCurrentPlacement().getContext();
+      return ToolManager.getCurrentPlacement().getContext();
     }
   }  
      
@@ -1858,15 +1891,17 @@ return topicTypeUuid;
   }
   
   public Area getAreaByContextIdAndTypeId(final String typeId) {
-    log.debug("getAreaByContextIdAndTypeId executing for current user: " + getCurrentUser());
-    HibernateCallback<Area> hcb = session -> {
-        Query q = session.getNamedQuery("findAreaByContextIdAndTypeId");
-        q.setParameter("contextId", getContextId(), StringType.INSTANCE);
-        q.setParameter("typeId", typeId, StringType.INSTANCE);
-        return (Area) q.uniqueResult();
+    LOG.debug("getAreaByContextIdAndTypeId executing for current user: " + getCurrentUser());
+    HibernateCallback hcb = new HibernateCallback() {
+        public Object doInHibernate(Session session) throws HibernateException, SQLException {
+            Query q = session.getNamedQuery("findAreaByContextIdAndTypeId");
+            q.setParameter("contextId", getContextId(), Hibernate.STRING);
+            q.setParameter("typeId", typeId, Hibernate.STRING);
+            return q.uniqueResult();
+        }
     };
 
-    return getHibernateTemplate().execute(hcb);
+    return (Area) getHibernateTemplate().execute(hcb);
   }
   
   /**
@@ -1897,7 +1932,7 @@ return topicTypeUuid;
    * Constructs the event message string
    */
   private String getEventMessage(Object object) {
-	  return getEventMessage(object, toolManager.getCurrentTool().getId(), getCurrentUser(), getContextId());
+	  return getEventMessage(object, ToolManager.getCurrentTool().getId(), getCurrentUser(), getContextId());
 	}
   
   private String getEventMessage(Object object, String toolId, String userId, String contextId) {

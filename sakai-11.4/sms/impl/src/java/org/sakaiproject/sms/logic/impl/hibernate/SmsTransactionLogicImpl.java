@@ -25,8 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.type.LongType;
-import org.hibernate.type.StringType;
+import org.hibernate.Hibernate;
 import org.sakaiproject.genericdao.api.search.Restriction;
 import org.sakaiproject.genericdao.api.search.Search;
 import org.sakaiproject.sms.bean.SearchFilterBean;
@@ -84,7 +83,7 @@ public class SmsTransactionLogicImpl extends SmsLogic implements
 	 * 
 	 * @param Long
 	 *            sms transaction id
-	 * @return sms configuration
+	 * @return sms congiguration
 	 */
 	public SmsTransaction getSmsTransaction(Long smsTransactionId) {
 		return (SmsTransaction) findById(SmsTransaction.class, smsTransactionId);
@@ -227,7 +226,7 @@ public class SmsTransactionLogicImpl extends SmsLogic implements
 	public List<SmsTransaction> getSmsTransactionsForAccountId(Long accountId) {
 		String hql = "from SmsTransaction transaction where transaction.smsAccount.id = :accountId";
 		List<SmsTransaction> transactions = smsDao.runQuery(hql,
-				new QueryParameter("accountId", accountId, LongType.INSTANCE));
+				new QueryParameter("accountId", accountId, Hibernate.LONG));
 		return transactions;
 	}
 
@@ -242,7 +241,7 @@ public class SmsTransactionLogicImpl extends SmsLogic implements
 	public List<SmsTransaction> getSmsTransactionsForTaskId(Long taskId) {
 		String hql = "from SmsTransaction transaction where transaction.smsTaskId = :taskId";
 		List<SmsTransaction> transactions = smsDao.runQuery(hql,
-				new QueryParameter("smsTaskId", taskId, LongType.INSTANCE));
+				new QueryParameter("smsTaskId", taskId, Hibernate.LONG));
 		return transactions;
 	}
 
@@ -264,9 +263,9 @@ public class SmsTransactionLogicImpl extends SmsLogic implements
 		hql.append(" order by transaction.transactionDate desc ");
 
 		List<SmsTransaction> transactions = smsDao.runQuery(hql.toString(),
-				new QueryParameter("taskId", taskId, LongType.INSTANCE),
+				new QueryParameter("taskId", taskId, Hibernate.LONG),
 				new QueryParameter("transactionTypeCode", smsBilling
-						.getReserveCreditsCode(), StringType.INSTANCE));
+						.getReserveCreditsCode(), Hibernate.STRING));
 
 		if (transactions != null && !transactions.isEmpty()) {
 			return transactions.get(0);

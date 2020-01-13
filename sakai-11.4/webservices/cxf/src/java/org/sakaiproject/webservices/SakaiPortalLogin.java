@@ -24,7 +24,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.user.api.User;
 
@@ -76,8 +77,9 @@ import org.sakaiproject.user.api.User;
 
 @WebService
 @SOAPBinding(style = SOAPBinding.Style.RPC, use = SOAPBinding.Use.LITERAL)
-@Slf4j
 public class SakaiPortalLogin extends AbstractWebService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SakaiPortalLogin.class);
 
     private User getSakaiUser(String id) {
         User user = null ;
@@ -119,21 +121,21 @@ public class SakaiPortalLogin extends AbstractWebService {
         String portalIPs = serverConfigurationService.getString("webservice.portalIP");
         String ipCheck = serverConfigurationService.getString("webservice.IPCheck");
 
-        if (log.isDebugEnabled()) {
-            log.debug("SakaiPortalLogin.loginAndCreate id="+id);
-            log.debug("SakaiPortalLogin.loginAndCreate ip="+ipAddress+" portalIP="+portalIPs+" IPCheck="+ipCheck);
-            log.debug("        fn="+firstName+" ln="+lastName+" em="+eMail+" ip="+ipAddress);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("SakaiPortalLogin.loginAndCreate id="+id);
+            LOG.debug("SakaiPortalLogin.loginAndCreate ip="+ipAddress+" portalIP="+portalIPs+" IPCheck="+ipCheck);
+            LOG.debug("        fn="+firstName+" ln="+lastName+" em="+eMail+" ip="+ipAddress);
         }
 
         if ( portalSecret == null || pw == null || portalSecret.equals("") || ! portalSecret.equals(pw) ) {
-            log.info("SakaiPortalLogin secret mismatch ip="+ipAddress);
+            LOG.info("SakaiPortalLogin secret mismatch ip="+ipAddress);
                     throw new RuntimeException("Failed login");
         }
 
         // Verify that this IP address matches our string
         if ( "true".equalsIgnoreCase(ipCheck) ) {
             if (  portalIPs == null || portalIPs.equals("") ||  portalIPs.indexOf(ipAddress) == -1 ) {
-                log.info("SakaiPortalLogin Trusted IP not found");
+                LOG.info("SakaiPortalLogin Trusted IP not found");
                         throw new RuntimeException("Failed login");
             }
         }
@@ -141,25 +143,25 @@ public class SakaiPortalLogin extends AbstractWebService {
         User user = getSakaiUser(id);
 
         if ( user == null && firstName != null && lastName != null && eMail != null ) {
-            log.debug("Creating Sakai Account...");
+            LOG.debug("Creating Sakai Account...");
             try {
                 // Set password to something unguessable - they can set a new PW once they are logged in
                 String hiddenPW = idManager.createUuid();
                 userDirectoryService.addUser(null,id,firstName,lastName,eMail,hiddenPW,"registered", null);
-                            log.debug("User Created...");
+                            LOG.debug("User Created...");
             } catch(Exception e) {
-                log.error("Unable to create user...");
+                LOG.error("Unable to create user...");
                     throw new RuntimeException("Failed login");
             }
                 user = getSakaiUser(id);
         }
 
         if ( user != null ) {
-            log.debug("Have User");
+            LOG.debug("Have User");
             Session s = sessionManager.startSession();
             sessionManager.setCurrentSession(s);
             if (s == null) {
-                log.warn("Web Services Login failed to establish session for id="+id+" ip="+ipAddress);
+                LOG.warn("Web Services Login failed to establish session for id="+id+" ip="+ipAddress);
                 throw new RuntimeException("Unable to establish session");
             } else {
                 // We do not care too much on the off-chance that this fails - folks simply won't show up in presense
@@ -170,16 +172,16 @@ public class SakaiPortalLogin extends AbstractWebService {
 
                 try {
                     String siteId = siteService.getUserSiteId(s.getUserId());
-                    log.debug("Site exists..."+siteId);
+                    LOG.debug("Site exists..."+siteId);
                 } catch(Exception e) {
-                    log.debug("Site does not exist...");
+                    LOG.debug("Site does not exist...");
                         throw new RuntimeException("Failed login");
                 }
-                if ( log.isDebugEnabled() ) log.debug("Sakai Portal Login id="+id+" ip="+ipAddress+" session="+s.getId());
+                if ( LOG.isDebugEnabled() ) LOG.debug("Sakai Portal Login id="+id+" ip="+ipAddress+" session="+s.getId());
                     return s.getId();
             }
         }
-        log.info("SakaiPortalLogin Failed ip="+ipAddress);
+        LOG.info("SakaiPortalLogin Failed ip="+ipAddress);
             throw new RuntimeException("Failed login");
     }
 
@@ -199,7 +201,7 @@ public class SakaiPortalLogin extends AbstractWebService {
     public String login(
             @WebParam(name = "id", partName = "id") @QueryParam("id") String id,
             @WebParam(name = "pw", partName = "pw") @QueryParam("pw") String pw) {
-        log.debug("SakaiPortalLogin.login()");
+        LOG.debug("SakaiPortalLogin.login()");
         return loginAndCreate(id, pw, null, null, null);
     }
 }

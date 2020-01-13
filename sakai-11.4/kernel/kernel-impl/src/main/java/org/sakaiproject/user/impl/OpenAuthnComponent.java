@@ -21,8 +21,8 @@
 
 package org.sakaiproject.user.impl;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.user.api.Authentication;
 import org.sakaiproject.user.api.AuthenticationException;
 import org.sakaiproject.user.api.AuthenticationManager;
@@ -36,9 +36,11 @@ import org.sakaiproject.user.api.IdPwEvidence;
  * A placeholder wide open Authentication - returns the password as the authentication user (UUID) id.
  * </p>
  */
-@Slf4j
 public class OpenAuthnComponent implements AuthenticationManager
 {
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(OpenAuthnComponent.class);
+
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Dependencies and their setter methods
 	 *********************************************************************************************************************************************************************************************************************************************************/
@@ -52,7 +54,7 @@ public class OpenAuthnComponent implements AuthenticationManager
 	 */
 	public void init()
 	{
-		log.info("init()");
+		M_log.info("init()");
 	}
 
 	/**
@@ -60,7 +62,7 @@ public class OpenAuthnComponent implements AuthenticationManager
 	 */
 	public void destroy()
 	{
-		log.info("destroy()");
+		M_log.info("destroy()");
 	}
 
 	/**********************************************************************************************************************************************************************************************************************************************************

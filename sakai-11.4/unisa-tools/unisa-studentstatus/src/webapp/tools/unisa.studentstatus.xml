@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.studentstatus"
+		title="Application for Admission Status"
+		description="Unisa Student Application Status">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

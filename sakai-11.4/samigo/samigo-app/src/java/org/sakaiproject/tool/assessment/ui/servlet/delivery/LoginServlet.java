@@ -19,13 +19,16 @@
  *
  **********************************************************************************/
 
-package org.sakaiproject.tool.assessment.ui.servlet.delivery;
 
+
+package org.sakaiproject.tool.assessment.ui.servlet.delivery;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
+import org.apache.commons.lang.BooleanUtils;
 
 import javax.faces.component.UICommand;
 import javax.faces.component.UIComponent;
@@ -37,9 +40,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.BooleanUtils;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.cover.SiteService;
@@ -63,7 +65,7 @@ import org.sakaiproject.user.cover.UserDirectoryService;
  * @author Ed Smiley
  * @version $Id$
  */
-@Slf4j
+
 public class LoginServlet
     extends HttpServlet
 {
@@ -71,6 +73,7 @@ public class LoginServlet
 	 * 
 	 */
 	private static final long serialVersionUID = -5495078878170443939L;
+	private static Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
 	private SiteService siteService;
 
@@ -174,8 +177,6 @@ public class LoginServlet
           // in 2.2, agentId is differnt from req.getRemoteUser()
           agentIdString = AgentFacade.getAgentString();
         }
-        delivery.setAnonymousLogin(false);
-        person.setAnonymousId(null);
       }
 
       log.debug("*** agentIdString: "+agentIdString);
@@ -217,9 +218,6 @@ public class LoginServlet
         }
         else if ("timeExpired".equals(nextAction)){
         	path = "/jsf/delivery/timeExpired.faces";
-        }
-        else if ("accessDenied".equals(nextAction)) {
-        	path = "/jsf/delivery/accessDenied.faces";
         }
         else {
         	path = "/jsf/delivery/assessmentNotAvailable.faces";
@@ -335,4 +333,5 @@ public class LoginServlet
 	  }
 	  return false;
   }
+  
 }

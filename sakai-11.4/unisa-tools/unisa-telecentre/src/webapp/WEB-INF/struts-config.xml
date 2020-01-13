@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	<form-bean name="telecentreForm" type="za.ac.unisa.lms.tools.telecentre.forms.TelecentreForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.telecentre.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/telecentre.do?action=displayStartingPage"
+				contextRelative="true" />
+		 </action>
+	
+          <action
+			parameter="action"
+			attribute="telecentreForm" 
+			name="telecentreForm"
+			path="/telecentre"			
+			scope="session"
+			type="za.ac.unisa.lms.tools.telecentre.actions.TelecentreAction"
+			validate="false">
+			<forward
+				name="startpage"
+				path="/WEB-INF/jsp/telecentrestep1.jsp"
+				contextRelative="true" />
+			<forward
+				name="endpage"
+				path="/WEB-INF/jsp/telecentrestep2.jsp"
+				contextRelative="true" />
+			<forward 
+				name="extendedhoursdownload"
+				path="/WEB-INF/jsp/extendedHoursDownload.jsp"
+				contextRelative="true" />
+			<forward
+				name="lastpage"
+				path="/WEB-INF/jsp/telecentrestep3.jsp"
+				contextRelative="true" />	
+			<forward
+				name="empty"
+				path="/WEB-INF/jsp/teleempty.jsp"
+				contextRelative="true" />
+			<forward
+				name="telelist"
+				path="/WEB-INF/jsp/telecentrelist.jsp"
+				contextRelative="true" />
+		    <forward name="displayvisitdetails"
+		        path="/WEB-INF/jsp/displayVisitDetails.jsp" 
+		        contextRelative="true" />
+		    <forward name="exportvisitdetails" 
+                path="/WEB-INF/jsp/exportVisitDetails.jsp"
+                contextRelative="true" />
+            <forward name="extendhours"
+                   path="/WEB-INF/jsp/hoursExtension.jsp" 
+                   contextRelative="true" />
+            <forward name="extensionconfirmation" 
+                   path="/WEB-INF/jsp/extensionConfirmation.jsp" 
+                   contextRelative="true" />
+            <forward name="createCentres" 
+                   path="/WEB-INF/jsp/createCentres.jsp" 
+                   contextRelative="true" />
+            <forward name="createConfirmation" 
+                   path="/WEB-INF/jsp/createConfirmation.jsp" 
+                   contextRelative="true" />                   
+            <forward name="updateCentres" 
+                   path="/WEB-INF/jsp/updateCentres.jsp" 
+                   contextRelative="true" />
+            <forward name="updateConfirmation" 
+                   path="/WEB-INF/jsp/updateConfirmation.jsp" 
+                   contextRelative="true" />                            
+            <forward name="removeCentres" 
+                   path="/WEB-INF/jsp/removeCentres.jsp" 
+                   contextRelative="true" />
+            <forward name="removeConfirmation" 
+                   path="/WEB-INF/jsp/removeConfirmation.jsp" 
+                   contextRelative="true" />                   
+            <forward name="activateCentres" 
+                   path="/WEB-INF/jsp/activateCentres.jsp" 
+                   contextRelative="true" />
+            <forward name="activateConfirmation" 
+                   path="/WEB-INF/jsp/activateConfirmation.jsp" 
+                   contextRelative="true" />
+            <forward name="manageAdmins" 
+                   path="/WEB-INF/jsp/manageAdmins.jsp" 
+                   contextRelative="true" />  
+            <forward name="addAdmins" 
+                   path="/WEB-INF/jsp/addAdmins.jsp" 
+                   contextRelative="true" />   
+            <forward name="viewAdmins" 
+                   path="/WEB-INF/jsp/viewAdmins.jsp" 
+                   contextRelative="true" />   
+            <forward name="removeAdmins" 
+                   path="/WEB-INF/jsp/removeAdmins.jsp" 
+                   contextRelative="true" />                    
+         </action>  
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.telecentre.ApplicationResources" />
+</struts-config>

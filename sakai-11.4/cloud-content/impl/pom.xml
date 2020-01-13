@@ -4,18 +4,17 @@
   <parent>
     <groupId>org.sakaiproject.content</groupId>
     <artifactId>cloud-content</artifactId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <name>Sakai Cloud Resources Providers (impl)</name>
   <groupId>org.sakaiproject.content</groupId>
   <artifactId>cloud-content-impl</artifactId>
-  <packaging>sakai-component</packaging>
+  <packaging>jar</packaging>
 
   <properties>
-    <jclouds.version>2.1.1</jclouds.version>
-    <deploy.target>components</deploy.target>
+    <jclouds.version>1.9.1</jclouds.version>
   </properties>
 
   <dependencies>
@@ -65,6 +64,14 @@
       <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>aws-s3</artifactId>
       <version>${jclouds.version}</version>
+    </dependency>
+
+    <!-- 3rd party dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.10</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.tutoringplanAdministration"
+		title="Tutoring Plan Administration"
+		description="Tutoring Plan Administration">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

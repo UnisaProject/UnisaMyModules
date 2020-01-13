@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+
+     <form-beans>
+	  <form-bean name="signoffForm" type="za.ac.unisa.lms.tools.signoff.forms.SignoffForm" />
+	    
+	</form-beans>
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="act"
+			path="/default"
+			type="za.ac.unisa.lms.tools.signoff.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/signoff.do?act=authorisationPage"
+				contextRelative="false" />
+		</action>
+		<action
+      attribute="signoffForm"
+      name="signoffForm"
+      parameter="act"
+      path="/signoff"
+      scope="session"
+      type="za.ac.unisa.lms.tools.signoff.actions.SignoffAction">
+      <forward
+        name="authstructure"
+        path="/WEB-INF/jsp/authorisation.jsp"
+        contextRelative="true" />
+       <forward
+        name="removepersons"
+        path="/WEB-INF/jsp/removeperson.jsp"
+        contextRelative="true" />
+        <forward
+        name="editstandin"
+        path="/WEB-INF/jsp/editstandin.jsp"
+        contextRelative="true" />
+        <forward
+        name="orderdisplay"
+        path="/WEB-INF/jsp/orderdisplay.jsp"
+        contextRelative="true" />
+        </action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.signoff.ApplicationResources" />
+
+	
+</struts-config>

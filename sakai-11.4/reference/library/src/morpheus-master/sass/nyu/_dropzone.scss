@@ -1,0 +1,80 @@
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+//  Dropzone Custom Theme
+//   - replicate the v3.8.4 look and feel
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+body {
+  .dropzone {
+    .dz-preview {
+      
+    }
+    .dz-preview {
+      border: 1px solid #DDD;
+      padding: 10px;
+
+      .dz-image {
+        border-radius: 0 !important;
+      }
+      .dz-progress {
+        position: static;
+        left: initial;
+        top: initial;
+        margin: 6px 0;
+        width: 100%;
+        border: 1px solid #EEE;
+      }
+      .dz-details {
+        position: static;
+        opacity: 1;
+        padding: 0;
+      }
+      .dz-size {
+        margin: 10px 0 6px !important;
+        text-align: left;
+        font-size: 1em !important;
+      }
+      .dz-filename {
+        position: absolute;
+        font-size: 0.9em;
+        top: 10%;
+        white-space: normal !important;
+        z-index: 5;
+        overflow: visible;
+        z-index: 20;
+        text-align: left;
+        padding: 0px 15px;
+        left: 0;
+
+        span {
+          display: block;
+          padding: 4px !important;
+          line-height: 1.2em;
+          word-break: break-all;
+        }
+      }
+      .dz-remove {
+        cursor: pointer;
+      }
+
+
+      &.dz-image-preview {
+        .dz-filename {
+          opacity: 1;
+        }
+      }
+
+      .dz-image {
+        img {
+          -webkit-transform: none !important;
+          -moz-transform: none !important;
+          -ms-transform: none !important;
+          -o-transform: none !important;
+          transform: none !important;
+          -webkit-filter: none !important;
+          filter: none !important;
+        }
+      }
+    }
+  }
+}

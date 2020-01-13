@@ -110,34 +110,27 @@ VALIDATOR.validatePassword = function() {
 	VALIDATOR.verifyPasswordsMatch();
 };
 
-VALIDATOR.clearPasswordMatchMsgs = function() {
-		VALIDATOR.display( VALIDATOR.get("matchMsg"), false);
-		VALIDATOR.display(VALIDATOR.get("noMatchMsg"), false);
-};
-
 // Verify the passwords match
 VALIDATOR.verifyPasswordsMatch = function() {
 	var pw = VALIDATOR.get("passrow1::password1").value;
-	var pw2 = VALIDATOR.get("passrow2::password2").value;
+	if(VALIDATOR.get("passrow2::password2")) {
+		var pw2 = VALIDATOR.get("passrow2::password2").value;
+	}
+	else {
+		var pw2 = pw;
+	}
 
 	var matchMsg = VALIDATOR.get("matchMsg");
 	var noMatchMsg = VALIDATOR.get("noMatchMsg");
-
-	// Only continue validation if the the second password element has contents.  
-	if (pw2.length === 0) {
-		VALIDATOR.display(matchMsg, false);
-		VALIDATOR.display(noMatchMsg, false);
-		return;
-	}
-
+	
 	VALIDATOR.passwordsMatch = pw === pw2;
-	if (VALIDATOR.passwordsMatch) {
+	if (pw.length > 0 || pw2.length > 0) {
 		VALIDATOR.display(matchMsg, VALIDATOR.passwordsMatch);
 		VALIDATOR.display(noMatchMsg, !VALIDATOR.passwordsMatch);
 	}
 	else {
 		VALIDATOR.display(matchMsg, false);
-		VALIDATOR.display(noMatchMsg, true);
+		VALIDATOR.display(noMatchMsg, false);
 	}
 	
 	VALIDATOR.validateActivateForm();
@@ -192,16 +185,12 @@ VALIDATOR.displayStrengthInfo = function() {
 	}
 };
 
-// Validate the form (enable/disable the submit button).  
-// Password match checking is on the onblur event so enable the button if both pw boxes have contents  
-// and all other validation is met.  
+// Validate the form (enable/disable the submit button)
 VALIDATOR.validateActivateForm = function() {
 	var submitButton = VALIDATOR.get("addDetailsSub");
 	if (submitButton !== null)
 	{
-		if (VALIDATOR.firstNameValid && VALIDATOR.lastNameValid && VALIDATOR.get("passrow1::password1").value.length > 0 &&
-			VALIDATOR.get("passrow2::password2").value.length > 0 && VALIDATOR.termsChecked) {
-
+		if (VALIDATOR.firstNameValid && VALIDATOR.lastNameValid && VALIDATOR.passwordValid && VALIDATOR.passwordsMatch && VALIDATOR.termsChecked) {
 			submitButton.disabled = false;
 		}
 		else {

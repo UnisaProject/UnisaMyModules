@@ -18,15 +18,16 @@ package org.sakaiproject.profile2.logic;
 import java.util.Calendar;
 import java.util.Date;
 
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-
 import org.sakaiproject.profile2.dao.ProfileDao;
 import org.sakaiproject.profile2.model.ProfilePrivacy;
 import org.sakaiproject.profile2.model.ProfileStatus;
 import org.sakaiproject.profile2.types.PrivacyType;
 import org.sakaiproject.profile2.util.ProfileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import lombok.Setter;
 
 /**
  * Implementation of ProfileStatusLogic API
@@ -34,9 +35,11 @@ import org.sakaiproject.profile2.util.ProfileUtils;
  * @author Steve Swinsburg (steve.swinsburg@gmail.com)
  *
  */
-@Slf4j
 public class ProfileStatusLogicImpl implements ProfileStatusLogic {
 
+	private static final Logger log = LoggerFactory.getLogger(ProfileStatusLogicImpl.class);
+
+	
 	/**
  	 * {@inheritDoc}
  	 */

@@ -23,7 +23,7 @@ import java.util.Properties;
 import org.sakaiproject.tool.api.Placement;
 import org.sakaiproject.tool.api.Tool;
 
-public abstract class FakePlacement implements Placement {
+public class FakePlacement implements Placement {
 	Properties config;
 	Properties placementConfig;
 	String context;
@@ -32,10 +32,9 @@ public abstract class FakePlacement implements Placement {
 	
 	Tool tool;
 	
-	public FakePlacement set(Tool tool, String context) {
+	public FakePlacement(Tool tool, String context) {
 		this.tool = tool;
 		this.context = context;
-		return this;
 	}
 	
 	public String getToolId() {

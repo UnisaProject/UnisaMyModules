@@ -113,18 +113,15 @@ public interface EntityContentProducer
 	
 	/**
 	 * get the site ID from the resource Name
-	 *
 	 * @param reference
-	 * @return the site ID or {@code null} if a site ID is not present or this provider does not manage site-specific
-	 *   content
+	 * @return
 	 */
 	String getSiteId(String reference);
 
 	/**
 	 * Get the site content as an iterator
 	 * @param context
-	 * @return an iterator over all content associted with the given site ID, or an empty iterator if this provider
-	 *   does not manage site-specific content
+	 * @return
 	 */
 	Iterator<String> getSiteContentIterator(String context);
 

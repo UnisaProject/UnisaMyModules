@@ -23,17 +23,17 @@ package org.sakaiproject.sms.logic.command;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.entitybroker.util.http.HttpRESTUtils;
+import org.sakaiproject.entitybroker.util.http.HttpResponse;
 import org.sakaiproject.entitybroker.util.http.HttpRESTUtils.HttpIOException;
 import org.sakaiproject.entitybroker.util.http.HttpRESTUtils.HttpRequestException;
 import org.sakaiproject.entitybroker.util.http.HttpRESTUtils.Method;
-import org.sakaiproject.entitybroker.util.http.HttpResponse;
 import org.sakaiproject.sms.logic.incoming.AccountSpecifiedCommand;
 import org.sakaiproject.sms.logic.incoming.ParsedMessage;
 import org.sakaiproject.sms.logic.incoming.ShortMessageCommand;
 import org.sakaiproject.sms.model.constants.SmsConstants;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * This executes an external command by invoking an http url.
@@ -47,8 +47,9 @@ import lombok.extern.slf4j.Slf4j;
  * command: the command used
  * 
  */
-@Slf4j
 public class SmsRestCommand implements ShortMessageCommand, AccountSpecifiedCommand {
+
+	private static final Log LOG = LogFactory.getLog(SmsRestCommand.class);
 
 	private String restUrl = null;
 	private String commandKey = null;
@@ -65,7 +66,7 @@ public class SmsRestCommand implements ShortMessageCommand, AccountSpecifiedComm
 
 	public String execute(ParsedMessage msg, String messageType, String sourceAddress) {
 	
-		log.debug("Settings for this command: " + 
+		LOG.debug("Settings for this command: " + 
 				" requiresSiteId=" + requiresSiteId + 
 				" requiresUserId=" + requiresUserId);
 		
@@ -75,7 +76,7 @@ public class SmsRestCommand implements ShortMessageCommand, AccountSpecifiedComm
 			return SmsConstants.SMS_MO_EMPTY_REPLY_BODY;
 		}
 		
-		log.debug("executing URL: " + restUrl + " : " + body[0]);
+		LOG.debug("executing URL: " + restUrl + " : " + body[0]);
 		
 		Map<String,String> params = new HashMap<String,String>();
 		
@@ -96,29 +97,29 @@ public class SmsRestCommand implements ShortMessageCommand, AccountSpecifiedComm
 		try {
 			resp = HttpRESTUtils.fireRequest(restUrl, Method.POST, params);
 		} catch (HttpRequestException e) {
-			log.warn("Command: " + commandKey + "threw Exception: " + e);
-			if (log.isDebugEnabled()) {
-				log.warn(e.getLocalizedMessage(), e);
+			LOG.warn("Command: " + commandKey + "threw Exception: " + e);
+			if (LOG.isDebugEnabled()) {
+				e.printStackTrace();
 			}
 			
 			//TODO -  retry or queue
 			//TODO - probably throw upwards or return null
 		} catch (HttpIOException hio) {
-			log.warn("Command: " + commandKey + "threw Exception: " + hio);
-			if (log.isDebugEnabled()) {
-				log.warn(hio.getLocalizedMessage(),hio);
+			LOG.warn("Command: " + commandKey + "threw Exception: " + hio);
+			if (LOG.isDebugEnabled()) {
+				hio.printStackTrace();
 			}
 		}
 
 		String returnStr = "";
 
 		if (resp != null) {
-			log.debug("Return code is: " + resp.getResponseCode());
+			LOG.debug("Return code is: " + resp.getResponseCode());
 			
 			if (resp.getResponseCode() == 200) {
 				returnStr = resp.getResponseBody();
 			} else {
-				log.warn("Command: " + commandKey + " gave a response code: " + resp.getResponseCode() + ": " + resp.responseMessage);
+				LOG.warn("Command: " + commandKey + " gave a response code: " + resp.getResponseCode() + ": " + resp.responseMessage);
 			}
 		}
 		

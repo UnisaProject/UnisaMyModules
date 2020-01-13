@@ -4,7 +4,7 @@
   <parent>
     <artifactId>content</artifactId>
     <groupId>org.sakaiproject.content</groupId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <name>content-providers-impl</name>
@@ -15,9 +15,9 @@
     <url>http://sakaiproject.org/</url>
   </organization>
   <inceptionYear>2003</inceptionYear>
-  <packaging>sakai-component</packaging>
+  <packaging>jar</packaging>
   <properties>
-    <deploy.target>components</deploy.target>
+    <deploy.target />
   </properties>
   <dependencies>
     <dependency>

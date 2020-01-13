@@ -31,8 +31,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.tool.api.ToolSession;
 import org.sakaiproject.tool.cover.SessionManager;
@@ -54,7 +52,6 @@ import org.sakaiproject.tool.api.ToolException;
  * @version $Id$
  * 
  */
-@Slf4j
 public class MessageForumsFilePickerServlet extends JsfTool  implements HttpServletAccessProvider {
     private static final String HELPER_EXT = ".helper";
 
@@ -288,10 +285,11 @@ public class MessageForumsFilePickerServlet extends JsfTool  implements HttpServ
         if (siteService != null && forumManager != null)
           initComplete = true;
       } catch (Exception e) {
-        log.error(e.getMessage(), e);
+        e.printStackTrace();
       }
     }
-
+    
+    
     public void handleAccess(HttpServletRequest req, HttpServletResponse res, EntityReference ref) {
         //don't bother if the user is not logged in
         if (req.getRemoteUser() == null) {
@@ -305,10 +303,10 @@ public class MessageForumsFilePickerServlet extends JsfTool  implements HttpServ
                 return;
             }
             catch (UnsupportedEncodingException e) {
-                log.error(e.getMessage(), e);
+                e.printStackTrace();
             }
             catch (IOException e) {
-                log.error(e.getMessage(), e);
+                e.printStackTrace();
             }
         }
       
@@ -339,7 +337,7 @@ public class MessageForumsFilePickerServlet extends JsfTool  implements HttpServ
                 }
             }
             catch (IdUnusedException iue) {
-                log.error(iue.getMessage(), iue);
+                iue.printStackTrace();
             }
     
             //TODO: I've tried (and failed) a number of things here to try to get this to work
@@ -371,10 +369,10 @@ public class MessageForumsFilePickerServlet extends JsfTool  implements HttpServ
                 dispatcher.forward(req, res);
             }
             catch (ServletException e) {
-                log.error(e.getMessage(), e);
+                e.printStackTrace();
             }
             catch (IOException e) {
-                log.error(e.getMessage(), e);
+                e.printStackTrace();
             }        
         }
     }

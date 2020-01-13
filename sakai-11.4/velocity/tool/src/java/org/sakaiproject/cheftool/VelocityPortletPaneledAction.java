@@ -38,9 +38,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.cover.SecurityService;
 import org.sakaiproject.cheftool.api.Alert;
 import org.sakaiproject.cheftool.api.Menu;
@@ -73,11 +73,13 @@ import org.sakaiproject.vm.ActionURL;
  * </p>
  */
 @SuppressWarnings("deprecation")
-@Slf4j
 public abstract class VelocityPortletPaneledAction extends ToolServlet
 {
 
 	private static final long serialVersionUID = 1L;
+
+	/** Our logger. */
+	private static Logger M_log = LoggerFactory.getLogger(VelocityPortletPaneledAction.class);
 
 	/** message bundle */
 	private static ResourceLoader rb = new ResourceLoader("velocity-tool");
@@ -345,7 +347,7 @@ public abstract class VelocityPortletPaneledAction extends ToolServlet
             String languageCode = locale.getLanguage();
             String countryCode = locale.getCountry();
             if(countryCode != null && countryCode.length() > 0) {
-                languageCode += "-" + countryCode;
+                languageCode += "_" + countryCode;
             }
             context.put("language",languageCode);
             context.put("dir", rl.getOrientation(locale));
@@ -575,7 +577,7 @@ public abstract class VelocityPortletPaneledAction extends ToolServlet
 					}
 					catch (IOException e)
 					{
-						log.warn("IOException: ", e);
+						M_log.warn("IOException: ", e);
 					}
 				}
 			}
@@ -610,7 +612,7 @@ public abstract class VelocityPortletPaneledAction extends ToolServlet
 		}
 		else
 		{
-			log.debug("processAction: no action");
+			M_log.debug("processAction: no action");
 		}
 
 	} // processAction
@@ -638,9 +640,9 @@ public abstract class VelocityPortletPaneledAction extends ToolServlet
 				{
 					if (StringUtils.equalsIgnoreCase(toolId, insecureTools[i]))
 					{
-						if (log.isDebugEnabled())
+						if (M_log.isDebugEnabled())
 						{
-							log.debug("Will skip all CSRF checks on toolId=" + toolId);
+							M_log.debug("Will skip all CSRF checks on toolId=" + toolId);
 						}
 						skipCSRFCheck = true;
 						break;
@@ -659,7 +661,7 @@ public abstract class VelocityPortletPaneledAction extends ToolServlet
 				Object sessionAttr = SessionManager.getCurrentSession().getAttribute(UsageSessionService.SAKAI_CSRF_SESSION_ATTRIBUTE);
 				if ( sessionAttr == null )
 				{
-					log.warn("Missing CSRF Token session attribute: " + action + "; toolId=" + toolId);
+					M_log.warn("Missing CSRF Token session attribute: " + action + "; toolId=" + toolId);
 					return false;
 				}
 				
@@ -667,12 +669,12 @@ public abstract class VelocityPortletPaneledAction extends ToolServlet
 				String sessionToken = sessionAttr.toString();
 				if (csrfToken == null || sessionToken == null || !StringUtils.equals(csrfToken, sessionToken)) 
 				{
-					log.warn("CSRF Token mismatched or missing on velocity action: " + action + "; toolId=" + toolId);
+					M_log.warn("CSRF Token mismatched or missing on velocity action: " + action + "; toolId=" + toolId);
 					return false;
 				}
-				if (log.isDebugEnabled())
+				if (M_log.isDebugEnabled())
 				{
-					log.debug("CSRF token (" + csrfToken + ") matches on action: " + action + "; toolId=" + toolId);
+					M_log.debug("CSRF token (" + csrfToken + ") matches on action: " + action + "; toolId=" + toolId);
 				}
 			}
 		}
@@ -741,29 +743,29 @@ public abstract class VelocityPortletPaneledAction extends ToolServlet
 			}
 			catch (NoSuchMethodException e2)
 			{
-				log.warn("Exception calling method " + methodName + " " + e2);
+				M_log.warn("Exception calling method " + methodName + " " + e2);
 			}
 			catch (IllegalAccessException e2)
 			{
-				log.warn("Exception calling method " + methodName + " " + e2);
+				M_log.warn("Exception calling method " + methodName + " " + e2);
 			}
 			catch (InvocationTargetException e2)
 			{
 				String xtra = "";
 				if (e2.getCause() != null) xtra = " (Caused by " + e2.getCause() + ")";
-				log.warn("Exception calling method " + methodName + " " + e2 + xtra, e2);
+				M_log.warn("Exception calling method " + methodName + " " + e2 + xtra, e2);
 
 			}
 		}
 		catch (IllegalAccessException e)
 		{
-			log.warn("Exception calling method " + methodName + " " + e);
+			M_log.warn("Exception calling method " + methodName + " " + e);
 		}
 		catch (InvocationTargetException e)
 		{
 			String xtra = "";
 			if (e.getCause() != null) xtra = " (Caused by " + e.getCause() + ")";
-			log.warn("Exception calling method " + methodName + " " + e + xtra, e);
+			M_log.warn("Exception calling method " + methodName + " " + e + xtra, e);
 		}
 
 	} // actionDispatch
@@ -809,21 +811,21 @@ public abstract class VelocityPortletPaneledAction extends ToolServlet
 		}
 		catch (ClassNotFoundException e)
 		{
-			log.warn("Exception helper class not found " + e);
+			M_log.warn("Exception helper class not found " + e);
 		}
 		catch (NoSuchMethodException e)
 		{
-			log.warn("Exception calling method " + methodName + " " + e);
+			M_log.warn("Exception calling method " + methodName + " " + e);
 		}
 		catch (IllegalAccessException e)
 		{
-			log.warn("Exception calling method " + methodName + " " + e);
+			M_log.warn("Exception calling method " + methodName + " " + e);
 		}
 		catch (InvocationTargetException e)
 		{
 			String xtra = "";
 			if (e.getCause() != null) xtra = " (Caused by " + e.getCause() + ")";
-			log.warn("Exception calling method " + methodName + " " + e + xtra);
+			M_log.warn("Exception calling method " + methodName + " " + e + xtra);
 		}
 
 	} // helperActionDispatch
@@ -1249,7 +1251,7 @@ public abstract class VelocityPortletPaneledAction extends ToolServlet
 			
       if ( formatArray.length != DEFAULT_FORMAT_ARRAY.length )
       {
-         log.warn("Unknown date format string (using default): " 
+         M_log.warn("Unknown date format string (using default): " 
                     + sdf.toPattern() );
          return DEFAULT_FORMAT_ARRAY;
       }
@@ -1287,7 +1289,7 @@ public abstract class VelocityPortletPaneledAction extends ToolServlet
 		if (formatArray.length != DEFAULT_TIME_FORMAT_ARRAY.length
 				&& formatArray.length != DEFAULT_TIME_FORMAT_ARRAY.length - 1)
 		{
-			log.warn("Unknown time format string (using default): " + format);
+			M_log.warn("Unknown time format string (using default): " + format);
 			return DEFAULT_TIME_FORMAT_ARRAY.clone();
 		}
 		else

@@ -17,6 +17,8 @@ package org.sakaiproject.qna.tool.producers.renderers;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.qna.logic.ExternalLogic;
 import org.sakaiproject.qna.model.QnaQuestion;
 import org.sakaiproject.qna.tool.constants.SortByConstants;
@@ -27,7 +29,6 @@ import org.sakaiproject.qna.tool.utils.DateUtil;
 import org.sakaiproject.qna.tool.utils.QuestionsSorter;
 import org.sakaiproject.qna.utils.TextUtil;
 
-import lombok.extern.slf4j.Slf4j;
 import uk.org.ponder.rsf.components.UIBranchContainer;
 import uk.org.ponder.rsf.components.UIContainer;
 import uk.org.ponder.rsf.components.UIForm;
@@ -40,9 +41,9 @@ import uk.org.ponder.rsf.components.UIOutput;
  * Standard question list
  * Only shows published questions
  */
-@Slf4j
 public class StandardQuestionListRenderer implements QuestionListRenderer {
 
+	private static Log log = LogFactory.getLog(StandardQuestionListRenderer.class);
 	private QuestionsSorter questionsSorter;
 	private ExternalLogic externalLogic;
 	private PagerRenderer pagerRenderer;

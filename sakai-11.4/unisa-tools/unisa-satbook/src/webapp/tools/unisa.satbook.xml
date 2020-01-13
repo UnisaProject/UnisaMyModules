@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.satbook"
+		title="Booking System"
+		description="Booking System">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

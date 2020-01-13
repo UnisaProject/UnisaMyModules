@@ -19,9 +19,11 @@
  *
  **********************************************************************************/
 
+
 package org.sakaiproject.tool.assessment.qti.helper.assessment;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.tool.assessment.qti.constants.QTIVersion;
 
@@ -34,9 +36,10 @@ import org.sakaiproject.tool.assessment.qti.constants.QTIVersion;
  */
 
 // Note assessment for QTI 1.2 and 2.0 are nearly identical
-@Slf4j
 public class AssessmentHelper12Impl extends AssessmentHelperBase
 {
+  private static Logger log = LoggerFactory.getLogger(AssessmentHelper12Impl.class);
+
   public AssessmentHelper12Impl()
   {
     log.debug("AssessmentHelper12Impl");

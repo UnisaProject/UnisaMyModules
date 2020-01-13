@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+    <form-bean name="eshopform" type="za.ac.unisa.lms.tools.ebookshop.forms.EshopForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+		<action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.ebookshop.actions.DefaultAction">
+      <forward
+      name="default"
+      path="/eshop.do?action=showAdverts"
+      contextRelative="true" />
+    </action>
+    <action
+      attribute="eshopform"
+      name="eshopform"
+      parameter="action"
+      path="/eshop"
+      scope="session"
+      type="za.ac.unisa.lms.tools.ebookshop.actions.EshopAction">
+      <forward
+        name="editadvert"
+        path="/WEB-INF/jsp/editadvert.jsp"
+        contextRelative="true" />
+      <forward
+        name="addadvert"
+        path="/WEB-INF/jsp/addadvert.jsp"
+        contextRelative="true" />
+      <forward
+        name="showadverts"
+        path="/WEB-INF/jsp/showadverts.jsp"
+        contextRelative="true" />
+      <forward
+        name="viewadvert"
+        path="/WEB-INF/jsp/viewadvert.jsp"
+        contextRelative="true" />
+        <forward
+        name="preview"
+        path="/WEB-INF/jsp/preview.jsp"
+        contextRelative="true" />
+        <forward
+        name="editadvert"
+        path="/WEB-INF/jsp/editadvert.jsp"
+        contextRelative="true" />
+        <forward
+        name="delete"
+        path="/WEB-INF/jsp/delete.jsp"
+        contextRelative="true" />
+        <forward
+        name="revise"
+        path="/WEB-INF/jsp/revise.jsp"
+        contextRelative="true" />
+    </action>
+
+	</action-mappings>
+
+	<message-resources parameter="za.ac.unisa.lms.tools.ebookshop.ApplicationResources"/>
+
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in>
+</struts-config>

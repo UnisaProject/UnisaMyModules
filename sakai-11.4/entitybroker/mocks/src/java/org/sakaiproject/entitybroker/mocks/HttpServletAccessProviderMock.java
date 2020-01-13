@@ -25,8 +25,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.sakaiproject.entitybroker.EntityReference;
 import org.sakaiproject.entitybroker.access.HttpServletAccessProvider;
 import org.sakaiproject.entitybroker.util.http.EntityHttpServletResponse;
@@ -38,7 +36,6 @@ import org.sakaiproject.entitybroker.util.http.EntityHttpServletResponse;
  * 
  * @author Aaron Zeckoski (aaron@caret.cam.ac.uk)
  */
-@Slf4j
 @SuppressWarnings("deprecation")
 public class HttpServletAccessProviderMock implements HttpServletAccessProvider {
 
@@ -55,7 +52,8 @@ public class HttpServletAccessProviderMock implements HttpServletAccessProvider 
         try {
             res.getWriter().print(prefix + ": HttpServletAccessProviderMock");
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            // nothing to do here
+            e.printStackTrace();
         }
         ((EntityHttpServletResponse) res).setStatus(HttpServletResponse.SC_OK);
     }

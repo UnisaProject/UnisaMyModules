@@ -15,14 +15,12 @@
  */
 package org.sakaiproject.webservices;
 
-import java.lang.reflect.Method;
-
 import com.thoughtworks.paranamer.BytecodeReadingParanamer;
 import com.thoughtworks.paranamer.Paranamer;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-
 import org.sakaiproject.webservices.SakaiPortalLogin;
+
+import java.lang.reflect.Method;
 
 /**
  * Created by jbush on 2/11/14.
@@ -33,7 +31,6 @@ import org.sakaiproject.webservices.SakaiPortalLogin;
  * for a class once we've brought the jws file forward, so its just a copy and past
  * affair to get all the annotations in place.
  */
-@Slf4j
 public class MethodGenerator {
 
     @Test
@@ -43,11 +40,11 @@ public class MethodGenerator {
             if (!method.getDeclaringClass().getName().equals(clazz.getName())) {
                 continue;
             }
-            log.info("@WebMethod");
-            log.info("@Path(\"/" + method.getName() + "\")");
-            log.info("@Produces(\"text/plain\")");
-            log.info("@GET");
-            log.info("public " + method.getReturnType().getSimpleName() + " " + method.getName() + "(");
+            System.out.println("@WebMethod");
+            System.out.println("@Path(\"/" + method.getName() + "\")");
+            System.out.println("@Produces(\"text/plain\")");
+            System.out.println("@GET");
+            System.out.println("public " + method.getReturnType().getSimpleName() + " " + method.getName() + "(");
             Paranamer paranamer = new BytecodeReadingParanamer();
 
             try {
@@ -57,16 +54,16 @@ public class MethodGenerator {
                 Class<?>[] types = method.getParameterTypes();
                 int i = 0;
                 for (String name : parameterNames) {
-                    log.info("@WebParam(name = \"" + name + "\", partName = \"" + name + "\") @QueryParam(\"" + name + "\") " + types[i].getSimpleName() + " " + name);
+                    System.out.print("@WebParam(name = \"" + name + "\", partName = \"" + name + "\") @QueryParam(\"" + name + "\") " + types[i].getSimpleName() + " " + name);
                     if (i + 1 != parameterNames.length) {
-                        log.info(",");
+                        System.out.println(",");
                     } else {
-                        log.info(") {\n");
+                        System.out.println(") {\n");
                     }
                     i++;
                 }
             } catch (Exception e) {
-                log.error(e.getMessage(), e);
+                e.printStackTrace();
             }
 
         }

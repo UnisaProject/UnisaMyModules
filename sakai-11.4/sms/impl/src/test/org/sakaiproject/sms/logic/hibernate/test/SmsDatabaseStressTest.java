@@ -3,7 +3,7 @@ package org.sakaiproject.sms.logic.hibernate.test;
 import java.util.Calendar;
 import java.util.Date;
 import org.junit.After;
-import org.junit.Assert;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -86,14 +86,14 @@ public class SmsDatabaseStressTest extends AbstractBaseTestCase {
 					smsMessage);
 		}
 
-		Assert.assertTrue("Not all messages returned",
+		assertTrue("Not all messages returned",
 				smsTask.getSmsMessages().size() == MESSAGECOUNT);
         
         
 		final SmsTask theSmsTask = hibernateLogicLocator.getSmsTaskLogic()
 				.getSmsTask(smsTask.getId());
-		Assert.assertNotNull("theSmsTask may not be null", theSmsTask);
-		Assert.assertEquals("Message size not correct", MESSAGECOUNT, 
+		assertNotNull("theSmsTask may not be null", theSmsTask);
+		assertEquals("Message size not correct", MESSAGECOUNT, 
                 hibernateLogicLocator.getSmsMessageLogic().getSmsMessagesForTask(theSmsTask.getId()).size());
         
         for(SmsMessage m: hibernateLogicLocator.getSmsMessageLogic().getAllSmsMessages()){

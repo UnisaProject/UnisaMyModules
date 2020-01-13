@@ -22,17 +22,18 @@ package org.sakaiproject.component.app.messageforums.dao.hibernate;
  
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.messageforums.ActorPermissions;
 import org.sakaiproject.api.app.messageforums.DateRestrictions;
 import org.sakaiproject.api.app.messageforums.DiscussionTopic;
 import org.sakaiproject.api.app.messageforums.Label;
 import org.sakaiproject.api.app.messageforums.UniqueArrayList;
 
-@Slf4j
 public class DiscussionTopicImpl extends OpenTopicImpl implements DiscussionTopic {
 
+    private static final Logger LOG = LoggerFactory.getLogger(DiscussionTopicImpl.class);
+    
     private Boolean confidentialResponses;
     private Boolean mustRespondBeforeReading;
     private Integer hourBeforeResponsesVisible;
@@ -111,8 +112,8 @@ public class DiscussionTopicImpl extends OpenTopicImpl implements DiscussionTopi
     ////////////////////////////////////////////////////////////////////////
     
     public void addLabel(Label label) {
-        if (log.isDebugEnabled()) {
-            log.debug("addLabel(label " + label + ")");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("addLabel(label " + label + ")");
         }
         
         if (label == null) {
@@ -124,8 +125,8 @@ public class DiscussionTopicImpl extends OpenTopicImpl implements DiscussionTopi
     }
 
     public void removeLabel(Label label) {
-        if (log.isDebugEnabled()) {
-            log.debug("removeLabel(label " + label + ")");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("removeLabel(label " + label + ")");
         }
         
         if (label == null) {

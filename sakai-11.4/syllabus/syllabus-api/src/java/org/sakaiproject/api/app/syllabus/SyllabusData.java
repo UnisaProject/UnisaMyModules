@@ -20,6 +20,7 @@
  **********************************************************************************/
 package org.sakaiproject.api.app.syllabus;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ public interface SyllabusData
 {
  	public final String ITEM_POSTED="posted";
  	public final String ITEM_DRAFT= "draft";
+ 	public final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
   /**
    * @return Returns the emailNotification.
    */

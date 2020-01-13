@@ -25,20 +25,22 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.BindException;
-import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.poll.logic.ExternalLogic;
 import org.sakaiproject.poll.logic.PollListManager;
 import org.sakaiproject.poll.logic.PollVoteManager;
 import org.sakaiproject.poll.model.Poll;
 import org.sakaiproject.poll.model.VoteCollection;
+import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
-@Slf4j
+
 public class VoteValidator implements Validator {
 
+    /** Logger for this class and subclasses */
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     private PollVoteManager pollVoteManager;
     private PollListManager manager;
     
@@ -64,7 +66,7 @@ public class VoteValidator implements Validator {
 	public void validate(Object obj, Errors errors) {
 
 		VoteCollection votes = (VoteCollection)obj;
-		log.debug("we are validating a vote collection of " + votes + " for poll " + votes.getPollId());
+		logger.debug("we are validating a vote collection of " + votes + " for poll " + votes.getPollId());
 	
 		if (votes.getSubmissionStatus().equals("cancel"))
 			return;
@@ -72,12 +74,12 @@ public class VoteValidator implements Validator {
 		
 	//get the poll
 	Poll poll = manager.getPollById(votes.getPollId());
-	log.debug("this is a vote for " + poll.getText());
+	logger.debug("this is a vote for " + poll.getText());
 	List<String> options = new ArrayList<String>();
 	
 	//is the poll open?
 	if (!(poll.getVoteClose().after(new Date()) && new Date().after(poll.getVoteOpen()))) {
-		log.warn("poll is closed!");
+		logger.warn("poll is closed!");
 		if (!errors.hasFieldErrors("vote_closed")) {
 			errors.reject("vote_closed","vote closed");
 		} else {
@@ -90,7 +92,7 @@ public class VoteValidator implements Validator {
 	if (!externalLogic.isUserAdmin()) {
 		if (!pollVoteManager.pollIsVotable(poll))
 		{
-			log.error("attempt to vote in " + poll.getReference() + " by unauthorized user" );
+			logger.error("attempt to vote in " + poll.getReference() + " by unauthorized user" );
 			if (!errors.hasFieldErrors("vote_noperm")) {
 				errors.reject("vote_noperm","no permissions");
 			}
@@ -103,7 +105,7 @@ public class VoteValidator implements Validator {
 	}
 	
 	if (votes.getOptionsSelected() == null && votes.getOption() == null && poll.getMinOptions()>0) {
-		log.debug("there seems to be no vote on this poll");  
+		logger.debug("there seems to be no vote on this poll");  
 		String errStr = Integer.valueOf(poll.getMinOptions()).toString();
 		if (!errors.hasFieldErrors("error_novote")) {
 			errors.reject("error_novote", new Object[] {errStr}, "no vote");
@@ -126,7 +128,7 @@ public class VoteValidator implements Validator {
 		}
 	}
 	  
-	  log.debug("options selected is " + options.size());
+	  logger.debug("options selected is " + options.size());
 	  // the exact choise case
 	  
 	  if (pollVoteManager.userHasVoted(poll.getPollId()) && poll.getLimitVoting()) {
@@ -140,15 +142,15 @@ public class VoteValidator implements Validator {
 		}
 	  
 	  if (poll.getMaxOptions() == poll.getMinOptions() && options.size() != poll.getMaxOptions()){
-		  log.debug("exact match failure!");
+		  logger.debug("exact match failure!");
 		  String errStr = Integer.valueOf(poll.getMinOptions()).toString();
 		  errors.reject("error_exact_required", new Object[] {errStr}, "exact required");
 	  }else if (options.size() > poll.getMaxOptions()) {
-		  log.debug("votes are for more than allowed!");
+		  logger.debug("votes are for more than allowed!");
 		  String errStr = Integer.valueOf(poll.getMaxOptions()).toString();
 		  errors.reject("error_tomany_votes", new Object[] {errStr}, "to many votes");
 	  }else if (options.size() < poll.getMinOptions()) {
-		  log.debug("votes are for fewer than required!");
+		  logger.debug("votes are for fewer than required!");
 		  String errStr = Integer.valueOf(poll.getMinOptions()).toString();
 		  errors.reject("error_tofew_votes", new Object[] {errStr}, "to few");
 	  }

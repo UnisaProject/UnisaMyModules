@@ -19,13 +19,14 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.ui.listener.author;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.faces.application.FacesMessage;
@@ -34,10 +35,9 @@ import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.event.cover.EventTrackingService;
-import org.sakaiproject.samigo.util.SamigoConstants;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AnswerIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
@@ -70,10 +70,11 @@ import org.sakaiproject.util.FormattedText;
  * @author Ed Smiley
  * @version $Id$
  */
-@Slf4j
+
 public class SavePartListener
     implements ActionListener
 {
+  private static Logger log = LoggerFactory.getLogger(SavePartListener.class);
   private boolean isEditPendingAssessmentFlow;
 
   public SavePartListener()
@@ -95,7 +96,7 @@ public class SavePartListener
     // create an assessment based on the title entered and the assessment
     // template selected
     // #1 - read from form editpart.jsp
-    String title = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(sectionBean.getSectionTitle()).trim();
+    String title = TextFormat.convertPlaintextToFormattedTextNoHighUnicode(log, sectionBean.getSectionTitle()).trim();
     if(title == null || title.equals("")){
     	String err=ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.AuthorMessages", "empty_part_title_error");
     	context.addMessage(null, new FacesMessage(err));
@@ -139,10 +140,10 @@ public class SavePartListener
     }
     
     if (isEditPendingAssessmentFlow) {
-    	EventTrackingService.post(EventTrackingService.newEvent(SamigoConstants.EVENT_ASSESSMENT_REVISE, "siteId=" + AgentFacade.getCurrentSiteId() + ", sectionId=" + sectionId, true));
+    	EventTrackingService.post(EventTrackingService.newEvent("sam.assessment.revise", "siteId=" + AgentFacade.getCurrentSiteId() + ", sectionId=" + sectionId, true));
     }
     else {
-    	EventTrackingService.post(EventTrackingService.newEvent(SamigoConstants.EVENT_PUBLISHED_ASSESSMENT_REVISE, "siteId=" + AgentFacade.getCurrentSiteId() + ", sectionId=" + sectionId, true));
+    	EventTrackingService.post(EventTrackingService.newEvent("sam.pubassessment.revise", "siteId=" + AgentFacade.getCurrentSiteId() + ", sectionId=" + sectionId, true));
     }
 
     boolean addItemsFromPool = false;
@@ -191,13 +192,13 @@ public class SavePartListener
 
     if (isEditPendingAssessmentFlow) {
     	if (!("".equals(sectionBean.getKeyword())))
-    		section.addSectionMetaData(SectionMetaDataIfc.KEYWORDS, TextFormat.convertPlaintextToFormattedTextNoHighUnicode(sectionBean.getKeyword()));
+    		section.addSectionMetaData(SectionMetaDataIfc.KEYWORDS, TextFormat.convertPlaintextToFormattedTextNoHighUnicode(log, sectionBean.getKeyword()));
 
     	if (!("".equals(sectionBean.getObjective())))
-    		section.addSectionMetaData(SectionMetaDataIfc.OBJECTIVES, TextFormat.convertPlaintextToFormattedTextNoHighUnicode(sectionBean.getObjective()));
+    		section.addSectionMetaData(SectionMetaDataIfc.OBJECTIVES, TextFormat.convertPlaintextToFormattedTextNoHighUnicode(log, sectionBean.getObjective()));
 
     	if (!("".equals(sectionBean.getRubric())))
-    		section.addSectionMetaData(SectionMetaDataIfc.RUBRICS, TextFormat.convertPlaintextToFormattedTextNoHighUnicode(sectionBean.getRubric()));
+    		section.addSectionMetaData(SectionMetaDataIfc.RUBRICS, TextFormat.convertPlaintextToFormattedTextNoHighUnicode(log, sectionBean.getRubric()));
 
     	if (!("".equals(sectionBean.getType())))  {
     		section.addSectionMetaData(SectionDataIfc.AUTHOR_TYPE, sectionBean.getType());
@@ -278,7 +279,7 @@ public class SavePartListener
     assessmentBean.setAssessment(assessment);
     assessmentService.updateAssessmentLastModifiedInfo(assessment);
     
-    EventTrackingService.post(EventTrackingService.newEvent(SamigoConstants.EVENT_ASSESSMENT_REVISE, "siteId=" + AgentFacade.getCurrentSiteId() + ", sectionId=" + section.getSectionId(), true));
+    EventTrackingService.post(EventTrackingService.newEvent("sam.assessment.revise", "siteId=" + AgentFacade.getCurrentSiteId() + ", sectionId=" + section.getSectionId(), true));
   }
 
   public SectionFacade addPart(String assessmentId){
@@ -308,7 +309,7 @@ public class SavePartListener
     
      QuestionPoolService qpservice = new QuestionPoolService();
 
-     List itemlist = qpservice.getAllItems(Long.valueOf(sectionBean.getSelectedPool()) );
+     ArrayList itemlist = qpservice.getAllItems(Long.valueOf(sectionBean.getSelectedPool()) );
      int itemcount = itemlist.size();
      String itemcountString=" "+Integer.toString(itemcount);
 
@@ -374,7 +375,7 @@ public class SavePartListener
     private void updateAttachment(List oldList, List newList, SectionDataIfc section){
     if ((oldList == null || oldList.size() == 0 ) && (newList == null || newList.size() == 0)) return;
     List list = new ArrayList();
-    Map map = getAttachmentIdHash(oldList);
+    HashMap map = getAttachmentIdHash(oldList);
     for (int i=0; i<newList.size(); i++){
       SectionAttachmentIfc a = (SectionAttachmentIfc)newList.get(i);
       if (map.get(a.getAttachmentId())!=null){
@@ -406,8 +407,8 @@ public class SavePartListener
     }
   }
 
-  private Map getAttachmentIdHash(List list){
-    Map map = new HashMap();
+  private HashMap getAttachmentIdHash(List list){
+    HashMap map = new HashMap();
     for (int i=0; i<list.size(); i++){
       SectionAttachmentIfc a = (SectionAttachmentIfc)list.get(i);
       map.put(a.getAttachmentId(), a);

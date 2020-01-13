@@ -16,21 +16,22 @@
 
 package org.sakaiproject.tool.gradebook.ui;
 
-import java.io.Serializable;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.sakaiproject.service.gradebook.shared.StaleObjectModificationException;
 import org.sakaiproject.tool.gradebook.Spreadsheet;
 import org.sakaiproject.tool.gradebook.jsf.FacesUtil;
+import org.sakaiproject.service.gradebook.shared.StaleObjectModificationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
 
 /**
  * User: louis
  * Date: Jun 14, 2006
  * Time: 11:12:51 AM
  */
-@Slf4j
 public class SpreadsheetRemoveBean extends GradebookDependentBean implements Serializable {
+
+    private static final Logger logger = LoggerFactory.getLogger(SpreadsheetRemoveBean.class);
 
     private Long spreadsheetId;
     private boolean removeConfirmed;
@@ -40,14 +41,14 @@ public class SpreadsheetRemoveBean extends GradebookDependentBean implements Ser
 
     public void init() {
 
-        if(log.isDebugEnabled()) log.debug("loading spreadsheetRemove().init()");
+        if(logger.isDebugEnabled()) logger.debug("loading spreadsheetRemove().init()");
         if (spreadsheetId != null) {
-            log.debug("spreadsheet id is "+ spreadsheetId);
+            logger.debug("spreadsheet id is "+ spreadsheetId);
             spreadsheet = getGradebookManager().getSpreadsheet(spreadsheetId);
             if (spreadsheet == null) {
                 // The assignment might have been removed since this link was set up.
-                if(log.isDebugEnabled()) log.debug("No spreadsheetId=" + spreadsheetId + " in gradebookUid " + getGradebookUid());
-                if(log.isDebugEnabled()) log.debug("spreadsheet is null");
+                if(logger.isDebugEnabled()) logger.debug("No spreadsheetId=" + spreadsheetId + " in gradebookUid " + getGradebookUid());
+                if(logger.isDebugEnabled()) logger.debug("spreadsheet is null");
             }            
         }
     }
@@ -105,4 +106,5 @@ public class SpreadsheetRemoveBean extends GradebookDependentBean implements Ser
         }
 
     }
+
 }

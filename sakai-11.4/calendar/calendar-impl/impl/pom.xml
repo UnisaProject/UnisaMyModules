@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.sakaiproject.calendar</groupId>
         <artifactId>calendar</artifactId>
-        <version>12.6</version>
+        <version>11.4</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -17,10 +17,7 @@
         <url>http://sakaiproject.org/</url>
     </organization>
     <inceptionYear>2003</inceptionYear>
-    <packaging>sakai-component</packaging>
-    <properties>
-        <deploy.target>components</deploy.target>
-    </properties>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
@@ -69,6 +66,11 @@
             <artifactId>servlet-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>avalon-framework</groupId>
+            <artifactId>avalon-framework</artifactId>
+            <version>20020627</version>
+        </dependency>
+        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
         </dependency>
@@ -84,15 +86,15 @@
             <groupId>org.mnode.ical4j</groupId>
             <artifactId>ical4j</artifactId>
         </dependency>
+        <!-- ical4j is dependent on backport -->
+   		<dependency>
+			<groupId>backport-util-concurrent</groupId>
+			<artifactId>backport-util-concurrent</artifactId>
+		</dependency>
         <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
+            <groupId>fop</groupId>
             <artifactId>fop</artifactId>
-            <version>2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>xmlgraphics-commons</artifactId>
-            <version>2.2</version>
+            <version>0.20.5</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -109,47 +111,9 @@
             <artifactId>ehcache-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.sakaiproject.kernel</groupId>
-            <artifactId>sakai-kernel-impl</artifactId>
-            <version>${sakai.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4-common</artifactId>
-            <version>${sakai.powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4-rule</artifactId>
-            <version>${sakai.powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-classloading-xstream</artifactId>
-            <version>${sakai.powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-classloading-base</artifactId>
-            <version>${sakai.powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <version>${sakai.powermock.version}</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.9</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -177,16 +141,6 @@
                 </includes>
             </resource>
         </resources>
-        <testResources>
-            <testResource>
-                <directory>${basedir}/src/test/resources</directory>
-                <includes>
-                    <include>**/*.xml</include>
-                    <include>**/*.properties</include>
-                    <include>**/*.ics</include>
-                </includes>
-            </testResource>
-        </testResources>
         
     </build>
 </project>

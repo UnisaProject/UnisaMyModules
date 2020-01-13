@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.sms.logic.exception.SmsAccountNotFoundException;
 import org.sakaiproject.sms.logic.exception.SmsTaskNotFoundException;
 import org.sakaiproject.sms.logic.smpp.SmsBilling;
@@ -39,8 +41,6 @@ import org.sakaiproject.sms.logic.smpp.validate.SmsTaskValidator;
 import org.sakaiproject.sms.model.SmsMessage;
 import org.sakaiproject.sms.model.SmsTask;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * This API allows for easy implementation of SMS services in an existing or new
  * Sakai tool.
@@ -48,9 +48,10 @@ import lombok.extern.slf4j.Slf4j;
  * @author etienne@psybergate.co.za
  * 
  */
-@Slf4j
+
 public class SmsServiceImpl implements SmsService {
 
+	private final static Log log = LogFactory.getLog(SmsServiceImpl.class);
 
 	public SmsCore smsCore = null;
 
@@ -172,7 +173,7 @@ public class SmsServiceImpl implements SmsService {
 		try {
 			smsAcountId = smsBilling.getAccountID(sakaiSiteID, sakaiUserID);
 		} catch (SmsAccountNotFoundException e) {
-			log.warn(e.getLocalizedMessage(), e);
+			e.printStackTrace();
 			return false;
 		}
 		return smsBilling.checkSufficientCredits(smsAcountId, creditsRequired,

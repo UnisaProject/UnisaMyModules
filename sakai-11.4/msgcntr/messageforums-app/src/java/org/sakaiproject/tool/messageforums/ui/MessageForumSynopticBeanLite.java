@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2003-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.tool.messageforums.ui;
 
 import java.text.DateFormat;
@@ -23,10 +8,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.messageforums.Area;
 import org.sakaiproject.api.app.messageforums.AreaManager;
 import org.sakaiproject.api.app.messageforums.DiscussionForumService;
@@ -43,17 +27,16 @@ import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.site.api.Site;
-import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.site.api.ToolConfiguration;
-import org.sakaiproject.tool.api.SessionManager;
-import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.site.cover.SiteService;
+import org.sakaiproject.tool.cover.SessionManager;
+import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.tool.messageforums.PrivateMessagesTool;
 import org.sakaiproject.tool.messageforums.SynopticSiteSemesterComparator;
 import org.sakaiproject.tool.messageforums.SynopticSitesPreferencesComparator;
 import org.sakaiproject.user.api.Preferences;
 import org.sakaiproject.user.cover.PreferencesService;
 
-@Slf4j
 public class MessageForumSynopticBeanLite {
 	
 	// transient only persists in request scope
@@ -61,14 +44,18 @@ public class MessageForumSynopticBeanLite {
 	private transient Boolean anyMFToolInSite = null;
 	private transient List<DecoratedSynopticMsgcntrItem> myContents = null;
 	private transient DecoratedSynopticMsgcntrItem siteHomepageContent = null;
+	/** to get accces to log file */
+	private static final Logger LOG = LoggerFactory.getLogger(MessageForumSynopticBeanLite.class);	
 	private SynopticMsgcntrManager synopticMsgcntrManager;
 	private MessageForumsForumManager forumsManager;
 	private MessageForumsTypeManager typeManager;
 	private AreaManager areaManager;
 	private PrivateMessageManager pvtMessageManager;
 	private int myContentsSize = -1;
-	private Map mfPageInSiteMap, sitesMap;
+	private HashMap mfPageInSiteMap, sitesMap;
 	private int myDisplayedSites = 0;
+	/** The string that Charon uses for preferences. */
+	private static final String CHARON_PREFS = "sakai:portal:sitenav";
 	private static final String PERFORMANCE_2 = "2";
 	private String performance;
 	private Boolean userRequestSynoptic;
@@ -77,27 +64,10 @@ public class MessageForumSynopticBeanLite {
 	private Boolean disableForums;
 	private String disableMyWorkspaceDisabledMessage;
 	
-	/** Dependency Injected   */
-	private SiteService siteService;
-	private SessionManager sessionManager;
-	private ToolManager toolManager;
-
-	
-	public void setToolManager(ToolManager toolManager) {
-		this.toolManager = toolManager;
-	}
-
-	public void setSessionManager(SessionManager sessionManager) {
-		this.sessionManager = sessionManager;
-	}
-
-	public void setSiteService(SiteService siteService) {
-		this.siteService = siteService;
-	}
-
-	
 	public List<DecoratedSynopticMsgcntrItem> getContents(){
-
+		
+		
+		
 		if(isMyWorkspace() && !isDisableMyWorkspace()){
 			if(myContents != null){
 				return myContents;
@@ -114,7 +84,7 @@ public class MessageForumSynopticBeanLite {
 			
 			//Grab user's preferences for site order, and remove sites that user has removed
 			Preferences prefs = PreferencesService.getPreferences(getCurrentUser());
-			ResourceProperties props = prefs.getProperties(org.sakaiproject.user.api.PreferencesService.SITENAV_PREFS_KEY);
+			ResourceProperties props = prefs.getProperties(CHARON_PREFS);
 			List<String> orderedSites = props.getPropertyList("order");
 			
 			List<String> excludedSites = props.getPropertyList("exclude");
@@ -139,7 +109,7 @@ public class MessageForumSynopticBeanLite {
 			 * In theory sorting by TITLE_ASC seems like it would be slower, but that actually allows the query cache to find
 			 * it. If this is causing a slow down, check to see if portal changed it's getSites query.
 			 */
-			List<Site> sites = siteService.getSites(
+			List<Site> sites = SiteService.getSites(
 					org.sakaiproject.site.api.SiteService.SelectionType.ACCESS, null, null,
 					null, org.sakaiproject.site.api.SiteService.SortType.TITLE_ASC, null);
 			
@@ -258,13 +228,13 @@ public class MessageForumSynopticBeanLite {
 			//return empty synopticMsgcntrItem for anon users
 			Site site;
 			try {
-				site = siteService.getSite(getContext());
+				site = SiteService.getSite(getContext());
 				synItem = new SynopticMsgcntrItemImpl();
 				synItem.setSiteId(site.getId());
 				siteHomepageContent = new DecoratedSynopticMsgcntrItem(synItem, site);
 			} catch (IdUnusedException e) {
 				//we not longer need this record so delete it
-				log.error(e.getMessage(), e);
+				e.printStackTrace();
 			}
 			
 		}else{
@@ -277,7 +247,7 @@ public class MessageForumSynopticBeanLite {
 				Site site;
 				try {
 					//only add if the site exists:
-					site = siteService.getSite(synItem.getSiteId());
+					site = SiteService.getSite(synItem.getSiteId());
 					//check if the site title has changed:
 					if(synItem.getSiteTitle() != null && !synItem.getSiteTitle().equals(site.getTitle())){
 						//update all site titles in table
@@ -289,12 +259,12 @@ public class MessageForumSynopticBeanLite {
 				} catch (IdUnusedException e) {
 					//we not longer need this record so delete it
 					getSynopticMsgcntrManager().deleteSynopticMsgcntrItem(synItem);
-					log.error(e.getMessage(), e);
+					e.printStackTrace();
 				}					
 			}else{
 				//add a new entry to the table
-				String userId = sessionManager.getCurrentSessionUserId();
-				String siteId = toolManager.getCurrentPlacement().getContext();
+				String userId = SessionManager.getCurrentSessionUserId();
+				String siteId = ToolManager.getCurrentPlacement().getContext();
 				
 				
 				//calling resetMessagesAndForumSynopticInfo will create a new item (if needed) and 
@@ -309,12 +279,12 @@ public class MessageForumSynopticBeanLite {
 					Site site;
 					try {
 						//only add if the site exists:
-						site = siteService.getSite(synopticMsgcntrItem.getSiteId());
+						site = SiteService.getSite(synopticMsgcntrItem.getSiteId());
 						siteHomepageContent = new DecoratedSynopticMsgcntrItem(synopticMsgcntrItem, site);	
 					} catch (IdUnusedException e) {
 						//we not longer need this record so delete it
 						getSynopticMsgcntrManager().deleteSynopticMsgcntrItem(synopticMsgcntrItem);
-						log.error(e.getMessage(), e);
+						e.printStackTrace();
 					}			
 				}
 			}
@@ -325,9 +295,9 @@ public class MessageForumSynopticBeanLite {
 	
 	  private String getSiteTitle(){	  
 		  try {
-			return siteService.getSite(toolManager.getCurrentPlacement().getContext()).getTitle();
+			return SiteService.getSite(ToolManager.getCurrentPlacement().getContext()).getTitle();
 		} catch (IdUnusedException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 		return "";
 	  }
@@ -344,12 +314,12 @@ public class MessageForumSynopticBeanLite {
 			// get context id
 			final String siteId = getContext();
 
-			if (siteService.getUserSiteId("admin").equals(siteId))
+			if (SiteService.getUserSiteId("admin").equals(siteId))
 				return false;
 
-			myWorkspace = siteService.isUserSite(siteId);
+			myWorkspace = SiteService.isUserSite(siteId);
 
-			log.debug("Result of determining if My Workspace: " + myWorkspace);
+			LOG.debug("Result of determining if My Workspace: " + myWorkspace);
 		}
 		
 		return myWorkspace.booleanValue();
@@ -362,7 +332,7 @@ public class MessageForumSynopticBeanLite {
 	 * 		String The site id (context) where tool currently located
 	 */
 	public String getContext() {
-		return toolManager.getCurrentPlacement().getContext();
+		return ToolManager.getCurrentPlacement().getContext();
 	}
 
 	public SynopticMsgcntrManager getSynopticMsgcntrManager() {
@@ -376,7 +346,7 @@ public class MessageForumSynopticBeanLite {
 
 
 	public String getCurrentUser(){
-		return sessionManager.getCurrentSessionUserId();
+		return SessionManager.getCurrentSessionUserId();
 	}
 
 	public String getServerUrl() {
@@ -431,7 +401,7 @@ public class MessageForumSynopticBeanLite {
 			mfToolExists = isForumsPageInSite(thisSite);
 
 		} catch (IdUnusedException e) {
-			log.error("IdUnusedException while trying to check if site has MF tool.");
+			LOG.error("IdUnusedException while trying to check if site has MF tool.");
 		}
 
 		return mfToolExists;
@@ -459,7 +429,7 @@ public class MessageForumSynopticBeanLite {
 			mfToolExists = isMessagesPageInSite(thisSite);
 
 		} catch (IdUnusedException e) {
-			log.error("IdUnusedException while trying to check if site has MF tool.");
+			LOG.error("IdUnusedException while trying to check if site has MF tool.");
 		}
 
 		return mfToolExists;
@@ -487,7 +457,7 @@ public class MessageForumSynopticBeanLite {
 			mfToolExists = isMessageForumsPageInSite(thisSite);
 
 		} catch (IdUnusedException e) {
-			log.error("IdUnusedException while trying to check if site has MF tool.");
+			LOG.error("IdUnusedException while trying to check if site has MF tool.");
 		}
 
 		return mfToolExists;
@@ -512,7 +482,7 @@ public class MessageForumSynopticBeanLite {
 		}
 	
 		if (sitesMap.get(siteId) == null) {
-			Site site = siteService.getSite(siteId);
+			Site site = SiteService.getSite(siteId);
 			sitesMap.put(site.getId(), site);
 			return site;
 		}
@@ -793,7 +763,7 @@ public class MessageForumSynopticBeanLite {
 			}
 			catch (IdUnusedException e) {
 				// Weirdness since site ids used gotten from SiteService
-				log.error("IdUnusedException while trying to check if site has MF tool.");
+				LOG.error("IdUnusedException while trying to check if site has MF tool.");
 
 			}
 
@@ -869,7 +839,7 @@ public class MessageForumSynopticBeanLite {
 		    		}
 		    	}
 		    	catch (IdUnusedException e) {
-		    		log.error("IdUnusedException attempting to move to Private Messages for a site. Site id used is: " + contextId);
+		    		LOG.error("IdUnusedException attempting to move to Private Messages for a site. Site id used is: " + contextId);
 		    	}
 		    }
 

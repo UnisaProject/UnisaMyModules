@@ -25,7 +25,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.authz.api.GroupNotDefinedException;
 import org.sakaiproject.authz.api.Role;
@@ -61,9 +62,9 @@ import org.sakaiproject.user.cover.UserDirectoryService;
  *
  *
  */
-@Slf4j
- public class AgentHelperImpl implements AgentHelper
+public class AgentHelperImpl implements AgentHelper
 {
+  private Logger log = LoggerFactory.getLogger(AgentHelperImpl.class);
   AgentImpl agent;
 
   private AuthzGroupService authzGroupService;
@@ -125,6 +126,7 @@ import org.sakaiproject.user.cover.UserDirectoryService;
       }
       else
       {
+        //log.debug("**** userEid = " + user.getEid());
         eid = user.getEid();
       }
     }
@@ -260,10 +262,11 @@ log.debug("getEidById agentString s = " + s);
       userRole = siteAuthzGroup.getUserRole(agentString);
       if (userRole!=null)
         role = userRole.getId();
+      //log.debug(realmName + ":" + role);
     }
     catch(Exception e)
     {
-        log.error(e.getMessage(), e);
+      e.printStackTrace();
     }
     return role;
   }
@@ -346,6 +349,7 @@ log.debug("getEidById agentString s = " + s);
    String siteName=null;
    try{
       siteName = SiteService.getSite(siteId).getTitle();
+      //log.debug("**** siteName="+siteName);
     }
     catch (Exception ex){
       log.warn("getSiteName : " + ex.getMessage());
@@ -367,7 +371,7 @@ log.debug("getEidById agentString s = " + s);
       name = UserDirectoryService.getUser(agentId).getDisplayName();
     }
     catch (Exception e){
-        log.error(e.getMessage(), e);
+      e.printStackTrace();
     }
     return name;
   }

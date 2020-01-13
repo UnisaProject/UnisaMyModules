@@ -19,31 +19,30 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.qti.helper;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.StringTokenizer;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.sakaiproject.component.cover.ComponentManager;
-import org.sakaiproject.tags.api.*;
 import org.sakaiproject.tool.assessment.qti.constants.AuthoringConstantStrings;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentMetaDataIfc;
+import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
 import org.sakaiproject.tool.assessment.facade.AssessmentFacade;
 import org.sakaiproject.tool.assessment.facade.ItemFacade;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Contract: use List of special "|" delimited "KEY|VALUE" Strings!
  * @author Ed Smiley esmiley@stanford.edu
  */
-@Slf4j
- public class MetaDataList
+public class MetaDataList
 {
-  private static final TagService tagService= (TagService) ComponentManager.get( TagService.class );
+  private static Logger log = LoggerFactory.getLogger(ExtractionHelper.class);
 
-    /**
+  /**
    * list of editable settings
    */
   private static final String[] editableKeys =
@@ -150,41 +149,6 @@ import org.sakaiproject.tool.assessment.facade.ItemFacade;
         else if (key.equalsIgnoreCase("ATTACHMENT")) {
       	  value = meta.substring(meta.indexOf("|") + 1);
       	  item.addItemAttachmentMetaData(value);
-        }else if (key.equalsIgnoreCase("ITEM_TAGS")) {
-
-            String[] tagList = value.split("\\),");
-            for (String tagString: tagList){
-                 String tagLabel =tagString.trim(); //We add the last ) to the tag string
-                 if (!(tagLabel.substring(tagLabel.length()-1).equals(")"))) {
-                    tagLabel = tagLabel + ")";
-                }
-                String tagCollectionName;
-                try {
-                     tagCollectionName = tagLabel.substring(tagLabel.lastIndexOf("(")+1, tagLabel.lastIndexOf(")"));
-                }catch (Exception e){
-                    tagCollectionName = "Not assigned collection";
-                    tagLabel = "No label needed";
-                }
-                try {
-                    tagLabel = tagLabel.substring(0,tagLabel.lastIndexOf("(")-1).trim();
-                }catch (Exception ex) {
-                    //Nothing to do if this happens...
-                }
-
-                if (!(tagCollectionName.equals("Not assigned collection"))){ //check if the collection is in our system and add the tag
-                    Optional collection = tagService.getTagCollections().getForExternalSourceName(tagCollectionName);
-                    if (collection.isPresent()) {
-                        TagCollection tagCollection = (TagCollection) collection.get();
-                        List<Tag> potentialTags = tagService.getTags().getTagsByExactLabel(tagLabel.trim());
-                        potentialTags.stream().filter(t -> t.getCollectionName().equals(tagCollection.getName())).forEach(t -> {
-                                item.addItemTag(t.getTagId(), t.getTagLabel(), t.getTagCollectionId(), t.getCollectionName());
-                        });
-
-                    }
-                }
-
-            }
-
         }
         else {
         	log.debug("key now is " + key);
@@ -250,6 +214,7 @@ import org.sakaiproject.tool.assessment.facade.ItemFacade;
     for (int i = 0; i < metadataList.size(); i++)
     {
       String meta = (String) metadataList.get(i);
+      //log.debug( "meta = "+ meta);
       StringTokenizer st = new StringTokenizer(meta, "|");
       String key = "";
       String value = "";
@@ -257,7 +222,7 @@ import org.sakaiproject.tool.assessment.facade.ItemFacade;
       {
         key = st.nextToken().trim();
       }
-
+      //log.debug( "key  = "+ key );
       // translate XML metadata strings to assessment metadata strings here
       // key to patch up the difference between Daisy's and earlier labels
       // that are compatible with the earlier beta version of Samigo
@@ -314,6 +279,7 @@ import org.sakaiproject.tool.assessment.facade.ItemFacade;
       }
        
       else if ("SUBMISSION_MESSAGE".equalsIgnoreCase(key)){
+    	  //log.debug("key is submsg " + key);
     	  // skip
       }
 

@@ -16,7 +16,6 @@
 package org.sakaiproject.profile2.tool.components;
 
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
@@ -38,7 +37,6 @@ public class CloseButton extends Panel{
 		
 		//image
 		ContextImage image = new ContextImage("img",new Model(ProfileConstants.CLOSE_IMAGE));
-		image.add(new AttributeModifier("alt",""));
 		
 		AjaxFallbackLink link = new AjaxFallbackLink("link") {
 			public void onClick(AjaxRequestTarget target) {

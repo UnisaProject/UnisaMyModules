@@ -26,11 +26,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.StatefulJob;
-
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.sitestats.api.PrefsData;
 import org.sakaiproject.sitestats.api.StatsManager;
@@ -38,8 +38,11 @@ import org.sakaiproject.sitestats.api.event.EventInfo;
 import org.sakaiproject.sitestats.api.event.EventRegistryService;
 import org.sakaiproject.sitestats.api.event.ToolInfo;
 
-@Slf4j
+
 public class ConvOldPrefsJobImpl implements StatefulJob {
+	// Logger
+	private Logger							LOG							= LoggerFactory.getLogger(ConvOldPrefsJobImpl.class);
+
 	// Sakai Services
 	private StatsManager				statsManager				= null;
 	public void setStatsManager(StatsManager statsManager) {
@@ -57,11 +60,11 @@ public class ConvOldPrefsJobImpl implements StatefulJob {
 
 	/** Convert old SST_PREFS to new SST_PREFERENCES. */
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-		log.info("Old SiteStats Preferences table conversion started...");
+		LOG.info("Old SiteStats Preferences table conversion started...");
 		if(areBothTablesPresent()){
 			convertPrefs();
 		}
-		log.info("Old SiteStats Preferences table conversion finished.");
+		LOG.info("Old SiteStats Preferences table conversion finished.");
 	}
 
 	private boolean convertPrefs() {
@@ -87,7 +90,7 @@ public class ConvOldPrefsJobImpl implements StatefulJob {
 					while(rs.next()) {
 						String eventId = rs.getString(1);
 						eventIds.add(eventId);
-						//log.info("Site '"+siteId+"' has selected: "+eventId);
+						//LOG.info("Site '"+siteId+"' has selected: "+eventId);
 					}
 					rs.close();
 					
@@ -117,22 +120,22 @@ public class ConvOldPrefsJobImpl implements StatefulJob {
 //						if(ti2.isSelected()) {
 //							for(EventInfo ei2 : ti2.getEvents()) {
 //								if(ei2.isSelected() && !eventIds.contains(ei2.getEventId())) {
-//									log.warn("Check failed: event '"+ei2.getEventId()+"' selected in new preferences but unselected in old preferences.");
+//									LOG.warn("Check failed: event '"+ei2.getEventId()+"' selected in new preferences but unselected in old preferences.");
 //								}
 //								if(!ei2.isSelected() && eventIds.contains(ei2.getEventId())) {
-//									log.warn("Check failed: event '"+ei2.getEventId()+"' unselected in new preferences but selected in old preferences.");
+//									LOG.warn("Check failed: event '"+ei2.getEventId()+"' unselected in new preferences but selected in old preferences.");
 //								}
 //							}
 //						}
 //					}
 				}catch(SQLException e){
-					log.error("An SQL error occurred while converting SST_PREFS data for site: "+siteId, e);
+					LOG.error("An SQL error occurred while converting SST_PREFS data for site: "+siteId, e);
 					return false;
 				}					
 			}
 			
 		}catch(SQLException e){
-			log.error("An SQL error occurred while converting SST_PREFS data to SST_PREFERENCES table.", e);
+			LOG.error("An SQL error occurred while converting SST_PREFS data to SST_PREFERENCES table.", e);
 		}finally{
 			if(rs != null){
 				try{ rs.close(); }catch(SQLException e){ /* ignore */ }
@@ -163,7 +166,7 @@ public class ConvOldPrefsJobImpl implements StatefulJob {
 					siteIds.add(rs.getString(1));
 				}
 			}catch(SQLException e){
-				log.error("Unable to get list of sites from SST_PREFS.", e);
+				LOG.error("Unable to get list of sites from SST_PREFS.", e);
 			}finally{
 				if(rs != null){
 					try{ rs.close(); }catch(SQLException e){ /* ignore */ }
@@ -173,7 +176,7 @@ public class ConvOldPrefsJobImpl implements StatefulJob {
 				}
 			}
 		}catch(SQLException e){
-			log.error("An SQL error occurred while getting list of sites from SST_PREFS.", e);
+			LOG.error("An SQL error occurred while getting list of sites from SST_PREFS.", e);
 		}finally{
 			if(c != null){
 				sqlService.returnConnection(c);
@@ -196,7 +199,7 @@ public class ConvOldPrefsJobImpl implements StatefulJob {
 				rs = s.executeQuery("select count(*) from SST_PREFS");
 				present = true;
 			}catch(SQLException e){
-				log.error("Table SST_PREFS doesn't exist! Nothing to do, aborting.");
+				LOG.error("Table SST_PREFS doesn't exist! Nothing to do, aborting.");
 				present = false;
 			}finally{
 				if(rs != null){
@@ -214,7 +217,7 @@ public class ConvOldPrefsJobImpl implements StatefulJob {
 					present = true;
 				}
 			}catch(SQLException e){
-				log.error("Table SST_PREFERENCES doesn't exist! Create it before running this conversion script.");
+				LOG.error("Table SST_PREFERENCES doesn't exist! Create it before running this conversion script.");
 				present = false;
 			}finally{
 				if(rs != null){
@@ -225,7 +228,7 @@ public class ConvOldPrefsJobImpl implements StatefulJob {
 				}
 			}
 		}catch(SQLException e){
-			log.error("An SQL error occurred while checking for SST_PREFS and SST_PREFERENCES existence.", e);
+			LOG.error("An SQL error occurred while checking for SST_PREFS and SST_PREFERENCES existence.", e);
 		}finally{
 			if(c != null){
 				sqlService.returnConnection(c);

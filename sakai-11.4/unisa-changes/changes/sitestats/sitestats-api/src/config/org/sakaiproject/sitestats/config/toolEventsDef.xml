@@ -89,29 +89,18 @@
 
 	<!-- gradebook (available in sakai 2.4+) -->
 	<!-- (see SAK-6207 and SAK-10802) -->
-	<tool
-		toolId="sakai.gradebookng"
-		additionalToolIds="sakai.gradebook.tool"
+	<tool 
+		toolId="sakai.gradebook.tool"
 		selected="true">
 		<event eventId="gradebook.newItem" selected="true"/>
-		<event eventId="gradebook.updateAssignment" selected="true"/>
 		<event eventId="gradebook.deleteItem" selected="true"/>
-		<event eventId="gradebook.updateItemScore" selected="true"/>
-		<event eventId="gradebook.updateUngradedScores" selected="true"/>
-		<event eventId="gradebook.comment" selected="true"/>
-		<event eventId="gradebook.studentView" selected="true"/>
-		<event eventId="gradebook.export" selected="true"/>
-		<event eventId="gradebook.importBegin" selected="true"/>
-		<event eventId="gradebook.importCompleted" selected="true"/>
-		<event eventId="gradebook.overrideCourseGrade" selected="true"/>
-		<event eventId="gradebook.updateSettings" selected="true"/>
-		<!-- legacy Gradebook Classic events, included here to retain historical statistics -->
 		<event eventId="gradebook.updateItemScores" selected="true"/>
 		<event eventId="gradebook.updateCourseGrades" selected="true"/>
+		<event eventId="gradebook.comment" selected="true"/>
 		<event eventId="gradebook.downloadRoster" selected="true"/>
 		<event eventId="gradebook.downloadCourseGrade " selected="true"/>
 		<event eventId="gradebook.importEntire" selected="true"/>
-		<event eventId="gradebook.importItem" selected="true"/>
+        <event eventId="gradebook.importItem" selected="true"/>
 		<eventParserTip for="contextId" separator="/" index="2"/>
 	</tool>
 
@@ -139,10 +128,8 @@
 
 
 	<!-- news -->
-	<!-- sakai.simple.rss = current id, sakai.news = legacy id -->
 	<tool 
-		toolId="sakai.simple.rss"
-		additionalToolIds="sakai.news"
+		toolId="sakai.news"
 		selected="true">
 		<event eventId="news.read" selected="true"/>
 		<event eventId="news.revise" selected="true"/>
@@ -348,8 +335,6 @@
 		<event eventId="dropbox.delete" selected="true"/>
 		<eventParserTip for="contextId" separator="/" index="3"/>
 	</tool>
-
-
 	<!-- roster (available in sakai 2.5.x) -->
 	<tool 
 		toolId="sakai.site.roster"
@@ -370,14 +355,7 @@
 		<event eventId="sam.assessment.revise" selected="true"/>
 		<event eventId="sam.assessment.submit" selected="true"/>
 		<event eventId="sam.assessment.submit.via_url" selected="true"/>
-		<event eventId="sam.assessment.submit.checked" selected="true"/>
-		<event eventId="sam.assessment.submit.click_sub" selected="true"/>
-		<event eventId="sam.assessment.submit.auto" selected="true"/>
-		<event eventId="sam.assessment.submit.from_last" selected="true"/>
-		<event eventId="sam.assessment.submit.from_toc" selected="true"/>
-		<event eventId="sam.assessment.submit.timer" selected="true"/>
-		<event eventId="sam.assessment.submit.timer.url" selected="true"/>
-		<event eventId="sam.assessment.submit.timer.thrd" selected="true"/>
+		<event eventId="sam.assessment.timer_submit" selected="true"/>
 		<event eventId="sam.assessment.publish" selected="true"/>
 		<event eventId="sam.assessment.take" selected="true"/>
 		<event eventId="sam.assessment.take.via_url" selected="true"/>
@@ -540,6 +518,34 @@
         <event eventId="yaft.forum.deleted" selected="true"/>
         <eventParserTip for="contextId" separator="/" index="2"/>
     </tool>
+        <!-- Unisa Discussion forums: unisa-discussionforums -->
+    <tool
+            toolId="unisa.discussionforums"
+            selected="true">
+            <event eventId="discussionforums.add" selected="true"/>
+            <event eventId="discussionforums.addtopic" selected="true"/>
+            <event eventId="discussionforums.addreply" selected="true"/>
+            <event eventId="discussionforums.delete" selected="true"/>
+            <event eventId="discussionforums.edit" selected="true"/>
+            <event eventId="discussionforums.deletetopic" selected="true"/>
+            <event eventId="discussionforums.deletereply" selected="true"/>
+            <eventParserTip for="contextId" separator="/" index="0"/>
+    </tool>
+  
+        	    <!-- Unisa FAQ's: unisa-faqs -->
+    <tool
+            toolId="unisa.faqs"
+            selected="true">
+            <event eventId="faqs.view" selected="true"/>
+            <event eventId="faqs.contentadd" selected="true"/>
+            <event eventId="faqs.contentdelete" selected="true"/>
+            <event eventId="faqs.contentedit" selected="true"/>
+            <event eventId="faqs.contentview" selected="true"/>
+            <event eventId="faqs.categoryadd" selected="true"/>
+            <event eventId="faqs.categorydelete" selected="true"/>
+            <event eventId="faqs.categoryedit" selected="true"/>
+            <eventParserTip for="contextId" separator="/" index="0"/>
+    </tool>
     
     <!-- sitestats -->
     <tool 
@@ -604,34 +610,4 @@
         <event eventId="webcontent.site.revise" selected="true"/>
         <eventParserTip for="contextId" separator="/" index="2"/>
 	</tool>
-	  <!-- Unisa Discussion forums: unisa-discussionforums -->
-    <tool
-            toolId="unisa.discussionforums"
-            selected="true">
-            <event eventId="discussionforums.add" selected="true"/>
-            <event eventId="discussionforums.addtopic" selected="true"/>
-            <event eventId="discussionforums.addreply" selected="true"/>
-            <event eventId="discussionforums.delete" selected="true"/>
-            <event eventId="discussionforums.edit" selected="true"/>
-            <event eventId="discussionforums.deletetopic" selected="true"/>
-            <event eventId="discussionforums.deletereply" selected="true"/>
-            <eventParserTip for="contextId" separator="/" index="0"/>
-    </tool>
-  
-        	    <!-- Unisa FAQ's: unisa-faqs -->
-    <tool
-            toolId="unisa.faqs"
-            selected="true">
-            <event eventId="faqs.view" selected="true"/>
-            <event eventId="faqs.contentadd" selected="true"/>
-            <event eventId="faqs.contentdelete" selected="true"/>
-            <event eventId="faqs.contentedit" selected="true"/>
-            <event eventId="faqs.contentview" selected="true"/>
-            <event eventId="faqs.categoryadd" selected="true"/>
-            <event eventId="faqs.categorydelete" selected="true"/>
-            <event eventId="faqs.categoryedit" selected="true"/>
-            <eventParserTip for="contextId" separator="/" index="0"/>
-    </tool>
-    
-	
 </toolEventsDef>

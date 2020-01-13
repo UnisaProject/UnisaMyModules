@@ -34,8 +34,6 @@ import org.sakaiproject.content.metadata.model.MetadataValidator;
  */
 public class StringMetadataType extends MetadataType<String>
 {
-
-	private static final long serialVersionUID = 1L;
 	private int minLength;
 	private int maxLength;
 	private String regularExpression;

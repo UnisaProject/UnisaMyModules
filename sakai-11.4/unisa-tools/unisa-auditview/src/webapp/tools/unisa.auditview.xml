@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.auditview"
+		title="myUnisa Audit: View"
+		description="This is for student help desk to track myUnisa sessions and usage.">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

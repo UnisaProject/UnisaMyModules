@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	  <form-bean name="brochuresForm" type="za.ac.unisa.lms.tools.brochures.forms.BrochuresForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="act"
+			path="/default"
+			type="za.ac.unisa.lms.tools.brochures.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/brochures.do?act=brochuresPage"
+				contextRelative="false" />
+		</action>
+		<action
+      attribute="brochuresForm"
+      name="brochuresForm"
+      parameter="act"
+      path="/brochures"
+      scope="session"
+      type="za.ac.unisa.lms.tools.brochures.actions.BrochuresAction">
+      <forward
+        name="mainmenu"
+        path="/WEB-INF/jsp/mainmenu.jsp"
+        contextRelative="true" />
+          <forward
+        name="mychoice"
+        path="/WEB-INF/jsp/mychoice.jsp"
+        contextRelative="true" />
+         <forward
+        name="myregistration"
+        path="/WEB-INF/jsp/myregistration.jsp"
+        contextRelative="true" />
+          <forward
+        name="mymodules"
+        path="/WEB-INF/jsp/mymodules.jsp"
+        contextRelative="true" />
+        </action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.brochures.ApplicationResources" />
+
+</struts-config>

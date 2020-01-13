@@ -88,16 +88,11 @@ public class CalendarImporterService
 	 */
 	public static List doImport(String importType, InputStream importStream, Map columnMapping, String[] customFieldPropertyNames) throws ImportException
 	{
-		return doImport(importType, importStream, columnMapping, customFieldPropertyNames, null);
-	}
-	
-	public static List doImport(String importType, InputStream importStream, Map columnMapping, String[] customFieldPropertyNames, String userTzid) throws ImportException
-	{
 		org.sakaiproject.calendar.api.CalendarImporterService service = getInstance();
 		
 		if ( service != null )
 		{
-			return service.doImport(importType, importStream, columnMapping, customFieldPropertyNames, userTzid);
+			return service.doImport(importType, importStream, columnMapping, customFieldPropertyNames);
 		}
 		else
 		{

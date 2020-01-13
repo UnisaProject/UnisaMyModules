@@ -19,9 +19,13 @@
  *
  **********************************************************************************/
 
+
 package org.sakaiproject.tool.assessment.shared.impl.common;
 
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.tool.assessment.data.ifc.shared.TypeIfc;
 import org.sakaiproject.tool.assessment.services.shared.TypeService;
@@ -35,6 +39,7 @@ import org.sakaiproject.tool.assessment.shared.api.common.TypeServiceAPI;
  */
 public class TypeServiceImpl implements TypeServiceAPI
 {
+  private Logger log = LoggerFactory.getLogger(TypeServiceImpl.class);
 
   /**
    * Get type for id

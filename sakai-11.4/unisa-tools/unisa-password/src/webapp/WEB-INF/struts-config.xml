@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans >
+    <form-bean name="forgetPasswordForm" type="za.ac.unisa.lms.tools.password.forms.ForgetPasswordForm" />
+
+  </form-beans>
+
+  <global-exceptions />
+  <global-forwards />
+  <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.password.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/forgotPassword.do?action=studentnrstep"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="forgetPasswordForm"
+      name="forgetPasswordForm"
+      parameter="action"
+      path="/forgotPassword"
+      type="za.ac.unisa.lms.tools.password.actions.ForgotPasswordAction"
+      validate="false">
+        <forward
+         name="studnostep"
+        path="/WEB-INF/jsp/studentnrstep.jsp"
+        contextRelative="true" /> 
+          <forward
+        name="personneldetailstep"
+        path="/WEB-INF/jsp/personneldetailstep.jsp"
+        contextRelative="true" /> 
+      <forward
+        name="passwordToOldStudents"
+        path="/WEB-INF/jsp/passwordToOldStudents.jsp"
+        contextRelative="true" />
+        <forward
+          name="confirm"
+          path="/WEB-INF/jsp/confirm.jsp"
+          contextRelative="true" />
+       <forward
+      name="updateCellNumber"
+      path="/WEB-INF/jsp/updateCellNumber.jsp"
+      contextRelative="true" />
+      <forward
+      name="processNewStudent"
+      path="/WEB-INF/jsp/processnewstudent.jsp"
+      contextRelative="true" />
+      <forward 
+      name="processforeignStudent"
+      path="/WEB-INF/jsp/processforeignStudent.jsp" 
+      contextRelative="true"/>
+    </action>
+
+  </action-mappings>
+
+  <message-resources parameter="za.ac.unisa.lms.tools.password.ApplicationResources" />
+  
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property property="pathnames" value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property property="stopOnFirstError" value="true"/>
+	</plug-in>  
+  
+</struts-config>
+

@@ -20,14 +20,17 @@
  **********************************************************************************/
 
 package org.sakaiproject.tool.assessment.data.dao.assessment;
-
-import java.io.*;
-
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AnswerFeedbackIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AnswerIfc;
 
+import java.io.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class PublishedAnswerFeedback
     implements Serializable, AnswerFeedbackIfc {
+  static Logger errorLogger = LoggerFactory.getLogger("errorLogger");
 
   private static final long serialVersionUID = 7526471155622776147L;
 
@@ -84,4 +87,5 @@ public class PublishedAnswerFeedback
       ClassNotFoundException {
     in.defaultReadObject();
   }
+
 }

@@ -33,7 +33,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Comment;
 import org.w3c.dom.DOMException;
@@ -54,10 +55,10 @@ import org.sakaiproject.tool.assessment.qti.util.XmlStringBuffer;
  * @author Ed Smiley esmiley@stanford.edu
  * @version $Id$
  */
-@Slf4j
- public abstract class ASIBaseClass
+public abstract class ASIBaseClass
   extends XmlStringBuffer
 {
+  private static Logger log = LoggerFactory.getLogger(ASIBaseClass.class);
   private static final long serialVersionUID = 5670937321581940933L;
   private String idString;
 
@@ -332,6 +333,7 @@ import org.sakaiproject.tool.assessment.qti.util.XmlStringBuffer;
     }
     catch(ParserConfigurationException pce) {
     	log.error("Exception thrown from createFieldentry()" + pce.getMessage(), pce);
+		pce.printStackTrace();
     }
     catch(Exception ex)
     {

@@ -16,17 +16,16 @@
 
 package org.sakaiproject.delegatedaccess.tool;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.apache.wicket.Page;
 import org.apache.wicket.protocol.http.WebApplication;
+import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
+import org.sakaiproject.delegatedaccess.tool.pages.UserPage;
+import org.sakaiproject.delegatedaccess.tool.pages.UserPageSiteSearch;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.Url;
-import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 
-import org.sakaiproject.delegatedaccess.tool.pages.UserPage;
-import org.sakaiproject.delegatedaccess.tool.pages.UserPageSiteSearch;
 
 /**
  * Main application class for delegated access
@@ -34,7 +33,6 @@ import org.sakaiproject.delegatedaccess.tool.pages.UserPageSiteSearch;
  * @author Bryan Holladay (holladay@longsight.com)
  *
  */
-@Slf4j
 public class DelegatedAccessApplication extends WebApplication {    
 
 	/**
@@ -80,7 +78,7 @@ public class DelegatedAccessApplication extends WebApplication {
 
 				// then, return the appropriate IRequestHandler, or "null"
 				// to let another listener handle the exception
-				log.error(ex.getMessage(), ex);
+				ex.printStackTrace();
 				return null;
 			}
 

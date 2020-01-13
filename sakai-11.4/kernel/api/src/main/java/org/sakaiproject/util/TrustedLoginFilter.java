@@ -32,8 +32,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.user.api.UserNotDefinedException;
@@ -103,9 +103,10 @@ import org.sakaiproject.user.api.UserNotDefinedException;
  * 
  * @author ieb
  */
-@Slf4j
 public class TrustedLoginFilter implements Filter
 {
+	private final static Logger log = LoggerFactory.getLogger(TrustedLoginFilter.class);
+
 	private SessionManager sessionManager;
 
 	private String sharedSecret;
@@ -152,7 +153,8 @@ public class TrustedLoginFilter implements Filter
 					requestSession.setUserId(usr.getId());
 					requestSession.setActive();
 				} catch (UserNotDefinedException e) {
-					log.error(e.getMessage(), e);				}
+					e.printStackTrace();
+				}
 				sessionManager.setCurrentSession(requestSession);
 			}
 		}

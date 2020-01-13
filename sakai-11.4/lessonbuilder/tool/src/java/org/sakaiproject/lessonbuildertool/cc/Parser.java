@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2003-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.lessonbuildertool.cc;
 
 /***********
@@ -58,14 +43,17 @@ package org.sakaiproject.lessonbuildertool.cc;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jdom.Element;
 import org.jdom.Attribute;
 import org.jdom.JDOMException;
+import org.jdom.Namespace;
 import org.jdom.xpath.XPath;
 
 /**
@@ -88,8 +76,9 @@ import org.jdom.xpath.XPath;
  * @version 1.0
  *
  */
-@Slf4j
+
 public class Parser extends AbstractParser {
+  private static final Logger log = LoggerFactory.getLogger(Parser.class);
   CartridgeLoader utils;
 
   private static final String IMS_MANIFEST="imsmanifest.xml";
@@ -137,6 +126,8 @@ public class Parser extends AbstractParser {
     } catch (Exception e) {
 	the_handler.getSimplePageBean().setErrKey("simplepage.cc-error", "");
 	log.info("parse error, stack trace follows " + e);
+	e.printStackTrace();
+	//      throw new ParseException(e.getMessage(),e);
     }
   }
   
@@ -308,7 +299,7 @@ public class Parser extends AbstractParser {
 			  }
 		  }
 	  } catch (Exception e) {
-		  log.error(e.getMessage(), e);
+		  e.printStackTrace();
 		  if (the_item == null)
 			  log.info("processitem the item null");
 		  else 

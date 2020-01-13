@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2003-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.lessonbuildertool.cc;
 
 /***********
@@ -57,24 +42,27 @@ package org.sakaiproject.lessonbuildertool.cc;
  *
  **********************************************************************************/
 
+
 import java.io.IOException;
-import java.io.StringBufferInputStream;
 import java.util.Iterator;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
-import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.XPath;
+
+import org.jdom.output.XMLOutputter;
 
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
+import java.io.StringBufferInputStream;
 
-@Slf4j
 public abstract class AbstractParser {
+
+  private static final Logger log = LoggerFactory.getLogger(AbstractParser.class);
   private static final String RESOURCE_QUERY="ims:resource[@identifier='xxx']";
   private static final String MD_ROOT="lom";
   private static final String METADATA="metadata";
@@ -147,6 +135,12 @@ public abstract class AbstractParser {
     try {
 	result=builder.build(the_cartridge.getFile(the_file)).getRootElement();
       XMLOutputter outputter = new XMLOutputter();
+      //      try {
+	  //	  outputter.output(result, System.out);       
+      //}
+      //      catch (IOException e) {
+      //	  System.err.println("output problem " + e);
+      //      }
     } catch (Exception e) {
       throw new ParseException(e);
     }
@@ -164,7 +158,7 @@ public abstract class AbstractParser {
     processDependencies(handler, the_resource);
     handler.endResource();
       } catch (Exception e) {
-	  log.error(e.getMessage(), e);
+	  e.printStackTrace();
           if (the_resource == null)
               log.info("processresouce the item null");
           else

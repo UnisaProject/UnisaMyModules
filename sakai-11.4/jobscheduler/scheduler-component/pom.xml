@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.sakaiproject.scheduler</groupId>
         <artifactId>scheduler</artifactId>
-        <version>12.6</version>
+        <version>11.4</version>
     </parent>
 
     <name>Sakai Job Scheduler Component (scheduler-component)</name>
@@ -22,13 +22,5 @@
         <deploy.target>components</deploy.target>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>${sakai.spring.groupId}</groupId>
-            <artifactId>${sakai.spring.artifactId}</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.sakaiproject.scheduler</groupId>
-            <artifactId>scheduler-component-shared</artifactId></dependency>
-    </dependencies>
+    <dependencies />
 </project>

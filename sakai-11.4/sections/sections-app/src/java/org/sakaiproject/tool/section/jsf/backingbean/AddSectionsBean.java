@@ -34,8 +34,9 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.component.api.ComponentManager;
 import org.sakaiproject.section.api.coursemanagement.Course;
@@ -49,10 +50,10 @@ import org.sakaiproject.util.ResourceLoader;
  * @author <a href="mailto:jholtzman@berkeley.edu">Josh Holtzman</a>
  *
  */
-@Slf4j
 public class AddSectionsBean extends CourseDependentBean implements SectionEditor, Serializable {
 	private static final long serialVersionUID = 1L;
-
+	private static final Logger log = LoggerFactory.getLogger(AddSectionsBean.class);
+	
 	private Integer numToAdd;
 	private String category;
 	private List<SelectItem> categoryItems;

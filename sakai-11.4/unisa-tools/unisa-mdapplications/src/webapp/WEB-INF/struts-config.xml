@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		<form-bean name="mdApplicationsForm" type="za.ac.unisa.lms.tools.mdapplications.forms.MdApplicationsForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.mdapplications.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/mdapplications.do?action=walkthrough"    
+        		contextRelative="true" />
+<!--			path="/WEB-INF/jsp/default.jsp"
+				contextRelative="true" />  -->
+		</action>
+  		<action
+      		attribute="mdApplicationsForm"
+      		name="mdApplicationsForm"
+      		parameter="action"
+      		path="/mdapplications"
+      		type="za.ac.unisa.lms.tools.mdapplications.actions.MdApplicationsAction"
+      		validate="false">
+      		<forward
+        		name="walkthroughforward"
+        		path="/WEB-INF/jsp/mdapplications.jsp"
+        		contextRelative="true" />
+      		<forward
+        		name="login"
+        		path="/WEB-INF/jsp/mdapplyp0.jsp"
+        		contextRelative="true" />
+        	<forward
+        		name="loginAdmin"
+        		path="/WEB-INF/jsp/mdadmin.jsp"
+        		contextRelative="true" />
+        	<forward
+				name="step1forward"
+				path="/WEB-INF/jsp/mdapplyp1.jsp"
+				contextRelative="true" />
+        	<forward
+				name="step2forward"
+				path="/WEB-INF/jsp/mdapplyp2.jsp"
+				contextRelative="true" />
+        	<forward
+				name="step3forward"
+				path="/WEB-INF/jsp/mdapplyp3.jsp"
+				contextRelative="true" />
+        	<forward
+				name="step5forward"
+				path="/WEB-INF/jsp/mddeclare.jsp"
+				contextRelative="true" />
+       	<forward
+				name="histforward"
+				path="/WEB-INF/jsp/mdhistory.jsp"
+				contextRelative="true" />
+      	<forward
+				name="confirmforward"
+				path="/WEB-INF/jsp/mdconfirm.jsp"
+				contextRelative="true" />
+   		<forward
+        		name="docuploadforward"
+        		path="/WEB-INF/jsp/uploaddocs.jsp"
+        		contextRelative="true" />
+      	<forward
+       	 		name="addattachmentforward"
+        		path="/WEB-INF/jsp/uploadadd.jsp"
+       	 		contextRelative="true" />
+      	<forward
+       	 		name="uploaddoneforward"
+        		path="/WEB-INF/jsp/uploaddone.jsp"
+       	 		contextRelative="true" />
+ 		</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.mdapplications.ApplicationResources" />
+
+	<!--  Validator plugin 
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property
+			property="pathnames"
+			value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property
+			property="stopOnFirstError"
+			value="true" />
+	</plug-in> -->
+</struts-config>

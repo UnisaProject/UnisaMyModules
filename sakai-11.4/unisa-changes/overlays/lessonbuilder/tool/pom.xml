@@ -7,7 +7,7 @@
   <parent>
     <artifactId>unisa-overlays-lessonbuilder</artifactId>
     <groupId>unisa.overlays.lessonbuilder</groupId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Unisa overlay Lessonbuilder  tool</name>
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.sakaiproject.lessonbuilder</groupId>
       <artifactId>lessonbuilder-tool</artifactId>
-      <version>12.6</version>
+      <version>11.4</version>
       <type>war</type>
       <scope>runtime</scope>
     </dependency>

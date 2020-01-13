@@ -40,11 +40,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.codec.binary.Base64;
-
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -53,7 +52,6 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
-
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -64,9 +62,10 @@ import org.xml.sax.helpers.DefaultHandler;
  * Xml is a DOM XML helper object with static functions to help with XML.
  * </p>
  */
-@Slf4j
 public class Xml
 {
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(Xml.class);
 	private static SAXParserFactory parserFactory;
 
 	/**
@@ -85,7 +84,7 @@ public class Xml
 		}
 		catch (Exception any)
 		{
-			log.warn("createDocument: " + any.toString());
+			M_log.warn("createDocument: " + any.toString());
 			return null;
 		}
 	}
@@ -148,7 +147,7 @@ public class Xml
 		}
 		catch (Exception any)
 		{
-			log.warn("readDocument failed on file: " + name + " with exception: " + any.toString());
+			M_log.warn("readDocument failed on file: " + name + " with exception: " + any.toString());
 			doc = null;
 		}
 
@@ -173,7 +172,7 @@ public class Xml
 		}
 		catch (Exception any)
 		{
-			log.warn("readDocumentFromString: " + any.toString());
+			M_log.warn("readDocumentFromString: " + any.toString());
 			return null;
 		}
 	}
@@ -251,7 +250,7 @@ public class Xml
 		}
 		catch (Exception any)
 		{
-			log.warn("readDocumentFromStream: " + any.toString());
+			M_log.warn("readDocumentFromStream: " + any.toString());
 			return null;
 		}
 	}
@@ -287,7 +286,7 @@ public class Xml
 		}
 		catch (Exception any)
 		{
-			log.warn("writeDocument: " + any.toString());
+			M_log.warn("writeDocument: " + any.toString());
 		}
 		finally {
 			if (out != null) {
@@ -334,7 +333,7 @@ public class Xml
 		}
 		catch (Exception any)
 		{
-			log.warn("writeDocumentToString: " + any.toString());
+			M_log.warn("writeDocumentToString: " + any.toString());
 			return null;
 		}
 	}
@@ -365,7 +364,7 @@ public class Xml
 		}
 		catch (Exception e)
 		{
-			log.warn("encodeAttribute: " + e);
+			M_log.warn("encodeAttribute: " + e);
 		}
 	}
 
@@ -393,7 +392,7 @@ public class Xml
 			}
 			catch (Exception e)
 			{
-				log.warn("decodeAttribute: " + e);
+				M_log.warn("decodeAttribute: " + e);
 			}
 		}
 
@@ -419,7 +418,7 @@ public class Xml
 			}
 			catch (Exception e)
 			{
-				log.warn("decodeAttribute: " + e);
+				M_log.warn("decodeAttribute: " + e);
 			}
 		}
 

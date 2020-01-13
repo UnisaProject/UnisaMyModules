@@ -38,9 +38,10 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.alias.api.Alias;
 import org.sakaiproject.alias.api.AliasService;
-import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.cover.SecurityService;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
@@ -79,11 +80,6 @@ import org.sakaiproject.util.Web;
 import org.sakaiproject.portal.util.ToolUtils;
 import org.sakaiproject.portal.charon.PortalStringUtil;
 import org.sakaiproject.util.FormattedText;
-import org.sakaiproject.util.Validator;
-
-import org.sakaiproject.lessonbuildertool.model.SimplePageToolDao;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author ieb
@@ -91,7 +87,6 @@ import lombok.extern.slf4j.Slf4j;
  * @version $Rev$
  */
 @SuppressWarnings("deprecation")
-@Slf4j
 public class PortalSiteHelperImpl implements PortalSiteHelper
 {
 	// namespace for sakai icons see _icons.scss
@@ -100,6 +95,8 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 	// Alias prefix for page aliases. Use Entity.SEPARATOR as IDs shouldn't contain it.
 	private static final String PAGE_ALIAS = Entity.SEPARATOR+ "pagealias"+ Entity.SEPARATOR;
 
+	private static final Logger log = LoggerFactory.getLogger(PortalSiteHelper.class);
+
 	private final String PROP_PARENT_ID = SiteService.PROP_PARENT_ID;
 
 	private static final String PROP_HTML_INCLUDE = "sakai:htmlInclude";
@@ -107,10 +104,6 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 	private static final String PROP_MENU_CLASS = "sakai:menuClass";
 
 	protected final static String CURRENT_PLACEMENT = "sakai:ToolComponent:current.placement";
-
-	private static final String OVERVIEW_TOOL_TITLE = "overview";
-	private static final String SAK_PROP_FORCE_OVERVIEW_TO_TOP = "portal.forceOverviewToTop";
-	private static final boolean SAK_PROP_FORCE_OVERVIEW_TO_TOP_DEFAULT = false;
 
 	private Portal portal;
 
@@ -129,18 +122,6 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 			toolManager = (ToolManager) ComponentManager.get(ToolManager.class.getName());
 		}
 		return toolManager;
-	}
-
-	private static AuthzGroupService getAuthzGroupService() {
-		return (AuthzGroupService) ComponentManager.get(AuthzGroupService.class.getName());
-	}
-
-	private SimplePageToolDao simplePageToolDao;
-	public SimplePageToolDao getSimplePageToolDao() {
-		if (simplePageToolDao == null) {
-			simplePageToolDao = (SimplePageToolDao) ComponentManager.get(SimplePageToolDao.class.getName());
-		}
-		return simplePageToolDao;
 	}
 
 	public void setToolManager(ToolManager toolManager) {
@@ -297,7 +278,7 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 		if ( session != null )
                 { 
                         Preferences prefs = PreferencesService.getPreferences(session.getUserId());
-                        ResourceProperties props = prefs.getProperties(org.sakaiproject.user.api.PreferencesService.SITENAV_PREFS_KEY);
+                        ResourceProperties props = prefs.getProperties("sakai:portal:sitenav");
 
                         List propList = props.getPropertyList("order");
                         if (propList != null)
@@ -308,7 +289,6 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
                 }
 
 		// Determine the depths of the child sites if needed
-		Map<String, List<String>> realmProviderMap = getProviderIDsForSites(mySites);
 		for (Iterator i = mySites.iterator(); i.hasNext();)
 		{
 			Site s = (Site) i.next();
@@ -321,7 +301,8 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 			{
 				ResourceProperties rp = s.getProperties();
 				String ourParent = rp.getProperty(PROP_PARENT_ID);
-				log.debug("Depth Site:{} parent={}", s.getTitle(), ourParent);
+				// System.out.println("Depth Site:"+s.getTitle()+
+				// "parent="+ourParent);
 				if (ourParent != null)
 				{
 					Integer pDepth = depthChart.get(ourParent);
@@ -331,12 +312,12 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 					}
 				}
 				depthChart.put(s.getId(), cDepth);
-				log.debug("Depth = {}", cDepth);
+				// System.out.println("Depth = "+cDepth);
 			}
 
 			Map m = convertSiteToMap(req, s, prefix, currentSiteId, myWorkspaceSiteId,
 					includeSummary, expandSite, resetTools, doPages, toolContextPath,
-					loggedIn, realmProviderMap.get(s.getReference()));
+					loggedIn);
 
 			// Add the Depth of the site
 			m.put("depth", cDepth);
@@ -363,61 +344,16 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 	}
 
 	/**
-	 * Get all provider IDs for the given site.
-	 *
-	 * @param site the site to retrieve all provider IDs
-	 * @return a List of Strings of provider IDs for the given site
-	 */
-	public static List<String> getProviderIDsForSite(Site site)
-	{
-		List<String> providers = new ArrayList<>();
-		if (site != null)
-		{
-			providers.addAll(getAuthzGroupService().getProviderIds(site.getReference()));
-		}
-
-		return providers;
-	}
-
-	/**
-	 * Get all provider IDs for all sites given.
-	 *
-	 * @param sites the list of sites to retrieve all provider IDs
-	 * @return a Map, where the key is the realm ID, and the value is a list of provider IDs for that site
-	 */
-	public static Map<String, List<String>> getProviderIDsForSites(List<Site> sites)
-	{
-		Map<String, List<String>> realmProviderMap = new HashMap<>();
-		if (!sites.isEmpty())
-		{
-			List<String> realmIDs = new ArrayList<>();
-			for (Site site : sites)
-			{
-				realmIDs.add(site.getReference());
-			}
-
-			realmProviderMap = getAuthzGroupService().getProviderIDsForRealms(realmIDs);
-		}
-
-		return realmProviderMap;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public String getUserSpecificSiteTitle( Site site, boolean escaped )
 	{
-		return getUserSpecificSiteTitle( site, true, escaped, null );
+		return getUserSpecificSiteTitle( site, true, escaped );
 	}
 
 	public String getUserSpecificSiteTitle( Site site, boolean truncated, boolean escaped )
 	{
-		return getUserSpecificSiteTitle(site, truncated, escaped, null);
-	}
-
-	public String getUserSpecificSiteTitle(Site site, boolean truncated, boolean escaped, List<String> siteProviders)
-	{
-		String retVal = SiteService.getUserSpecificSiteTitle( site, UserDirectoryService.getCurrentUser().getId(), siteProviders );
+		String retVal = SiteService.getUserSpecificSiteTitle( site, UserDirectoryService.getCurrentUser().getId() );
 		if( truncated )
 		{
 			retVal = FormattedText.makeShortenedText( retVal, null, null, null );
@@ -437,12 +373,12 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 	 * @see org.sakaiproject.portal.api.PortalSiteHelper#convertSiteToMap(javax.servlet.http.HttpServletRequest,
 	 *      org.sakaiproject.site.api.Site, java.lang.String, java.lang.String,
 	 *      java.lang.String, boolean, boolean, boolean, boolean,
-	 *      java.lang.String, boolean, java.util.List<java.lang.String>)
+	 *      java.lang.String, boolean)
 	 */
 	public Map convertSiteToMap(HttpServletRequest req, Site s, String prefix,
 			String currentSiteId, String myWorkspaceSiteId, boolean includeSummary,
 			boolean expandSite, boolean resetTools, boolean doPages,
-			String toolContextPath, boolean loggedIn, List<String> siteProviders)
+			String toolContextPath, boolean loggedIn)
 	{
 		if (s == null) return null;
 		Map<String, Object> m = new HashMap<>();
@@ -454,16 +390,16 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 				&& (s.getId().equals(currentSiteId) || effectiveSite
 						.equals(currentSiteId));
 		m.put("isCurrentSite", Boolean.valueOf(isCurrentSite));
-		m.put("isPublished", s.isPublished());
 		m.put("isMyWorkspace", Boolean.valueOf(myWorkspaceSiteId != null
 				&& (s.getId().equals(myWorkspaceSiteId) || effectiveSite
 						.equals(myWorkspaceSiteId))));
 		
-		String siteTitle = Validator.escapeHtml(getUserSpecificSiteTitle(s, false, false, siteProviders));
-		String siteTitleTruncated = FormattedText.makeShortenedText(siteTitle, null, null, null);
-		m.put("siteTitle", siteTitle);
-		m.put("siteTitleTrunc", siteTitleTruncated);
-		m.put("fullTitle", siteTitle);
+		// SAK-29138
+		String siteTitleTruncated = getUserSpecificSiteTitle( s, true, true );
+		String siteTitleNotTruncated = getUserSpecificSiteTitle( s, false, true );
+		m.put( "siteTitleNotTruncated", siteTitleNotTruncated );
+		m.put( "siteTitle", siteTitleTruncated );
+		m.put( "fullTitle", siteTitleNotTruncated );
 		
 		m.put("siteDescription", s.getHtmlDescription());
 
@@ -501,14 +437,15 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 				for (int i = 0; i < pwd.size() - 1; i++)
 				{
 					Site site = pwd.get(i);
-					log.debug("PWD[{}]={}{}", i, site.getId(), site.getTitle());
+					// System.out.println("PWD["+i+"]="+site.getId()+"
+					// "+site.getTitle());
 					Map<String, Object> pm = new HashMap<>();
-					List<String> providers = getProviderIDsForSite(site);
-
-					String parentSiteTitle = getUserSpecificSiteTitle(site, false, false, providers);
-					String parentSiteTitleTruncated = FormattedText.makeShortenedText(parentSiteTitle, null, null, null);
-					pm.put("siteTitle", parentSiteTitle);
-					pm.put("siteTitleTrunc", parentSiteTitleTruncated);
+					String siteTitleTruncatedBreadCrumb = getUserSpecificSiteTitle( site, true, true );
+					String siteTitleNotTruncatedBreadCrumb = getUserSpecificSiteTitle( site, false, true );
+					
+					pm.put("siteTitleNotTruncated", siteTitleNotTruncatedBreadCrumb );
+					pm.put("siteTitle", siteTitleTruncatedBreadCrumb );
+					pm.put("fullTitle", siteTitleNotTruncatedBreadCrumb );
 					pm.put("siteUrl", siteUrl + Web.escapeUrl(getSiteEffectiveId(site)));
 
 					l.add(pm);
@@ -549,7 +486,8 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 	{
 		if (ourParent == null) return null;
 
-		log.debug("Getting Current Working Directory for {} {}", s.getId(), s.getTitle());
+		// System.out.println("Getting Current Working Directory for
+		// "+s.getId()+" "+s.getTitle());
 
 		int depth = 0;
 		Vector<Site> pwd = new Vector<Site>();
@@ -575,7 +513,8 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 			// We have no patience with loops
 			if (added.contains(site.getId())) break;
 
-			log.debug("Adding Parent {} {}", site.getId(), site.getTitle());
+			// System.out.println("Adding Parent "+site.getId()+"
+			// "+site.getTitle());
 			pwd.insertElementAt(site, 0); // Push down stack
 			added.add(site.getId());
 
@@ -649,8 +588,6 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 		theMap.put("pageNavIconUrl", iconUrl);
 		String htmlInclude = site.getProperties().getProperty(PROP_HTML_INCLUDE);
 		if (htmlInclude != null) theMap.put("siteHTMLInclude", htmlInclude);
-
-		boolean siteUpdate = SecurityService.unlock("site.upd", site.getReference());
 
 		// theMap.put("pageNavSitToolsHead",
 		// Web.escapeHtml(rb.getString("sit_toolshead")));
@@ -727,10 +664,10 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 					}
 				}
 
+				boolean siteUpdate = SecurityService.unlock("site.upd", site.getReference());
 				if ( ! siteUpdate ) addMoreToolsUrl = null;
 
-				boolean legacyAddMoreToolsPropertyValue = ServerConfigurationService.getBoolean("portal.experimental.addmoretools", false);
-				if ( ! ServerConfigurationService.getBoolean("portal.addmoretools.enable", legacyAddMoreToolsPropertyValue) ) addMoreToolsUrl = null;
+				if ( ! ServerConfigurationService.getBoolean("portal.experimental.addmoretools", false) ) addMoreToolsUrl = null;
 
 				String pagePopupUrl = Web.returnUrl(req, "/page/");
 				
@@ -765,7 +702,6 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 				if (includeSummary) summarizePage(m, site, p);
 				if (firstTool != null)
 				{
-					m.put("wellKnownToolId", firstTool.getToolId());
 					String menuClass = firstTool.getToolId();
 					menuClass = ICON_SAKAI + menuClass.replace('.', '-');
 					m.put("menuClass", menuClass);
@@ -821,7 +757,6 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 					m.put("toolrefUrl", toolrefUrl);
 					m.put("toolpopup", Boolean.valueOf(source!=null));
 					m.put("toolpopupurl", source);
-					m.put("wellKnownToolId", placement.getToolId());
 					String menuClass = placement.getToolId();
 					menuClass = ICON_SAKAI + menuClass.replace('.', '-');
 					m.put("menuClass", menuClass);
@@ -848,13 +783,6 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 			theMap.put("pageNavCanAddMoreTools", true);
 		} else {
 			theMap.put("pageNavCanAddMoreTools", false);
-		}
-
-		theMap.put("pageNavTools", l);
-
-		if ("true".equals(site.getProperties().getProperty("lessons_submenu")) && !l.isEmpty()) {
-			theMap.put("additionalLessonsPages",
-					getSimplePageToolDao().getLessonSubPageJSON(UserDirectoryService.getCurrentUser().getId(), siteUpdate, site.getId(), l));
 		}
 
 		theMap.put("pageNavTools", l);
@@ -1204,16 +1132,18 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 	public List getPermittedPagesInOrder(Site site)
 	{
 		// Get all of the pages
-		List<SitePage> pages = site.getOrderedPages();
-		boolean siteUpdate = SecurityService.unlock("site.upd", site.getReference());
+		List pages = site.getOrderedPages();
+ 		boolean siteUpdate = SecurityService.unlock("site.upd", site.getReference());
 
-		List<SitePage> newPages = new ArrayList<>();
+		List newPages = new ArrayList();
 
-		for (SitePage p : pages)
+		for (Iterator i = pages.iterator(); i.hasNext();)
 		{
 			// check if current user has permission to see page
+			SitePage p = (SitePage) i.next();
 			List pTools = p.getTools();
 			Iterator iPt = pTools.iterator();
+
 			boolean allowPage = false;
 			while (iPt.hasNext())
 			{
@@ -1232,29 +1162,6 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 		{
 			newPages = pageFilter.filter(newPages, site);
 		}
-
-		// Force "Overview" to the top at all times if enabled
-		if (ServerConfigurationService.getBoolean(SAK_PROP_FORCE_OVERVIEW_TO_TOP, SAK_PROP_FORCE_OVERVIEW_TO_TOP_DEFAULT))
-		{
-			List<SitePage> newPagesCopy = new ArrayList<>(newPages);
-			for (SitePage page : newPages)
-			{
-				if (OVERVIEW_TOOL_TITLE.equalsIgnoreCase(page.getTitle()))
-				{
-					int index = newPages.indexOf(page);
-					if (index >= 0)
-					{
-						newPagesCopy = new ArrayList<>(newPages.size());
-						newPagesCopy.addAll(newPages.subList(0, index));
-						newPagesCopy.add(0, (SitePage) newPages.get(index));
-						newPagesCopy.addAll(newPages.subList(index + 1, newPages.size()));
-					}
-				}
-			}
-
-			return newPagesCopy;
-		}
-
 		return newPages;
 	}
 
@@ -1314,7 +1221,10 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 			}
 			catch (IdUnusedException e)
 			{
-				log.debug("Alias does not resolve {}", e.getMessage());
+				if (log.isDebugEnabled())
+				{
+					log.debug("Alias does not resolve " + e.getMessage());
+				}
 			}
 		}
 		return page;

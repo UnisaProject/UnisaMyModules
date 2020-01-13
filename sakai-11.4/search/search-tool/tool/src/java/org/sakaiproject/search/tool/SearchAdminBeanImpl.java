@@ -25,8 +25,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -56,8 +54,6 @@ public class SearchAdminBeanImpl implements SearchAdminBean
 
 	private static final String COMMAND = "command";
 
-	private static final String INDEX_BUILDER_NAME = "indexbuildername";
-
 	private static final String REBUILDSITE = "rebuildsite";
 
 	private static final String COMMAND_REBUILDSITE = "?" + COMMAND + "="
@@ -73,10 +69,10 @@ public class SearchAdminBeanImpl implements SearchAdminBean
 	private static final String COMMAND_REBUILDINSTANCE = "?" + COMMAND + "="
 			+ REBUILDINSTANCE;
 
-	private static final String REFRESHINSTANCE = "refreshinstance";
+	private static final String REFRESHINSTNACE = "refreshinstance";
 
 	private static final String COMMAND_REFRESHINSTANCE = "?" + COMMAND + "="
-			+ REFRESHINSTANCE;
+			+ REFRESHINSTNACE;
 
 	private static final String REFRESHSTATUS = "refreshstatus";
 
@@ -129,10 +125,7 @@ public class SearchAdminBeanImpl implements SearchAdminBean
 	 * @param request
 	 * @param searchService
 	 * @param siteService
-	 * @param toolManager
-	 * @param sessionManager
-	 * @param securityService
-	 * @param serverConfigurationService
+	 * @param portalService
 	 * @throws IdUnusedException
 	 * @throws PermissionException
 	 */
@@ -160,15 +153,15 @@ public class SearchAdminBeanImpl implements SearchAdminBean
 		if (command != null)
 		{
 			internCommand = command.intern();
+
 		}
-		String indexBuilderName = request.getParameter(INDEX_BUILDER_NAME);
-		doCommand(indexBuilderName);
+		doCommand();
 		internCommand = null;
 	}
 	
 	
 
-	private void doCommand(String indexBuilderName) throws PermissionException
+	private void doCommand() throws PermissionException
 	{
 		if (internCommand == null) return;
 		if (internCommand == REBUILDSITE)
@@ -183,12 +176,12 @@ public class SearchAdminBeanImpl implements SearchAdminBean
 		}
 		else if (internCommand == REBUILDINSTANCE)
 		{
-			doRebuildInstance(indexBuilderName);
+			doRebuildInstance();
 			redirect = true;
 		}
-		else if (internCommand == REFRESHINSTANCE)
+		else if (internCommand == REFRESHINSTNACE)
 		{
-			doRefreshInstance(indexBuilderName);
+			doRefreshInstance();
 			redirect = true;
 		}
 		else if (internCommand == REFRESHSTATUS)
@@ -248,13 +241,13 @@ public class SearchAdminBeanImpl implements SearchAdminBean
 	 * Refresh all the documents in the index
 	 * @throws PermissionException 
 	 */
-	private void doRefreshInstance(String indexBuilderName) throws PermissionException
+	private void doRefreshInstance() throws PermissionException
 	{
 		if (!superUser)
 		{
 			throw new PermissionException(userName, "site.update", siteCheck);
 		}
-		searchService.refreshIndex(indexBuilderName);
+		searchService.refreshInstance();
 		commandFeedback = Messages.getString("searchadmin_statok");;
 
 	}
@@ -264,13 +257,13 @@ public class SearchAdminBeanImpl implements SearchAdminBean
 	 * all entities from the EntityContentProviders
 	 * @throws PermissionException 
 	 */
-	private void doRebuildInstance(String indexBuilderName) throws PermissionException
+	private void doRebuildInstance() throws PermissionException
 	{
 		if (!superUser)
 		{
 			throw new PermissionException(userName, "site.update", siteCheck);
 		}
-		searchService.rebuildIndex(indexBuilderName);
+		searchService.rebuildInstance();
 		commandFeedback = Messages.getString("searchadmin_statok");;
 
 	}
@@ -309,43 +302,30 @@ public class SearchAdminBeanImpl implements SearchAdminBean
 	 */
 	public String getIndexStatus(String statusFormat) throws PermissionException
 	{
-		final List<SearchStatus> searchStatus = searchService.getSearchStatus();
-
-		final String allStatusMessages = searchStatus
-				.stream()
-				.map(ss -> formatSearchStatus(ss, statusFormat))
-				.collect(Collectors.joining("<br>"));
-		return allStatusMessages;
-	}
-
-	private String formatSearchStatus(SearchStatus ss, String format) {
-		return MessageFormat.format(format,
+		SearchStatus ss = searchService.getSearchStatus();
+		
+			
+		return MessageFormat.format(statusFormat,
 				new Object[] {
-						ss.getLastLoad(),
-						ss.getLoadTime(),
-						ss.getCurrentWorker(),
-						ss.getCurrentWorkerETC(),
-						ss.getNDocuments(),
-						ss.getPDocuments()
-				});
+				ss.getLastLoad(),
+				ss.getLoadTime(),
+				ss.getCurrentWorker(),
+				ss.getCurrentWorkerETC(),
+				ss.getNDocuments(),
+				ss.getPDocuments()
+		});
 	}
 
 	public String getWorkers(String rowFormat) {
-
-		final List<SearchStatus> searchStatus = searchService.getSearchStatus();
-
-		final String allWorkerMessages = searchStatus
-				.stream()
-				.map(ss -> formatSearchStatusWorkerNodes(ss, rowFormat))
-				.collect(Collectors.joining("<br>"));
-		return allWorkerMessages;
-	}
-
-	private String formatSearchStatusWorkerNodes(SearchStatus searchStatus, String format) {
-		return (String) searchStatus
-				.getWorkerNodes()
-				.stream()
-				.map(wn -> MessageFormat.format(format, wn)).collect(Collectors.joining(""));
+		SearchStatus ss = searchService.getSearchStatus();
+		StringBuilder sb = new StringBuilder();
+		List l = ss.getWorkerNodes();
+		for ( Iterator i = l.iterator(); i.hasNext(); ) {
+			Object[] worker = (Object[]) i.next();
+			sb.append(MessageFormat.format(rowFormat,
+					worker));
+		}
+		return sb.toString();
 	}
 
 	public String getIndexDocuments( String rowFormat ) {
@@ -489,28 +469,39 @@ public class SearchAdminBeanImpl implements SearchAdminBean
 		return masters;		
 	}
 
-    @Override
-    public Set<String> getIndexBuilderNames() {
-        return searchService.getIndexBuilderNames();
-    }
 
-    @Override
-    public List<AdminOption> getDefaultOptions() {
+
+
+
+
+
+
+
+	/* (non-Javadoc)
+	 * @see org.sakaiproject.search.tool.SearchAdminBean#getOptons()
+	 */
+	public List<AdminOption> getOptons()
+	{
 		List<AdminOption> o  = new ArrayList<AdminOption>();
 		o.add(new AdminOptionImpl(COMMAND_REBUILDSITE, Messages.getString("searchadmin_cmd_rebuildsiteind"),"" ));
 		o.add(new AdminOptionImpl(COMMAND_REFRESHSITE, Messages.getString("searchadmin_cmd_refreshsiteind"),"" ));
+		if (superUser)
+		{
+			o.add(new AdminOptionImpl(COMMAND_REBUILDINSTANCE, Messages.getString("searchadmin_cmd_rebuildind"),"" ));
+			o.add(new AdminOptionImpl(COMMAND_REFRESHINSTANCE, Messages.getString("searchadmin_cmd_refreshind"),"" ));
+			o.add(new AdminOptionImpl(COMMAND_REMOVELOCK, Messages.getString("searchadmin_cmd_removelock"), 
+				"onclick=\"return confirm('"+Messages.getString("searchadmin_cmd_removelockconfirm")+"');\"" ));
+			o.add(new AdminOptionImpl(COMMAND_RELOADINDEX, Messages.getString("searchadmin_cmd_reloadind"),"" ));
+			if ( searchService.hasDiagnostics() ) {
+				o.add(new AdminOptionImpl(COMMAND_DISABLEDIAGNOSTICS, Messages.getString("searchadmin_cmd_disablediagnostics"),"" ));
+			} else {
+				o.add(new AdminOptionImpl(COMMAND_ENABLEDIAGNOSTICS, Messages.getString("searchadmin_cmd_enablediagnostics"),"" ));
+				
+			}
+		}
 		return o;
 	}
 
-    @Override
-    public List<AdminOption> getIndexSpecificOptions() {
-		List<AdminOption> o  = new ArrayList<AdminOption>();
-		if (superUser) {
-			o.add(new AdminOptionImpl(REBUILDINSTANCE, Messages.getString("searchadmin_cmd_rebuildind"),"" ));
-			o.add(new AdminOptionImpl(REFRESHINSTANCE, Messages.getString("searchadmin_cmd_refreshind"),"" ));
-		}
-		return o;
-    }
 
 
 	/* (non-Javadoc)
@@ -634,7 +625,7 @@ public class SearchAdminBeanImpl implements SearchAdminBean
 	/* (non-Javadoc)
 	 * @see org.sakaiproject.search.tool.SearchAdminBean#getSearchStatus()
 	 */
-	public List<SearchStatus> getSearchStatus()
+	public SearchStatus getSearchStatus()
 	{
 		return searchService.getSearchStatus();
 	}
@@ -646,27 +637,31 @@ public class SearchAdminBeanImpl implements SearchAdminBean
 	 */
 	public List<WorkerThread> getWorkerThreads()
 	{
-		final List<WorkerThread> workerThreads = (List<WorkerThread>)searchService
-				.getSearchStatus()
-				.stream()
-				.flatMap(ss -> ss.getWorkerNodes().stream())
-				.map(w -> new WorkerThread() {
-					Object[] wa = (Object[]) w;
+		List<WorkerThread> workers = new ArrayList<WorkerThread>();
+		SearchStatus ss = searchService.getSearchStatus();
+		List l = ss.getWorkerNodes();
+		for ( Iterator i = l.iterator(); i.hasNext(); ) {
+			final Object[] w = (Object[]) i.next();
+			workers.add(new WorkerThread(){
 
-					public String getEta() {
-						return FormattedText.escapeHtml(String.valueOf(wa[1]), false);
-					}
+				public String getEta()
+				{
+					return FormattedText.escapeHtml(String.valueOf(w[1]),false);
+				}
 
-					public String getName() {
-						return FormattedText.escapeHtml(String.valueOf(wa[0]), false);
-					}
+				public String getName()
+				{
+					return FormattedText.escapeHtml(String.valueOf(w[0]),false);
+				}
 
-					public String getStatus() {
-						return FormattedText.escapeHtml(String.valueOf(wa[2]), false);
-					}
-				})
-				.collect(Collectors.toList());
-		return workerThreads;
+				public String getStatus()
+				{
+					return FormattedText.escapeHtml(String.valueOf(w[2]),false);
+				}
+				
+			});
+		}
+		return workers;
 	}
 
 

@@ -1,30 +1,16 @@
-/**
- * Copyright (c) 2003-2016 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.pasystem.impl.handlebars;
-
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import com.github.jknack.handlebars.Parser;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.cache.TemplateCache;
 import com.github.jknack.handlebars.io.TemplateSource;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
@@ -35,8 +21,11 @@ import static org.apache.commons.lang3.Validate.notNull;
  * @author buckett
  * @see com.github.jknack.handlebars.cache.ConcurrentMapTemplateCache
  */
-@Slf4j
 public class ForeverTemplateCache implements TemplateCache {
+    /**
+     * The logging system.
+     */
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * The map cache.
@@ -58,12 +47,6 @@ public class ForeverTemplateCache implements TemplateCache {
      */
     public ForeverTemplateCache() {
         this(new ConcurrentHashMap<TemplateSource, Pair<TemplateSource, Template>>());
-    }
-
-    @Override
-    public TemplateCache setReload(boolean reload) {
-        // Ignored: Forever means forever...
-        return this;
     }
 
     @Override
@@ -98,11 +81,11 @@ public class ForeverTemplateCache implements TemplateCache {
     private Template cacheGet(final TemplateSource source, final Parser parser) throws IOException {
         Pair<TemplateSource, Template> entry = cache.get(source);
         if (entry == null) {
-            log.debug("Loading: {}", source);
+            logger.debug("Loading: {}", source);
             entry = Pair.of(source, parser.parse(source));
             cache.put(source, entry);
         } else {
-            log.debug("Found in cache: {}", source);
+            logger.debug("Found in cache: {}", source);
         }
         return entry.getValue();
     }

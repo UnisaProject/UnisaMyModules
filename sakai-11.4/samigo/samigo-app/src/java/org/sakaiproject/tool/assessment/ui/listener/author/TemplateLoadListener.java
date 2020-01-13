@@ -19,6 +19,8 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.ui.listener.author;
 
 import java.text.SimpleDateFormat;
@@ -28,19 +30,19 @@ import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentAccessControl;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AssessmentFeedback;
 import org.sakaiproject.tool.assessment.data.dao.assessment.EvaluationModel;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentAccessControlIfc;
-import org.sakaiproject.tool.assessment.data.ifc.shared.TypeIfc;
 import org.sakaiproject.tool.assessment.facade.AssessmentTemplateFacade;
+import org.sakaiproject.tool.assessment.data.ifc.shared.TypeIfc;
 import org.sakaiproject.tool.assessment.services.assessment.AssessmentService;
 import org.sakaiproject.tool.assessment.ui.bean.author.TemplateBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
-import org.sakaiproject.user.cover.UserDirectoryService;
 import org.sakaiproject.util.FormattedText;
+import org.sakaiproject.user.cover.UserDirectoryService;
 
 /**
  * <p>Description: Action Listener for loading a template</p>
@@ -49,11 +51,12 @@ import org.sakaiproject.util.FormattedText;
  * @author Ed Smiley
  * @version $Id$
  */
-@Slf4j
+
 public class TemplateLoadListener
     extends TemplateBaseListener
     implements ActionListener
 {
+  private static Logger log = LoggerFactory.getLogger(TemplateLoadListener.class);
   static private ContextUtil cu;
   /**
    * Normal listener method.
@@ -65,6 +68,7 @@ public class TemplateLoadListener
     FacesContext context = FacesContext.getCurrentInstance();
 
     TemplateBean templateBean = lookupTemplateBean(context);
+    //log.info("id=" + cu.lookupParam("templateId"));
     String templateId = cu.lookupParam("templateId");
 
     AssessmentService assessmentService = new AssessmentService();
@@ -101,7 +105,8 @@ public class TemplateLoadListener
         (templateId);
 
       templateBean.setIdString(templateId);
-      templateBean.setTemplateName(FormattedText.convertFormattedTextToPlaintext(template.getTitle()));      
+      templateBean.setTemplateName(FormattedText.convertFormattedTextToPlaintext(template.getTitle()));
+      templateBean.setTemplateAuthor(FormattedText.convertFormattedTextToPlaintext((String) template.getAssessmentMetaDataMap(template.getAssessmentMetaDataSet()).get("author")));
       templateBean.setTemplateDescription(template.getDescription());
 
       // Assessment Access Control

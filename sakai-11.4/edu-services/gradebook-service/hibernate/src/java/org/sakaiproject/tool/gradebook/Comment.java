@@ -16,12 +16,12 @@
 
 package org.sakaiproject.tool.gradebook;
 
-import java.io.Serializable;
-import java.util.Date;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import java.util.Date;
+import java.io.Serializable;
 
 /**
  * Comment Object
@@ -32,8 +32,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * Time: 10:56:34 AM
  */
 public class Comment implements Serializable {
-	
-	private Long id;
+
+    private Long id;
     private String studentId;
     private String graderId;
     private int version;
@@ -110,8 +110,7 @@ public class Comment implements Serializable {
     }
 
 
-    @Override
-	public String toString() {
+    public String toString() {
         return new ToStringBuilder(this).
                 append("id", id).
                 append("grader", graderId).
@@ -120,8 +119,7 @@ public class Comment implements Serializable {
 
     }
 
-    @Override
-	public boolean equals(Object other) {
+    public boolean equals(Object other) {
         if (!(other instanceof Comment)) {
             return false;
         }
@@ -132,8 +130,7 @@ public class Comment implements Serializable {
             .append(commentText, comment.getCommentText()).isEquals();
     }
 
-    @Override
-	public int hashCode() {
+    public int hashCode() {
         return new HashCodeBuilder().
           append(gradableObject).
           append(id).

@@ -38,8 +38,9 @@ import javax.faces.event.ActionListener;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ValueChangeListener;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAssessmentData;
 import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
 import org.sakaiproject.tool.assessment.data.dao.grading.StudentGradingSummaryData;
@@ -58,15 +59,16 @@ import org.sakaiproject.tool.assessment.util.BeanSort;
 import org.sakaiproject.tool.assessment.integration.helper.ifc.AgentHelper;
 import org.sakaiproject.tool.assessment.integration.context.IntegrationContextFactory;
 
+
 /**
  * <p>Description: Action Listener for displaying Submission Status for anonymnous grading</p>
  * @version $Id$
  */
 
-@Slf4j
 public class SubmissionStatusListener
   implements ActionListener, ValueChangeListener
 {
+  private static Logger log = LoggerFactory.getLogger(SubmissionStatusListener.class);
   //private static EvaluationListenerUtil util;
   private static BeanSort bs;
   //private static ContextUtil cu;
@@ -79,11 +81,13 @@ public class SubmissionStatusListener
   public void processAction(ActionEvent ae) throws
     AbortProcessingException
   {
+    //log.info("Submission Status LISTENER.");
     SubmissionStatusBean bean = (SubmissionStatusBean) ContextUtil.lookupBean("submissionStatus");
     TotalScoresBean totalScoresBean = (TotalScoresBean) ContextUtil.lookupBean("totalScores");
 
     // we probably want to change the poster to be consistent
     String publishedId = ContextUtil.lookupParam("publishedId");
+    //log.info("Got publishedId " + publishedId);
 
     // Reset the search field
     String defaultSearchString = ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.EvaluationMessages", "search_default_student_search_string");
@@ -163,7 +167,7 @@ public class SubmissionStatusListener
       // we are only interested in showing last submissions
 
       List scores = delegate.getLastSubmittedAssessmentGradingList(new Long(publishedId));
-      List agents = new ArrayList();
+      ArrayList agents = new ArrayList();
       Iterator iter = scores.iterator();
       if (!iter.hasNext())
       {
@@ -181,7 +185,7 @@ public class SubmissionStatusListener
       Map useridMap= totalScoresBean.getUserIdMap(TotalScoresBean.CALLED_FROM_SUBMISSION_STATUS_LISTENER);
 
 
-      List agentUserIds = totalScorelistener.getAgentIds(useridMap);
+      ArrayList agentUserIds = totalScorelistener.getAgentIds(useridMap);
       AgentHelper helper = IntegrationContextFactory.getInstance().getAgentHelper();
       Map userRoles = helper.getUserRolesFromContextRealm(agentUserIds);
 
@@ -209,9 +213,9 @@ public class SubmissionStatusListener
 
 
       /* Dump the grading and agent information into AgentResults */
-      List students_submitted= new ArrayList();
+      ArrayList students_submitted= new ArrayList();
       iter = scores.iterator();
-      Map studentGradingSummaryDataMap = new HashMap();
+      HashMap studentGradingSummaryDataMap = new HashMap();
       RetakeAssessmentBean retakeAssessment = (RetakeAssessmentBean) ContextUtil.lookupBean("retakeAssessment");
       while (iter.hasNext())
       {
@@ -246,7 +250,7 @@ public class SubmissionStatusListener
       }
       retakeAssessment.setStudentGradingSummaryDataMap(studentGradingSummaryDataMap);
 
-      List students_not_submitted= new ArrayList();
+      ArrayList students_not_submitted= new ArrayList();
       Iterator useridIterator = useridMap.keySet().iterator();
       while (useridIterator.hasNext()) {
         String userid = (String) useridIterator.next();
@@ -266,11 +270,11 @@ public class SubmissionStatusListener
 
       if (sortAscending) {
       	log.debug("TotalScoreListener: setRoleAndSortSection() :: sortAscending");
-      	agents = (List)bs.sort();
+      	agents = (ArrayList)bs.sort();
       }
       else {
       	log.debug("TotalScoreListener: setRoleAndSortSection() :: !sortAscending");
-      	agents = (List)bs.sortDesc();
+      	agents = (ArrayList)bs.sortDesc();
       }
       
       bean.setAgents(agents);
@@ -280,13 +284,13 @@ public class SubmissionStatusListener
 
     catch (RuntimeException e)
     {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
       return false;
     } catch (IllegalAccessException e) {
-		log.error(e.getMessage(), e);
+		e.printStackTrace();
 		return false;
 	} catch (InvocationTargetException e) {
-		log.error(e.getMessage(), e);
+		e.printStackTrace();
 		return false;
 	}
 
@@ -296,7 +300,8 @@ public class SubmissionStatusListener
 
   //add those students that have not submitted scores, need to display them
   // in the UI 
-  public void prepareNotSubmittedAgentResult(Iterator notsubmitted_iter, List agents, Map userRoles, RetakeAssessmentBean retakeAssessment, Map studentGradingSummaryDataMap){
+  public void prepareNotSubmittedAgentResult(Iterator notsubmitted_iter,
+                                             ArrayList agents, Map userRoles, RetakeAssessmentBean retakeAssessment, HashMap studentGradingSummaryDataMap){
     while (notsubmitted_iter.hasNext()){
       String studentid = (String) notsubmitted_iter.next();
       AgentResults results = new AgentResults();
@@ -328,7 +333,7 @@ public class SubmissionStatusListener
     }
   }
   
-  public boolean getRetakeAllowed(String agentId, Map studentGradingSummaryDataMap, RetakeAssessmentBean retakeAssessment) {
+  public boolean getRetakeAllowed(String agentId, HashMap studentGradingSummaryDataMap, RetakeAssessmentBean retakeAssessment) {
 	    TotalScoresBean totalScoresBean = (TotalScoresBean) ContextUtil.lookupBean("totalScores");
 	    PublishedAssessmentData publishedAssessmentData = totalScoresBean.getPublishedAssessment();
 	    PublishedAssessmentService pubService = new PublishedAssessmentService();

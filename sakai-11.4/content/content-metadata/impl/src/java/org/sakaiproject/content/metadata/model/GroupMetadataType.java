@@ -42,9 +42,6 @@ import org.sakaiproject.content.metadata.model.MetadataValidator;
  */
 public class GroupMetadataType extends MetadataType<Map<String, ?>>
 {
-
-	private static final long serialVersionUID = 1L;
-
 	/**
 	 * Content of the group
 	 */

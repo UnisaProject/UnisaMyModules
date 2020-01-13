@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	
+	<form-beans>
+		<form-bean name="mdAdmissionForm" type="za.ac.unisa.lms.tools.mdadm.forms.MdAdmissionForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.mdadm.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/displaymdadmission.do?action=inputstep1"
+				contextRelative="true" />
+		</action>
+		<action
+    	 	 attribute="mdAdmissionForm"
+    	 	 name="mdAdmissionForm"
+     		 parameter="action"
+     	 	 path="/displaymdadmission"
+     	 	 type="za.ac.unisa.lms.tools.mdadm.actions.DisplayMdAdmissionAction"
+     		 validate="false">
+      	<forward
+      	 	 name="invaliduser"
+        	 path="/WEB-INF/jsp/invalidUser.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="recommendation"
+       		 path="/WEB-INF/jsp/recommendation.jsp"
+       		 contextRelative="true" />	
+       	<forward
+       		 name="reviewRecommendation"
+       		 path="/WEB-INF/jsp/reviewRecommendation.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="viewAdmission"
+       		 path="/WEB-INF/jsp/viewAdmission.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="signOffConfirmation"
+       		 path="/WEB-INF/jsp/signOffConfirmation.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="reviewReferredBack"
+       		 path="/WEB-INF/jsp/reviewReferredBack.jsp"
+       		 contextRelative="true" />	  
+       	<forward
+       		 name="appealRecommendation"
+       		 path="/WEB-INF/jsp/appealRecommendation.jsp"
+       		 contextRelative="true" />   
+       	<forward
+       		 name="appealSignOffConfirmation"
+       		 path="/WEB-INF/jsp/appealSignOffConfirmation.jsp"
+       		 contextRelative="true" />	     
+      	<forward
+       		 name="step1forward"
+       		 path="/WEB-INF/jsp/inputstep1.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="step2forward"
+       		 path="/WEB-INF/jsp/inputstep2.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="displayforward"
+       		 path="/WEB-INF/jsp/displaymdadmission.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="addforward"
+       		 path="/WEB-INF/jsp/addmdactivity.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="searchStaff"
+       		 path="/WEB-INF/jsp/searchStaff.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="cancel"
+       		 path="/WEB-INF/jsp/inputstep1.jsp"
+       		 contextRelative="true" />
+       	<forward
+       		 name="home"
+       		 path="/displaymdadmission.do?action=inputstep1"
+       		 contextRelative="true" />
+    </action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.mdadm.ApplicationResources" />
+	
+</struts-config>

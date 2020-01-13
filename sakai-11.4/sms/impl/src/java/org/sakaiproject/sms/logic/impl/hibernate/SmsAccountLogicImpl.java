@@ -26,8 +26,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.type.DateType;
-import org.hibernate.type.StringType;
+import org.hibernate.Hibernate;
 import org.quartz.impl.jdbcjobstore.InvalidConfigurationException;
 import org.sakaiproject.genericdao.api.search.Restriction;
 import org.sakaiproject.genericdao.api.search.Search;
@@ -43,8 +42,6 @@ import org.sakaiproject.sms.model.SmsConfig;
 import org.sakaiproject.sms.model.SmsTransaction;
 import org.sakaiproject.sms.model.constants.SmsConstants;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * The data service will handle all sms Account database transactions for the
  * sms tool in Sakai.
@@ -54,7 +51,6 @@ import lombok.extern.slf4j.Slf4j;
  * @created 25-Nov-2008 08:12:41 AM
  */
 @SuppressWarnings("unchecked")
-@Slf4j
 public class SmsAccountLogicImpl extends SmsLogic implements SmsAccountLogic {
 
 	private HibernateLogicLocator hibernateLogicLocator = null;
@@ -96,7 +92,7 @@ public class SmsAccountLogicImpl extends SmsLogic implements SmsAccountLogic {
 	 * 
 	 * @param Long
 	 *            sms account id
-	 * @return sms configuration
+	 * @return sms congiguration
 	 */
 	public SmsAccount getSmsAccount(Long smsAccountId) {
 		return (SmsAccount) findById(SmsAccount.class, smsAccountId);
@@ -281,7 +277,8 @@ public class SmsAccountLogicImpl extends SmsLogic implements SmsAccountLogic {
 			try {
 				persistSmsAccount(smsAccount);
 			} catch (IllegalArgumentException e) {
-				log.warn(e.getLocalizedMessage(), e);
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 
 			return getSmsAccount(sakaiSiteId, sakaiUserId);
@@ -313,8 +310,8 @@ public class SmsAccountLogicImpl extends SmsLogic implements SmsAccountLogic {
 		hql.append(" and (account.sakaiSiteId = :sakaiSiteId)");
 		List<SmsAccount> accounts = smsDao
 				.runQuery(hql.toString(), new QueryParameter("sakaiSiteId",
-						sakaiSiteId, StringType.INSTANCE), new QueryParameter(
-						"today", new Date(), DateType.INSTANCE));
+						sakaiSiteId, Hibernate.STRING), new QueryParameter(
+						"today", new Date(), Hibernate.DATE));
 
 		if (accounts != null && !accounts.isEmpty()) {
 			account = accounts.get(0);
@@ -342,8 +339,8 @@ public class SmsAccountLogicImpl extends SmsLogic implements SmsAccountLogic {
 		hql.append(" and (account.sakaiUserId = :sakaiUserId)");
 		List<SmsAccount> accounts = smsDao
 				.runQuery(hql.toString(), new QueryParameter("today",
-						new Date(), DateType.INSTANCE), new QueryParameter(
-						"sakaiUserId", sakaiUserId, StringType.INSTANCE));
+						new Date(), Hibernate.DATE), new QueryParameter(
+						"sakaiUserId", sakaiUserId, Hibernate.STRING));
 		if (accounts != null && !accounts.isEmpty()) {
 			account = accounts.get(0);
 		}
@@ -391,7 +388,8 @@ public class SmsAccountLogicImpl extends SmsLogic implements SmsAccountLogic {
 		try {
 			persistSmsAccount(account);
 		} catch (IllegalArgumentException e) {
-			log.warn(e.getLocalizedMessage(), e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

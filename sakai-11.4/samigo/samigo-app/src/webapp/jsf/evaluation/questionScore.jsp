@@ -373,7 +373,7 @@ function hiddenLinkOnClick(){
   </t:dataList>
   </div>
 
-  <h2>
+  <h2 class="hide">
     <p class="navView navModeAction">
       <h:outputText value="#{evaluationMessages.responses}"/>
     </p>

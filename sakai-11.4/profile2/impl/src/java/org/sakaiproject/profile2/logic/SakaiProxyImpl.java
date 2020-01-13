@@ -23,11 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-
 import org.sakaiproject.api.common.edu.person.SakaiPerson;
 import org.sakaiproject.api.common.edu.person.SakaiPersonManager;
 import org.sakaiproject.authz.api.SecurityAdvisor;
@@ -64,6 +61,10 @@ import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserEdit;
 import org.sakaiproject.user.api.UserNotDefinedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import lombok.Setter;
 
 /**
  * Implementation of SakaiProxy for Profile2.
@@ -71,8 +72,9 @@ import org.sakaiproject.user.api.UserNotDefinedException;
  * @author Steve Swinsburg (s.swinsburg@lancaster.ac.uk)
  *
  */
-@Slf4j
 public class SakaiProxyImpl implements SakaiProxy {
+
+	private static final Logger log = LoggerFactory.getLogger(SakaiProxyImpl.class);
 
 	/**
 	 * {@inheritDoc}
@@ -249,7 +251,7 @@ public class SakaiProxyImpl implements SakaiProxy {
 		try {
 			type = this.userDirectoryService.getUser(userId).getType();
 		} catch (final UserNotDefinedException e) {
-			log.debug("User with eid: " + userId + " does not exist : " + e.getClass() + " : " + e.getMessage());
+			log.info("User with eid: " + userId + " does not exist : " + e.getClass() + " : " + e.getMessage());
 		}
 		return type;
 	}
@@ -263,7 +265,7 @@ public class SakaiProxyImpl implements SakaiProxy {
 		try {
 			u = this.userDirectoryService.getUser(userId);
 		} catch (final UserNotDefinedException e) {
-			log.debug("User with id: " + userId + " does not exist : " + e.getClass() + " : " + e.getMessage());
+			log.info("User with id: " + userId + " does not exist : " + e.getClass() + " : " + e.getMessage());
 		}
 
 		return u;
@@ -444,6 +446,7 @@ public class SakaiProxyImpl implements SakaiProxy {
 			return true;
 		} catch (final Exception e) {
 			log.error("SakaiProxy.updateSakaiPerson(): Couldn't update SakaiPerson: " + e.getClass() + " : " + e.getMessage());
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -969,24 +972,15 @@ public class SakaiProxyImpl implements SakaiProxy {
 	 */
 	@Override
 	public String getDirectUrlToProfileComponent(final String userId, final String component, final Map<String, String> extraParams) {
-	    return getDirectUrlToProfileComponent(getCurrentUserId(), userId, component, extraParams);
-	}
-
-    /**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getDirectUrlToProfileComponent(final String viewerUuid, final String viewedUuid, final String component, final Map<String, String> extraParams) {
-
 		final String portalUrl = getFullPortalUrl();
 
-		// this is for the viewer
-		final String siteId = getUserMyWorkspace(viewerUuid);
+		// this is for current user
+		final String siteId = getUserMyWorkspace(getCurrentUserId());
 		final ToolConfiguration toolConfig = getFirstInstanceOfTool(siteId, ProfileConstants.TOOL_ID);
 		if (toolConfig == null) {
 			// if the user doesn't have the Profile2 tool installed in their My Workspace,
 			log.warn("SakaiProxy.getDirectUrlToProfileComponent() failed to find " + ProfileConstants.TOOL_ID
-					+ " installed in My Workspace for userId: " + viewerUuid);
+					+ " installed in My Workspace for userId: " + userId);
 
 			// just return a link to their My Workspace
 			final StringBuilder url = new StringBuilder();
@@ -994,6 +988,7 @@ public class SakaiProxyImpl implements SakaiProxy {
 			url.append("/site/");
 			url.append(siteId);
 			return url.toString();
+
 		}
 
 		final String placementId = toolConfig.getId();
@@ -1013,7 +1008,7 @@ public class SakaiProxyImpl implements SakaiProxy {
 				}
 				case "viewprofile": {
 					url.append("/viewprofile/");
-					url.append(viewedUuid);
+					url.append(userId);
 					break;
 				}
 			}
@@ -1023,6 +1018,7 @@ public class SakaiProxyImpl implements SakaiProxy {
 			log.error("SakaiProxy.getDirectUrlToProfileComponent():" + e.getClass() + ":" + e.getMessage());
 			return null;
 		}
+
 	}
 
 	/**
@@ -1582,11 +1578,11 @@ public class SakaiProxyImpl implements SakaiProxy {
 		try {
 			site = this.siteService.addSite(id, type);
 		} catch (final IdInvalidException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		} catch (final IdUsedException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		} catch (final PermissionException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 
 		return site;
@@ -1600,10 +1596,10 @@ public class SakaiProxyImpl implements SakaiProxy {
 		try {
 			this.siteService.save(site);
 		} catch (final IdUnusedException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 			return false;
 		} catch (final PermissionException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 			return false;
 		}
 		return true;
@@ -1617,7 +1613,7 @@ public class SakaiProxyImpl implements SakaiProxy {
 		try {
 			return this.siteService.getSite(siteId);
 		} catch (final IdUnusedException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -1771,14 +1767,6 @@ public class SakaiProxyImpl implements SakaiProxy {
 	public boolean isOnlineStatusEnabledGlobally() {
 		return this.serverConfigurationService.getBoolean("profile2.onlineStatus.enabled",
 				ProfileConstants.SAKAI_PROP_PROFILE2_ONLINE_STATUS_ENABLED);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public SiteService.SiteTitleValidationStatus validateSiteTitle(String orig, String stripped) {
-		return this.siteService.validateSiteTitle(orig, stripped);
 	}
 
 	// PRIVATE METHODS FOR SAKAIPROXY

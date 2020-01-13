@@ -144,11 +144,6 @@ public interface ContentHostingService extends EntityProducer
 	 */
 	public static final String EVENT_RESOURCE_UPD_TITLE = "content.upd.title";
 
-	/** 
-	 * Name of the event when the file of a content-resource changes. 
-	 */
-	public static final String EVENT_RESOURCE_UPD_NEW_VERSION = "content.upd.new.version";
-
 	/** Security function for creating a resource. */
 	public static final String AUTH_RESOURCE_ADD = "content.new";
 
@@ -353,7 +348,7 @@ public interface ContentHostingService extends EntityProducer
 	 * @throws IdInvalidException 
 	 * @throws IdUsedException 
 	 * @deprecated Suggest use of {@link #addCollection(String)} followed by {@link Entity#getProperties()},
-	 * 		{@link GroupAwareEdit#setGroupAccess(Collection)}, {@link GroupAwareEdit#setAvailability(boolean, Instant, Instant)} 
+	 * 		{@link GroupAwareEdit#setGroupAccess(Collection)}, {@link GroupAwareEdit#setAvailability(boolean, Time, Time)} 
 	 * 		and {@link #commitCollection(ContentCollectionEdit)}
 	 */
 	public ContentCollection addCollection(String id, ResourceProperties properties, Collection<String>  groups, boolean hidden, Time releaseDate, Time retractDate) throws IdUsedException, IdInvalidException, PermissionException, InconsistentException;
@@ -1946,37 +1941,8 @@ public interface ContentHostingService extends EntityProducer
 		throws PermissionException, IdUnusedException, IdUsedException, 
 				IdLengthException, IdInvalidException, TypeException;
 
-	/**
-	 * This method with the limit parameter should be used if you want to create a unique collection id.
-	 * Because the Resources tool allows renaming folders, the end-user can become confused when folder
-	 * creation is denied because the resourceId was already taken.
-	 * 
-	 * @param collectionId
-	 * @param name
-	 * @param limit
-	 *            number of attempts to find a unique resourceId for the collection via incrementing
-	 * @return
-	 * @exception PermissionException
-	 *            if the user does not have permission to add a resource to the containing collection.
-	 * @exception TypeException
-	 *            if the collectionId is not in the form to identify a collection.
-	 * @exception IdUnusedException
-	 *            if the collectionId does not identify an existing collection.
-	 * @exception IdUnusedException
-	 *            if the collection id for the proposed name already exists in this collection.
-	 * @exception IdLengthException
-	 *            if the new collection id exceeds the maximum number of characters for a valid collection id.
-	 * @exception IdInvalidException
-	 *            if the resource id is invalid.
-	 * @exception IdUniquenessException
-	 *            if a unique id for the collection cannot be found despite using an incrementor
-	 */
-	public ContentCollectionEdit addCollection(String collectionId, String name, int limit)
-		throws PermissionException, IdUnusedException, IdUsedException,
-				IdLengthException, IdInvalidException, TypeException, IdUniquenessException;
-
    /**
-    * gets the quota for a site collection or for a user's Home collection
+    * gets the quota for a site collection or for a user's my workspace collection
     *
     * @param collection the collection on which to test for a quota.  this can be the collection for a site
     * or a user's workspace collection

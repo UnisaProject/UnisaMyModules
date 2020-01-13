@@ -19,12 +19,9 @@ package org.sakaiproject.delegatedaccess.dao.impl;
 import java.util.Arrays;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.joda.time.DateTime;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.JobExecutionException;
-
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.Role;
@@ -49,7 +46,7 @@ import org.sakaiproject.user.api.UserIdInvalidException;
 import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.user.api.UserPermissionException;
 
-@Slf4j
+
 public class DelegatedAccessSampleDataLoader {
 	private SiteService siteService;
 	private DelegatedAccessSiteHierarchyJob delegatedAccessSiteHierarchyJob;
@@ -59,14 +56,13 @@ public class DelegatedAccessSampleDataLoader {
 	private UsageSessionService usageSessionService;
 	private SessionManager sessionManager;
 	private UserDirectoryService userDirectoryService;
+	private static final Logger log = LoggerFactory.getLogger(DelegatedAccessSampleDataLoader.class);
 
 	private List<String> schools = Arrays.asList("MUSIC", "MEDICINE", "EDUCATION");
 	private List<String> depts = Arrays.asList("DEPT1", "DEPT2", "DEPT3");
 	private List<String> subjs = Arrays.asList("SUBJ1", "SUBJ2","SUBJ3");
 	
 	public void init(){
-		log.info("init()");
-		
 		if(siteService == null || securityService == null || delegatedAccessSiteHierarchyJob == null){
 			return;
 		}
@@ -81,9 +77,6 @@ public class DelegatedAccessSampleDataLoader {
 			loginToSakai();
 			securityService.pushAdvisor(yesMan);
 			AuthzGroup templateGroup = authzGroupService.getAuthzGroup("!site.template.course");
-		
-			DateTime date = new DateTime();
-			String term = "Spring " + date.getYear();
 			for(String school : schools){
 				for(String dept : depts){
 					for(String subject : subjs){
@@ -137,7 +130,7 @@ public class DelegatedAccessSampleDataLoader {
 									//Gradebook
 									page = siteEdit.addPage();
 									page.setTitle("Gradebook");
-									page.addTool("sakai.gradebookng");
+									page.addTool("sakai.gradebook.tool");
 									
 									//Schedule
 									page = siteEdit.addPage();
@@ -171,9 +164,6 @@ public class DelegatedAccessSampleDataLoader {
 								propEdit.addProperty("Department", dept);
 								propEdit.addProperty("Subject", subject);
 								
-								propEdit.addProperty("term", term);
-								propEdit.addProperty("term_eid", term);
-								
 								siteService.save(siteEdit);
 								
 								//Make sure roles exist:
@@ -188,9 +178,6 @@ public class DelegatedAccessSampleDataLoader {
 
 							} catch (IdInvalidException | PermissionException e) {
 								log.warn(e.getMessage(), e);
-							} catch (IdUsedException e) {
-								log.debug("IdUsedException: " + e.getId(), e);
-								return;
 							} catch (Exception e) {
 								log.warn(e.getMessage(), e);
 								return;
@@ -206,7 +193,8 @@ public class DelegatedAccessSampleDataLoader {
 			} catch (JobExecutionException e) {
 				log.warn(e.getMessage(), e);
 			}
-		} catch(Exception e){
+		
+		}catch(Exception e){
 			log.warn(e.getMessage(), e);
 		}finally{
 			securityService.popAdvisor(yesMan);
@@ -224,11 +212,14 @@ public class DelegatedAccessSampleDataLoader {
 				//String id, String eid, String firstName, String lastName, String email, String pw, String type, ResourceProperties properties
 				user = userDirectoryService.addUser("datest", "datest", "DA", "Test", "", "datest", "", null);
 			} catch (UserIdInvalidException e1) {
-				log.error(e1.getMessage(), e1);
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			} catch (UserAlreadyDefinedException e1) {
-				log.error(e1.getMessage(), e1);
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			} catch (UserPermissionException e1) {
-				log.error(e1.getMessage(), e1);
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 		}
 		if(user != null){

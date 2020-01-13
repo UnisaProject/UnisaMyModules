@@ -37,8 +37,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.el.ValueBinding;
 import javax.faces.model.SelectItem;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.podcasts.PodcastService;
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.authz.api.GroupNotDefinedException;
@@ -50,7 +50,6 @@ import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.site.cover.SiteService;
 
-@Slf4j
 public class podPermBean {
 
 	private final String CONTENT = "content";
@@ -287,11 +286,11 @@ public class podPermBean {
 					podAuthzGroup = authzGroupService.getAuthzGroup(podcastFolderRef);
 				} 
 				catch (PermissionException e) {
-					log.warn("PermissionException trying to get roles for site "
+					LOG.warn("PermissionException trying to get roles for site "
 								+ podcastService.getSiteId() + e.getMessage(), e);
 				} 
 				catch (GroupNotDefinedException e) {
-					log.info("GroupNotDefinedException while constructing permission data table contents for site "
+					LOG.info("GroupNotDefinedException while constructing permission data table contents for site "
 									+ podcastService.getSiteId() + ".", e);
 				}
 
@@ -354,6 +353,7 @@ public class podPermBean {
 	private List checkboxTableValues;
 
 	// injected beans
+	private Logger LOG = LoggerFactory.getLogger(podPermBean.class);
 	private PodcastService podcastService;
 
 	/**
@@ -411,7 +411,7 @@ public class podPermBean {
 			}
 
 		} catch (GroupNotDefinedException e) {
-			log.error("GroupNotDefinedException trying to get roles for site "
+			LOG.error("GroupNotDefinedException trying to get roles for site "
 							+ podcastService.getSiteId() + ". " + e.getMessage(), e);
 		}
 
@@ -509,7 +509,7 @@ public class podPermBean {
 			siteName = SiteService.getSite(podcastService.getSiteId()).getTitle();
 
 		} catch (IdUnusedException e) {
-			log.error("IdUnusedException attempting to get site name for site. "
+			LOG.error("IdUnusedException attempting to get site name for site. "
 						+ e.getMessage(), e);
 		}
 
@@ -558,11 +558,11 @@ public class podPermBean {
 			podAuthzGroup = authzGroupService.getAuthzGroup(podcastFolderRef);
 		} 
 		catch (PermissionException e) {
-			log.warn("PermissionException trying to get roles for site "
+			LOG.warn("PermissionException trying to get roles for site "
 						+ podcastService.getSiteId() + e.getMessage(), e);
 		} 
 		catch (GroupNotDefinedException e) {
-			log.error("GroupNotDefinedException while constructing permission table for site "
+			LOG.error("GroupNotDefinedException while constructing permission table for site "
 							+ podcastService.getSiteId() + ".", e);
 		}
 

@@ -21,7 +21,7 @@ limitations under the License.
   <parent>
     <groupId>org.sakaiproject</groupId>
     <artifactId>master</artifactId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../master/pom.xml</relativePath>
   </parent>
   <groupId>org.sakaiproject</groupId>
@@ -35,6 +35,7 @@ limitations under the License.
     <module>rwiki-util/jrcs</module>
     <module>rwiki-util/radeox</module>
     <module>rwiki-util/util</module>
+    <module>rwiki-impl/pack</module>
     <module>rwiki-tool/tool</module>
     <module>rwiki-access-tool</module>
   </modules>

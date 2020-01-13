@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE form-validation PUBLIC
+          "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1.3//EN"
+          "http://jakarta.apache.org/commons/dtds/validator_1_1_3.dtd">
+
+<form-validation>
+	<formset>
+		<form name="/examPaperCoverDocket">
+		<field property="fillInPaper"
+				depends="required">
+				<arg0 key="page.fillInPaper"/>
+		</field>		
+		<field property="exampaper.writtenTotal"
+				depends="integer">
+				<arg0 key="page.writtenTotal"/>
+		</field>
+		<field property="exampaper.mcqTotal"
+				depends="integer">
+				<arg0 key="page.mcqTotal"/>
+		</field>
+		<field property="exampaper.paperTotal"
+				depends="integer">
+				<arg0 key="page.paperTotal"/>
+		</field>
+		<field property="exampaper.totalPages"
+				depends="required">
+				<arg0 key="page.totalPages"/>
+		</field>
+		<field property="exampaper.totalPages"
+				depends="integer">
+				<arg0 key="page.totalPages"/>
+		</field>
+		<field property="openBook"
+				depends="required">
+				<arg0 key="page.openBook"/>
+		</field>
+		<field property="keepPaper"
+				depends="required">
+				<arg0 key="page.keepPaper"/>
+		</field>
+		<field property="calcPermit"
+				depends="required">
+				<arg0 key="page.calcPermit"/>
+		</field>
+		<field property="requestToProofRead"
+				depends="required">
+				<arg0 key="page.requestToProofRead"/>
+		</field>
+		<field property="memoIncluded"
+				depends="required">
+				<arg0 key="page.memoIncluded"/>
+		</field>
+		<field property="contactPerson"
+				depends="required">
+				<arg0 key="page.contactPerson"/>
+		</field>
+		<field property="contactPerson"
+				depends="integer">
+				<arg0 key="page.contactPerson"/>
+		</field>
+	</form>
+	</formset>	
+</form-validation>

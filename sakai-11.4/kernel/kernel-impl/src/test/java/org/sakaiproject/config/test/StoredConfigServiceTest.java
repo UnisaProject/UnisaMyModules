@@ -21,15 +21,12 @@
 
 package org.sakaiproject.config.test;
 
-import java.util.Arrays;
-import java.util.List;
-
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.component.api.ServerConfigurationService.ConfigItem;
 import org.sakaiproject.component.impl.BasicConfigurationService;
@@ -39,6 +36,9 @@ import org.sakaiproject.config.impl.StoredConfigService;
 import org.sakaiproject.test.SakaiKernelTestBase;
 import org.sakaiproject.util.BasicConfigItem;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * StoredConfigServiceTest
  * KNL-1063
@@ -46,8 +46,9 @@ import org.sakaiproject.util.BasicConfigItem;
  * @author Earle Nietzel
  *         Created on April 18, 2013
  */
-@Slf4j
 public class StoredConfigServiceTest extends SakaiKernelTestBase {
+    private static final Logger LOG = LoggerFactory.getLogger(StoredConfigServiceTest.class);
+
     private static BasicConfigurationService basicConfigurationService;
     private static StoredConfigService storedConfigService;
     private static final String SOURCE = "TEST";
@@ -55,12 +56,12 @@ public class StoredConfigServiceTest extends SakaiKernelTestBase {
 	@BeforeClass
 	public static void beforeClass() {
 		try {
-			log.debug("starting oneTimeSetup");
-			oneTimeSetup("storedconfigservice");
-			oneTimeSetupAfter();
-			log.debug("finished oneTimeSetup");
+            LOG.debug("starting oneTimeSetup");
+            oneTimeSetup("storedconfigservice");
+            oneTimeSetupAfter();
+            LOG.debug("finished oneTimeSetup");
 		} catch (Exception e) {
-			log.warn(e.getMessage(), e);
+			LOG.warn(e.getMessage(), e);
 		}
 	}
 	
@@ -76,7 +77,7 @@ public class StoredConfigServiceTest extends SakaiKernelTestBase {
 
     @Test
     public void testStoredConfigService() {
-        log.info("Total # of Config Items is " + storedConfigService.countAll());
+        LOG.info("Total # of Config Items is " + storedConfigService.countAll());
 
         // check that test[1-4] has been added
         Assert.assertEquals(1, storedConfigService.countByName("test1"));
@@ -87,7 +88,7 @@ public class StoredConfigServiceTest extends SakaiKernelTestBase {
         // modify test1 for time test
         basicConfigurationService.registerConfigItem(new ConfigItemImpl("test1", "test1-updated", SOURCE));
         HibernateConfigItem test1 = storedConfigService.findByName("test1");
-        log.info(test1.toString());
+        LOG.info(test1.toString());
         Assert.assertEquals("test1-updated", test1.getValue());
         Assert.assertFalse(test1.getCreated().equals(test1.getModified()));
 
@@ -114,7 +115,7 @@ public class StoredConfigServiceTest extends SakaiKernelTestBase {
         List<HibernateConfigItem> securedItems = storedConfigService.findSecured();
         Assert.assertTrue(isConfigItemInList(securedItems, "test5"));
 
-        log.info("Number of secured: " + securedItems.size() + ", defaulted: " + defaultedItems.size() + ", registered: " + registeredItems.size() + ", dynamic: " + dynamicItems.size());
+        LOG.info("Number of secured: " + securedItems.size() + ", defaulted: " + defaultedItems.size() + ", registered: " + registeredItems.size() + ", dynamic: " + dynamicItems.size());
 
         // test type boolean
         ConfigItem test6CI = new ConfigItemImpl("test6", Boolean.TRUE, ServerConfigurationService.TYPE_BOOLEAN, SOURCE);
@@ -140,7 +141,7 @@ public class StoredConfigServiceTest extends SakaiKernelTestBase {
     private boolean isConfigItemInList(List<HibernateConfigItem> list, String name) {
         for (HibernateConfigItem item : list) {
             if (item.getName().equals(name)) {
-                log.info(item.toString());
+                LOG.info(item.toString());
                 return true;
             }
         }
@@ -148,7 +149,7 @@ public class StoredConfigServiceTest extends SakaiKernelTestBase {
     }
 
     private void persistAndRetrieve(ConfigItem item) {
-        log.info("persistAndRetrieve: " + item.toString());
+        LOG.info("persistAndRetrieve: " + item.toString());
         HibernateConfigItem origItem = storedConfigService.createHibernateConfigItem(item);
 
         storedConfigService.saveOrUpdate(origItem);
@@ -169,3 +170,4 @@ public class StoredConfigServiceTest extends SakaiKernelTestBase {
         }
     }
 }
+

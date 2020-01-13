@@ -4,7 +4,7 @@
     <parent>
         <artifactId>basiclti</artifactId>
         <groupId>org.sakaiproject.basiclti</groupId>
-        <version>12.6</version>
+        <version>11.4</version>
     </parent>
   <name>sakai-web-portlet-basiclti</name>
   <groupId>org.sakaiproject.basiclti</groupId>
@@ -55,10 +55,6 @@
       <artifactId>velocity</artifactId>
       <version>${sakai.velocity.version}</version>
     </dependency>
-      <dependency>
-          <groupId>org.sakaiproject.velocity</groupId>
-          <artifactId>sakai-velocity-util</artifactId>
-      </dependency>
     <dependency>
       <groupId>logkit</groupId>
       <artifactId>logkit</artifactId>

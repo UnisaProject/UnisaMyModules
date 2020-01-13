@@ -25,16 +25,24 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import javax.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author ieb
  * @since Sakai 2.4
  * @version $Rev$
  */
-@Slf4j
+
 public class URLUtils
 {
+
+	/**
+	 * Our log (commons).
+	 */
+	private static Logger M_log = LoggerFactory.getLogger(URLUtils.class);
+
 	public static String addParameter(String URL, String name, String value)
 	{
 		int qpos = URL.indexOf('?');
@@ -91,7 +99,7 @@ public class URLUtils
 		if (! newPathInfo.equals(pathInfo) ) {
 			String ipAddress = req.getRemoteAddr();
 
-			log.warn("Truncated pathInfo IP="+ipAddress+" from "+pathInfo+" to "+newPathInfo);
+			M_log.warn("Truncated pathInfo IP="+ipAddress+" from "+pathInfo+" to "+newPathInfo);
 		}
 		return newPathInfo;
 	}

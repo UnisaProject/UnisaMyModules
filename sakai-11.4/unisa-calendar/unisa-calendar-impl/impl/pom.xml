@@ -2,7 +2,7 @@
   <parent>
     <artifactId>unisa-calendar-base</artifactId>
     <groupId>org.sakaiproject</groupId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -10,16 +10,10 @@
   <artifactId>unisa-calendar-impl</artifactId>
   <name>unisa-calendar-impl</name>
   <inceptionYear>2003</inceptionYear>
-  <!--  Sonette add 10 Jan 2020 -->
-  <packaging>sakai-component</packaging>
-    <properties>
-        <deploy.target>components</deploy.target>
-    </properties>
   <organization>
     <name>University of South Africa</name>
     <url>http://sakaiproject.org/</url>
   </organization>
-  
   <dependencies>
     <dependency>
       <groupId>commons-logging</groupId>
@@ -45,10 +39,6 @@
       <groupId>org.sakaiproject.calendar</groupId>
       <artifactId>sakai-calendar-impl</artifactId>
       <version>${sakai.version}</version>
-    </dependency>
-    <dependency>
-        <groupId>org.sakaiproject.kernel</groupId>
-        <artifactId>sakai-kernel-util</artifactId>
     </dependency>
  	<dependency>
 	  <groupId>org.sakaiproject.kernel</groupId>
@@ -81,5 +71,7 @@
       <version>${sakai.version}</version>
     </dependency>
   </dependencies>
-
+  <properties>
+    <deploy.target></deploy.target>
+  </properties>
 </project>

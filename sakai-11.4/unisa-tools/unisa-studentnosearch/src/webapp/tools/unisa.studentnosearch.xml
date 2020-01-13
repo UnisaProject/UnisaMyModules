@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.studentnosearch"
+		title="Unisa Student Number Search"
+		description="Unisa Student Number Search">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

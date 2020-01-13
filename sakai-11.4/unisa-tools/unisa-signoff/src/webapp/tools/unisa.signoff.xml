@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.signoff"
+		title="Authorisation Structures"
+		description="">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

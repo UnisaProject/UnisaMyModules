@@ -15,13 +15,11 @@
  */
 package org.sakaiproject.profile2.tool.components;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.image.ContextImage;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.image.resource.BufferedDynamicImageResource;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.StringResourceModel;
 import org.apache.wicket.request.resource.IResource;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.sakaiproject.profile2.logic.SakaiProxy;
@@ -66,10 +64,7 @@ public class GalleryImageRenderer extends Panel {
 				}
 			};
 
-			Image myPic = new Image("img", new Model(imageResource));
-			myPic.add(new AttributeModifier("alt", new StringResourceModel("profile.gallery.image.alt",this,null).getString()));
-			add(myPic);
-
+			add(new Image("img", new Model(imageResource)));
 		} else {
 			add(new ContextImage("img",new Model(ProfileConstants.UNAVAILABLE_IMAGE)));
 		}

@@ -4,7 +4,7 @@
   <parent>
     <artifactId>search</artifactId>
     <groupId>org.sakaiproject.search</groupId>
-    <version>12.6</version><!-- ProjectVersion -->
+    <version>11.4</version><!-- ProjectVersion -->
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <name>sakai-search-tool</name>
@@ -72,6 +72,7 @@
     <dependency>
       <groupId>org.sakaiproject.search</groupId>
       <artifactId>search-api</artifactId>
+      <type>jar</type>
     </dependency>
     <dependency>
         <groupId>org.sakaiproject.portal</groupId>
@@ -81,6 +82,7 @@
       <groupId>org.apache.velocity</groupId>
       <artifactId>velocity</artifactId>
       <version>${sakai.velocity.version}</version>
+      <type>jar</type>
     </dependency>
     <dependency>
       <groupId>velocity-tools</groupId>
@@ -88,39 +90,36 @@
       <version>1.4</version>
     </dependency>
     <dependency>
-      <groupId>org.sakaiproject.velocity</groupId>
-      <artifactId>sakai-velocity-util</artifactId>
-    </dependency>
-    <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
+      <type>jar</type>
     </dependency>
     <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.elasticsearch</groupId>
-      <artifactId>elasticsearch</artifactId>
-      <version>${sakai.elasticsearch.version}</version>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <type>jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>jmock</groupId>
       <artifactId>jmock</artifactId>
       <version>1.1.0</version>
+      <type>jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>jmock</groupId>
       <artifactId>jmock-cglib</artifactId>
       <version>1.1.0</version>
+      <type>jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>cglib</groupId>
       <artifactId>cglib-full</artifactId>
       <version>2.0.2</version>
+      <type>jar</type>
       <scope>test</scope>
     </dependency>
   </dependencies>

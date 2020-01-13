@@ -24,7 +24,8 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
-import java.time.format.DateTimeParseException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -46,9 +47,9 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.fileupload.FileItem;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.podcasts.PodcastPermissionsService;
 import org.sakaiproject.api.app.podcasts.PodcastService;
 import org.sakaiproject.api.app.podcasts.exception.PodcastException;
@@ -73,14 +74,14 @@ import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.exception.ServerOverloadException;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.cover.SiteService;
+import org.sakaiproject.time.cover.TimeService;
 import org.sakaiproject.tool.api.ToolSession;
 import org.sakaiproject.tool.cover.SessionManager;
 import org.sakaiproject.tool.cover.ToolManager;
-import org.sakaiproject.util.DateFormatterUtil;
+import org.sakaiproject.tool.podcasts.util.DateUtil;
 import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.Validator;
 
-@Slf4j
 public class podHomeBean {
 	// Message Bundle handles
 	private static final String QUOTA_ALERT = "quota_alert";
@@ -94,11 +95,15 @@ public class podHomeBean {
 	
 	// Patterns for Date and Number formatting
 	private static final String PUBLISH_DATE_FORMAT = "publish_date_format";
-	private static final String DATEPICKER_EDIT_FORMAT = "yyyy-MM-dd HH:mm:ss";
+	private static final String DATE_PICKER_FORMAT = "date_picker_format";
+	private static final String DATE_BY_HAND_FORMAT = "date_by_hand_format";
+	private static final String INTERNAL_DATE_FORMAT = "internal_date_format";
 
-	private static final String POD_ADD_ISO_HIDDEN_DATE = "podAddISO8601";
-	private static final String POD_REVISE_ISO_HIDDEN_DATE = "podReviseISO8601";
+	/** TODO: This is required until date-picker is internationalized. */
+	private static final String FIXED_DATE_PICKER_FORMAT = "MM/dd/yyyy hh:mm:ss a";
 
+	private static final String LAST_MODIFIED_TIME_FORMAT = "hh:mm a z";
+	private static final String LAST_MODIFIED_DATE_FORMAT = "MM/dd/yyyy";
 	
 	// error handling variables
 	private boolean displayNoFileErrMsg = false;
@@ -120,12 +125,12 @@ public class podHomeBean {
 		private long fileSize;
 		private String displayDate;
 		private String displayDateRevise;
-		private Date editDate;
 		private String title;
 		private String description;
 		private String size;
 		private String type;
-		private String postedDatetime;
+		private String postedTime;
+		private String postedDate;
 		private String author;
 		private String fileURL;
 		private String newWindow;
@@ -161,24 +166,33 @@ public class podHomeBean {
 			String dispDate = null;
 			
 			if (displayDateRevise == null) {
-				return DateFormatterUtil.format(this.getEditDate(), DATEPICKER_EDIT_FORMAT, rb.getLocale());
+				dispDate = displayDate;
 			}
 			else {
-				return displayDateRevise;
+				dispDate = displayDateRevise;
 			}
+				
+			SimpleDateFormat formatter = new SimpleDateFormat(getErrorMessageString(DATE_BY_HAND_FORMAT), rb.getLocale());
+			formatter.setTimeZone(TimeService.getLocalTimeZone());
+			
+			try {
+				Date tempDate = convertDateString(dispDate,
+						getErrorMessageString(PUBLISH_DATE_FORMAT));
+				
+				return formatter.format(tempDate);
+			
+			} catch (ParseException e) {
+				// since revising, only log error if malformed date and not just blank
+				if (! "".equals(dispDate)) {
+					LOG.error("ParseException while rendering Revise Podcast page. ", e);
+				}
+			}
+			
+			return dispDate;
+
 		}
 		public void setDisplayDate(String displayDate) {
 			this.displayDate = displayDate;
-		}
-
-		/** Returns the revised date for this podcast **/
-		public Date getEditDate() {
-			return this.editDate;
-		}
-
-		/** Sets the revised date for this podcast **/
-		public void setEditDate(Date editDate) {
-			this.editDate = editDate;
 		}
 
 		public String getFilename() {
@@ -217,12 +231,20 @@ public class podHomeBean {
 			this.type = type;
 		}
 
-		public String getPostedDatetime() {
-			return postedDatetime;
+		public String getPostedTime() {
+			return postedTime;
 		}
 
-		public void setPostedDatetime(String postedDatetime) {
-			this.postedDatetime = postedDatetime;
+		public void setPostedTime(String postedTime) {
+			this.postedTime = postedTime;
+		}
+
+		public String getPostedDate() {
+			return postedDate;
+		}
+
+		public void setPostedDate(String postedDate) {
+			this.postedDate = postedDate;
 		}
 
 		public String getAuthor() {
@@ -258,13 +280,13 @@ public class podHomeBean {
 				return podcastService.getPodcastFileURL(resourceId);
 			} 
 			catch (PermissionException e) {
-				log.info("PermissionException getting file URL for "
+				LOG.info("PermissionException getting file URL for "
 						+ resourceId + "while displaying podcast file for site " + podcastService.getSiteId(), e);
 				setErrorMessage(PERMISSION_ALERT);
 
 			} 
 			catch (IdUnusedException e) {
-				log.info("IdUnusedException getting file URL for " + resourceId
+				LOG.info("IdUnusedException getting file URL for " + resourceId
 						+ " while displaying podcast file for site " + podcastService.getSiteId(), e);
 				setErrorMessage(ID_UNUSED_ALERT);
 
@@ -365,6 +387,8 @@ public class podHomeBean {
 	private PodcastService podcastService;
 	private PodcastPermissionsService podcastPermissionsService;
 
+	private Logger LOG = LoggerFactory.getLogger(podHomeBean.class);
+
 	// variables to hold miscellanous information
 	private List contents;
 	private String URL;
@@ -400,7 +424,7 @@ public class podHomeBean {
 		try {
 			//
 			// Get a list of tool ids and see if RESOURCE_TOOL_ID is in the returned Collection			
-			log.debug("Checking for presence of Sakai Resources tool using RESOURCE_TOOL_ID = " + RESOURCE_TOOL_ID);
+			LOG.debug("Checking for presence of Sakai Resources tool using RESOURCE_TOOL_ID = " + RESOURCE_TOOL_ID);
 			Site thisSite = SiteService.getSite(ToolManager.getCurrentPlacement().getContext());
 
 			Collection toolsInSite = thisSite.getTools(RESOURCE_TOOL_ID);
@@ -410,7 +434,7 @@ public class podHomeBean {
 			}
 		} 
 		catch (IdUnusedException e) {
-			log.error("No Site found while trying to check if site has Resources tool.", e);
+			LOG.error("No Site found while trying to check if site has Resources tool.", e);
 			
 			// Only want to display this message if they are instructors or administrators
 			// so if student say it exists		
@@ -462,13 +486,13 @@ public class podHomeBean {
 
 			}
 			catch (InUseException e) {
-				log.info("InUseException while attempting to determine if podcast folder exists."
+				LOG.info("InUseException while attempting to determine if podcast folder exists."
 								+ " for site " + podcastService.getSiteId(), e);
 				setErrorMessage(INTERNAL_ERROR_ALERT);
 
 			}
 			catch (PermissionException e) {
-				log.warn("PermissionException while attempting to determine if podcast folder exists."
+				LOG.warn("PermissionException while attempting to determine if podcast folder exists."
 							+ " for site " + podcastService.getSiteId(), e);
 				setErrorMessage(PERMISSION_ALERT);
 
@@ -616,6 +640,8 @@ public class podHomeBean {
 		// if instructor or has hidden property, set hidden property of decorated bean
 		// if not, return null since user cannot see
 		Date tempDate = null;
+		final SimpleDateFormat formatter = new SimpleDateFormat(getErrorMessageString(PUBLISH_DATE_FORMAT), rb.getLocale());
+		formatter.setTimeZone(TimeService.getLocalTimeZone());
 
 		// get release/publish date - else part needed for podcasts created before release/retract dates
 		// feature implemented
@@ -633,9 +659,7 @@ public class podHomeBean {
 		if (! uiHidden || getHasHidden()) {
 			podcastInfo = new DecoratedPodcastBean();
 
-			podcastInfo.setDisplayDate(DateFormatterUtil.format(tempDate, getErrorMessageString(PUBLISH_DATE_FORMAT), rb.getLocale()));
-
-			podcastInfo.setEditDate(tempDate);
+			podcastInfo.setDisplayDate(formatter.format(tempDate));
 
 			// store resourceId
 			podcastInfo.setResourceId(podcastResource.getId());
@@ -659,11 +683,11 @@ public class podHomeBean {
 				filename = url.substring(url.lastIndexOf("/")+1);
 			}
 			catch (PermissionException e) {
-				log.warn("PermissionException getting podcast with id " + podcastResource.getId() + " while constructing DecoratedPodcastBean for site "
+				LOG.warn("PermissionException getting podcast with id " + podcastResource.getId() + " while constructing DecoratedPodcastBean for site "
 						+ podcastService.getSiteId() + ". " + e.getMessage(), e);
 			}
 			catch (IdUnusedException e) {
-				log.warn("IdUnusedException getting podcast with id " + podcastResource.getId() + " while constructing DecoratedPodcastBean for site "
+				LOG.warn("IdUnusedException getting podcast with id " + podcastResource.getId() + " while constructing DecoratedPodcastBean for site "
 						+ podcastService.getSiteId() + ". " + e.getMessage(), e);
 			}
 			
@@ -701,9 +725,19 @@ public class podHomeBean {
 				podcastInfo.setType("UNK");
 			}
 
+			// get and format last modified time
+			formatter.applyPattern(LAST_MODIFIED_TIME_FORMAT);
+
 			tempDate = new Date(podcastProperties.getTimeProperty(ResourceProperties.PROP_MODIFIED_DATE).getTime());
 
-			podcastInfo.setPostedDatetime(DateFormatterUtil.format(tempDate, getErrorMessageString(PUBLISH_DATE_FORMAT), rb.getLocale()));
+			podcastInfo.setPostedTime(formatter.format(tempDate));
+
+			// get and format last modified date
+			formatter.applyPattern(LAST_MODIFIED_DATE_FORMAT);
+
+			tempDate = new Date(podcastProperties.getTimeProperty(ResourceProperties.PROP_MODIFIED_DATE).getTime());
+
+			podcastInfo.setPostedDate(formatter.format(tempDate));
 
 			// get author
 			podcastInfo.setAuthor(podcastProperties.getPropertyFormatted(ResourceProperties.PROP_CREATOR));
@@ -752,25 +786,25 @@ public class podHomeBean {
 
 		} 
 		catch (PermissionException e) {
-			log.warn("PermissionException getting podcasts for display in site "
+			LOG.warn("PermissionException getting podcasts for display in site "
 						+ podcastService.getSiteId() + ". " + e.getMessage(), e);
 			setErrorMessage(PERMISSION_ALERT);
 
 		} 
 		catch (InUseException e) {
-			log.warn("InUseException while getting podcasts for display"
+			LOG.warn("InUseException while getting podcasts for display"
 						+ podcastService.getSiteId() + ". " + e.getMessage(), e);
 			setErrorMessage(INTERNAL_ERROR_ALERT);
 
 		} 
 		catch (IdInvalidException e) {
-			log.error("IdInvalidException while getting podcasts for display "
+			LOG.error("IdInvalidException while getting podcasts for display "
 						+ podcastService.getSiteId() + ". " + e.getMessage(), e);
 			setErrorMessage(ID_INVALID_ALERT);
 
 		} 
 		catch (InconsistentException e) {
-			log.error("InconsistentException while getting podcasts for display "
+			LOG.error("InconsistentException while getting podcasts for display "
 						+ podcastService.getSiteId() + ". " + e.getMessage(), e);
 			setErrorMessage(INTERNAL_ERROR_ALERT);
 			
@@ -778,13 +812,13 @@ public class podHomeBean {
 
 		} 
 		catch (IdUsedException e) {
-			log.warn("IdUsedException while gettting podcasts for display "
+			LOG.warn("IdUsedException while gettting podcasts for display "
 						+ podcastService.getSiteId() + ". " + e.getMessage(), e);
 			setErrorMessage(ID_UNUSED_ALERT);
 
 		}
 		catch (IdUnusedException e) {
-			log.warn("IdUnusedException while determining if Podcasts folder has HIDDEN permission set" 
+			LOG.warn("IdUnusedException while determining if Podcasts folder has HIDDEN permission set" 
 						+ " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 		}
 
@@ -810,11 +844,11 @@ public class podHomeBean {
 
 				} 
 				catch (EntityPropertyNotDefinedException e) {
-					log.error("EntityPropertyNotDefinedException while creating DecoratedPodcastBean "
+					LOG.error("EntityPropertyNotDefinedException while creating DecoratedPodcastBean "
 									+ " for site "+ podcastService.getSiteId() + ". SKIPPING..." + e.getMessage(), e);
 				}
 				catch (EntityPropertyTypeException e) {
-					log.error("EntityPropertyTypeException while creating DecoratedPodcastBean "
+					LOG.error("EntityPropertyTypeException while creating DecoratedPodcastBean "
 									+ " for site "+ podcastService.getSiteId() + ". SKIPPING..." + e.getMessage(), e);
 				}
 			}
@@ -850,7 +884,7 @@ public class podHomeBean {
 				
 			} 
 			catch (PermissionException e) {
-				log.warn("PermissionException while determining if there are files in the podcast folder "
+				LOG.warn("PermissionException while determining if there are files in the podcast folder "
 								+ " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 				setErrorMessage(PERMISSION_ALERT);
 			}
@@ -899,23 +933,23 @@ public class podHomeBean {
 
 			} 
 			catch (EntityPropertyNotDefinedException e) {
-				log.error("EntityPropertyNotDefinedException while attempting to fill selectedPodcast property "
+				LOG.error("EntityPropertyNotDefinedException while attempting to fill selectedPodcast property "
 								+ " for site " + podcastService.getSiteId() + ". SKIPPING..." + e.getMessage(), e);
 				throw new PodcastException(e);
 
 			} 
 			catch (EntityPropertyTypeException e) {
-				log.error("EntityPropertyTypeException while attempting to fill selectedPodcast property "
+				LOG.error("EntityPropertyTypeException while attempting to fill selectedPodcast property "
 								+ " for site " + podcastService.getSiteId() + ". SKIPPING..." + e.getMessage(), e);
 				throw new PodcastException(e);
 
 			}
 			catch (IdUnusedException e) {
-				log.error("IdUnusedException while attempting to determine if Podcasts folder is hidden for site " 
+				LOG.error("IdUnusedException while attempting to determine if Podcasts folder is hidden for site " 
 							+ podcastService.getSiteId() + ". SKIPPING..." + e.getMessage(), e);
 			}
 			catch (PermissionException e) {
-				log.error("PermissionException while attempting to determine if Podcasts folder is hidden for site " 
+				LOG.error("PermissionException while attempting to determine if Podcasts folder is hidden for site " 
 						+ podcastService.getSiteId() + ". SKIPPING..." + e.getMessage(),e );
 			}
 		}
@@ -1150,7 +1184,7 @@ public class podHomeBean {
 		Object oldValue = event.getOldValue();
 		PhaseId phaseId = event.getPhaseId();
 		Object source = event.getSource();
-//		log.info("processFileUpload() event: " + event
+//		System.out.println("processFileUpload() event: " + event
 //				+ " component: " + component + " newValue: " + newValue
 //				+ " oldValue: " + oldValue + " phaseId: " + phaseId
 //				+ " source: " + source);
@@ -1165,7 +1199,7 @@ public class podHomeBean {
 		filename = Validator.getFileName(item.getName());
 		fileSize = item.getSize();
 		fileContentType = item.getContentType();
-//		log.info("processFileUpload(): item: " + item
+//		System.out.println("processFileUpload(): item: " + item
 //				+ " fieldname: " + fieldName + " filename: " + filename
 //				+ " length: " + fileSize);
 
@@ -1175,13 +1209,46 @@ public class podHomeBean {
 			
 		} 
 		catch (IOException e) {
-			log.warn("IOException while attempting to set BufferedInputStream to upload "
+			LOG.warn("IOException while attempting to set BufferedInputStream to upload "
 							+ filename + " from site " + podcastService.getSiteId() + ". "
 									 + e.getMessage(), e);
 			setErrorMessage(INTERNAL_ERROR_ALERT);
 
 		}
 
+	}
+
+	/**
+	 * Converts the date string input using the FORMAT_STRING given.
+	 * 
+	 * @param inputDate
+	 *            The string that needs to be converted.
+	 * @param FORMAT_STRING
+	 *            The format the data needs to conform to
+	 * 
+	 * @return Date
+	 * 			The Date object containing the date passed in or null if invalid.
+	 * 
+	 * @throws ParseException
+	 * 			If not a valid date compared to FORMAT_STRING given
+	 */
+	private Date convertDateString(final String inputDate,
+			final String FORMAT_STRING) throws ParseException {
+
+		Date convertedDate = null;
+		SimpleDateFormat dateFormat = new SimpleDateFormat(FORMAT_STRING, rb.getLocale());
+		dateFormat.setTimeZone(TimeService.getLocalTimeZone());
+
+		try {
+			convertedDate = dateFormat.parse(inputDate);
+		} catch (ParseException e) {
+			// TODO: This is required until date-picker is internationalized.
+			dateFormat = new SimpleDateFormat(FORMAT_STRING, Locale.ENGLISH);
+			dateFormat.setTimeZone(TimeService.getLocalTimeZone());
+			convertedDate = dateFormat.parse(inputDate);
+		}
+
+		return convertedDate;
 	}
 
 	/**
@@ -1205,7 +1272,7 @@ public class podHomeBean {
 				
 			} 
 			catch (IOException e) {
-				log.error("IOException while attempting the actual upload file " + filename + " during processAdd "
+				LOG.error("IOException while attempting the actual upload file " + filename + " during processAdd "
 								+ " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 				setErrorMessage(IO_ALERT);
 				
@@ -1218,22 +1285,33 @@ public class podHomeBean {
 					if (fileAsStream != null)
 						fileAsStream.close();
 				} catch (IOException ioe) {
-					log.warn("IOException error while closing the stream:" + ioe);
+					LOG.warn("IOException error while closing the stream:" + ioe);
 				}
 			}
 			try {
 				Date displayDate = null;
 
 				try {
-					displayDate = DateFormatterUtil.parseISODate(date);
-				} 
-				catch (DateTimeParseException e1) {
-					// Now it's invalid, so set error message and stay on page
-					log.warn("DateTimeParseException attempting to convert " + date
-							+ " both valid ways. " + e1.getMessage(), e1);
+					displayDate = convertDateString(date,
+							FIXED_DATE_PICKER_FORMAT);
 
-					displayInvalidDateErrMsg = true;
-					return "podcastAdd";
+				} 
+				catch (ParseException e) {
+					// must have entered it in by hand so try again
+					try {
+						displayDate = convertDateString(date,
+								getErrorMessageString(DATE_BY_HAND_FORMAT));
+
+					} 
+					catch (ParseException e1) {
+						// Now it's invalid, so set error message and stay on page
+						LOG.warn("ParseException attempting to convert " + date
+								+ " both valid ways. " + e1.getMessage(), e1);
+
+						displayInvalidDateErrMsg = true;
+						return "podcastAdd";
+					}
+
 				}
 
 				podcastService.addPodcast(title, displayDate, description,
@@ -1253,14 +1331,14 @@ public class podHomeBean {
 				try {
 					fileAsStream = null;	
 				} catch (Exception e){
-					log.warn("Exception error while setting the stream to null: " + e);
+					LOG.warn("Exception error while setting the stream to null: " + e);
 				}
 				finally {
 					try {
 						if (fileAsStream != null)
 							fileAsStream.close();
 					} catch (IOException ioe) {
-						log.warn("IOException error while closing the stream:" + ioe);
+						LOG.warn("IOException error while closing the stream:" + ioe);
 					}
 				}
 				
@@ -1269,43 +1347,43 @@ public class podHomeBean {
 
 			} 
 			catch (OverQuotaException e) {
-				log.warn("OverQuotaException while attempting to actually add the new podcast "
+				LOG.warn("OverQuotaException while attempting to actually add the new podcast "
 								+ " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 				setErrorMessage(QUOTA_ALERT);
 
 			} 
 			catch (ServerOverloadException e) {
-				log.info("ServerOverloadException while attempting to actually add the new podcast "
+				LOG.info("ServerOverloadException while attempting to actually add the new podcast "
 								+ " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 				setErrorMessage(INTERNAL_ERROR_ALERT);
 
 			} 
 			catch (InconsistentException e) {
-				log.error("InconsistentException while attempting to actually add the new podcast "
+				LOG.error("InconsistentException while attempting to actually add the new podcast "
 								+ " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 				throw new PodcastException(e);
 
 			} 
 			catch (IdInvalidException e) {
-				log.error("IdInvalidException while attempting to actually add the new podcast "
+				LOG.error("IdInvalidException while attempting to actually add the new podcast "
 								+ " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 				setErrorMessage(ID_INVALID_ALERT);
 
 			} 
 			catch (IdLengthException e) {
-				log.warn("IdLengthException while attempting to actually add the new podcast "
+				LOG.warn("IdLengthException while attempting to actually add the new podcast "
 								+ " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 				setErrorMessage(LENGTH_ALERT);
 
 			} 
 			catch (PermissionException e) {
-				log.warn("PermissionException while attempting to actually add the new podcast "
+				LOG.warn("PermissionException while attempting to actually add the new podcast "
 								+ " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 				setErrorMessage(PERMISSION_ALERT);
 
 			} 
 			catch (IdUniquenessException e) {
-				log.error("IdUniquenessException while attempting to actually add the new podcast "
+				LOG.error("IdUniquenessException while attempting to actually add the new podcast "
 								+ " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 				setErrorMessage(ID_USED_ALERT);
 
@@ -1338,14 +1416,14 @@ public class podHomeBean {
 		try {
 			fileAsStream = null;	
 		} catch (Exception e){
-			log.warn("Exception error while setting the stream to null: " + e);
+			LOG.warn("Exception error while setting the stream to null: " + e);
 		}
 		finally {
 			try {
 				if (fileAsStream != null)
 					fileAsStream.close();
 			} catch (IOException ioe) {
-				log.warn("IOException error while closing the stream:" + ioe);
+				LOG.warn("IOException error while closing the stream:" + ioe);
 			}
 		}
 		filename = "";
@@ -1405,7 +1483,7 @@ public class podHomeBean {
 					}
 				} 
 				catch (IOException e) {
-					log.error("IOException while attempting to get file contents when revising podcast for "
+					LOG.error("IOException while attempting to get file contents when revising podcast for "
 									+ filename + " in site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 					setErrorMessage(IO_ALERT);
 					return "podcastRevise";
@@ -1416,7 +1494,7 @@ public class podHomeBean {
 						if (fileAsStream != null)
 							fileAsStream.close();
 					} catch (IOException ioe) {
-						log.warn("IOException error while closing the stream:" + ioe);
+						LOG.warn("IOException error while closing the stream:" + ioe);
 					}
 				}
 			}
@@ -1424,21 +1502,27 @@ public class podHomeBean {
 
 		Date displayDate = null;
 		Date displayDateRevise = null;
-
-		Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-		String editedISODate = params.get(POD_REVISE_ISO_HIDDEN_DATE);
-
 		try {
 			try {
-				if (DateFormatterUtil.isValidISODate(editedISODate)) {
-					displayDateRevise = DateFormatterUtil.parseISODate(editedISODate);
+				// SAK-13493: SimpleDateFormat.parse() did not enforce format specified, so
+				// had to call custom method to check if String was valid
+				if (DateUtil.isValidDate(selectedPodcast.displayDateRevise, getErrorMessageString(DATE_BY_HAND_FORMAT), rb.getLocale())) {
+					displayDateRevise = convertDateString(selectedPodcast.displayDateRevise, 
+											getErrorMessageString(DATE_BY_HAND_FORMAT));
 				}
 				else {
-					throw new DateTimeParseException("Invalid displayDate stored in selectedPodcast", editedISODate, 0);
+					throw new ParseException("Invalid displayDate stored in selectedPodcast", 0);
 				}
 			}
-			catch (DateTimeParseException e) {
-					throw new DateTimeParseException("Invalid displayDate entered while revising podcast " + selectedPodcast.filename, editedISODate, 0);
+			catch (ParseException e) {
+				// must have used date picker, so try again
+				if (isValidDate(selectedPodcast.displayDateRevise)) {
+					displayDateRevise = convertDateString(selectedPodcast.displayDateRevise, 
+											FIXED_DATE_PICKER_FORMAT);
+				}
+				else {
+					throw new ParseException("Invalid displayDate entered while revising podcast " + selectedPodcast.filename, 0);
+				}
 			}
 
 			if (filenameChange) {
@@ -1473,39 +1557,39 @@ public class podHomeBean {
 			}
 */			
 		} 
-		catch (DateTimeParseException e1) {
-			log.error("DateTimeParseException attempting to convert date for " + selectedPodcast.title
+		catch (ParseException e1) {
+			LOG.error("ParseException attempting to convert date for " + selectedPodcast.title
 							+ " for site " + podcastService.getSiteId() + ". " + e1.getMessage(), e1);
 			date = "";
 			displayInvalidDateErrMsg = true;
 			return "podcastRevise";
 		}
 		catch (PermissionException e) {
-			log.error("PermissionException while revising podcast "
+			LOG.error("PermissionException while revising podcast "
 					+ selectedPodcast.title + " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 			setErrorMessage(PERMISSION_ALERT);
 			
 		} 
 		catch (InUseException e) {
-			log.warn("InUseException while revising podcast "
+			LOG.warn("InUseException while revising podcast "
 					+ selectedPodcast.title + " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 			setErrorMessage(INTERNAL_ERROR_ALERT);
 
 		} 
 		catch (OverQuotaException e) {
-			log.warn("OverQuotaException while revising podcast "
+			LOG.warn("OverQuotaException while revising podcast "
 					+ selectedPodcast.title + " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 			setErrorMessage(QUOTA_ALERT);
 
 		} 
 		catch (ServerOverloadException e) {
-			log.warn("ServerOverloadException while revising podcast "
+			LOG.warn("ServerOverloadException while revising podcast "
 					+ selectedPodcast.title + " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 			setErrorMessage(INTERNAL_ERROR_ALERT);
 
 		} 
 		catch (IdLengthException e) {
-			log.warn("IdLengthException while revising podcast with filename changed from "
+			LOG.warn("IdLengthException while revising podcast with filename changed from "
 							+ selectedPodcast.filename + " to " + filename
 							+ " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 			setErrorMessage(LENGTH_ALERT);
@@ -1516,7 +1600,7 @@ public class podHomeBean {
 			// catches	IdUnusedException	TypeException
 			//			IdInvalidException	InconsistentException
 			//			IdUniquenessException
-			log.error(e.getMessage() + " while revising podcast with filename changed from "
+			LOG.error(e.getMessage() + " while revising podcast with filename changed from "
 							+ selectedPodcast.filename + " to " + filename
 							+ " for site " + podcastService.getSiteId() + ". " + e.getMessage(), e);
 			setErrorMessage(INTERNAL_ERROR_ALERT);
@@ -1530,14 +1614,14 @@ public class podHomeBean {
 		try {
 			fileAsStream = null;	
 		} catch (Exception e){
-			log.warn("Exception error while setting the stream to null: " + e);
+			LOG.warn("Exception error while setting the stream to null: " + e);
 		}
 		finally {
 			try {
 				if (fileAsStream != null)
 					fileAsStream.close();
 			} catch (IOException ioe) {
-				log.warn("IOException error while closing the stream:" + ioe);
+				LOG.warn("IOException error while closing the stream:" + ioe);
 			}
 		}
 		filename = "";
@@ -1557,14 +1641,14 @@ public class podHomeBean {
 		try {
 			fileAsStream = null;	
 		} catch (Exception e){
-			log.warn("Exception error while setting the stream to null: " + e);
+			LOG.warn("Exception error while setting the stream to null: " + e);
 		}
 		finally {
 			try {
 				if (fileAsStream != null)
 					fileAsStream.close();
 			} catch (IOException ioe) {
-				log.warn("IOException error while closing the stream:" + ioe);
+				LOG.warn("IOException error while closing the stream:" + ioe);
 			}
 		}
 		filename = "";
@@ -1585,14 +1669,14 @@ public class podHomeBean {
 			
 		} 
 		catch (PermissionException e) {
-			log.error("PermissionException while deleting podcast "
+			LOG.error("PermissionException while deleting podcast "
 							+ selectedPodcast.title + " from site " + podcastService.getSiteId() 
 							+ ". " + e.getMessage(), e);
 			setErrorMessage(PERMISSION_ALERT);
 
 		} 
 		catch (InUseException e) {
-			log.warn("InUseException while deleting podcast "
+			LOG.warn("InUseException while deleting podcast "
 					+ selectedPodcast.title + " from site " + podcastService.getSiteId() 
 					+ ". " + e.getMessage(), e);
 			setErrorMessage(INTERNAL_ERROR_ALERT);
@@ -1600,7 +1684,7 @@ public class podHomeBean {
 		} 
 		catch (Exception e) {
 			// For IdUnusedException and TypeException
-			log.error(e.getMessage() + " while deleting podcast "
+			LOG.error(e.getMessage() + " while deleting podcast "
 					+ selectedPodcast.title + " from site " + podcastService.getSiteId() 
 					+ ". " + e.getMessage(), e);
 			setErrorMessage(INTERNAL_ERROR_ALERT);
@@ -1700,10 +1784,6 @@ public class podHomeBean {
 			displayNoFileErrMsg = false;
 		
 		}
-	
-
-		Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-		date = params.get(POD_ADD_ISO_HIDDEN_DATE);
 
 		if (date == null) {
 			displayNoDateErrMsg = true;
@@ -1718,8 +1798,10 @@ public class podHomeBean {
 		else {
 			displayNoDateErrMsg = false;
 
-			if (DateFormatterUtil.isValidISODate(date)) {
+			if (DateUtil.isValidDate(date, getErrorMessageString(DATE_BY_HAND_FORMAT), rb.getLocale())
+					|| isValidDate(date)) {
 				displayInvalidDateErrMsg = false;
+			
 			} 
 			else {
 				displayInvalidDateErrMsg = true;
@@ -1762,10 +1844,142 @@ public class podHomeBean {
 	}
 
 	/**
+	 * Performs date validation checking. Validator object
+	 * does not do bounds checking, so do that and if OK,
+	 * let Validator check for errors like Feb 30, etc.
+	 * 
+	 * TODO: Try and find an actual validator to replace this
+	 * 		 method
+	 * 
+	 * @param date
+	 * 			The candidate String date
+	 * 
+	 * @return boolean
+	 * 			TRUE - Conforms to a valid input date format string
+	 * 			FALSE - Does not conform 
+	 */
+	private boolean isValidDate(String date) {
+		boolean validDate = true;
+
+		// Should contain date part, time port, AM/PM part
+		String[] wholeDateSplit = date.split(" ");
+
+		// if not in 2 parts, input error
+		if (wholeDateSplit.length != 3) {
+			return false;
+		}
+
+		// since date entered first, check it first
+		String[] dateSplit = wholeDateSplit[0].split("/");
+		
+		if (dateSplit.length != 3) {
+			return false;
+
+		} 
+		else {
+			if(!dateSplit[0].equals("") && !dateSplit[1].equals("") && !dateSplit[2].equals("")) {
+				int month = Integer.parseInt(dateSplit[0]);
+				int day = Integer.parseInt(dateSplit[1]);
+
+				if (month < 0 || month > 12) {
+					return false;
+				} 
+				else if (day < 0 || day > 31) {
+					return false;
+				} 
+				else if (dateSplit[2].length() != 4) {
+					return false;
+				} 
+				else {
+					int year = Integer.parseInt(dateSplit[2]);
+
+					validDate = Validator.checkDate(day, month, year);
+				}
+			} else {
+				return false;
+			}
+		}
+
+		if (! validDate) {
+			return false;
+		}
+		else {
+			// Date's OK, now to the time
+			String[] timeSplit = wholeDateSplit[1].split(":");
+
+			// Valid times are hh:mm or hh:mm:ss, so check for either 
+			if (timeSplit.length < 2 || timeSplit.length > 3) {
+				return false;
+
+			} 
+			else if (timeSplit.length == 2) {
+				if(!timeSplit[0].equals("") && !timeSplit[1].equals("")) {
+					int hour = Integer.parseInt(timeSplit[0]);
+					int min = Integer.parseInt(timeSplit[1]);
+
+					if (hour < 1 || hour > 12) {
+						return false;
+
+					} 
+					else if (min < 0 || min > 59) {
+						return false;
+
+					}
+				} 
+				else {
+					return false;
+				}
+			} 
+			else {
+				if(!timeSplit[0].equals("") && !timeSplit[1].equals("") && !timeSplit[2].equals("")) {
+					int hour = Integer.parseInt(timeSplit[0]);
+					int min = Integer.parseInt(timeSplit[1]);
+					int sec = Integer.parseInt(timeSplit[2]);
+
+					if (hour < 1 || hour > 12) {
+						return false;
+
+					}
+					else if (min < 0 || min > 59) {
+						return false;
+
+					} 
+					else if (sec < 0 || sec > 59) {
+						return false;
+
+					}
+				}
+				else {
+					return false;
+				}
+			}
+		}
+
+		// We want a 12 hour clock, so AM/PM needs to be specified
+		if ("AM".equalsIgnoreCase(wholeDateSplit[2]) || "PM".equalsIgnoreCase(wholeDateSplit[2])) {
+			return true;
+
+		}
+		else {
+			return false;
+
+		}	
+	}
+	
+	private String formatDate(long date) {
+		String disTimeString = TimeService.newTime(date).toStringGmtFull();
+		
+		String temp = monStrings.get(disTimeString.substring(0, 3)) + disTimeString.substring(3);
+		
+		return temp;
+		
+	}
+
+	/**
 	 * Returns whether a file too large tried to be uploaded. (SAK-9822) 
 	 */
 	public boolean getUploadStatus() {
-		log.debug("getUploadStatus()");
+		LOG.debug("getUploadStatus()");
 		FacesContext context = FacesContext.getCurrentInstance();
 		String status = (String) ((HttpServletRequest) context.getExternalContext().getRequest()).getAttribute("upload.status");
 

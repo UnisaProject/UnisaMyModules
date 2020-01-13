@@ -30,7 +30,8 @@ import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.facade.AgentFacade;
 import org.sakaiproject.tool.assessment.facade.ItemFacade;
 import org.sakaiproject.tool.assessment.services.ItemService;
@@ -43,10 +44,11 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
  * @version $Id$
  */
 
-@Slf4j
- public class StartRemoveItemsListener implements ActionListener
+public class StartRemoveItemsListener implements ActionListener
 {
+  private static Logger log = LoggerFactory.getLogger(StartRemoveItemsListener.class);
   private static ContextUtil cu;
+
 
   /**
    * Standard process action method.
@@ -55,6 +57,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
    */
   public void processAction(ActionEvent ae) throws AbortProcessingException
   {
+    //log.info("StartRemoveItemsListener:");
     QuestionPoolBean  qpoolbean= (QuestionPoolBean) cu.lookupBean("questionpool");
     if (!startRemoveItems(qpoolbean))
     {
@@ -62,6 +65,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
     }
 
   }
+
 
   public boolean startRemoveItems(QuestionPoolBean qpoolbean){
 // used by the editPool.jsp, to remove one or more items
@@ -97,9 +101,11 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
         }
     }
     catch (Exception e) {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
       return false;	
     }
     return true;
   }
+
+
 }

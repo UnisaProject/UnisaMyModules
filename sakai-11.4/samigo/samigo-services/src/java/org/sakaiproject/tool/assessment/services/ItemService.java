@@ -19,20 +19,17 @@
  *
  **********************************************************************************/
 
+
 package org.sakaiproject.tool.assessment.services;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.List;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.sakaiproject.component.cover.ComponentManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.content.api.ContentResource;
-import org.sakaiproject.tags.api.Tag;
-import org.sakaiproject.tags.api.TagService;
 import org.sakaiproject.tool.assessment.data.dao.assessment.Answer;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AnswerFeedback;
 import org.sakaiproject.tool.assessment.data.dao.assessment.FavoriteColChoices;
@@ -40,27 +37,21 @@ import org.sakaiproject.tool.assessment.data.dao.assessment.ItemAttachment;
 import org.sakaiproject.tool.assessment.data.dao.assessment.ItemData;
 import org.sakaiproject.tool.assessment.data.dao.assessment.ItemFeedback;
 import org.sakaiproject.tool.assessment.data.dao.assessment.ItemMetaData;
-import org.sakaiproject.tool.assessment.data.dao.assessment.ItemTag;
 import org.sakaiproject.tool.assessment.data.dao.assessment.ItemText;
 import org.sakaiproject.tool.assessment.data.dao.assessment.ItemTextAttachment;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemAttachmentIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
-import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTagIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTextAttachmentIfc;
-import org.sakaiproject.tool.assessment.facade.BackfillItemHashResult;
 import org.sakaiproject.tool.assessment.facade.ItemFacade;
-import org.sakaiproject.tool.assessment.integration.helper.ifc.TagServiceHelper;
 import org.sakaiproject.tool.assessment.services.assessment.AssessmentService;
 
 /**
  * The ItemService calls persistent service locator to reach the
  * manager on the back end.
  */
-@Slf4j
 public class ItemService
 {
-  private static final TagService tagService= (TagService) ComponentManager.get( TagService.class );
-
+  private Logger log = LoggerFactory.getLogger(ItemService.class);
 
   /**
    * Creates a new ItemService object.
@@ -199,6 +190,9 @@ public class ItemService
     }
   }
 
+
+
+
   /**
    * Save a question item.
    */
@@ -213,22 +207,6 @@ public class ItemService
       log.error(e.getMessage(), e);
 
       return item;
-    }
-  }
-
-  /**
-   * Save question items (in a single transaction for improved performance over sequential saveItem() invocations)
-   */
-  public List<ItemFacade> saveItems(List<ItemFacade> items)
-  {
-    try
-    {
-      return PersistenceService.getInstance().getItemFacadeQueries().saveItems(items);
-    }
-    catch (Exception e)
-    {
-      log.error(e.getMessage(), e);
-      return items;
     }
   }
 
@@ -249,40 +227,10 @@ public class ItemService
     }
   }
 
-  public Map getItemsByHash(String hash) {
-    try{
-      return PersistenceService.getInstance().getItemFacadeQueries().getItemsByHash(hash);
-    }
-    catch(Exception e)
-    {
-      log.error(e.getMessage(), e); throw new RuntimeException(e);
-    }
-  }
-
-  public List<Long> getItemsIdsByHash(String hash) {
-    try{
-      return PersistenceService.getInstance().getItemFacadeQueries().getItemsIdsByHash(hash);
-    }
-    catch(Exception e)
-    {
-      log.error(e.getMessage(), e); throw new RuntimeException(e);
-    }
-  }
-
-  public Long getAssessmentId(Long itemId) {
-    try{
-      return PersistenceService.getInstance().getItemFacadeQueries().getAssessmentId(itemId);
-    }
-    catch(Exception e)
-    {
-      log.error(e.getMessage(), e); throw new RuntimeException(e);
-    }
-  }
-
-  public Map getItemsByKeyword(String keyword)
+  public HashMap getItemsByKeyword(String keyword)
   {
     keyword="%" + keyword + "%";
-    Map map= null;
+    HashMap map= null;
       map= PersistenceService.getInstance().getItemFacadeQueries().getItemsByKeyword(keyword);
     return map;
 
@@ -306,18 +254,16 @@ public class ItemService
         item.getDescription(),item.getTypeId(),item.getGrade(),item.getScore(), item.getScoreDisplayFlag(), item.getDiscount(), item.getMinScore(),
         item.getHint(),item.getHasRationale(),item.getStatus(),item.getCreatedBy(),
         item.getCreatedDate(),item.getLastModifiedBy(),item.getLastModifiedDate(),
-        null, null, null, item.getTriesAllowed(), item.getPartialCreditFlag(), item.getHash());
+        null, null, null, item.getTriesAllowed(), item.getPartialCreditFlag());
 
     // perform deep copy, set ItemTextSet, itemMetaDataSet and itemFeedbackSet
     Set newItemTextSet = copyItemTextSet(cloned, item.getItemTextSet());
     Set newItemMetaDataSet = copyItemMetaDataSet(cloned, item.getItemMetaDataSet());
-    Set newItemTagSet = copyItemTagSet(cloned, item.getItemTagSet());
     Set newItemFeedbackSet = copyItemFeedbackSet(cloned, item.getItemFeedbackSet());
     Set newItemAttachmentSet = copyItemAttachmentSet(cloned, item.getItemAttachmentSet());
     String newItemInstruction = AssessmentService.copyStringAttachment(item.getInstruction());
     cloned.setItemTextSet(newItemTextSet);
     cloned.setItemMetaDataSet(newItemMetaDataSet);
-    cloned.setItemTagSet(newItemTagSet);
     cloned.setItemFeedbackSet(newItemFeedbackSet);
     cloned.setItemAttachmentSet(newItemAttachmentSet);
     cloned.setAnswerOptionsSimpleOrRich(item.getAnswerOptionsSimpleOrRich());
@@ -328,7 +274,7 @@ public class ItemService
   }
 
   private Set copyItemTextSet(ItemData cloned, Set itemTextSet) {
-    Set h = new HashSet();
+    HashSet h = new HashSet();
     Iterator k = itemTextSet.iterator();
     while (k.hasNext()) {
       ItemText itemText = (ItemText) k.next();
@@ -344,7 +290,7 @@ public class ItemService
   }
 
   private Set copyAnswerSet(ItemText newItemText, Set answerSet) {
-    Set h = new HashSet();
+    HashSet h = new HashSet();
     Iterator l = answerSet.iterator();
     while (l.hasNext()) {
       Answer answer = (Answer) l.next();
@@ -363,7 +309,7 @@ public class ItemService
   }
 
   private Set copyAnswerFeedbackSet(Answer newAnswer, Set answerFeedbackSet) {
-    Set h = new HashSet();
+    HashSet h = new HashSet();
     Iterator m = answerFeedbackSet.iterator();
     while (m.hasNext()) {
       AnswerFeedback answerFeedback = (AnswerFeedback) m.next();
@@ -375,7 +321,7 @@ public class ItemService
   }
 
   private Set copyItemMetaDataSet(ItemData cloned, Set itemMetaDataSet) {
-    Set h = new HashSet();
+    HashSet h = new HashSet();
     Iterator n = itemMetaDataSet.iterator();
     while (n.hasNext()) {
       ItemMetaData itemMetaData = (ItemMetaData) n.next();
@@ -386,20 +332,8 @@ public class ItemService
     return h;
   }
 
-  private Set copyItemTagSet(ItemData cloned, Set itemTagSet) {
-    Set h = new HashSet();
-    Iterator n = itemTagSet.iterator();
-    while (n.hasNext()) {
-      ItemTag itemTag = (ItemTag) n.next();
-      ItemTag newItemTag = new ItemTag(
-              cloned, itemTag.getTagId(), itemTag.getTagLabel(), itemTag.getTagCollectionId(), itemTag.getTagCollectionName());
-      h.add(newItemTag);
-    }
-    return h;
-  }
-
   private Set copyItemFeedbackSet(ItemData cloned, Set itemFeedbackSet) {
-    Set h = new HashSet();
+    HashSet h = new HashSet();
     Iterator o = itemFeedbackSet.iterator();
     while (o.hasNext()) {
       ItemFeedback itemFeedback = (ItemFeedback) o.next();
@@ -412,7 +346,7 @@ public class ItemService
 
   private Set copyItemAttachmentSet(ItemData cloned, Set itemAttachmentSet) {
     AssessmentService service = new AssessmentService();
-    Set h = new HashSet();
+    HashSet h = new HashSet();
     Iterator n = itemAttachmentSet.iterator();
     while (n.hasNext()) {
       ItemAttachmentIfc itemAttachment = (ItemAttachmentIfc) n.next();
@@ -432,7 +366,7 @@ public class ItemService
   
   private Set copyItemAttachmentSetItemText(ItemText itemText, Set itemAttachmentSet) {
 	AssessmentService service = new AssessmentService();
-	Set h = new HashSet();
+	HashSet h = new HashSet();
 	Iterator n = itemAttachmentSet.iterator();
 	while (n.hasNext()) {
 	  ItemTextAttachmentIfc ItemTextAttachment = (ItemTextAttachmentIfc) n.next();
@@ -479,73 +413,4 @@ public class ItemService
           throw new RuntimeException(e);
 	  }
   }
-
-  public void updateItemTagBindingsHavingTag(TagServiceHelper.TagView tagView) {
-    // intentionally not perpetuating the prevailing log-and-throw exception handling pattern.
-    // at best that just results in duplicated logging
-    PersistenceService.getInstance().getItemFacadeQueries().updateItemTagBindingsHavingTag(tagView);
-  }
-
-  public void deleteItemTagBindingsHavingTagId(String tagId) {
-    // intentionally not perpetuating the prevailing log-and-throw exception handling pattern.
-    // at best that just results in duplicated logging
-    PersistenceService.getInstance().getItemFacadeQueries().deleteItemTagBindingsHavingTagId(tagId);
-  }
-
-  public void updateItemTagBindingsHavingTagCollection(TagServiceHelper.TagCollectionView tagCollectionView) {
-    // intentionally not perpetuating the prevailing log-and-throw exception handling pattern.
-    // at best that just results in duplicated logging
-    PersistenceService.getInstance().getItemFacadeQueries().updateItemTagBindingsHavingTagCollection(tagCollectionView);
-  }
-
-  public void deleteItemTagBindingsHavingTagCollectionId(String tagCollectionId) {
-    // intentionally not perpetuating the prevailing log-and-throw exception handling pattern.
-    // at best that just results in duplicated logging
-    PersistenceService.getInstance().getItemFacadeQueries().deleteItemTagBindingsHavingTagCollectionId(tagCollectionId);
-  }
-
-  public BackfillItemHashResult backfillItemHashes(int batchSize, boolean backfillBaselineHashes) {
-    return PersistenceService.getInstance().getItemFacadeQueries().backfillItemHashes(batchSize);
-  }
-
-  /**
-   * Update all the items in the items with the same hash...
-   * @param itemOrigin the item that we have changed the Tags.
-   * @return void
-   */
-  public void saveTagsInHashedQuestions(ItemFacade itemOrigin){
-    ItemService itemService = new ItemService();
-    Set<ItemTagIfc> itemTagIfcSet = itemOrigin.getItemTagSet();
-    Map itemsToUpdate = itemService.getItemsByHash(itemOrigin.getHash());
-    Iterator itemsIterator = itemsToUpdate.values().iterator();
-
-    while (itemsIterator.hasNext()){
-      ItemFacade itemHashed = (ItemFacade)itemsIterator.next();
-      if (itemHashed.getItemId()!=itemOrigin.getItemId()) { //Not needed in the actual item
-
-        //Let's delete all in the origin
-        //Let's use a copy to avoid the concurrentmodificationException
-        Set<ItemTagIfc> itemTagIfcSetOriginal =new HashSet<>();
-        itemTagIfcSetOriginal.addAll(itemHashed.getItemTagSet());
-        Iterator originIterator = itemTagIfcSetOriginal.iterator();
-        while (originIterator.hasNext()) {
-          ItemTagIfc tagToDelete = (ItemTagIfc) originIterator.next();
-          itemHashed.removeItemTagByTagId(tagToDelete.getTagId());
-        }
-
-        //Now let's add the right ones
-        Iterator itemsNewTagsIterator = itemTagIfcSet.iterator();
-        while (itemsNewTagsIterator.hasNext()) {
-          ItemTagIfc tagToAdd = (ItemTagIfc) itemsNewTagsIterator.next();
-          if (tagService.getTags().getForId(tagToAdd.getTagId()).isPresent()) {
-            Tag tag = tagService.getTags().getForId(tagToAdd.getTagId()).get();
-            itemHashed.addItemTag(tagToAdd.getTagId(), tag.getTagLabel(), tag.getTagCollectionId(), tag.getCollectionName());
-          }
-        }
-        //And now save the item
-        itemService.saveItem(itemHashed);
-      }
-    }
-  }
-
 }

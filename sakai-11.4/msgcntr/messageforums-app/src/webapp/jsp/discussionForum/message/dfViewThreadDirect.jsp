@@ -1,7 +1,5 @@
 <%@ page import="java.util.*,javax.faces.context.*,javax.faces.application.*,javax.faces.el.*,org.sakaiproject.tool.messageforums.*,org.sakaiproject.api.app.messageforums.*,org.sakaiproject.site.cover.SiteService,org.sakaiproject.tool.cover.ToolManager" %>
 <%@ page import="org.sakaiproject.component.cover.ServerConfigurationService" %>
-<%@ page import="org.slf4j.Logger,org.slf4j.LoggerFactory" %>
-<%! static final Logger log = LoggerFactory.getLogger("dfViewThreadDirect.jsp"); %>
 <%
 	FacesContext context = FacesContext.getCurrentInstance();
 	Application app = context.getApplication();
@@ -24,7 +22,7 @@
 			response.sendRedirect(target);
 			return;
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 	}else if (request.getParameter("topicId") == null
 			|| "".equals(request.getParameter("topicId"))
@@ -37,7 +35,7 @@
 					+ "/discussionForum/forumsOnly/dfForums";
 			response.sendRedirect(target);
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 		return;
 
@@ -55,7 +53,7 @@
 		try {
 			dispatcher.forward(request, response);
 		} catch (ServletException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 	}else{
 		%>

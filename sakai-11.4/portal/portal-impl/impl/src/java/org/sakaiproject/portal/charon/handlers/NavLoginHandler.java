@@ -73,7 +73,7 @@ public class NavLoginHandler extends SiteHandler
 			Session session, String siteId) throws IOException
 	{
 		// start the response
-		PortalRenderContext rcontext = portal.startPageContext("", "Login", null, req, null);
+		PortalRenderContext rcontext = portal.startPageContext("", "Login", null, req);
 
 		includeLogo(rcontext, req, session, siteId);
 

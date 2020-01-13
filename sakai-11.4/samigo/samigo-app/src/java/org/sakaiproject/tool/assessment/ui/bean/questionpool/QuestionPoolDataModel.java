@@ -26,20 +26,23 @@ package org.sakaiproject.tool.assessment.ui.bean.questionpool;
 import javax.faces.model.DataModel;
 import javax.faces.model.DataModelListener;
 
-import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.tool.assessment.data.model.Tree;
 import org.sakaiproject.tool.assessment.facade.QuestionPoolFacade;
+
+
 
 /**
  * This Data Model contains the tree.
  *
  * $Id$
  */
-@Slf4j
- public class QuestionPoolDataModel extends DataModel
+public class QuestionPoolDataModel extends DataModel
 {
+          // for JSF
   private Tree tree;
   private DataModel model;
+
+
 
   /**
    * Creates a new QuestionPoolDatModel object.
@@ -57,7 +60,7 @@ import org.sakaiproject.tool.assessment.facade.QuestionPoolFacade;
     }
     catch(Exception e)
     {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
       throw new RuntimeException(e);
     }
 	return model.getRowData();

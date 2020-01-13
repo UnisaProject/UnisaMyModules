@@ -19,24 +19,28 @@
 
 package org.tsugi.lti2;
 
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-
-import lombok.extern.slf4j.Slf4j;
 
 import org.tsugi.basiclti.BasicLTIUtil;
 import org.tsugi.basiclti.BasicLTIConstants;
 import org.tsugi.lti2.objects.StandardServices;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-@Slf4j
 public class LTI2Util {
+
+	// We use the built-in Java logger because this code needs to be very generic
+	private static Logger M_log = Logger.getLogger(LTI2Util.class.toString());
 
 	public static final String SCOPE_LtiLink = "LtiLink";
 	public static final String SCOPE_ToolProxyBinding = "ToolProxyBinding";
@@ -103,9 +107,9 @@ public class LTI2Util {
 		if (binding_settings != null ) binding_settings.remove(LTI2Constants.JSONLD_ID);
 		if (link_settings != null ) link_settings.remove(LTI2Constants.JSONLD_ID);
 		if (proxy_settings != null ) proxy_settings.remove(LTI2Constants.JSONLD_ID);
-		log.debug("link_settings={}", link_settings);
-		log.debug("proxy_settings={}", proxy_settings);
-		log.debug("binding_settings={}", binding_settings);
+		M_log.fine("link_settings="+link_settings);
+		M_log.fine("proxy_settings="+proxy_settings);
+		M_log.fine("binding_settings="+binding_settings);
 
 		// Lets get this party started...
 		JSONObject jsonResponse = null;
@@ -301,8 +305,8 @@ public class LTI2Util {
 		try {
 			json = (JSONObject) JSONValue.parse(customstr.trim());
 		} catch(Exception e) {
-			log.warn("mergeLTI2Custom could not parse\n{}", customstr);
-			log.warn(e.getLocalizedMessage());
+			M_log.warning("mergeLTI2Custom could not parse\n"+customstr);
+			M_log.warning(e.getLocalizedMessage());
 			return false;
 		}
 
@@ -339,8 +343,8 @@ public class LTI2Util {
 		try {
 			json = (JSONArray) JSONValue.parse(customstr.trim());
 		} catch(Exception e) {
-			log.warn("mergeLTI2Parameters could not parse\n{}", customstr);
-			log.warn(e.getLocalizedMessage());
+			M_log.warning("mergeLTI2Parameters could not parse\n"+customstr);
+			M_log.warning(e.getLocalizedMessage());
 			return false;
 		}
 		Iterator<?> parameters = json.iterator();
@@ -350,8 +354,8 @@ public class LTI2Util {
 			try {
 				parameter = (JSONObject) o;
 			} catch(Exception e) {
-				log.warn("mergeLTI2Parameters did not find list of objects\n{}", customstr);
-				log.warn(e.getLocalizedMessage());
+				M_log.warning("mergeLTI2Parameters did not find list of objects\n"+customstr);
+				M_log.warning(e.getLocalizedMessage());
 				return false;
 			}
 
@@ -432,8 +436,8 @@ public class LTI2Util {
 			String capStr = property2Capability(keyStr);
 			String mapStr = mapping.getProperty(keyStr, null);
 			if ( enabledCapabilities.contains(keyStr) || 
-			     (capStr != null && enabledCapabilities.contains(capStr) ) || 
-			     (mapStr != null && enabledCapabilities.contains(mapStr) ) ) {
+			     enabledCapabilities.contains(capStr) || 
+			     enabledCapabilities.contains(mapStr) ) {
 				// Allowed to stay...
 			} else {
 				ltiProps.remove(keyStr);
@@ -484,7 +488,6 @@ public class LTI2Util {
 		Properties mapping = new Properties();
 		mapping.setProperty("context_title", "CourseSection.title");
 		mapping.setProperty("context_label", "CourseSection.label");
-		mapping.setProperty("context_type", "Context.type");
 		mapping.setProperty("lis_course_section_sourcedid", "CourseSection.sourcedId");
 		mapping.setProperty("resource_link_id", "ResourceLink.id");
 		mapping.setProperty("resource_link_title", "ResourceLink.title");

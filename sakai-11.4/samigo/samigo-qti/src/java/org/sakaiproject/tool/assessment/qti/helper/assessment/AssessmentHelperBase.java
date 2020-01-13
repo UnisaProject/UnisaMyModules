@@ -19,6 +19,8 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.qti.helper.assessment;
 
 import java.io.IOException;
@@ -31,9 +33,8 @@ import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import lombok.extern.slf4j.Slf4j;
-import org.xml.sax.SAXException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AttachmentData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentAccessControlIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentFeedbackIfc;
@@ -46,6 +47,7 @@ import org.sakaiproject.tool.assessment.qti.helper.AuthoringHelper;
 import org.sakaiproject.tool.assessment.qti.util.Iso8601DateFormat;
 import org.sakaiproject.tool.assessment.qti.util.Iso8601TimeInterval;
 import org.sakaiproject.tool.assessment.qti.util.XmlUtil;
+import org.xml.sax.SAXException;
 
 /**
  * <p>Copyright: Copyright (c) 2005/p>
@@ -54,10 +56,10 @@ import org.sakaiproject.tool.assessment.qti.util.XmlUtil;
  * @author based on some code by: Shastri, Rashmi <rshastri@iupui.edu>
  * @version $Id$
  */
-@Slf4j
- public abstract class AssessmentHelperBase
+public abstract class AssessmentHelperBase
   implements AssessmentHelperIfc
 {
+  private static Logger log = LoggerFactory.getLogger(AssessmentHelperBase.class);
 
   abstract protected int getQtiVersion();
 

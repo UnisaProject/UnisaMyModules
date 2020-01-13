@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2005 Sakai Foundation Licensed under the
+    Educational Community License, Version 2.0 (the "License"); you may
+    not use this file except in compliance with the License. You may
+    obtain a copy of the License at
+
+    http://www.osedu.org/licenses/ECL-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an "AS IS"
+    BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+    or implied. See the License for the specific language governing
+    permissions and limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    
+    <!-- common logic -->
+    <bean id="org.sakaiproject.evaluation.logic.EvalCommonLogic" 
+        class="org.sakaiproject.evaluation.logic.EvalCommonLogicImpl"
+        init-method="init">
+        <property name="externalLogic"
+            ref="org.sakaiproject.evaluation.logic.externals.EvalExternalLogic" />
+		<property name="evalSettings"
+            ref="org.sakaiproject.evaluation.logic.EvalSettings" />
+        <property name="adhocSupportLogic"
+            ref="org.sakaiproject.evaluation.dao.EvalAdhocSupport" />
+		<property name="evalAdminSupportLogic"
+            ref="org.sakaiproject.evaluation.dao.EvalAdminSupport" />
+    </bean>
+	
+    <!-- utils which require other low level evaluation beans -->
+    <bean id="org.sakaiproject.evaluation.beans.EvalBeanUtils"
+        class="org.sakaiproject.evaluation.beans.EvalBeanUtils">
+        <property name="commonLogic"
+            ref="org.sakaiproject.evaluation.logic.EvalCommonLogic" />
+        <property name="settings" ref="org.sakaiproject.evaluation.logic.EvalSettings" />
+    </bean>
+
+    <!-- handles security checks -->
+    <bean id="org.sakaiproject.evaluation.logic.externals.EvalSecurityChecks"
+        class="org.sakaiproject.evaluation.logic.externals.EvalSecurityChecksImpl">
+        <property name="commonLogic"
+            ref="org.sakaiproject.evaluation.logic.EvalCommonLogic" />
+        <property name="evalBeanUtils"
+            ref="org.sakaiproject.evaluation.beans.EvalBeanUtils" />
+    </bean>
+
+    <bean id="org.sakaiproject.evaluation.logic.ReportingPermissions"
+        class="org.sakaiproject.evaluation.logic.ReportingPermissionsImpl">
+        <property name="dao" ref="org.sakaiproject.evaluation.dao.EvaluationDao" />
+        <property name="commonLogic"
+            ref="org.sakaiproject.evaluation.logic.EvalCommonLogic" />
+        <property name="evalSettings"
+            ref="org.sakaiproject.evaluation.logic.EvalSettings" />
+        <property name="evaluationService"
+            ref="org.sakaiproject.evaluation.logic.EvalEvaluationService" />
+        <property name="evalBeanUtils"
+            ref="org.sakaiproject.evaluation.beans.EvalBeanUtils" />
+    </bean>
+
+    <!-- handles simpler evaluation methods -->
+    <bean id="org.sakaiproject.evaluation.logic.EvalEvaluationService"
+        class="org.sakaiproject.evaluation.logic.EvalEvaluationServiceImpl">
+        <property name="dao" ref="org.sakaiproject.evaluation.dao.EvaluationDao" />
+        <property name="commonLogic"
+            ref="org.sakaiproject.evaluation.logic.EvalCommonLogic" />
+        <property name="securityChecks"
+            ref="org.sakaiproject.evaluation.logic.externals.EvalSecurityChecks" />
+        <property name="settings" ref="org.sakaiproject.evaluation.logic.EvalSettings" />
+    </bean>
+
+	<bean id="org.sakaiproject.evaluation.logic.EvalLockManager" 
+		class="org.sakaiproject.evaluation.logic.EvalLockManagerImpl">
+        <property name="dao" ref="org.sakaiproject.evaluation.dao.EvaluationDao" />
+	</bean>
+</beans>

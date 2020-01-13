@@ -1,0 +1,52 @@
+<%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@ taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%@ taglib uri="http://sakaiproject.org/struts/sakai" prefix="sakai" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<fmt:setBundle basename="za.ac.unisa.lms.tools.libmaint.ApplicationResources"/>
+
+<sakai:html>
+<html:form action="/maintenance"> 
+	<html:hidden property="atstep" value="placementremove"/>
+	
+	<sakai:group_heading>
+		<fmt:message key="heading"/><br>
+		<fmt:message key="plc.rem.heading"/>
+	</sakai:group_heading>
+	<p>
+	<sakai:messages/>
+	<sakai:messages message="true"/>
+	<p>
+	<fmt:message key="rem.sure"/>
+	<p>
+	<sakai:flat_list>
+		<logic:notEmpty name="maintenanceForm" property="removalList">
+			<ul>
+			<logic:iterate name="maintenanceForm" property="removalList" id="record" indexId="i">
+				<tr>
+					<td><li>
+						<bean:write name="record" property="placement"/>
+						<logic:equal name="record" property="inUse" value="true">
+							(Warning: Full text content in use)
+						</logic:equal>
+					</li></td>
+				</tr>
+			</logic:iterate>
+			</ul>
+		</logic:notEmpty>
+	</sakai:flat_list>
+	
+	</p>
+	<sakai:actions>
+		<html:submit property="act">
+			<fmt:message key="button.remove"/>
+		</html:submit>
+		<html:submit property="act">
+			<fmt:message key="button.cancel"/>
+		</html:submit>
+	</sakai:actions>
+	
+</html:form>
+</sakai:html>

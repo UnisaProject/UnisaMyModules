@@ -19,6 +19,13 @@
 
 package org.sakaiproject.user.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.memory.api.Cache;
+import org.sakaiproject.memory.api.MemoryService;
+import org.sakaiproject.user.api.Authentication;
+import org.sakaiproject.user.api.AuthenticationException;
+
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -26,14 +33,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.sakaiproject.memory.api.Cache;
-import org.sakaiproject.memory.api.MemoryService;
-import org.sakaiproject.user.api.Authentication;
-import org.sakaiproject.user.api.AuthenticationException;
-
 
 /**
  * Because DAV clients do not understand the concept of secure sessions, a DAV
@@ -49,16 +48,17 @@ import org.sakaiproject.user.api.AuthenticationException;
  *
  * @author Aaron Zeckoski (aaron@caret.cam.ac.uk)
  */
-@Slf4j
 public class AuthenticationCache {
+	private static final Logger log = LoggerFactory.getLogger(AuthenticationCache.class);
+
     private MemoryService memoryService;
-    private Cache<String, AuthenticationRecord> authCache = null;
+	private Cache authCache = null;
     /**
-     * List of algorithms to attempt to use, best ones should come first.
-     */
-    private List<String> algorithms = Arrays.asList(new String[]{"SHA2","SHA1"});
-    private Random saltGenerator = new Random();
-    private int saltLength = 8;
+	 * List of algorithms to attempt to use, best ones should come first.
+	 */
+	private List<String> algorithms = Arrays.asList(new String[]{"SHA2","SHA1"});
+	private Random saltGenerator = new Random();
+	private int saltLength = 8;
 	
     public void setMemoryService(MemoryService memoryService) {
         this.memoryService = memoryService;
@@ -76,7 +76,7 @@ public class AuthenticationCache {
 	/**
 	* The central cache object, should be injected
 	*/
-	public void setAuthCache(Cache<String, AuthenticationRecord> authCache) {
+	public void setAuthCache(Cache authCache) {
 		this.authCache = authCache;
 		if (log.isDebugEnabled() && (authCache != null)) log.debug("authCache ");
 	}
@@ -84,7 +84,7 @@ public class AuthenticationCache {
 	public Authentication getAuthentication(String authenticationId, String password)
 			throws AuthenticationException {
 		Authentication auth = null;
-		AuthenticationRecord record = authCache.get(authenticationId);
+		AuthenticationRecord record = (AuthenticationRecord) authCache.get(authenticationId);
 		if (record != null) {
 			byte[] salt = new byte[saltLength];
 			System.arraycopy(record.encodedPassword, 0, salt, 0, salt.length);

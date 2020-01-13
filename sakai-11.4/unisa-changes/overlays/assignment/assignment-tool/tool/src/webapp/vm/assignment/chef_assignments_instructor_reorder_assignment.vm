@@ -1,24 +1,29 @@
+<!-- $Id$ -->
 <!-- start: chef_assignments_instructor_reorder_assignment.vm  -->
+##<!-- $Header: Exp $ -->
+## Assignments - reorder view
+#javascript("/library/js/fluid/1.5/MyInfusion.js")
+#javascript("/library/js/reorderer.js")
+
 <div class="portletBody container-fluid">
 	#if ($allowAddAssignment || ($withGrade && $!allowGradeSubmission))
 		## for user who cannot create assignment nor grade submission, no need to show "Assignment List" link at all since there is really no other toolbar choices
-		#navBarHREF( $allowAddAssignment $withGrade $allowGradeSubmission $allowAddAssignment $allowRecoverAssignment $allowAllGroups $assignmentscheck $allowUpdateSite $enableViewOption $view "reorder" )
+		#navBarHREF( $allowAddAssignment $withGrade $allowGradeSubmission $allowAddAssignment $allowAllGroups $assignmentscheck $allowUpdateSite $enableViewOption $view "reorder" )
 	#end
-	#if ($alertMessage)<div class="alertMessage" style="width:80%  !important"><strong>$tlang.getString("gen.alert")</strong> $alertMessage</div><div style="display:block;clear:both"></div>#end
+	#if ($alertMessage)<div class="alertMessage" style="width:80%  !important">$tlang.getString("gen.alert") $alertMessage</div><div style="display:block;clear:both"></div>#end
 
-#* <!-- Unisa Changes:2018/10/18:Change page-header class to unisaToolHeading and H1 to H3 -->
-      <div class="page-header">
-        <h1>
-            $tlang.getString("gen.reordertitle")
-        </h1>
-    </div>  
-    *#
-    
+	<!-- Unisa Changes:2018/10/18:Change page-header class to unisaToolHeading and H1 to H3 -->
+    <!-- <div class="page-header"> -->
+    <!--     <h1> -->
+    <!--         $tlang.getString("gen.reordertitle") -->
+    <!--     </h1> -->
+    <!-- </div> -->
     <div class="unisaToolHeading">
         <h3>
             $tlang.getString("gen.reordertitle")
         </h3>
-    </div>
+    </div>    
+    <!-- Unisa Changes:2018/10/18 -->
 
 	<form name="reorderForm" id="reorderForm" action="#toolForm("AssignmentAction")" method="post" onsubmit="return true;">
 		<input name="assignmentSize" id="assignmentSize" value="$assignmentsize" type="hidden" />
@@ -88,27 +93,27 @@
 			</div>
 		</div>
 
-		<ul id="reorder-list" class="styled-reorder-list">
+		<ul id="reorder-list">
 
 			#set($count = 1)
 			#foreach($assignment in $assignments)
 
-			<li class="sortable row" tabindex="0" id="listitem.orderable$count">
+			<li class="sortable row"  id="listitem.orderable$count">
 				<span style="display:none" class="grabHandle">
 					<input type="text" size="3" value="$count" id="index$count"/>
 					<input type="hidden"  size="3" id="holder$count"  value="$count" tabindex="-2"/>
 				</span>
-				<span class="col-md-6 col-sm-6 col-xs-12" title="$validator.escapeHtml($!assignment.Title)">
-					#if ($!assignment.Draft)
+				<span class="title col-md-6 col-sm-6 col-xs-12">
+					#if ($!assignment.draft)
 						<em class="highlight" style="font-style:normal">$tlang.getString("gen.dra2")</em>
 					#end
-					$validator.escapeHtml($!assignment.Title)
+					$validator.escapeHtml($validator.limit($!assignment.getTitle(), 45))
 				</span>
 				<span class="col-md-3 col-sm-3 col-xs-12">
-					$!service.getUsersLocalDateTimeString($!assignment.OpenDate)
+					$!assignment.openTime.toStringLocalFull()
 				</span>
 				<span class="col-md-3 col-sm-3 col-xs-12">
-					$!service.getUsersLocalDateTimeString($!assignment.DueDate)
+					$!assignment.dueTime.toStringLocalFull()
 					<select name="position_$validator.escapeUrl("$assignment.id")" class="selectSet">
 						#foreach($i in [1..$assignmentsize])
 						<option value="$i"#if("$i" == "$count") selected="selected"#end>$i</option>

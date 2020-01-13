@@ -30,7 +30,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.osid.shared.SharedException;
 
 import org.sakaiproject.tool.assessment.data.dao.questionpool.QuestionPoolData;
@@ -39,13 +40,17 @@ import org.sakaiproject.tool.assessment.facade.QuestionPoolFacade;
 import org.sakaiproject.tool.assessment.facade.QuestionPoolIteratorFacade;
 import org.sakaiproject.tool.assessment.util.BeanSort;
 
+//import org.sakaiproject.tool.assessment.osid.shared.impl.IdImpl;
+//import osid.shared.*;
+// import org.osid.shared.Id;  // should only use Long for id.
+
+
 /**
  * DOCUMENTATION PENDING
  *
  * @author $author$
  * @version $Id$
  */
-@Slf4j
 public class QuestionPoolTreeImpl
   implements Tree
 {
@@ -54,6 +59,10 @@ public class QuestionPoolTreeImpl
 	 * 
 	 */
 	private static final long serialVersionUID = 2173986944623441011L;
+
+
+private static Logger log = LoggerFactory.getLogger(QuestionPoolTreeImpl.class);
+
 
   private HashMap poolMap;
   private HashMap poolFamilies;
@@ -146,11 +155,11 @@ public class QuestionPoolTreeImpl
     }
     catch (SharedException se)
     {
-      log.error(se.getMessage(), se);
+      se.printStackTrace();
     }
     catch(RuntimeException e)
     {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
     }
   }
 
@@ -183,7 +192,7 @@ public class QuestionPoolTreeImpl
     }
     catch(Exception e)
     {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
       return null;
     }
   }
@@ -218,7 +227,7 @@ public class QuestionPoolTreeImpl
     }
     catch(Exception e)
     {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
 
       return null;
     }
@@ -267,7 +276,7 @@ public class QuestionPoolTreeImpl
 
     catch(RuntimeException e)
     {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
       return "0";
     }
 
@@ -297,7 +306,7 @@ public class QuestionPoolTreeImpl
 
     catch(Exception e)
     {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
       return "0";
     }
 
@@ -376,7 +385,7 @@ public class QuestionPoolTreeImpl
       }
       catch(Exception e)
       {
-        log.error(e.getMessage(), e);
+        e.printStackTrace();
         throw new RuntimeException(e);
 
       }
@@ -420,7 +429,7 @@ public class QuestionPoolTreeImpl
     }
     catch(Exception e)
     {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
       throw new RuntimeException(e);
     }
 
@@ -439,7 +448,7 @@ public class QuestionPoolTreeImpl
     }
     catch(Exception e)
     {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
       throw new RuntimeException(e);
     }
 
@@ -671,7 +680,7 @@ public class QuestionPoolTreeImpl
     	return rootA.equals(rootB);
     }
 	catch(Exception e){
-                log.error(e.getMessage(), e);
+                e.printStackTrace();
       		return false;
     	}
   }
@@ -691,7 +700,7 @@ public class QuestionPoolTreeImpl
       return false;
 
     }catch(Exception e){
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
       return false;
     }
   }
@@ -716,7 +725,7 @@ public class QuestionPoolTreeImpl
     }
     return level;
     }catch(Exception e){
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
       return 0;
     }
   }

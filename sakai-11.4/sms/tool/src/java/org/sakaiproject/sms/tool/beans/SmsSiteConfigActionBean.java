@@ -18,17 +18,18 @@
 
 package org.sakaiproject.sms.tool.beans;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.sms.logic.SmsConfigLogic;
 import org.sakaiproject.sms.logic.external.ExternalLogic;
 import org.sakaiproject.sms.model.SmsConfig;
 import org.sakaiproject.sms.tool.otp.SmsConfigLocator;
 import org.springframework.util.Assert;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class SmsSiteConfigActionBean {
 
+	private static final Log LOG = LogFactory
+			.getLog(SmsSiteConfigActionBean.class);
 
 	private SmsConfigLocator smsConfigLocator;
 	private SmsConfigLogic smsConfigLogic;
@@ -61,8 +62,8 @@ public class SmsSiteConfigActionBean {
 		// if(smsConfig.getSmsEnabled().equals(Boolean.FALSE))
 		// smsConfig.setNotificationEmail("");
 
-		if (log.isInfoEnabled()) {
-			log.info("Persisting smsConfig");
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Persisting smsConfig");
 		}
 
 		smsConfigLogic.persistSmsConfig(smsConfig);

@@ -29,7 +29,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.Iterator;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.radeox.EngineManager;
 import org.radeox.api.engine.RenderEngine;
 import org.radeox.api.engine.context.InitialRenderContext;
@@ -50,9 +51,11 @@ import org.radeox.util.Service;
  * @version $Id: BaseRenderEngine.java 7707 2006-04-12 17:30:19Z
  *          ian@caret.cam.ac.uk $
  */
-@Slf4j
+
 public class BaseRenderEngine implements RenderEngine
 {
+	private static Logger log = LoggerFactory.getLogger(BaseRenderEngine.class);
+
 	protected InitialRenderContext initialContext;
 
 	protected FilterPipe fp;

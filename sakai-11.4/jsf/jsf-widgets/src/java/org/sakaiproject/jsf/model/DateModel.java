@@ -26,8 +26,6 @@ import java.text.*;
 import java.util.*;
 import javax.faces.model.*;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  *
  * <p>Models Locale specific date chanracteristics.</p>
@@ -36,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Ed Smiley
  * @version $Id$
  */
-@Slf4j
+
 public class DateModel
   implements Serializable
 {
@@ -244,59 +242,59 @@ public class DateModel
     
     for (int i = 0; i < ye.length; i++)
     {
-      log.debug("year: {}", ye[i]);
+      System.out.println("year: " + ye[i]);
     }
     for (int i = 0; i < mo.length; i++)
     {
-      log.debug("month: {}", mo[i]);
+      System.out.println("month: " + mo[i]);
     }
     for (int i = 0; i < da.length; i++)
     {
-      log.debug("day: {}", da[i]);
+      System.out.println("day: " + da[i]);
     }
     for (int i = 0; i < h12.length; i++)
     {
-      log.debug("hour 12: {}", h12[i]);
+      System.out.println("hour 12: " + h12[i]);
     }
     for (int i = 0; i < h24.length; i++)
     {
-      log.debug("hour 24: {}", h24[i]);
+      System.out.println("hour 24: " + h24[i]);
     }
     for (int i = 0; i < mi.length; i++)
     {
-      log.debug("minutes: {}", mi[i]);
+      System.out.println("minutes: " + mi[i]);
     }
     for (int i = 0; i < se.length; i++)
     {
-      log.debug("seconds: {}", se[i]);
+      System.out.println("seconds: " + se[i]);
     }
     for (int i = 0; i < se.length; i++)
     {
       String zs =
         dateModel1.zeroPad(se[i].toString());
-      log.debug("zero pad seconds={}", zs);
+      System.out.println("zero pad seconds=" + zs);
     }
     for (int i = 0; i < ap.length; i++)
     {
-      log.debug("am pm: {}", ap[i]);
+      System.out.println("am pm: " + ap[i]);
     }
 
     // test select items
-    log.debug("testing select items 12hr");
+    System.out.println("testing select items 12hr");
     unitTestSelectItemList(dateModel1.get12HourSelectItems());
-    log.debug("testing select items 24hr");
+    System.out.println("testing select items 24hr");
     unitTestSelectItemList(dateModel1.get24HourSelectItems());
-    log.debug("testing select items am pm");
+    System.out.println("testing select items am pm");
     unitTestSelectItemList(dateModel1.getAmPmSelectItems());
-    log.debug("testing select items day");
+    System.out.println("testing select items day");
     unitTestSelectItemList(dateModel1.getDaySelectItems());
-    log.debug("testing select items minute");
+    System.out.println("testing select items minute");
     unitTestSelectItemList(dateModel1.getMinuteSelectItems());
-    log.debug("testing select items month");
+    System.out.println("testing select items month");
     unitTestSelectItemList(dateModel1.getMonthSelectItems());
-    log.debug("testing select items second");
+    System.out.println("testing select items second");
     unitTestSelectItemList(dateModel1.getSecondsSelectItems());
-    log.debug("testing select items year");
+    System.out.println("testing select items year");
     unitTestSelectItemList(dateModel1.getYearSelectItems(2, 2));
   }
 
@@ -304,8 +302,8 @@ public class DateModel
   {
     for (Iterator iter = list.iterator(); iter.hasNext(); ) {
       SelectItem item = (SelectItem)iter.next();
-      log.debug("item.getLabel()={}", item.getLabel());
-      log.debug("item.getValue()={}", item.getValue());
+      System.out.println("item.getLabel()="+item.getLabel());
+      System.out.println("item.getValue()="+item.getValue());
     }
   }
 

@@ -20,7 +20,8 @@ package org.sakaiproject.tool.assessment.util;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.tool.assessment.data.dao.grading.MediaData;
@@ -36,7 +37,6 @@ import org.sakaiproject.tool.assessment.services.PersistenceService;
  * there are errors, they are reported in the usual log (catalina.out unless
  * configured otherwise).
  */
-@Slf4j
 public class MediaContentConverter {
 
 	private static final String CONVERT_MEDIA_PROP = "samigo.convertMedia";
@@ -46,6 +46,8 @@ public class MediaContentConverter {
 	private int recordsConverted = 0;
 	private int recordsNotMarked = 0;
 	private int recordsInError = 0;
+
+ Logger log = LoggerFactory.getLogger(MediaContentConverter.class);
 
 	public void init() {
 		boolean convertMedia = ServerConfigurationService.getBoolean(CONVERT_MEDIA_PROP, false);

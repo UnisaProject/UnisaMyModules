@@ -26,8 +26,8 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.Member;
@@ -55,10 +55,11 @@ import org.sakaiproject.thread_local.api.ThreadLocalManager;
 * @author University of Michigan, Sakai Software Development Team
 * @version $Revision$
 */
-@Slf4j
 public class RoleGroupEventWatcher implements Observer
 {
-
+	
+	private static Logger log = LoggerFactory.getLogger(RoleGroupEventWatcher.class);
+	
 	/*******************************************************************************
 	* Dependencies and their setter methods
 	*******************************************************************************/
@@ -244,11 +245,7 @@ public class RoleGroupEventWatcher implements Observer
 										{
 											if (m.getRole().getId().equals(role))
 											{
-												try {
-													g.deleteMember(m.getUserId());
-												} catch (IllegalStateException e) {
-													log.error(".update: User with id {} cannot be deleted from group with id {} because the group is locked", m.getUserId(), g.getId());
-												}
+												g.removeMember(m.getUserId());
 											}
 										}
 										
@@ -258,11 +255,7 @@ public class RoleGroupEventWatcher implements Observer
 										{
 											for(String userId:roleUserSet)
 											{
-												try {
-													g.insertMember(userId, role.trim(), true, false);
-												} catch (IllegalStateException e) {
-													log.error(".update: User with id {} cannot be inserted in group with id {} because the group is locked", userId, g.getId());
-												}
+												g.addMember(userId, role.trim(), true, false);
 											}
 										}
 									}
@@ -285,6 +278,7 @@ public class RoleGroupEventWatcher implements Observer
 				catch (Exception e)
 				{
 					log.warn(this + ".update:" + e + ": " + event.getResource());
+					e.printStackTrace();
 				}
 				
 				securityService.popAdvisor();
@@ -296,3 +290,7 @@ public class RoleGroupEventWatcher implements Observer
 	} // update
 	
 } // RoleGroupEventWatcher
+
+
+
+

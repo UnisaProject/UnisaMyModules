@@ -1,13 +1,11 @@
 <?xml version="1.0"?>
 <registration>
-    <tool id="sakai.bbb"
-      title="Meetings"
-      description="Sakai Interface onto the BigBlueButton conferencing tool"
-      version="12.6">
-        <category name="course" />
+    <tool id="sakai.bbb" 
+    	title="Meetings" 
+    	description="Sakai Interface onto the BigBlueButton conferencing tool"
+    	version="1.0.7">
+    
+    	<category name="course" />
         <category name="project" />
-        <!-- unisa change: Add following categories -->
-        <category name="onlcourse" />
-		<category name="Postgraduate"/>
     </tool>
 </registration>

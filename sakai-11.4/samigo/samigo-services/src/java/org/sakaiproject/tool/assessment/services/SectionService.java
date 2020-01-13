@@ -19,9 +19,11 @@
  *
  **********************************************************************************/
 
+
 package org.sakaiproject.tool.assessment.services;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.tool.assessment.facade.SectionFacade;
 
@@ -29,9 +31,9 @@ import org.sakaiproject.tool.assessment.facade.SectionFacade;
  * The SectionService calls persistent service locator to reach the
  * manager on the back end.
  */
-@Slf4j
 public class SectionService
 {
+  private Logger log = LoggerFactory.getLogger(SectionService.class);
 
   /**
    * Creates a new SectionService object.
@@ -59,4 +61,6 @@ public class SectionService
 
     return section;
   }
+
+
 }

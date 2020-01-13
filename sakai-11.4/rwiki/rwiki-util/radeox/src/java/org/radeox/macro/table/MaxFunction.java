@@ -23,7 +23,8 @@
 
 package org.radeox.macro.table;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A function that finds the max of table cells
@@ -31,9 +32,11 @@ import lombok.extern.slf4j.Slf4j;
  * @author stephan
  * @version $Id$
  */
-@Slf4j
+
 public class MaxFunction implements Function
 {
+	private static Logger log = LoggerFactory.getLogger(MaxFunction.class);
+
 	public String getName()
 	{
 		return "MAX";

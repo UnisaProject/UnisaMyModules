@@ -23,8 +23,8 @@
 package org.sakaiproject.tool.assessment.util;
 
 import java.util.HashMap;
-
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * In memory mime type lookup utility class.
@@ -33,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
  * @author esmiley@stanford.edu
  * @version $Id$
  */
-@Slf4j
 public class MimeType {
   private static HashMap extensionMime = new HashMap();
   private static HashMap mimeExtension = new HashMap();
@@ -46,6 +45,7 @@ public class MimeType {
    */
   public static void main(String[] args)
   {
+    Logger log = LoggerFactory.getLogger(MimeType.class);
     log.info("mime for BMP= " + get("BMP"));
     log.info("mime for .zip= " + get(".zip"));
     log.info("mime for .HTM= " + get (".HTM"));
@@ -197,4 +197,5 @@ public class MimeType {
     mimeExtension.put("video/quicktime", ".mov");
     mimeExtension.put("video/x-msvideo", ".avi");
   }
+
 }

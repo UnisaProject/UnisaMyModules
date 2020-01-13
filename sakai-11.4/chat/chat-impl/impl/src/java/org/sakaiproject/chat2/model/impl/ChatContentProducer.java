@@ -1,19 +1,27 @@
-/**
- * Copyright (c) 2003-2016 The Apereo Foundation
+/**********************************************************************************
+* $URL$
+* $Id$
+***********************************************************************************
+*
+ * Copyright (c) 2007, 2008 The Sakai Foundation
  *
  * Licensed under the Educational Community License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *             http://opensource.org/licenses/ecl2
+ *       http://www.opensource.org/licenses/ECL-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*
+**********************************************************************************/
 
+/**
+ * 
+ */
 package org.sakaiproject.chat2.model.impl;
 
 import java.io.Reader;
@@ -24,8 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.chat2.model.ChatChannel;
 import org.sakaiproject.chat2.model.ChatManager;
 import org.sakaiproject.chat2.model.ChatMessage;
@@ -52,9 +60,9 @@ import org.sakaiproject.util.ResourceLoader;
  * @author chrismaurer
  *
  */
-@Slf4j
 public class ChatContentProducer implements EntityContentProducer {
 
+   protected final Logger logger = LoggerFactory.getLogger(getClass());
    private SearchService searchService = null;
    private SearchIndexBuilder searchIndexBuilder = null;
    private EntityManager entityManager = null;
@@ -72,7 +80,7 @@ public class ChatContentProducer implements EntityContentProducer {
    }
 
 protected void init() throws Exception {
-      log.info("init()");
+      logger.info("init()");
       
       if ("true".equals(ServerConfigurationService.getString( //$NON-NLS-1$
             "search.enable", "false"))) //$NON-NLS-1$ //$NON-NLS-2$
@@ -99,7 +107,7 @@ protected void init() throws Exception {
     */
    protected void destroy()
    {
-      log.info("destroy()");
+      logger.info("destroy()");
    }
 
    
@@ -202,7 +210,7 @@ protected void init() throws Exception {
          }
          catch (Exception ex)
          {
-            log.error("Got error on channel ", ex); //$NON-NLS-1$
+            logger.error("Got error on channel ", ex); //$NON-NLS-1$
 
          }
       }
@@ -227,7 +235,7 @@ protected void init() throws Exception {
       try {
          sender = UserDirectoryService.getUser(user);
       } catch(UserNotDefinedException e) {
-         log.error(e.getMessage(), e);
+         logger.error(e.getMessage());
          return user;
       }
       if (contextualUserDisplayService == null) {
@@ -276,8 +284,8 @@ protected void init() throws Exception {
             */
             
             sb.append("\n"); //$NON-NLS-1$
-            log.debug("Message Content for {} is {}", ref.getReference(), //$NON-NLS-1$ //$NON-NLS-2$
-                    sb.toString());
+            logger.debug("Message Content for " + ref.getReference() + " is " //$NON-NLS-1$ //$NON-NLS-2$
+                  + sb.toString());
 
             return sb.toString();
          }
@@ -353,8 +361,9 @@ protected void init() throws Exception {
          }
          catch (Exception ex)
          {
-            log.warn("Failed to get channel {}", c.getId()); //$NON-NLS-1$
-            log.error(ex.getMessage(), ex);
+            ex.printStackTrace();
+            logger.warn("Failed to get channel " + c.getId()); //$NON-NLS-1$
+
          }
       }
       return all;
@@ -407,8 +416,9 @@ protected void init() throws Exception {
                }
                catch (Exception ex)
                {
-                  log.warn("Failed to get channel {}", c.getId()); //$NON-NLS-1$
-                  log.error(ex.getMessage(), ex);
+                  ex.printStackTrace();
+                  logger.warn("Failed to get channel " + c.getId()); //$NON-NLS-1$
+
                }
             }
             return false;
@@ -534,19 +544,19 @@ protected void init() throws Exception {
             ChatMessage m = cep.getMessage(ref);
             if (m == null)
             {
-               log.debug("Rejected null message {}", ref.getReference()); //$NON-NLS-1$
+               logger.debug("Rejected null message " + ref.getReference()); //$NON-NLS-1$
                return false;
             }
          }
          catch (IdUnusedException e)
          {
-            log.debug("Rejected Missing message or Collection {}", //$NON-NLS-1$
-                  ref.getReference());
+            logger.debug("Rejected Missing message or Collection " //$NON-NLS-1$
+                  + ref.getReference());
             return false;
          }
          catch (PermissionException e)
          {
-            log.warn("Rejected private message {}", ref.getReference()); //$NON-NLS-1$
+            logger.warn("Rejected private message " + ref.getReference()); //$NON-NLS-1$
             return false;
          }
          return true;

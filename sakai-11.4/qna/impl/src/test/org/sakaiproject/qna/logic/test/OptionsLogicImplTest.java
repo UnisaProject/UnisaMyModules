@@ -33,6 +33,8 @@ import static org.sakaiproject.qna.logic.test.TestDataPreload.USER_UPDATE;
 
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,8 +47,6 @@ import org.sakaiproject.qna.logic.test.stubs.ServerConfigurationServiceStub;
 import org.sakaiproject.qna.model.QnaCustomEmail;
 import org.sakaiproject.qna.model.QnaOptions;
 import org.sakaiproject.qna.model.constants.QnaConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
@@ -62,7 +62,7 @@ public class OptionsLogicImplTest extends
 	PermissionLogicImpl permissionLogic;
 	QnaDao dao;
 
-	private static Logger log = LoggerFactory.getLogger(OptionsLogicImplTest.class);
+	private static Log log = LogFactory.getLog(OptionsLogicImplTest.class);
 
 	private final ExternalLogicStub externalLogicStub = new ExternalLogicStub();
 	private final ExternalEventLogicStub externalEventLogicStub = new ExternalEventLogicStub();

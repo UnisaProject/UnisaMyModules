@@ -19,6 +19,8 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.ui.listener.author;
 
 import javax.faces.application.FacesMessage;
@@ -26,8 +28,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
-
-import lombok.extern.slf4j.Slf4j;
 
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAssessmentData;
 import org.sakaiproject.tool.assessment.facade.AgentFacade;
@@ -38,6 +38,8 @@ import org.sakaiproject.tool.assessment.ui.bean.author.PublishedAssessmentBean;
 import org.sakaiproject.tool.assessment.ui.bean.authz.AuthorizationBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 import org.sakaiproject.util.FormattedText;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>Title: Samigo</p>
@@ -45,9 +47,10 @@ import org.sakaiproject.util.FormattedText;
  * @author Ed Smiley
  * @version $Id$
  */
-@Slf4j
+
 public class ConfirmRemovePublishedAssessmentListener implements ActionListener
 {
+  private static Logger log = LoggerFactory.getLogger(ConfirmRemovePublishedAssessmentListener.class);
 
   public ConfirmRemovePublishedAssessmentListener()
   {

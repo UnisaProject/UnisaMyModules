@@ -11,10 +11,7 @@
     	<form id="Mrphs-xlogin" method="post" action="${action}" #if (${notify}) class="with-errors" #end>
             <h1>${loginRequired}</h1>
             <aside class="logo"></aside>
-            #if (${xloginChoice})
-                <div class="xloginMessage">${xloginChoice}&nbsp;<a href="${loginContainerUrl}">${containerText}</a></div>
-            #end
-            #if (${notify})
+        	#if (${notify})
         		<div class="alertMessage" role="alert">${notify}</div>
         	#end
     		<fieldset>	
@@ -27,7 +24,7 @@
     			#end
     			<!-- Unisa change -->
     			<p class="buttons">
-    				<input name="submit" type="submit" id="submit" class="loginsubmit" value="${loginWording}"/>
+    			   <input name="submit" type="submit" id="submit" class="loginsubmit" value="${loginWording}"/>
     				<input name="cancel" type="submit" class="loginsubmit" value="${cancelWording}"/>
     			</p>
     			#if (${passwordResetUrl})
@@ -51,8 +48,8 @@
     	        }
     	    }
     	    if ( needJQuery ) {
-    	        document.write('\x3Cscript src="${pageWebjarsPath}jquery/1.12.4/jquery.min.js$!{portalCDNQuery}">'+'\x3C/script>')
-    	        document.write('\x3Cscript src="${pageWebjarsPath}jquery-migrate/1.4.1/jquery-migrate.min.js$!{portalCDNQuery}">'+'\x3C/script>')
+    	        document.write('\x3Cscript src="${pageWebjarsPath}jquery/1.11.3/jquery.min.js$!{portalCDNQuery}">'+'\x3C/script>')
+    	        document.write('\x3Cscript src="${pageWebjarsPath}jquery-migrate/1.4.0/jquery-migrate.min.js$!{portalCDNQuery}">'+'\x3C/script>')
     	    }
     	</script>
     	<script>
@@ -60,6 +57,5 @@
     	</script>
     	<script src="${pageSkinRepo}/${pageSkin}/js/morpheus.plugins.min.js$!{portalCDNQuery}"></script>
     	<script src="${pageSkinRepo}/${pageSkin}/js/morpheus.scripts.min.js$!{portalCDNQuery}"></script>
-    	<script src="${pageScriptPath}caps-lock-checker.js$!{portalCDNQuery}"></script>
     </body>
 </html>

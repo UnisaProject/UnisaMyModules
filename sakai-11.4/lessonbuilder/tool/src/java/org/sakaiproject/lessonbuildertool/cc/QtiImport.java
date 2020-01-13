@@ -1,50 +1,39 @@
-/**
- * Copyright (c) 2003-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.lessonbuildertool.cc;
 
-import java.io.CharArrayWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.ArrayList;
-
+import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
-
-import lombok.extern.slf4j.Slf4j;
-
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-
+import org.xml.sax.SAXParseException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.DOMException;
 import org.sakaiproject.lessonbuildertool.tool.beans.SimplePageBean;
 import org.sakaiproject.util.FormattedText;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class QtiImport {
+
+    private static final Logger log = LoggerFactory.getLogger(QtiImport.class);
+
     String title = null;
     int noscore = 0;
     int paras = 0;
     PrintWriter out = null;
+    boolean debug = false;
     boolean needHeader = true;
     CharArrayWriter charout = null;
     String filebase = null;
@@ -297,8 +286,11 @@ public class QtiImport {
   
 	Node stuff = material.getFirstChild();
   
-	log.debug("start");
+	//	System.err.println("start");
 	while (stuff != null) {
+	    //		 System.err.println("node: " + 
+	    //		       stuff.getNodeName() + ": " +
+	    //		       stuff.getNodeValue());
 	    if (stuff.getNodeName().equalsIgnoreCase("mattext")) {
 		String thistext = getText(stuff);
 		if (thistext != null)
@@ -315,9 +307,10 @@ public class QtiImport {
 	    } else if (stuff.getNodeName().equals("#text")) {
 		// apparently the whitespace is reported as #text nodes;
 		// ignore them
-	    } else {
-		log.error("unknown contents in material: {}: {}", stuff.getNodeName(), stuff.getNodeValue());
-            }
+	    } else
+		System.err.println("unknown contents in material: " +
+				   stuff.getNodeName() + ": " +
+				   stuff.getNodeValue());
 	    stuff = stuff.getNextSibling();
 	}
 
@@ -333,7 +326,7 @@ public class QtiImport {
 	try {
 	    element = (Element)n;
 	} catch (Exception e) {
-	    log.error("node is not an element: {}", n.getNodeName());
+	    System.err.println("node is not an element: " + n.getNodeName());
 	    return null;
 	}
 	return element.getAttribute(name);
@@ -349,7 +342,7 @@ public class QtiImport {
 
     // matching question
     boolean procmatch(Node item)throws IOException {
-	log.debug("match");
+	if (debug) System.err.println("match");
 
 	String title = null;
 	List<Pair> pairs = new ArrayList<Pair>();
@@ -358,11 +351,11 @@ public class QtiImport {
 	boolean scoreset = false;
 
 	title = getAttribute(item, "title");
-	log.debug("title: {}", title);
+	if (debug) System.err.println("title: " + title);
 
 	Node presentation = getFirstByName(item, "presentation");
 	if (presentation == null) {
-	    log.debug("can't find <presentation>");
+	    System.err.println("can't find <presentation>");
 	    return false;
 	}
 
@@ -405,7 +398,7 @@ public class QtiImport {
 	    }
 	}
 
-	log.debug("question: {}", question.toString());
+	if (debug) System.err.println("question: " + question.toString());
 
 	// now build the pairs. we depend upon the specific approach
 	// webct uses
@@ -418,7 +411,7 @@ public class QtiImport {
 
 	Node resproc = getFirstByName(item, "resprocessing");
 	if (presentation == null) {
-	    log.debug("can't find <resprocessing> {}", getAttribute(item, "ident"));
+	    System.err.println("can't find <resprocessing> " + getAttribute(item, "ident"));
 	    return false;
 	}
 
@@ -445,7 +438,7 @@ public class QtiImport {
 
 	Node respcondl = getFirstByName(resproc, "respcondition");
 	if (respcondl == null) {
-	    log.debug("can't find <respconditionl>");
+	    System.err.println("can't find <respconditionl>");
 	    return false;
 	}
 	
@@ -477,7 +470,7 @@ public class QtiImport {
 				} catch (Exception ignore) {};
 
 				rightanswers.add(new Pair(null, respident, null, vartext));
-				log.debug("right answer: {}:{}", respident, vartext);
+				if (debug) System.err.println("right answer: " + respident + ":" + vartext);
 			    }
 			}
 		    }
@@ -490,7 +483,7 @@ public class QtiImport {
 	if (respgroup == null) {
 	    respgroup = getFirstByName(presentation, "response_lid");
 	    if (respgroup == null) {
-		log.debug("can't find <response_grp>");
+		System.err.println("can't find <response_grp>");
 		return false;
 	    }
 	}	
@@ -499,7 +492,7 @@ public class QtiImport {
 	while (respgroup != null) {
 	    String lident = getAttribute(respgroup, "ident");
 	    if (lident == null) {
-		log.debug("Response group has no ident");
+		System.err.println("Response group has no ident");
 		return false;
 	    }
 	    
@@ -512,12 +505,12 @@ public class QtiImport {
 
 	    Node choice = getFirstByName(respgroup, "render_choice");
 	    if (choice == null) {
-		log.debug("can't find <render_choice> in response");
+		System.err.println("can't find <render_choice> in response");
 		return false;
 	    }
 	    Node label = getFirstByName(choice, "response_label");
 	    if (label == null) {
-		log.debug("can't find <response_label> in response");
+		System.err.println("can't find <response_label> in response");
 		return false;
 	    }
 	    while (label != null) {
@@ -527,7 +520,7 @@ public class QtiImport {
 		    Iterator rights = rightanswers.iterator();
 		    while (rights.hasNext()) {
 			Pair rightans = (Pair)rights.next();
-			log.debug("allpairs: {}:{}={}:{}", lident, ident, rightans.leftident, rightans.rightident);
+			if (debug) System.err.println("allpairs: " + lident + ":" + ident + "=" + rightans.leftident + ":" + rightans.rightident);
 			if ((rightans.leftident == null || 
 			     rightans.leftident .equals(lident)) &&
 			    rightans.rightident.equals(ident)) {
@@ -535,7 +528,7 @@ public class QtiImport {
 			    Node matr = getFirstByName(label, "material");
 			    String right = getMatText(matr);
 
-			    log.debug("pair {}:{}:{}:{}", left, lident, right, ident);
+			    if (debug) System.err.println("pair " + left + ":" + lident + ":" + right + ":" + ident);
 			    pairs.add(new Pair(left, lident, right, ident));
 			}
 		    }
@@ -554,7 +547,7 @@ public class QtiImport {
 	    Node matf = getFirstByName(feeditem, "material");
 	    feedback = getMatText(matf);
 	}
-	log.debug("feedback {}", feedback);
+	if (debug) System.err.println("feedback " + feedback);
 
 	doHeader();
 	out.print("<item ident=\""+getAttribute(item, "ident")+"\"");
@@ -665,7 +658,7 @@ public class QtiImport {
     }
 
     boolean procpara(Node item) throws IOException{
-	log.debug("para");
+	if (debug) System.err.println("para");
 
 	String title = null;
 	String ident = null;
@@ -676,11 +669,11 @@ public class QtiImport {
 
 	title = getAttribute(item, "title");
 	ident = getAttribute(item, "ident");
-	log.debug("title: {}", title);
+	if (debug) System.err.println("title: " + title);
 
 	Node presentation = getFirstByName(item, "presentation");
 	if (presentation == null) {
-	    log.debug("can't find <presentation>");
+	    System.err.println("can't find <presentation>");
 	    return false;
 	}
 
@@ -688,7 +681,7 @@ public class QtiImport {
 
 	question = getMatText(material);
 
-	log.debug("question: {}", question);
+	if (debug) System.err.println("question: " + question);
 
 	Node feeditem = getFirstByName(item, "itemfeedback");
 	boolean haveanswerfeedback = false;
@@ -740,8 +733,8 @@ public class QtiImport {
 			score = numval;
 	    } catch (Exception ignore) {};
 
-	log.debug("feedback {}", feedback);
-	log.debug("model {}", model);
+	if (debug) System.err.println("feedback " + feedback);
+	if (debug) System.err.println("model " + model);
 
 	doHeader();
 	out.print("<item ident=\""+ident+"\"");
@@ -806,7 +799,7 @@ public class QtiImport {
     }
 
     boolean procshort(Node item) throws IOException{
-	log.debug("short");
+	if (debug) System.err.println("short");
 
 	String title = null;
 	String ident = null;
@@ -831,7 +824,7 @@ public class QtiImport {
 
             Node labelNode = getFirstByName(meta, "fieldlabel");
             if (labelNode== null) {
-                log.debug("No fieldlabel for qtimetadatafield");
+                System.err.println("No fieldlabel for qtimetadatafield");
                 return false;
             }
 
@@ -841,7 +834,7 @@ public class QtiImport {
 
             Node valueNode = getFirstByName(meta, "fieldentry");
             if (valueNode== null) {
-                log.debug("No fieldentry for qtimetadatafield");
+                System.err.println("No fieldentry for qtimetadatafield");
                 return false;
             }
 
@@ -856,11 +849,11 @@ public class QtiImport {
 
 	title = getAttribute(item, "title");
 	ident = getAttribute(item, "ident");
-	log.debug("title: {}", title);
+	if (debug) System.err.println("title: " + title);
 
 	Node presentation = getFirstByName(item, "presentation");
 	if (presentation == null) {
-	    log.debug("can't find <presentation>");
+	    System.err.println("can't find <presentation>");
 	    return false;
 	}
 
@@ -873,7 +866,7 @@ public class QtiImport {
 	//	if (isPattern)
 	//            question = bean.getMessageLocator().getMessage("simplepage.import_cc_pattern") + " " + question;
 
-	log.debug("question: {}", question);
+	if (debug) System.err.println("question: " + question);
 
 	// the full Qti spec has multiple material and response_str, alternating. 
 	// So roses are {} and violets are {} also
@@ -891,7 +884,7 @@ public class QtiImport {
 	while (response != null) {
 	    Node fib = getFirstByName(response, "render_fib");
 	    if (fib == null) {
-		log.debug("No render_fib for response_str");
+		System.err.println("No render_fib for response_str");
 		return false;
 	    }
 	    String qident = getAttribute(response, "ident");
@@ -901,18 +894,18 @@ public class QtiImport {
 		rident = getAttribute(label, "ident");
 
 	    if (qident == null && rident == null) {
-		log.debug("No ident for response_label");
+		System.err.println("No ident for response_label");
 		return false;
 	    }
 
-	    log.debug("blank: {}:{}", qident, rident);
+	    if (debug) System.err.println("blank: " + qident + ":" + rident);
 	    answers.add(new Shortans(qident, rident));
 	    response = getNextByName(response,"response_str");
 	}
 
 	Node resproc = getFirstByName(item, "resprocessing");
 	if (presentation == null) {
-	    log.debug("can't find <resprocessing> {}", getAttribute(item, "ident"));
+	    System.err.println("can't find <resprocessing> " + getAttribute(item, "ident"));
 	    return false;
 	}
 
@@ -933,11 +926,11 @@ public class QtiImport {
 
 	Node respcondl = getFirstByName(resproc, "respcondition");
 	if (respcondl == null) {
-	    log.debug("can't find <respconditionl>");
+	    System.err.println("can't find <respconditionl>");
 	    return false;
 	}
 	
-	log.debug("point 1");
+	if (debug) System.err.println("point 1");
 
 	while (respcondl != null) {
 	    String contin = getAttribute(respcondl, "continue");
@@ -978,7 +971,7 @@ public class QtiImport {
 				else 
 				    ans.answer = ans.answer + "|" + vtext;
 			        
-				log.debug("answer: {}", ans.answer);
+				if (debug) System.err.println("answer: " + ans.answer);
 			    }
 			}
 			if (vcase != null && vcase.equalsIgnoreCase("Yes"))
@@ -1045,7 +1038,7 @@ public class QtiImport {
 	    respcondl = getNextByName(respcondl, "respcondition");
 	}
 
-	log.debug("point 2");
+	if (debug) System.err.println("point 2");
 
 	Node feeditem = getFirstByName(item, "itemfeedback");
 	while (feeditem != null) {
@@ -1066,7 +1059,7 @@ public class QtiImport {
 	    feeditem = getNextByName(feeditem, "itemfeedback");
 	}
 
-	log.debug("feedback {}", cfeedback);
+	if (debug) System.err.println("feedback " + cfeedback);
 
 	doHeader();
 	out.print("<item ident=\""+ident+"\"");
@@ -1202,7 +1195,7 @@ public class QtiImport {
     }
 
     boolean procmc(Node item, boolean truefalse) throws IOException{
-	log.debug("mc");
+	if (debug) System.err.println("mc");
 
 	String title = null;
 	String ident = null;
@@ -1220,11 +1213,11 @@ public class QtiImport {
 
 	title = getAttribute(item, "title");
 	ident = getAttribute(item, "ident");
-	log.debug("title: {}", title);
+	if (debug) System.err.println("title: " + title);
 
 	Node presentation = getFirstByName(item, "presentation");
 	if (presentation == null) {
-	    log.debug("can't find <presentation>");
+	    System.err.println("can't find <presentation>");
 	    return false;
 	}
 
@@ -1232,22 +1225,22 @@ public class QtiImport {
 
 	question = getMatText(material);
 
-	log.debug("question: {}", question);
+	if (debug) System.err.println("question: " + question);
 
 	Node response = getFirstByName(presentation, "response_lid");
 	if (response == null) {
-	    log.debug("No response_lid");
+	    System.err.println("No response_lid");
 	    return false;
 	}
 	String rcardinality = getAttribute(response, "rcardinality");
 	Node choice = getFirstByName(response, "render_choice");
 	if (choice == null) {
-	    log.debug("No render_choice");
+	    System.err.println("No render_choice");
 	    return false;
 	}
 	Node label = getFirstByName(choice, "response_label");
 	if (label == null) {
-	    log.debug("No response_label");
+	    System.err.println("No response_label");
 	    return false;
 	}
 	byte [] newident = {65};
@@ -1257,7 +1250,7 @@ public class QtiImport {
 	    String ltext = getMatText(lmaterial);
 	    
 	    if (lident != null && ltext != null) {
-		log.debug("answer {} {} {}", lident, newident, ltext);
+		if (debug) System.err.println("answer " + lident  + " " + newident + " " + ltext);
 		answers.add(new Mcans(lident, new String(newident), ltext));
 		newident[0]++;
 	    }
@@ -1266,7 +1259,7 @@ public class QtiImport {
 
 	Node resproc = getFirstByName(item, "resprocessing");
 	if (resproc == null) {
-	    log.debug("can't find <resprocessing> {}", getAttribute(item, "ident"));
+	    System.err.println("can't find <resprocessing> " + getAttribute(item, "ident"));
 	    return false;
 	}
 
@@ -1282,7 +1275,7 @@ public class QtiImport {
 		    if (numval > score) {
 			score = numval;
 			scoreset = true;
-			log.debug("set score {}", score);
+			if (debug) System.err.println("set score " + score);
 		    }
 		} catch (Exception ignore) {};
 	    }
@@ -1290,7 +1283,7 @@ public class QtiImport {
 
 	Node respcondl = getFirstByName(resproc, "respcondition");
 	if (respcondl == null) {
-	    log.debug("can't find <respconditionl>");
+	    System.err.println("can't find <respconditionl>");
 	    return false;
 	}
 	
@@ -1348,10 +1341,10 @@ public class QtiImport {
 		    }
 		    if (answer == null) {
 			if (altanswer != null) {
-			    log.debug("id in respcondition not matching question {} but answer matches ", question);
+			    System.err.println("id in respcondition not matching question " + question + " but answer matches ");
 			    answer = altanswer;
 			} else {
-			    log.debug("id in respcondition not matching question {}", question);
+			    System.err.println("id in respcondition not matching question " + question);
 			    break;
 			}
 		    }
@@ -1425,7 +1418,7 @@ public class QtiImport {
 	    feeditem = getNextByName(feeditem, "itemfeedback");
 	}
 
-	log.debug("feedback {}", feedback);
+	if (debug) System.err.println("feedback " + feedback);
 
 	doHeader();
 	out.print("<item ident=\""+ident+"\"");
@@ -1563,13 +1556,13 @@ public class QtiImport {
 
 	Node resproc = getFirstByName(item, "resprocessing");
 	if (resproc == null) {
-	    log.debug("can't find <resprocessing> {}", getAttribute(item, "ident"));
+	    System.err.println("can't find <resprocessing> " + getAttribute(item, "ident"));
 	}
 
 	if (resproc != null) {
 	   Node extension = getFirstByName(resproc, "itemproc_extension");
 	   if (extension != null) {
-	       log.debug("Item is a WebCT extension, can't process");
+	       if (debug) System.err.println("Item is a WebCT extension, can't process");
 	       return false;
   	   }
         }
@@ -1580,7 +1573,7 @@ public class QtiImport {
 
 	if (qticomment == null) {
 	    String type = guessQuestionType(item);
-	    log.debug("main we guess type {}", type);
+	    if (debug) System.err.println("main we guess type " + type);
 
 	    // matching not used in CC, not tested
 	    if (type.equalsIgnoreCase("Matching"))
@@ -1597,14 +1590,14 @@ public class QtiImport {
 	    else if (type.equalsIgnoreCase("True False"))
 		return procmc(item, true);
 	    else {
-	        log.debug("type not matched");
+	        if (debug) System.err.println("type not matched");
 		return false;
 	    }
 	}
 
 	String commenttext = getNodeText(qticomment);
 	if (commenttext == null) {
-	    log.debug("No text in <qticomment>");
+	    System.err.println("No text in <qticomment>");
 	    return false;
 	}
 
@@ -1793,7 +1786,7 @@ public class QtiImport {
 	    for (int sectionno=0; sectionno < numsections; sectionno++) {
 		section = sections.item(sectionno);
 
-		log.debug("section");
+		if (debug) System.err.println("section");
 		
 		NodeList items = ((Element)section).getElementsByTagName("item");
 		int numitems;
@@ -1870,15 +1863,15 @@ public class QtiImport {
 	    Exception  x = sxe;
 	    if (sxe.getException() != null)
 		x = sxe.getException();
-	    log.error(x.getMessage(), x);
+	    x.printStackTrace();
 	    
 	} catch (ParserConfigurationException pce) {
 	    // Parser with specified options can't be built
-	    log.error(pce.getMessage(), pce);
+	    pce.printStackTrace();
 	    
 	} catch (IOException ioe) {
 	    // I/O error
-	    log.error(ioe.getMessage(), ioe);
+	    ioe.printStackTrace();
 	}
 
 	return usesPatternMatch;
@@ -1886,3 +1879,4 @@ public class QtiImport {
     }
 
 }
+

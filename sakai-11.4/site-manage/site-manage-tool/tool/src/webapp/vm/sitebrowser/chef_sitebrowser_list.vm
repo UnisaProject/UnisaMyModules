@@ -126,11 +126,11 @@
                         <td headers="joinable">
                         #if( $site.isJoinable() )
                     	
-                    		## SAK-24423 - if site browser joining is disabled, just use the normal strings
+                    		## bjones86 - SAK-24423 - if site browser joining is disabled, just use the normal strings
                     		#if( !$siteBrowserJoinEnabled )
                     			$tlang.getString( "list.joinable" )
                     			
-                    		## SAK-24423 - otherwise, provide the ability to join from the site browser
+                    		## bjones86 - SAK-24423 - otherwise, provide the ability to join from the site browser
                         #else
 	                    		#if( !$currentUser.Id || $currentUser.Id == "" )
 	                    			<a href="#toolLinkParam( "$action" "doJoin" "id=$validator.escapeUrl( $site.Id )" )" 

@@ -23,7 +23,8 @@
 
 package org.radeox.macro.table;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A function that calculates the average table cells
@@ -32,9 +33,9 @@ import lombok.extern.slf4j.Slf4j;
  * @version $Id$
  */
 
-@Slf4j
 public class AvgFunction implements Function
 {
+	private static Logger log = LoggerFactory.getLogger(AvgFunction.class);
 
 	public String getName()
 	{

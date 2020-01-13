@@ -19,37 +19,39 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.ui.bean.author;
 
+//import org.navigoproject.osid.assessment.AssessmentServiceDelegate;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
-import org.sakaiproject.component.cover.ServerConfigurationService;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.sakaiproject.samigo.util.SamigoConstants;
 import org.sakaiproject.tool.assessment.api.SamigoApiFactory;
 import org.sakaiproject.tool.assessment.business.entity.RecordingData;
 import org.sakaiproject.tool.assessment.shared.api.assessment.SecureDeliveryServiceAPI;
 import org.sakaiproject.tool.assessment.ui.bean.authz.AuthorizationBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
+import org.sakaiproject.component.cover.ServerConfigurationService;
 
 /**
  * <p>  JSF backing bean for Template pages
  * </p>
  *
  */
-@Slf4j
- public class TemplateBean implements Serializable
+public class TemplateBean implements Serializable
 {
   private static final long serialVersionUID = 7526471155622776147L;
-  private Map values = new HashMap();
+  private HashMap values = new HashMap();
   private String newName;
-  private String templateName;  
+  private String templateName;
+  private String templateAuthor;
   private String templateDescription;
   private String itemAccessType = "2";
   private String displayChunking = "1";
@@ -74,7 +76,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
   private Boolean feedbackComponent_SelectionLevel = Boolean.FALSE;
   private Boolean feedbackComponent_GraderComments = Boolean.TRUE;
   private Boolean feedbackComponent_Statistics = Boolean.TRUE;
-  private Map feedbackTypes = new HashMap();
+  private HashMap feedbackTypes = new HashMap();
   private String anonymousGrading = "1";
   private String toGradebook = "1";
   private String recordedScore = "1";
@@ -149,7 +151,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
    *
    * @param newMap
    */
-  public void setValueMap(Map newMap)
+  public void setValueMap(HashMap newMap)
   {
     values = newMap;
   }
@@ -159,7 +161,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
    *
    * @return
    */
-  public Map getValueMap()
+  public HashMap getValueMap()
   {
     return values;
   }
@@ -231,7 +233,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
    *
    * @return
    */
-  public Map getFeedbackTypeMap()
+  public HashMap getFeedbackTypeMap()
   {
     return feedbackTypes;
   }
@@ -295,6 +297,26 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
   public String getTemplateName()
   {
     return checker(templateName, "");
+  }
+
+  /**
+   * suthor
+   *
+   * @param newAuthor aquthor
+   */
+  public void setTemplateAuthor(String newAuthor)
+  {
+    templateAuthor = newAuthor;
+  }
+
+  /**
+   * author
+   *
+   * @return author
+   */
+  public String getTemplateAuthor()
+  {
+    return checker(templateAuthor, "");
   }
 
   /**
@@ -925,7 +947,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
          modifiedDate=dateFm.parse(getLastModified());
 	}
 	catch(ParseException e){
-	    log.error(e.getMessage(), e);
+	    e.printStackTrace();
        }
     return modifiedDate;
 

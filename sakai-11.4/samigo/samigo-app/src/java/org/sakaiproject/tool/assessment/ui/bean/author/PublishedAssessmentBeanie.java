@@ -19,6 +19,7 @@
  *
  **********************************************************************************/
 
+
 package org.sakaiproject.tool.assessment.ui.bean.author;
 
 import java.io.Serializable;
@@ -33,16 +34,17 @@ import org.sakaiproject.tool.assessment.facade.PublishedAssessmentFacade;
 import org.sakaiproject.tool.assessment.services.shared.TypeService;
 import org.sakaiproject.tool.assessment.ui.bean.delivery.ItemContentsBean;
 import org.sakaiproject.tool.assessment.ui.bean.delivery.SectionContentsBean;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>Description: Backing bean for Published Assessment</p>
  *
  *
  */
-@Slf4j
 public class PublishedAssessmentBeanie
     implements Serializable {
+    private static Logger log = LoggerFactory.getLogger(PublishedAssessmentBeanie.class);
 
   /** Use serialVersionUID for interoperability. */
   private final static long serialVersionUID = -630950053380808339L;
@@ -50,8 +52,8 @@ public class PublishedAssessmentBeanie
   private String assessmentId;
   private String title;
   // ArrayList of SectionContentsBean
-  private List<SectionContentsBean> sections = new ArrayList<>();
-  private List partNumbers = new ArrayList();
+  private ArrayList sections = new ArrayList();
+  private ArrayList partNumbers = new ArrayList();
   private int questionSize=0;
   private double totalScore=0;
   private String newQuestionTypeId;
@@ -74,7 +76,7 @@ public class PublishedAssessmentBeanie
 
       // work out the question side & total point
       this.sections = new ArrayList();
-      List sectionArray = assessment.getSectionArraySorted();
+      ArrayList sectionArray = assessment.getSectionArraySorted();
       for (int i=0; i<sectionArray.size(); i++){
         SectionDataIfc section = (SectionDataIfc)sectionArray.get(i);
         SectionContentsBean sectionBean = new SectionContentsBean(section);
@@ -105,15 +107,15 @@ public class PublishedAssessmentBeanie
     this.title = title;
   }
 
-  public List getSections() {
+  public ArrayList getSections() {
     return sections;
   }
 
-  public void setSections(List sections) {
+  public void setSections(ArrayList sections) {
     this.sections = sections;
   }
 
-  public List getPartNumbers() {
+  public ArrayList getPartNumbers() {
     return partNumbers;
   }
 
@@ -131,10 +133,12 @@ public class PublishedAssessmentBeanie
   public void setQuestionSizeAndTotalScore() {
    this.questionSize = 0;
    this.totalScore = 0;
-   for(SectionContentsBean sectionBean : sections) {
-      List<ItemContentsBean> items = sectionBean.getItemContents();
+   for(int i=0;i<this.sections.size();i++){
+      SectionContentsBean sectionBean = (SectionContentsBean) sections.get(i);
+      ArrayList items = sectionBean.getItemContents();
       this.questionSize += items.size();
-      for (ItemContentsBean item : items) {
+      for (int j=0; j<items.size();j++){
+        ItemContentsBean item = (ItemContentsBean)items.get(j);
         if (item.getItemData().getScore()!=null){
           this.totalScore += item.getItemData().getScore().doubleValue();
         }

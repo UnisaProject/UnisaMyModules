@@ -1,14 +1,16 @@
 package org.sakaiproject.sms.tool.beans;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.sms.logic.smpp.SmsBilling;
 
-import lombok.extern.slf4j.Slf4j;
 import uk.org.ponder.messageutil.TargettedMessage;
 import uk.org.ponder.messageutil.TargettedMessageList;
 
-@Slf4j
 public class CreditAccountActionBean {
 
+	private static final Log LOG = LogFactory
+			.getLog(CreditAccountActionBean.class);
 
 	private CreditAccountBean creditAccountBean;
 	private SmsBilling smsBilling;
@@ -32,7 +34,7 @@ public class CreditAccountActionBean {
 					Double.valueOf(creditAccountBean.getCreditsToCredit()), creditAccountBean.getDescription());
 		} catch (Exception e) {
 
-			log.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 
 			messages.addMessage(new TargettedMessage("GeneralActionError",
 					null, TargettedMessage.SEVERITY_INFO));

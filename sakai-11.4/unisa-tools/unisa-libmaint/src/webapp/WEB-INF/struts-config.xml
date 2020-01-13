@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	<form-bean name="maintenanceForm" type="za.ac.unisa.lms.tools.libmaint.forms.MaintenanceForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.libmaint.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/maintenance.do?act=mainDisplay"
+				contextRelative="true" />
+		</action>
+		<action
+		attribute="maintenanceForm"
+		input="/WEB-INF/jsp/maindisplay.jsp"
+		name="maintenanceForm"
+		parameter="act"
+		path="/maintenance"
+		scope="session"
+		type="za.ac.unisa.lms.tools.libmaint.actions.MaintenanceAction"
+		validate="false">
+        
+		<forward name="mainDisplay" path="/WEB-INF/jsp/maindisplay.jsp" contextRelative="true"/>
+		<forward name="txtDisplay" path="/WEB-INF/jsp/txtdisplay.jsp" contextRelative="true"/>
+		<forward name="txtAdd" path="/WEB-INF/jsp/txtadd.jsp" contextRelative="true"/>
+		<forward name="txtRemove" path="/WEB-INF/jsp/txtremove.jsp" contextRelative="true"/>
+		<forward name="placementDisplay" path="/WEB-INF/jsp/placementdisplay.jsp" contextRelative="true"/>
+		<forward name="placementAdd" path="/WEB-INF/jsp/placementadd.jsp" contextRelative="true"/>
+		<forward name="placementRanking" path="/WEB-INF/jsp/placementranking.jsp" contextRelative="true"/>
+		<forward name="placementRemove" path="/WEB-INF/jsp/placementremove.jsp" contextRelative="true"/>
+		<forward name="vendorDisplay" path="/WEB-INF/jsp/vendordisplay.jsp" contextRelative="true"/>
+		<forward name="vendorAdd" path="/WEB-INF/jsp/vendoradd.jsp" contextRelative="true"/>
+		<forward name="vendorRemove" path="/WEB-INF/jsp/vendorremove.jsp" contextRelative="true"/>
+		<forward name="subjectDisplay" path="/WEB-INF/jsp/subjectdisplay.jsp" contextRelative="true"/>
+		<forward name="subjectAdd" path="/WEB-INF/jsp/subjectadd.jsp" contextRelative="true"/>
+		<forward name="subjectRemove" path="/WEB-INF/jsp/subjectremove.jsp" contextRelative="true"/>
+		<forward name="highlightDisplay" path="/WEB-INF/jsp/highlightdisplay.jsp" contextRelative="true"/>
+		<forward name="highlightAdd" path="/WEB-INF/jsp/highlightadd.jsp" contextRelative="true"/>
+		<forward name="highlightRemove" path="/WEB-INF/jsp/highlightremove.jsp" contextRelative="true"/>
+		<forward name="resourceDisplay" path="/WEB-INF/jsp/resourcedisplay.jsp" contextRelative="true"/>
+		<forward name="resourceAdd" path="/WEB-INF/jsp/resourceadd.jsp" contextRelative="true"/>
+		<forward name="resourceView" path="/WEB-INF/jsp/resourceview.jsp" contextRelative="true"/>
+		<forward name="resourceConfirm" path="/WEB-INF/jsp/resourceconfirm.jsp" contextRelative="true"/>
+		<forward name="resourceRemove" path="/WEB-INF/jsp/resourceremove.jsp" contextRelative="true"/>
+		<forward name="resourceLinkPlacements" path="/WEB-INF/jsp/resourcelinkplacements.jsp" contextRelative="true"/>
+		<forward name="resourceLinkSubjects" path="/WEB-INF/jsp/resourcelinksubjects.jsp" contextRelative="true"/>
+		<forward name="newsTitleDisplay" path="/WEB-INF/jsp/newstitledisplay.jsp" contextRelative="true"/>
+		<forward name="newsTitleAdd" path="/WEB-INF/jsp/newstitleadd.jsp" contextRelative="true"/>
+		<forward name="newsTitleRemove" path="/WEB-INF/jsp/newstitleremove.jsp" contextRelative="true"/>
+		
+
+		</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.libmaint.ApplicationResources" />
+
+</struts-config>

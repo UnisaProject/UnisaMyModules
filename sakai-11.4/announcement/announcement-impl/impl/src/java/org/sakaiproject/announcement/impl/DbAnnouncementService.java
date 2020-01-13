@@ -27,11 +27,8 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.Stack;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.authz.api.GroupNotDefinedException;
 import org.sakaiproject.authz.api.Role;
@@ -49,6 +46,8 @@ import org.sakaiproject.util.DoubleStorageUser;
 import org.sakaiproject.util.Xml;
 import org.sakaiproject.javax.Filter;
 import org.sakaiproject.javax.PagingPosition;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * <p>
@@ -58,9 +57,11 @@ import org.sakaiproject.javax.PagingPosition;
  * The sql scripts in src/sql/chef_announcement.sql must be run on the database.
  * </p>
  */
-@Slf4j
 public class DbAnnouncementService extends BaseAnnouncementService
 {
+	/** Our logger. */
+	private static Logger M_log = LoggerFactory.getLogger(DbAnnouncementService.class);
+
 	/** The name of the db table holding announcement channels. */
 	protected String m_cTableName = "ANNOUNCEMENT_CHANNEL";
 
@@ -184,7 +185,7 @@ public class DbAnnouncementService extends BaseAnnouncementService
 
 			super.init();
 
-			log.info("init(): tables: {} {} locks-in-db: {}", m_cTableName, m_rTableName, m_locksInDb);
+			M_log.info("init(): tables: " + m_cTableName + " " + m_rTableName + " locks-in-db: " + m_locksInDb);
 
 			// convert draft?
 			if (m_convertToDraft)
@@ -203,7 +204,7 @@ public class DbAnnouncementService extends BaseAnnouncementService
 		}
 		catch (Throwable t)
 		{
-			log.warn("init(): ", t);
+			M_log.warn("init(): ", t);
 		}
 	}
 
@@ -357,7 +358,7 @@ public class DbAnnouncementService extends BaseAnnouncementService
 	 */
 	protected void convertToDraft()
 	{
-		log.info("convertToDraft");
+		M_log.info("convertToDraft");
 
 		try
 		{
@@ -388,7 +389,7 @@ public class DbAnnouncementService extends BaseAnnouncementService
 						Element root = doc.getDocumentElement();
 						if (!root.getTagName().equals("message"))
 						{
-							log.warn("convertToDraft(): XML root element not message: {}", root.getTagName());
+							M_log.warn("convertToDraft(): XML root element not message: " + root.getTagName());
 							return null;
 						}
 						Message m = new BaseMessageEdit(null, root);
@@ -408,12 +409,13 @@ public class DbAnnouncementService extends BaseAnnouncementService
 						boolean ok = m_sqlService.dbWrite(connection, update, fields);
 
 						if (!ok)
-							log.info("convertToDraft: channel: {} message: {} owner: {} draft: {} ok: {}", channelId, messageId, owner, draft, ok);
+							M_log.info("convertToDraft: channel: " + channelId + " message: " + messageId + " owner: " + owner
+									+ " draft: " + draft + " ok: " + ok);
 
 						count++;
 						if (count % 100 == 0)
 						{
-							log.info("convertToDraft: {}", count);
+							M_log.info("convertToDraft: " + count);
 						}
 						return null;
 					}
@@ -430,10 +432,10 @@ public class DbAnnouncementService extends BaseAnnouncementService
 		}
 		catch (Throwable t)
 		{
-			log.warn("convertToDraft: failed: " + t);
+			M_log.warn("convertToDraft: failed: " + t);
 		}
 
-		log.info("convertToDraft: done");
+		M_log.info("convertToDraft: done");
 	}
 
 	/**
@@ -441,7 +443,7 @@ public class DbAnnouncementService extends BaseAnnouncementService
 	 */
 	protected void convertToPubView()
 	{
-		log.info("convertToPubView");
+		M_log.info("convertToPubView");
 
 		try
 		{
@@ -471,7 +473,7 @@ public class DbAnnouncementService extends BaseAnnouncementService
 						Element root = doc.getDocumentElement();
 						if (!root.getTagName().equals("message"))
 						{
-							log.warn("convertToPubView(): XML root element not message: {}", root.getTagName());
+							M_log.warn("convertToPubView(): XML root element not message: " + root.getTagName());
 							return null;
 						}
 						BaseMessageEdit m = new BaseMessageEdit(null, root);
@@ -516,7 +518,8 @@ public class DbAnnouncementService extends BaseAnnouncementService
 							boolean ok = m_sqlService.dbWrite(connection, update, fields);
 
 							if (!ok)
-								log.info("convertToPubView: channel: {} message: {} pubview: {} ok: {}", channelId, messageId, pubview, ok);
+								M_log.info("convertToPubView: channel: " + channelId + " message: " + messageId + " pubview: "
+										+ pubview + " ok: " + ok);
 						}
 
 						// update those that have pubview
@@ -540,7 +543,8 @@ public class DbAnnouncementService extends BaseAnnouncementService
 							boolean ok = m_sqlService.dbWrite(connection, update, fields);
 
 							if (!ok)
-								log.info("convertToPubView: channel: {} message: {} pubview: {} ok: {}", channelId, messageId, pubview, ok);
+								M_log.info("convertToPubView: channel: " + channelId + " message: " + messageId + " pubview: "
+										+ pubview + " ok: " + ok);
 						}
 
 						return null;
@@ -558,10 +562,10 @@ public class DbAnnouncementService extends BaseAnnouncementService
 		}
 		catch (Throwable t)
 		{
-			log.warn("convertToPubView: failed: " + t);
+			M_log.warn("convertToPubView: failed: " + t);
 		}
 
-		log.info("convertToPubView: done");
+		M_log.info("convertToPubView: done");
 	}
 
 	/**

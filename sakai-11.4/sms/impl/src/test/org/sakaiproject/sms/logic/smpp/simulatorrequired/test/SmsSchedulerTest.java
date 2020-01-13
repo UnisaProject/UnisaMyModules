@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Level;
+import static org.junit.Assert.*;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 import org.sakaiproject.sms.logic.external.ExternalLogic;
 import org.sakaiproject.sms.logic.impl.hibernate.SmsConfigLogicImpl;
@@ -109,11 +109,11 @@ public class SmsSchedulerTest extends AbstractBaseTestCase {
 		try {
 			smsCoreImpl.insertTask(smsTask3);
 		} catch (SmsTaskValidationException e1) {
-			Assert.fail(e1.getMessage());
+			fail(e1.getMessage());
 		} catch (SmsSendDeniedException e) {
-			Assert.fail("SmsSendDeniedException caught");
+			fail("SmsSendDeniedException caught");
 		} catch (SmsSendDisabledException sd) {
-			Assert.fail("SmsSendDisabledException caught");
+			fail("SmsSendDisabledException caught");
 		}
 
 		now.add(Calendar.MINUTE, -1);
@@ -125,11 +125,11 @@ public class SmsSchedulerTest extends AbstractBaseTestCase {
 		try {
 			smsCoreImpl.insertTask(smsTask2);
 		} catch (SmsTaskValidationException e1) {
-			Assert.fail(e1.getMessage());
+			fail(e1.getMessage());
 		} catch (SmsSendDeniedException e) {
-			Assert.fail("SmsSendDeniedException caught");
+			fail("SmsSendDeniedException caught");
 		} catch (SmsSendDisabledException sd) {
-			Assert.fail("SmsSendDisabledException caught");
+			fail("SmsSendDisabledException caught");
 		}
 
 		now.add(Calendar.MINUTE, -3);
@@ -141,11 +141,11 @@ public class SmsSchedulerTest extends AbstractBaseTestCase {
 		try {
 			smsCoreImpl.insertTask(smsTask1);
 		} catch (SmsTaskValidationException e1) {
-			Assert.fail(e1.getMessage());
+			fail(e1.getMessage());
 		} catch (SmsSendDeniedException e) {
-			Assert.fail("SmsSendDeniedException caught");
+			fail("SmsSendDeniedException caught");
 		} catch (SmsSendDisabledException sd) {
-			Assert.fail("SmsSendDisabledException caught");
+			fail("SmsSendDisabledException caught");
 		}
 
 		try {
@@ -154,7 +154,7 @@ public class SmsSchedulerTest extends AbstractBaseTestCase {
 
 			e.printStackTrace();
 		}
-		Assert.assertTrue(smsCoreImpl.getNextSmsTask() == null);
+		assertTrue(smsCoreImpl.getNextSmsTask() == null);
 	}
 
 	@After

@@ -19,6 +19,8 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.ui.listener.author;
 
 import javax.faces.context.FacesContext;
@@ -41,6 +43,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 public class PreviewPublishedAssessmentListener
     implements ActionListener
 {
+  //private static Logger log = LoggerFactory.getLogger(PreviewPublishedAssessmentListener.class);
 
   public PreviewPublishedAssessmentListener()
   {
@@ -57,6 +60,8 @@ public class PreviewPublishedAssessmentListener
     PublishedAssessmentService assessmentService = new PublishedAssessmentService();
     PublishedAssessmentFacade publishedAssessment = assessmentService.getPublishedAssessment(
         publishedAssessmentId);
+    //log.info("** assessment = "+publishedAssessment);
+    //log.info("** assessment Bean= "+assessmentBean);
     assessmentBean.setAssessment(publishedAssessment);
 
   }

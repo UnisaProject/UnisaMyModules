@@ -23,7 +23,7 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -94,38 +94,38 @@ public class IncomingLogicManagerTest{
 
     @Test
 	public void testRegisterLogic() {
-    	Assert.assertTrue(manager.isValidCommand("CREATE"));
-    	Assert.assertTrue(manager.isValidCommand("UPDATE"));
-    	Assert.assertTrue(manager.isValidCommand("DELETE"));
-    	Assert.assertTrue(manager.isValidCommand(LOWERCASE_STRING));
-    	Assert.assertFalse(manager.isValidCommand("SOMETHING"));
+		assertTrue(manager.isValidCommand("CREATE"));
+		assertTrue(manager.isValidCommand("UPDATE"));
+		assertTrue(manager.isValidCommand("DELETE"));
+		assertTrue(manager.isValidCommand(LOWERCASE_STRING));
+		assertFalse(manager.isValidCommand("SOMETHING"));
 	}
 
     @Test
 	public void testCaseInsensitivity() {
-    	Assert.assertTrue(manager.isValidCommand("cReAtE"));
-    	Assert.assertTrue(manager.isValidCommand("update"));
-    	Assert.assertTrue(manager.isValidCommand("delETE"));
-    	Assert.assertTrue(manager.isValidCommand(LOWERCASE_STRING.toUpperCase()));
-    	Assert.assertTrue(manager.isValidCommand("LowerCaseString"));
-    	Assert.assertFalse(manager.isValidCommand("something"));
+		assertTrue(manager.isValidCommand("cReAtE"));
+		assertTrue(manager.isValidCommand("update"));
+		assertTrue(manager.isValidCommand("delETE"));
+		assertTrue(manager.isValidCommand(LOWERCASE_STRING.toUpperCase()));
+		assertTrue(manager.isValidCommand("LowerCaseString"));
+		assertFalse(manager.isValidCommand("something"));
 		
 	}
 
     @Test
 	public void testDuplicateNotReplace() {
 		ParsedMessage msg = manager.process("create test body", TEST_MOBILE);
-		Assert.assertTrue(manager.isValidCommand("CREATE"));
-		Assert.assertEquals("CREATE", msg.getCommand());
+		assertTrue(manager.isValidCommand("CREATE"));
+		assertEquals("CREATE", msg.getCommand());
 		try {
 			manager.register("test", new CreateSmsCommandCopy());
-			Assert.fail("Should throw exception");
+			fail("Should throw exception");
 		} catch (DuplicateCommandKeyException de) {
-			Assert.assertNotNull(de);
+			assertNotNull(de);
 		}
 
-		Assert.assertTrue(manager.isValidCommand("CREATE"));
-		Assert.assertEquals("CREATE", manager.process("create " + TEST_SITE + " body",
+		assertTrue(manager.isValidCommand("CREATE"));
+		assertEquals("CREATE", manager.process("create " + TEST_SITE + " body",
 				TEST_MOBILE).getBodyReply());
 	}
 
@@ -158,7 +158,7 @@ public class IncomingLogicManagerTest{
     @Test
 	public void testProcess() {
 		ParsedMessage msg = manager.process("updat test", TEST_MOBILE);
-		Assert.assertEquals("UPDATE", msg.getCommand());
+		assertEquals("UPDATE", msg.getCommand());
 
 	}
 
@@ -176,13 +176,13 @@ public class IncomingLogicManagerTest{
 			// System.out.println("Looking for " + command + " #"
 			//  + commandSplit[1] + " " + result + " (found "
 			//  + smsPatternSearchResult.getPossibleMatches().size() + ")");
-			Assert.assertTrue(result);
+			assertTrue(result);
 		}
 	}
 	/* not sure how we can test with resourceloader
     @Test
 	public void testHelpCommand() {
-		Assert.assertTrue(manager.isValidCommand("help"));
+		assertTrue(manager.isValidCommand("help"));
 		ParsedMessage msg = manager.process("help", TEST_MOBILE);
 		assertEquals("Valid commands: CREATE, UPDATE, DELETE, MULTIPLE", msg
 				.getBodyReply());
@@ -204,13 +204,13 @@ public class IncomingLogicManagerTest{
 
     @Test
 	public void testClearCommands() {
-		Assert.assertTrue(manager.isValidCommand("CREATE"));
-		Assert.assertTrue(manager.isValidCommand("UPDATE"));
-		Assert.assertTrue(manager.isValidCommand("DELETE"));
+		assertTrue(manager.isValidCommand("CREATE"));
+		assertTrue(manager.isValidCommand("UPDATE"));
+		assertTrue(manager.isValidCommand("DELETE"));
 		manager.clearCommands("test");
-		Assert.assertFalse(manager.isValidCommand("CREATE"));
-		Assert.assertFalse(manager.isValidCommand("UPDATE"));
-		Assert.assertFalse(manager.isValidCommand("DELETE"));
+		assertFalse(manager.isValidCommand("CREATE"));
+		assertFalse(manager.isValidCommand("UPDATE"));
+		assertFalse(manager.isValidCommand("DELETE"));
 	}
 
     @Test
@@ -218,26 +218,26 @@ public class IncomingLogicManagerTest{
 		ParsedMessage msg = manager.process("CREATE " + TEST_SITE, TEST_MOBILE);
 		System.out.println("expected help: " + createCmd.getHelpMessage(ShortMessageCommand.MESSAGE_TYPE_SMS));
 		System.out.println("actual reply: " + msg.getBodyReply());
-		Assert.assertEquals(createCmd.getHelpMessage(ShortMessageCommand.MESSAGE_TYPE_SMS), msg.getBodyReply());
+		assertEquals(createCmd.getHelpMessage(ShortMessageCommand.MESSAGE_TYPE_SMS), msg.getBodyReply());
 
 		msg = manager.process("UPDATE", TEST_MOBILE);
-		Assert.assertEquals(updateCmd.getHelpMessage(ShortMessageCommand.MESSAGE_TYPE_SMS), msg.getBodyReply());
+		assertEquals(updateCmd.getHelpMessage(ShortMessageCommand.MESSAGE_TYPE_SMS), msg.getBodyReply());
 	}
 
     @Test
 	public void testMultipleBody() {
 		ParsedMessage msg = manager.process("MULTIPLE " + TEST_SITE
 				+ " PARAM1 PARAM2", TEST_MOBILE);
-		Assert.assertEquals("MULTIPLE", msg.getBodyReply());
-		Assert.assertEquals("PARAM1", multipleCmd.param1);
-		Assert.assertEquals("PARAM2", multipleCmd.param2);
+		assertEquals("MULTIPLE", msg.getBodyReply());
+		assertEquals("PARAM1", multipleCmd.param1);
+		assertEquals("PARAM2", multipleCmd.param2);
 	}
 
     @Test
 	public void testMultipleBodyInvalid() {
 		ParsedMessage msg = manager.process(
 				"MULTIPLE " + TEST_SITE + " PARAM1", TEST_MOBILE);
-		Assert.assertEquals("MULTIPLE HELP", msg.getBodyReply());
+		assertEquals("MULTIPLE HELP", msg.getBodyReply());
 	}
 
 	/**
@@ -259,7 +259,7 @@ public class IncomingLogicManagerTest{
 	public void testHiddenSmsCommandNullBodyNoMessage() {
 		manager.register("TEST", hiddenCmd);
 		ParsedMessage msg = manager.process("hidden " + TEST_SITE, TEST_MOBILE);
-		Assert.assertEquals(null, msg.getBodyReply());
+		assertEquals(null, msg.getBodyReply());
 	}
 
 	/**
@@ -270,7 +270,7 @@ public class IncomingLogicManagerTest{
 		manager.register("TEST", hiddenCmd);
 		ParsedMessage msg = manager.process("hidden " + TEST_SITE + " param1",
 				TEST_MOBILE);
-		Assert.assertEquals(null, msg.getBodyReply());
+		assertEquals(null, msg.getBodyReply());
 	}
 
 	/**
@@ -281,7 +281,7 @@ public class IncomingLogicManagerTest{
 		manager.register("TEST", hiddenCmd);
 		ParsedMessage msg = manager.process("hidden " + TEST_SITE
 				+ " param1 param2", TEST_MOBILE);
-		Assert.assertEquals("HIDDEN", msg.getCommand());
+		assertEquals("HIDDEN", msg.getCommand());
 	}
 
 	/**
@@ -290,7 +290,7 @@ public class IncomingLogicManagerTest{
     @Test
 	public void testBlankMessage() {
 		ParsedMessage msg = manager.process("", TEST_MOBILE);
-		Assert.assertEquals(null, msg.getCommand());
+		assertEquals(null, msg.getCommand());
 	}
 
 	/**
@@ -299,7 +299,7 @@ public class IncomingLogicManagerTest{
     @Test
 	public void testNullMessage() {
 		ParsedMessage msg = manager.process(null, TEST_MOBILE);
-		Assert.assertEquals(null, msg.getCommand());
+		assertEquals(null, msg.getCommand());
 	}
 
 	/**
@@ -309,7 +309,7 @@ public class IncomingLogicManagerTest{
 	public void testInvalidMessage() {
 		ParsedMessage msg = manager.process("ssdfsdfsdfsdfsdfsdfsdfSDF",
 				TEST_MOBILE);
-		Assert.assertEquals(null, msg.getCommand());
+		assertEquals(null, msg.getCommand());
 	}
 
 }

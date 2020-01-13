@@ -25,42 +25,29 @@ import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
 import java.util.Vector;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.user.api.DisplayAdvisorUDP;
-import org.sakaiproject.user.api.ExternalUserSearchUDP;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryProvider;
 import org.sakaiproject.user.api.UserEdit;
 import org.sakaiproject.user.api.UserFactory;
 import org.sakaiproject.user.api.UsersShareEmailUDP;
-import org.sakaiproject.user.detail.ValueEncryptionUtilities;
 
 /**
  * <p>
  * SampleUserDirectoryProvider is a samaple UserDirectoryProvider.
  * </p>
  */
-@Slf4j
-public class SampleUserDirectoryProvider implements UserDirectoryProvider, UsersShareEmailUDP, DisplayAdvisorUDP, ExternalUserSearchUDP
+public class SampleUserDirectoryProvider implements UserDirectoryProvider, UsersShareEmailUDP, DisplayAdvisorUDP
 {
-	private static final String USER_PROP_CANDIDATE_ID = "candidateID";
-	private static final String USER_PROP_ADDITIONAL_INFO = "additionalInfo";
-	
-	private final static String SITE_PROP_USE_INSTITUTIONAL_ANONYMOUS_ID = "useInstitutionalAnonymousID";
-	private final static String SITE_PROP_DISPLAY_ADDITIONAL_INFORMATION = "displayAdditionalInformation";
-	
-	private final static String SYSTEM_PROP_USE_INSTITUTIONAL_ANONYMOUS_ID = "useInstitutionalAnonymousID";
-	private final static String SYSTEM_PROP_DISPLAY_ADDITIONAL_INFORMATION = "displayAdditionalInformation";
-	
 	// Use the standard example domain name for examples.
 	public static final String EMAIL_DOMAIN = "@example.edu";
+
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(SampleUserDirectoryProvider.class);
 
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Dependencies and their setter methods
@@ -78,12 +65,6 @@ public class SampleUserDirectoryProvider implements UserDirectoryProvider, Users
 	public void setCourseStudents(String count)
 	{
 		m_courseStudents = Integer.parseInt(count);
-	}
-
-	protected ValueEncryptionUtilities encryptionUtilities;
-
-	public void setValueEncryptionUtilities(ValueEncryptionUtilities encryptionUtilities) {
-		this.encryptionUtilities = encryptionUtilities;
 	}
 
 	/***************************************************************************
@@ -156,11 +137,11 @@ public class SampleUserDirectoryProvider implements UserDirectoryProvider, Users
 			m_info.put("student", new Info("student", "The", "Student", "student" + EMAIL_DOMAIN));
 			m_info.put("faculty", new Info("faculty", "The", "Faculty", "faculty" + EMAIL_DOMAIN));
 
-			log.info("init()");
+			M_log.info("init()");
 		}
 		catch (Throwable t)
 		{
-			log.warn("Problem creating SampleUserDirectoryProvider", t);
+			M_log.warn(".init(): ", t);
 		}
 	}
 	
@@ -170,7 +151,7 @@ public class SampleUserDirectoryProvider implements UserDirectoryProvider, Users
 	public void destroy()
 	{
 
-		log.info("destroy()");
+		M_log.info("destroy()");
 
 	} // destroy
 
@@ -204,12 +185,6 @@ public class SampleUserDirectoryProvider implements UserDirectoryProvider, Users
 			this.firstName = firstName;
 			this.lastName = lastName;
 			this.email = email;
-		}
-
-		boolean contains(CharSequence sequence)
-		{
-			return id.contains(sequence) || firstName.contains(sequence) || lastName.contains(sequence)
-				|| email.contains(sequence);
 		}
 
 	} // class info
@@ -261,41 +236,6 @@ public class SampleUserDirectoryProvider implements UserDirectoryProvider, Users
 		}
 		else
 		{
-			if(edit.getEid().equals("student0001")){
-				edit.getProperties().addProperty(USER_PROP_CANDIDATE_ID, encryptionUtilities.encrypt("user1encrypted", 0));
-				edit.getProperties().addPropertyToList(USER_PROP_ADDITIONAL_INFO, encryptionUtilities.encrypt("Additional notes encrypted", 0));
-			}
-			if(edit.getEid().equals("student0002")){
-				edit.getProperties().addProperty(USER_PROP_CANDIDATE_ID, encryptionUtilities.encrypt("2notes", 20));
-				edit.getProperties().addPropertyToList(USER_PROP_ADDITIONAL_INFO, encryptionUtilities.encrypt("Additional notes encrypted student0002", 60));
-				edit.getProperties().addPropertyToList(USER_PROP_ADDITIONAL_INFO, encryptionUtilities.encrypt("Additional notes encrypted again", 60));
-			}
-			if(edit.getEid().equals("student0003")){
-				edit.getProperties().addPropertyToList(USER_PROP_CANDIDATE_ID, encryptionUtilities.encrypt("id1of2", 0));
-				edit.getProperties().addPropertyToList(USER_PROP_CANDIDATE_ID, encryptionUtilities.encrypt("id2of2", 0));
-				edit.getProperties().addPropertyToList(USER_PROP_ADDITIONAL_INFO, encryptionUtilities.encrypt("Additional notes encrypted again2", 0));
-			}
-			if(edit.getEid().equals("student0004")){
-				edit.getProperties().addProperty(USER_PROP_CANDIDATE_ID, encryptionUtilities.encrypt("", 0));
-				edit.getProperties().addPropertyToList(USER_PROP_ADDITIONAL_INFO, encryptionUtilities.encrypt("", 0));
-			}
-			if(edit.getEid().equals("student0005")){
-				edit.getProperties().addProperty(USER_PROP_CANDIDATE_ID, encryptionUtilities.encrypt("", 0));
-				edit.getProperties().addPropertyToList(USER_PROP_ADDITIONAL_INFO, encryptionUtilities.encrypt("", 0));
-			}
-			if(edit.getEid().equals("student0006")){
-				edit.getProperties().addProperty(USER_PROP_CANDIDATE_ID, encryptionUtilities.encrypt(" ", 0));
-				edit.getProperties().addPropertyToList(USER_PROP_ADDITIONAL_INFO, encryptionUtilities.encrypt(" ", 0));
-			}
-			if(edit.getEid().equals("student0007")){
-				edit.getProperties().addProperty(USER_PROP_CANDIDATE_ID, encryptionUtilities.encrypt("student0007", 0));
-				String reallyLongString = "abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 ,"+
-					"abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 ,abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 ,"+
-					"abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 ,abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 ,"+
-					"abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 ,abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 ,"+
-					"abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 ,abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 abcdefghijklmnopqrstuvwxyz1234567890 ,up_until_10 0 0 _char";
-				edit.getProperties().addPropertyToList(USER_PROP_ADDITIONAL_INFO, encryptionUtilities.encrypt(reallyLongString, 0));
-			}
 			edit.setFirstName(info.firstName);
 			edit.setLastName(info.lastName);
 			edit.setEmail(info.email);
@@ -313,9 +253,9 @@ public class SampleUserDirectoryProvider implements UserDirectoryProvider, Users
 	 * @param users
 	 *        The UserEdit objects (with id set) to fill in or remove.
 	 */
-	public void getUsers(Collection<UserEdit> users)
+	public void getUsers(Collection users)
 	{
-		for (Iterator<UserEdit> i = users.iterator(); i.hasNext();)
+		for (Iterator i = users.iterator(); i.hasNext();)
 		{
 			UserEdit user = (UserEdit) i.next();
 			if (!getUser(user))
@@ -359,35 +299,22 @@ public class SampleUserDirectoryProvider implements UserDirectoryProvider, Users
 	 *        Use this factory's newUser() method to create all the UserEdit objects you populate and return in the return collection.
 	 * @return Collection (UserEdit) of user objects that have this email address, or an empty Collection if there are none.
 	 */
-	public Collection<UserEdit> findUsersByEmail(String email, UserFactory factory)
+	public Collection findUsersByEmail(String email, UserFactory factory)
 	{
-		Collection<UserEdit> rv = new Vector<>();
+		Collection rv = new Vector();
+
+		// get a UserEdit to populate
+		UserEdit edit = factory.newUser();
 
 		int pos = email.indexOf(EMAIL_DOMAIN);
 		if (pos != -1)
 		{
-			// get a UserEdit to populate
 			String id = email.substring(0, pos);
-			UserEdit edit = factory.newUser(id);
+			edit.setEid(id);
 			if (getUser(edit)) rv.add(edit);
 		}
 
 		return rv;
-	}
-
-	@Override
-	public List<UserEdit> searchExternalUsers(String criteria, int first, int last, UserFactory factory) {
-		Stream<Info> stream = m_info.values().stream().filter(i -> i.contains(criteria));
-		if (first != -1) {
-			stream = stream.skip(first);
-		}
-		if (last != -1) {
-			stream = stream.limit(last-first+1);
-		}
-		return stream.map(i -> {
-			UserEdit edit = factory.newUser(i.id);
-			return getUser(edit)?edit:null;
-		}).filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	/**

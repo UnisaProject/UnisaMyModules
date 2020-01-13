@@ -1,14 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
-<hibernate-mapping package="org.sakaiproject.tool.assessment.data.dao.assessment"
-                   default-lazy="false">
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD//EN"
+  "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
-  <class name="org.sakaiproject.tool.assessment.data.dao.assessment.FavoriteColChoices"
+<hibernate-mapping default-lazy="false">
+  <class name="org.sakaiproject.tool.assessment.data.dao.assessment.FavoriteColChoices" 
 	table="SAM_FAVORITECOLCHOICES_T">
     <id name="favoriteId" column="FAVORITEID" type="java.lang.Long" unsaved-value="0">
-      <generator class="native">
-      	<param name="sequence">SAM_FAVORITECOLCHOICES_S</param>
-      </generator> 
+      <generator class="native"/> 
     </id>
    
     <property name="favoriteName" type="string" length="255" column="FAVORITENAME" not-null="false" />
@@ -22,9 +21,7 @@
      <class name="org.sakaiproject.tool.assessment.data.dao.assessment.FavoriteColChoicesItem" 
 	table="SAM_FAVORITECOLCHOICESITEM_T">
     <id name="favoriteItemId" column="FAVORITEITEMID" type="java.lang.Long" unsaved-value="0">
-      <generator class="native">
-      	<param name="sequence">SAM_FAVORITECOLCHOICESITEM_S</param>
-      </generator> 
+      <generator class="native"/> 
     </id>
     <many-to-one name="favoriteChoice" class="org.sakaiproject.tool.assessment.data.dao.assessment.FavoriteColChoices">
      <column name="FAVORITEID" not-null="true"/>

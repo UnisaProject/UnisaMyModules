@@ -37,14 +37,13 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
-
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -54,10 +53,11 @@ import org.xml.sax.helpers.DefaultHandler;
  * Special utils used in the storage utils
  * (some duplication from the other kernel Xml utils)
  */
-@Slf4j
 public class StorageUtils {
+
+	private static Logger M_log = LoggerFactory.getLogger(StorageUtils.class);
+
 	private static SAXParserFactory parserFactory;
-	private static DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 
 	/**
 	 * Create a new DOM Document.
@@ -68,14 +68,14 @@ public class StorageUtils {
 	{
 		try
 		{
-			DocumentBuilder builder = dbFactory.newDocumentBuilder();
+			DocumentBuilder builder = getDocumentBuilder();
 			Document doc = builder.newDocument();
 
 			return doc;
 		}
 		catch (Exception any)
 		{
-			log.warn("createDocument: " + any.toString());
+			M_log.warn("createDocument: " + any.toString());
 			return null;
 		}
 	}
@@ -94,7 +94,7 @@ public class StorageUtils {
 		InputStream fis = null;
 		try
 		{
-			DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
+			DocumentBuilder docBuilder = getDocumentBuilder();
 			fis = new FileInputStream(name);
 			doc = docBuilder.parse(fis);
 		}
@@ -116,7 +116,7 @@ public class StorageUtils {
 		// OK, that didn't work - the document is probably ISO-8859-1
 		try
 		{
-			DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
+			DocumentBuilder docBuilder = getDocumentBuilder();
 			InputStreamReader in = new InputStreamReader(new FileInputStream(name), "ISO-8859-1");
 			InputSource inputSource = new InputSource(in);
 			doc = docBuilder.parse(inputSource);
@@ -131,14 +131,14 @@ public class StorageUtils {
 		// try forcing UTF-8
 		try
 		{
-			DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
+			DocumentBuilder docBuilder = getDocumentBuilder();
 			InputStreamReader in = new InputStreamReader(new FileInputStream(name), "UTF-8");
 			InputSource inputSource = new InputSource(in);
 			doc = docBuilder.parse(inputSource);
 		}
 		catch (Exception any)
 		{
-			log.warn("readDocument failed on file: " + name + " with exception: " + any.toString());
+			M_log.warn("readDocument failed on file: " + name + " with exception: " + any.toString());
 			doc = null;
 		}
 
@@ -156,14 +156,14 @@ public class StorageUtils {
 	{
 		try
 		{
-			DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
+			DocumentBuilder docBuilder = getDocumentBuilder();
 			InputSource inputSource = new InputSource(new StringReader(in));
 			Document doc = docBuilder.parse(inputSource);
 			return doc;
 		}
 		catch (Exception any)
 		{
-			log.warn("readDocumentFromString: " + any.toString());
+			M_log.warn("readDocumentFromString: " + any.toString());
 			return null;
 		}
 	}
@@ -226,10 +226,12 @@ public class StorageUtils {
 		try
 		{
 			out = new FileOutputStream(fileName);
-			// get an instance of the DOMImplementation registry
-			DocumentBuilder builder = dbFactory.newDocumentBuilder();
-			DOMImplementation impl = builder.getDOMImplementation();
-
+//			 get an instance of the DOMImplementation registry
+			 DocumentBuilderFactory factory 
+			   = DocumentBuilderFactory.newInstance();
+			  DocumentBuilder builder = factory.newDocumentBuilder();
+			  DOMImplementation impl = builder.getDOMImplementation();
+			  
 			DOMImplementationLS feature = (DOMImplementationLS) impl.getFeature("LS","3.0");
 			LSSerializer serializer = feature.createLSSerializer();
 			LSOutput output = feature.createLSOutput();
@@ -241,7 +243,7 @@ public class StorageUtils {
 		}
 		catch (Exception any)
 		{
-			log.warn("writeDocument: " + any.toString());
+			M_log.warn("writeDocument: " + any.toString());
 		}
 		finally {
 			if (out != null) {
@@ -269,7 +271,9 @@ public class StorageUtils {
 			
 			StringWriter sw = new StringWriter();
 			
-			  DocumentBuilder builder = dbFactory.newDocumentBuilder();
+			 DocumentBuilderFactory factory 
+			   = DocumentBuilderFactory.newInstance();
+			  DocumentBuilder builder = factory.newDocumentBuilder();
 			  DOMImplementation impl = builder.getDOMImplementation();
 			  
 			
@@ -286,7 +290,7 @@ public class StorageUtils {
 		}
 		catch (Exception any)
 		{
-			log.warn("writeDocumentToString: " + any.toString());
+			M_log.warn("writeDocumentToString: " + any.toString());
 			return null;
 		}
 	}
@@ -312,8 +316,20 @@ public class StorageUtils {
             String rv = buf.toString();
             return rv;
         } catch (Exception e) {
-            log.warn("Validator.escapeSql: "+e, e);
+            M_log.warn("Validator.escapeSql: "+e, e);
             return "";
         }
     }
+
+
+    /**
+     * @return a DocumentBuilder object for XML parsing.
+     */
+    private static DocumentBuilder getDocumentBuilder() throws ParserConfigurationException
+    {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+
+        return dbf.newDocumentBuilder();
+    }
+
 }

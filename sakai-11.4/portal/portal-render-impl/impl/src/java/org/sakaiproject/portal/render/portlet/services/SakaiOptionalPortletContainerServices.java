@@ -32,6 +32,8 @@ import java.util.Properties;
 
 import javax.portlet.PortletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.pluto.OptionalContainerServices;
 import org.apache.pluto.PortletContainerException;
 import org.apache.pluto.PortletWindow;
@@ -57,21 +59,19 @@ import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.thread_local.cover.ThreadLocalManager;
 import org.sakaiproject.tool.api.Placement;
 import org.sakaiproject.tool.api.Session;
-import org.sakaiproject.tool.api.ToolSession;
 import org.sakaiproject.tool.cover.SessionManager;
-import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.cover.UserDirectoryService;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author csev
  * @since Sakai 2.4
  * @version $Rev$
  */
-@Slf4j
 public class SakaiOptionalPortletContainerServices implements OptionalContainerServices
 {
+
+	private static Logger M_log = LoggerFactory.getLogger(SakaiOptionalPortletContainerServices.class);
 
 	protected final static String CURRENT_PLACEMENT = "sakai:ToolComponent:current.placement";
 
@@ -88,7 +88,7 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 	public PortletPreferencesService getPortletPreferencesService()
 	{
 		if (prefLog)
-			log.info("Sakai Optional Portal Services returning " + prefService);
+			M_log.info("Sakai Optional Portal Services returning " + prefService);
 		prefLog = false; // Only log once
 		return prefService;
 	}
@@ -151,7 +151,7 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 			User user = UserDirectoryService.getCurrentUser();
 			if (user != null)
 			{
-				log.debug("Found Current User={}", user.getEid());
+				// System.out.println("Found Current User="+user.getEid());
 				retval = new HashMap<String, String>();
 				retval.put(P3PAttributes.USER_HOME_INFO_ONLINE_EMAIL, user.getEmail());
 				retval
@@ -176,7 +176,7 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 			}
 
 			if (retval == null) retval = new HashMap();
-			log.debug("Returning={}", retval);
+			// System.out.println("Returning=" +retval);
 			return retval;
 		}
 	}
@@ -211,18 +211,18 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 
 			public void onBegin(PortletInvocationEvent event)
 			{
-				log.debug("======== onBegin!");
+				// System.out.println("======== onBegin!");
 				setupThread(event.getPortletRequest(), true);
 			}
 
 			public void onEnd(PortletInvocationEvent event)
 			{
-				log.debug("======== onEnd!");
+				// System.out.println("======== onEnd!");
 			}
 
 			public void onError(PortletInvocationEvent event, Throwable error)
 			{
-				log.debug("======== onError!");
+				// System.out.println("======== onError!");
 			}
 
 		}
@@ -233,43 +233,45 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 
 		String placementId = (String) request
 				.getAttribute("org.sakaiproject.portal.api.PortalService_placementid");
-		log.debug("place from getAttribute = {}", placementId);
+		// System.out.println("place from getAttribute = "+placementId);
 		if (placementId == null)
 		{
-			if (doLog) log.info("No Placement found");
+			if (doLog) M_log.info("No Placement found");
 			return; // We have nothing to work with
 		}
 
 		Session session = SessionManager.getCurrentSession();
-		log.debug("Session = {}", session);
+		// System.out.println("Session = "+session);
 		if (session == null)
 		{
-			if (doLog) log.info("No Session found placementId=" + placementId);
+			if (doLog) M_log.info("No Session found placementId=" + placementId);
 			return; // We have nothing to work with
 		}
 
-		log.debug("UserId={} UserEID={}", session.getUserId(), session.getUserEid());
+		// System.out.println("UserId="+session.getUserId()+"
+		// UserEID="+session.getUserEid());
 
 		// Check to see if there is already a placement in place
 		Placement ppp = (Placement) ThreadLocalManager.get(CURRENT_PLACEMENT);
-		log.debug("ThreadLocal CURRENT_PLACEMENT={}", ppp);
+		// System.out.println("ThreadLocal CURRENT_PLACEMENT="+ppp);
 		if (ppp != null)
 		{
-			log.debug("ThreadLocal CURRENT_PLACEMENT ID={}", ppp.getId());
+			// System.out.println("ThreadLocal CURRENT_PLACEMENT
+			// ID="+ppp.getId());
 			if (placementId.equals(ppp.getId()))
 			{
-				log.debug("Thread already setup");
+				// System.out.println("Thread already setup");
 				return; // Placement in place
 			}
 		}
 
 		// find the tool from some site (ToolConfiguration extends Placement)
 		ToolConfiguration siteTool = SiteService.findTool(placementId);
-		log.debug("siteTool={}", siteTool);
+		// System.out.println("siteTool="+siteTool);
 		if (siteTool == null)
 		{
 			if (doLog)
-				log.info("No ToolConfiguration found, placementId=" + placementId
+				M_log.info("No ToolConfiguration found, placementId=" + placementId
 						+ " session=" + session);
 			return;
 		}
@@ -277,21 +279,19 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 		// Actually store the placement in Thread Local
 		ThreadLocalManager.set(CURRENT_PLACEMENT, siteTool);
 
-		if (log.isDebugEnabled()) {
-			// *** Testing Printout to see how well we have the APIs Configured ****
-			ToolSession ts = SessionManager.getCurrentToolSession();
-			log.debug("*** TEST *** \nTool Session = {}", ts);
-			if ( ts != null ) {
-				log.debug("ToolSession.getId={}", ts.getId());
-			}
+		// *** Testing Printout to see how well we have the APIs Configured ****
+		// ToolSession ts = SessionManager.getCurrentToolSession();
+		// System.out.println("*** TEST *** \nTool Session = "+ts);
+		// if ( ts != null )
+		// System.out.println("ToolSession.getId="+ts.getId());
 
-			Placement placement = ToolManager.getCurrentPlacement();
-			log.debug("Placement = {}", placement);
+		// Placement placement = ToolManager.getCurrentPlacement();
+		// System.out.println("Placement = "+placement);
 
-			if ( placement != null ) {
-				log.debug("Context = {}", placement.getContext());
-			}
-		}
+		// if ( placement != null ) {
+		// String placementContext = placement.getContext();
+		// System.out.println("Context = "+placementContext);
+		// }
 	}
 
 	public class SakaiPortletPreferencesService implements PortletPreferencesService
@@ -329,38 +329,42 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 
 			// find the tool from some site
 			ToolConfiguration siteTool = SiteService.findTool(key);
-			log.debug("siteTool={}", siteTool);
+			// System.out.println("siteTool="+siteTool);
 
 			ArrayList<InternalPortletPreference> prefArray = new ArrayList<InternalPortletPreference>();
 			if (siteTool != null)
 			{
 				String siteId = siteTool.getSiteId();
-				log.debug("siteId={}", siteId);
+				// System.out.println("siteId="+siteId);
 
 				String siteReference = SiteService.siteReference(siteId);
-				log.debug("Reference={}", siteReference);
+				// System.out.println("Reference="+siteReference);
 
 				// If you don't have site.upd - Mark all references as read only
 				readOnly = !SecurityService.unlock(SiteService.SECURE_UPDATE_SITE,
 						siteReference);
 
 				Properties props = siteTool.getPlacementConfig();
-				log.debug("props = {}", props);
+				// System.out.println("props = "+props);
 				for (Enumeration e = props.propertyNames(); e.hasMoreElements();)
 				{
 					String propertyName = (String) e.nextElement();
-					log.debug("Property name = {}", propertyName);
-
+					if (M_log.isDebugEnabled())
+					{
+						M_log.debug("Property name = "+propertyName);
+					}
+;
 					if (propertyName != null && propertyName.startsWith("javax.portlet") 
 							&& propertyName.length() > 14)
 					{
 						String propertyValue = props.getProperty(propertyName);
 						String[] propertyList = deSerializeStringArray(propertyValue);
 						String internalName = propertyName.substring(14);
-						log.debug("internalName={} propertyList={}", internalName, propertyList);
+						// System.out.println("internalName="+internalName+"
+						// propertyList="+propertyList);
 						InternalPortletPreference newPref = new PortletPreferenceImpl(
 								internalName, propertyList, readOnly);
-						log.debug("newPref = {}", newPref);
+						// System.out.println("newPref = "+newPref);
 						prefArray.add(newPref);
 					}
 					else if ( propertyName != null ) 
@@ -369,10 +373,10 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 						String internalName = "sakai:" + propertyName;
 						String[] propertyList = new String[1];
 						propertyList[0] = propertyValue;
-						log.debug("internalName={} propertyList={}", internalName, propertyList);
+						// System.out.println("internalName="+internalName+"propertyList="+propertyList);
 						InternalPortletPreference newPref = new PortletPreferenceImpl(
 								internalName, propertyList, readOnly);
-						log.debug("newPref = {}", newPref);
+						// System.out.println("newPref = "+newPref);
 						prefArray.add(newPref);
 					}
 				}
@@ -382,7 +386,11 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 					.size()];
 
 			preferences = (InternalPortletPreference[]) prefArray.toArray(preferences);
-			log.debug("Got {} stored preferences.", preferences.length);
+
+			if (M_log.isDebugEnabled())
+			{
+				M_log.debug("Got " + preferences.length + " stored preferences.");
+			}
 			return preferences;
 		}
 
@@ -416,28 +424,29 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 
 			// find the tool from some site
 			ToolConfiguration siteTool = SiteService.findTool(key);
-			log.debug("siteTool={}", siteTool);
+			// System.out.println("siteTool="+siteTool);
 			if (siteTool == null) return;
 
 			Properties props = siteTool.getPlacementConfig();
 			if (props == null) return;
 
 			String siteId = siteTool.getSiteId();
-			log.debug("siteId={}", siteId);
+			// System.out.println("siteId="+siteId);
 
 			String siteReference = SiteService.siteReference(siteId);
-			log.debug("Reference={}", siteReference);
+			// System.out.println("Reference="+siteReference);
 
 			// If you don't have site.upd - silently return not storing
 			// In an ideal world perhaps we should throw java.io.IOException
 			// As per PortletPreferences API on the store() method
 			if (!SecurityService.unlock(SiteService.SECURE_UPDATE_SITE, siteReference))
 			{
-				log.debug("You do not have site.upd - silently returning and not storing");
+				// System.out.println("You do not have site.upd - silently
+				// returning and not storing");
 				return;
 			}
 
-			log.debug("props before cleanup= {}", props);
+			// System.out.println("props before cleanup= "+props);
 
 			boolean changed = false;
 
@@ -448,19 +457,21 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 				for (Enumeration e = props.propertyNames(); e.hasMoreElements();)
 				{
 					String propertyName = (String) e.nextElement();
-					log.debug("Checking Sakai property name = {}", propertyName);
+					// System.out.println("Checking Sakai property name = "+propertyName);
 					if (propertyName != null && (propertyName.startsWith("javax.portlet"))
 							&& propertyName.length() > 14)
 					{
 						String internalName = propertyName.substring(14);
-						log.debug("making sure we still have a prop named internalName={}", internalName);
+						// System.out.println("making sure we still have a prop
+						// named internalName="+internalName);
 						boolean found = false;
 						for (int i = 0; i < preferences.length; i++)
 						{
 							if (preferences[i] != null)
 							{
 								String propName = preferences[i].getName();
-								log.debug("Store[{}]={}", i, propName);
+								// System.out.println("Store["+i+"]
+								// ="+propName);
 								if (internalName.equals(propName))
 								{
 									found = true;
@@ -470,7 +481,7 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 						}
 						if (!found)
 						{
-							log.debug("Removing {}", propertyName);
+							// System.out.println("Removing "+propertyName);
 							props.remove(propertyName);
 							changed = true;
 						}
@@ -491,7 +502,7 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 						}
 						if (!found)
 						{
-							log.debug("Removing {}", propertyName);
+							// System.out.println("Removing "+propertyName);
 							props.remove(propertyName);
 							changed = true;
 						}
@@ -499,17 +510,17 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 				}
 			}
 
-			log.debug("props after cleanup= {}", props);
+			// System.out.println("props after cleanup= "+props);
 
 			// Add / up date which are still there 
 			for (int i = 0; i < preferences.length; i++)
 			{
-				log.debug("Store[{}] = {}", i, preferences[i]);
+				// System.out.println("Store["+i+"] ="+preferences[i]);
 				if (preferences[i] != null && props != null)
 				{
 					String propName = preferences[i].getName();
 					if ( propName == null || propName.length() < 1 ) continue;
-					log.debug("Property Name={}", propName);
+					// System.out.println("Property Name="+propName);
 
 					//New property prefix SAK-30354 
 					String propKey = "javax.portlet-" + propName;
@@ -525,28 +536,32 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 					// Grab the property to see if it changed
 					String oldString = props.getProperty(propKey);
 
-					log.debug("propKey = {}", propKey);
-					log.debug("storeString = {}", storeString);
-					log.debug("oldString = {}", oldString);
+					// System.out.println("propKey = "+propKey);
+					// System.out.println("storeString = "+storeString);
+					// System.out.println("oldString = "+oldString);
 					if (storeString!=null && !storeString.equals(oldString))
 					{
-						log.debug("Setting {} value={}", propKey, storeString);
+						// System.out.println("Setting "+propKey+"
+						// value="+storeString);
 						props.setProperty(propKey, storeString);
 						changed = true;
 					}
 				}
 			}
 
-			log.debug("props after update= {}", props);
-			log.debug("changed={}", changed);
+			// System.out.println("props after update= "+props);
+			// System.out.println("changed="+changed);
 
 			if (changed && siteTool != null)
 			{
 				siteTool.save();
-				log.debug("Saved");
+				// System.out.println("Saved");
 			}
 
-			log.debug("Portlet preferences stored for: {}", key);
+			if (M_log.isDebugEnabled())
+			{
+				M_log.debug("Portlet preferences stored for: " + key);
+			}
 		}
 
 		private String serializeStringArray(String[] input)
@@ -564,12 +579,12 @@ public class SakaiOptionalPortletContainerServices implements OptionalContainerS
 
 		private String[] deSerializeStringArray(String input)
 		{
-			log.debug("Input={}", input);
+			// System.out.println("Input="+input);
 			String[] retval = input.split("!");
-			log.debug("Found {} items.", retval.length);
+			// System.out.println("Found "+retval.length+" items.");
 			for (int i = 0; i < retval.length; i++)
 			{
-				log.debug("retval[{}]={}", i, retval[i]);
+				// System.out.println("retval["+i+"]="+retval[i]);
 				if ( retval[i] == null ) continue;
 				retval[i] = URLDecoder.decode(retval[i]);
 			}

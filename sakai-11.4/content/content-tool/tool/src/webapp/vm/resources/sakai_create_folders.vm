@@ -45,24 +45,25 @@
 						<div class="col-sm-4 col-xs-12">
 							<a href="#" id="propsTrigger${DOT}$i">$tlang.getString("edit.show")</a>
 							<a class="remove" style="display:none" href="#" id="removeTrigger${DOT}$i" title="$tlang.getString("edit.remove")">
-								<span class="fa fa-times" aria-hidden="true"></span>
-								<span class="sr-only">x</span>
+								<img src="#imageLink("sakai/cross.png")"  alt="x" />
 							</a>
 						</div>
 						<br><br>
 					</div>
 					<input type="hidden" id="prev${DOT}$i" name="prev${DOT}$i" value="#if($prev >= 0)${prev}#end" />
 					<input type="hidden" id="next${DOT}$i" name="next${DOT}$i" value="#if($next < $pipes.size())${next}#end" />
-					<div id="propertiesDiv${DOT}$i" style="display:none;" aria-expanded="false">
-						#parse("/vm/resources/sakai_properties.vm")
-						<hr class="itemSeparator" />
-					</div>
+				</div>
+				<div id="propertiesDiv${DOT}$i" style="display:none;">
+#parse("/vm/resources/sakai_properties.vm")
+					<hr class="itemSeparator" />
 				</div>
 			#end
 		</div>
+		<!-- Disabled See SAK-32136
 		<p class="act">
 			<a href="#" onclick="addFileInput();return false">$tlang.getString("label.addFolder")</a>
 		</p>
+		-->
 #*
 		#if ($model.resourceTypeDef.hasNotificationDialog())
 			<p class="shorttext">
@@ -70,15 +71,9 @@
 					$tlang.getString("gen.email1")
 				</label>	
 				<select name="notify" id="notify">
-					#if ($noti)
-						<option value="r" #if($noti=="r") selected="selected" #end>$tlang.getString("gen.email2")</option>
-						<option value="o" #if($noti=="o") selected="selected" #end>$tlang.getString("gen.email3")</option>
-						<option value="n" #if($noti=="n") selected="selected" #end>$tlang.getString("gen.email4")</option>
-					#else
-						<option value="r">$tlang.getString("gen.email2")</option>
-						<option value="o">$tlang.getString("gen.email3")</option>
-						<option value="n" selected="selected">$tlang.getString("gen.email4")</option>
-					#end							
+					<option value="r">$tlang.getString("gen.email2")</option>
+					<option value="o">$tlang.getString("gen.email3")</option>
+					<option value="n" selected="selected">$tlang.getString("gen.email4")</option>
 				</select>
 			</p>	
 		#end

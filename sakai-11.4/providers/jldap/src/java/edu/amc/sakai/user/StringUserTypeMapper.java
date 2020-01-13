@@ -20,8 +20,10 @@
  **********************************************************************************/
 package edu.amc.sakai.user;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.novell.ldap.LDAPEntry;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Very simple {@link UserTypeMapper} which generates the same
@@ -30,9 +32,11 @@ import lombok.extern.slf4j.Slf4j;
  * 
  * @author dmccallum
  */
-@Slf4j
 public class StringUserTypeMapper implements UserTypeMapper {
-
+	
+	/** Class-specific logger */
+	private static Logger M_log = LoggerFactory.getLogger(StringUserTypeMapper.class);
+	
 	private String userType;
 	
 	/**
@@ -63,8 +67,8 @@ public class StringUserTypeMapper implements UserTypeMapper {
 	public String mapLdapEntryToSakaiUserType(LDAPEntry ldapEntry,
 			LdapAttributeMapper mapper) {
 		
-		if ( log.isDebugEnabled() ) {
-			log.debug("mapLdapEntryToSakaiUserType(): returning user type [" + userType + 
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("mapLdapEntryToSakaiUserType(): returning user type [" + userType + 
 					"] for [entry DN = " + ldapEntry.getDN() + "]");
 		}
 		

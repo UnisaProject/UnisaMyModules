@@ -35,7 +35,7 @@ import org.sakaiproject.sitestats.impl.event.EventUtil;
 import org.sakaiproject.sitestats.test.data.FakeData;
 import org.sakaiproject.tool.api.ToolManager;
 
-public abstract class FakeEventRegistryService implements EventRegistryService {
+public class FakeEventRegistryService implements EventRegistryService {
 	private SiteService						M_ss;
 	public void setSiteService(SiteService M_ss) {
 		this.M_ss = M_ss;
@@ -54,6 +54,11 @@ public abstract class FakeEventRegistryService implements EventRegistryService {
 		return Collections.singleton(FakeData.EVENT_CONTENTDEL);
 	}
 
+	public EventFactory getEventFactory() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	public Map<String, ToolInfo> getEventIdToolMap() {
 		return FakeData.EVENTID_TOOL_MAP;
 	}
@@ -65,6 +70,11 @@ public abstract class FakeEventRegistryService implements EventRegistryService {
 			return eventIds;
 		}
 		return FakeData.EVENTIDS;
+	}
+
+	public String getEventName(String eventId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public List<ToolInfo> getEventRegistry() {
@@ -89,6 +99,21 @@ public abstract class FakeEventRegistryService implements EventRegistryService {
 			// return the event registry with only tools available in (whole) Sakai
 			return FakeData.EVENT_REGISTRY;
 		}
+	}
+
+	public ToolFactory getToolFactory() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getToolIcon(String toolId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getToolName(String toolId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public List<String> getServerEventIds() {

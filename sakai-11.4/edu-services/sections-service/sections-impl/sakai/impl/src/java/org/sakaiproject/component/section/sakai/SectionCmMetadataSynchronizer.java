@@ -24,12 +24,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
 import org.sakaiproject.authz.api.GroupProvider;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.component.cover.ComponentManager;
@@ -55,8 +54,8 @@ import org.sakaiproject.tool.cover.SessionManager;
  * @author <a href="mailto:jholtzman@berkeley.edu">jholtzman@berkeley.edu</a>
  *
  */
-@Slf4j
 public class SectionCmMetadataSynchronizer implements Job {
+	private static final Logger log = LoggerFactory.getLogger(SectionCmMetadataSynchronizer.class);
 	public static final int PAGE_SIZE = 100;
 	
 	protected SiteService siteService;
@@ -75,11 +74,11 @@ public class SectionCmMetadataSynchronizer implements Job {
 		this.siteService = siteService;
 	}
 
-	public void init() {
-		if(log.isInfoEnabled()) log.info("init()");
+    public void init() {
+    	if(log.isInfoEnabled()) log.info("init()");
 		// A group provider may not exist, so we can't use spring to inject it
 		groupProvider = (GroupProvider)ComponentManager.get(GroupProvider.class);
-	}
+    }
     
 	public void updateSakaiSectionMetadata() {
 		loginToSakai();

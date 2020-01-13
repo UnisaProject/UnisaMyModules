@@ -1,0 +1,41 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="242,88" />
+  <StrutsActivity path="/bulkEmailAction.do" location="950,150" dimension="302,88" />
+  <StrutsActivity path="/WEB-INF/jsp/step3.jsp" location="650,150" dimension="143,49" />
+  <StrutsActivity path="/WEB-INF/jsp/step2.jsp" location="350,150" dimension="143,49" />
+  <StrutsActivity path="/WEB-INF/jsp/step1.jsp" location="950,50" dimension="143,49" />
+  <StrutsActivity path="/WEB-INF/jsp/preview.jsp" location="50,250" dimension="154,49" />
+  <StrutsTransition id="/bulkEmailAction.do,step2,/WEB-INF/jsp/step2.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="950,214" />
+      <AbsolutePoint location="421,214" />
+      <AbsolutePoint location="421,199" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/bulkEmailAction.do,step3,/WEB-INF/jsp/step3.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="950,184" />
+      <AbsolutePoint location="793,184" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/bulkEmailAction.do,step1,/WEB-INF/jsp/step1.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1078,150" />
+      <AbsolutePoint location="1078,99" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/bulkEmailAction.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="292,114" />
+      <AbsolutePoint location="1108,114" />
+      <AbsolutePoint location="1108,150" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/bulkEmailAction.do,preview,/WEB-INF/jsp/preview.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="1101,238" />
+      <AbsolutePoint location="1101,274" />
+      <AbsolutePoint location="204,274" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

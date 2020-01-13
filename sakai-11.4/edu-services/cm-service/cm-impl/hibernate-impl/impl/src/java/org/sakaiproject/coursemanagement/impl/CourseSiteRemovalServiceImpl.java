@@ -15,30 +15,34 @@
  */
 package org.sakaiproject.coursemanagement.impl;
 
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.FunctionManager;
+import org.sakaiproject.authz.api.Member;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.coursemanagement.api.AcademicSession;
 import org.sakaiproject.coursemanagement.api.CourseManagementService;
 import org.sakaiproject.coursemanagement.api.CourseSiteRemovalService;
+import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.entity.api.ResourcePropertiesEdit;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.site.api.SiteService.SelectionType;
 import org.sakaiproject.site.api.SiteService.SortType;
-import org.springframework.orm.hibernate4.support.HibernateDaoSupport;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
 
 
 /**
  * This class is an implementation of the auto site removal service interface.
  */
-@Slf4j
 public class CourseSiteRemovalServiceImpl extends HibernateDaoSupport implements CourseSiteRemovalService {
+
+   // logger
+   private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
    // class members
    private static final long ONE_DAY_IN_MS = 1000L * 60L * 60L * 24L;    // one day in ms = 1000ms/s · 60s/m · 60m/h · 24h/day
@@ -53,7 +57,7 @@ public class CourseSiteRemovalServiceImpl extends HibernateDaoSupport implements
     * called by the spring framework.
     */
    public void destroy() {
-      log.debug("destroy()");
+      logger.debug("destroy()");
 
        // no code necessary
    }
@@ -62,7 +66,7 @@ public class CourseSiteRemovalServiceImpl extends HibernateDaoSupport implements
     * called by the spring framework after this class has been instantiated, this method registers the permissions necessary to invoke the course site removal service.
     */
    public void init() {
-      log.debug("init()");
+      logger.debug("init()");
 
       // register permissions with sakai
       functionManager.registerFunction(PERMISSION_COURSE_SITE_REMOVAL);
@@ -153,7 +157,7 @@ public class CourseSiteRemovalServiceImpl extends HibernateDaoSupport implements
 
     public int removeCourseSites(CourseSiteRemovalService.Action action, int numDaysAfterTermEnds) {
 
-       log.info("removeCourseSites(" + action + " course sites, " + numDaysAfterTermEnds + " days after the term ends)");
+       logger.info("removeCourseSites(" + action + " course sites, " + numDaysAfterTermEnds + " days after the term ends)");
        Date today           = new Date();
        Date expirationDate  = new Date(today.getTime() - numDaysAfterTermEnds * ONE_DAY_IN_MS);
        int  numSitesRemoved = 0;
@@ -184,14 +188,14 @@ public class CourseSiteRemovalServiceImpl extends HibernateDaoSupport implements
                             // check permissions
 
                             if (!checkPermission(PERMISSION_COURSE_SITE_REMOVAL, site.getId())) {
-                                log.error("You do not have permission to " + action + " the " + site.getTitle() + " course site (" + site.getId() + ").");
+                                logger.error("You do not have permission to " + action + " the " + site.getTitle() + " course site (" + site.getId() + ").");
                             } else if (action == CourseSiteRemovalService.Action.remove) {
                                 // remove the course site
-                                log.debug(action + "removing course site " + site.getTitle() + " (" + site.getId() + ").");
+                                logger.debug(action + "removing course site " + site.getTitle() + " (" + site.getId() + ").");
                                 siteService.removeSite(site);
                             } else {
                                 // unpublish the course site
-                                log.debug("unpublishing course site " + site.getTitle() + " (" + site.getId() + ").");
+                                logger.debug("unpublishing course site " + site.getTitle() + " (" + site.getId() + ").");
                                 siteProperties.addProperty(SITE_PROPERTY_COURSE_SITE_REMOVAL, "set");
                                 site.setPublished(false);
                                 siteService.save(site);
@@ -204,7 +208,7 @@ public class CourseSiteRemovalServiceImpl extends HibernateDaoSupport implements
             }
          }
        } catch (Exception ex) {
-         log.error(ex.getMessage(), ex);
+         logger.error(ex.getMessage(), ex);
        }
        return numSitesRemoved;
     }

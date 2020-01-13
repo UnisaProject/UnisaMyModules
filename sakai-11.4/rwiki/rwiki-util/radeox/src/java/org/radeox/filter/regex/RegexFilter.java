@@ -26,7 +26,8 @@ package org.radeox.filter.regex;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.radeox.filter.FilterSupport;
 import org.radeox.filter.context.FilterContext;
 
@@ -36,9 +37,10 @@ import org.radeox.filter.context.FilterContext;
  * 
  * @version $Id$
  */
-@Slf4j
+
 public abstract class RegexFilter extends FilterSupport
 {
+	private static Logger log = LoggerFactory.getLogger(RegexFilter.class);
 
 	protected List pattern = new ArrayList();
 

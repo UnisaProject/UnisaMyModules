@@ -25,10 +25,12 @@ import javax.faces.context.FacesContext;
 import javax.faces.el.ValueBinding;
 import javax.faces.webapp.UIComponentTag;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class FlowStateTag extends UIComponentTag {
+	private static final Logger logger = LoggerFactory.getLogger(FlowStateTag.class);
+
 	private String bean;
 
 	public void setBean(String bean) {
@@ -36,7 +38,7 @@ public class FlowStateTag extends UIComponentTag {
 	}
 
 	protected void setProperties(UIComponent component) {
-		if (log.isDebugEnabled()) log.debug("setProperties " + bean);
+		if (logger.isDebugEnabled()) logger.debug("setProperties " + bean);
 		super.setProperties(component);
 
 		FacesContext context = getFacesContext();
@@ -46,7 +48,7 @@ public class FlowStateTag extends UIComponentTag {
 				ValueBinding vb = context.getApplication().createValueBinding(bean);
 				component.setValueBinding("bean", vb);
 			} else {
-				log.error("Invalid expression " + bean);
+				logger.error("Invalid expression " + bean);
 			}
 		}
 	}

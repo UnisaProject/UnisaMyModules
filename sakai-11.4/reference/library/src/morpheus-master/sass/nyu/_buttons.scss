@@ -1,0 +1,683 @@
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+//  Buttons
+//   - override the morpheus mixins to match desired NYU styles
+//   - tool portlet button styles too
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------------------------
+//  Custom NYU Button mixins
+// -------------------------------------------------------------------------------------------------------------------
+@mixin nyu_button( $nyu-btn-text-color,
+                   $nyu-btn-icon-color,
+                   $nyu-btn-background-color,
+                   $nyu-btn-border-color,
+                   $nyu-btn-hover-text-color,
+                   $nyu-btn-hover-icon-color,
+                   $nyu-btn-hover-background-color,
+                   $nyu-btn-hover-border-color) {
+
+  color: $nyu-btn-text-color !important;
+  background: $nyu-btn-background-color !important;
+  border: 1px solid $nyu-btn-border-color !important;
+  border-radius: $nyu-button-radius !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  text-transform: $nyu-button-text-transform !important;
+
+  &:before {
+    color: $nyu-btn-icon-color !important;
+  }
+
+  &:active,
+  &:focus,
+  &:hover {
+    color: $nyu-btn-hover-text-color !important;
+    background: $nyu-btn-hover-background-color !important;
+    border-color: $nyu-btn-hover-border-color !important;
+    text-decoration: none !important;
+
+    &:before {
+      color: $nyu-btn-hover-icon-color !important;
+    }
+  }
+
+  &:focus {
+    outline-color: $nyu-active-button-outline-color !important;
+  }
+}
+
+@mixin nyu_primary_button() {
+  @include nyu_button($nyu-button-primary-text-color,
+                      $nyu-button-primary-text-color,
+                      $nyu-button-primary-background-color,
+                      $nyu-button-primary-border-color,
+                      $nyu-button-primary-hover-text-color,
+                      $nyu-button-primary-hover-text-color,
+                      $nyu-button-primary-hover-background-color,
+                      $nyu-button-primary-hover-border-color);
+}
+
+@mixin nyu_secondary_button() {
+  @include nyu_button($nyu-button-secondary-text-color,
+                      $nyu-button-secondary-icon-color,
+                      $nyu-button-secondary-background-color,
+                      $nyu-button-secondary-border-color,
+                      $nyu-button-secondary-hover-text-color,
+                      $nyu-button-secondary-hover-icon-color,
+                      $nyu-button-secondary-hover-background-color,
+                      $nyu-button-secondary-hover-border-color);
+}
+
+@mixin nyu_link_button() {
+  @include nyu_button($nyu-link-color,
+                      $nyu-link-color,
+                      transparent,
+                      transparent,
+                      $nyu-link-hover-color,
+                      $nyu-link-hover-color,
+                      transparent,
+                      transparent);
+  &:active,
+  &:focus,
+  &:hover {
+    text-decoration: underline !important;
+  }
+}
+
+@mixin nyu_red_button() {
+  @include nyu_button(#FFFFFF,
+                      #FFFFFF,
+                      #d9534f,
+                      #d43f3a,
+                      #FFFFFF,
+                      #FFFFFF,
+                      #c9302c,
+                      #ac2925);
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+//  Apply our Custom mixins to the various button selectors
+// -------------------------------------------------------------------------------------------------------------------
+// Scope within body so our CSS !important apply over any Morpheus defined !important
+body {
+  a {
+    &[href] {
+      &.btn-primary {
+        @include nyu_primary_button();
+      }
+    }
+  }
+
+  .button_color,
+  input[type="submit"],
+  input[type="button"].active,
+  button.btn-primary {
+    @include nyu_primary_button();
+  }
+
+  .button,
+  button,
+  button.ui-state-default,
+  .btn.btn-default,
+  input[type="reset"],
+  input[type="button"],
+  input[type='submit'][name^='cancel'],
+  input[type='submit'][name^='Cancel'],
+  input[type='submit'][value^='cancel'],
+  input[type='submit'][value^='Cancel'],
+  input[type='button'][name^='cancel'],
+  input[type='button'][name^='Cancel'],
+  input[type='button'][value^='cancel'],
+  input[type='button'][value^='Cancel'] {
+    @include nyu_secondary_button();
+  }
+
+  .button.link, a.btn-link, button.btn-link {
+    @include nyu_link_button();
+  }
+
+  .navIntraTool {
+    li {
+      span {
+        a {
+          @media #{$phone}{
+            @include nyu_secondary_button();
+          }
+        }
+        &.current{
+          @media #{$phone}{
+            @include nyu_primary_button();
+          }
+        }
+      }
+    }
+  }
+
+  .#{$namespace}toolTitleNav{
+    .#{$namespace}toolTitleNav__link{
+      text-transform: $nyu-button-text-transform !important;
+
+      .#{$namespace}itemTitle {
+        text-transform: $nyu-button-text-transform !important;
+        letter-spacing: normal !important;
+      }
+    }
+  }
+  @media #{$desktop} {
+    .#{$namespace}toolTitleNav{
+      .#{$namespace}toolTitleNav__link{
+        @include nyu_secondary_button();
+        line-height: 18px !important;
+        padding: 0.4em 0.8em 0.45em 0.8em !important;
+        font-family: $font-family !important;
+        font-size: 12px !important;
+        display: inline-block;
+
+        &:before {
+          font-family: 'FontAwesome' !important;
+        }
+
+        .#{$namespace}itemTitle {
+          font-size: 12px !important;
+          -webkit-font-smoothing: auto !important;
+        }
+      }
+    }
+  }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+//  Synoptic Tools and Help/News buttons (tool title actions)
+// -------------------------------------------------------------------------------------------------------------------
+body {
+  @media #{$tablet} {
+    .#{$namespace}toolTitleNav {
+      .#{$namespace}toolTitleNav__link {
+        @include nyu_secondary_button();
+        font-size: 12px !important;
+      }
+    }
+    sakai-iframe-myworkspace,
+    .#{$namespace}sakai-iframe-site,
+    .nyu-synoptic-announcements {
+      .#{$namespace}itemTitle {
+        display: inline !important;
+        font-size: 12px !important;
+      }
+    }
+  }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+//  Resources Tool
+//   - style secondary buttons
+// -------------------------------------------------------------------------------------------------------------------
+body {
+  // Site Resources
+  .#{$namespace}sakai-resources {
+    .inactive {
+      button {
+        span {
+          color: $nyu-button-secondary-text-color !important;
+        }
+      }
+    }
+  }
+
+  // Upload Files
+  #addContentForm {
+    input[type="button"] {
+      &#finish {
+        @include nyu_primary_button();
+      }
+    }
+  }
+
+  // Create Citation List
+  #citationsPortletBody {
+    #PickResource,
+    #CreateCitation,
+    #ImportCitation,
+    #addSectionButton {
+      @include nyu_secondary_button();
+    }
+    input[type="button"][value="Done"] {
+      @include nyu_primary_button();
+    }
+    .h1Editor {
+      input[type="button"] {
+        @include nyu_secondary_button();
+      }
+    }
+  }
+
+  // Trash
+  #restoreForm {
+    #restore-button {
+      @include nyu_primary_button();
+    }
+  }
+
+  // Transfer Files
+  input[type="button"][value="Return"] {
+    @include nyu_secondary_button();
+  }
+
+  // Quota
+  form[name="quotaForm"] {
+    input[type="submit"][name="eventSubmit_doCancel"] {
+      @include nyu_secondary_button();
+    }
+  }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+//  Messages Tool
+//   - style secondary buttons
+// -------------------------------------------------------------------------------------------------------------------
+body {
+  .#{$namespace}sakai-messages {
+
+    // Folder navigation
+    #prefs_pvt_form {
+      .itemNav {
+        .btn-primary {
+          @include nyu_secondary_button();
+        }
+      }
+      .searchNav {
+        #adv_button {
+          input[type="submit"] {
+            @include nyu_secondary_button();
+          }
+        }
+      }
+      #adv_input {
+        input[type="submit"].button_search {
+          @include nyu_secondary_button();
+        }
+      }
+    }
+
+    // Compose Message
+    #compose {
+      input[type="submit"][value="Add attachments"],
+      input[type="submit"][value="Preview"],
+      input[type="submit"][value="Save Draft"] {
+        @include nyu_secondary_button();
+      }
+    }
+
+    // Preview
+    #pvtMsgDetail {
+      input[type="submit"][value="Back"] {
+        @include nyu_secondary_button();
+      }
+    }
+  }
+}
+// -------------------------------------------------------------------------------------------------------------------
+//  Announcements Tool
+//   - style secondary buttons
+// -------------------------------------------------------------------------------------------------------------------
+body {
+  .#{$namespace}sakai-announcements {
+
+    // Listing
+    form[name="firstpageForm"],
+    form[name="prevpageForm"],
+    form[name="nextpageForm"],
+    form[name="lastpageForm"] {
+      input[type="submit"] {
+        @include nyu_secondary_button();
+      }
+    }
+
+    // View Announcement
+    form[name="formII"] {
+      .itemNav {
+        input[type="submit"][name="eventSubmit_doPrev_message"],
+        input[type="submit"][name="eventSubmit_doLinkcancel"],
+        input[type="submit"][name="eventSubmit_doNext_message"] {
+          @include nyu_secondary_button();
+        }
+      }
+    }
+
+    // Preview
+    form[name="form2"] {
+      input[type="submit"][name="eventSubmit_doPreviewrevise"] {
+        @include nyu_secondary_button();
+      }
+    }
+  }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+//  Assignments Tool
+//   - style secondary buttons
+// -------------------------------------------------------------------------------------------------------------------
+body {
+  .#{$namespace}sakai-assignment-grades {
+
+    // Pager
+    .assignment-pager {
+      form[name="firstpageForm"],
+      form[name="prevpageForm"],
+      form[name="nextpageForm"],
+      form[name="lastpageForm"] {
+        input[type="submit"] {
+          @include nyu_secondary_button();
+        }
+      }
+    }
+
+    // Listing
+    form[name="listAssignmentsForm"] {
+      #btnRemove {
+        @include nyu_secondary_button();
+      }
+    }
+
+    // Preview
+    #previewAssignmentsForm {
+      input[type="button"][name="revise"],
+      input[type="button"][name="done"] {
+        @include nyu_secondary_button();
+      }
+    }
+
+    // View Submissions
+    #defaultGradeForm {
+      input[type="button"][name="apply"] {
+        @include nyu_secondary_button();
+      }
+    }
+  }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+//  Gradebook Classic Tool
+//   - style secondary buttons
+// -------------------------------------------------------------------------------------------------------------------
+body {
+  .#{$namespace}sakai-gradebook-tool {
+
+    // Gradebook Item
+    #gbForm {
+      .nav {
+        input[type="submit"] {
+          @include nyu_secondary_button();
+        }
+      }
+      .gbContainerNav {
+        input[type="submit"] {
+          @include nyu_secondary_button();
+        }
+      }
+      .gbButtonBar {
+        input[type="submit"][value="Clear Changes"] {
+          @include nyu_secondary_button();
+        }
+      }
+      .gradingTable {
+        input[type="submit"] {
+          @include nyu_secondary_button();
+        }
+      }
+    }
+
+    // All Grades
+    #gbForm {
+      .listNav,
+      .gbListView {
+        input[type="submit"] {
+          @include nyu_secondary_button();
+        }
+      }
+    }
+
+    // Course Grades
+    #gbForm {
+      input[type="submit"][value="Download"],
+      input[type="submit"][value="Clear Changes"],
+      input[type="submit"][value="Replace Ungraded Items"] {
+        @include nyu_secondary_button();
+      }
+    }
+
+    // Course Grade Options
+    #gbForm {
+      .itemName {
+        input[type="submit"][value="Change grade type"] {
+          @include nyu_secondary_button();
+        }
+      }
+    }
+
+    // Import Grades
+    #gbForm {
+      input[type="submit"][value="Choose File"] {
+        @include nyu_secondary_button();
+      }
+    }
+  }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+//  Syllabus Tool
+//   - style secondary buttons
+// -------------------------------------------------------------------------------------------------------------------
+body {
+
+  // Listing/Inline Edit
+  .editable-popup {
+    .editableform {
+      button[type="submit"].editable-submit {
+        @include nyu_primary_button();
+
+        .ui-icon {
+          background-image: url(/library/webjars/jquery-ui/1.11.3/images/ui-icons_ffffff_256x240.png) !important;
+        }
+      }
+    }
+  }
+
+  .#{$namespace}sakai-syllabus {
+
+    // Edit Details
+    #readview {
+      input[type="submit"][value="Add attachments"],
+      input[type="submit"][value="Preview"],
+      input[type="submit"][value="Save Draft"] {
+        @include nyu_secondary_button();
+      }
+    }
+
+    // Bulk Edit
+    input[type="submit"][value="Reset"] {
+      @include nyu_secondary_button();
+    }
+
+  }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+//  Forums Tool
+//   - style secondary buttons
+// -------------------------------------------------------------------------------------------------------------------
+body {
+  .#{$namespace}sakai-forums {
+
+    // Add/Edit Forum/Topic
+    #revise {
+      input[type="submit"][value="Add attachments"],
+      input[type="submit"][value="Save Settings & Add Topic"],
+      input[type="submit"][value="Delete Forum"],
+      input[type="submit"][value="Save Draft"] {
+        @include nyu_secondary_button();
+      }
+    }
+
+    // Statistics and Grading
+    #dfStatisticsForm {
+      .navPanel {
+        .itemNav {
+          input[type="submit"] {
+            @include nyu_secondary_button();
+          }
+        }
+      }
+    }
+
+    // Start a Conversation
+    #dfCompose {
+      input[type="submit"][value="Add attachments"] {
+        @include nyu_secondary_button();
+      }
+    }
+
+    // Forum Settings
+    #revise {
+      .permissionRow {
+        .permissionCustomize {
+          @include nyu_secondary_button();
+
+          &.ui-state-active {
+            @include nyu_primary_button();
+          }
+        }
+      }
+    }
+  }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+//  Lessons Tool
+//   - red delete button
+// -------------------------------------------------------------------------------------------------------------------
+body {
+ .#{$namespace}sakai-lessonbuildertool {
+    .deleteButton {
+      @include nyu_red_button();
+    }
+  }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+//  Tests and Quizzes Tool
+//   - style secondary buttons
+// -------------------------------------------------------------------------------------------------------------------
+body {
+  .#{$namespace}sakai-samigo {
+    // Add / Edit Item
+    #itemForm {
+      input[type="submit"][value="Add Attachments"],
+      input[type="submit"][value="Upload"] {
+        @include nyu_secondary_button();
+      }
+    }
+
+    // Add / Edit Part
+    .attachmentEditor {
+      input[type="submit"] {
+        @include nyu_secondary_button();
+      }
+    }
+
+    // Publish
+    #publishAssessmentForm {
+      input[type="submit"] {
+        @include nyu_secondary_button();
+      }
+      input[type="submit"].active {
+        @include nyu_primary_button();
+      }
+    }
+
+    // Student View
+    #takeAssessmentForm {
+      input[type="submit"] {
+        @include nyu_secondary_button();
+      }
+      input[type="submit"].active {
+        @include nyu_primary_button();
+      }
+    }
+
+    // Event Log
+    #eventLogId {
+      input[type="submit"] {
+        @include nyu_secondary_button();
+      }
+      input[type="submit"].active {
+        @include nyu_primary_button();
+      }
+    }
+  }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+//  Calendar Tool
+//   - style secondary buttons
+// -------------------------------------------------------------------------------------------------------------------
+body {
+  .#{$namespace}sakai-schedule {
+
+    // Calendar by Week
+    form[name="weekform"] {
+      input[type="submit"][name="eventSubmit_doPrev"],
+      input[type="submit"][name="eventSubmit_doToday"],
+      input[type="submit"][name="eventSubmit_doNext"] {
+        @include nyu_secondary_button();
+      }
+    }
+
+    .viewLinkControl {
+      padding: 0 !important;
+
+      a {
+        color: $nyu-button-secondary-text-color !important;
+        text-decoration: none !important;
+        padding: 0.4em 0.8em 0.45em 0.8em;
+        display: inline-block;
+      }
+
+      &:hover {
+        a {
+          color: $nyu-button-secondary-hover-text-color !important;
+        }
+      }
+    }
+
+    // Add/Edit Event
+    input[type="submit"][name="eventSubmit_doEditfrequency"],
+    input[type="submit"][name="eventSubmit_doAttachments"] {
+      @include nyu_secondary_button();
+    }
+
+    // Event
+    form[name="navigatorform"] {
+      input[type="submit"][name="eventSubmit_doPrev_activity"],
+      input[type="submit"][name="eventSubmit_doToday"],
+      input[type="submit"][name="eventSubmit_doNext_activity"] {
+        @include nyu_secondary_button();
+      }
+    }
+    form[name="form"] {
+      input[type="submit"][name="eventSubmit_doDelete"] {
+        @include nyu_secondary_button();
+      }
+    }
+
+    // Fields
+    form[name="Options"] {
+      input[type="submit"][name="eventSubmit_doAddfield"] {
+        @include nyu_secondary_button();
+      }
+    }
+  }
+}

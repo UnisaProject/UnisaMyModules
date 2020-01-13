@@ -282,9 +282,8 @@ public abstract class Reader
 	 * Import a CSV file from a stream and callback on each row.
 	 * @param stream Stream of CSV (or other delimited data)
 	 * @param handler Callback for each row.
-	 * @return tzid of calendar (returns null if it does not exist)
 	 */
-	abstract public String importStreamFromDelimitedFile(
+	abstract public void importStreamFromDelimitedFile(
 		InputStream stream,
 		ReaderImportRowHandler handler)
 		throws ImportException;
@@ -306,17 +305,16 @@ public abstract class Reader
 	 * that will define the actual start time/date of the event.
 	 * @param importStream
 	 * @param customFieldNames
-	 * @param tzid
 	 * @throws ImportException
 	 */
-	abstract public List filterEvents(List events, String[] customFieldNames, String tzid) throws ImportException;
+	abstract public List filterEvents(List events, String[] customFieldNames) throws ImportException;
 
 	/**
 	 * Derived classes must provide a default mapping of text column header labels in the import file to
 	 * calendar event properties.
 	 * @throws ImportException
 	 */
-	abstract public Map<String, String> getDefaultColumnMap();
+	abstract public Map getDefaultColumnMap();
 	
 	/**
 	 */

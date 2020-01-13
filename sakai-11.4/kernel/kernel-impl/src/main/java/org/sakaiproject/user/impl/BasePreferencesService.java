@@ -21,15 +21,8 @@
 
 package org.sakaiproject.user.impl;
 
-import java.util.*;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.FunctionManager;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -54,25 +47,34 @@ import org.sakaiproject.util.BaseResourceProperties;
 import org.sakaiproject.util.BaseResourcePropertiesEdit;
 import org.sakaiproject.util.SingleStorageUser;
 import org.sakaiproject.util.StringUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.util.*;
 
 /**
  * <p>
  * BasePreferencesService is a Sakai Preferences implementation.
  * </p>
  */
-@Slf4j
 public abstract class BasePreferencesService implements PreferencesService, SingleStorageUser
 {
+	
+
 	/**
 	 * Key used to store the locale preferences
 	 */
 	private static final String LOCALE_PREFERENCE_KEY = "sakai:resourceloader";
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(BasePreferencesService.class);
 	/** Storage manager for this service. */
 	protected Storage m_storage = null;
 	/** The initial portion of a relative access point URL. */
 	protected String m_relativeAccessPoint = null;
 	/** the cache for Preference objects **/
-	private Cache<String, BasePreferences> m_cache;
+	private Cache m_cache;
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Abstractions, etc.
 	 *********************************************************************************************************************************************************************************************************************************************************/
@@ -226,13 +228,13 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 
 			
 			//register a cache
-			m_cache = memoryService().getCache(BasePreferencesService.class.getName() +".preferences");
+			m_cache = memoryService().newCache(BasePreferencesService.class.getName() +".preferences");
 			
-			log.info("init()");
+			M_log.info("init()");
 		}
 		catch (Exception t)
 		{
-			log.warn("init(): ", t);
+			M_log.warn("init(): ", t);
 		}
 	}
 
@@ -244,7 +246,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 		m_storage.close();
 		m_storage = null;
 
-		log.info("destroy()");
+		M_log.info("destroy()");
 	}
 
 	/**********************************************************************************************************************************************************************************************************************************************************
@@ -285,7 +287,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 			}
 			catch (IdUsedException e) {
 				//This should never happen
-				log.warn("Could not add "+id+" even after checking that it didn't exist in storage. Throwing IdUnusedException but this shouldn't be possible.",e);
+				M_log.warn("Could not add "+id+" even after checking that it didn't exist in storage. Throwing IdUnusedException but this shouldn't be possible.",e);
 				throw new IdUnusedException(id);
 			
 			}
@@ -316,7 +318,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 				}
 				catch (Exception e)
 				{
-					log.warn("commit(): closed PreferencesEdit", e);
+					M_log.warn("commit(): closed PreferencesEdit", e);
 				}
 				return;
 			}
@@ -365,7 +367,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 					}
 					catch (Exception e)
 					{
-						log.warn("cancel(): closed PreferencesEdit", e);
+						M_log.warn("cancel(): closed PreferencesEdit", e);
 					}
 					return;
 				}
@@ -393,7 +395,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 			}
 			catch (Exception e)
 			{
-				log.warn("remove(): closed PreferencesEdit", e);
+				M_log.warn("remove(): closed PreferencesEdit", e);
 			}
 			return;
 		}
@@ -424,7 +426,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 		}
 
 		// Try the cache
-		BasePreferences prefs = m_cache.get(id);
+		BasePreferences prefs = (BasePreferences) m_cache.get(id);
 
 		// Failing that, try the storage
 		if (prefs == null) {
@@ -578,12 +580,12 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 	/**
 	 * @inheritDoc
 	 */
-	public Collection<String> getEntityAuthzGroups(Reference ref, String userId)
+	public Collection getEntityAuthzGroups(Reference ref, String userId)
 	{
 		// double check that it's mine
 		if (!APPLICATION_ID.equals(ref.getType())) return null;
 
-		Collection<String> rv = new Vector<String>();
+		Collection rv = new Vector();
 
 		// for preferences access: no additional role realms
 		try
@@ -594,7 +596,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 		}
 		catch (NullPointerException e)
 		{
-			log.warn("getEntityAuthzGroups(): " + e);
+			M_log.warn("getEntityAuthzGroups(): " + e);
 		}
 
 		return rv;
@@ -781,7 +783,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 		protected ResourcePropertiesEdit m_properties = null;
 
 		/** The sets of keyed ResourceProperties. */
-		protected Map<String, ResourcePropertiesEdit> m_props = null;
+		protected Map m_props = null;
 		/** The event code for this edit. */
 		protected String m_event = null;
 		/** Active flag. */
@@ -801,7 +803,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 			ResourcePropertiesEdit props = new BaseResourcePropertiesEdit();
 			m_properties = props;
 
-			m_props = new Hashtable<>();
+			m_props = new Hashtable();
 
 			// if the id is not null (a new user, rather than a reconstruction)
 			// and not the anon (id == "") user,
@@ -831,7 +833,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 			// setup for properties
 			m_properties = new BaseResourcePropertiesEdit();
 
-			m_props = new Hashtable<>();
+			m_props = new Hashtable();
 
 			m_id = el.getAttribute("id");
 
@@ -888,7 +890,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 					else if (key.endsWith("sitenav"))
 					{
 						// matches Charon portal's value
-						key = SITENAV_PREFS_KEY;
+						key = "sakai:portal:sitenav";
 					}
 					else if (key.endsWith("ResourceLoader"))
 					{
@@ -936,14 +938,14 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 			m_properties.addAll(prefs.getProperties());
 
 			// %%% is this deep enough? -ggolden
-			m_props = new Hashtable<>();
+			m_props = new Hashtable();
 			m_props.putAll(((BasePreferences) prefs).m_props);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		public Element toXml(Document doc, Stack<Element> stack)
+		public Element toXml(Document doc, Stack stack)
 		{
 			Element prefs = doc.createElement("preferences");
 
@@ -953,7 +955,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 			}
 			else
 			{
-				stack.peek().appendChild(prefs);
+				((Element) stack.peek()).appendChild(prefs);
 			}
 
 			stack.push(prefs);
@@ -1039,7 +1041,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 		 */
 		public ResourceProperties getProperties(String key)
 		{
-			ResourceProperties rv = m_props.get(key);
+			ResourceProperties rv = (ResourceProperties) m_props.get(key);
 			if (rv == null)
 			{
 				// new, throwaway empty one
@@ -1052,7 +1054,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 		/**
 		 * @inheritDoc
 		 */
-		public Collection<String> getKeys()
+		public Collection getKeys()
 		{
 			return m_props.keySet();
 		}
@@ -1101,7 +1103,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 		{
 			synchronized (m_props)
 			{
-				ResourcePropertiesEdit rv = m_props.get(key);
+				ResourcePropertiesEdit rv = (ResourcePropertiesEdit) m_props.get(key);
 				if (rv == null)
 				{
 					// new one saved in the map
@@ -1205,7 +1207,7 @@ public abstract class BasePreferencesService implements PreferencesService, Sing
 		 */
 		public void valueUnbound(SessionBindingEvent event)
 		{
-			if (log.isDebugEnabled()) log.debug("valueUnbound()");
+			if (M_log.isDebugEnabled()) M_log.debug("valueUnbound()");
 
 			// catch the case where an edit was made but never resolved
 			if (m_active)

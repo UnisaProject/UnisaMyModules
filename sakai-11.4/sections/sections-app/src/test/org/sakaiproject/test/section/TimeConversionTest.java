@@ -22,14 +22,15 @@ package org.sakaiproject.test.section;
 
 import java.sql.Time;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.tool.section.jsf.JsfUtil;
+
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.sakaiproject.tool.section.jsf.JsfUtil;
-
-@Slf4j
 public class TimeConversionTest extends TestCase {
+	private static final Logger log = LoggerFactory.getLogger(TimeConversionTest.class);
 
 	private class TimeObject {
 		TimeObject(String startTime, boolean startTimeAm, String endTime, boolean endTimeAm) {

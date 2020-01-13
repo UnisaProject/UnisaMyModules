@@ -35,35 +35,39 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.antivirus.api.VirusFoundException;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.cover.SecurityService;
+import org.sakaiproject.cheftool.Context;
 import org.sakaiproject.component.cover.ComponentManager;
-import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.conditions.api.ConditionService;
+import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentCollection;
 import org.sakaiproject.content.api.ContentCollectionEdit;
 import org.sakaiproject.content.api.ContentEntity;
-import org.sakaiproject.content.api.ContentHostingHandlerResolver;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.content.api.ContentResourceEdit;
 import org.sakaiproject.content.api.ContentResourceFilter;
 import org.sakaiproject.content.api.ExpandableResourceType;
 import org.sakaiproject.content.api.GroupAwareEdit;
 import org.sakaiproject.content.api.GroupAwareEntity;
-import org.sakaiproject.content.api.GroupAwareEntity.AccessMode;
 import org.sakaiproject.content.api.ResourceToolAction;
 import org.sakaiproject.content.api.ResourceToolActionPipe;
 import org.sakaiproject.content.api.ResourceType;
 import org.sakaiproject.content.api.ResourceTypeRegistry;
-import org.sakaiproject.content.api.ServiceLevelAction;
+import org.sakaiproject.content.api.ContentHostingHandlerResolver;
 import org.sakaiproject.content.cover.ContentHostingService;
+import org.sakaiproject.content.api.ServiceLevelAction;
+import org.sakaiproject.content.api.GroupAwareEntity.AccessMode;
 import org.sakaiproject.content.cover.ContentTypeImageService;
 import org.sakaiproject.content.metadata.logic.MetadataService;
 import org.sakaiproject.content.metadata.model.MetadataType;
@@ -76,17 +80,14 @@ import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.entity.api.ResourcePropertiesEdit;
 import org.sakaiproject.entity.cover.EntityManager;
 import org.sakaiproject.event.cover.NotificationService;
-import org.sakaiproject.exception.IdUnusedException;
-import org.sakaiproject.exception.InconsistentException;
-import org.sakaiproject.exception.PermissionException;
-import org.sakaiproject.exception.SakaiException;
-import org.sakaiproject.exception.TypeException;
+import org.sakaiproject.exception.*;
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.thread_local.cover.ThreadLocalManager;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.cover.TimeService;
+import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.cover.UserDirectoryService;
 import org.sakaiproject.util.FormattedText;
@@ -106,7 +107,6 @@ import org.sakaiproject.util.Validator;
  * </ul>
  *
  */
-@Slf4j
 public class ListItem
 {
     /** Resource bundle using current language locale */
@@ -114,6 +114,8 @@ public class ListItem
 
 	/** Resource bundle using current language locale */
     private static ResourceLoader trb = new ResourceLoader("types");
+
+    private static final Logger logger = LoggerFactory.getLogger(ListItem.class);
     
     protected static final Comparator<ContentEntity> DEFAULT_COMPARATOR = ContentHostingService.newContentHostingComparator(ResourceProperties.PROP_DISPLAY_NAME, true);
 
@@ -142,7 +144,6 @@ public class ListItem
 	 * Services
 	 */
 	private static final MetadataService metadataService = (MetadataService) ComponentManager.get(MetadataService.class.getCanonicalName());
-	private static SecurityService securityService  = ComponentManager.get(SecurityService.class);
 	private static final org.sakaiproject.tool.api.ToolManager toolManager = (org.sakaiproject.tool.api.ToolManager) ComponentManager.get(org.sakaiproject.tool.api.ToolManager.class.getCanonicalName());
 
 	/** 
@@ -370,7 +371,6 @@ public class ListItem
 	protected String expandLabel;
 	protected String accessUrl;
 	protected String iconLocation;
-	protected String iconClass;
 	protected String mimetype;
 	protected String resourceType;
 	protected ResourceType resourceTypeDef = null;
@@ -618,11 +618,9 @@ public class ListItem
 		{
 			this.hoverText = typeDef.getLocalizedHoverText(entity);
 			this.iconLocation = typeDef.getIconLocation(entity);
-			this.iconClass = typeDef.getIconClass(entity);
 			if(typeDef.isExpandable())
 			{
 				this.expandIconLocation = ((ExpandableResourceType) typeDef).getIconLocation(this.entity, this.isExpanded);
-				this.iconClass = ((ExpandableResourceType) typeDef).getIconClass(this.entity, this.isExpanded);
 				this.expandLabel = ((ExpandableResourceType) typeDef).getLocalizedHoverText(this.entity, this.isExpanded);
 			}
 			String[] args = { typeDef.getLabel() };
@@ -731,10 +729,6 @@ public class ListItem
 			else if(this.iconLocation == null)
 			{
 				this.iconLocation = ContentTypeImageService.getContentTypeImage(this.mimetype);
-			}
-			if(this.iconClass == null && this.mimetype != null)
-			{ 
-				this.iconClass = ContentTypeImageService.getContentTypeImageClass(this.mimetype);
 			}
 			if (SecurityService.isSuperUser())
 			{
@@ -959,7 +953,7 @@ public class ListItem
 		    }
 		    catch (IdUnusedException e)
 		    {
-		        log.warn("IdUnusedException context == " + context);
+		        logger.warn("IdUnusedException context == " + context);
 		    }
 		}
 		return site;
@@ -1022,7 +1016,6 @@ public class ListItem
 		{
 			this.hoverText = resourceTypeDef.getLocalizedHoverText(null);
 			this.iconLocation = resourceTypeDef.getIconLocation(this.entity);
-			this.iconClass = resourceTypeDef.getIconClass(this.entity);
 			String[] args = { resourceTypeDef.getLabel() };
 			this.otherActionsLabel = trb.getFormattedMessage("action.other", args);
 			// NOTE: Don't do this at home kids, this is hackery of the worst order!
@@ -1065,10 +1058,6 @@ public class ListItem
 			else if(this.iconLocation == null)
 			{
 				this.iconLocation = ContentTypeImageService.getContentTypeImage(this.mimetype);
-			}
-			if(this.iconClass == null && this.mimetype != null)
-			{ 
-				this.iconClass = ContentTypeImageService.getContentTypeImageClass(this.mimetype);
 			}
 			String size = "";
 			if(pipe.getContent() != null)
@@ -1216,17 +1205,17 @@ public class ListItem
         catch (IdUnusedException e)
         {
             // TODO Auto-generated catch block
-            log.warn("IdUnusedException " + e);
+            logger.warn("IdUnusedException " + e);
         }
         catch (TypeException e)
         {
             // TODO Auto-generated catch block
-            log.warn("TypeException " + e);
+            logger.warn("TypeException " + e);
         }
         catch (PermissionException e)
         {
             // TODO Auto-generated catch block
-            log.warn("PermissionException " + e);
+            logger.warn("PermissionException " + e);
         }
 
 		this.containingCollectionId = contentService.getContainingCollectionId(entityId);
@@ -1646,7 +1635,7 @@ public class ListItem
 			// what to do with errorMessages
 			if(errorMessages.length() > 0)
 			{
-				log.warn("ListItem.captureDescription() containingCollectionId: " + this.containingCollectionId + " id: " + this.id + " error in FormattedText.processFormattedText(): " + errorMessages.toString());
+				logger.warn("ListItem.captureDescription() containingCollectionId: " + this.containingCollectionId + " id: " + this.id + " error in FormattedText.processFormattedText(): " + errorMessages.toString());
 			}
 			this.setDescription(description);
 		}
@@ -1689,7 +1678,7 @@ public class ListItem
 	}
 
 	protected void captureHtmlInline(ParameterParser params, String index) {
-		log.debug("got allow inline of " + params.getBoolean("allowHtmlInline" + index));
+		logger.debug("got allow inline of " + params.getBoolean("allowHtmlInline" + index));
 		this.allowHtmlInline = params.getBoolean("allowHtmlInline" + index);
 	}
 
@@ -1848,7 +1837,7 @@ public class ListItem
 			if(this.parent == null)
 			{
 				label = trb.getString("access.site.noparent");
-				log.warn("ListItem.getLongAccessLabel(): Unable to display label because isSiteOnly == true and parent == null and constructor == " + this.constructor);  
+				logger.warn("ListItem.getLongAccessLabel(): Unable to display label because isSiteOnly == true and parent == null and constructor == " + this.constructor);  
 			}
 			else
 			{
@@ -1884,7 +1873,7 @@ public class ListItem
 	    	{
 	    		if(this.id == null)
 	    		{
-					log.warn("ListItem.checkParent(): parent == null, containingCollectionId == null, id == null and constructor == " + this.constructor, new Throwable());  
+					logger.warn("ListItem.checkParent(): parent == null, containingCollectionId == null, id == null and constructor == " + this.constructor, new Throwable());  
 	    			return;
 	    		}
 	    		this.containingCollectionId = ContentHostingService.getContainingCollectionId(this.id);
@@ -1896,17 +1885,17 @@ public class ListItem
 	        catch (IdUnusedException e)
 	        {
 	            // TODO Auto-generated catch block
-	            log.warn("IdUnusedException ", e);
+	            logger.warn("IdUnusedException ", e);
 	        }
 	        catch (TypeException e)
 	        {
 	            // TODO Auto-generated catch block
-	            log.warn("TypeException ", e);
+	            logger.warn("TypeException ", e);
 	        }
 	        catch (PermissionException e)
 	        {
 	            // TODO Auto-generated catch block
-	            log.warn("PermissionException ", e);
+	            logger.warn("PermissionException ", e);
 	        }
 	    }
     }
@@ -1969,15 +1958,15 @@ public class ListItem
 			} 
 			catch (IdUnusedException e) 
 			{
-				log.warn("IdUnusedException " + e);
+				logger.warn("IdUnusedException " + e);
 			} 
 			catch (TypeException e) 
 			{
-				log.warn("TypeException " + e);
+				logger.warn("TypeException " + e);
 			} 
 			catch (PermissionException e) 
 			{
-				log.warn("PermissionException " + e);
+				logger.warn("PermissionException " + e);
 			}
 			
 		}
@@ -2160,7 +2149,7 @@ public class ListItem
 
         if (roleIds.size() == 0)
         {
-            log.warn("ListItem: Constructing a roles access label with no roles defined");
+            logger.warn("ListItem: Constructing a roles access label with no roles defined");
             return "";
         }
 
@@ -2355,14 +2344,6 @@ public class ListItem
 	public String getIconLocation()
 	{
 		return this.iconLocation;
-	}
-	
-	/**
-	 * @return the iconClass
-	 */
-	public String getIconClass()
-	{
-		return this.iconClass;
 	}
 
 	/**
@@ -2670,9 +2651,9 @@ public class ListItem
     	if (group == null || group.getContainingSite() == null) return false;
     	
     	String userId = UserDirectoryService.getCurrentUser().getId();
-    	if (securityService.unlock(userId,ContentHostingService.AUTH_RESOURCE_ALL_GROUPS, group.getContainingSite().getReference())) return true;
-    			
-    	return securityService.unlock(userId,SiteService.SITE_VISIT,group.getReference());
+    	if (group.getContainingSite().isAllowed(userId, ContentHostingService.AUTH_RESOURCE_ALL_GROUPS)) return true;
+    	
+    	return group.isAllowed(userId, SiteService.SITE_VISIT);
     }
     
 	/**
@@ -2968,7 +2949,6 @@ public class ListItem
     	if(this.resourceTypeDef != null && this.resourceTypeDef instanceof ExpandableResourceType)
     	{
  			this.expandIconLocation = ((ExpandableResourceType) resourceTypeDef).getIconLocation(this.entity, this.isExpanded);
- 			this.iconClass = ((ExpandableResourceType) resourceTypeDef).getIconClass(this.entity, this.isExpanded);
 			this.expandLabel = ((ExpandableResourceType) resourceTypeDef).getLocalizedHoverText(this.entity, this.isExpanded);
 		}
     }
@@ -3028,14 +3008,6 @@ public class ListItem
 	public void setIconLocation(String iconLocation)
 	{
 		this.iconLocation = iconLocation;
-	}
-	
-	/**
-	 * @param iconClass the iconClass to set
-	 */
-	public void setIconClass(String iconClass)
-	{
-		this.iconClass = iconClass;
 	}
 
 	/**
@@ -3344,7 +3316,7 @@ public class ListItem
 
 	public void updateContentCollectionEdit(ContentCollectionEdit edit) 
 	{
-		log.debug("updateContentCollectionEdit()");
+		logger.debug("updateContentCollectionEdit()");
 		ResourcePropertiesEdit props = edit.getPropertiesEdit();
 		setDisplayNameOnEntity(props);
 		setDescriptionOnEntity(props);
@@ -3385,7 +3357,7 @@ public class ListItem
 	
 	private void setHtmlInlineOnEntity(ResourcePropertiesEdit props, ContentCollectionEdit topFolder) 
 	{
-		log.debug("setHtmlInlineOnEntity() with allowHtmlInline: " + allowHtmlInline);
+		logger.debug("setHtmlInlineOnEntity() with allowHtmlInline: " + allowHtmlInline);
 		if(SecurityService.isSuperUser())
 		{
 			if(allowHtmlInline != null)
@@ -3405,7 +3377,7 @@ public class ListItem
 	
 	private void setHtmlInlineOnEntity(ResourcePropertiesEdit props, ContentResourceEdit topFolder) 
 	{
-		log.debug("setHtmlInlineOnEntity() with allowHtmlInline: " + allowHtmlInline);
+		logger.debug("setHtmlInlineOnEntity() with allowHtmlInline: " + allowHtmlInline);
 		if(SecurityService.isSuperUser())
 		{
 			if(allowHtmlInline != null)
@@ -3449,7 +3421,7 @@ public class ListItem
 				ContentHostingService.commitResource(res, NotificationService.NOTI_NONE);
 			}
 		} catch (SakaiException se) {
-			log.warn(String.format("Failed to set property '%s' on '%s' ", property, contentId), se);
+			logger.warn(String.format("Failed to set property '%s' on '%s' ", property, contentId), se);
 		}
 	}
 	
@@ -3525,11 +3497,11 @@ public class ListItem
 		} 
 		catch (InconsistentException e) 
 		{
-			log.warn("InconsistentException " + e);
+			logger.warn("InconsistentException " + e);
 		} 
 		catch (PermissionException e) 
 		{
-			log.warn("PermissionException " + e);
+			logger.warn("PermissionException " + e);
 		}
 	}
 
@@ -4170,7 +4142,7 @@ public class ListItem
 					}
 				} else {
 					// Warn about other types.
-					log.warn("Unable to save metadata with key: "+ entry.getKey()+ " value: "+ entry.getValue());
+					logger.warn("Unable to save metadata with key: "+ entry.getKey()+ " value: "+ entry.getValue());
 				}
 			}
 		}
@@ -4352,11 +4324,11 @@ public class ListItem
 		}
 		catch (EntityPropertyNotDefinedException e)
 		{
-			log.info("EntityPropertyNotDefinedException for size of " + entity.getId());
+			logger.info("EntityPropertyNotDefinedException for size of " + entity.getId());
 		}
 		catch(EntityPropertyTypeException e)
 		{
-			log.info("EntityPropertyTypeException not long of " + entity.getId());
+			logger.info("EntityPropertyTypeException not long of " + entity.getId());
 		}
 		return sizzle;
 	}
@@ -4409,7 +4381,7 @@ public class ListItem
 		}
 		catch (EntityPropertyNotDefinedException e)
 		{
-			log.warn("EntityPropertyNotDefinedException for size of " + entity.getId());
+			logger.warn("EntityPropertyNotDefinedException for size of " + entity.getId());
 		}
 		catch (EntityPropertyTypeException e)
 		{

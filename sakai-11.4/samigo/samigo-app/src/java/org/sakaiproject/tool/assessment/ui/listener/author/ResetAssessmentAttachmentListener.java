@@ -19,8 +19,9 @@
  *
  **********************************************************************************/
 
-package org.sakaiproject.tool.assessment.ui.listener.author;
 
+
+package org.sakaiproject.tool.assessment.ui.listener.author;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +29,8 @@ import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
@@ -48,10 +49,11 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
  * <p>Description: Sakai Assessment Manager</p>
  * @version $Id$
  */
-@Slf4j
+
 public class ResetAssessmentAttachmentListener
     implements ActionListener
 {
+  private static Logger log = LoggerFactory.getLogger(ResetAssessmentAttachmentListener.class);
 
   public ResetAssessmentAttachmentListener()
   {

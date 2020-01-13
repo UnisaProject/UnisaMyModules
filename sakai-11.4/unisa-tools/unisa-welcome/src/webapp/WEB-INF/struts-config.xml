@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans >
+    <form-bean name="welcomedisplayform" type="za.ac.unisa.lms.tools.welcome.forms.WelcomeDisplayForm" />
+
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	<action-mappings>
+		<action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.welcome.actions.DefaultAction">
+      <forward
+        name="defaultForward"
+        path="/welcomedisplay.do?action=display"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="welcomedisplayform"
+      input="/WEB-INF/jsp/welcomedisplay.jsp"
+      name="welcomedisplayform"
+      parameter="action"
+      path="/welcomedisplay"
+      scope="request"
+      type="za.ac.unisa.lms.tools.welcome.actions.WelcomeDisplayAction"
+      validate="false">
+      <forward name="welcomedisplayForward" path="/WEB-INF/jsp/welcomedisplay.jsp" />
+      <forward name="editForward" path="/WEB-INF/jsp/welcomeedit.jsp" />
+    </action>
+
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.welcome.ApplicationResources" />
+</struts-config>
+

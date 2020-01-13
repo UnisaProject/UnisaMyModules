@@ -26,10 +26,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
-import org.hibernate.type.DateType;
-import org.hibernate.type.LongType;
-import org.hibernate.type.StringType;
 import org.sakaiproject.genericdao.api.search.Restriction;
 import org.sakaiproject.genericdao.api.search.Search;
 import org.sakaiproject.sms.bean.SearchFilterBean;
@@ -47,8 +47,6 @@ import org.sakaiproject.sms.model.constants.SmsConst_DeliveryStatus;
 import org.sakaiproject.sms.model.constants.SmsConstants;
 import org.sakaiproject.sms.util.DateUtil;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * The data service will handle all sms Message database transactions for the
  * sms tool in Sakai.
@@ -57,11 +55,11 @@ import lombok.extern.slf4j.Slf4j;
  * @version 1.0
  * @created 25-Nov-2008
  */
-@Slf4j
 @SuppressWarnings("unchecked")
 public class SmsMessageLogicImpl extends SmsLogic implements SmsMessageLogic {
 
-        
+	private static final Log LOG = LogFactory.getLog(SmsMessageLogicImpl.class);
+
 	private ExternalLogic externalLogic;
 
 	public void setExternalLogic(ExternalLogic externalLogic) {
@@ -179,7 +177,7 @@ public class SmsMessageLogicImpl extends SmsLogic implements SmsMessageLogic {
 				getPageSize());
 		con.setTotalResultSetSize(Long.valueOf(messages.size()));
 		con.calculateAndSetPageResults(messages, searchBean.getCurrentPage());
-		log.debug(con.toString());
+		LOG.debug(con.toString());
 
 		return con;
 	}
@@ -218,8 +216,8 @@ public class SmsMessageLogicImpl extends SmsLogic implements SmsMessageLogic {
 		String hql = "from SmsMessage mes where mes.smscMessageId = :smscMessageId and mes.smscId = :smscID";
 
 		List<SmsMessage> messages = smsDao.runQuery(hql, new QueryParameter(
-				"smscMessageId", smscMessageId, StringType.INSTANCE),
-				new QueryParameter("smscID", smscID, StringType.INSTANCE));
+				"smscMessageId", smscMessageId, Hibernate.STRING),
+				new QueryParameter("smscID", smscID, Hibernate.STRING));
 		if (messages != null && !messages.isEmpty()) {
 			return messages.get(0);
 		}
@@ -238,11 +236,11 @@ public class SmsMessageLogicImpl extends SmsLogic implements SmsMessageLogic {
 		if (smsTaskId != null) {
 			hql.append(" and message.smsTask.id = :smsTaskId ");
 		}
-		log
+		LOG
 				.debug("getSmsTasksFilteredByMessageStatus() HQL: "
 						+ hql.toString());
 		QueryParameter[] queryParameters = { new QueryParameter("smsTaskId",
-				smsTaskId, LongType.INSTANCE) };
+				smsTaskId, Hibernate.LONG) };
 
 		List theMessages = smsDao.runQuery(hql.toString(), queryParameters);
 		if (theMessages != null && !theMessages.isEmpty()) {
@@ -254,7 +252,7 @@ public class SmsMessageLogicImpl extends SmsLogic implements SmsMessageLogic {
 	private List<SmsMessage> getSmsMessagesForCriteria(
 			SearchFilterBean searchBean) throws SmsSearchException {
 		Search search = new Search();
-		log.debug(searchBean.toString());
+		LOG.debug(searchBean.toString());
 		try {
 			// Message status
 			if (searchBean.getStatus() != null
@@ -347,7 +345,7 @@ public class SmsMessageLogicImpl extends SmsLogic implements SmsMessageLogic {
 			}
 			hql.append(" and message.statusCode IN (:statusCodes) ");
 
-			log.debug("getSmsTasksFilteredByMessageStatus() HQL: "
+			LOG.debug("getSmsTasksFilteredByMessageStatus() HQL: "
 					+ hql.toString());
 
 			QueryParameter[] queryParameters;
@@ -359,11 +357,11 @@ public class SmsMessageLogicImpl extends SmsLogic implements SmsMessageLogic {
 			}
 
 			queryParameters[0] = new QueryParameter("statusCodes", statusCodes,
-					StringType.INSTANCE);
+					Hibernate.STRING);
 
 			if (smsTaskId != null) {
 				queryParameters[1] = new QueryParameter("smsTaskId", smsTaskId,
-						LongType.INSTANCE);
+						Hibernate.LONG);
 			}
 			messages = smsDao.runQuery(hql.toString(), queryParameters);
 		}
@@ -377,10 +375,10 @@ public class SmsMessageLogicImpl extends SmsLogic implements SmsMessageLogic {
 		QueryParameter[] queryParameters = new QueryParameter[2];
 
 		queryParameters[0] = new QueryParameter("statusCode", 
-				SmsConst_DeliveryStatus.STATUS_SENT, StringType.INSTANCE);
+				SmsConst_DeliveryStatus.STATUS_SENT, Hibernate.STRING);
 
 		queryParameters[1] = new QueryParameter("cutoffTime", 
-				cutoffTime, DateType.INSTANCE);
+				cutoffTime, Hibernate.DATE);
 
 		return smsDao.runQuery(hql, queryParameters);
 	}
@@ -407,8 +405,8 @@ public class SmsMessageLogicImpl extends SmsLogic implements SmsMessageLogic {
 	}
 
 	public Session getNewHibernateSession() {
-                
-		return smsDao.getTheHibernateTemplateSession();//smsDao.getTheHibernateTemplate().getSessionFactory().openSession();
+		return smsDao.getTheHibernateTemplate().getSessionFactory()
+				.openSession();
 	}
 
 	public void updateStatusForMessages(Long smsTaskId, String oldStatus, String newStatus) {

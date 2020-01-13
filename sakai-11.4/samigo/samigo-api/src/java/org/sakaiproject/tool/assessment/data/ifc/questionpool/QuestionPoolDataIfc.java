@@ -126,10 +126,10 @@ public interface QuestionPoolDataIfc
   Integer getQuestionSize();
 
   // for JSF, sigh - daisyf
-  void setSubPoolSize(Long subPoolSize);
+  void setSubPoolSize(Integer subPoolSize);
 
   // for JSF, sigh - daisyf
-  Long getSubPoolSize();
+  Integer getSubPoolSize();
 
   Object clone();
 }

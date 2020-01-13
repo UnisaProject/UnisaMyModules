@@ -31,17 +31,16 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.context.ConfigurableApplicationContext;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.api.ComponentManager;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.component.api.ServerConfigurationService.ConfigData;
 import org.sakaiproject.util.ComponentsLoader;
 import org.sakaiproject.util.SakaiApplicationContext;
 import org.sakaiproject.util.SakaiComponentEvent;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * <p>
@@ -53,8 +52,10 @@ import org.sakaiproject.util.SakaiComponentEvent;
  * for details.
  * </p>
  */
-@Slf4j
 public class SpringCompMgr implements ComponentManager {
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(SpringCompMgr.class);
+
 	/**
 	 * System property to control if we close on jvm shutdown (if set) or on the
 	 * loss of our last child (if not set).
@@ -94,8 +95,6 @@ public class SpringCompMgr implements ComponentManager {
 	/** Records that close has been called. */
 	protected boolean m_hasBeenClosed = false;
 
-	protected boolean lateRefresh = false;
-
 	/**
 	 * Initialize.
 	 * 
@@ -123,8 +122,6 @@ public class SpringCompMgr implements ComponentManager {
 	public void init(boolean lateRefresh) {
 		if (m_ac != null)
 			return;
-
-		this.lateRefresh = lateRefresh;
 
 		// Make sure a "sakai.home" system property is set.
 		ensureSakaiHome();
@@ -162,15 +159,14 @@ public class SpringCompMgr implements ComponentManager {
 			try {
 				// get the singletons loaded
 				m_ac.refresh();
-				m_ac.start();
 				m_ac.publishEvent(new SakaiComponentEvent(this, SakaiComponentEvent.Type.STARTED));
 			} catch (Exception e) {
 				if (Boolean.valueOf(System.getProperty(SHUTDOWN_ON_ERROR, "false"))) {
-					log.error(e.getMessage(), e);
-					log.error("Shutting down JVM");
+					M_log.error(e.getMessage(), e);
+					M_log.error("Shutting down JVM");
 					System.exit(1);
 				} else {
-					log.error(e.getMessage(), e);
+					M_log.error(e.getMessage(), e);
 				}
 			}
 
@@ -179,30 +175,30 @@ public class SpringCompMgr implements ComponentManager {
 			    final ServerConfigurationService scs = (ServerConfigurationService) this.get(ServerConfigurationService.class);
 			    if (scs != null) {
 		            ConfigData cd = scs.getConfigData();
-		            log.info("Configuration loaded "+cd.getTotalConfigItems()+" values, "+cd.getRegisteredConfigItems()+" registered");
+		            M_log.info("Configuration loaded "+cd.getTotalConfigItems()+" values, "+cd.getRegisteredConfigItems()+" registered");
 		            if (scs.getBoolean("config.dump.to.log", false)) {
 		                // output the config logs now and then output then again in 120 seconds
-		                log.info("Configuration values:\n" + cd.toString());
+		                M_log.info("Configuration values:\n" + cd.toString());
 		                Timer timer = new Timer(true);
 		                timer.schedule(new TimerTask() {
 		                    @Override
 		                    public void run() {
-		                        log.info("Configuration values: (delay 1):\n" + scs.getConfigData().toString());
+		                        M_log.info("Configuration values: (delay 1):\n" + scs.getConfigData().toString());
 		                    }
 		                }, 120*1000);
 		                timer.schedule(new TimerTask() {
 		                    @Override
 		                    public void run() {
-		                        log.info("Configuration values: (delay 2):\n" + scs.getConfigData().toString());
+		                        M_log.info("Configuration values: (delay 2):\n" + scs.getConfigData().toString());
 		                    }
 		                }, 300*1000);
 		            }
 			    } else {
 			        // probably testing so just say we cannot dump the config
-		            log.warn("Configuration: Unable to get and dump out the registered server config values because no ServerConfigurationService is available - this is OK if this is part of a test, this is very bad otherwise");
+		            M_log.warn("Configuration: Unable to get and dump out the registered server config values because no ServerConfigurationService is available - this is OK if this is part of a test, this is very bad otherwise");
 			    }
 			} catch (Exception e) {
-			    log.error("Configuration: Unable to get and dump out the registered server config values (config.dump.to.log): "+e, e);
+			    M_log.error("Configuration: Unable to get and dump out the registered server config values (config.dump.to.log): "+e, e);
 			}
 		}
 	}
@@ -226,11 +222,11 @@ public class SpringCompMgr implements ComponentManager {
 			component = m_ac.getBean(iface.getName(), iface);
 		} catch (NoSuchBeanDefinitionException e) {
 			// This is an expected outcome, we don't usually want logs
-			if (log.isDebugEnabled()) {
-				log.debug("get(" + iface.getName() + "): " + e, e);
+			if (M_log.isDebugEnabled()) {
+				M_log.debug("get(" + iface.getName() + "): " + e, e);
 			}
 		} catch (Exception e) {
-			log.error("get(" + iface.getName() + "): ", e);
+			M_log.error("get(" + iface.getName() + "): ", e);
 		}
 
 		return component;
@@ -246,11 +242,11 @@ public class SpringCompMgr implements ComponentManager {
 			component = m_ac.getBean(ifaceName);
 		} catch (NoSuchBeanDefinitionException e) {
 			// This is an expected outcome, we don't usually want logs
-			if (log.isDebugEnabled()) {
-				log.debug("get(" + ifaceName + "): " + e, e);
+			if (M_log.isDebugEnabled()) {
+				M_log.debug("get(" + ifaceName + "): " + e, e);
 			}
 		} catch (Exception e) {
-			log.error("get(" + ifaceName + "): ", e);
+			M_log.error("get(" + ifaceName + "): ", e);
 		}
 
 		return component;
@@ -301,9 +297,6 @@ public class SpringCompMgr implements ComponentManager {
 	 */
 	public void close() {
 		m_hasBeenClosed = true;
-		if (!lateRefresh) {
-			m_ac.stop();
-		}
 		if(m_ac.isActive()) {
 			m_ac.publishEvent(new SakaiComponentEvent(this, SakaiComponentEvent.Type.STOPPING));
 		}
@@ -351,7 +344,7 @@ public class SpringCompMgr implements ComponentManager {
 		}
 
 		if (componentsRoot == null) {
-			log.warn("loadComponents: cannot establish a root directory for the components packages");
+			M_log.warn("loadComponents: cannot establish a root directory for the components packages");
 			return;
 		}
 
@@ -401,8 +394,9 @@ public class SpringCompMgr implements ComponentManager {
 	 * @inheritDoc
 	 */
 	public Properties getConfig() {
-		if (log.isErrorEnabled())
-			log.error(
+		if (M_log.isErrorEnabled())
+			M_log
+					.error(
 							"getConfig called; ServerConfigurationService should be used instead",
 							new Exception());
 		return null;
@@ -446,10 +440,11 @@ public class SpringCompMgr implements ComponentManager {
 											// try to create one
 		{
 			if (sakaiHomeDirectory.mkdir()) {
-				log.debug("Created sakai.home directory at: "
+				M_log
+						.debug("Created sakai.home directory at: "
 								+ sakaiHomePath);
 			} else {
-				log.warn("Could not create sakai.home directory at: "
+				M_log.warn("Could not create sakai.home directory at: "
 						+ sakaiHomePath);
 			}
 		}

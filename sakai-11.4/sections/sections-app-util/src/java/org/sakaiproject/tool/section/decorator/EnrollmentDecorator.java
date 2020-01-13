@@ -23,10 +23,9 @@ package org.sakaiproject.tool.section.decorator;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Map;
-import java.text.Collator;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.builder.CompareToBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.section.api.coursemanagement.CourseSection;
 import org.sakaiproject.section.api.coursemanagement.EnrollmentRecord;
 import org.sakaiproject.section.api.coursemanagement.User;
@@ -37,9 +36,9 @@ import org.sakaiproject.section.api.coursemanagement.User;
  * @author <a href="mailto:jholtzman@berkeley.edu">Josh Holtzman</a>
  *
  */
-@Slf4j
 public class EnrollmentDecorator implements Serializable {
     private static final long serialVersionUID = 1L;
+    private static final Logger log = LoggerFactory.getLogger(EnrollmentDecorator.class);
 
     protected EnrollmentRecord enrollment;
 
@@ -53,15 +52,8 @@ public class EnrollmentDecorator implements Serializable {
 
     public static final Comparator<EnrollmentDecorator> getNameComparator(final boolean sortAscending) {
         return new Comparator<EnrollmentDecorator>() {
-            private final Collator collator = Collator.getInstance();        	
-            private int compareUsers(final User u1, final User u2) {
-        	    this.collator.setStrength(Collator.PRIMARY);
-        	    return new CompareToBuilder()
-        		        .append(u1.getSortName(), u2.getSortName(), this.collator)        				
-        		        .toComparison();
-            }
             public int compare(EnrollmentDecorator enr1, EnrollmentDecorator enr2) {
-                int comparison = compareUsers(enr1.getUser(), enr2.getUser());
+                int comparison = enr1.getUser().getSortName().compareTo(enr2.getUser().getSortName());
                 return sortAscending ? comparison : (-1 * comparison);
             }
         };

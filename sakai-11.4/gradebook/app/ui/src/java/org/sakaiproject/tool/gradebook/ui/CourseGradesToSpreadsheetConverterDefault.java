@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.section.api.coursemanagement.EnrollmentRecord;
 import org.sakaiproject.section.api.coursemanagement.User;
 import org.sakaiproject.tool.gradebook.CourseGrade;
@@ -39,32 +41,33 @@ import org.sakaiproject.tool.gradebook.jsf.FacesUtil;
  */
 public class CourseGradesToSpreadsheetConverterDefault implements CourseGradesToSpreadsheetConverter {
 
+	private static final Logger log = LoggerFactory.getLogger(CourseGradesToSpreadsheetConverterDefault.class);
+
 	/* (non-Javadoc)
 	 * @see org.sakaiproject.tool.gradebook.CourseGradesConverter#getSpreadsheetData(java.util.List, org.sakaiproject.tool.gradebook.CourseGrade, java.util.Map)
 	 */
-	@Override
-	public List<List<Object>> getSpreadsheetData(final List<EnrollmentRecord> enrollments, final CourseGrade courseGrade, final Map<String, CourseGradeRecord> gradesMap, final List<String> fields) {
+	public List<List<Object>> getSpreadsheetData(List<EnrollmentRecord> enrollments, CourseGrade courseGrade, Map<String, CourseGradeRecord> gradesMap, List<String> fields) {
 
-		final List<List<Object>> spreadsheetData = new ArrayList<>();
+		List<List<Object>> spreadsheetData = new ArrayList<List<Object>>();
 
 		// Build column headers.
-		final List<Object> headerRow = new ArrayList<>();
-		for (final String headerField : fields){
+		List<Object> headerRow = new ArrayList<Object>();
+		for (String headerField : fields){
 			headerRow.add(FacesUtil.getLocalizedString(headerField));
 		}
 		spreadsheetData.add(headerRow);
 
 		// Build student grade rows.
-		for (final Object enrollment : enrollments) {
-			final User student = ((EnrollmentRecord)enrollment).getUser();
-			final String studentUid = student.getUserUid();
-			final Map studentMap = (Map)gradesMap.get(studentUid);
-			final List<Object> row = new ArrayList<>();
+		for (Object enrollment : enrollments) {
+			User student = ((EnrollmentRecord)enrollment).getUser();
+			String studentUid = student.getUserUid();
+			Map studentMap = (Map)gradesMap.get(studentUid);
+			List<Object> row = new ArrayList<Object>();
 			if (studentMap != null) {
-				final CourseGradeRecord gradeRecord = (CourseGradeRecord)studentMap.get(courseGrade.getId());
+				CourseGradeRecord gradeRecord = (CourseGradeRecord)studentMap.get(courseGrade.getId()); 
 				if (gradeRecord != null) {
 
-					for (final String field : fields){
+					for (String field : fields){
 
 						switch (StandardFields.valueOf(field)) {
 						case usereid:
@@ -107,20 +110,19 @@ public class CourseGradesToSpreadsheetConverterDefault implements CourseGradesTo
 		}
 		return spreadsheetData;
 	}
-
+	
 	/**
-	 *
+	 * 
 	 * @return letter grade representation of grade or null if no course grade yet
 	 */
-    public String getCalculatedLetterGrade(final CourseGrade courseGrade, final CourseGradeRecord gradeRecord) {
-
-		final GradeMapping gradeMapping = courseGrade.getGradebook().getSelectedGradeMapping();
-		final Double grade = gradeRecord.getAutoCalculatedGrade();
-		String letterGrade = null;
-		if (grade != null) {
-			letterGrade = gradeMapping.getMappedGrade(gradeRecord.getNonNullAutoCalculatedGrade());
-		}
-		return letterGrade;
+    public String getCalculatedLetterGrade(CourseGrade courseGrade, CourseGradeRecord gradeRecord) {
+    	
+    	GradeMapping gradeMapping = courseGrade.getGradebook().getSelectedGradeMapping();
+    	Double grade = gradeRecord.getAutoCalculatedGrade();
+    	String letterGrade = null;
+    	if (grade != null)
+    		letterGrade = gradeMapping.getGrade(gradeRecord.getNonNullAutoCalculatedGrade());
+    	return letterGrade;
     }
 
 	public enum StandardFields

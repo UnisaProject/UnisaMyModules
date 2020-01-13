@@ -40,14 +40,16 @@ include file for displaying multiple choice single correct survey questions
         rendered="#{question.hint == '***'}" />
     </h:column>
     <h:column><%-- radio button, select answer --%>
-      <h:selectOneRadio id="samigo-mc-single-choice" value="#{question.hint}" disabled="true" rendered="#{question.hint != '***'}">
-        <f:selectItem itemLabel="#{answer.label}. " itemValue="#{answer.sequence}"/>
+      <h:selectOneRadio value="#{question.hint}"  disabled="true"
+        rendered="#{question.hint != '***'}">
+        <f:selectItem itemLabel="#{answer.label}. "
+          itemValue="#{answer.sequence}"/>
       </h:selectOneRadio>
     </h:column>
     <h:column>
-      <h:outputLabel for="samigo-mc-single-choice" styleClass="mcAnswerText" value="#{answer.text}" escape="false" >
-        <f:converter converterId="org.sakaiproject.tool.assessment.jsf.convert.AnswerSurveyConverter" />
-      </h:outputLabel>
+      <h:outputText styleClass="mcAnswerText" value="#{answer.text}" escape="false" >
+      	<f:converter converterId="org.sakaiproject.tool.assessment.jsf.convert.AnswerSurveyConverter" />
+      </h:outputText>
     </h:column>
    </h:dataTable>
    </h:column>
@@ -60,4 +62,3 @@ include file for displaying multiple choice single correct survey questions
     <h:outputText id="answerKeyMC"
        value="#{question.answerKey}" escape="false" />
   </h:panelGroup>
-<%@ include file="/jsf/evaluation/item/displayTags.jsp" %>

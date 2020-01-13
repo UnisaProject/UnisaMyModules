@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+    <form-bean name="nositeForm" type="za.ac.unisa.lms.tools.nosite.forms.NositeForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+		<action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.nosite.actions.DefaultAction">
+      <forward
+      name="default"
+      path="/nosite.do?action=view"
+      contextRelative="true" />
+      <forward 
+      name="home" 
+      path="/nosite.do?action=input" 
+      contextRelative="true" />
+      
+    </action>
+
+
+    <action
+      attribute="nositeForm"
+      name="nositeForm"
+      parameter="action"
+      path="/nosite"
+      scope="session"
+      type="za.ac.unisa.lms.tools.nosite.actions.NositeAction">
+      <forward
+        name="viewforward"
+        path="/WEB-INF/jsp/viewlist.jsp"
+        contextRelative="true" />
+      <forward
+        name="viewnosites"
+        path="/WEB-INF/jsp/school_department.jsp"
+        contextRelative="true" />
+        
+      </action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.nosite.ApplicationResources" />
+
+	</struts-config>

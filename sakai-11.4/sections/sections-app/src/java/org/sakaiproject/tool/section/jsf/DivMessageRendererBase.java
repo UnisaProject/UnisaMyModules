@@ -30,7 +30,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
 import javax.faces.render.Renderer;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for custom message renderers.
@@ -38,8 +39,8 @@ import lombok.extern.slf4j.Slf4j;
  * @author <a href="mailto:jholtzman@berkeley.edu">Josh Holtzman</a>
  *
  */
-@Slf4j
 public abstract class DivMessageRendererBase extends Renderer {
+	private static final Logger logger = LoggerFactory.getLogger(DivMessageRendererBase.class);
 
 	public static String INNER_TAG = "div";
 

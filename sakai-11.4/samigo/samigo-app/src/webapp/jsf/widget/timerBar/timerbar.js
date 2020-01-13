@@ -217,7 +217,7 @@ function progressTimerBar(){
 
 function stopTimer(){
   if(hasTimeLimit) {
-    document.getElementById('timer').innerHTML=timeUpMessage;
+    document.getElementById('timer').innerHTML="Time's up";
   }
   clearTimeout(timerID);
 running=false;

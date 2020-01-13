@@ -30,18 +30,20 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.Vector;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.entity.api.Edit;
 import org.sakaiproject.entity.api.Entity;
+import org.sakaiproject.entity.api.serialize.EntityParseException;
+import org.sakaiproject.entity.api.serialize.EntityReader;
+import org.sakaiproject.entity.api.serialize.EntityReaderHandler;
 import org.sakaiproject.event.cover.UsageSessionService;
 import org.sakaiproject.javax.Filter;
 import org.sakaiproject.time.cover.TimeService;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Single Storage provides persisting of just resources(no properties, no container).
@@ -61,10 +63,12 @@ import org.sakaiproject.time.cover.TimeService;
  * should be inserted as fields in a PreparedStatement. Databases handle Unicode better in fields.
  * </p>
  */
-@Slf4j
 public class BaseDbSingleStorage implements DbSingleStorage 
 {
 	public static final String STORAGE_FIELDS = "XML";
+
+	/** Our logger. */
+	private static Logger M_log = LoggerFactory.getLogger(BaseDbSingleStorage.class);
 
 	/** Table name for resource records. */
 	protected String m_resourceTableName = null;
@@ -194,7 +198,7 @@ public class BaseDbSingleStorage implements DbSingleStorage
         m_storage = storage;
         if (m_storage == null && m_resourceTableName != null && m_resourceTableName.toUpperCase().contains("DELETE")) {
             // warn if the delete storage does not have the main storage set
-            log.warn("resource storage is not set, delete table resource file paths will be invalid");
+            M_log.warn("resource storage is not set, delete table resource file paths will be invalid");
         }
 
 	    setSingleStorageSql(m_sql.getVendor());
@@ -216,7 +220,7 @@ public class BaseDbSingleStorage implements DbSingleStorage
 	{
 		if (!m_locks.isEmpty())
 		{
-			log.warn("close(): locks remain!");
+			M_log.warn("close(): locks remain!");
 			// %%%
 		}
 		m_locks.clear();
@@ -251,7 +255,7 @@ public class BaseDbSingleStorage implements DbSingleStorage
 				Element root = doc.getDocumentElement();
 				if (!root.getTagName().equals(m_resourceEntryTagName))
 				{
-					log.warn("readResource(): not = " + m_resourceEntryTagName + " : "
+					M_log.warn("readResource(): not = " + m_resourceEntryTagName + " : "
 							+ root.getTagName());
 					return null;
 				}
@@ -264,7 +268,7 @@ public class BaseDbSingleStorage implements DbSingleStorage
 		}
 		catch (Exception e)
 		{
-			log.debug("readResource(): ", e);
+			M_log.debug("readResource(): ", e);
 			return null;
 		}
 	}
@@ -600,7 +604,7 @@ public class BaseDbSingleStorage implements DbSingleStorage
 		Edit edit = editResource(id);
 		if (edit == null)
 		{
-			log.warn("putResource(): didn't get a lock!");
+			M_log.warn("putResource(): didn't get a lock!");
 			return null;
 		}
 
@@ -656,7 +660,7 @@ public class BaseDbSingleStorage implements DbSingleStorage
 		Edit edit = editResource(id);
 		if (edit == null)
 		{
-			log.warn("putResourceDelete(): didn't get a lock!");
+			M_log.warn("putResourceDelete(): didn't get a lock!");
 			return null;
 		}
 
@@ -713,7 +717,7 @@ public class BaseDbSingleStorage implements DbSingleStorage
 			Connection lock = (Connection) m_locks.get(edit.getReference());
 			if (lock == null)
 			{
-				log.warn("commitResource(): edit not in locks");
+				M_log.warn("commitResource(): edit not in locks");
 				return;
 			}
 			// update, commit, release the lock's connection
@@ -737,7 +741,7 @@ public class BaseDbSingleStorage implements DbSingleStorage
 			boolean ok = m_sql.dbWrite(statement, lockFields);
 			if (!ok)
 			{
-				log.warn("commit: missing lock for table: " + lockFields[0] + " key: " + lockFields[1]);
+				M_log.warn("commit: missing lock for table: " + lockFields[0] + " key: " + lockFields[1]);
 			}
 		}
 		else
@@ -868,7 +872,7 @@ public class BaseDbSingleStorage implements DbSingleStorage
 			Connection lock = (Connection) m_locks.get(edit.getReference());
 			if (lock == null)
 			{
-				log.warn("commitResource(): edit not in locks");
+				M_log.warn("commitResource(): edit not in locks");
 				return;
 			}
 
@@ -894,7 +898,7 @@ public class BaseDbSingleStorage implements DbSingleStorage
 			boolean ok = m_sql.dbWrite(statement, lockFields);
 			if (!ok)
 			{
-				log.warn("commit: missing lock for table: " + lockFields[0] + " key: " + lockFields[1]);
+				M_log.warn("commit: missing lock for table: " + lockFields[0] + " key: " + lockFields[1]);
 			}
 		}
 
@@ -919,7 +923,7 @@ public class BaseDbSingleStorage implements DbSingleStorage
 			Connection lock = (Connection) m_locks.get(edit.getReference());
 			if (lock == null)
 			{
-				log.warn("cancelResource(): edit not in locks");
+				M_log.warn("cancelResource(): edit not in locks");
 				return;
 			}
 
@@ -942,7 +946,7 @@ public class BaseDbSingleStorage implements DbSingleStorage
 			boolean ok = m_sql.dbWrite(statement, lockFields);
 			if (!ok)
 			{
-				log.warn("cancel: missing lock for table: " + lockFields[0] + " key: " + lockFields[1]);
+				M_log.warn("cancel: missing lock for table: " + lockFields[0] + " key: " + lockFields[1]);
 			}
 		}
 
@@ -970,7 +974,7 @@ public class BaseDbSingleStorage implements DbSingleStorage
 			Connection lock = (Connection) m_locks.get(edit.getReference());
 			if (lock == null)
 			{
-				log.warn("removeResource(): edit not in locks");
+				M_log.warn("removeResource(): edit not in locks");
 				return;
 			}
 
@@ -996,7 +1000,7 @@ public class BaseDbSingleStorage implements DbSingleStorage
 			boolean ok = m_sql.dbWrite(statement, lockFields);
 			if (!ok)
 			{
-				log.warn("remove: missing lock for table: " + lockFields[0] + " key: " + lockFields[1]);
+				M_log.warn("remove: missing lock for table: " + lockFields[0] + " key: " + lockFields[1]);
 			}
 		}
 		else

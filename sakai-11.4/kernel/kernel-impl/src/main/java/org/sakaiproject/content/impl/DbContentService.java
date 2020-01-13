@@ -45,14 +45,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.content.api.ContentCollection;
 import org.sakaiproject.content.api.ContentCollectionEdit;
@@ -89,6 +83,10 @@ import org.sakaiproject.util.DbSingleStorage;
 import org.sakaiproject.util.EntityReaderAdapter;
 import org.sakaiproject.util.SingleStorageUser;
 import org.sakaiproject.util.Xml;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * <p>
@@ -98,9 +96,10 @@ import org.sakaiproject.util.Xml;
  * The sql scripts in src/sql/chef_content.sql must be run on the database.
  * </p>
  */
-@Slf4j
 public class DbContentService extends BaseContentService
 {
+    /** Our logger. */
+    private static Logger M_log = LoggerFactory.getLogger(DbContentService.class);
     private static final Marker FATAL = MarkerFactory.getMarker("FATAL");
 
     /** Table name for collections. */
@@ -377,7 +376,7 @@ public class DbContentService extends BaseContentService
     {
 
         if (m_sqlService == null) {
-            log.error("init(): no sqlService found");
+            M_log.error("init(): no sqlService found");
             return;
         }
 
@@ -404,7 +403,7 @@ public class DbContentService extends BaseContentService
             {
             	//See KNL-487 - DH
                 //if the columns don't exist we need to exit - updat needs to be run
-            	log.error("The filesize column doesn't exit. Please make sure you ran the 2.4-2.5 DB Conversion");
+            	M_log.error("The filesize column doesn't exit. Please make sure you ran the 2.4-2.5 DB Conversion");
             	throw new Error("The filesize column doesn't exit. Please make sure you ran the 2.4-2.5 DB Conversion");
             }
 
@@ -424,9 +423,9 @@ public class DbContentService extends BaseContentService
             }
             catch (Exception ex)
             {
-                log.error(FATAL, "Check on Database Failed", ex);
-                log.error(FATAL, "===========================================================");
-                log.error(FATAL, "WARNING \n"
+                M_log.error(FATAL, "Check on Database Failed", ex);
+                M_log.error(FATAL, "===========================================================");
+                M_log.error(FATAL, "WARNING \n"
                         + "  The connection from this instance of Sakai to the database\n"
                         + "  has been tested and found to corrupt UTF-8 Data. \n"
                         + "  In order for Sakai to operate correctly you must ensure that your \n"
@@ -444,9 +443,9 @@ public class DbContentService extends BaseContentService
             }
 
             if ( migrateData ) {
-                log.info("Migration of data to the Binary format will be performed by this node ");
+                M_log.info("Migration of data to the Binary format will be performed by this node ");
             } else {
-                log.info("Migration of data to the Binary format will NOT be performed by this node ");
+                M_log.info("Migration of data to the Binary format will NOT be performed by this node ");
 
             }
 
@@ -471,13 +470,13 @@ public class DbContentService extends BaseContentService
                 throw new IllegalStateException("There is no FileSystemHandler set for the ContentService!");
             }
 
-            log.info("init(): tables: " + m_collectionTableName + " " + m_resourceTableName + " " + m_resourceBodyTableName + " "
+            M_log.info("init(): tables: " + m_collectionTableName + " " + m_resourceTableName + " " + m_resourceBodyTableName + " "
                     + m_groupTableName + " locks-in-db: " + m_locksInDb + " bodyPath: " + m_bodyPath + " storage: " + m_storage);
 
         }
         catch (Exception t)
         {
-            log.error("init(): ", t);
+            M_log.error("init(): ", t);
         }
 
         //testResourceByTypePaging();
@@ -552,13 +551,13 @@ public class DbContentService extends BaseContentService
                         }
                         catch(Exception e)
                         {
-                            log.error("TEMPORARY LOG MESSAGE WITH STACK TRACE: Failed to create all resources; ch1 = " + ch1, e);
+                            M_log.error("TEMPORARY LOG MESSAGE WITH STACK TRACE: Failed to create all resources; ch1 = " + ch1, e);
                         }
                     }
                 }
                 catch(Exception e)
                 {
-                    log.error("TEMPORARY LOG MESSAGE WITH STACK TRACE: Failed to create all collections; ch = " + ch, e);
+                    M_log.error("TEMPORARY LOG MESSAGE WITH STACK TRACE: Failed to create all collections; ch = " + ch, e);
                 }
             }
 
@@ -573,7 +572,7 @@ public class DbContentService extends BaseContentService
                 {
                     if(p * pageSize + r >= resourceIdList.size())
                     {
-                        log.info("TEMPORARY LOG MESSAGE: test failed ====> p = " + p + " r = " + r + " index out of range: p * pageSize + r = " + (p * pageSize + r) + " resourceIdList.size() = " + resourceIdList.size());
+                        M_log.info("TEMPORARY LOG MESSAGE: test failed ====> p = " + p + " r = " + r + " index out of range: p * pageSize + r = " + (p * pageSize + r) + " resourceIdList.size() = " + resourceIdList.size());
                         failCount++;
                     }
                     else if(cr.getId().equals(resourceIdList.get(p * pageSize + r)))
@@ -582,14 +581,14 @@ public class DbContentService extends BaseContentService
                     }
                     else
                     {
-                        log.info("TEMPORARY LOG MESSAGE: test failed ====> p = " + p + " r = " + r + " resource-id doesn't match: cr.getId() = " + cr.getId() + " resourceIdList.get(p * pageSize + r) = resourceIdList.get(" + (p * pageSize + r) + ") = " + resourceIdList.get(p * pageSize + r));
+                        M_log.info("TEMPORARY LOG MESSAGE: test failed ====> p = " + p + " r = " + r + " resource-id doesn't match: cr.getId() = " + cr.getId() + " resourceIdList.get(p * pageSize + r) = resourceIdList.get(" + (p * pageSize + r) + ") = " + resourceIdList.get(p * pageSize + r));
                         failCount++;
                     }
                     r++;
                 }
-                log.info("TEMPORARY LOG MESSAGE: Testing getResourcesOfType() completed page " + p + " of " + (resourceIdList.size() / pageSize));
+                M_log.info("TEMPORARY LOG MESSAGE: Testing getResourcesOfType() completed page " + p + " of " + (resourceIdList.size() / pageSize));
             }
-            log.info("TEMPORARY LOG MESSAGE: Testing getResourcesOfType() SUCCEEDED: " + successCount + " FAILED: " + failCount);
+            M_log.info("TEMPORARY LOG MESSAGE: Testing getResourcesOfType() SUCCEEDED: " + successCount + " FAILED: " + failCount);
 
             for(String resourceId : resourceIdList)
             {
@@ -597,7 +596,7 @@ public class DbContentService extends BaseContentService
                 this.removeResource(edit);
             }
 
-            log.info("TEMPORARY LOG MESSAGE: Will delete 26 collections and 676 resources.  Some log messages will appear.  This block of code will be removed in trunk within a few days and the log messages will disappear.");
+            M_log.info("TEMPORARY LOG MESSAGE: Will delete 26 collections and 676 resources.  Some log messages will appear.  This block of code will be removed in trunk within a few days and the log messages will disappear.");
             for(String collId : collectionIdList)
             {
                 ContentCollectionEdit edit = this.editCollection(collId);
@@ -606,7 +605,7 @@ public class DbContentService extends BaseContentService
         }
         catch(Exception e)
         {
-            log.debug("TEMPORARY LOG MESSAGE WITH STACK TRACE: TEST FAILED ", e);
+            M_log.debug("TEMPORARY LOG MESSAGE WITH STACK TRACE: TEST FAILED ", e);
         }
     }
 
@@ -643,12 +642,12 @@ public class DbContentService extends BaseContentService
                 if(hasNullFilesizeValues())
                 {
                     filesizeColumnCheckExpires = now + TWENTY_MINUTES;
-                    log.debug("Conversion of the ContentHostingService database tables is needed to improve performance");
+                    M_log.debug("Conversion of the ContentHostingService database tables is needed to improve performance");
                 }
                 else
                 {
                     String highlight = "\n====================================================\n====================================================\n";
-                    log.info(highlight + "Conversion of the ContentHostingService database tables is complete.\nUsing new filesize column" + highlight);
+                    M_log.info(highlight + "Conversion of the ContentHostingService database tables is complete.\nUsing new filesize column" + highlight);
                     filesizeColumnReady = true;
                 }
             }
@@ -688,7 +687,7 @@ public class DbContentService extends BaseContentService
                 }
                 catch (Exception ignore)
                 {
-                    log.warn("Exception parsing integer from count query: " + val);
+                    M_log.warn("Exception parsing integer from count query: " + val);
                 }
             }
             return rv;
@@ -796,7 +795,7 @@ public class DbContentService extends BaseContentService
             connection.setAutoCommit(wasCommit);
 
         } catch (SQLException e) {
-            log.warn("setUuid: failed: " + e);
+            M_log.warn("setUuid: failed: " + e);
         }
         finally {
             if (connection != null)
@@ -1007,7 +1006,7 @@ public class DbContentService extends BaseContentService
                                 if ( t1ch.convertSource(collectionid, xml, updateStatement) ) {
                                     updateStatement.executeUpdate();
                                 } else {
-                                    log.info("XML Pase failed "+collectionid);												
+                                    M_log.info("XML Pase failed "+collectionid);												
                                 }
                             }
                         } else {
@@ -1025,12 +1024,12 @@ public class DbContentService extends BaseContentService
                         n = rs.getInt(1);
                     }
                     if ( n != 0 ) {
-                        log.error(FATAL, "There are migrated content collection entries in the \n" +
+                        M_log.error(FATAL, "There are migrated content collection entries in the \n" +
                                 "BINARY_ENTITY column  of CONTENT_COLLECTION you must ensure that this \n" +
                                 "data is not required and set all entries to null before starting \n" +
                                 "up with migrate data disabled. Failure to do this could loose \n" +
                                 "updates since this database was upgraded \n");
-                        log.error(FATAL, "STOP ============================================");
+                        M_log.error(FATAL, "STOP ============================================");
                         /*we need to close these here otherwise the system exit will lead them to being left open
                          * While this may be harmful is bad practice and prevents us identifying real issues
                          */
@@ -1045,12 +1044,12 @@ public class DbContentService extends BaseContentService
                         n = rs.getInt(1);
                     }
                     if ( n != 0 ) {
-                        log.error(FATAL, "There are migrated content collection entries in the \n" +
+                        M_log.error(FATAL, "There are migrated content collection entries in the \n" +
                                 "BINARY_ENTITY column  of CONTENT_RESOURCE you must ensure that this \n" +
                                 "data is not required and set all entries to null before starting \n" +
                                 "up with migrate data disabled. Failure to do this could loose \n" +
                                 "updates since this database was upgraded \n");
-                        log.error(FATAL, "STOP ============================================");
+                        M_log.error(FATAL, "STOP ============================================");
                         /*we need to close these here otherwise the system exit will lead them to being left open
                          * While this may be harmful is bad practice and prevents us identifying real issues
                          */
@@ -1065,12 +1064,12 @@ public class DbContentService extends BaseContentService
                         n = rs.getInt(1);
                     }
                     if ( n != 0 ) {
-                        log.error(FATAL, "There are migrated content collection entries in the \n" +
+                        M_log.error(FATAL, "There are migrated content collection entries in the \n" +
                                 "BINARY_ENTITY column  of CONTENT_RESOURCE_DELETE you must ensure that this \n" +
                                 "data is not required and set all entries to null before starting \n" +
                                 "up with migrate data disabled. Failure to do this could loose \n" +
                                 "updates since this database was upgraded \n");
-                        log.error(FATAL, "STOP ============================================");
+                        M_log.error(FATAL, "STOP ============================================");
                         /*we need to close these here otherwise the system exit will lead them to being left open
                          * While this may be harmful is bad practice and prevents us identifying real issues
                          */
@@ -1084,7 +1083,7 @@ public class DbContentService extends BaseContentService
                 }
 
             } catch (SQLException e) {
-                log.error("Unable to get database statement: {}", e.getMessage(), e);
+                M_log.error("Unable to get database statement: {}", e.getMessage(), e);
             } finally {
                 cleanup(connection, statement, rs, selectStatement, updateStatement);
             }
@@ -1172,28 +1171,28 @@ public class DbContentService extends BaseContentService
                     rs.close();
                 }
             } catch (SQLException ex) {
-                log.error("Failed to close resultset: " + ex, ex);
+                M_log.error("Failed to close resultset: " + ex, ex);
             }
             try {
                 if (statement != null) {
                     statement.close();
                 }
             } catch (SQLException ex) {
-                log.error("Failed to close statement: " + ex, ex);
+                M_log.error("Failed to close statement: " + ex, ex);
             }
             try {
                 if (selectStatement != null) {
                     selectStatement.close();
                 }
             } catch (SQLException ex) {
-                log.error("Failed to close selectStatement: " + ex, ex);
+                M_log.error("Failed to close selectStatement: " + ex, ex);
             }
             try {
                 if (updateStatement != null) {
                     updateStatement.close();
                 }
             } catch (SQLException ex) {
-                log.error("Failed to close updateStatement: " + ex, ex);
+                M_log.error("Failed to close updateStatement: " + ex, ex);
             }
             m_sqlService.returnConnection(connection);
         }
@@ -1698,7 +1697,7 @@ public class DbContentService extends BaseContentService
             }
             catch(Exception e)
             {
-                log.error("sql == " + sql, e);
+                M_log.error("sql == " + sql, e);
             }
 
         }
@@ -1765,7 +1764,7 @@ public class DbContentService extends BaseContentService
                     String referenceResourceId = redit.referenceCopy;
                     if (referenceResourceId != null) {
                         // special handling for reference commits
-                        if (log.isDebugEnabled()) log.debug("Making resource ("+redit.getId()+") reference copy of DB resource ("+referenceResourceId+"), body/contentStream is ignored");
+                        if (M_log.isDebugEnabled()) M_log.debug("Making resource ("+redit.getId()+") reference copy of DB resource ("+referenceResourceId+"), body/contentStream is ignored");
                         if (m_bodyPath == null) {
                             /* SPECIAL handling for a reference copy of a resource,
                              * for reference we just move the binary data location to point at the new one
@@ -1779,27 +1778,27 @@ public class DbContentService extends BaseContentService
                                 String sql = "update "+m_resourceBodyTableName+" set RESOURCE_ID=? where RESOURCE_ID=?";
                                 // this write could fail if we try to move it to a taken resource_id, no way to recover if it does
                                 ok = m_sqlService.dbWrite(sql, new Object[] {redit.getId(), referenceResourceId});
-                                if (log.isDebugEnabled()) log.debug("Moving RESOURCE_ID ("+redit.getId()+") to ("+referenceResourceId+") for DB stored content data ("+m_resourceBodyTableName+"), success="+ok);
+                                if (M_log.isDebugEnabled()) M_log.debug("Moving RESOURCE_ID ("+redit.getId()+") to ("+referenceResourceId+") for DB stored content data ("+m_resourceBodyTableName+"), success="+ok);
                             } else {
                                 ok = false;
-                                if (log.isDebugEnabled()) log.debug("Moving RESOURCE_ID ("+redit.getId()+") to ("+referenceResourceId+") for DB stored content data ("+m_resourceBodyTableName+") failed because the referenceResourceId ("+referenceResourceId+") does not exist in the table");
+                                if (M_log.isDebugEnabled()) M_log.debug("Moving RESOURCE_ID ("+redit.getId()+") to ("+referenceResourceId+") for DB stored content data ("+m_resourceBodyTableName+") failed because the referenceResourceId ("+referenceResourceId+") does not exist in the table");
                             }
                             if (!ok) {
                                 // cannot recover so we will flip this over and do a normal content copy
-                                log.warn("Moving RESOURCE_ID ("+redit.getId()+") to ("+referenceResourceId+") for DB stored content data ("+m_resourceBodyTableName+") failed... we will do a normal content copy as a fallback");
+                                M_log.warn("Moving RESOURCE_ID ("+redit.getId()+") to ("+referenceResourceId+") for DB stored content data ("+m_resourceBodyTableName+") failed... we will do a normal content copy as a fallback");
                                 referenceResourceId = null;
                             }
                         }
                     }
                     if (referenceResourceId == null) {
                         // normal handling (write the resource content data)
-                        if (log.isDebugEnabled()) log.debug("Normal resource ("+redit.getId()+") body/contentStream storage");
+                        if (M_log.isDebugEnabled()) M_log.debug("Normal resource ("+redit.getId()+") body/contentStream storage");
                         if (redit.m_body == null)
                         {
                             if (redit.m_contentStream == null)
                             {
                                 // no body and no stream -- may result from edit in which body is not accessed or modified
-                                log.debug("ContentResource committed with no change to contents (i.e. no body and no stream for content): "
+                                M_log.debug("ContentResource committed with no change to contents (i.e. no body and no stream for content): "
                                         + edit.getReference());
                             }
                             else
@@ -1852,7 +1851,7 @@ public class DbContentService extends BaseContentService
                         cancelResource(edit);
                         ServerOverloadException e = new ServerOverloadException(message);
                         // may be overkill, but let's make sure stack trace gets to log
-                        log.error(message, e);
+                        M_log.error(message, e);
                         throw e;
                     }
                     if(isInsideIndividualDropbox(edit.getId()))
@@ -2034,7 +2033,7 @@ public class DbContentService extends BaseContentService
 					   if (redit.m_contentStream == null)
 					   {
 						   // no body and no stream -- may result from edit in which body is not accessed or modified
-						   log.debug("ContentResource committed with no change to contents (i.e. no body and no stream for content): " + edit.getReference());
+						   M_log.debug("ContentResource committed with no change to contents (i.e. no body and no stream for content): " + edit.getReference());
 					   }
 					   else
 					   {
@@ -2084,7 +2083,7 @@ public class DbContentService extends BaseContentService
 					   cancelResource(edit);
 					   ServerOverloadException e = new ServerOverloadException(message);
 					   // may be overkill, but let's make sure stack trace gets to log
-					   log.error(message, e);
+					   M_log.error(message, e);
 					   throw e;
 				   }
 
@@ -2121,10 +2120,10 @@ public class DbContentService extends BaseContentService
 				   {
 					   // if we have been configured to use an external file system
 					   if (removeContent) {
-						   log.info("Removing resource ("+edit.getId()+") content: "+m_bodyPath);
+						   M_log.info("Removing resource ("+edit.getId()+") content: "+m_bodyPath);
 						   delResourceBodyFilesystem(m_bodyPath, edit);
 					   } else {
-						   log.info("Removing original resource reference ("+edit.getId()+") without removing the actual content: "+m_bodyPath);
+						   M_log.info("Removing original resource reference ("+edit.getId()+") without removing the actual content: "+m_bodyPath);
 					   }
 				   }
 				   else
@@ -2132,9 +2131,9 @@ public class DbContentService extends BaseContentService
 					   // otherwise use the database
 					   if (removeContent) {
 						   delResourceBodyDb(edit, m_resourceBodyTableName);
-						   log.info("Removing resource ("+edit.getId()+") DB content");
+						   M_log.info("Removing resource ("+edit.getId()+") DB content");
 					   } else {
-						   log.info("Removing original resource reference ("+edit.getId()+") without removing the actual DB content");
+						   M_log.info("Removing original resource reference ("+edit.getId()+") without removing the actual DB content");
 					   }
 				   }
 
@@ -2192,7 +2191,7 @@ public class DbContentService extends BaseContentService
 		   try {
 			   in = streamResourceBody(resource);
 			   if (in == null) {
-				   log.warn("Cannot retrieve body for resource " + resource.getId() +". Reset content to empty text.");
+				   M_log.warn("Cannot retrieve body for resource " + resource.getId() +". Reset content to empty text.");
 				   Arrays.fill(body, (byte)' '); // fill body with spaces
 				   return body;
 			   } else {
@@ -2205,7 +2204,7 @@ public class DbContentService extends BaseContentService
 		   catch (IOException ioe) 
 		   {
 			   // If we have a non-zero body length and reading failed, it is an error worth of note
-			   log.warn(": failed to read resource: " + resource.getId() + " len: " + contentLength + " : " + ioe);
+			   M_log.warn(": failed to read resource: " + resource.getId() + " len: " + contentLength + " : " + ioe);
 			   throw new ServerOverloadException("failed to read resource");
 			   // return null;
 		   }
@@ -2213,7 +2212,7 @@ public class DbContentService extends BaseContentService
 		   {
 			   if (in != null) {
 				   try { in.close(); } catch (IOException ignore) {
-					   log.warn(": failed to close file stream: ");
+					   M_log.warn(": failed to close file stream: ");
 				   }
 			   }
 		   }
@@ -2238,7 +2237,7 @@ public class DbContentService extends BaseContentService
                     {
                         if (length < 0)
                         {
-                            log.warn("streamDeletedResourceBody(): negative content length: " + length + "  id: "
+                            M_log.warn("streamDeletedResourceBody(): negative content length: " + length + "  id: "
                                     + resource.getId());
                             return null;
                         }
@@ -2282,7 +2281,7 @@ public class DbContentService extends BaseContentService
                     {
                         if (length < 0)
                         {
-                            log.warn("streamResourceBody(): negative content length: " + ((BaseResourceEdit) resource).m_contentLength + "  id: "
+                            M_log.warn("streamResourceBody(): negative content length: " + ((BaseResourceEdit) resource).m_contentLength + "  id: "
                                     + resource.getId());
                             return null;
                         }
@@ -2330,7 +2329,7 @@ public class DbContentService extends BaseContentService
         		return fileSystemHandler.getAssetDirectLink(((BaseResourceEdit) resource).m_id, m_bodyPath, ((BaseResourceEdit) resource).m_filePath);
         	}
         	catch (IOException e) {
-        		log.debug("No direct link available for resource: " + resource.getId());
+        		M_log.debug("No direct link available for resource: " + resource.getId());
         	}
         	
         	return null;
@@ -2360,7 +2359,7 @@ public class DbContentService extends BaseContentService
             catch (IOException e)
             {
                 // If we have a non-zero body length and reading failed, it is an error worth of note
-                log.error("Failed to read resource: " + resource.getId() + " len: " + ((BaseResourceEdit) resource).m_contentLength, e);
+                M_log.error("Failed to read resource: " + resource.getId() + " len: " + ((BaseResourceEdit) resource).m_contentLength, e);
                 throw new ServerOverloadException("Failed to read resource body", e);
             }
         }
@@ -2398,7 +2397,7 @@ public class DbContentService extends BaseContentService
         {
             if ((body == null) || (body.length == 0)) return true;
 
-            if (log.isDebugEnabled()) log.debug("Making resource ("+resource.getId()+") copy of DB resource body");
+            if (M_log.isDebugEnabled()) M_log.debug("Making resource ("+resource.getId()+") copy of DB resource body");
             // delete the old
             String statement = contentServiceSql.getDeleteContentSql(resourceBodyTableName);
 
@@ -2411,7 +2410,7 @@ public class DbContentService extends BaseContentService
             statement = contentServiceSql.getInsertContentSql(resourceBodyTableName);
 
             boolean success = m_sqlService.dbWriteBinary(statement, fields, body, 0, body.length);
-            if (log.isDebugEnabled()) log.debug("putResourceBodyDb: resource ("+resource.getId()+") put success="+success);
+            if (M_log.isDebugEnabled()) M_log.debug("putResourceBodyDb: resource ("+resource.getId()+") put success="+success);
             return success;
 
             /*
@@ -2456,7 +2455,7 @@ public class DbContentService extends BaseContentService
             catch (IOException e)
             {
                 // TODO Auto-generated catch block
-                log.error("IOException ", e);
+                M_log.error("IOException ", e);
             }
             finally
             {
@@ -2469,14 +2468,14 @@ public class DbContentService extends BaseContentService
                     catch (IOException e)
                     {
                         // TODO Auto-generated catch block
-                        log.error("IOException ", e);
+                        M_log.error("IOException ", e);
                     }
                 }
             }
 
             if (byteCount > Integer.MAX_VALUE)
             {
-                log.warn("Attempted to write file of size > 2G to database content store");
+                M_log.warn("Attempted to write file of size > 2G to database content store");
                 return false;
             }
 
@@ -2510,7 +2509,7 @@ public class DbContentService extends BaseContentService
             }
             catch (IOException e)
             {
-                log.error("IOException", e);
+                M_log.error("IOException", e);
                 return false;
             }
         }
@@ -2701,11 +2700,11 @@ public class DbContentService extends BaseContentService
                 catch(SQLException e)
                 {
                     // ignore?
-                    log.debug("SqlException unable to read entity");
+                    M_log.debug("SqlException unable to read entity");
                 }
                 catch(EntityParseException e)
                 {
-                    log.warn("EntityParseException unable to parse entity");
+                    M_log.warn("EntityParseException unable to parse entity");
                 }
                 if(edit == null)
                 {
@@ -2714,7 +2713,7 @@ public class DbContentService extends BaseContentService
                         String xml = result.getString(2);
                         if (xml == null)
                         {
-                            log.warn("EntityReader: null xml : " );
+                            M_log.warn("EntityReader: null xml : " );
                             return null;
                         }
 
@@ -2722,7 +2721,7 @@ public class DbContentService extends BaseContentService
                         Document doc = Xml.readDocumentFromString(xml);
                         if (doc == null)
                         {
-                            log.warn("EntityReader: null xml doc : " );
+                            M_log.warn("EntityReader: null xml doc : " );
                             return null;
                         }
 
@@ -2730,7 +2729,7 @@ public class DbContentService extends BaseContentService
                         Element root = doc.getDocumentElement();
                         if (!root.getTagName().equals("resource"))
                         {
-                            log.warn("EntityReader: XML root element not resource: " + root.getTagName());
+                            M_log.warn("EntityReader: XML root element not resource: " + root.getTagName());
                             return null;
                         }
                         edit = new BaseResourceEdit(root);
@@ -2738,7 +2737,7 @@ public class DbContentService extends BaseContentService
                     }
                     catch(SQLException e)
                     {
-                        log.debug("SqlException problem with results");
+                        M_log.debug("SqlException problem with results");
                     }
                 }
                 return edit;
@@ -2831,7 +2830,7 @@ public class DbContentService extends BaseContentService
         }
         catch (Exception e)
         {
-            log.error("escapeResourceName: ", e);
+            M_log.error("escapeResourceName: ", e);
             return id;
         }
     }
@@ -2842,7 +2841,7 @@ public class DbContentService extends BaseContentService
      */
     protected void convertToFile()
     {
-        log.info("convertToFile");
+        M_log.info("convertToFile");
 
         //final Pattern contextPattern = Pattern.compile("\\A/group/(.+?)/");
 
@@ -2879,12 +2878,12 @@ public class DbContentService extends BaseContentService
                     catch(SQLException e)
                     {
                         // ignore?
-                        log.debug("convertToFile(): SqlException unable to read entity");
+                        M_log.debug("convertToFile(): SqlException unable to read entity");
                         edit = null;
                     }
                     catch(EntityParseException e)
                     {
-                        log.warn("convertToFile(): EntityParseException unable to parse entity");
+                        M_log.warn("convertToFile(): EntityParseException unable to parse entity");
                         edit = null;
                     }
                     if(edit == null)
@@ -2894,7 +2893,7 @@ public class DbContentService extends BaseContentService
                             String xml = result.getString(2);
                             if (xml == null)
                             {
-                                log.warn("convertToFile(): null xml : " );
+                                M_log.warn("convertToFile(): null xml : " );
                                 return null;
                             }
 
@@ -2902,7 +2901,7 @@ public class DbContentService extends BaseContentService
                             Document doc = Xml.readDocumentFromString(xml);
                             if (doc == null)
                             {
-                                log.warn("convertToFile(): null xml doc : " );
+                                M_log.warn("convertToFile(): null xml doc : " );
                                 return null;
                             }
 
@@ -2910,7 +2909,7 @@ public class DbContentService extends BaseContentService
                             Element root = doc.getDocumentElement();
                             if (!root.getTagName().equals("resource"))
                             {
-                                log.warn("convertToFile(): XML root element not resource: " + root.getTagName());
+                                M_log.warn("convertToFile(): XML root element not resource: " + root.getTagName());
                                 return null;
                             }
                             edit = new BaseResourceEdit(root);
@@ -2918,7 +2917,7 @@ public class DbContentService extends BaseContentService
                         }
                         catch(SQLException e)
                         {
-                            log.debug("convertToFile(): SqlException problem with results");
+                            M_log.debug("convertToFile(): SqlException problem with results");
                         }
                     }
 
@@ -2930,7 +2929,7 @@ public class DbContentService extends BaseContentService
                     // zero length?
                     if (edit.getContentLength() == 0)
                     {
-                        log.warn("convertToFile(): zero length body ");
+                        M_log.warn("convertToFile(): zero length body ");
 
                     }
 
@@ -2950,7 +2949,7 @@ public class DbContentService extends BaseContentService
                     if ((found == null) || (found.size() == 0))
                     {
                         // not found
-                        log.warn("convertToFile(): body not found in source : " + id);
+                        M_log.warn("convertToFile(): body not found in source : " + id);
                     }
 
                     // get the creation date (or modified date, or now)
@@ -2987,13 +2986,13 @@ public class DbContentService extends BaseContentService
                         boolean ok = ((DbStorage) m_storage).putResourceBodyFilesystem(edit, stream, m_bodyPath);
                         if (!ok)
                         {
-                            log.warn("convertToFile: body file failure : " + id + " file: " + edit.m_filePath);
+                            M_log.warn("convertToFile: body file failure : " + id + " file: " + edit.m_filePath);
                             return null;
                         }
                     }
                     catch (ServerOverloadException e)
                     {
-                        log.debug("convertToFile(): ServerOverloadException moving resource body for " + id);
+                        M_log.debug("convertToFile(): ServerOverloadException moving resource body for " + id);
                         return null;
                     }
 
@@ -3028,22 +3027,24 @@ public class DbContentService extends BaseContentService
 
                         m_sqlService.dbWrite(connection, sql, fields);
 
+                        // m_logger.info(" ** converted: " + id + " size: " +
+                        // edit.m_contentLength);
                         count.value++;
                         if ((count.value % 1000) == 0)
                         {
                             connection.commit();
-                            log.info(" ** converted: " + count.value);
+                            M_log.info(" ** converted: " + count.value);
                         }
 
                         return null;
                     }
                     catch (EntityParseException e)
                     {
-                        log.debug("convertToFile(): EntityParseException for " + id);
+                        M_log.debug("convertToFile(): EntityParseException for " + id);
                         return null;
                     }
                     catch (SQLException e) {
-                        log.info(" ** exception converting : " + id + " : ", e);
+                        M_log.info(" ** exception converting : " + id + " : ", e);
                         return null;
                     }
                 }
@@ -3051,7 +3052,7 @@ public class DbContentService extends BaseContentService
 
             connection.commit();
 
-            log.info("convertToFile: converted resources: " + count.value);
+            M_log.info("convertToFile: converted resources: " + count.value);
 
             m_sqlService.returnConnection(sourceConnection);
 
@@ -3060,10 +3061,10 @@ public class DbContentService extends BaseContentService
         }
         catch (Exception t)
         {
-            log.warn("convertToFile: failed: " + t);
+            M_log.warn("convertToFile: failed: " + t);
         }
 
-        log.info("convertToFile: done");
+        M_log.info("convertToFile: done");
     }
 
     /**
@@ -3083,17 +3084,18 @@ public class DbContentService extends BaseContentService
 
     public void lockObject(String id, String lockId, String subject, boolean system)
     {
-        if (log.isDebugEnabled()) log.debug("lockObject has been called on: " + id);
+        if (M_log.isDebugEnabled()) M_log.debug("lockObject has been called on: " + id);
         try
         {
             m_lockManager.lockObject(id, lockId, subject, system);
         }
         catch (Exception e)
         {
-            log.warn("lockObject failed: " + e);
+            M_log.warn("lockObject failed: " + e);
+            e.printStackTrace();
             return;
         }
-        if (log.isDebugEnabled()) log.debug("lockObject succeeded");
+        if (M_log.isDebugEnabled()) M_log.debug("lockObject succeeded");
     }
 
     public void removeLock(String id, String lockId)
@@ -3186,7 +3188,7 @@ public class DbContentService extends BaseContentService
             }
             catch(Exception e)
             {
-                log.warn("TimeReader.readSqlResultRecord(): " + result.toString() + " exception: " + e);
+                M_log.warn("TimeReader.readSqlResultRecord(): " + result.toString() + " exception: " + e);
             }
             return null;
         }
@@ -3304,7 +3306,7 @@ public class DbContentService extends BaseContentService
                     }
                 }
 
-                log.info("adding new field values: resourceId == \"" + resourceId + "\" uuid == \"" + uuid + "\" context == \"" + context + "\" filesize == \"" + filesize + "\" addingUuid == " + addingUuid);
+                M_log.info("adding new field values: resourceId == \"" + resourceId + "\" uuid == \"" + uuid + "\" context == \"" + context + "\" filesize == \"" + filesize + "\" addingUuid == " + addingUuid);
 
                 if(addingUuid)
                 {
@@ -3332,7 +3334,7 @@ public class DbContentService extends BaseContentService
             }
             catch(Exception e)
             {
-                log.error("ContextAndFilesizeReader.readSqlResultRecord() failed. result skipped", e);
+                M_log.error("ContextAndFilesizeReader.readSqlResultRecord() failed. result skipped", e);
             }
 
             return null;
@@ -3366,7 +3368,7 @@ public class DbContentService extends BaseContentService
             }
             catch(Exception e)
             {
-                log.warn("getSizeForContext() unable to parse long from \"" + result + "\" for context \"" + context + "\"");
+                M_log.warn("getSizeForContext() unable to parse long from \"" + result + "\" for context \"" + context + "\"");
             }
         }
 

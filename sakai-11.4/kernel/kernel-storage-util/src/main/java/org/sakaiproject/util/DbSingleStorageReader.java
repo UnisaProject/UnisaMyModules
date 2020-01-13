@@ -23,16 +23,18 @@ package org.sakaiproject.util;
 
 import java.sql.ResultSet;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.db.api.SqlReader;
 
 /**
  * @author ieb
  */
-@Slf4j
 public class DbSingleStorageReader implements SqlReader
 {
+
+	private static final Logger log = LoggerFactory.getLogger(DbSingleStorageReader.class);
+
 	private DbSingleStorage storage;
 
 	public DbSingleStorageReader(DbSingleStorage storage)

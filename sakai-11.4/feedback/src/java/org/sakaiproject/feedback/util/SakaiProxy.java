@@ -21,18 +21,14 @@
 
 package org.sakaiproject.feedback.util;
 
+import java.util.*;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.fileupload.FileItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.mail.util.ByteArrayDataSource;
 
 import org.sakaiproject.api.privacy.PrivacyManager;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -49,12 +45,15 @@ import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
+
+import lombok.Setter;
 import org.sakaiproject.util.ResourceLoader;
 
-@Slf4j
 public class SakaiProxy {
 
     public static final int ATTACH_MAX_DEFAULT = 10;
+
+	private static final Logger logger = LoggerFactory.getLogger(SakaiProxy.class);
 
     private static ResourceLoader rb = new ResourceLoader("org.sakaiproject.feedback");
 
@@ -101,7 +100,7 @@ public class SakaiProxy {
         try {
             return userDirectoryService.getUser(userId);
         } catch (UserNotDefinedException unde) {
-            log.error("No user with id: " + userId + ". Returning null ...");
+            logger.error("No user with id: " + userId + ". Returning null ...");
             return null;
         }
     }
@@ -120,7 +119,7 @@ public class SakaiProxy {
         try {
             return siteService.getSite(siteId);
         } catch (Exception e) {
-            log.error("Failed to get site for id : " + siteId + ". Returning null ...");
+            logger.error("Failed to get site for id : " + siteId + ". Returning null ...");
         }
 
         return null;
@@ -132,7 +131,7 @@ public class SakaiProxy {
             Site site = siteService.getSite(siteId);
             return site.getProperties().getProperty(name);
         } catch (Exception e) {
-            log.error("Failed to get property '" + name + "' for site : " + siteId + ". Returning null ...");
+            logger.error("Failed to get property '" + name + "' for site : " + siteId + ". Returning null ...");
         }
 
         return null;
@@ -163,7 +162,7 @@ public class SakaiProxy {
             }
             return map;
         } catch (Exception e) {
-            log.error("Failed to get site updaters for site : " + siteId + ". Returning an empty map ...");
+            logger.error("Failed to get site updaters for site : " + siteId + ". Returning an empty map ...");
             return new HashMap<String, String>();
         }
     }
@@ -178,7 +177,15 @@ public class SakaiProxy {
 
 		if (fileItems.size() > 0) {
 			for (FileItem fileItem : fileItems) {
-				attachments.add(new Attachment(new FileItemDataSource(fileItem)));
+				String name = fileItem.getName();
+
+				if (name.contains("/")) {
+					name = name.substring(name.lastIndexOf("/") + 1);
+                } else if (name.contains("\\")) {
+					name = name.substring(name.lastIndexOf("\\") + 1);
+                }
+
+				attachments.add(new Attachment(new ByteArrayDataSource(fileItem.get(), fileItem.getContentType()), name));
 			}
 		}
 
@@ -196,7 +203,7 @@ public class SakaiProxy {
         }
 
         if (fromAddress == null) {
-            log.error("No email for reporter: " + fromUserId + ". No email will be sent.");
+            logger.error("No email for reporter: " + fromUserId + ". No email will be sent.");
             return;
         }
 
@@ -280,16 +287,16 @@ public class SakaiProxy {
         }
 
 
-        if (log.isDebugEnabled()) {
-            log.debug("fromName: " + fromName);
-            log.debug("fromAddress: " + fromAddress);
-            log.debug("toAddress: " + toAddress);
-            log.debug("userContent: " + userContent);
-            log.debug("userTitle: " + userTitle);
-            log.debug("subjectTemplate: " + subjectTemplate);
-            log.debug("bodyTemplate: " + bodyTemplate);
-            log.debug("formattedSubject: " + formattedSubject);
-            log.debug("formattedBody: " + formattedBody);
+        if (logger.isDebugEnabled()) {
+            logger.debug("fromName: " + fromName);
+            logger.debug("fromAddress: " + fromAddress);
+            logger.debug("toAddress: " + toAddress);
+            logger.debug("userContent: " + userContent);
+            logger.debug("userTitle: " + userTitle);
+            logger.debug("subjectTemplate: " + subjectTemplate);
+            logger.debug("bodyTemplate: " + bodyTemplate);
+            logger.debug("formattedSubject: " + formattedSubject);
+            logger.debug("formattedBody: " + formattedBody);
         }
 
 		final EmailMessage msg = new EmailMessage();
@@ -316,7 +323,7 @@ public class SakaiProxy {
 		        try {
 			        emailService.send(msg, true);
                 } catch (Exception e) {
-                    log.error("Failed to send email.", e);
+                    logger.error("Failed to send email.", e);
                 }
             }
         }, "Feedback Email Thread").start();

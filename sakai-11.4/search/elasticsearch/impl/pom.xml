@@ -5,17 +5,13 @@
     <parent>
         <groupId>org.sakaiproject.search.elasticsearch</groupId>
         <artifactId>elasticsearch-base</artifactId>
-        <version>12.6</version><!-- ProjectVersion -->
+        <version>11.4</version><!-- ProjectVersion -->
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>elasticsearch-impl</artifactId>
     <groupId>org.sakaiproject.search.elasticsearch</groupId>
     <name>Sakai search - ElasticSearch impl</name>
-    <packaging>sakai-component</packaging>
-
-    <properties>
-        <deploy.target>components</deploy.target>
-    </properties>
+    <packaging>jar</packaging>
 
     <dependencies>
         <!-- Dependencies -->
@@ -36,18 +32,6 @@
           <groupId>org.sakaiproject.search</groupId>
           <artifactId>search-util</artifactId>
           <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.sakaiproject.search.elasticsearch</groupId>
-            <artifactId>elasticsearch-util</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.sakaiproject.search.elasticsearch</groupId>
-            <artifactId>elasticsearch-api</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.sakaiproject.kernel</groupId>
@@ -81,12 +65,12 @@
             <artifactId>spring-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

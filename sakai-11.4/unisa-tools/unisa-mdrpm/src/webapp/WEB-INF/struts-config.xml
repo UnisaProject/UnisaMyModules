@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+	<form-bean name="mdRpmForm" 
+		 	type="za.ac.unisa.lms.tools.mdrpm.forms.MdRpmForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.mdrpm.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/mdRpm.do?act=initial"
+				contextRelative="true" />
+		</action>
+		<action
+			name="mdRpmForm"
+			attribute="mdRpmForm"
+			parameter="act"
+			path="/mdRpm"
+			type="za.ac.unisa.lms.tools.mdrpm.actions.MdRpmAction"
+			validate="false">
+			<forward
+				name="inputRpmList"
+				path="/WEB-INF/jsp/inputRpmList.jsp"
+				contextRelative="true" />
+			<forward
+				name="displayRpmList"
+				path="/WEB-INF/jsp/displayRpmList.jsp"
+				contextRelative="true" />	
+			<forward
+				name="proposeResult"
+				path="/WEB-INF/jsp/proposeResult.jsp"
+				contextRelative="true" />	
+			<forward
+				name="reviewResult"
+				path="/WEB-INF/jsp/reviewResult.jsp"
+				contextRelative="true" />	
+			<forward
+				name="reviewReferBack"
+				path="/WEB-INF/jsp/reviewReferBack.jsp"
+				contextRelative="true" />
+			<forward
+				name="viewRpm"
+				path="/WEB-INF/jsp/viewRpm.jsp"
+				contextRelative="true" />	
+			<forward
+				name="confirmSignoff"
+				path="/WEB-INF/jsp/confirmSignoff.jsp"
+				contextRelative="true" />	
+			<forward
+				name="titleMnt"
+				path="/WEB-INF/jsp/titleMnt.jsp"
+				contextRelative="true" />		
+			<forward
+				name="supervisorMnt"
+				path="/WEB-INF/jsp/supervisorMnt.jsp"
+				contextRelative="true" />
+			<forward
+				name="supervisorHistory"
+				path="/WEB-INF/jsp/supervisorHistory.jsp"
+				contextRelative="true" />	
+			<forward
+				name="searchStaff"
+				path="/WEB-INF/jsp/search.jsp"
+				contextRelative="true" />	
+			<forward
+				name="searchForward"
+				path="/WEB-INF/jsp/search.jsp"
+				contextRelative="true" />				
+			<forward
+				name="userUnknown"
+				path="/WEB-INF/jsp/userUnknown.jsp"
+				contextRelative="true" />	
+			<forward
+				name="userInvalid"
+				path="/WEB-INF/jsp/userInvalid.jsp"
+				contextRelative="true" />
+		</action>		
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.mdrpm.ApplicationResources" />
+	
+</struts-config>

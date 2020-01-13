@@ -21,13 +21,17 @@
 
 package edu.amc.sakai.user;
 
-import com.novell.ldap.LDAPConnection;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
+import com.novell.ldap.LDAPConnection;
+
 public class NativeLdapConnectionLivenessValidator 
 implements LdapConnectionLivenessValidator {
 
+	/** Class-specific logger */
+	private static Logger log = LoggerFactory.getLogger(NativeLdapConnectionLivenessValidator.class);
+	
 	public boolean isConnectionAlive(LDAPConnection connectionToTest) {
 		if ( log.isDebugEnabled() ) {
 			log.debug("isConnectionAlive(): attempting native liveness test");

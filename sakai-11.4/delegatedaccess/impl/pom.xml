@@ -6,17 +6,14 @@
     <parent>
         <artifactId>delegatedaccess</artifactId>
         <groupId>org.sakaiproject.delegatedaccess</groupId>
-        <version>12.6</version>
+        <version>11.4</version>
     </parent>
 
     <name>Delegated Access - Implementation</name>
     <groupId>org.sakaiproject.delegatedaccess</groupId>
     <artifactId>delegatedaccess-impl</artifactId>
 
-    <packaging>sakai-component</packaging>
-    <properties>
-        <deploy.target>components</deploy.target>
-    </properties>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
@@ -78,13 +75,8 @@
             <artifactId>commons-configuration</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>${joda.time.version}</version>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
         </dependency>
     </dependencies>
 

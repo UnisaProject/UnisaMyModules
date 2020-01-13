@@ -20,14 +20,13 @@
  **********************************************************************************/
 
 package org.sakaiproject.content.tool;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.cheftool.Context;
 import org.sakaiproject.cheftool.VelocityPortletPaneledAction;
 import org.sakaiproject.component.cover.ComponentManager;
@@ -47,13 +46,15 @@ import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.util.ParameterParser;
 import org.sakaiproject.util.ResourceLoader;
 
-@Slf4j
+
 public class ResourceConditionsHelper {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -3875833398687224551L;
+
+	static final Logger logger = LoggerFactory.getLogger(ResourceConditionsHelper.class);
 	
 	static final ConditionService conditionService = (ConditionService)ComponentManager.get("org.sakaiproject.conditions.api.ConditionService");
 	
@@ -67,7 +68,7 @@ public class ResourceConditionsHelper {
 		boolean cbSelected = Boolean.valueOf(params.get("cbCondition" + ListItem.DOT + index));
 		String selectedConditionValue = params.get("selectCondition" + ListItem.DOT + index);
 		if (selectedConditionValue == null) return;
-		log.debug("Selected condition value: {}", selectedConditionValue);
+		logger.debug("Selected condition value: " + selectedConditionValue);
 		//The selectCondition value must be broken up so we can get at the values
 		//that make up the index, submittedFunctionName, missingTermQuery, and operatorValue in that order
 		String[] conditionTokens = selectedConditionValue.split("\\|");
@@ -75,16 +76,16 @@ public class ResourceConditionsHelper {
 		String submittedFunctionName = conditionTokens[1];
 		String missingTermQuery = conditionTokens[2];
 		String operatorValue = conditionTokens[3];
-		log.debug("submittedFunctionName: {}", submittedFunctionName);
-		log.debug("missingTermQuery: {}", missingTermQuery);
-		log.debug("operatorValue: {}", operatorValue);			
+		logger.debug("submittedFunctionName: " + submittedFunctionName);
+		logger.debug("missingTermQuery: " + missingTermQuery);
+		logger.debug("operatorValue: " + operatorValue);			
 		String submittedResourceFilter = params.get("selectResource" + ListItem.DOT + index);
 		// the number of grade points are tagging along for the ride. chop this off.
 		String[] resourceTokens = submittedResourceFilter.split("/");
 		String assignmentPointsString = resourceTokens[4];
 		submittedResourceFilter = "/" + resourceTokens[1] + "/" + resourceTokens[2] + "/" + resourceTokens[3];
 		String additionalAssignmentInfo = "/" + resourceTokens[4] + "/" + resourceTokens[5] + "/" + resourceTokens[6] + "/" + resourceTokens[7];
-		log.debug("submittedResourceFilter: {}", submittedResourceFilter);
+		logger.debug("submittedResourceFilter: " + submittedResourceFilter);
 		String eventDataClass = conditionService.getClassNameForEvent(submittedFunctionName);
 		Object argument = null;
 		if ((selectedIndex == 1) || (selectedIndex == 2)) {
@@ -107,12 +108,12 @@ public class ResourceConditionsHelper {
 			    VelocityPortletPaneledAction.addAlert(state, rb.getFormattedMessage("conditions.condition.argument.outofrange", new String[] { assignmentPointsString }));
 				return;
 			}
-			log.debug("argument: {}", argument);
+			logger.debug("argument: " + argument);
 		}
 
 		if (cbSelected) {
 			if (item.useConditionalRelease) {
-				log.debug("Previous condition exists. Removing related notification");
+				logger.debug("Previous condition exists. Removing related notification");
 				removeExistingNotification(item, state);
 			}
 			
@@ -170,7 +171,7 @@ public class ResourceConditionsHelper {
 		if (! conditionsEnabled()) {
 			return;
 		}
-		log.debug("Loading condition data");
+		logger.debug("Loading condition data");
 		ListItem item = (ListItem) state.getAttribute(ResourcesAction.STATE_REVISE_PROPERTIES_ITEM);
 		if ((item != null) && (item.useConditionalRelease)) {
 			try {
@@ -215,7 +216,7 @@ public class ResourceConditionsHelper {
 		if (! conditionsEnabled()) {
 			return;
 		}
-		log.debug("Removing condition");	
+		logger.debug("Removing condition");	
 		try {
 			NotificationEdit notificationToRemove = NotificationService.editNotification(item.getNotificationId());
 			NotificationService.removeNotification(notificationToRemove);
@@ -249,7 +250,7 @@ public class ResourceConditionsHelper {
 				resourceNotification = NotificationService.getNotification(notificationId);
 			} catch (NotificationNotDefinedException e) {
 				// TODO Auto-generated catch block
-				log.error(e.getMessage(), e);
+				e.printStackTrace();
 			}
 		}
 			

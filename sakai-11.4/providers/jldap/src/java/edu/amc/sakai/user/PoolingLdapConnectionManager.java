@@ -22,12 +22,14 @@
 
 package edu.amc.sakai.user;
 
-import com.novell.ldap.LDAPConnection;
-import com.novell.ldap.LDAPException;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool.Config;
+
+import com.novell.ldap.LDAPConnection;
+import com.novell.ldap.LDAPException;
 
 /**
  * Allocates connected, constrained, bound and optionally secure <code>LDAPConnection</code>s.
@@ -41,8 +43,11 @@ import org.apache.commons.pool.impl.GenericObjectPool.Config;
  * @see PooledLDAPConnectionFactory
  * @author John Lewis, Unicon Inc
  */
-@Slf4j
 public class PoolingLdapConnectionManager extends SimpleLdapConnectionManager {
+	
+	/** Class-specific logger */
+	private static Logger log = LoggerFactory.getLogger(PoolingLdapConnectionManager.class);
+	
 	/** LDAP connection pool */
 	private ObjectPool pool;
 

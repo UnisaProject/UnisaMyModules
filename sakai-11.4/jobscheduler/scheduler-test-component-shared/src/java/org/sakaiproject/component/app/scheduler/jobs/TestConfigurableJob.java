@@ -1,22 +1,7 @@
-/**
- * Copyright (c) 2003-2016 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.component.app.scheduler.jobs;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.JobExecutionException;
 
 /**
@@ -26,9 +11,11 @@ import org.quartz.JobExecutionException;
  * Time: 4:02:31 PM
  * To change this template use File | Settings | File Templates.
  */
-@Slf4j
 public class TestConfigurableJob extends AbstractConfigurableJob
 {
+    private static final Logger
+        LOG = LoggerFactory.getLogger(TestConfigurableJob.class);
+
     public static final String
         INTEGER_PROPERTY            = "integer.property",
         STRING_PROPERTY             = "string.property",
@@ -39,7 +26,7 @@ public class TestConfigurableJob extends AbstractConfigurableJob
         throws JobExecutionException
     {
 
-        log.debug ("running TestConfigurableJob");
+        LOG.debug ("running TestConfigurableJob");
 
         readIntegerProperty();
         readStringProperty();
@@ -54,17 +41,17 @@ public class TestConfigurableJob extends AbstractConfigurableJob
 
         if (temp == null)
         {
-            log.debug ("integer property is null");
+            LOG.debug ("integer property is null");
         }
         else
         {
             try
             {
-                log.debug ("integer property is set to integer value: '" + Integer.parseInt(temp) + "'");
+                LOG.debug ("integer property is set to integer value: '" + Integer.parseInt(temp) + "'");
             }
             catch (NumberFormatException nfe)
             {
-                log.error ("integer property is set to a non-integer value: '" + temp + "'");
+                LOG.error ("integer property is set to a non-integer value: '" + temp + "'");
             }
         }
     }
@@ -76,15 +63,15 @@ public class TestConfigurableJob extends AbstractConfigurableJob
 
         if (temp == null)
         {
-            log.debug ("string property is null");
+            LOG.debug ("string property is null");
         }
         else if (temp.trim().length() == 0)
         {
-            log.debug ("string property is empty");
+            LOG.debug ("string property is empty");
         }
         else
         {
-            log.debug ("string property is set to: '" + temp + "'");
+            LOG.debug ("string property is set to: '" + temp + "'");
         }
     }
 
@@ -95,11 +82,11 @@ public class TestConfigurableJob extends AbstractConfigurableJob
 
         if (temp == null)
         {
-            log.debug ("boolean property is null");
+            LOG.debug ("boolean property is null");
         }
         else
         {
-            log.debug ("boolean property is set to boolean value: '" + Boolean.parseBoolean(temp) + "'");
+            LOG.debug ("boolean property is set to boolean value: '" + Boolean.parseBoolean(temp) + "'");
         }
     }
 }

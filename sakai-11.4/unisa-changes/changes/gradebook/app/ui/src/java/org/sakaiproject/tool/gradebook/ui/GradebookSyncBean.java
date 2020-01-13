@@ -43,8 +43,7 @@ import org.sakaiproject.tool.cover.SessionManager;
 import org.sakaiproject.tool.gradebook.business.impl.UnisaGradeBookDAO;
 import org.sakaiproject.tool.gradebook.business.impl.GradebookSyncStudentSystemWebServiceServiceLocator;
 import org.sakaiproject.tool.gradebook.business.impl.GradebookSyncStudentSystemWebService_PortType;
-import org.sakaiproject.tool.gradebook.GradebookAssignment;
-//import org.sakaiproject.tool.gradebook.Assignment;
+import org.sakaiproject.tool.gradebook.Assignment;
 import org.sakaiproject.tool.gradebook.jsf.FacesUtil;
 
 
@@ -63,7 +62,7 @@ public class GradebookSyncBean extends GradebookDependentBean implements Seriali
 
     // View maintenance fields - serializable.
     private Long assignmentId;
-    private GradebookAssignment assignment;
+    private Assignment assignment;
     private EmailService emailService;	
     String url = "";				
     private static final String WEBSERVICE_URL = "/sakai-axis/GradebookSyncStudentSystemWebService.jws";
@@ -83,7 +82,7 @@ public class GradebookSyncBean extends GradebookDependentBean implements Seriali
                 if (logger.isWarnEnabled()) 
                 	logger.warn("No assignmentId=" + assignmentId + " in gradebookUid " + getGradebookUid());
                 // it is a new assignment
-				assignment = new GradebookAssignment();
+				assignment = new Assignment();
 				assignment.setReleased(true);
             }
     	}
@@ -242,11 +241,11 @@ public class GradebookSyncBean extends GradebookDependentBean implements Seriali
         return "assignmentDetails";
     }
     
-    public GradebookAssignment getAssignment() {
+    public Assignment getAssignment() {
         return assignment;
     }
     
-    public void setAssignment(GradebookAssignment assignment) {
+    public void setAssignment(Assignment assignment) {
         this.assignment = assignment;
     }
     
@@ -309,7 +308,7 @@ public class GradebookSyncBean extends GradebookDependentBean implements Seriali
 	 * @param gradebookUid The UID of gradebook
 	 * @param assignment The assignment object
 	 */
-	public String getAssignmentDetails(String gradebookUid, GradebookAssignment assignment){
+	public String getAssignmentDetails(String gradebookUid, Assignment assignment){
 		if (gradebookUid == null){
 			if (logger.isErrorEnabled()) logger.error("null gradebookUid passed to getAssignmentDetails()");
 			throw new IllegalArgumentException("null gradebookUid passed to getAssignmentDetails()");
@@ -452,7 +451,7 @@ public class GradebookSyncBean extends GradebookDependentBean implements Seriali
 	 * 
 	 * @param assignment The assignment that has the GB title
 	 */
-	public boolean verifyGradebookTitle( GradebookAssignment assignment ){
+	public boolean verifyGradebookTitle( Assignment assignment ){
 		if ( assignment == null ){
 			if (logger.isErrorEnabled()) 
 				logger.error("null assignment passed to verifyGradebookTitle()");

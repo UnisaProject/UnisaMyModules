@@ -19,10 +19,8 @@
 
 package org.sakaiproject.entitybroker.providers;
 
-import java.util.Map;
-
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.entitybroker.EntityView;
 import org.sakaiproject.entitybroker.entityprovider.annotations.EntityCustomAction;
 import org.sakaiproject.entitybroker.entityprovider.capabilities.ActionsExecutable;
@@ -37,6 +35,8 @@ import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
 
+import java.util.Map;
+
 /**
  * NotificationEntityProvider exposes a REST api to the notification service at baseURL/<code>PREFIX</code>/post/{userEId}
  *
@@ -44,7 +44,6 @@ import org.sakaiproject.user.api.UserNotDefinedException;
  * @author Bill Smith (wsmith @ unicon.net)
  * @author Aaron Zeckoski (azeckoski @ gmail.com) (azeckoski @ unicon.net)
  */
-@Slf4j
 public class NotificationEntityProvider extends AbstractEntityProvider implements ActionsExecutable, Describeable {
 
     /**
@@ -52,6 +51,8 @@ public class NotificationEntityProvider extends AbstractEntityProvider implement
      */
     public static final String NOTIFY_POST_ENABLED = "notify.post.enabled";
     public static final String PREFIX = "notify";
+
+    private static Logger log = LoggerFactory.getLogger(NotificationEntityProvider.class);
 
     private EventTrackingService eventTrackingService;
     private NotificationService notificationService;

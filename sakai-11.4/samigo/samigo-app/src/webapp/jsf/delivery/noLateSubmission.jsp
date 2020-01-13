@@ -43,7 +43,10 @@
   <h:outputText value="#{deliveryMessages.no_late_submission_url}" rendered="#{delivery.actionString=='takeAssessmentViaUrl'}"/>
   <p></p>
   <h:panelGroup  rendered="#{delivery.publishedAssessment.assessmentAccessControl.dueDate!=null}">
-    <h:outputLabel value="#{deliveryMessages.due_date}: #{delivery.dayDueDateString}." />
+    <h:outputLabel value="#{deliveryMessages.due_date}: " />
+	<h:outputText value="#{delivery.publishedAssessment.assessmentAccessControl.dueDate}" >
+		<f:convertDateTime dateStyle="medium" type="both" locale="#{UserLocale.locale}" timeZone="#{UserTimeZone.userTimeZone}"/>
+	</h:outputText>
   </h:panelGroup> 
 
 

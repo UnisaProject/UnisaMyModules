@@ -18,6 +18,8 @@ package org.sakaiproject.qna.logic.impl;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.genericdao.api.search.Restriction;
 import org.sakaiproject.genericdao.api.search.Search;
 import org.sakaiproject.qna.dao.QnaDao;
@@ -29,12 +31,9 @@ import org.sakaiproject.qna.logic.QnaBundleLogic;
 import org.sakaiproject.qna.model.QnaCategory;
 import org.sakaiproject.qna.model.QnaQuestion;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class CategoryLogicImpl implements CategoryLogic {
 
-
+	private static Log log = LogFactory.getLog(CategoryLogicImpl.class);
 	private PermissionLogic permissionLogic;
 	private ExternalLogic externalLogic;
 	private org.sakaiproject.qna.dao.QnaDao dao;

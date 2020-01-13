@@ -1,0 +1,39 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="242,88" />
+  <StrutsActivity path="/WEB-INF/jsp/displaystudent.jsp" location="780,285" dimension="186,49" />
+  <StrutsActivity path="/WEB-INF/jsp/displayemail.jsp" location="870,210" dimension="173,49" />
+  <StrutsActivity path="/WEB-INF/jsp/displaylecturer.jsp" location="480,285" dimension="186,49" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="350,50" dimension="150,49" />
+  <StrutsTransition id="/displayemail.do,displayLecturer,/WEB-INF/jsp/displaylecturer.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="651,138" />
+      <AbsolutePoint location="651,285" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/displayemail.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="171,50" />
+      <AbsolutePoint location="171,-25" />
+      <AbsolutePoint location="815,-25" />
+      <AbsolutePoint location="815,50" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayemail.do,displayPreview,/WEB-INF/jsp/displayemail.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="885,138" />
+      <AbsolutePoint location="885,210" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayemail.do,displayStudent,/WEB-INF/jsp/displaystudent.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="815,138" />
+      <AbsolutePoint location="815,285" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/WEB-INF/jsp/default.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="292,84" />
+      <AbsolutePoint location="350,84" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

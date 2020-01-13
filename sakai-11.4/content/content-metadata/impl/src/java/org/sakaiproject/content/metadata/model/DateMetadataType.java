@@ -21,9 +21,16 @@
 
 package org.sakaiproject.content.metadata.model;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 
+import org.sakaiproject.content.metadata.model.MetadataConverter;
+import org.sakaiproject.content.metadata.model.MetadataRenderer;
+import org.sakaiproject.content.metadata.model.MetadataType;
+import org.sakaiproject.content.metadata.model.MetadataValidator;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.cover.TimeService;
 
@@ -32,8 +39,6 @@ import org.sakaiproject.time.cover.TimeService;
  */
 public class DateMetadataType extends MetadataType<Time>
 {
-
-	private static final long serialVersionUID = 1L;
 	private String minimumDateTime;
 	private String maximumDateTime;
 	private boolean date = true;

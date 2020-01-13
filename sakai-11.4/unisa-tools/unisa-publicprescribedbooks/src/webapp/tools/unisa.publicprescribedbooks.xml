@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registration>
+	<tool
+		id="unisa.publicprescribedbooks"
+		title="Unisa Public Prescribedbooks"
+		description="Unisa publicprescribedbooks tool">
+		<category name="unisa.tools" />
+	</tool>
+</registration>

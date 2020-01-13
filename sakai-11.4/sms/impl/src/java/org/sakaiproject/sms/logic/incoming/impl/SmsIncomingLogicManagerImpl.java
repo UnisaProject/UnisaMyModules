@@ -27,7 +27,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.sms.logic.HibernateLogicLocator;
 import org.sakaiproject.sms.logic.external.ExternalLogic;
 import org.sakaiproject.sms.logic.incoming.AccountSpecifiedCommand;
@@ -40,9 +42,6 @@ import org.sakaiproject.sms.logic.parser.exception.ParseException;
 import org.sakaiproject.sms.model.constants.SmsConstants;
 import org.sakaiproject.sms.model.smpp.SmsPatternSearchResult;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class SmsIncomingLogicManagerImpl implements SmsIncomingLogicManager {
 
 	// Collection for keeping tool ids with their logic
@@ -50,6 +49,8 @@ public class SmsIncomingLogicManagerImpl implements SmsIncomingLogicManager {
 
 	private final RegisteredCommands allCommands = new RegisteredCommands();
 
+	private static final Log log = LogFactory
+	.getLog(SmsIncomingLogicManagerImpl.class);
 
 	private HibernateLogicLocator hibernateLogicLocator;
 

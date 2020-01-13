@@ -21,49 +21,64 @@
 
 package org.sakaiproject.lessonbuildertool.service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
+import java.net.URLEncoder;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Locale;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+import java.net.URL;
+import java.net.URLConnection;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.context.MessageSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.authz.api.AuthzGroupService;
+import org.sakaiproject.authz.api.AuthzGroup;
+import org.sakaiproject.authz.api.Member;
 import org.sakaiproject.authz.cover.SecurityService;
 import org.sakaiproject.component.cover.ServerConfigurationService;
-import org.sakaiproject.site.api.Group;
-import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
-import org.sakaiproject.lessonbuildertool.SimplePage;
-import org.sakaiproject.lessonbuildertool.SimplePageLogEntry;
-import org.sakaiproject.lessonbuildertool.SimplePageItem;
-import org.sakaiproject.lessonbuildertool.tool.beans.SimplePageBean;
-import org.sakaiproject.lessonbuildertool.model.SimplePageToolDao;
+import org.sakaiproject.site.api.Site;
+import org.sakaiproject.site.api.Group;
+import org.sakaiproject.site.api.SitePage;
+import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.tool.api.Placement;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.cover.SessionManager;
 import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.cover.UserDirectoryService;
+import org.sakaiproject.util.Validator;
+import org.sakaiproject.util.Web;
+import org.springframework.context.MessageSource;
 import org.sakaiproject.util.FormattedText;
+import org.sakaiproject.lessonbuildertool.tool.beans.SimplePageBean;
+import org.sakaiproject.lessonbuildertool.model.SimplePageToolDao;
+import org.sakaiproject.lessonbuildertool.SimplePage;
+import org.sakaiproject.lessonbuildertool.SimplePageItem;
+import org.sakaiproject.lessonbuildertool.SimplePageLogEntry;
+import org.sakaiproject.lessonbuildertool.service.LessonsAccess;
+import org.sakaiproject.lessonbuildertool.service.LessonBuilderAccessService;
 
 /**
  * <p>
@@ -82,7 +97,6 @@ import org.sakaiproject.util.FormattedText;
  * @version $Revision: $
  */
 @SuppressWarnings({ "serial", "deprecation" })
-@Slf4j
 public class AjaxServer extends HttpServlet
 {
    private static final String UTF8 = "UTF-8";
@@ -99,6 +113,9 @@ public class AjaxServer extends HttpServlet
        simplePageToolDao = (SimplePageToolDao) dao;
    }
 
+   /** Our log (commons). */
+   private static Logger log = LoggerFactory.getLogger(AjaxServer.class);
+   
    public static final String FILTERHTML = "lessonbuilder.filterhtml";
    private static String filterHtml = ServerConfigurationService.getString(FILTERHTML);
 
@@ -466,8 +483,6 @@ public class AjaxServer extends HttpServlet
 	    return null;
 	}
 	
-	simplePageToolDao.setRefreshMode();
-
 	boolean below = false;
 	itemId = itemId.trim();
 	if (itemId.startsWith("-")) {
@@ -498,6 +513,7 @@ public class AjaxServer extends HttpServlet
 	    }
 	    siteId = page.getSiteId();
 	} catch (Exception e) {
+	    e.printStackTrace();
 	    log.error("Ajax insertBreakBefore passed invalid data " + e);
 	    return null;
 	}
@@ -599,8 +615,6 @@ public class AjaxServer extends HttpServlet
 	    return null;
 	}
 
-	simplePageToolDao.setRefreshMode();
-
 	itemId = itemId.trim();
 	// we don't actually use the integers. Just for syntax checking
 	int widthi = 0;
@@ -633,6 +647,7 @@ public class AjaxServer extends HttpServlet
 	    page = simplePageToolDao.getPage(item.getPageId());
 	    siteId = page.getSiteId();
 	} catch (Exception e) {
+	    e.printStackTrace();
 	    log.error("Ajax setcolumnproperties passed invalid data " + e);
 	    return null;
 	}
@@ -673,8 +688,6 @@ public class AjaxServer extends HttpServlet
 			return null;
 		}
 
-		simplePageToolDao.setRefreshMode();
-
 		itemId = itemId.trim();
 		// we don't actually use the integers. Just for syntax checking
 		int collapsiblei = 0;
@@ -698,6 +711,7 @@ public class AjaxServer extends HttpServlet
 			page = simplePageToolDao.getPage(item.getPageId());
 			siteId = page.getSiteId();
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.error("Ajax setSectionCollapsible passed invalid data " + e);
 			return null;
 		}
@@ -762,8 +776,6 @@ public class AjaxServer extends HttpServlet
 	    return null;
 	}
 
-	simplePageToolDao.setRefreshMode();
-
 	itemId = itemId.trim();
 
 	// currently this is only needed by the instructor
@@ -776,6 +788,7 @@ public class AjaxServer extends HttpServlet
 	    page = simplePageToolDao.getPage(item.getPageId());
 	    siteId = page.getSiteId();
 	} catch (Exception e) {
+	    e.printStackTrace();
 	    log.error("Ajax deleteBreak passed invalid data " + e);
 	    return null;
 	}
@@ -828,6 +841,7 @@ public class AjaxServer extends HttpServlet
 	    page = simplePageToolDao.getPage(item.getPageId());
 	    siteId = page.getSiteId();
 	} catch (Exception e) {
+	    e.printStackTrace();
 	    log.error("Ajax track passed invalid data " + e);
 	    return null;
 	}

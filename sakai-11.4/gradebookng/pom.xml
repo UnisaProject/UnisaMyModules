@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.sakaiproject</groupId>
 		<artifactId>master</artifactId>
-		<version>12.6</version>
+		<version>11.4</version>
 		<relativePath>../master/pom.xml</relativePath>
 	</parent>
 	<properties>
@@ -20,18 +20,19 @@
 			<!-- additional third party dependencies -->
 			<dependency>
 				<groupId>org.apache.wicket</groupId>
-				<artifactId>wicket-core</artifactId>
-				<version>6.26.0</version>
+				<artifactId>wicket</artifactId>
+				<version>6.18.0</version>
+				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.wicket</groupId>
 				<artifactId>wicket-spring</artifactId>
-				<version>6.26.0</version>
+				<version>6.18.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.wicket</groupId>
 				<artifactId>wicket-extensions</artifactId>
-				<version>6.26.0</version>
+				<version>6.18.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

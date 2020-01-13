@@ -7,7 +7,7 @@
     <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
       <head><%= request.getAttribute("html.head") %>
       <title><h:outputText value="EventLog"/></title>
-      <samigo:script path="/js/eventInfo.js"/>
+      <script type="text/javascript" language="JavaScript" src="/samigo-app/js/eventInfo.js"></script>
       </head>
     <body onload="<%= request.getAttribute("html.body.onload") %>;initHelpValue('<h:outputText value="#{eventLogMessages.search_hint}"/>', 'eventLogId:filteredUser');">
 
@@ -187,7 +187,7 @@
 	</h:column>
 
 	<!-- IP Address -->
-	<h:column rendered="#{eventLog.enabledIpAddress}">
+	<h:column>
 	  <f:facet name="header">
         <h:commandLink title="#{eventLogMessages.t_sortIP}" action="eventLog">
         <h:outputText value="#{eventLogMessages.ipAddress}"/>

@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2003-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.tool.messageforums.entityproviders;
 
 import java.util.*;
@@ -20,11 +5,9 @@ import java.util.*;
 import javax.servlet.http.HttpServletResponse;
 
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.math.NumberUtils;
 
-import org.sakaiproject.user.api.UserDirectoryService;
-import org.sakaiproject.user.api.UserNotDefinedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.messageforums.Attachment;
 import org.sakaiproject.api.app.messageforums.BaseForum;
 import org.sakaiproject.api.app.messageforums.DiscussionForum;
@@ -57,11 +40,11 @@ import org.sakaiproject.tool.messageforums.entityproviders.utils.MessageUtils;
  * 
  * @author Adrian Fish <adrian.r.fish@gmail.com>
  */
-@Slf4j
 public class ForumsEntityProviderImpl extends AbstractEntityProvider implements Outputable, AutoRegisterEntityProvider, ActionsExecutable, Describeable {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ForumsEntityProviderImpl.class);
 
 	public final static String ENTITY_PREFIX = "forums";
-	public static int DEFAULT_NUM_MESSAGES = 3;
 	
 	@Setter
 	protected DiscussionForumManager forumManager;
@@ -74,9 +57,6 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 	
 	@Setter
 	protected ToolManager toolManager;
-
-	@Setter
-	private UserDirectoryService userDirectoryService;
 
 	@Setter
 	private SecurityService securityService;
@@ -104,21 +84,21 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 	@EntityCustomAction(action="site",viewKey=EntityView.VIEW_LIST)
     public Object handleSite(EntityView view, Map<String, Object> params) {
 		
-		if(log.isDebugEnabled()) {
-			log.debug("handleSite");
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("handleSite");
 		}
 		
 		String userId = developerHelperService.getCurrentUserId();
 		
 		if(userId == null) {
-			log.error("Not logged in");
+			LOG.error("Not logged in");
 			throw new EntityException("You must be logged in to retrieve fora.","",HttpServletResponse.SC_UNAUTHORIZED);
 		}
 		
         String siteId = view.getPathSegment(2);
         
         if(siteId == null) {
-			log.error("Bad request. No SITEID supplied on path.");
+			LOG.error("Bad request. No SITEID supplied on path.");
         	throw new EntityException("Bad request: To get the fora in a site you need a url like '/direct/forum/site/SITEID.json'"
         									,"",HttpServletResponse.SC_BAD_REQUEST);
         }
@@ -137,7 +117,7 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
         	try {
         		forumId = Long.parseLong(view.getPathSegment(4));
         	} catch(NumberFormatException nfe) {
-        		log.error("Bad request. FORUMID must be an integer.");
+        		LOG.error("Bad request. FORUMID must be an integer.");
         		throw new EntityException("The forum id must be an integer.","",HttpServletResponse.SC_BAD_REQUEST);
         	}
         	return getForum(forumId,siteId,userId);
@@ -148,7 +128,7 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
         	try {
         		topicId = Long.parseLong(view.getPathSegment(6));
         	} catch(NumberFormatException nfe) {
-        		log.error("Bad request. TOPICID must be an integer.");
+        		LOG.error("Bad request. TOPICID must be an integer.");
         		throw new EntityException("The topic id must be an integer.","",HttpServletResponse.SC_BAD_REQUEST);
         	}
         	return getTopic(topicId,siteId,userId);
@@ -158,7 +138,7 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
     		try {
     			messageId = Long.parseLong(view.getPathSegment(8));
     		} catch(NumberFormatException nfe) {
-        		log.error("Bad request. MESSAGEID must be an integer.");
+        		LOG.error("Bad request. MESSAGEID must be an integer.");
     			throw new EntityException("The message id must be an integer.","",HttpServletResponse.SC_BAD_REQUEST);
     		}
     		
@@ -170,8 +150,8 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 	
 	private List<?> getAllForaForSite(String siteId,String userId) {
 		
-		if(log.isDebugEnabled()) {
-			log.debug("getAllForaForSite(" + siteId + "," + userId + ")");
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("getAllForaForSite(" + siteId + "," + userId + ")");
 		}
 		
 		List<SparsestForum> sparseFora = new ArrayList<SparsestForum>();
@@ -181,7 +161,7 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 		for(DiscussionForum fatForum : fatFora) {
 			
 			if( ! checkAccess(fatForum,userId,siteId)) {
-				log.warn("Access denied for user id '" + userId + "' to forum '" + fatForum.getId()
+				LOG.warn("Access denied for user id '" + userId + "' to forum '" + fatForum.getId()
 							+ "'. This forum will not be returned.");
 				continue;
 			}
@@ -198,13 +178,13 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 			
 			int totalForumMessages = 0;
 			for(Object[] topicTotal : topicTotals) {
-				totalForumMessages += ((Long) topicTotal[1]).intValue();
+				totalForumMessages += (Integer) topicTotal[1];
 			}
 			sparseForum.setTotalMessages(totalForumMessages);
 			
 			int totalForumReadMessages = 0;
 			for(Object[] topicReadTotal : topicReadTotals) {
-				totalForumReadMessages += ((Long) topicReadTotal[1]).intValue();
+				totalForumReadMessages += (Integer) topicReadTotal[1];
 			}
 			sparseForum.setReadMessages(totalForumReadMessages);
 		
@@ -220,8 +200,8 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 	 */
 	private Object getForum(Long forumId, String siteId, String userId) {
 		
-		if(log.isDebugEnabled()) {
-			log.debug("getForum(" + forumId + "," + siteId + "," + userId + ")");
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("getForum(" + forumId + "," + siteId + "," + userId + ")");
 		}
 		
 		DiscussionForum fatForum = forumManager.getForumByIdWithTopicsAttachmentsAndMessages(forumId);
@@ -244,13 +224,13 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 			
 			int totalForumMessages = 0;
 			for(Object[] topicTotal : topicTotals) {
-				totalForumMessages += ((Long) topicTotal[1]).intValue();
+				totalForumMessages += (Integer) topicTotal[1];
 			}
 			sparseForum.setTotalMessages(totalForumMessages);
 				
 			int totalForumReadMessages = 0;
 			for(Object[] topicReadTotal : topicReadTotals) {
-				totalForumReadMessages += ((Long) topicReadTotal[1]).intValue();
+				totalForumReadMessages += (Integer) topicReadTotal[1];
 			}
 			sparseForum.setReadMessages(totalForumReadMessages);
 			
@@ -268,12 +248,12 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 				SparsestTopic sparseTopic = new SparsestTopic(fatTopic);
 				for(Object[] topicTotal : topicTotals) {
 					if(topicTotal[0].equals(sparseTopic.getId())) {
-						sparseTopic.setTotalMessages(((Long)topicTotal[1]).intValue());
+						sparseTopic.setTotalMessages((Integer)topicTotal[1]);
 					}
 				}
 				for(Object[] topicReadTotal : topicReadTotals) {
 					if(topicReadTotal[0].equals(sparseTopic.getId())) {
-						sparseTopic.setReadMessages(((Long)topicReadTotal[1]).intValue());
+						sparseTopic.setReadMessages((Integer)topicReadTotal[1]);
 					}
 				}
 				
@@ -291,22 +271,22 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 			
 			return sparseForum;
 		} else {
-			log.error("Not authorised to access forum '" + forumId + "'");
+			LOG.error("Not authorised to access forum '" + forumId + "'");
 			throw new EntityException("You are not authorised to access this forum.","",HttpServletResponse.SC_UNAUTHORIZED);
 		}
 	}
 	
 	private Object getTopic(Long topicId,String siteId,String userId) {
 		
-		if(log.isDebugEnabled()) {
-			log.debug("getTopic(" + topicId + "," + siteId + "," + userId + ")");
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("getTopic(" + topicId + "," + siteId + "," + userId + ")");
 		}
 		
 		// This call gets the attachments for the messages but not the topic. Unexpected, yes. Cool, not.
 		DiscussionTopic fatTopic = (DiscussionTopic)forumManager.getTopicByIdWithMessagesAndAttachments(topicId);
 		
 		if(!uiPermissionsManager.isRead(topicId,fatTopic.getDraft(),false,userId,forumManager.getContextForTopicById(topicId))) {
-			log.error("'" + userId + "' is not authorised to read topic '" + topicId + "'.");
+			LOG.error("'" + userId + "' is not authorised to read topic '" + topicId + "'.");
 			throw new EntityException("You are not authorised to read this topic.","",HttpServletResponse.SC_UNAUTHORIZED);
 		}
 		
@@ -318,14 +298,14 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 		
 		List<Object[]> totalCounts = forumManager.getMessageCountsForMainPage(topicIds);
 		if(totalCounts.size() > 0) {
-			sparseTopic.setTotalMessages(((Long) totalCounts.get(0)[1]).intValue());
+			sparseTopic.setTotalMessages((Integer) totalCounts.get(0)[1]);
 		} else {
 			sparseTopic.setTotalMessages(0);
 		}
 		
 		List<Object[]> readCounts = forumManager.getReadMessageCountsForMainPage(topicIds);
 		if(readCounts.size() > 0) {
-			sparseTopic.setReadMessages(((Long) readCounts.get(0)[1]).intValue());
+			sparseTopic.setReadMessages((Integer) readCounts.get(0)[1]);
 		} else {
 			sparseTopic.setReadMessages(0);
 		}
@@ -346,8 +326,8 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 	
 	private Object getMessage(Long messageId,String siteId,String userId) {
 		
-		if(log.isDebugEnabled()) {
-			log.debug("getMessage(" + messageId + "," + siteId + "," + userId + ")");
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("getMessage(" + messageId + "," + siteId + "," + userId + ")");
 		}
 		
 		Message fatMessage = forumManager.getMessageById(messageId);
@@ -359,7 +339,7 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 		setAttachments(fatMessage,fatTopic.getMessages());
 		
 		if(!uiPermissionsManager.isRead(fatTopic.getId(),((DiscussionTopic)fatTopic).getDraft(),false,userId,forumManager.getContextForTopicById(fatTopic.getId()))) {
-			log.error("'" + userId + "' is not authorised to read message '" + messageId + "'.");
+			LOG.error("'" + userId + "' is not authorised to read message '" + messageId + "'.");
 			throw new EntityException("You are not authorised to read this message.","",HttpServletResponse.SC_UNAUTHORIZED);
 		}
 		
@@ -452,87 +432,5 @@ public class ForumsEntityProviderImpl extends AbstractEntityProvider implements 
 		if(!toolManager.isVisible(site, toolConfig)) {
 			throw new EntityException("No access to tool in site: " + siteId, "",HttpServletResponse.SC_UNAUTHORIZED);
 		}
-	}
-
-	/**
-	 * Handles requests /direct/forums/messages/SITEID.json?n=10 and returns latest threads for a site
-	 * @param view
-	 * @param params
-	 * @return
-	 */
-	@EntityCustomAction(action="messages",viewKey=EntityView.VIEW_LIST)
-	public Object displayMessages(EntityView view, Map<String, Object> params) {
-
-		if(log.isDebugEnabled()) {
-			log.debug("handleSite");
-		}
-
-		//get number of messages to display from the URL params, validate and set to 0 if not set or conversion fails
-		int numberOfMessages = NumberUtils.toInt((String)params.get("n"), 0);
-		if(numberOfMessages == 0){
-			numberOfMessages = DEFAULT_NUM_MESSAGES;
-		}
-		String userId = developerHelperService.getCurrentUserId();
-
-		if(userId == null) {
-			log.error("Not logged in");
-			throw new EntityException("You must be logged in view conversations.","",HttpServletResponse.SC_UNAUTHORIZED);
-		}
-
-		String siteId = view.getPathSegment(2);
-
-		if(siteId == null) {
-			log.error("Bad request. No SITEID supplied on path.");
-			throw new EntityException("Bad request: To get the fora in a site you need a url like '/direct/forums/site/SITEID/latestmessages.json?n=10'"
-					,"",HttpServletResponse.SC_BAD_REQUEST);
-		}
-
-		checkSiteAndToolAccess(siteId);
-		List<SparseMessage> messages = new ArrayList<SparseMessage>();
-		//List of topicIds from all forums which are accessible to the user
-		List<Long> topicIds = new ArrayList<Long>();
-
-		//get all forums for the site
-		List<DiscussionForum> forums = forumManager.getDiscussionForumsWithTopics(siteId);
-		for(DiscussionForum forum : forums){
-			if( ! checkAccess(forum, userId, siteId)) {
-				log.debug("Access denied for user id '" + userId + "' to forum '" + forum.getId()
-						+ "'. Topic ids will not be added for this forum .");
-				continue;
-			}
-
-			for(Topic topic : (List<Topic>) forum.getTopics()) {
-				//check if user can see this topic
-				if(!uiPermissionsManager.isRead(topic.getId(),((DiscussionTopic)topic).getDraft(),false, userId, siteId)) {
-					//user has no permission so skip adding this topicId into the list.
-					continue;
-				}
-				topicIds.add(topic.getId());
-			}
-		}
-		//For given 'topicIds' fetch recently updated threads
-		for(Message fm : (List<Message>) forumManager.getRecentDiscussionForumThreadsByTopicIds(topicIds, numberOfMessages)) {
-			//message has user_Id set in the 'modifiedBy' field, setting it to 'displayId' for display purpose
-			try {
-				String createdByDisplayName =  userDirectoryService.getUser(fm.getCreatedBy()).getDisplayName();
-				fm.setCreatedBy(createdByDisplayName);
-			} catch (UserNotDefinedException e) {
-				log.debug("User not defined for id '{}'.", fm.getCreatedBy());
-			}
-			try {
-				String modifiedByDisplayName =  userDirectoryService.getUser(fm.getModifiedBy()).getDisplayName();
-				fm.setModifiedBy(modifiedByDisplayName);
-			} catch (UserNotDefinedException e) {
-				log.debug("User not defined for id '{}'.", fm.getModifiedBy());
-			}
-			SparseMessage sm = new SparseMessage(fm,/* readStatus =*/ false,/* addAttachments =*/ true, developerHelperService.getServerURL());
-			Topic topic = fm.getTopic();
-			//setting forumId for the sparse message
-			if(topic != null && topic.getBaseForum() != null) {
-				sm.setForumId(topic.getBaseForum().getId());
-			}
-			messages.add(sm);
-		}
-		return messages;
 	}
 }

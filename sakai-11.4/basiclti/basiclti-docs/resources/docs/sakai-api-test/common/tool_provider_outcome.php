@@ -26,9 +26,6 @@ if (strlen($oauth_consumer_secret) < 1 ) $oauth_consumer_secret = 'secret';
 $sourcedid = $_REQUEST['sourcedid'];
 if (get_magic_quotes_gpc()) $sourcedid = stripslashes($sourcedid);
 
-$signature = false;
-if ( isset($_REQUEST['oauth_signature_method']) ) $signature = $_REQUEST['oauth_signature_method'];
-
 ?>
 <p>
 <form method="POST">
@@ -36,7 +33,6 @@ Service URL: <input type="text" name="url" size="100" disabled="true" value="<?p
 lis_result_sourcedid: <input type="text" name="sourcedid" disabled="true" size="100" value="<?php echo(htmlent_utf8($sourcedid));?>"/></br>
 OAuth Consumer Key: <input type="text" name="key" disabled="true" size="80" value="<?php echo(htmlent_utf8($_REQUEST['key']));?>"/></br>
 OAuth Consumer Secret: <input type="text" name="secret" size="80" value="<?php echo(htmlent_utf8($oauth_consumer_secret));?>"/></br>
-OAuth Signature Method: <input type="text" name="oauth_signature_method" value="<?php echo(htmlent_utf8($_REQUEST['oauth_signature_method']));?>"/></br>
 </p><p>
 Grade to Send to LMS: <input type="text" name="grade" value="<?php echo(htmlent_utf8($_REQUEST['grade']));?>"/>
 (i.e. 0.95)<br/>
@@ -100,8 +96,7 @@ if ( $_REQUEST['submit'] == "Send Grade" && isset($_REQUEST['grade'] ) ) {
     exit();
 }
 
-$more_headers = false;
-$response = sendOAuthBody($method, $endpoint, $oauth_consumer_key, $oauth_consumer_secret, $content_type, $postBody, $more_headers, $signature);
+$response = sendOAuthBody($method, $endpoint, $oauth_consumer_key, $oauth_consumer_secret, $content_type, $postBody);
 global $LastOAuthBodyBaseString;
 $lbs = $LastOAuthBodyBaseString;
 

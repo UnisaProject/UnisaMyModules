@@ -21,8 +21,8 @@
 
 package org.sakaiproject.user.impl;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.user.api.Preferences;
 import org.sakaiproject.user.api.PreferencesEdit;
@@ -34,9 +34,11 @@ import org.sakaiproject.util.SingleStorageUser;
  * DbPreferencesService is an extension of the BasePreferencesService with database storage.
  * </p>
  */
-@Slf4j
 public abstract class DbPreferencesService extends BasePreferencesService
 {
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(DbPreferencesService.class);
+
 	/** Table name for realms. */
 	protected String m_tableName = "SAKAI_PREFERENCES";
 
@@ -111,11 +113,11 @@ public abstract class DbPreferencesService extends BasePreferencesService
 
 			super.init();
 
-			log.info("init(): table: " + m_tableName + " locks-in-db: " + m_locksInDb);
+			M_log.info("init(): table: " + m_tableName + " locks-in-db: " + m_locksInDb);
 		}
 		catch (Exception t)
 		{
-			log.warn("init(): ", t);
+			M_log.warn("init(): ", t);
 		}
 	}
 

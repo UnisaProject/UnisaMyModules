@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans >
+    <form-bean name="bulkEmailForm" type="za.ac.unisa.lms.tools.bulkemail.forms.BulkEmailForm" />
+
+  </form-beans>
+
+  <global-exceptions />
+  <global-forwards />
+  <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.bulkemail.actions.DefaultAction">
+      
+      <forward 
+      	name="default" 
+	    path="/bulkEmailAction.do?action=step1"
+	    contextRelative="true"
+	  />
+    </action>
+    
+    <action
+      attribute="bulkEmailForm"
+      name="bulkEmailForm"
+      parameter="action"
+      path="/bulkEmailAction"
+      type="za.ac.unisa.lms.tools.bulkemail.actions.BulkEmailAction">
+      <forward
+        name="step3"
+        path="/WEB-INF/jsp/step3.jsp"
+        contextRelative="true" />
+      <forward
+        name="preview"
+        path="/WEB-INF/jsp/preview.jsp"
+        contextRelative="true" />
+      <forward
+        name="step2"
+        path="/WEB-INF/jsp/step2.jsp"
+        contextRelative="true" />
+      <forward
+        name="step1"
+        path="/WEB-INF/jsp/step1.jsp"
+        contextRelative="true" />
+    </action>
+	
+  </action-mappings>
+
+  <message-resources parameter="za.ac.unisa.lms.tools.bulkemail.ApplicationResources" />
+</struts-config>
+

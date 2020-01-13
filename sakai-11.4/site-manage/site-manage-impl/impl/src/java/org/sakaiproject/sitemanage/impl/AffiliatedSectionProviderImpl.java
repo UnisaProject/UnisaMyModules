@@ -22,17 +22,19 @@ package org.sakaiproject.sitemanage.impl;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.sitemanage.api.AffiliatedSectionProvider;
 
 /**
  * @author zqian
  *
  */
-@Slf4j
 public class AffiliatedSectionProviderImpl implements AffiliatedSectionProvider {
+	
 
+	private static final Logger log = LoggerFactory.getLogger(AffiliatedSectionProviderImpl.class);
+	
 	public List getAffiliatedSectionEids(String userEid, String academicSessionEid)
 	{
 		return null;

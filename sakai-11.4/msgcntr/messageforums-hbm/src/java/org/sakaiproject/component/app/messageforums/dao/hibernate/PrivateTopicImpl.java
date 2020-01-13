@@ -26,14 +26,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.messageforums.PrivateTopic;
 import org.sakaiproject.api.app.messageforums.Topic;
 
-@Slf4j
 public class PrivateTopicImpl extends TopicImpl implements PrivateTopic {
 
+    private static final Logger LOG = LoggerFactory.getLogger(PrivateTopicImpl.class);
+    
     private String userId;
     private String contextId;
     private PrivateTopic parentTopic;
@@ -139,8 +140,8 @@ public class PrivateTopicImpl extends TopicImpl implements PrivateTopic {
     ////////////////////////////////////////////////////////////////////////
     
     public void addChildFolder(PrivateTopic folder) {
-        if (log.isDebugEnabled()) {
-            log.debug("addChildFolder(folder " + folder + ")");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("addChildFolder(folder " + folder + ")");
         }
         
         if (folder == null) {
@@ -152,8 +153,8 @@ public class PrivateTopicImpl extends TopicImpl implements PrivateTopic {
     }
 
     public void removeChildFolder(PrivateTopic folder) {
-        if (log.isDebugEnabled()) {
-            log.debug("removeChildFolder(folder " + folder + ")");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("removeChildFolder(folder " + folder + ")");
         }
         
         if (folder == null) {

@@ -21,25 +21,13 @@
 
 package org.sakaiproject.portlets;
 
-import javax.portlet.*;
-import javax.servlet.ServletRequest;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
-
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.authz.api.GroupNotDefinedException;
 import org.sakaiproject.authz.api.Role;
@@ -69,13 +57,26 @@ import org.sakaiproject.user.cover.UserDirectoryService;
 import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.ResourceLoader;
 
+import javax.portlet.*;
+import javax.servlet.ServletRequest;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 // Velocity
 
 /**
  * a simple PortletIFrame Portlet
  */
-@Slf4j
 public class PortletIFrame extends GenericPortlet {
+
+	private static final Logger M_log = LoggerFactory.getLogger(PortletIFrame.class);
 
 	/** Event for accessing the web-content tool */
 	protected final static String EVENT_ACCESS_WEB_CONTENT = "webcontent.read";
@@ -264,7 +265,7 @@ public class PortletIFrame extends GenericPortlet {
 		{
 			throw new PortletException("Cannot initialize Velocity ", e);
 		}
-		log.info("iFrame Portlet vengine="+vengine+" rb="+rb);
+		M_log.info("iFrame Portlet vengine="+vengine+" rb="+rb);
 	}
 
 	private void addAlert(ActionRequest request,String message) {
@@ -287,7 +288,7 @@ public class PortletIFrame extends GenericPortlet {
 		throws PortletException, IOException {
 			response.setContentType("text/html");
 
-			// log.info("==== doView called ====");
+			// System.out.println("==== doView called ====");
 
 			// Grab that underlying request to get a GET parameter
 			ServletRequest req = (ServletRequest) ThreadLocalManager.get(CURRENT_HTTP_REQUEST);
@@ -324,14 +325,13 @@ public class PortletIFrame extends GenericPortlet {
 						StringBuilder alertMsg = new StringBuilder();
 						if ( siteInfo != null ) siteInfo = validator.processFormattedText(siteInfo, alertMsg);
 						context.put("siteInfo", siteInfo);
-						context.put("height",height);
 						vHelper.doTemplate(vengine, "/vm/info.vm", context, out);
 						return;
 					}
 				}
 				catch (Exception any)
 				{
-					log.error(any.getMessage(), any);
+					any.printStackTrace();
 				}
 			}
 
@@ -349,12 +349,12 @@ public class PortletIFrame extends GenericPortlet {
             // Compute the URL
             String url = sourceUrl(special, source, placement.getContext(), macroExpansion, passPid, placement.getId(), sakaiPropertiesUrlKey);
 
-            //log.info("special="+special+" source="+source+" pgc="+placement.getContext()+" macroExpansion="+macroExpansion+" passPid="+passPid+" PGID="+placement.getId()+" sakaiPropertiesUrlKey="+sakaiPropertiesUrlKey+" url="+url);
+            //System.out.println("special="+special+" source="+source+" pgc="+placement.getContext()+" macroExpansion="+macroExpansion+" passPid="+passPid+" PGID="+placement.getId()+" sakaiPropertiesUrlKey="+sakaiPropertiesUrlKey+" url="+url);
 
 			if ( url != null && url.trim().length() > 0 ) {
 				url = sanitizeHrefURL(url);
 				if ( url == null || ! validateURL(url) ) {
-					log.warn("invalid URL suppressed placement="+placement.getId()+" site="+placement.getContext()+" url="+url);
+					M_log.warn("invalid URL suppressed placement="+placement.getId()+" site="+placement.getContext()+" url="+url);
 					url = "about:blank";
 				}
 
@@ -398,7 +398,7 @@ public class PortletIFrame extends GenericPortlet {
             // TODO: state.setAttribute(EVENT_ACCESS_WEB_CONTENT, config.getProperty(EVENT_ACCESS_WEB_CONTENT));
             // TODO: state.setAttribute(EVENT_REVISE_WEB_CONTENT, config.getProperty(EVENT_REVISE_WEB_CONTENT));
 
-			// log.info("==== doView complete ====");
+			// System.out.println("==== doView complete ====");
 		}
 
     // Determine if we should pop up due to an X-Frame-Options : [SAMEORIGIN]
@@ -452,11 +452,11 @@ public class PortletIFrame extends GenericPortlet {
             lastTime = -1;
         }
 
-        log.debug("lastTime="+lastTime+" nowTime="+nowTime);
+        M_log.debug("lastTime="+lastTime+" nowTime="+nowTime);
 
         if ( lastTime > 0 && nowTime < lastTime + xframeCache ) {
             String lastXF = placement.getPlacementConfig().getProperty(XFRAME_LAST_STATUS);
-            log.debug("Status from placement="+lastXF);
+            M_log.debug("Status from placement="+lastXF);
             return "true".equals(lastXF);
         }
 
@@ -469,9 +469,6 @@ public class PortletIFrame extends GenericPortlet {
             HttpURLConnection con =
                 (HttpURLConnection) new URL(url).openConnection();
             con.setRequestMethod("HEAD");
-
-            String sakaiVersion = ServerConfigurationService.getString("version.sakai", "?");
-            con.setRequestProperty("User-Agent","Java Sakai/"+sakaiVersion);
 
             Map headerfields = con.getHeaderFields();
             Set headers = headerfields.entrySet(); 
@@ -492,21 +489,21 @@ public class PortletIFrame extends GenericPortlet {
         }
         catch (Exception e) {
             // Fail pretty silently because this could be pretty chatty with bad urls and all
-            log.debug(e.getMessage());
+            M_log.debug(e.getMessage());
             retval = false;
         }
         placement.getPlacementConfig().setProperty(XFRAME_LAST_STATUS, String.valueOf(retval));
         // Permanently set popup to true as we don't expect that a site will go back
         if ( retval == true ) placement.getPlacementConfig().setProperty(POPUP, "true");
         placement.save();
-        log.debug("Retrieved="+url+" XFrame="+retval);
+        M_log.debug("Retrieved="+url+" XFrame="+retval);
         return retval;
     }
 
 	public void doEdit(RenderRequest request, RenderResponse response)
 		throws PortletException, IOException 
     {
-			// log.info("==== doEdit called ====");
+			// System.out.println("==== doEdit called ====");
 			response.setContentType("text/html");
 			PrintWriter out = response.getWriter();
 			String title = getTitleString(request);
@@ -594,20 +591,15 @@ public class PortletIFrame extends GenericPortlet {
 					    Site s = SiteService.getSite(ToolManager.getCurrentPlacement().getContext());
 					    String siteId = s.getId();
 
-						String infoUrl = StringUtils.trimToNull(s.getInfoUrl());
-						if (infoUrl != null)
-						{
-							//Check if infoUrl is relative? and prepend the server url
-							if(infoUrl.startsWith("/") && !infoUrl.contains("://")){
-								infoUrl = ServerConfigurationService.getServerUrl() + infoUrl;
-							}
-							//Check if infoUrl is relative? and prepend the server url
-							String serverUrl = ServerConfigurationService.getServerUrl();
-							if(infoUrl.startsWith("/") && infoUrl.indexOf("://") == -1){
-								infoUrl = serverUrl + infoUrl;
-							}
-							context.put("info_url", FormattedText.escapeHtmlFormattedTextarea(infoUrl));
-						}
+					    String infoUrl = StringUtils.trimToNull(s.getInfoUrl());
+					    if (infoUrl != null)
+					    {
+                                            //Check if infoUrl is relative? and prepend the server url
+                                            if(infoUrl.startsWith("/") && !infoUrl.contains("://")){
+                                                infoUrl = ServerConfigurationService.getServerUrl() + infoUrl;
+                                            }
+						    context.put("info_url", FormattedText.escapeHtmlFormattedTextarea(infoUrl));
+					    }
 
 					    String description = StringUtils.trimToNull(s.getDescription());
 					    if (description != null)
@@ -667,7 +659,7 @@ public class PortletIFrame extends GenericPortlet {
             if (SPECIAL_SITE.equals(special)) template = "/vm/edit-site.vm";
             if (SPECIAL_WORKSITE.equals(special)) template = "/vm/edit-site.vm";
             if (SPECIAL_ANNOTATEDURL.equals(special)) template = "/vm/edit-annotatedurl.vm";
-            // log.info("EDIT TEMP="+template+" special="+special);
+            // System.out.println("EDIT TEMP="+template+" special="+special);
 
 			// capture the revise events
 			if (placement != null && placement.getContext() != null && placement.getId() != null) {
@@ -682,15 +674,15 @@ public class PortletIFrame extends GenericPortlet {
 
 			vHelper.doTemplate(vengine, template, context, out);
 
-			// log.info("==== doEdit done ====");
+			// System.out.println("==== doEdit done ====");
 		}
 
 	public void doHelp(RenderRequest request, RenderResponse response)
 		throws PortletException, IOException {
-			// log.info("==== doHelp called ====");
+			// System.out.println("==== doHelp called ====");
 			// sendToJSP(request, response, "/help.jsp");
 			JSPHelper.sendToJSP(pContext, request, response, "/help.jsp");
-			// log.info("==== doHelp done ====");
+			// System.out.println("==== doHelp done ====");
 		}
 
 	// Process action is called for action URLs / form posts, etc
@@ -700,7 +692,7 @@ public class PortletIFrame extends GenericPortlet {
 	public void processAction(ActionRequest request, ActionResponse response)
 		throws PortletException, IOException {
 
-			// log.info("==== processAction called ====");
+			// System.out.println("==== processAction called ====");
 
 			PortletSession pSession = request.getPortletSession(true);
 
@@ -723,11 +715,11 @@ public class PortletIFrame extends GenericPortlet {
 			} else if ( doUpdate != null ) {
 				processActionEdit(request, response);
 			} else {
-				// log.info("Unknown action");
+				// System.out.println("Unknown action");
 				response.setPortletMode(PortletMode.VIEW);
 			}
 
-			// log.info("==== End of ProcessAction  ====");
+			// System.out.println("==== End of ProcessAction  ====");
 		}
 
 	public void processActionEdit(ActionRequest request, ActionResponse response)
@@ -757,7 +749,7 @@ public class PortletIFrame extends GenericPortlet {
             }
 
             // If we have a URL from the user, lets validate it
-            if ((StringUtils.isNotBlank(source)) && (!validateURL(source)) ) {
+            if ((!StringUtils.isBlank(source)) && (!validateURL(source)) ) {
                 addAlert(request, rb.getString("gen.url.invalid"));
                 return;
             }
@@ -775,7 +767,7 @@ public class PortletIFrame extends GenericPortlet {
             }
 
             // If we have an infourl from the user, lets validate it
-            if ((StringUtils.isNotBlank(infoUrl)) && (!validateURL(infoUrl)) ) {
+            if ((!StringUtils.isBlank(infoUrl)) && (!validateURL(infoUrl)) ) {
                 addAlert(request, rb.getString("gen.url.invalid"));
                 return;
             }
@@ -860,7 +852,7 @@ public class PortletIFrame extends GenericPortlet {
 			}
 			catch (Exception ignore)
 			{
-				log.warn("doConfigure_update: " + ignore);
+				M_log.warn("doConfigure_update: " + ignore);
 			}
 
 			// popup and maximize
@@ -880,17 +872,12 @@ public class PortletIFrame extends GenericPortlet {
             if (SPECIAL_WORKSITE.equals(special))
             {
                 //Check info-url for null and empty
-                if(StringUtils.isNotBlank(infoUrl)) {
+                if(StringUtils.isNotBlank(infoUrl)){
                     // If the site info url has server url then make it a relative link.
-                    Collection<String> serverNames = new ArrayList<String>();
-                    //get the server name
-                    serverNames.add(new URL(ServerConfigurationService.getServerUrl()).getHost());
-                    serverNames.addAll(ServerConfigurationService.getInstance().getServerNameAliases());
-                    for (String serverName : serverNames) {
-                        // if the supplied url starts with protocol//serverName:port/
-                        Pattern serverUrlPattern = Pattern.compile(String.format("^(https?:)?//%s:?\\d*/", serverName));
-                        infoUrl = serverUrlPattern.matcher(infoUrl).replaceFirst("/");
-                    }
+                    String serverName = new URL(ServerConfigurationService.getServerUrl()).getHost();
+                    // if the supplied url starts with protocol//serverName:port/
+                    Pattern serverUrlPattern = Pattern.compile(String.format("^(https?:)?//%s:?\\d*/", serverName));
+                    infoUrl = serverUrlPattern.matcher(infoUrl).replaceFirst("/");
                 }
                 String description = StringUtils.trimToNull(request.getParameter("description"));
                 //Need to save this processed
@@ -903,7 +890,7 @@ public class PortletIFrame extends GenericPortlet {
                 }
                 catch (Throwable e)
                 {
-                    log.warn("doConfigure_update: " + e);
+                    M_log.warn("doConfigure_update: " + e);
                 }
             }
 

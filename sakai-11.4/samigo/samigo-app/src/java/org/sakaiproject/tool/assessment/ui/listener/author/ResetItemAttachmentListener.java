@@ -20,29 +20,28 @@
  **********************************************************************************/
 
 package org.sakaiproject.tool.assessment.ui.listener.author;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.exception.TypeException;
+import org.sakaiproject.tool.api.ToolSession;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AttachmentIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTextAttachmentIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTextIfc;
-import org.sakaiproject.tool.assessment.facade.ItemFacade;
 import org.sakaiproject.tool.assessment.services.ItemService;
 import org.sakaiproject.tool.assessment.services.PublishedItemService;
 import org.sakaiproject.tool.assessment.services.assessment.AssessmentService;
@@ -51,16 +50,18 @@ import org.sakaiproject.tool.assessment.ui.bean.author.AnswerBean;
 import org.sakaiproject.tool.assessment.ui.bean.author.AuthorBean;
 import org.sakaiproject.tool.assessment.ui.bean.author.ItemAuthorBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
+import org.sakaiproject.tool.cover.SessionManager;
 
 /**
  * <p>Title: Samigo</p>
  * <p>Description: Sakai Assessment Manager</p>
  * @version $Id$
  */
-@Slf4j
+
 public class ResetItemAttachmentListener
     implements ActionListener
 {
+  private static Logger log = LoggerFactory.getLogger(ResetItemAttachmentListener.class);
 
   public ResetItemAttachmentListener()
   {
@@ -88,27 +89,33 @@ public class ResetItemAttachmentListener
 
     if (answerBean == null) {
 	    if (itemId !=null && !("").equals(itemId)){
-	      ItemFacade item = itemService.getItem(itemId);
+	      ItemDataIfc item = itemService.getItem(itemId);
 	      log.debug("*** item attachment="+item.getItemAttachmentList());
-	      resetItemAttachment(itemauthorBean.getResourceHash(), item.getItemAttachmentList(), assessmentService, item, itemService);
-	    } // else never saved, so no attachments to clean up
+	      resetItemAttachment(itemauthorBean.getResourceHash(), item.getItemAttachmentList(), assessmentService);
+	    }
+	    else{
+	      resetItemAttachment(itemauthorBean.getResourceHash(), new ArrayList(), assessmentService);
+	    }
 	}
 	else {
 	    Long sequence = answerBean.getSequence();
 	    if (itemId !=null && !("").equals(itemId)){
-            ItemFacade item = itemService.getItem(itemId);
+	      ItemDataIfc item = itemService.getItem(itemId);
 	      ItemTextIfc itemText = item.getItemTextBySequence(sequence);
-	      resetItemTextAttachment(answerBean.getResourceHash(), itemText.getItemTextAttachmentSet(), assessmentService, itemText, item, itemService);
+	      //log.debug("*** item attachment="+item.getItemAttachmentList());
+	      resetItemTextAttachment(answerBean.getResourceHash(), itemText.getItemTextAttachmentSet(), assessmentService);
+	    }
+	    else{
+	      resetItemTextAttachment(answerBean.getResourceHash(), new HashSet(), assessmentService);
 	    }
 		
 	}
   }
 
-    private void resetItemAttachment(Map resourceHash, List attachmentList, AssessmentService service, ItemFacade item, ItemService itemService){
+    private void resetItemAttachment(HashMap resourceHash, List attachmentList, AssessmentService service){
     // 1. we need to make sure that attachment removed/added by file picker 
     //    will be restored/remove when user cancels the entire modification
     if (attachmentList != null){
-      boolean itemEdited = false;
       for (int i=0; i<attachmentList.size(); i++){
          AttachmentIfc attach = (AttachmentIfc) attachmentList.get(i);
          try{
@@ -127,8 +134,7 @@ public class ResetItemAttachmentListener
            // so we would just do clean up to avoid having attachments
            // points to empty resources
            log.warn("***2.removing an empty item attachment association, attachmentId="+attach.getAttachmentId());
-           item.removeItemAttachmentById(attach.getAttachmentId());
-           itemEdited = true;
+           service.removeItemAttachment(attach.getAttachmentId().toString());
 
            /* forget it #1
            if (resourceHash!=null){
@@ -142,9 +148,6 @@ public class ResetItemAttachmentListener
          catch (TypeException e) {
     	   log.warn("TypeException from ContentHostingService:"+e.getMessage());
 	 }
-      }
-      if ( itemEdited ) {
-          itemService.saveItem(item);
       }
     }
 
@@ -189,8 +192,8 @@ public class ResetItemAttachmentListener
   }
   */
     
-    private void resetItemTextAttachment(Map resourceHash, Set<ItemTextAttachmentIfc> attachmentSet, AssessmentService service, ItemTextIfc itemText, ItemFacade item, ItemService itemService){
-        // 1. we need to make sure that attachment removed/added by file picker
+    private void resetItemTextAttachment(HashMap resourceHash, Set<ItemTextAttachmentIfc> attachmentSet, AssessmentService service){
+        // 1. we need to make sure that attachment removed/added by file picker 
         //    will be restored/remove when user cancels the entire modification
         if (attachmentSet != null){
           for (Iterator<ItemTextAttachmentIfc> it = attachmentSet.iterator(); it.hasNext();) {
@@ -211,7 +214,8 @@ public class ResetItemAttachmentListener
                // so we would just do clean up to avoid having attachments
                // points to empty resources
                log.warn("***2.removing an empty item attachment association, attachmentId="+attach.getAttachmentId());
-                 itemText.removeItemTextAttachmentById(attach.getAttachmentId());
+               service.removeItemTextAttachment(attach.getAttachmentId().toString());
+
                /* forget it #1
                if (resourceHash!=null){
                  ContentResource old_cr = (ContentResource) resourceHash.get(attach.getResourceId());

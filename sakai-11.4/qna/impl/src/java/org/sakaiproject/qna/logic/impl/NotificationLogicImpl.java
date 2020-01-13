@@ -15,7 +15,7 @@
  */
 package org.sakaiproject.qna.logic.impl;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.validator.EmailValidator;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.qna.logic.ExternalLogic;
@@ -24,7 +24,6 @@ import org.sakaiproject.qna.logic.QnaBundleLogic;
 import org.sakaiproject.qna.logic.QuestionLogic;
 import org.sakaiproject.qna.model.QnaQuestion;
 import org.sakaiproject.qna.utils.TextUtil;
-
 
 public class NotificationLogicImpl implements NotificationLogic {
 
@@ -285,7 +284,7 @@ public class NotificationLogicImpl implements NotificationLogic {
 	 * Strip tags from html Copy of TextUtil method in tool
 	 */
 	private String stripTags(String html) {
-		return StringEscapeUtils.unescapeHtml3(html.replaceAll("\\<.*?>","").replaceAll("&nbsp;"," "));		
+		return StringEscapeUtils.unescapeHtml(html.replaceAll("\\<.*?>","").replaceAll("&nbsp;"," "));		
 	}
 
 }

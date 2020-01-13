@@ -23,6 +23,8 @@ package org.sakaiproject.sms.entity;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.entitybroker.DeveloperHelperService;
 import org.sakaiproject.entitybroker.EntityReference;
@@ -32,12 +34,10 @@ import org.sakaiproject.entitybroker.entityprovider.extension.Formats;
 import org.sakaiproject.entitybroker.entityprovider.search.Search;
 import org.sakaiproject.sms.logic.command.SmsRestCommand;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class SmsCommandEntityProviderImpl implements SmsCommandEntityProvider,
 		RESTful, AutoRegisterEntityProvider {
 
+	private static final Log LOG = LogFactory.getLog(SmsCommandEntityProviderImpl.class);
 
 	public String getEntityPrefix() {
 		return ENTITY_PREFIX;

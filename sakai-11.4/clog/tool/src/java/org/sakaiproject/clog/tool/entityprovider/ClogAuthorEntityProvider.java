@@ -96,48 +96,14 @@ public class ClogAuthorEntityProvider extends AbstractEntityProvider implements 
             throw new EntityException("No site id supplied.", "", HttpServletResponse.SC_BAD_REQUEST);
         }
 
-        int page = 0;
-        String pageString = (String) params.get("page");
-        if (pageString != null) {
-            try {
-                page = Integer.parseInt(pageString);
-            } catch (NumberFormatException nfe) {
-                LOG.error("Invalid page number " + pageString + " supplied. The first page will be returned ...");
-                throw new EntityException("Invalid page value. Needs to be an integer.", ""
-                                                                    , HttpServletResponse.SC_BAD_REQUEST);
-            }
-        }
-
         String sort = (String) params.get("sort");
 
         try {
             List<ClogMember> authors = clogManager.getAuthors(siteId, sort);
-            int pageSize = 50;
-            int start  = page * pageSize;
-            int authorsTotal = authors.size();
-
-            if (start >= authorsTotal) {
-                AuthorsData data = new AuthorsData();
-                data.status = "END";
-                return data;
-            } else {
-                int end = start + pageSize;
-
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("end: " + end);
-                }
-
-                AuthorsData data = new AuthorsData();
-                data.authorsTotal = authorsTotal;
-
-                if (end >= authorsTotal) {
-                    end = authorsTotal;
-                    data.status = "END";
-                }
-
-                data.authors = authors.subList(start, end);
-                return data;
-            }
+       	 	AuthorsData data = new AuthorsData();
+       	 	data.authorsTotal = authors.size();
+       	 	data.authors = authors;
+       	 	return data;
 
         } catch (Exception e) {
             LOG.error("Caught exception whilst getting authors.", e);

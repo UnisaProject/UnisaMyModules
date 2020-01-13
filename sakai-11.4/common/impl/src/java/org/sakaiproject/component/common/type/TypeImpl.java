@@ -21,17 +21,18 @@
 
 package org.sakaiproject.component.common.type;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.common.type.Type;
 import org.sakaiproject.component.common.manager.PersistableImpl;
 
 /**
  * @author <a href="mailto:lance@indiana.edu">Lance Speelmon </a>
  */
-@Slf4j
 public class TypeImpl extends PersistableImpl implements Type
 {
+	private static final Logger LOG = LoggerFactory.getLogger(TypeImpl.class);
+
 	private String authority;
 
 	private String domain;
@@ -49,7 +50,7 @@ public class TypeImpl extends PersistableImpl implements Type
 	 */
 	private String getBusinessKey()
 	{
-		log.trace("getBusinessKey()");
+		LOG.trace("getBusinessKey()");
 
 		StringBuilder sb = new StringBuilder();
 		sb.append(authority);
@@ -63,27 +64,27 @@ public class TypeImpl extends PersistableImpl implements Type
 	 */
 	public boolean equals(Object obj)
 	{
-		if (log.isTraceEnabled())
+		if (LOG.isTraceEnabled())
 		{
-			log.trace("equals(Object " + obj + ")");
+			LOG.trace("equals(Object " + obj + ")");
 		}
 
 		if (this == obj) return true;
 		if (!(obj instanceof Type)) return false;
 		if (obj instanceof TypeImpl)
 		{ // found well known Type
-			if (log.isDebugEnabled())
+			if (LOG.isDebugEnabled())
 			{
-				log.debug("equals(obj): // found well known Type");
+				LOG.debug("equals(obj): // found well known Type");
 			}
 			TypeImpl other = (TypeImpl) obj;
 			if (this.getBusinessKey().equals(other.getBusinessKey())) return true;
 		}
 		else
 		{ // found external Type
-			if (log.isDebugEnabled())
+			if (LOG.isDebugEnabled())
 			{
-				log.debug("equals(obj): // found external Type");
+				LOG.debug("equals(obj): // found external Type");
 			}
 			Type other = (Type) obj;
 			if (this.getAuthority().equals(other.getAuthority()) && this.getDomain().equals(other.getDomain())
@@ -97,7 +98,7 @@ public class TypeImpl extends PersistableImpl implements Type
 	 */
 	public int hashCode()
 	{
-		log.trace("hashCode()");
+		LOG.trace("hashCode()");
 
 		return getBusinessKey().hashCode();
 	}
@@ -107,7 +108,7 @@ public class TypeImpl extends PersistableImpl implements Type
 	 */
 	public String toString()
 	{
-		log.trace("toString()");
+		LOG.trace("toString()");
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("{id=");
@@ -129,7 +130,7 @@ public class TypeImpl extends PersistableImpl implements Type
 	 */
 	public String getAuthority()
 	{
-		log.trace("getAuthority()");
+		LOG.trace("getAuthority()");
 
 		return authority;
 	}
@@ -139,7 +140,7 @@ public class TypeImpl extends PersistableImpl implements Type
 	 */
 	public String getDomain()
 	{
-		log.trace("getDomain()");
+		LOG.trace("getDomain()");
 
 		return domain;
 	}
@@ -149,7 +150,7 @@ public class TypeImpl extends PersistableImpl implements Type
 	 */
 	public String getKeyword()
 	{
-		log.trace("getKeyword()");
+		LOG.trace("getKeyword()");
 
 		return keyword;
 	}
@@ -159,7 +160,7 @@ public class TypeImpl extends PersistableImpl implements Type
 	 */
 	public String getDisplayName()
 	{
-		log.trace("getDisplayName()");
+		LOG.trace("getDisplayName()");
 
 		return displayName;
 	}
@@ -169,7 +170,7 @@ public class TypeImpl extends PersistableImpl implements Type
 	 */
 	public String getDescription()
 	{
-		log.trace("getDescription()");
+		LOG.trace("getDescription()");
 
 		return description;
 	}
@@ -179,9 +180,9 @@ public class TypeImpl extends PersistableImpl implements Type
 	 */
 	public void setAuthority(String authority)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setAuthority(String " + authority + ")");
+			LOG.debug("setAuthority(String " + authority + ")");
 		}
 		if (authority == null || authority.length() < 1) throw new IllegalArgumentException("authority");
 
@@ -193,9 +194,9 @@ public class TypeImpl extends PersistableImpl implements Type
 	 */
 	public void setDomain(String domain)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setDomain(String " + domain + ")");
+			LOG.debug("setDomain(String " + domain + ")");
 		}
 		if (domain == null || domain.length() < 1) throw new IllegalArgumentException("domain");
 
@@ -207,9 +208,9 @@ public class TypeImpl extends PersistableImpl implements Type
 	 */
 	public void setKeyword(String keyword)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setKeyword(String " + keyword + ")");
+			LOG.debug("setKeyword(String " + keyword + ")");
 		}
 		if (keyword == null || keyword.length() < 1) throw new IllegalArgumentException("keyword");
 
@@ -221,9 +222,9 @@ public class TypeImpl extends PersistableImpl implements Type
 	 */
 	public void setDisplayName(String displayName)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setDisplayName(String " + displayName + ")");
+			LOG.debug("setDisplayName(String " + displayName + ")");
 		}
 		if (displayName == null || displayName.length() < 1) throw new IllegalArgumentException("displayName");
 
@@ -235,9 +236,9 @@ public class TypeImpl extends PersistableImpl implements Type
 	 */
 	public void setDescription(String description)
 	{
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("setDescription(String " + description + ")");
+			LOG.debug("setDescription(String " + description + ")");
 		}
 
 		this.description = description;

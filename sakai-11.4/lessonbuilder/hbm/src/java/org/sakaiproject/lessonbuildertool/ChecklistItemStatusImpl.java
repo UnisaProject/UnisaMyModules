@@ -28,47 +28,50 @@ public class ChecklistItemStatusImpl implements ChecklistItemStatus, Serializabl
 
     private static final long serialVersionUID = 1L;
 
-    private ChecklistItemStatusId id;
+    private long checklistId; // ID of the Checklist to which the checklist item belongs
+    private long checklistItemId; // ID of the Checklist Item to which this belongs
+    private String owner; // The user associated with this checklist item
     private boolean done; // Has this item been completed?
 
     public ChecklistItemStatusImpl() {
-        id = new ChecklistItemStatusId();
     }
 
     public ChecklistItemStatusImpl(long checklistId, long checklistItemId, String owner) {
-        this.id = new ChecklistItemStatusId();
-        this.id.setChecklistId(checklistId);
-        this.id.setChecklistItemId(checklistItemId);
-        this.id.setOwner(owner);
+        this.checklistId = checklistId;
+        this.checklistItemId = checklistItemId;
+        this.owner = owner;
         this.done = false;
     }
 
     public ChecklistItemStatusImpl(long checklistId, long checklistItemId, String owner, boolean done) {
-        this.id = new ChecklistItemStatusId();
-        this.id.setChecklistId(checklistId);
-        this.id.setChecklistItemId(checklistItemId);
-        this.id.setOwner(owner);
+        this.checklistId = checklistId;
+        this.checklistItemId = checklistItemId;
+        this.owner = owner;
         this.done = done;
     }
 
-    public ChecklistItemStatusId getId() {
-        return id;
-    }
-
-    public void setId(ChecklistItemStatusId id) {
-        this.id = id;
-    }
-
     public long getChecklistId() {
-        return id.getChecklistId();
+        return checklistId;
+    }
+
+    public void setChecklistId(long checklistId) {
+        this.checklistId = checklistId;
     }
 
     public long getChecklistItemId() {
-        return id.getChecklistItemId();
+        return checklistItemId;
+    }
+
+    public void setChecklistItemId(long checklistItemId) {
+        this.checklistItemId = checklistItemId;
     }
 
     public String getOwner() {
-        return id.getOwner();
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public boolean isDone() {
@@ -78,6 +81,4 @@ public class ChecklistItemStatusImpl implements ChecklistItemStatus, Serializabl
     public void setDone(boolean done) {
         this.done = done;
     }
-
-
 }

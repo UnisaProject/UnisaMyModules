@@ -74,7 +74,7 @@
 	#if ($isOnWorkspaceTab.equals("true")) ##in workspace
 		
 		<div class="page-header">
-		  <h3>$tlang.getString("gen.announcements") <br /><small>$tlang.getFormattedMessage("gen.viewing.days.phrase.brackets", $daysList.toArray())</small></h3>
+		  <h1>$tlang.getString("gen.announcements") <br /><small>$tlang.getFormattedMessage("gen.viewing.days.phrase.brackets", $daysList.toArray())</small></h1>
 		</div>
 
 		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("gen.alert.message", $alertMessage)</div><div class="clear"></div>#end
@@ -269,8 +269,7 @@
 										#end
 										#if ($size == 0)
 										#else
-											<span class="fa fa-paperclip" aria-hidden="true"></span>
-											<span class="sr-only">$tlang.getString('gen.includeattachments')</span>
+											<i class="fa fa-paperclip"></i>
 										#end
 
 										#if ($ann_item.Header.draft)
@@ -356,7 +355,7 @@
 			#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("gen.alert.message", $alertMessage)</div><div class="clear"></div>#end
 
 			<div class="page-header">
-			  <h3>$tlang.getString("gen.announcements") <br /><small>$tlang.getFormattedMessage("gen.viewing.days.phrase.brackets", $daysList.toArray())</small></h3>
+			  <h1>$tlang.getString("gen.announcements") <br /><small>$tlang.getFormattedMessage("gen.viewing.days.phrase.brackets", $daysList.toArray())</small></h1>
 			</div>
 			
 			<form name="announcementListForm" action="#toolForm("AnnouncementAction")" method="post">
@@ -422,7 +421,7 @@
 					## <h3>$tlang.getString("gen.announcements")</h3>
 
 					<div class="page-header">
-					  <h3>$tlang.getString("gen.announcements") <br /><small>$tlang.getFormattedMessage("gen.viewing.days.phrase.brackets", $daysList.toArray())</small></h3>
+					  <h1>$tlang.getString("gen.announcements") <br /><small>$tlang.getFormattedMessage("gen.viewing.days.phrase.brackets", $daysList.toArray())</small></h1>
 					</div>
 
 					#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("gen.alert.message", $alertMessage)</div><div class="clear"></div>#end
@@ -632,8 +631,7 @@
 										#end
 										#if ($size == 0)
 										#else
-											<span class="fa fa-paperclip" aria-hidden="true"></span>
-											<span class="sr-only">$tlang.getString('gen.includeattachments')</span>
+											<i class="fa fa-paperclip"></i>
 										#end
 
 										#if ($ann_item.Header.draft)
@@ -737,8 +735,8 @@
 								##if ($EnableItemCheckBoxes)  ## SAK-14021. This checks for new ann permission, which is not a requirement to have update and cancel buttons
 									#if ($allow_delete)
 										<p class="act">
-											<input type="submit" class="button_color active" name="eventSubmit_doDeleteannouncement" value="$tlang.getString("gen.delete")"  accesskey="s" />
-											<input type="reset" class="button" name="reset" id="reset" value="$tlang.getString("gen.clearSelections")"  accesskey="x" />
+											<input type="submit" class="button_color active" name="eventSubmit_doDeleteannouncement" value="$tlang.getString("gen.update")"  accesskey="s" />
+											<input type="reset" class="button" name="reset" id="reset" value="$tlang.getString("gen.cancel")"  accesskey="x" />
 										</p>
 									#end
 								##end

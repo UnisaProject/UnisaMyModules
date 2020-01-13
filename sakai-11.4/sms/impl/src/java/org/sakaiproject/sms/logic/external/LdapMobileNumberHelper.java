@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.user.api.UserDirectoryService;
@@ -44,10 +46,8 @@ import com.novell.ldap.LDAPSearchConstraints;
 import com.novell.ldap.LDAPSearchResults;
 import com.novell.ldap.LDAPSocketFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class LdapMobileNumberHelper extends MobileNumberHelperImpl {
+	private static Log LOG = LogFactory.getLog(LdapMobileNumberHelper.class);
 
 	private String ldapHost = ""; //address of ldap server
 	private int ldapPort = 389; //port to connect to ldap server on
@@ -72,9 +72,9 @@ public class LdapMobileNumberHelper extends MobileNumberHelperImpl {
 	
 	
 	public void init() {
-		log.info("init");
+		LOG.info("init");
 		if(isSecureConnection()){
-			log.debug("Keystore is at: " + System.getenv("javax.net.ssl.trustStore"));
+			LOG.debug("Keystore is at: " + System.getenv("javax.net.ssl.trustStore"));
 			LDAPSocketFactory ssf = new LDAPJSSESecureSocketFactory();
 			LDAPConnection.setSocketFactory(ssf);
 		}
@@ -127,14 +127,16 @@ public class LdapMobileNumberHelper extends MobileNumberHelperImpl {
 			}
 
 		} catch (LDAPException e) {
-			log.warn(e.getLocalizedMessage(), e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} 
 		finally {
 			if (conn.isConnected()) {
 				try {
 					conn.disconnect();
 				} catch (LDAPException e) {
-					log.warn(e.getLocalizedMessage(), e);
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		}
@@ -154,7 +156,8 @@ public class LdapMobileNumberHelper extends MobileNumberHelperImpl {
 					ret.add(id);
 				}
 			} catch (UserNotDefinedException e) {
-				log.warn(e.getLocalizedMessage(), e);
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			
 		}
@@ -224,13 +227,13 @@ public class LdapMobileNumberHelper extends MobileNumberHelperImpl {
 		String mobile = null;
 		try {
 			conn.connect( ldapHost, ldapPort );
-			log.debug("going to search for: " + sFilter);
+			LOG.debug("going to search for: " + sFilter);
 
 			// get entry from directory
 			LDAPEntry userEntry = getEntryFromDirectory(sFilter,attrList,conn);
 			if (userEntry != null) {
 				//mobile No is"
-				log.debug("got an ldap entry for " + userEid);
+				LOG.debug("got an ldap entry for " + userEid);
 				LDAPAttribute attr = userEntry.getAttribute(attributeMappings.get("mobileNumber"));
 				if (attr != null) {
 					String ldapNumber = attr.getStringValue();
@@ -239,19 +242,21 @@ public class LdapMobileNumberHelper extends MobileNumberHelperImpl {
 					userCache.put(userid, mobile);
 				}
 			} else {
-				log.debug("this user has no ldap entry: " + userEid);
+				LOG.debug("this user has no ldap entry: " + userEid);
 				userCache.put(userid, null);
 			}
 
 		} catch (LDAPException e) {
-			log.warn(e.getLocalizedMessage(), e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} 
 		finally {
 			if (conn.isConnected()) {
 				try {
 					conn.disconnect();
 				} catch (LDAPException e) {
-					log.warn(e.getLocalizedMessage(), e);
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		}
@@ -272,7 +277,7 @@ public class LdapMobileNumberHelper extends MobileNumberHelperImpl {
 	}
 
 	public List<String> getUsersWithMobileNumbers(Set<String> userids) {
-		log.debug("getUsersWithMobileNumbers");
+		LOG.debug("getUsersWithMobileNumbers");
 		List<String> ret = new ArrayList<String>();
 		Iterator<String> iter = userids.iterator();
 		while (iter.hasNext()) {
@@ -329,11 +334,11 @@ public class LdapMobileNumberHelper extends MobileNumberHelperImpl {
 			try {
 				conn.bind(LDAPConnection.LDAP_V3, this.ldapUser, ldapPassword.getBytes("utf8"));
 			} catch (UnsupportedEncodingException e) {
-				log.error("failed to encode user password");
+				LOG.error("failed to encode user password");
 			}
 		}
 		
-		log.debug("seaching for " + searchFilter + " in " + getBasePath());
+		LOG.debug("seaching for " + searchFilter + " in " + getBasePath());
 		LDAPSearchResults searchResults =
 			conn.search(getBasePath(),
 					LDAPConnection.SCOPE_SUB,
@@ -342,7 +347,7 @@ public class LdapMobileNumberHelper extends MobileNumberHelperImpl {
 					false,
 					cons);
 
-		log.debug("found: " + searchResults.getCount() + " results");
+		LOG.debug("found: " + searchResults.getCount() + " results");
 		if(searchResults.hasMore()){
 			nextEntry = searchResults.next();            
 		}
@@ -359,7 +364,7 @@ public class LdapMobileNumberHelper extends MobileNumberHelperImpl {
 			try {
 				conn.bind(LDAPConnection.LDAP_V3, this.ldapUser, ldapPassword.getBytes("utf8"));
 			} catch (UnsupportedEncodingException e) {
-				log.error("failed to encode user password");
+				LOG.error("failed to encode user password");
 			}
 		}
 		LDAPSearchConstraints cons = new LDAPSearchConstraints();

@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.sakaiproject</groupId>
         <artifactId>master</artifactId>
-        <version>12.6</version>
+        <version>11.4</version>
         <relativePath>../master/pom.xml</relativePath>
     </parent>
 
@@ -24,6 +24,7 @@
         <module>tool</module>
         <module>api</module>
         <module>impl</module>
+        <module>pack</module>
     </modules>
 
 	<dependencyManagement>
@@ -56,6 +57,11 @@
                 <artifactId>wicket-extensions</artifactId>
                 <version>6.26.0</version>
             </dependency>
+			<dependency>
+				<groupId>commons-configuration</groupId>
+				<artifactId>commons-configuration</artifactId>
+				<version>1.6</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 </project>

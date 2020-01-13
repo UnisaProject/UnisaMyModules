@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.sakaiproject.sitemanage</groupId>
         <artifactId>sitemanage</artifactId>
-        <version>12.6</version>
+        <version>11.4</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -51,10 +51,6 @@
             <artifactId>sakai-rsf-core</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.sakaiproject.sitemanage</groupId>
-            <artifactId>sakai-site-manage-util</artifactId>
         </dependency>
     </dependencies>
 

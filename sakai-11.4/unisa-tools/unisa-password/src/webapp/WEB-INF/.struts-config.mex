@@ -1,0 +1,47 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="242,88" />
+  <StrutsActivity path="/forgotPassword.do" location="120,210" dimension="361,121" />
+  <StrutsActivity path="/WEB-INF/jsp/forgotinput.jsp" location="30,360" dimension="170,49" />
+  <StrutsActivity path="/WEB-INF/jsp/setpassword.jsp" location="450,360" dimension="177,49" />
+  <StrutsActivity path="/WEB-INF/jsp/forgotconfirm.jsp" location="240,360" dimension="181,49" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="350,50" dimension="150,49" />
+  <StrutsActivity path="/WEB-INF/jsp/failsetpwd.jsp" location="650,150" dimension="202,53" />
+  <StrutsTransition id="/forgotPassword.do,setpassword,/WEB-INF/jsp/setpassword.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="465,331" />
+      <AbsolutePoint location="465,360" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/forgotPassword.do,failsetpwd,/WEB-INF/jsp/failsetpwd.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="481,270" />
+      <AbsolutePoint location="751,270" />
+      <AbsolutePoint location="751,203" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/forgotPassword.do,input,/WEB-INF/jsp/forgotinput.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="185,331" />
+      <AbsolutePoint location="185,360" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/forgotPassword.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="171,138" />
+      <AbsolutePoint location="171,210" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/forgotPassword.do,confirm,/WEB-INF/jsp/forgotconfirm.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="300,331" />
+      <AbsolutePoint location="300,360" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/forgotPassword.do,falsetpwd,/WEB-INF/jsp/failsetpwd.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="481,270" />
+      <AbsolutePoint location="751,270" />
+      <AbsolutePoint location="751,203" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

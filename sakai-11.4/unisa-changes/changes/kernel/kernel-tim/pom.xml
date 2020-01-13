@@ -4,7 +4,7 @@
   <parent>
     <artifactId>kernel</artifactId>
     <groupId>org.sakaiproject</groupId>
-    <version>12.6</version><!-- KernelVersion -->
+    <version>11.4</version><!-- KernelVersion -->
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Sakai Kernel Terracotta Integration Module</name>
@@ -72,6 +72,7 @@
               <version>1.9.10</version>
             </dependency>
           </dependencies>
+          
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

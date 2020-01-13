@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans >
+    	<form-bean name="studentUploadForm" type="za.ac.unisa.lms.tools.studentupload.forms.StudentUploadForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+	
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.studentupload.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/studentUpload.do?act=walkthrough"
+       	 		contextRelative="true" />
+       	 	<forward
+				name="studentUpload"
+				path="/studentUpload.do?act=walkthrough"
+       	 		contextRelative="true" />
+		</action>
+		
+    	<action
+     		attribute="studentUploadForm"
+     		name="studentUploadForm"
+     		parameter="act"
+     		scope="session"
+     		path="/studentUpload"
+    		type="za.ac.unisa.lms.tools.studentupload.actions.StudentUploadAction"
+     		validate="false">
+     		<forward
+				name="input"
+				path="/studentUpload.do?act=walkthrough"
+       	 		contextRelative="true" />
+       	 	<forward
+				name="default"
+				path="/studentUpload.do?act=walkthrough"
+       	 		contextRelative="true" />
+        	<forward
+      	  		name="applyLogin"
+       	 		path="/WEB-INF/jsp/applyLogin.jsp"
+        		contextRelative="true" />
+       	 	<forward
+       	 		name="applyUpload"
+        		path="/WEB-INF/jsp/applyUpload.jsp"
+       	 		contextRelative="true" />
+			<forward
+       	 		name="documentUpload"
+        		path="studentUpload.do?act=uploadInput"
+       	 		contextRelative="true" 
+       	 		redirect="true"/>	
+       	 	<forward
+				name="documentInput"
+				path="/WEB-INF/jsp/documentUpload.jsp"
+				contextRelative="true" />
+			<forward 
+				name="success" 
+				path="/WEB-INF/jsp/documentUpload.jsp"
+				contextRelative="true" />
+			<forward
+       	 		name="uploadConfirm"
+        		path="/WEB-INF/jsp/uploadConfirm.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="completeNew"
+        		path="/WEB-INF/jsp/uploadComplete.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="completeMD"
+        		path="/WEB-INF/jsp//uploadCompleteMD.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="completeRet"
+        		path="/WEB-INF/jsp//uploadCompleteRet.jsp"
+       	 		contextRelative="true" />
+       	 	<forward
+       	 		name="completeSLP"
+        		path="/WEB-INF/jsp//uploadCompleteSLP.jsp"
+       	 		contextRelative="true" />
+    	</action>
+
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.studentupload.ApplicationResources" />
+
+</struts-config>

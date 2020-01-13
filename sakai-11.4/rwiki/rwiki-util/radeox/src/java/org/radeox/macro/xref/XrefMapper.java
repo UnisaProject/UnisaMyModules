@@ -33,7 +33,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Stores information and links to xref Java source code e.g.
@@ -42,9 +43,10 @@ import lombok.extern.slf4j.Slf4j;
  * @author Stephan J. Schmidt
  * @version $Id$
  */
-@Slf4j
+
 public class XrefMapper
 {
+	private static Logger log = LoggerFactory.getLogger(XrefMapper.class);
 
 	private final static String FILENAME = "conf/xref.txt";
 

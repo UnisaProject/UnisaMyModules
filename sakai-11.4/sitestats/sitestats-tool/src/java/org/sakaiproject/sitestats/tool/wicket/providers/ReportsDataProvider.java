@@ -26,12 +26,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
 import org.apache.wicket.injection.Injector;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-
 import org.sakaiproject.sitestats.api.EventStat;
 import org.sakaiproject.sitestats.api.PrefsData;
 import org.sakaiproject.sitestats.api.ResourceStat;
@@ -46,9 +46,10 @@ import org.sakaiproject.sitestats.tool.facade.Locator;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
 
-@Slf4j
+
 public class ReportsDataProvider extends SortableSearchableDataProvider {
 	private static final long		serialVersionUID	= 1L;
+	private static Logger				LOG					= LoggerFactory.getLogger(ReportsDataProvider.class);
 	public final static String		COL_SITE			= StatsManager.T_SITE;
 	public final static String		COL_USERID			= StatsManager.T_USER;
 	public final static String		COL_USERNAME		= "userName";
@@ -63,22 +64,23 @@ public class ReportsDataProvider extends SortableSearchableDataProvider {
 	public final static String		COL_UNIQUEVISITS	= StatsManager.T_UNIQUEVISITS;
 	public final static String		COL_DURATION		= StatsManager.T_DURATION;
 
-	private boolean					logInfo					= true;
+	private boolean					log					= true;
 	private PrefsData				prefsData;
 	private ReportDef				reportDef;
 	private Report					report;
 	private int 					reportRowCount		= -1;
+	private static Logger logger = LoggerFactory.getLogger(ReportsDataProvider.class);	
 
 	public ReportsDataProvider(PrefsData prefsData, ReportDef reportDef) {
 		this(prefsData, reportDef, true);
 	}
 	
-	public ReportsDataProvider(PrefsData prefsData, ReportDef reportDef, boolean logInfo) {
+	public ReportsDataProvider(PrefsData prefsData, ReportDef reportDef, boolean log) {
 		Injector.get().inject(this);
 		
 		this.prefsData = prefsData;
 		this.setReportDef(reportDef);
-		this.logInfo = logInfo;
+		this.log = log;
 		
         // set default sort
 		if(!reportDef.getReportParams().isHowSort() || reportDef.getReportParams().getHowSortBy() == null) {
@@ -109,9 +111,9 @@ public class ReportsDataProvider extends SortableSearchableDataProvider {
 	
 	public Report getReport() {
 		if(report == null) {
-			report = Locator.getFacade().getReportManager().getReport(getReportDef(), prefsData.isListToolEventsOnlyAvailableInSite(), null, logInfo);
-			if(logInfo && report != null) {
-				log.info("Site statistics report generated: "+report.getReportDefinition().toString(false));
+			report = Locator.getFacade().getReportManager().getReport(getReportDef(), prefsData.isListToolEventsOnlyAvailableInSite(), null, log);
+			if(log && report != null) {
+				LOG.info("Site statistics report generated: "+report.getReportDefinition().toString(false));
 			}
 		}
 		if(report != null) {
@@ -147,7 +149,7 @@ public class ReportsDataProvider extends SortableSearchableDataProvider {
 				try{
 					collator= new RuleBasedCollator(((RuleBasedCollator)Collator.getInstance()).getRules().replaceAll("<'\u005f'", "<' '<'\u005f'"));
 				}catch(ParseException e){
-				    log.error("Unable to create RuleBasedCollator");
+				    logger.error("Unable to create RuleBasedCollator");
 				}		
 			}			
 			

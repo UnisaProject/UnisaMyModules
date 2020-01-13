@@ -1,0 +1,235 @@
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="za.ac.unisa.lms.tools.studentappeal.forms.StudentAppealForm"%>
+<%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@ taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%@ taglib uri="http://sakaiproject.org/struts/sakai" prefix="sakai" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<fmt:setBundle basename="za.ac.unisa.lms.tools.studentappeal.ApplicationResources"/>
+
+<%
+response.setHeader("Cache-Control","no-cache"); //Forces caches to obtain a new copy of the page from the origin server
+response.setHeader("Cache-Control","no-store"); //Directs caches not to store the page under any circumstance
+response.setDateHeader("Expires", 0); //Causes the proxy cache to see the page as "stale"
+response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
+%>
+
+<sakai:html>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+	<!-- Sakai Themes -->
+	<link href="<c:url value='/resources/css/tool_base.css' />" rel="stylesheet"  type="text/css" />	
+	<link href="<c:url value='/resources/css/tool.css' />" rel="stylesheet"  type="text/css" />	
+	<link href="<c:url value='/resources/css/portal.css' />" rel="stylesheet"  type="text/css" />
+
+	<!-- Bootstrap core CSS -->
+	<link href="<c:url value="/resources/css/bootstrap.min.css" />" rel="stylesheet"  type="text/css" />	
+	<!-- Bootstrap theme -->
+    <link href="<c:url value="/resources/css/bootstrap-theme.css" />" rel="stylesheet"  type="text/css" />
+	<!-- jQuery modal styles -->
+    <link href="<c:url value='/resources/css/jquery-ui.css' />" rel="stylesheet"  type="text/css" />
+	
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    	<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      	<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+	
+	<script type="text/javascript" src="<c:url value='/resources/js/jquery-3.3.1.min.js' />"></script>
+	<script type="text/javascript" src="<c:url value='/resources/js/bootstrap.min.js' />"></script> 
+	<script type="text/javascript" src="<c:url value='/resources/js/jquery.blockUI.js' />"></script> 
+	<script type="text/javascript" src="<c:url value='/resources/js/jquery-ui.js' />"></script> 
+	
+	<style type="text/css">
+	   <!-- CSS code from Bootply.com editor -->
+    	.equal, .equal > div[class*='col-'] {  
+		    display: -webkit-flex;
+		    display: flex;
+		    flex:1 1 auto;
+		}
+		.panel {
+	        /*height : 300px;*/
+	        margin-bottom:1px;
+	        position: relative;
+	    }
+	    .panel .panel-footer {
+	        position : relative;
+	        /*bottom : 0;*/
+	        margin-bottom:1px;
+	        width : 100%;
+	    }
+	    <!-- Bootply end -->
+	    
+		.light {
+			opacity : 0.5;
+		    filter: alpha(opacity=50);   /* For IE8 and earlier */
+		}
+		.ui-dialog {
+		    left: 50% !important;
+		    top: 100px !important;
+		    margin-left: -175px !important; 
+		    /*margin-top: -175px !important;*/
+		} 
+		.dialog .ui-icon {
+		    background-image: url("<c:url value='/resources/images/ui-icons_222222_256x240.png' />");
+		}
+		.ui-state-default .ui-icon {
+			background-image: url("<c:url value='/resources/images/ui-icons_222222_256x240.png' />");
+		}
+		/* Override jQuery UI theme's padding on buttons: */
+		.ui-button-text-only .ui-button-text {
+			padding: 0.2em 0.5em;
+		}
+		input[type='radio'] {
+			float: left;
+		}
+		label:hover {
+		    cursor:pointer;
+		}
+		label.inline {
+			font-weight: normal;
+		    display: table-cell;
+		}
+		table { 
+		    border-spacing: 2px;
+		    border-collapse: separate;
+		}
+		td { 
+		    padding: 2px;
+		}
+		.full-width {
+		  width: 100vw;
+		  position: relative;
+		  left: 50%;
+		  right: 50%;
+		  margin-left: -50vw;
+		  margin-right: -50vw;
+		}
+		.dispFont {
+			font-size:14px;
+			//transform: scale(0.833);/*10/12=0.833, font-size:10px*/
+		}
+		#cssTable td {
+		    text-align:center; 
+		    vertical-align:middle;
+		}
+	</style>
+	
+	<script type="text/javascript">  
+	
+		$(document).ready(function() {
+			
+			$('form,input,select,textarea').attr("autocomplete", "off");
+
+		});
+		
+		function doSubmit(button){
+			document.studentAppealForm.action='studentAppeal.do?act=cancel';
+			document.studentAppealForm.submit();
+		}
+		
+	</script>
+					
+</head>
+<body>
+<!-- Form -->
+<html:form action="/studentAppeal">
+
+	<html:hidden property="page" value="applyAppeal"/>
+	
+	<input type='hidden' id="onToday" name="onToday" value="<%=(new java.util.Date()).getTime()%>" />
+	<input type="hidden" name="allowLogin" id="allowLogin" value="<bean:write name='studentAppealForm' property='allowLogin'/>"/>
+
+	<sakai:messages/>
+	<sakai:messages message="true"/>
+	
+	<div style="display: none;" id="dialogHolder"><p id="dialogContent"></p></div>
+	
+	<br/>
+	<div class="container full-width">
+		<div class="col-md-12 col-sm-12 col-xs-12">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title text-center"><fmt:message key="page.appeal.heading"/>&nbsp;<bean:write name="studentAppealForm" property="student.academicYear"/>&nbsp;<fmt:message key="page.appeal.heading.extra"/></h3>
+				</div>
+				<div class="panel-body">
+					<logic:equal name="studentAppealForm" property="student.stuExist" value="false">
+						<table id="cssTable" style="width:100%">
+							<tr>
+								<td style="height:50px;color:#A90E13;font-size:14px; margin-bottom:10px;">
+				                  	<strong>
+				                  		<fmt:message key="page.login.noSTUAPQ1"/><br/>
+				                  		<fmt:message key="page.login.noSTUAPQ2"/>
+				                  	</strong>
+				               	</td>
+			               	</tr>
+						</table>
+					</logic:equal>			               		
+					<logic:equal name="studentAppealForm" property="student.stuExist" value="true">
+						<sakai:group_table>
+						<tr>
+							<td colspan="3"><h4>Primary Qualification&nbsp;</h4></td>
+						</tr><tr>
+							<td style="width:40%"><b>Qualification&nbsp;</b></td>
+							<td style="width:30%"><b>Specializations&nbsp;</b></td>
+							<td style="width:30%"><b>Appeal&nbsp;</b></td>
+						</tr><tr>
+							<td class="dispFont"><bean:write name="studentAppealForm" property="selQualCode1"/></td>
+							<logic:notEqual name="studentAppealForm" property="selSpecCode1" value="">
+								<td class="dispFont"><bean:write name="studentAppealForm" property="selSpecCode1"/></td>
+							</logic:notEqual>
+							<logic:equal name="studentAppealForm" property="selSpecCode1" value="">
+								<td class="dispFont">N/A - Not Applicable</td>
+							</logic:equal>
+							<td class="dispFont">
+								<bean:write name="studentAppealForm" property="qualAppeal1"/>
+							</td>
+						</tr>	
+						<logic:notEqual name="studentAppealForm" property="selQualCode2" value="">
+							<logic:notEqual name="studentAppealForm" property="selQualCode2" value="Not Found">
+								<tr>
+									<td colspan="3"><h4>Alternative Qualification&nbsp;</h4></td>
+								</tr><tr>
+									<td style="width:40%"><b>Qualification&nbsp;</b></td>
+									<td style="width:30%"><b>Specializations&nbsp;</b></td>
+									<td style="width:30%"><b>Appeal&nbsp;</b></td>
+								</tr><tr>
+									<td class="dispFont"><bean:write name="studentAppealForm" property="selQualCode2"/></td>
+									<logic:notEqual name="studentAppealForm" property="selSpecCode2" value="">
+										<td class="dispFont"><bean:write name="studentAppealForm" property="selSpecCode2"/></td>
+									</logic:notEqual>
+									<logic:equal name="studentAppealForm" property="selSpecCode2" value="">
+										<td class="dispFont">N/A - Not Applicable</td>
+									</logic:equal>
+									<td class="dispFont">
+										<bean:write name="studentAppealForm" property="qualAppeal2"/>
+									</td>
+								</tr>
+							</logic:notEqual>
+						</logic:notEqual>
+						<tr>
+						</sakai:group_table>
+
+					</logic:equal>
+					<br/>
+				</div>	
+				<div class="panel-footer clearfix">
+					<sakai:actions>
+						<button class="btn btn-default" type="button" onclick="doSubmit('Quit');">Quit</button>
+					</sakai:actions>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div style="display: none;"><img src='<c:url value='/resources/images/ajax-loader.gif' />' alt=' * ' /></div>
+	<div style="display: none;" align="center"><bean:write name="studentAppealForm" property="version"/></div>
+	
+</html:form>
+</body>
+</sakai:html>

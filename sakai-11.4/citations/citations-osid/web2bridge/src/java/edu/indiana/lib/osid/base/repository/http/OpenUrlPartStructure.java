@@ -1,12 +1,5 @@
 package edu.indiana.lib.osid.base.repository.http;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.osid.OsidException;
-import org.osid.repository.PartStructure;
-import org.osid.repository.RepositoryException;
-import org.osid.shared.Id;
-
 /*******************************************************************************
  * Copyright (c) 2003, 2004, 2005, 2007, 2008 The Sakai Foundation
  *
@@ -23,10 +16,10 @@ import org.osid.shared.Id;
  * limitations under the License.
  *
 *******************************************************************************/
-@Slf4j
-public class OpenUrlPartStructure implements PartStructure
+
+public class OpenUrlPartStructure implements org.osid.repository.PartStructure
 {
-    private Id OPENURL_PART_STRUCTURE_ID = null;
+    private org.osid.shared.Id OPENURL_PART_STRUCTURE_ID = null;
     private org.osid.shared.Type type = new Type( "sakaibrary", "partStructure",
     		"openUrl", "OpenURL" );
     private String displayName = "OpenURL";
@@ -48,7 +41,7 @@ public class OpenUrlPartStructure implements PartStructure
         }
         catch (Throwable t)
         {
-        	log.error(t.getMessage(), t);
+        	t.printStackTrace();
         }
     }
 
@@ -63,81 +56,81 @@ public class OpenUrlPartStructure implements PartStructure
 		/**
 		 * Public method to fetch the PartStructure ID
 		 */
-		public static Id getPartStructureId()
+		public static org.osid.shared.Id getPartStructureId()
 		{
-			Id id = null;
+			org.osid.shared.Id id = null;
 
 			try
 			{
 				id = getInstance().getId();
 			}
-			catch (RepositoryException ignore) { }
+			catch (org.osid.repository.RepositoryException ignore) { }
 
  			return id;
 		}
 
     public String getDisplayName()
-    throws RepositoryException
+    throws org.osid.repository.RepositoryException
     {
         return this.displayName;
     }
 
     public String getDescription()
-    throws RepositoryException
+    throws org.osid.repository.RepositoryException
     {
         return this.description;
     }
 
     public boolean isMandatory()
-    throws RepositoryException
+    throws org.osid.repository.RepositoryException
     {
         return this.mandatory;
     }
 
     public boolean isPopulatedByRepository()
-    throws RepositoryException
+    throws org.osid.repository.RepositoryException
     {
         return this.populatedByRepository;
     }
 
     public boolean isRepeatable()
-    throws RepositoryException
+    throws org.osid.repository.RepositoryException
     {
         return this.repeatable;
     }
 
     public void updateDisplayName(String displayName)
-    throws RepositoryException
+    throws org.osid.repository.RepositoryException
     {
-        throw new RepositoryException(OsidException.UNIMPLEMENTED);
+        throw new org.osid.repository.RepositoryException(org.osid.OsidException.UNIMPLEMENTED);
     }
 
-    public Id getId()
-    throws RepositoryException
+    public org.osid.shared.Id getId()
+    throws org.osid.repository.RepositoryException
     {
         return this.OPENURL_PART_STRUCTURE_ID;
     }
 
     public org.osid.shared.Type getType()
-    throws RepositoryException
+    throws org.osid.repository.RepositoryException
     {
         return this.type;
     }
 
-    public RecordStructure getRecordStructure()
-    throws RepositoryException
+    public org.osid.repository.RecordStructure getRecordStructure()
+    throws org.osid.repository.RepositoryException
     {
         return RecordStructure.getInstance();
     }
 
     public boolean validatePart(org.osid.repository.Part part)
-    throws RepositoryException
+    throws org.osid.repository.RepositoryException
     {
         return true;
     }
 
     public org.osid.repository.PartStructureIterator getPartStructures()
-    throws RepositoryException
+    throws org.osid.repository.RepositoryException
     {
         return new PartStructureIterator(new java.util.Vector());
     }

@@ -165,7 +165,7 @@
 			<f:verbatim><h4></f:verbatim><h:outputText value="#{CalBean.selectedEvent.displayName}"/><f:verbatim></h4></f:verbatim>
 			
 			<h:panelGrid id="panel_selected_event_error" styleClass="sectionContainerNav" style="width:100%; padding-top: 5px;" columns="1" columnClasses="calTop" rendered="#{CalBean.selectedEvent.openDateError}">
-					<!--  unisa-change -->
+				<!--  unisa-change -->
 				<h:outputText value="#{msgs['java.alert.unisa_assignment_event']}" styleClass="alertMessage"/>
 				<h:outputText value="#{msgs['java.alert.unisa_exam_event']}" styleClass="alertMessage"/>
 				<!-- >h:outputText value="#{msgs['java.alert.opendate']}" styleClass="alertMessage"/-->
@@ -174,10 +174,8 @@
 				</h:panelGroup>
 			</h:panelGrid>
 			<!--  unisa change  -->
-			
-			
-			
-			<h:panelGrid id="panel_selected_event" styleClass="sectionContainerNav" style="width:100%; padding-top: 5px;" columns="2" columnClasses="calTop,calTop" rendered="#{not CalBean.selectedEvent.openDateError}"> 		
+			<!-- >h:panelGrid id="panel_selected_event" styleClass="sectionContainerNav" style="width:100%; padding-top: 5px;" columns="2" columnClasses="calTop,calTop" rendered="#{not CalBean.selectedEvent.openDateError}"--> 		
+			<h:panelGrid id="panel_selected_event" styleClass="sectionContainerNav" style="width:100%; padding-top: 5px;" columns="2" columnClasses="calTop,calTop" rendered="#{CalBean.selectedEvent.openDateError=='false'}">
 				<h:outputLabel for="date" value="#{msgs.date}" />
 		        <h:outputText id="date" value="#{CalBean.selectedEvent.date}" />
 				<h:outputLabel for="type" value="#{msgs.type}" />

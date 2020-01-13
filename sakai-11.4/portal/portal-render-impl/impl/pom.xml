@@ -5,7 +5,7 @@
     <parent>
         <artifactId>portal</artifactId>
         <groupId>org.sakaiproject.portal</groupId>
-        <version>12.6</version>
+        <version>11.4</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -17,10 +17,7 @@
         <url>http://sakaiproject.org/</url>
     </organization>
     <inceptionYear>2003</inceptionYear>
-    <packaging>sakai-component</packaging>
-    <properties>
-        <deploy.target>components</deploy.target>
-    </properties>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
@@ -70,10 +67,6 @@
         <dependency>
             <groupId>org.apache.pluto</groupId>
             <artifactId>pluto-descriptor-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
         </dependency>
     </dependencies>
 

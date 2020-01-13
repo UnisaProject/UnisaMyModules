@@ -22,12 +22,13 @@ package uk.ac.cam.caret.sakai.rwiki.component.dao.impl;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
-import org.springframework.orm.hibernate4.HibernateCallback;
-import org.springframework.orm.hibernate4.support.HibernateDaoSupport;
+import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 import uk.ac.cam.caret.sakai.rwiki.model.RWikiHistoryObjectContentImpl;
 import uk.ac.cam.caret.sakai.rwiki.service.api.dao.RWikiObjectContentDao;
@@ -37,10 +38,12 @@ import uk.ac.cam.caret.sakai.rwiki.service.api.model.RWikiObjectContent;
 import uk.ac.cam.caret.sakai.rwiki.utils.TimeLogger;
 
 // FIXME: Component
-@Slf4j
+
 public class RWikiHistoryObjectContentDaoImpl extends HibernateDaoSupport
 		implements RWikiObjectContentDao
 {
+	private static Logger log = LoggerFactory.getLogger(RWikiHistoryObjectContentDaoImpl.class);
+
 	public RWikiObjectContent getContentObject(final RWikiObject parent)
 	{
 		long start = System.currentTimeMillis();

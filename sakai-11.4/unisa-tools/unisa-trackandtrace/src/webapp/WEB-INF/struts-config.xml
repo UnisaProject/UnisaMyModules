@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans >
+    <form-bean name="ParcelTrackingDisplayForm" type="za.ac.unisa.lms.tools.trackandtrace.forms.ParcelTrackingDisplayForm" />
+    <form-bean name="trackAndTraceRecord" type="za.ac.unisa.lms.tools.trackandtrace.forms.TrackAndTraceRecord" />
+
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	<action-mappings>
+		<action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.trackandtrace.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/displayParcelTracking.do?action=input"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="parcelTrackingDisplayForm"
+      input="/WEB-INF/jsp/displayparceltracking.jsp"
+      name="ParcelTrackingDisplayForm"
+      parameter="action"
+      path="/displayParcelTracking"
+      type="za.ac.unisa.lms.tools.trackandtrace.actions.DisplayParcelTrackingAction"
+      validate="false">
+      <forward
+        name="displayforward"
+        path="/WEB-INF/jsp/displayparceltracking.jsp"
+        contextRelative="true" />
+      <forward name="TrackandTraceInput" path="/WEB-INF/jsp/TrackandTraceInput.jsp" />
+      <forward
+        name="unknownuser"
+        path="/WEB-INF/jsp/unknownuser.jsp"
+        contextRelative="true" />
+      
+    </action>
+    
+    
+    
+    
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.trackandtrace.ApplicationResources" />
+		
+	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property property="pathnames" value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property property="stopOnFirstError" value="true"/>
+	</plug-in>
+</struts-config>

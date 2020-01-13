@@ -18,18 +18,19 @@
  */
 package org.sakaiproject.sitestats.tool.wicket.models;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.wicket.model.LoadableDetachableModel;
-
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.sitestats.tool.facade.Locator;
 
-@Slf4j
+
 public class SiteModel extends LoadableDetachableModel {
 	private static final long		serialVersionUID	= 1L;
+	private static Logger				LOG					= LoggerFactory.getLogger(SiteModel.class);
 
-	private String id;
+	private String					id;
 
 	
 	public SiteModel(Site site) {
@@ -45,7 +46,7 @@ public class SiteModel extends LoadableDetachableModel {
 		try{
 			return Locator.getFacade().getSiteService().getSite(id);
 		}catch(IdUnusedException e){
-			log.warn("SiteModel: no site with id "+id);
+			LOG.warn("SiteModel: no site with id "+id);
 			return null;
 		}
 	}

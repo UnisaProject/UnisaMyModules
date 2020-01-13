@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2003-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 /*
 * Licensed to The Apereo Foundation under one or more contributor license
 * agreements. See the NOTICE file distributed with this work for
@@ -47,7 +32,6 @@ import java.util.UUID;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.DateTime;
@@ -55,33 +39,20 @@ import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.TimeZone;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
+import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VTimeZone;
 import net.fortuna.ical4j.model.parameter.Cn;
 import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
-import net.fortuna.ical4j.model.property.Attendee;
-import net.fortuna.ical4j.model.property.CalScale;
-import net.fortuna.ical4j.model.property.Description;
-import net.fortuna.ical4j.model.property.Location;
-import net.fortuna.ical4j.model.property.Method;
-import net.fortuna.ical4j.model.property.Organizer;
-import net.fortuna.ical4j.model.property.ProdId;
-import net.fortuna.ical4j.model.property.Sequence;
-import net.fortuna.ical4j.model.property.Status;
-import net.fortuna.ical4j.model.property.Uid;
-import net.fortuna.ical4j.model.property.Url;
-import net.fortuna.ical4j.model.property.Version;
-import net.fortuna.ical4j.validate.ValidationException;
+import net.fortuna.ical4j.model.property.*;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-
 import org.sakaiproject.calendar.api.CalendarEvent;
 import org.sakaiproject.calendaring.logic.SakaiProxy;
 import org.sakaiproject.time.api.TimeRange;
-import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.user.api.User;
 
 /**
@@ -92,9 +63,6 @@ import org.sakaiproject.user.api.User;
  */
 @Slf4j
 public class ExternalCalendaringServiceImpl implements ExternalCalendaringService {
-	
-	@Setter
-	private TimeService timeService;
 
 	/**
 	 * {@inheritDoc}
@@ -102,43 +70,21 @@ public class ExternalCalendaringServiceImpl implements ExternalCalendaringServic
 	public VEvent createEvent(CalendarEvent event) {
 		return createEvent(event, null);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public VEvent createEvent(CalendarEvent event, Set<User> attendees) {
-		//Default to time in GMT
-		return createEvent(event, null, false);
-	}
-
-	public VTimeZone getTimeZone(boolean timeIsLocal) {
-		//timezone. All dates are in GMT so we need to explicitly set that
-		TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
-		
-		//To prevent NPE on timezone
-		TimeZone timezone = null;
-		if (timeIsLocal == true) {
-			timezone = registry.getTimeZone(timeService.getLocalTimeZone().getID());
-		}
-		if (timezone == null) {
-			//This is guaranteed to return timezone if timeIsLocal == false or it fails and returns null
-			timezone = registry.getTimeZone("GMT");
-		}
-		return timezone.getVTimeZone();
-	}
-	
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public VEvent createEvent(CalendarEvent event, Set<User> attendees, boolean timeIsLocal) {
 		
 		if(!isIcsEnabled()) {
 			log.debug("ExternalCalendaringService is disabled. Enable via calendar.ics.generation.enabled=true in sakai.properties");
 			return null;
 		}
 		
-		VTimeZone tz = getTimeZone(timeIsLocal);
+		//timezone. All dates are in GMT so we need to explicitly set that
+		TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
+		TimeZone timezone = registry.getTimeZone("GMT");
+		VTimeZone tz = timezone.getVTimeZone();
 
 		//start and end date
 		DateTime start = new DateTime(getStartDate(event.getRange()).getTime());
@@ -292,13 +238,13 @@ public class ExternalCalendaringServiceImpl implements ExternalCalendaringServic
 	 * {@inheritDoc}
 	 */
 	public Calendar createCalendar(List<VEvent> events) {
-		return createCalendar(events, null, true);
+		return createCalendar(events, null);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	public Calendar createCalendar(List<VEvent> events, String method, boolean timeIsLocal) {
+	public Calendar createCalendar(List<VEvent> events, String method) {
 		
 		if(!isIcsEnabled()) {
 			log.debug("ExternalCalendaringService is disabled. Enable via calendar.ics.generation.enabled=true in sakai.properties");
@@ -316,11 +262,6 @@ public class ExternalCalendaringServiceImpl implements ExternalCalendaringServic
 		
 		//add vevents to calendar
 		calendar.getComponents().addAll(events);
-		
-		//add vtimezone
-		VTimeZone tz = getTimeZone(timeIsLocal);
-
-		calendar.getComponents().add(tz);
 		
 		//validate
 		try {
@@ -383,11 +324,14 @@ public class ExternalCalendaringServiceImpl implements ExternalCalendaringServic
 			fout.flush();
 			fout.close();
 		} catch (FileNotFoundException e) {
-			log.error(e.getMessage(), e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (IOException e) {
-			log.error(e.getMessage(), e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (ValidationException e) {
-			log.error(e.getMessage(), e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
  
 		return path;

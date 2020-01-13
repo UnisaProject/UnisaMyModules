@@ -7,7 +7,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
 import lombok.Setter;
 
 import org.sakaiproject.entitybroker.EntityView;
@@ -27,6 +26,9 @@ import uk.ac.cam.caret.sakai.rwiki.service.api.RenderService;
 import uk.ac.cam.caret.sakai.rwiki.service.api.model.RWikiObject;
 import uk.ac.cam.caret.sakai.rwiki.utils.NameHelper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Provides the /direct/wiki REST endpoint.
  * 
@@ -38,9 +40,10 @@ import uk.ac.cam.caret.sakai.rwiki.utils.NameHelper;
  *  
  * @author Adrian Fish <adrian.r.fish@gmail.com>
  */
-@Slf4j
 public class RWikiEntityProvider extends AbstractEntityProvider implements AutoRegisterEntityProvider, ActionsExecutable, Outputable,Describeable {
-
+	
+	private static Logger log = LoggerFactory.getLogger(RWikiEntityProvider.class);
+	
 	public final static String ENTITY_PREFIX = "wiki";
 	
 	@Setter

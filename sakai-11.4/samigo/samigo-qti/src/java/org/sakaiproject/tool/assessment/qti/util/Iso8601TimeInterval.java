@@ -19,12 +19,15 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.qti.util;
 import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.tool.assessment.qti.exception.Iso8601FormatException;
 
@@ -34,9 +37,9 @@ import org.sakaiproject.tool.assessment.qti.exception.Iso8601FormatException;
  * @author <a href="mailto:lance@indiana.edu">Lance Speelmon</a>
  * @version $Id$
  */
-@Slf4j
 public class Iso8601TimeInterval
 {
+  private static Logger log = LoggerFactory.getLogger(Iso8601TimeInterval.class);
   private static final long SECONDS = 1000L;
   private static final long MINUTES = 60L * SECONDS;
   private static final long HOURS = 60L * MINUTES;

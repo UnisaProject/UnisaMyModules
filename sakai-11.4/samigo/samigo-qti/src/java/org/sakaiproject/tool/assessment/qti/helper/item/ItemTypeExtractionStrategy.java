@@ -25,7 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.tool.assessment.facade.ItemFacade;
 import org.sakaiproject.tool.assessment.qti.constants.AuthoringConstantStrings;
@@ -41,9 +42,9 @@ import org.sakaiproject.tool.assessment.qti.constants.AuthoringConstantStrings;
  *
  * @author Ed Smiley
  */
-@Slf4j
- public class ItemTypeExtractionStrategy
+public class ItemTypeExtractionStrategy
 {
+  private static Logger log = LoggerFactory.getLogger(ItemTypeExtractionStrategy.class);
   private static final Long DEFAULT_TYPE =  Long.valueOf(2);
 
 

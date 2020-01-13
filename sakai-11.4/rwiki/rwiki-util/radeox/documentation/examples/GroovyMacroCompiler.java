@@ -24,15 +24,12 @@
 package examples;
 
 import groovy.lang.GroovyClassLoader;
+import org.radeox.macro.Macro;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import lombok.extern.slf4j.Slf4j;
-import org.radeox.macro.Macro;
-
 // cut:start-1
-@Slf4j
 public class GroovyMacroCompiler  {
  public Macro compileMacro(String macroSource) {
     Macro macro = null;
@@ -44,7 +41,7 @@ public class GroovyMacroCompiler  {
       Object aScript = clazz.newInstance();
       macro = (Macro) aScript;
     } catch (Exception e) {
-      log.error("Cannot compile groovy macro.");
+      System.err.println("Cannot compile groovy macro.");
     }
     return macro;
   }

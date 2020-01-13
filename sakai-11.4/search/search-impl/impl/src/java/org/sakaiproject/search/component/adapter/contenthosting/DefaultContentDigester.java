@@ -25,8 +25,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.Properties;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.search.api.SearchUtils;
@@ -34,12 +34,12 @@ import org.sakaiproject.search.api.SearchUtils;
 /**
  * @author ieb
  */
-@Slf4j
 public class DefaultContentDigester implements ContentDigester
 {
+	private static final Logger log = LoggerFactory.getLogger(DefaultContentDigester.class);
 	private int maxDigestSize =  1024 * 1024 * 20;
 	private Properties binaryTypes = null;
-
+	
 	public void init() {
 		try
 		{
@@ -56,7 +56,7 @@ public class DefaultContentDigester implements ContentDigester
 	    
 	}
 	
-
+	
 	public String getContent(ContentResource contentResource)
 	{
 		try
@@ -101,6 +101,7 @@ public class DefaultContentDigester implements ContentDigester
 		return true;
 	}
 
+
 	/* (non-Javadoc)
 	 * @see org.sakaiproject.search.component.adapter.contenthosting.ContentDigester#getContentReader(org.sakaiproject.content.api.ContentResource)
 	 */
@@ -108,6 +109,7 @@ public class DefaultContentDigester implements ContentDigester
 	{
 		return new StringReader(getContent(contentResource));
 	}
+
 
 	/**
 	 * @return the maxDigestSize
@@ -117,6 +119,7 @@ public class DefaultContentDigester implements ContentDigester
 		return maxDigestSize;
 	}
 
+
 	/**
 	 * @param maxDigestSize the maxDigestSize to set
 	 */
@@ -124,5 +127,8 @@ public class DefaultContentDigester implements ContentDigester
 	{
 		this.maxDigestSize = maxDigestSize;
 	}
+
+
+
 
 }

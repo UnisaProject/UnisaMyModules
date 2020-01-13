@@ -26,10 +26,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.dao.OptimisticLockingFailureException;
-
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.signup.logic.SakaiFacade;
 import org.sakaiproject.signup.logic.SignupEmailFacade;
@@ -46,6 +43,7 @@ import org.sakaiproject.signup.tool.jsf.attachment.AttachmentHandler;
 import org.sakaiproject.signup.tool.jsf.organizer.UserDefineTimeslotBean;
 import org.sakaiproject.signup.tool.util.Utilities;
 import org.sakaiproject.signup.util.SignupDateFormat;
+import org.springframework.dao.OptimisticLockingFailureException;
 
 /**
  * <p>
@@ -53,7 +51,6 @@ import org.sakaiproject.signup.util.SignupDateFormat;
  * by organizer.
  * </P>
  */
-@Slf4j
 public class EditMeeting extends SignupAction implements MeetingTypes {
 
 	private int maxNumOfAttendees;
@@ -140,11 +137,11 @@ public class EditMeeting extends SignupAction implements MeetingTypes {
 			Utilities.addErrorMessage(Utilities.rb.getString("max.num_attendee_changed_and_attendee_mayOver_limit_inTS"));
 		}
 
-		log.info("Meeting Name:" + meeting.getTitle() + " - UserId:" + userId
+		logger.info("Meeting Name:" + meeting.getTitle() + " - UserId:" + userId
 				+ " - has modified the meeting at meeting time:"
 				+ SignupDateFormat.format_date_h_mm_a(meeting.getStartTime()));
 		if (getMaxNumOfAttendees() > this.originalMeetingCopy.getMaxNumberOfAttendees())
-			log.info("Meeting Name:" + meeting.getTitle() + " - UserId:" + userId
+			logger.info("Meeting Name:" + meeting.getTitle() + " - UserId:" + userId
 					+ this.signupEventTrackingInfo.getAllAttendeeTransferLogInfo());
 		
 		/*cleanup unused attachments*/
@@ -303,15 +300,15 @@ public class EditMeeting extends SignupAction implements MeetingTypes {
 				//create the groups for the timeslots, if enabled
 				//this also loads the groupId into the timeslot object to be saved afterwards
 				if(isCreateGroups() && !this.hasProcessedSyn_createGroups_job){
-					log.error("Timeslot groupId: " + timeslot.getGroupId());
+					logger.error("Timeslot groupId: " + timeslot.getGroupId());
 					boolean justCreated = false;	
 					//if we don't already have a group for this timeslot, or the group has been deleted, create a group and set into timeslot
 					if(StringUtils.isBlank(timeslot.getGroupId()) || !sakaiFacade.checkForGroup(sakaiFacade.getCurrentLocationId(), timeslot.getGroupId())) {
-						log.error("Need to create a group for timeslot... ");
+						logger.error("Need to create a group for timeslot... ");
 						String title = generateGroupTitle(newlyModifyMeeting.getTitle(), timeslot, rownum);
 						String description = generateGroupDescription(newlyModifyMeeting.getTitle(), timeslot);
 						String groupId = sakaiFacade.createGroup(sakaiFacade.getCurrentLocationId(), title, description, null);
-						log.error("Created group for timeslot: " + groupId);
+						logger.error("Created group for timeslot: " + groupId);
 						timeslot.setGroupId(groupId);
 						justCreated = true;
 					}

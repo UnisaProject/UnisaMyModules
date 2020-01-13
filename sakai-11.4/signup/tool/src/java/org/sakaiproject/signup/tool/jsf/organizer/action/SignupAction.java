@@ -26,8 +26,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.signup.logic.SakaiFacade;
 import org.sakaiproject.signup.logic.SignupEmailFacade;
 import org.sakaiproject.signup.logic.SignupMeetingService;
@@ -47,7 +47,6 @@ import org.sakaiproject.signup.tool.util.Utilities;
  * shared methods for children user action classes.
  * </P>
  */
-@Slf4j
 public abstract class SignupAction implements SignupBeanConstants{
 
 	protected final String userId;
@@ -57,6 +56,8 @@ public abstract class SignupAction implements SignupBeanConstants{
 	protected final SignupMeetingService signupMeetingService;
 
 	protected SignupEventTrackingInfo signupEventTrackingInfo;
+
+	protected Logger logger = LoggerFactory.getLogger(getClass());
 
 	protected final boolean isOrganizer;
 

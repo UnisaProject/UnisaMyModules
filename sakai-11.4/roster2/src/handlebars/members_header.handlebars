@@ -1,4 +1,3 @@
-<div id="roster-members-header" class="roster-table">
     <div class="roster-table-header-group">
         <div class="roster-table-row">
             {{#if viewPicture}}
@@ -28,10 +27,9 @@
             {{#if viewEmail}}
             <div class="roster-table-cell">{{translate 'facet_email'}}</div>
             {{/if}}
-            {{#if viewUserProperty}}
-            <div class="roster-table-cell">{{translate 'facet_userProperties'}}</div>
+            {{#if viewConnections}}
+            <div class="roster-table-cell roster-connections-cell">{{translate 'facet_connected_status'}}</div>
             {{/if}}
         </div>
     </div>
     <div id="roster-members" class="roster-table-row-group"></div>
-</div>

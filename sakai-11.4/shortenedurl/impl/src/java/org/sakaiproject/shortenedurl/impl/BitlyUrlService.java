@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2009-2016 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.shortenedurl.impl;
 
 import java.io.UnsupportedEncodingException;
@@ -24,8 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -37,7 +23,6 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-
 import org.sakaiproject.shortenedurl.api.ShortenedUrlService;
 
 /**
@@ -46,13 +31,13 @@ import org.sakaiproject.shortenedurl.api.ShortenedUrlService;
  * @author Steve Swinsburg (steve.swinsburg@gmail.com)
  *
  */
-@Slf4j
 public class BitlyUrlService implements ShortenedUrlService {
 
+	private static Logger log = LoggerFactory.getLogger(BitlyUrlService.class);
 	private String login;
 	private String apiKey;
 	private final String BITLY_API_URL = "http://api.bit.ly/v3/shorten";
-
+	
 	/**
 	 * Shorten the give URL using the bit.ly service
 	 */
@@ -92,7 +77,7 @@ public class BitlyUrlService implements ShortenedUrlService {
 	public String resolve(String key) {
 		return null;
 	}
-
+	
 	public void init() {
   		log.debug("Sakai BitlyUrlService init().");
   	}
@@ -105,7 +90,7 @@ public class BitlyUrlService implements ShortenedUrlService {
 			throw new IllegalArgumentException("Missing auth for BitlyUrlService: login=" + login + ", key=" + apiKey);
 		}
 	}
-
+	
 	/**
 	 * Helper to URL encode a string
 	 * @param s 	string to encode
@@ -119,7 +104,8 @@ public class BitlyUrlService implements ShortenedUrlService {
 		}
 		return null;
 	}
-
+	
+	
 	/**
 	 * Makes a GET request to the given address. Any query string should be appended already.
 	 * @param address	the fully qualified URL to make the request to
@@ -149,7 +135,7 @@ public class BitlyUrlService implements ShortenedUrlService {
 		} 
 		return null;
 	}
-
+	
 	/**
 	 * Make a GET request and append the Map of parameters onto the query string.
 	 * @param address		the fully qualified URL to make the request to

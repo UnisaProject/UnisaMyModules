@@ -19,17 +19,18 @@
  *
  **********************************************************************************/
 
+
 package org.sakaiproject.tool.assessment.ui.bean.shared;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.sakaiproject.tool.assessment.ui.listener.author.AuthorActionListener;
 import org.sakaiproject.tool.assessment.ui.listener.select.SelectActionListener;
 import org.sakaiproject.tool.assessment.ui.listener.delivery.BeginDeliveryActionListener;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * <p> </p>
@@ -39,13 +40,15 @@ import org.sakaiproject.tool.assessment.ui.listener.delivery.BeginDeliveryAction
  * @author Ed Smiley
  * @version $id: $
  */
-@Slf4j
+
 public class BackingBean implements Serializable
 {
   /**
 	 * 
 	 */
 	private static final long serialVersionUID = -1137408628089300518L;
+
+private static Logger log = LoggerFactory.getLogger(BackingBean.class);
 
   private String prop1;
   private String prop2;

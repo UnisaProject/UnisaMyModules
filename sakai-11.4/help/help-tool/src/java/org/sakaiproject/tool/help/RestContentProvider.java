@@ -45,10 +45,12 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.codec.binary.Base64;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.api.app.help.HelpManager;
+import org.sakaiproject.api.app.help.Resource;
+import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -57,11 +59,9 @@ import org.w3c.dom.Text;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import org.sakaiproject.api.app.help.HelpManager;
-import org.sakaiproject.api.app.help.Resource;
-import org.sakaiproject.component.cover.ServerConfigurationService;
 
-@Slf4j
+
+
 public class RestContentProvider
 {
   
@@ -72,6 +72,8 @@ public class RestContentProvider
 
   private static Document xslDocumentPreprocess;
   private static Document xslDocumentAllInOne;
+    
+  private static final Logger LOG = LoggerFactory.getLogger(RestContentProvider.class);
 
   /**
    * @param htmlDocument
@@ -79,9 +81,9 @@ public class RestContentProvider
    */
   private static void addLinkToCss(Document htmlDocument)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("addLinkToCss(Document " + htmlDocument + ")");
+      LOG.debug("addLinkToCss(Document " + htmlDocument + ")");
     }
         
     String skinRoot = ServerConfigurationService.getString("skin.repo",
@@ -123,9 +125,9 @@ public class RestContentProvider
    */
   private static String serializeDocument(Document document)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("serializeDocumentDocument(Document " + document + ")");
+      LOG.debug("serializeDocumentDocument(Document " + document + ")");
     }
 
     if (document != null)
@@ -138,7 +140,7 @@ public class RestContentProvider
 			tf = TransformerFactory.newInstance().newTransformer();
 	    	tf.transform(xmlSource, outputTarget);
 		} catch (TransformerException e) {
-			log.warn(e.getMessage());
+			LOG.warn(e.getMessage());
 		}
     	return out.toString();
     }
@@ -157,9 +159,9 @@ public class RestContentProvider
   private static void transform(Transformer transformer, Source source,
       Result result)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("transform(Transformer " + transformer + ", Source" + source
+      LOG.debug("transform(Transformer " + transformer + ", Source" + source
           + ", Result " + result + ")");
     }
 
@@ -169,7 +171,7 @@ public class RestContentProvider
     }
     catch (TransformerException e)
     {
-      log.error(e.getMessage(), e);
+      LOG.error(e.getMessage(), e);
     }
   }
 
@@ -182,9 +184,9 @@ public class RestContentProvider
   private static Document transformDocument(Document document,
       Document stylesheet)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("transformDocument(Document " + document + ", Document "
+      LOG.debug("transformDocument(Document " + document + ", Document "
           + stylesheet + ")");
     }
 
@@ -203,9 +205,9 @@ public class RestContentProvider
    */
   private static Document createDocument()
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("createDocument()");
+      LOG.debug("createDocument()");
     }
 
     Document document = null;
@@ -220,7 +222,8 @@ public class RestContentProvider
     }
     catch (ParserConfigurationException e)
     {
-      log.error(e.getMessage(), e);
+      LOG.error(e.getMessage(), e);
+      e.printStackTrace();
     }
 
     return document;
@@ -233,9 +236,9 @@ public class RestContentProvider
    */
   private static Transformer createTransformer(Document stylesheet)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("createTransformer(Document " + stylesheet + ")");
+      LOG.debug("createTransformer(Document " + stylesheet + ")");
     }
 
     Transformer transformer = null;
@@ -252,7 +255,8 @@ public class RestContentProvider
     }
     catch (TransformerConfigurationException e)
     {
-      log.error(e.getMessage(), e);
+      LOG.error(e.getMessage(), e);
+      e.printStackTrace();
     }
 
     return transformer;
@@ -264,9 +268,9 @@ public class RestContentProvider
    */
   public static void initializeXsl(ServletContext context)
   {
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("initializeXsl(ServletContext " + context + ")");
+      LOG.debug("initializeXsl(ServletContext " + context + ")");
     }
     
     if (XSL_INITIALIZED.booleanValue())
@@ -297,15 +301,15 @@ public class RestContentProvider
           }
           catch (ParserConfigurationException e)
           {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
           }
           catch (IOException e)
           {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
           }
           catch (SAXException e)
           {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
           }
           try
           {
@@ -314,7 +318,7 @@ public class RestContentProvider
           }
           catch (IOException e)
           {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
           }
 
           XSL_INITIALIZED = Boolean.TRUE;
@@ -333,9 +337,9 @@ public class RestContentProvider
       StringBuilder sBuffer)
   {
 
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("getTransformedDocument(ServletContext " + context
+      LOG.debug("getTransformedDocument(ServletContext " + context
           + ", StringBuilder " + sBuffer + ")");
     }
 
@@ -354,25 +358,37 @@ public class RestContentProvider
       if (xmlDocument.getElementsByTagName("kberror").getLength() > 0){        
         result = createErrorDocument();
       }
-      else{        
+      else{
+        /** debugging
+        OutputFormat format = new OutputFormat(xmlDocument);
+        XMLSerializer output = new XMLSerializer(System.out, format);
+        output.serialize(xmlDocument);
+        */
+        
         result = transformDocument(xmlDocument, xslDocumentPreprocess);  
         result = transformDocument(result, xslDocumentAllInOne);
-      }
+      } 
+      
+      /** debugging  
+      OutputFormat format = new OutputFormat(result);
+      XMLSerializer output = new XMLSerializer(System.out, format);
+      output.serialize(result);
+      */
            
       addLinkToCss(result);
 
     }
     catch (ParserConfigurationException e)
     {
-      log.error(e.getMessage(), e);
+      LOG.error(e.getMessage(), e);
     }
     catch (IOException e)
     {
-      log.error(e.getMessage(), e);
+      LOG.error(e.getMessage(), e);
     }
     catch (SAXException e)
     {
-      log.error(e.getMessage(), e);
+      LOG.error(e.getMessage(), e);
     }
     return result;
   }
@@ -389,17 +405,17 @@ public class RestContentProvider
     
 	Long now = new Long((new Date()).getTime());
 	  
-    if (log.isDebugEnabled())
+    if (LOG.isDebugEnabled())
     {
-      log.debug("getTransformedDocument(ServletContext " + context
+      LOG.debug("getTransformedDocument(ServletContext " + context
           + ", HelpManager " + helpManager + "String " + resource.getDocId() + ")");
     }
     
     // test if resource is cached
     if (resource.getTstamp() != null){
       if ((now.longValue() - resource.getTstamp().longValue()) < helpManager.getRestConfiguration().getCacheInterval()){
-        if (log.isDebugEnabled()){
-          log.debug("retrieving document: " + resource.getDocId() + " from cache");                
+        if (LOG.isDebugEnabled()){
+          LOG.debug("retrieving document: " + resource.getDocId() + " from cache");                
         }
         return resource.getSource();
       }
@@ -438,11 +454,11 @@ public class RestContentProvider
     }
     catch (MalformedURLException e)
     {
-      log.error("Malformed URL in REST document: " + url.getPath());
+      LOG.error("Malformed URL in REST document: " + url.getPath());
     }
     catch (IOException e)
     {
-      log.error("Could not open connection to REST document: " + url.getPath());
+      LOG.error("Could not open connection to REST document: " + url.getPath());
     }
         
     resource.setSource(transformedString);

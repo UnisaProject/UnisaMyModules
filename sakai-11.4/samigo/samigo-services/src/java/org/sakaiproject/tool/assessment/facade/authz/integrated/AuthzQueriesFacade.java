@@ -21,14 +21,17 @@
 
 package org.sakaiproject.tool.assessment.facade.authz.integrated;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ResourceBundle;
 
-import lombok.extern.slf4j.Slf4j;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.cover.SecurityService;
@@ -38,19 +41,27 @@ import org.sakaiproject.tool.assessment.facade.AgentFacade;
 import org.sakaiproject.tool.assessment.facade.AuthzQueriesFacadeAPI;
 import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.user.cover.UserDirectoryService;
-import org.springframework.orm.hibernate4.HibernateCallback;
-import org.springframework.orm.hibernate4.support.HibernateDaoSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 /**
  * <p>Description: Facade for AuthZ queries, standalone version.
  * <p>Sakai Project Copyright (c) 2005</p>
+ * <p>@todo use resources in AuthzResource.</p>
  * @author cwen
  * @author Rachel Gollub <rgollub@stanford.edu>
  * @author Ed Smiley <esmiley@stanford.edu> split integrated, standlaone.
  */
-@Slf4j
-public class AuthzQueriesFacade extends HibernateDaoSupport implements AuthzQueriesFacadeAPI
+public class AuthzQueriesFacade
+  extends HibernateDaoSupport implements AuthzQueriesFacadeAPI
 {
+  private final static Logger logger = LoggerFactory.getLogger(AuthzQueriesFacade.class);
+
+  // stores sql strings
+  private static ResourceBundle res = ResourceBundle.getBundle(
+    "org.sakaiproject.tool.assessment.facade.authz.resource.AuthzResource");
   // can convert these to use the resource bundle....
   private final static String HQL_QUERY_CHECK_AUTHZ =
     "select from " +
@@ -72,10 +83,6 @@ public class AuthzQueriesFacade extends HibernateDaoSupport implements AuthzQuer
     this.authzGroupService = authzGroupService;
   }
 
-  public boolean hasPrivilege(String functionName, String siteId) {
-    return SecurityService.unlock(functionName, "/site/" + siteId);
-  }
-
   public boolean hasPrivilege(String functionName)
   {
       String context = ToolManager.getCurrentPlacement().getContext();
@@ -87,12 +94,21 @@ public class AuthzQueriesFacade extends HibernateDaoSupport implements AuthzQuer
   public boolean isAuthorized(final String agentId,
       final String functionId, final String qualifierId)
   {
-    final HibernateCallback<List<AuthorizationData>> hcb = session -> session
-            .createQuery("select a from AuthorizationData a where a.functionId = :fid and a.qualifierId = :id")
-            .setString("fid", functionId)
-            .setString("id", qualifierId)
-            .list();
-    List<AuthorizationData> authorizationList = getHibernateTemplate().execute(hcb);
+    final String query = "select a from AuthorizationData a where a.functionId=? and a.qualifierId=?";
+    
+    final HibernateCallback hcb = new HibernateCallback(){
+    	public Object doInHibernate(Session session) throws HibernateException, SQLException {
+    		Query q = session.createQuery(query);
+    		q.setString(0, functionId);
+    		q.setString(1, qualifierId);
+    		return q.list();
+    	};
+    };
+    List authorizationList = getHibernateTemplate().executeFind(hcb);
+
+//    List authorizationList = getHibernateTemplate().find(query,
+//                             new Object[] { functionId, qualifierId },
+//                             new org.hibernate.type.Type[] { Hibernate.STRING, Hibernate.STRING });
 
     String currentSiteId = null;
     if (ToolManager.getCurrentPlacement() != null)
@@ -100,6 +116,7 @@ public class AuthzQueriesFacade extends HibernateDaoSupport implements AuthzQuer
     if (currentSiteId == null)
       return false; // user don't login via any site if they are using published url
 
+    //System.out.println("**** currentSiteId"+currentSiteId);
     String currentAgentId = UserDirectoryService.getCurrentUser().getId();
     for (int i=0; i<authorizationList.size(); i++){
       AuthorizationData a = (AuthorizationData) authorizationList.get(i);
@@ -132,18 +149,24 @@ public class AuthzQueriesFacade extends HibernateDaoSupport implements AuthzQuer
     }
     final String queryAgentId = ToolManager.getCurrentPlacement().getContext();
 
-    HibernateCallback hcb = session -> {
-      Query query = session.createQuery(HQL_QUERY_CHECK_AUTHZ);
-      if(agentId == null) {
-        query.setString("agentId", queryAgentId);
-      } else {
-        query.setString("agentId", agentId);
+    HibernateCallback hcb = new HibernateCallback()
+    {
+      public Object doInHibernate(Session session) throws HibernateException,
+          SQLException
+      {
+        Query query = session.createQuery(HQL_QUERY_CHECK_AUTHZ);
+        //query.setString("agentId", agentId);
+        if(agentId == null)
+          query.setString("agentId", queryAgentId);
+        else
+          query.setString("agentId", agentId);
+        query.setString("functionId", functionId);
+        query.setString("qualifierId", qualifierId);
+        return query.uniqueResult();
+        //return query.list();
       }
-      query.setString("functionId", functionId);
-      query.setString("qualifierId", qualifierId);
-      return query.uniqueResult();
     };
-    Object result = getHibernateTemplate().execute(hcb);
+    Object result = (AuthorizationData)getHibernateTemplate().execute(hcb);
 
     if(result != null)
       return true;
@@ -177,41 +200,66 @@ public class AuthzQueriesFacade extends HibernateDaoSupport implements AuthzQuer
   }
 
   // this appears to be unused, it is also dangerous, as it is not in the API
-  public List<AuthorizationData> getAssessments(final String agentId, final String functionId)
+  public ArrayList getAssessments(final String agentId, final String functionId)
   {
+    ArrayList returnList = new ArrayList();
     if (agentId == null || functionId == null)
     {
       throw new IllegalArgumentException("Null Argument");
     }
-    HibernateCallback<List<AuthorizationData>> hcb = session -> {
-      Query query = session.createQuery(HQL_QUERY_BY_AGENT_FUNC);
-      query.setString("agentId", agentId);
-      query.setString("functionId", functionId);
-      return query.list();
-    };
-    List<AuthorizationData> returnList = getHibernateTemplate().execute(hcb);
-
-    if (returnList == null) {
-      returnList = new ArrayList<>();
+    else
+    {
+      HibernateCallback hcb = new HibernateCallback()
+      {
+        public Object doInHibernate(Session session) throws HibernateException,
+            SQLException
+        {
+          Query query = session.createQuery(HQL_QUERY_BY_AGENT_FUNC);
+          query.setString("agentId", agentId);
+          query.setString("functionId", functionId);
+          return query.list();
+        }
+      };
+      List result = (List)getHibernateTemplate().execute(hcb);
+      for (int i=0; i<result.size();i++){
+        AuthorizationData ad = (AuthorizationData) result.get(i);
+        returnList.add(ad);
+      }
     }
 
     return returnList;
   }
 
   // this appears to be unused, it is also dangerous, as it is not in the API
-  public List<AssessmentBaseData> getAssessmentsByAgentAndFunction(final String agentId, final String functionId)
+  public ArrayList getAssessmentsByAgentAndFunction(final String agentId, final String functionId)
   {
+    ArrayList returnList = new ArrayList();
     if (agentId == null || functionId == null)
     {
       throw new IllegalArgumentException("Null Argument");
     }
-    HibernateCallback<List<AssessmentBaseData>> hcb = session -> {
-      Query query = session.createQuery(HQL_QUERY_ASSESS_BY_AGENT_FUNC);
-      query.setString("agentId", agentId);
-      query.setString("functionId", functionId);
-      return query.list();
-    };
-    return getHibernateTemplate().execute(hcb);
+    else
+    {
+      HibernateCallback hcb = new HibernateCallback()
+      {
+        public Object doInHibernate(Session session) throws HibernateException,
+        SQLException
+        {
+          Query query = session.createQuery(HQL_QUERY_ASSESS_BY_AGENT_FUNC);
+          query.setString("agentId", agentId);
+          query.setString("functionId", functionId);
+          return query.list();
+        }
+      };
+      List result = (List)getHibernateTemplate().execute(hcb);
+      for(int i=0; i<result.size(); i++)
+      {
+        AssessmentBaseData ad = (AssessmentBaseData)result.get(i);
+        returnList.add(ad);
+      }
+    }
+
+    return returnList;
   }
 
   public void removeAuthorizationByQualifier(String qualifierId, boolean isPublishedAssessment) {
@@ -237,8 +285,8 @@ public class AuthzQueriesFacade extends HibernateDaoSupport implements AuthzQuer
    * @param functionId
    */
   public void removeAuthorizationByQualifierAndFunction(String qualifierId, String functionId) {
-	    String query="select a from AuthorizationData a where a.qualifierId = :id and a.functionId = :fid";
-	    List l = getHibernateTemplate().findByNamedParam(query, new String[] {"id", "fid"}, new String[] {qualifierId, functionId});
+	    String query="select a from AuthorizationData a where a.qualifierId=? and a.functionId=?";
+	    List l = getHibernateTemplate().find(query, new String[]{qualifierId, functionId});
 	    getHibernateTemplate().deleteAll(l);
   }
   
@@ -249,8 +297,8 @@ public class AuthzQueriesFacade extends HibernateDaoSupport implements AuthzQuer
    * @param qualifierId
    */
   public void removeAuthorizationByAgentQualifierAndFunction(String agentId, String qualifierId, String functionId) {
-	    String query="select a from AuthorizationData a where a.qualifierId = :id and a.agentIdString = :agent and a.functionId = :fid";
-	    List l = getHibernateTemplate().findByNamedParam(query, new String[] {"id", "agent", "fid"},new String[] {qualifierId, agentId, functionId});
+	    String query="select a from AuthorizationData a where a.qualifierId=? and a.agentIdString=? and a.functionId=?";
+	    List l = getHibernateTemplate().find(query, new String[]{qualifierId, agentId, functionId,});
 	    if (l != null && l.size() > 0) {
 	    	getHibernateTemplate().deleteAll(l);
 	    }
@@ -271,17 +319,15 @@ public class AuthzQueriesFacade extends HibernateDaoSupport implements AuthzQuer
   }
 
   public List getAuthorizationByAgentAndFunction(String agentId, String functionId) {
-    String query = "select a from AuthorizationData a where a.agentIdString = :agent and a.functionId = :fid";
-    return getHibernateTemplate().findByNamedParam(query, new String[] {"agent", "fid"}, new String[] {agentId, functionId});
+    String query = "select a from AuthorizationData a where a.agentIdString=? and a.functionId=?";
+    //System.out.println("query="+query);
+    return getHibernateTemplate().find(query, new String[]{agentId, functionId});
   }
 
   public List<AuthorizationData> getAuthorizationByFunctionAndQualifier(String functionId, String qualifierId) {
-    HibernateCallback<List<AuthorizationData>> hcb = session -> session
-            .createQuery("select a from AuthorizationData a where a.functionId = :fid and a.qualifierId = :id")
-            .setString("fid", functionId)
-            .setString("id", qualifierId)
-            .list();
-    return getHibernateTemplate().execute(hcb);
+  return (List<AuthorizationData>) getHibernateTemplate().find(
+		"select a from AuthorizationData a where a.functionId=?"+
+		" and a.qualifierId=?",new String[]{functionId,qualifierId});
   }
 
   public boolean checkMembership(String siteId) {
@@ -294,9 +340,10 @@ public class AuthzQueriesFacade extends HibernateDaoSupport implements AuthzQuer
     }
     catch(Exception e)
     {
-        log.error(e.getMessage(), e);
+       e.printStackTrace();
     }
     return isMember;
   }
 
+  
 }

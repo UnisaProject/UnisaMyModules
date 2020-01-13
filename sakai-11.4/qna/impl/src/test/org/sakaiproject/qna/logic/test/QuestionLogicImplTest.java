@@ -41,8 +41,6 @@ import org.sakaiproject.qna.logic.test.stubs.ExternalEventLogicStub;
 import org.sakaiproject.qna.logic.test.stubs.ExternalLogicStub;
 import org.sakaiproject.qna.logic.test.stubs.NotificationLogicStub;
 import org.sakaiproject.qna.model.QnaQuestion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
@@ -58,7 +56,7 @@ public class QuestionLogicImplTest extends AbstractTransactionalJUnit4SpringCont
 	OptionsLogicImpl optionsLogic;
 	PermissionLogicImpl permissionLogic;
 	
-	private static Logger log = LoggerFactory.getLogger(OptionsLogicImplTest.class);
+	private static Log log = LogFactory.getLog(OptionsLogicImplTest.class);
 
 	private final ExternalLogicStub externalLogicStub = new ExternalLogicStub();
 	private final NotificationLogicStub notificationLogicStub = new NotificationLogicStub();

@@ -27,11 +27,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-
 import javax.faces.context.FacesContext;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.tool.assessment.facade.AssessmentTemplateFacade;
 import org.sakaiproject.tool.assessment.services.assessment.AssessmentService;
@@ -43,12 +42,11 @@ import org.sakaiproject.tool.assessment.util.BeanSort;
  * @author $author$
  * @version $Id$
  */
-@Slf4j
 public class IndexBean implements Serializable
 {
   private static BeanSort bs;
   private Collection templateList;
-  private List sortTemplateList;
+  private ArrayList sortTemplateList;
 
   /** Use serialVersionUID for interoperability. */
   private final static long serialVersionUID = 7919219404875270127L;
@@ -60,6 +58,8 @@ public class IndexBean implements Serializable
   private String templateOrderBy= "templateName";
   private boolean templateAscending= true;
   private boolean automaticSubmissionEnabled = false;
+  
+  private static Logger log = LoggerFactory.getLogger(IndexBean.class);
 
   /**
    * Creates a new IndexBean object.
@@ -83,9 +83,9 @@ public class IndexBean implements Serializable
     try
     {
       AssessmentService delegate = new AssessmentService();
-      List list = delegate.getBasicInfoOfAllActiveAssessmentTemplates("title");
+      ArrayList list = delegate.getBasicInfoOfAllActiveAssessmentTemplates("title");
       //ArrayList list = delegate.getAllAssessmentTemplates();
-      List templates = new ArrayList();
+      ArrayList templates = new ArrayList();
       Iterator iter = list.iterator();
       while (iter.hasNext())
       {
@@ -99,7 +99,7 @@ public class IndexBean implements Serializable
       }
      this.templateList = templates;
     } catch (Exception e) {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
       templateList = new ArrayList();
       }
 
@@ -116,7 +116,7 @@ public class IndexBean implements Serializable
     this.templateList = templateList;
   }
 
-  public List getSortTemplateList()
+  public ArrayList getSortTemplateList()
   {
    return this.sortTemplateList;
   }
@@ -126,7 +126,7 @@ public class IndexBean implements Serializable
    *
    * @param templateList DOCUMENTATION PENDING
    */
-  public void setSortTemplateList(List sortTemplateList)
+  public void setSortTemplateList(ArrayList sortTemplateList)
   {
     this.sortTemplateList = sortTemplateList;
   }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="unisa-libmaint"
+  id="myeclipse.1124357479578"
+  context-root="/unisa-libmaint"
+  j2ee-spec="1.4"
+  archive="unisa-libmaint.war">
+  <attributes>
+    <attribute name="webrootdir" value="/web" />
+  </attributes>
+</project-module>
+

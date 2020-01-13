@@ -27,6 +27,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.entitybroker.DeveloperHelperService;
 import org.sakaiproject.entitybroker.EntityReference;
@@ -42,16 +44,15 @@ import org.sakaiproject.sms.logic.SmsAccountLogic;
 import org.sakaiproject.sms.logic.exception.DuplicateUniqueFieldException;
 import org.sakaiproject.sms.logic.exception.SmsInsufficientCreditsException;
 import org.sakaiproject.sms.logic.external.ExternalLogic;
-import org.sakaiproject.sms.logic.smpp.SmsBilling;
 import org.sakaiproject.sms.model.SmsAccount;
 import org.sakaiproject.sms.model.constants.SmsConstants;
 
-import lombok.extern.slf4j.Slf4j;
+import org.sakaiproject.sms.logic.smpp.SmsBilling;
 
-@Slf4j
 public class SmsAccountEntityProviderImp implements SmsAccountEntityProvider,
 		RESTful, AutoRegisterEntityProvider {
 
+	private static final Log LOG = LogFactory.getLog(SmsAccountEntityProviderImp.class);
 
 	public String getEntityPrefix() {
 		return ENTITY_PREFIX;
@@ -268,14 +269,14 @@ public class SmsAccountEntityProviderImp implements SmsAccountEntityProvider,
 				throw new SecurityException("No permission to view account info for this site");
 			}
 
-			log.info("looking for "  + siteId);
+			LOG.info("looking for "  + siteId);
 			
 			List<SmsAccount> accounts = new ArrayList<SmsAccount>();
 			SmsAccount account = smsAccountLogic.getSmsAccount(siteId, null);
 			
 			if (account != null) {
 				accounts.add(account);
-				log.info("added account");
+				LOG.info("added account");
 			}
 			
 			return accounts;			

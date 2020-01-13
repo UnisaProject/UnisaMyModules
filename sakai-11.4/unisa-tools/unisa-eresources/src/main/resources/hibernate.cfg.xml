@@ -1,0 +1,21 @@
+<!-- NOTE: If you're working offline, you might have to change the DOCTYPE to the following: -->
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<!-- <!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd"> -->
+
+<hibernate-configuration>
+    <session-factory>
+        <mapping class="org.appfuse.model.User"/>
+        <mapping class="org.appfuse.model.Role"/>
+        <mapping class="za.ac.unisa.lms.tool.eresources.model.EresourcePlacement"/>
+        <mapping class="za.ac.unisa.lms.tool.eresources.model.Alphabet"/>
+        <mapping class="za.ac.unisa.lms.tool.eresources.model.Subject"/>
+        <mapping class="za.ac.unisa.lms.tool.eresources.model.Eresource"/>
+        <mapping class="za.ac.unisa.lms.tool.eresources.model.Vendor"/>
+        <mapping class="za.ac.unisa.lms.tool.eresources.model.ContentType"/>
+        <mapping class="za.ac.unisa.lms.tool.eresources.model.HighlightNote"/>
+        <mapping class="za.ac.unisa.lms.tool.eresources.model.Newsletter"/>
+        <mapping class="za.ac.unisa.lms.tool.eresources.model.Placement"/>
+    </session-factory>
+</hibernate-configuration>

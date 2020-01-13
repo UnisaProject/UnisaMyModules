@@ -24,7 +24,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -34,6 +35,8 @@ import org.quartz.SchedulerException;
 import org.sakaiproject.api.app.scheduler.JobBeanWrapper;
 import org.sakaiproject.tool.api.Session;
 
+
+
 /**
  * SakaiJob.jws
  * <p/>
@@ -42,8 +45,9 @@ import org.sakaiproject.tool.api.Session;
 
 @WebService
 @SOAPBinding(style = SOAPBinding.Style.RPC, use = SOAPBinding.Use.LITERAL)
-@Slf4j
 public class SakaiJob extends AbstractWebService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SakaiJob.class);
 
     /**
      * Delete a job from the Job Scheduler
@@ -61,13 +65,13 @@ public class SakaiJob extends AbstractWebService {
             @WebParam(name = "name", partName = "name") @QueryParam("name") String name) {
         Session session = establishSession(sessionId);
         if (!securityService.isSuperUser()) {
-            log.warn("NonSuperUser trying to collect configuration: " + session.getUserId());
+            LOG.warn("NonSuperUser trying to collect configuration: " + session.getUserId());
             return "error: NonSuperUser trying to collect configuration: " + session.getUserId();
         }
         try {
             schedulerManager.getScheduler().deleteJob(new JobKey(name, Scheduler.DEFAULT_GROUP));
         } catch (SchedulerException e) {
-            log.warn(e.getMessage(), e);
+            LOG.warn(e.getMessage(), e);
             return "error:" + e.getMessage();
         }
         return "success";
@@ -91,7 +95,7 @@ public class SakaiJob extends AbstractWebService {
             @WebParam(name = "type", partName = "type") @QueryParam("type") String type) {
         Session session = establishSession(sessionId);
         if (!securityService.isSuperUser()) {
-            log.warn("NonSuperUser trying to collect configuration: " + session.getUserId());
+            LOG.warn("NonSuperUser trying to collect configuration: " + session.getUserId());
             return "error: NonSuperUser trying to collect configuration: " + session.getUserId();
         }
 
@@ -105,7 +109,7 @@ public class SakaiJob extends AbstractWebService {
             try {
                 scheduler.addJob(jd, false);
             } catch (SchedulerException e) {
-                log.warn(e.getMessage(), e);
+                LOG.warn(e.getMessage(), e);
                 return "error: " + e.getMessage();
             }
 
@@ -131,7 +135,7 @@ public class SakaiJob extends AbstractWebService {
             @WebParam(name = "jobName", partName = "jobName") @QueryParam("jobName") String jobName) {
         Session session = establishSession(sessionId);
         if (!securityService.isSuperUser()) {
-            log.warn("NonSuperUser trying to collect configuration: " + session.getUserId());
+            LOG.warn("NonSuperUser trying to collect configuration: " + session.getUserId());
             return "error: NonSuperUser trying to collect configuration: " + session.getUserId();
         }
 
@@ -141,7 +145,7 @@ public class SakaiJob extends AbstractWebService {
         try {
             jobDetail = scheduler.getJobDetail(new JobKey(jobName, Scheduler.DEFAULT_GROUP));
         } catch (SchedulerException e) {
-            log.warn(e.getMessage(), e);
+            LOG.warn(e.getMessage(), e);
             return "error: " + e.getMessage();
         }
         
@@ -149,7 +153,7 @@ public class SakaiJob extends AbstractWebService {
             try {
                 scheduler.triggerJob(jobDetail.getKey());
             } catch (SchedulerException e) {
-                log.warn(e.getMessage(), e);
+                LOG.warn(e.getMessage(), e);
                 return "error: " + e.getMessage();
             }
         } else {

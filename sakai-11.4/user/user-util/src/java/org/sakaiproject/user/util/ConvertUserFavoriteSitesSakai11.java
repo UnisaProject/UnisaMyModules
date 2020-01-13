@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2003-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.user.util;
 
 // Sakai 11 introduced a new way of storing users' favorite sites, which
@@ -72,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
-
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -80,11 +64,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
-
-import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
-import org.sakaiproject.user.api.PreferencesService;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -93,7 +74,7 @@ import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.InputSource;
 
-@Slf4j
+
 class ConvertUserFavoriteSitesSakai11 {
 
     // The maximum number of favorites we'll give to a user who needs some
@@ -101,13 +82,15 @@ class ConvertUserFavoriteSitesSakai11 {
 
     static int UPDATES_PER_TRANSACTION = 200;
 
+    static boolean DEBUG = false;
+
     private static void info(String msg) {
-        log.info(msg);
+        System.err.println(msg);
     }
 
     private static void debug(String msg) {
-        if (log.isDebugEnabled()) {
-            log.debug("*** DEBUG: " + msg);
+        if (DEBUG) {
+            System.err.println("*** DEBUG: " + msg);
         }
     }
 
@@ -133,9 +116,7 @@ class ConvertUserFavoriteSitesSakai11 {
 
                 migrateFavoriteSites(db);
             } finally  {
-                if (db != null) {
-                    db.close();
-                }
+                db.close();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -226,7 +207,7 @@ class ConvertUserFavoriteSitesSakai11 {
                         info("Failed to migrate preferences for user: " + entry.userId + ". Skipped!");
                         info("Migration error was: " + e);
                         info("\n");
-                        log.error(e.getMessage(), e);
+                        e.printStackTrace();
                     }
                 } else {
                     info("Couldn't fetch preferences for user: " + entry.userId + ".  Skipped!");
@@ -476,7 +457,7 @@ class ConvertUserFavoriteSitesSakai11 {
 
         private DocumentBuilder documentBuilder;
         private XPath xpath;
-        String prefsPrefix = "/preferences/prefs[@key='" + PreferencesService.SITENAV_PREFS_KEY + "']";
+        String prefsPrefix = "/preferences/prefs[@key='sakai:portal:sitenav']";
 
         public PreferenceMigrator() {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -560,7 +541,7 @@ class ConvertUserFavoriteSitesSakai11 {
             if (existingSiteNav == null) {
                 // Add the top-level sitenav property
                 Element siteNav = doc.createElement("prefs");
-                siteNav.setAttribute("key", PreferencesService.SITENAV_PREFS_KEY);
+                siteNav.setAttribute("key", "sakai:portal:sitenav");
                 doc.getDocumentElement().appendChild(siteNav);
 
                 existingSiteNav = (Node) xpath.evaluate(prefsPrefix, doc, XPathConstants.NODE);

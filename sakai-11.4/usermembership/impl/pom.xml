@@ -4,7 +4,7 @@
   <parent>
     <artifactId>usermembership-base</artifactId>
     <groupId>org.sakaiproject</groupId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>sakai-usermembership-impl</name>
@@ -13,10 +13,7 @@
   <description>
     This project creates the impl used by the Sakai Usermembership Tool
   </description>
-  <packaging>sakai-component</packaging>
-  <properties>
-    <deploy.target>components</deploy.target>
-  </properties>
+  <packaging>jar</packaging>
   <dependencies>
     <dependency>
       <groupId>org.sakaiproject.kernel</groupId>

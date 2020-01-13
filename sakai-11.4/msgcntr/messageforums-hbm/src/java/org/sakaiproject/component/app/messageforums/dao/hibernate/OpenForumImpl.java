@@ -22,13 +22,15 @@ package org.sakaiproject.component.app.messageforums.dao.hibernate;
 
 import java.util.Date;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.messageforums.OpenForum;
 import org.sakaiproject.api.app.messageforums.DBMembershipItem;
 
 public class OpenForumImpl extends BaseForumImpl implements OpenForum {
 
+    private static final Logger LOG = LoggerFactory.getLogger(OpenForumImpl.class);
+    
     private Boolean draft;
     private Boolean locked;
     private String defaultAssignName;

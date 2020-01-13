@@ -4,7 +4,6 @@
 	<tool id="sakai.qna"
 		title="Questions and Answers"
 		description="Questions and Answers tool">
-		<!-- unisa change: add more categories -->
 		<category name="course" />
 		<category name="project" />
 		<category name="PostGraduate" />

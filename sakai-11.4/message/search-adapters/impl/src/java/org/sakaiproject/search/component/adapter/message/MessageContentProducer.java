@@ -29,8 +29,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.entity.api.EntityManager;
@@ -39,7 +39,6 @@ import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.event.api.Event;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
-import org.sakaiproject.javax.PagingPosition;
 import org.sakaiproject.message.api.Message;
 import org.sakaiproject.message.api.MessageChannel;
 import org.sakaiproject.message.api.MessageHeader;
@@ -53,17 +52,23 @@ import org.sakaiproject.search.util.HTMLParser;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.user.api.ContextualUserDisplayService;
 import org.sakaiproject.util.ResourceLoader;
+import org.sakaiproject.javax.PagingPosition;
+
 
 /**
  * @author ieb
  */
-@Slf4j
 public class MessageContentProducer implements EntityContentProducer
 {
 
 	private static final String BUNDLE_NAME = "org.sakaiproject.search.component.adapter.message.bundle.Messages"; //$NON-NLS-1$
 
 	private static final ResourceLoader RESOURCE_BUNDLE = new ResourceLoader(BUNDLE_NAME);
+
+	/**
+	 * debug logger
+	 */
+	private static Logger log = LoggerFactory.getLogger(MessageContentProducer.class);
 
 	// runtime dependency
 	private String toolName = null;
@@ -513,6 +518,7 @@ public class MessageContentProducer implements EntityContentProducer
 			}
 			catch (Exception ex)
 			{
+				ex.printStackTrace();
 				log.warn("Failed to get channel " + chanellId); //$NON-NLS-1$
 
 			}
@@ -571,6 +577,7 @@ public class MessageContentProducer implements EntityContentProducer
 					}
 					catch (Exception ex)
 					{
+						ex.printStackTrace();
 						log.warn("Failed to get channel " + chanellId); //$NON-NLS-1$
 					}
 				}
@@ -610,6 +617,7 @@ public class MessageContentProducer implements EntityContentProducer
 				}
 				catch (Exception ex)
 				{
+					ex.printStackTrace();
 					log.warn("Failed to get message " + nextMessage); //$NON-NLS-1$
 					
 				}

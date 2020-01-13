@@ -29,10 +29,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class ReEncryptPasswords {
+
+	private static final Logger log = LoggerFactory.getLogger(ReEncryptPasswords.class);
 	private static Properties props;
 
 	/**

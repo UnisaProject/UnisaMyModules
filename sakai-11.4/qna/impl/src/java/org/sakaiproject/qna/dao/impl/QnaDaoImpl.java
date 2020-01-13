@@ -17,9 +17,10 @@ package org.sakaiproject.qna.dao.impl;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
-import org.hibernate.Session;
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Restrictions;
 import org.sakaiproject.genericdao.hibernate.HibernateGeneralGenericDao;
@@ -27,17 +28,15 @@ import org.sakaiproject.qna.dao.QnaDao;
 import org.sakaiproject.qna.model.QnaAnswer;
 import org.sakaiproject.qna.model.QnaQuestion;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Implementations of any specialized DAO methods from the specialized DAO that allows the developer to extend the functionality of the
  * generic dao package
  *
  * @author Sakai App Builder -AZ
  */
-@Slf4j
 public class QnaDaoImpl extends HibernateGeneralGenericDao implements QnaDao {
 
+    private static Log log = LogFactory.getLog(QnaDaoImpl.class);
 
     public void init() {
         log.debug("init");
@@ -50,12 +49,12 @@ public class QnaDaoImpl extends HibernateGeneralGenericDao implements QnaDao {
      * @return {@link List} of new {@link QnaQuestion}
      */
     @SuppressWarnings("unchecked")
-    public List<QnaQuestion> getNewQuestions(String locationId) {
+	public List<QnaQuestion> getNewQuestions(String locationId) {
     	String hql = "from QnaQuestion as q where q.location = '" + locationId + "' and q.published=false "
     	 + "and ((select count(*) from QnaAnswer as a where a.question = q and a.privateReply=true)=0)";
-
-        Session session = getHibernateTemplate().getSessionFactory().getCurrentSession();
-        Query query = session.createQuery(hql);
+    	
+       	Query query = getSession().createQuery(hql);
+       	
     	return query.list();
     }
     
@@ -67,10 +66,8 @@ public class QnaDaoImpl extends HibernateGeneralGenericDao implements QnaDao {
      * @return {@link List} of {@link QnaAnswer}
      */
     @SuppressWarnings("unchecked")
-    public List<QnaAnswer> getSearchAnswers(String search, String location) {
-        
-        Session session = getHibernateTemplate().getSessionFactory().getCurrentSession();
-    	Criteria criteria = session.createCriteria(QnaAnswer.class);
+	public List<QnaAnswer> getSearchAnswers(String search, String location) {
+    	Criteria criteria = getSession().createCriteria(QnaAnswer.class);
     	criteria.add(Restrictions.ilike("answerText", search));
     	criteria.createAlias("question", "question", Criteria.LEFT_JOIN);
     	criteria.add(Restrictions.eq("question.location", location));

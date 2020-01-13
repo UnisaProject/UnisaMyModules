@@ -21,24 +21,8 @@
 
 package org.sakaiproject.citation.servlet;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import lombok.extern.slf4j.Slf4j;
-
 import org.sakaiproject.cheftool.VmServlet;
-import org.sakaiproject.citation.api.Citation;
-import org.sakaiproject.citation.api.CitationCollection;
-import org.sakaiproject.citation.api.CitationService;
-import org.sakaiproject.citation.api.ConfigurationService;
-import org.sakaiproject.citation.api.Schema;
+import org.sakaiproject.citation.api.*;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentResource;
@@ -53,18 +37,25 @@ import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.tool.api.ToolException;
 import org.sakaiproject.tool.cover.ActiveToolManager;
 import org.sakaiproject.tool.cover.SessionManager;
-import org.sakaiproject.util.BasicAuth;
-import org.sakaiproject.util.ParameterParser;
-import org.sakaiproject.util.ResourceLoader;
-import org.sakaiproject.util.Validator;
-import org.sakaiproject.util.Web;
+import org.sakaiproject.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * 
  *
  */
 //public class CitationServlet extends VelocityPortletPaneledAction
-@Slf4j
 public class CitationServlet extends VmServlet
 {
 	/**
@@ -73,6 +64,8 @@ public class CitationServlet extends VmServlet
 	public static final String SERVLET_TEMPLATE = "/vm/servlet.vm";
 	public static final String COMPACT_TEMPLATE = "/vm/compact.vm";
 //	private String collectionTitle = null;
+	
+	private static final Logger M_log = LoggerFactory.getLogger(CitationServlet.class);
 
 	/** Resource bundle using current language locale */
 	protected static ResourceLoader rb = new ResourceLoader("citations");
@@ -168,7 +161,7 @@ public class CitationServlet extends VmServlet
 	 */
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException
 	{
-		log.debug("doGet() {}", req.getMethod());
+		M_log.debug("doGet() {}", req.getMethod());
 		// process any login that might be present
 		basicAuth.doLogin(req);
 		
@@ -275,8 +268,8 @@ public class CitationServlet extends VmServlet
 	}
 
 	public void doDelete(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		if(log.isDebugEnabled()) {
-			log.debug("doDelete() {}", req.getMethod());
+		if(M_log.isDebugEnabled()) {
+			M_log.debug("doDelete() "  + req.getMethod());
 		}
 		// process any login that might be present
 		basicAuth.doLogin(req);
@@ -295,8 +288,8 @@ public class CitationServlet extends VmServlet
 			String citationId = parts[2];
 			String resourceUuid = parts[1];
 			
-			if(log.isDebugEnabled()) {
-				log.debug("doDelete() citationId == {} resourceUuid == {}", citationId, resourceUuid);
+			if(M_log.isDebugEnabled()) {
+				M_log.debug("doDelete() citationId == " + citationId + "  resourceUuid == " + resourceUuid);
 			}
 			
 			if(resourceUuid == null || resourceUuid.trim().equals("") || citationId == null || citationId.trim().equals("")) {
@@ -331,7 +324,7 @@ public class CitationServlet extends VmServlet
 				collection.remove(item);
 				this.citationService.save(collection);
 				
-				log.debug("doDelete() SUCCESS");
+				M_log.debug("doDelete() SUCCESS");
 				
 			} catch (IdUnusedException e) {
 				res.sendError(HttpServletResponse.SC_NOT_FOUND, rb.getString("savecite.delete.invalid_uuid"));
@@ -377,8 +370,8 @@ public class CitationServlet extends VmServlet
 			
 		} catch (TypeException e) {
 			// Ignore.
-			if(log.isDebugEnabled()) {
-				log.debug("TypeException in findResource() {}", e.getMessage());
+			if(M_log.isDebugEnabled()) {
+				M_log.debug("TypeException in findResource() " + e.getMessage());
 			}
 		}
 		return resource;
@@ -582,7 +575,7 @@ public class CitationServlet extends VmServlet
 	{
 		// if basic auth is valid do that
 		if ( basicAuth.doAuth(req,res) ) {
-			log.debug("BASIC Auth Request Sent to the Browser ");
+			//System.err.println("BASIC Auth Request Sent to the Browser ");
 			return;
 		} 
 		
@@ -600,7 +593,7 @@ public class CitationServlet extends VmServlet
 		// check that we have a return path set; might have been done earlier
 		if (session.getAttribute(Tool.HELPER_DONE_URL) == null)
 		{
-			log.warn("doLogin - proceeding with null HELPER_DONE_URL");
+			M_log.warn("doLogin - proceeding with null HELPER_DONE_URL");
 		}
 
 		// map the request to the helper, leaving the path after ".../options" for the helper
@@ -623,7 +616,7 @@ public class CitationServlet extends VmServlet
 		}
 		catch (Throwable t)
 		{
-			log.warn("sendError: {}", t);
+			M_log.warn("sendError: " + t);
 		}
 	}
 }

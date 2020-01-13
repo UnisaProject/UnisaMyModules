@@ -53,7 +53,6 @@ import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.exception.PermissionException;
-import org.sakaiproject.event.api.EventTrackingService;
 
 @SuppressWarnings("deprecation")
 public class WelcomeAction extends VelocityPortletPaneledAction {
@@ -64,7 +63,6 @@ public class WelcomeAction extends VelocityPortletPaneledAction {
 	private boolean maintainUser;
 	private String siteId = null;
 	private String siteReference = null;
-	private EventTrackingService eventTrackingService = null;
 
 	/** Resource bundle using current language locale */
 	private static ResourceLoader rb = new ResourceLoader("admin");
@@ -112,12 +110,6 @@ public class WelcomeAction extends VelocityPortletPaneledAction {
 		bar.add(new MenuEntry(rb.getString("welcome.edit"), "editContent"));
 		context.put(Menu.CONTEXT_MENU, bar);
 
-		//add unisa eventtracking type
-		if (eventTrackingService == null) {
-			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
-		}
-		eventTrackingService.post(eventTrackingService.newEvent("welcome.view",	ToolManager.getCurrentPlacement().getContext(), false));
-		
 		if (MODE_EDIT.equals(state.getAttribute(STATE_DISPLAY_MODE))) {
 			template = template + "_edit";
 		}
@@ -152,17 +144,10 @@ public class WelcomeAction extends VelocityPortletPaneledAction {
 		}
 		if(insertContent==null) {
 			addAlert(state, rb.getString("welcome.alert.insertfail"));
-			M_log.error(this + " Welcome message save: failed for the site  " + siteId);
+    
 			state.setAttribute(STATE_DISPLAY_MODE, MODE_EDIT);
 			return;
 		}
-		
-	      	//add unisa eventtracking type
-				if (eventTrackingService == null) {
-					eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
-				}
-				eventTrackingService.post(eventTrackingService.newEvent("welcome.update",	ToolManager.getCurrentPlacement().getContext(), false));
-		
 		state.setAttribute(STATE_DISPLAY_MODE, null);
 	}
 
@@ -176,11 +161,6 @@ public class WelcomeAction extends VelocityPortletPaneledAction {
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
 		String revertContent = WelcomeService.revertWelcomeContent(siteId);
 		M_log.info(this + " Welcome message revert: success for the site  " + siteId);
-	  	//add unisa eventtracking type
-		if (eventTrackingService == null) {
-			eventTrackingService = (EventTrackingService) ComponentManager.get("org.sakaiproject.event.api.EventTrackingService");
-		}
-		eventTrackingService.post(eventTrackingService.newEvent("welcome.revert",	ToolManager.getCurrentPlacement().getContext(), false));
 		state.setAttribute(STATE_DISPLAY_MODE, null);
 	}
 
@@ -195,9 +175,9 @@ public class WelcomeAction extends VelocityPortletPaneledAction {
 	String regex = "<[^>]*>";
 	Pattern p2 = Pattern.compile(regex);
 	Matcher m2 = p2.matcher(welcomeContent);
-	//M_log.info(this + " String before sub :*" + welcomeContent + "*");
+	M_log.info(this + " String before sub :*" + welcomeContent + "*");
 	welcomeContent = m2.replaceAll("");
-	//M_log.info(this + " String after sub :*" + welcomeContent + "*");
+	M_log.info(this + " String after sub :*" + welcomeContent + "*");
 	regex = "([A-Za-z])";
 	Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 	Matcher m = p.matcher(welcomeContent);

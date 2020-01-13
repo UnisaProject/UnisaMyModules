@@ -19,6 +19,7 @@
  *
  **********************************************************************************/
 
+
 package org.sakaiproject.tool.assessment.ui.bean.qti;
 
 import java.io.File;
@@ -28,7 +29,6 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.application.FacesMessage;
@@ -37,7 +37,8 @@ import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
 import org.sakaiproject.spring.SpringBeanLocator;
@@ -63,15 +64,17 @@ import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.ResourceLoader;
 import org.w3c.dom.Document;
 
+ 
 /**
  * <p>Bean for QTI Import Data</p>
  */
-@Slf4j
+
 public class XMLImportBean implements Serializable
 {
 	
 	  /** Use serialVersionUID for interoperability. */
 	  private final static long serialVersionUID = 418920360211039758L;
+	  private static Logger log = LoggerFactory.getLogger(XMLImportBean.class);
 	  
   private int qtiVersion;
   private String uploadFileName;
@@ -285,7 +288,7 @@ public class XMLImportBean implements Serializable
 
     AssessmentService assessmentService = new AssessmentService();
     // Create an assessment based on the uploaded file
-    List failedMatchingQuestions = new ArrayList();
+    ArrayList failedMatchingQuestions = new ArrayList();
     AssessmentFacade assessment = createImportedAssessment(fileName, qtiVersion, isRespondus, failedMatchingQuestions);
     if (failedMatchingQuestions.size() > 0)
     {
@@ -342,7 +345,7 @@ public class XMLImportBean implements Serializable
 
     // update core AssessmentList: get the managed bean, author and set the list
     
-    List list = assessmentService.getBasicInfoOfAllActiveAssessments(
+    ArrayList list = assessmentService.getBasicInfoOfAllActiveAssessments(
                      AssessmentFacadeQueries.TITLE,true);
 	TimeUtil tu = new TimeUtil();
 	String display_dateFormat= ContextUtil.getLocalizedString("org.sakaiproject.tool.assessment.bundle.GeneralMessages","output_data_picker_w_sec");
@@ -352,7 +355,7 @@ public class XMLImportBean implements Serializable
 		AssessmentFacade assessmentFacade= (AssessmentFacade) iter.next();
 		assessmentFacade.setTitle(FormattedText.convertFormattedTextToPlaintext(assessmentFacade.getTitle()));
 		try {
-			String lastModifiedDateDisplay = tu.getDisplayDateTime(displayFormat, assessmentFacade.getLastModifiedDate(), false);
+			String lastModifiedDateDisplay = tu.getDisplayDateTime(displayFormat, assessmentFacade.getLastModifiedDate());
 			assessmentFacade.setLastModifiedDateForDisplay(lastModifiedDateDisplay);  
 		} catch (Exception ex) {
 			log.warn("Unable to format date: " + ex.getMessage());
@@ -395,7 +398,7 @@ public class XMLImportBean implements Serializable
    * @return
    */
   
-  private AssessmentFacade createImportedAssessment(String fullFileName, int qti, boolean isRespondus, List failedMatchingQuestions) throws Exception
+  private AssessmentFacade createImportedAssessment(String fullFileName, int qti, boolean isRespondus, ArrayList failedMatchingQuestions) throws Exception
   {
     //trim = true so that xml processing instruction at top line, even if not.
     Document document = null;
@@ -481,14 +484,14 @@ public class XMLImportBean implements Serializable
 
     // remove uploaded file
     try{
-      log.debug("****filename="+fileName);
+      //System.out.println("****filename="+fileName);
       File upload = new File(fileName);
       boolean success = upload.delete();
       if (!success)
 	log.error ("Failed to delete file " + fileName);
     }
     catch(Exception e){
-	log.error(e.getMessage(), e);
+	e.printStackTrace();
     }
   }
   

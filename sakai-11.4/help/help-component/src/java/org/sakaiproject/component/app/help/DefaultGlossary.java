@@ -28,8 +28,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.help.Glossary;
 import org.sakaiproject.api.app.help.GlossaryEntry;
 import org.sakaiproject.component.app.help.model.GlossaryEntryBean;
@@ -38,13 +38,14 @@ import org.sakaiproject.component.app.help.model.GlossaryEntryBean;
  * default glossary
  * @version $Id$
  */
-@Slf4j
 public class DefaultGlossary implements Glossary
 {
+
   private String file;
   private String url;
   private Map<String, GlossaryEntry> glossary = new TreeMap<String, GlossaryEntry>();
   private boolean initialized = false;
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   /**
    * initialize glossary
@@ -66,7 +67,7 @@ public class DefaultGlossary implements Glossary
     }
     catch (IOException e)
     {
-      log.error(e.getMessage());
+      logger.error(e.getMessage());
     }
   }
 

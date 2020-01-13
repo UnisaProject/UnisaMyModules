@@ -18,6 +18,8 @@
 			<h:form id="viewComment">
 				<sakai:tool_bar>
 					<h:outputLink id="print" value="javascript:window.print();" style="vertical-align:bottom;">
+						<h:graphicImage url="/images/printer.png"
+							alt="#{msgs.print_friendly}" title="#{msgs.print_friendly}" />
 						<h:outputText value="#{msgs.print_event}" escape="false"/>
 					</h:outputLink>
 				</sakai:tool_bar>

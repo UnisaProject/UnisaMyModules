@@ -15,18 +15,18 @@
  */
 package org.sakaiproject.qna.tool.inferrers;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.entitybroker.EntityReference;
 import org.sakaiproject.qna.logic.entity.QuestionEntityProvider;
 import org.sakaiproject.qna.tool.params.QuestionParams;
 import org.sakaiproject.qna.tool.producers.ViewQuestionProducer;
 import org.sakaiproject.rsf.entitybroker.EntityViewParamsInferrer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import uk.org.ponder.rsf.viewstate.ViewParameters;
 
 public class QuestionVPInferrer implements EntityViewParamsInferrer {
-	private static Logger log = LoggerFactory.getLogger(QuestionVPInferrer.class);
+	private static Log log = LogFactory.getLog(QuestionVPInferrer.class);
 	public String[] getHandledPrefixes() {
 		return new String[] {QuestionEntityProvider.ENTITY_PREFIX};
 	}

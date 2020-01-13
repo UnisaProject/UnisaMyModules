@@ -21,17 +21,8 @@
 
 package org.sakaiproject.chat2.model.impl;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -39,65 +30,45 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.Observable;
+import java.util.Observer;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
-
-import org.jgroups.Address;
-import org.jgroups.JChannel;
-import org.jgroups.Message;
-import org.jgroups.Receiver;
-import org.jgroups.View;
-
-import org.sakaiproject.authz.api.FunctionManager;
-import org.sakaiproject.authz.api.SecurityService;
+import org.sakaiproject.authz.cover.FunctionManager;
+import org.sakaiproject.authz.cover.SecurityService;
 import org.sakaiproject.chat2.model.ChatChannel;
 import org.sakaiproject.chat2.model.ChatManager;
-import org.sakaiproject.chat2.model.SimpleUser;
-import org.sakaiproject.chat2.model.TransferableChatMessage;
+import org.sakaiproject.chat2.model.RoomObserver;
 import org.sakaiproject.chat2.model.ChatFunctions;
 import org.sakaiproject.chat2.model.ChatMessage;
-import org.sakaiproject.chat2.model.DeleteMessage;
-import org.sakaiproject.chat2.model.MessageDateString;
-import org.sakaiproject.component.api.ServerConfigurationService;
-import org.sakaiproject.entity.api.ResourceProperties;
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.entity.api.EntityManager;
+import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.entity.api.Summary;
 import org.sakaiproject.event.api.Event;
-import org.sakaiproject.event.api.EventTrackingService;
-import org.sakaiproject.event.api.UsageSession;
-import org.sakaiproject.event.api.UsageSessionService;
+import org.sakaiproject.event.cover.EventTrackingService;
 import org.sakaiproject.exception.IdInvalidException;
 import org.sakaiproject.exception.IdUsedException;
 import org.sakaiproject.exception.PermissionException;
-import org.sakaiproject.presence.api.PresenceService;
-import org.sakaiproject.site.api.SiteService;
-import org.sakaiproject.time.api.TimeService;
-import org.sakaiproject.tool.api.SessionManager;
-import org.sakaiproject.user.api.Preferences;
-import org.sakaiproject.user.api.PreferencesService;
+
+import org.sakaiproject.util.FormattedText;
+import org.sakaiproject.site.cover.SiteService;
+import org.sakaiproject.time.api.Time;
+import org.sakaiproject.time.cover.TimeService;
+import org.sakaiproject.tool.cover.SessionManager;
 import org.sakaiproject.user.api.User;
-import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
-import org.sakaiproject.util.ResourceLoader;
-import org.sakaiproject.util.api.FormattedText;
-import org.springframework.orm.hibernate4.support.HibernateDaoSupport;
+import org.sakaiproject.user.cover.UserDirectoryService;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -106,42 +77,18 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author andersjb
  *
  */
-@Slf4j
-public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager, Receiver {
+public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager, Observer {
 
-    @Getter private int messagesMax = 100;
+    private int messagesMax = 100;
 
-    @Getter @Setter private ChatChannel defaultChannelSettings;
+    protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Setter private UserDirectoryService userDirectoryService;
-    @Setter private ServerConfigurationService serverConfigurationService;
-    @Setter private PresenceService presenceService;
-    @Setter private SessionManager sessionManager;
-    @Setter private UsageSessionService usageSessionService;
-    @Setter private FormattedText formattedText;
-    @Setter private PreferencesService preferencesService;
-    @Setter private SecurityService securityService;
-    @Setter private FunctionManager functionManager;
-    @Setter private SiteService siteService;
-    @Setter private EventTrackingService eventTrackingService;
+    /** the clients listening to the various rooms */
+    protected Map<String,List<RoomObserver>> roomListeners = new HashMap<String,List<RoomObserver>>();
 
-    /** MAP[SESSION_KEY][CHANNEL_ID] -> List<TransferableChatMessage> */
-    private Cache<String, Map<String, List<TransferableChatMessage>>> messageMap;
+    private EntityManager entityManager;
 
-    /** MAP[CHANNEL_ID][SESSION_ID] -> TransferableChatMessage */
-    /** We store the session_id to allow login multiple times with different browsers */
-    private Cache<String, Cache<String, TransferableChatMessage>> heartbeatMap;
-    
-    // Used for fetching user's default language locale
-    ResourceLoader rl = new ResourceLoader();
-    //stores users timezone
-    private Cache<String, String> timezoneCache;
-
-    @Getter private int pollInterval = 5000; //5 sec
-
-    /* JGroups channel for keeping the above maps in sync across nodes in a Sakai cluster */
-    private JChannel clusterChannel = null;
-    private boolean clustered = false;
+    private ChatChannel defaultChannelSettings;
 
 
     static Comparator<ChatMessage> channelComparatorAsc = new Comparator<ChatMessage>() {
@@ -161,7 +108,7 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
     protected void initDao() throws Exception {
         super.initDao();
         getHibernateTemplate().setCacheQueries(true);
-        log.info("initDao template " + getHibernateTemplate());
+        logger.info("initDao template " + getHibernateTemplate());
     }
 
     /**
@@ -171,82 +118,26 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
      */
     protected void init() throws Exception
     {
-        log.info("init()");
+        logger.info("init()");
 
         try {
 
+            EventTrackingService.addObserver(this);
+
             // register functions
-            if(functionManager.getRegisteredFunctions(ChatFunctions.CHAT_FUNCTION_PREFIX).size() == 0) {
-                functionManager.registerFunction(ChatFunctions.CHAT_FUNCTION_READ);
-                functionManager.registerFunction(ChatFunctions.CHAT_FUNCTION_NEW);
-                functionManager.registerFunction(ChatFunctions.CHAT_FUNCTION_DELETE_ANY);
-                functionManager.registerFunction(ChatFunctions.CHAT_FUNCTION_DELETE_OWN);
-                functionManager.registerFunction(ChatFunctions.CHAT_FUNCTION_DELETE_CHANNEL);
-                functionManager.registerFunction(ChatFunctions.CHAT_FUNCTION_NEW_CHANNEL);
-                functionManager.registerFunction(ChatFunctions.CHAT_FUNCTION_EDIT_CHANNEL);
-            }
-
-            pollInterval = serverConfigurationService.getInt("chat.pollInterval", 5000);
-
-            messageMap = CacheBuilder.newBuilder()
-                    //.recordStats()
-                    .expireAfterAccess(5, TimeUnit.MINUTES)
-                    .build();
-            heartbeatMap = CacheBuilder.newBuilder()
-            		//.recordStats()
-            		.expireAfterWrite(1, TimeUnit.HOURS)
-            		.build();
-            
-            timezoneCache = CacheBuilder.newBuilder()
-            		.maximumSize(1000)
-                    .expireAfterWrite(600, TimeUnit.SECONDS)
-                    .build();
-
-            messagesMax = serverConfigurationService.getInt("chat.max.messages", 100);
-
-            try {
-                String channelId = serverConfigurationService.getString("chat.cluster.channel", "");
-                
-                if (StringUtils.isNotBlank(channelId)) {
-                    URL jgroupsConfigURL = null;
-                    // Pick up the config file from sakai home if it exists
-                    File jgroupsConfig = new File(serverConfigurationService.getSakaiHomePath() + File.separator + "jgroups-chat-config.xml");
-                    if (jgroupsConfig.exists()) {
-                        log.debug("Using custom jgroups config file: {}", jgroupsConfig.getAbsolutePath());
-                        clusterChannel = new JChannel(jgroupsConfig);
-                    } else if((jgroupsConfigURL = this.getClass().getClassLoader().getResource("jgroups-config.xml")) != null) { //pick up our default file
-                        log.debug("Using default jgroups config file: {}", jgroupsConfigURL);
-                        clusterChannel = new JChannel(jgroupsConfigURL);
-                    } else {
-                        log.debug("No jgroups config file. Using jgroup defaults.");
-                        clusterChannel = new JChannel();
-                    }
-
-                    log.debug("JGROUPS PROTOCOL: {}", clusterChannel.getProtocolStack().printProtocolSpecAsXML());
-
-                    clusterChannel.setReceiver(this);
-                    clusterChannel.connect(channelId);
-                    // We don't want a copy of our JGroups messages sent back to us
-                    clusterChannel.setDiscardOwnMessages(true);
-                    //JmxConfigurator.registerChannel(clusterChannel, ManagementFactory.getPlatformMBeanServer(), "DefaultDomain:name=JGroups");
-                    clustered = true;
-
-                    log.info("Chat is connected on JGroups channel '" + channelId + "'"); 
-                } else {
-                    log.info("No 'chat.cluster.channel' specified in sakai.properties. JGroups will not be used and chat messages will not be replicated."); 
-                }
-            } catch (Exception e) {
-                log.error("Error creating JGroups channel. Chat messages will now NOT BE KEPT IN SYNC", e);
-                
-                if (clusterChannel != null && clusterChannel.isConnected()) {
-                    // This calls disconnect() first
-                    clusterChannel.close();
-                }
+            if(FunctionManager.getRegisteredFunctions(ChatFunctions.CHAT_FUNCTION_PREFIX).size() == 0) {
+                FunctionManager.registerFunction(ChatFunctions.CHAT_FUNCTION_READ);
+                FunctionManager.registerFunction(ChatFunctions.CHAT_FUNCTION_NEW);
+                FunctionManager.registerFunction(ChatFunctions.CHAT_FUNCTION_DELETE_ANY);
+                FunctionManager.registerFunction(ChatFunctions.CHAT_FUNCTION_DELETE_OWN);
+                FunctionManager.registerFunction(ChatFunctions.CHAT_FUNCTION_DELETE_CHANNEL);
+                FunctionManager.registerFunction(ChatFunctions.CHAT_FUNCTION_NEW_CHANNEL);
+                FunctionManager.registerFunction(ChatFunctions.CHAT_FUNCTION_EDIT_CHANNEL);
             }
 
         }
         catch (Exception e) {
-            log.warn("Error with ChatManager.init()", e);
+            logger.warn("Error with ChatManager.init()", e);
         }
 
     }
@@ -256,12 +147,9 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
      */
     public void destroy()
     {
-        if (clusterChannel != null && clusterChannel.isConnected()) {
-            // This calls disconnect() first
-            clusterChannel.close();
-        }
+        EventTrackingService.deleteObserver(this);
 
-        log.info("destroy()");
+        logger.info("destroy()");
     }
 
     /**
@@ -309,7 +197,7 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
             return;
 
         checkPermission(ChatFunctions.CHAT_FUNCTION_DELETE_CHANNEL, channel.getContext());
-        getHibernateTemplate().delete(getHibernateTemplate().merge(channel));
+        getHibernateTemplate().delete(channel);
 
         sendDeleteChannel(channel);
     }
@@ -398,7 +286,7 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
             localMax = messagesMax;
         }
 
-        Criteria c = this.getSessionFactory().getCurrentSession().createCriteria(ChatMessage.class);
+        Criteria c = this.getSession().createCriteria(ChatMessage.class);
         c.add(Expression.eq("chatChannel", channel));      
         if (localDate != null) {
             c.add(Expression.ge("messageDate", localDate));
@@ -454,13 +342,16 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
         }
         int count = 0;
         if (channel != null) {
-            Criteria c = this.getSessionFactory().getCurrentSession().createCriteria(ChatMessage.class);
+            Criteria c = this.getSession().createCriteria(ChatMessage.class);
             c.add(Expression.eq("chatChannel", channel));      
             if (date != null) {
                 c.add(Expression.ge("messageDate", date));
             }
             c.setProjection(Projections.rowCount());
-            count = ((Long) c.uniqueResult()).intValue();
+            Integer countInt = (Integer) c.uniqueResult();
+            if (countInt != null) {
+                count = countInt.intValue();
+            }
         }
         return count;
     }
@@ -517,14 +408,14 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
             String body      = (String) values[4];
             String migratedId= (String) values[5];
 
-            log.debug("migrate message: "+messageId+", "+channelId);
+            logger.debug("migrate message: "+messageId+", "+channelId);
 
 
             ChatMessage message = getMigratedMessage(messageId);
 
 
             if (owner == null) {
-                log.warn("can't migrate message, owner is null. messageId: ["+messageId
+                logger.warn("can't migrate message, owner is null. messageId: ["+messageId
                         +"] channelId: ["+channelId+"]");
                 return;
             }
@@ -539,7 +430,7 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
                 message.setChatChannel(channel);
                 message.setOwner(owner);
                 message.setMessageDate(messageDate);
-                message.setBody(formattedText.convertPlaintextToFormattedText(body));
+                message.setBody(FormattedText.convertPlaintextToFormattedText(body));
                 message.setMigratedMessageId(migratedId);
 
 
@@ -549,7 +440,7 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
 
         } catch (Exception e) {
 
-            log.error("migrateMessage: "+e);
+            logger.error("migrateMessage: "+e);
 
         }
 
@@ -568,8 +459,8 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
 
         boolean canDeleteAny = can(ChatFunctions.CHAT_FUNCTION_DELETE_ANY, context);
         boolean canDeleteOwn = can(ChatFunctions.CHAT_FUNCTION_DELETE_OWN, context);
-        boolean isOwner = sessionManager.getCurrentSessionUserId() != null ?
-                sessionManager.getCurrentSessionUserId().equals(message.getOwner()) : false;
+        boolean isOwner = SessionManager.getCurrentSessionUserId() != null ?
+                SessionManager.getCurrentSessionUserId().equals(message.getOwner()) : false;
 
                 boolean canDelete = canDeleteAny;
 
@@ -624,7 +515,7 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
     public boolean getCanPostMessage(ChatChannel channel)
     {
         // We don't currently support posting messages by anonymous users
-        if (sessionManager.getCurrentSessionUserId() == null)
+        if (SessionManager.getCurrentSessionUserId() == null)
             return false;
 
         boolean allowed = false;
@@ -668,7 +559,7 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
         if(!getCanDelete(message))
             checkPermission(ChatFunctions.CHAT_FUNCTION_DELETE_ANY, message.getChatChannel().getContext());
 
-        getHibernateTemplate().delete(getHibernateTemplate().merge(message));
+        getHibernateTemplate().delete(message);
 
         sendDeleteMessage(message);
     }
@@ -707,7 +598,7 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
      */
     @SuppressWarnings("unchecked")
     protected ChatMessage getMigratedMessage(String migratedMessageId) {
-        List<ChatMessage> messages = (List<ChatMessage>) getHibernateTemplate().findByNamedQueryAndNamedParam("findMigratedMessage", "messageId", migratedMessageId);
+        List<ChatMessage> messages = (List<ChatMessage>) getHibernateTemplate().findByNamedQuery("findMigratedMessage", migratedMessageId);
         ChatMessage message = null;
         if (messages.size() > 0)
             message = messages.get(0);
@@ -719,7 +610,7 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
      */
     @SuppressWarnings("unchecked")
     public List<ChatChannel> getContextChannels(String context, boolean lazy) {
-        List<ChatChannel> channels = (List<ChatChannel>) getHibernateTemplate().findByNamedQueryAndNamedParam("findChannelsInContext", "context", context);
+        List<ChatChannel> channels = (List<ChatChannel>) getHibernateTemplate().findByNamedQuery("findChannelsInContext", context);
         if (!lazy) {
             for (Iterator<ChatChannel> i = channels.iterator(); i.hasNext();) {
                 ChatChannel channel = i.next();
@@ -734,7 +625,7 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
      */
     @SuppressWarnings("unchecked")
     public List<ChatChannel> getContextChannels(String context, String defaultNewTitle, String placement) {
-        List<ChatChannel> channels = (List<ChatChannel>) getHibernateTemplate().findByNamedQueryAndNamedParam("findChannelsInContext", "context", context);
+        List<ChatChannel> channels = (List<ChatChannel>) getHibernateTemplate().findByNamedQuery("findChannelsInContext", context);
 
         if(channels.size() == 0) {
             try {
@@ -743,7 +634,7 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
                 channels.add(channel);
             }
             catch (PermissionException e) {
-                log.debug("Ignoring exception since it shouldn't be thrown here as we're not checking");
+                logger.debug("Ignoring exception since it shouldn't be thrown here as we're not checking");
             }
 
         }
@@ -756,7 +647,7 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
      */
     @SuppressWarnings("unchecked")
     public ChatChannel getDefaultChannel(String contextId, String placement) {
-        List<ChatChannel> channels = (List<ChatChannel>) getHibernateTemplate().findByNamedQueryAndNamedParam("findDefaultChannelsInContext", new String[] {"context", "placement"}, new Object[] {contextId, placement});
+        List<ChatChannel> channels = (List<ChatChannel>) getHibernateTemplate().findByNamedQuery("findDefaultChannelsInContext", new Object[] {contextId, placement});
         if (channels.size() == 0) {
             channels = getContextChannels(contextId, "", placement);
         }
@@ -769,13 +660,62 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
     /**
      * {@inheritDoc}
      */
+    public void addRoomListener(RoomObserver observer, String roomId)
+    {
+        List<RoomObserver> roomObservers;
+        synchronized(roomListeners) {
+            if(roomListeners.get(roomId) == null)
+                roomListeners.put(roomId, new ArrayList<RoomObserver>());
+            roomObservers = roomListeners.get(roomId);
+        }
+        synchronized(roomObservers) {
+            roomObservers.add(observer);
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("after add roomObservers " + roomObservers);
+        }
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void removeRoomListener(RoomObserver observer, String roomId)
+    {
+
+        if(roomListeners.get(roomId) != null) {
+            List<RoomObserver> roomObservers = roomListeners.get(roomId);
+
+            if(roomObservers != null) {
+                synchronized(roomObservers) {
+
+                    roomObservers.remove(observer);
+                    if(roomObservers.size() == 0) {
+
+                        synchronized(roomListeners) {
+                            roomListeners.remove(roomId);
+                        }
+
+                    }
+
+                }
+            } // end if(roomObservers != null)
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("after remove roomObservers " + roomObservers);
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void sendMessage(ChatMessage message) {
         ChatMessageTxSync txSync = new ChatMessageTxSync(message);
 
         getHibernateTemplate().flush();
         txSync.afterCompletion(ChatMessageTxSync.STATUS_COMMITTED);
-
-        sendToCluster(new TransferableChatMessage(message));
     }
 
     /**
@@ -790,8 +730,6 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
         else {
             txSync.afterCompletion(ChatMessageDeleteTxSync.STATUS_COMMITTED);
         }
-        
-        sendToCluster(new TransferableChatMessage(TransferableChatMessage.MessageType.REMOVE, message.getId(), message.getChatChannel().getId()));
     }   
 
 
@@ -821,8 +759,6 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
         else {
             txSync.afterCompletion(ChatChannelMessagesDeleteTxSync.STATUS_COMMITTED);
         }
-        
-        sendToCluster(new TransferableChatMessage(TransferableChatMessage.MessageType.REMOVE, "*", channel.getId()));
     }
 
     /**
@@ -840,20 +776,18 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
         public void afterCompletion(int status) {
             Event event = null;
             String function = ChatFunctions.CHAT_FUNCTION_DELETE_ANY;
-            if (message.getOwner().equals(sessionManager.getCurrentSessionUserId()))
+            if (message.getOwner().equals(SessionManager.getCurrentSessionUserId()))
             {
                 // own or any
                 function = ChatFunctions.CHAT_FUNCTION_DELETE_OWN;
             }
 
 
-            event = eventTrackingService.newEvent(function, 
+            event = EventTrackingService.newEvent(function, 
                     message.getReference(), false);
 
             if (event != null)
-                eventTrackingService.post(event);
-
-            addMessageToMap(new TransferableChatMessage(TransferableChatMessage.MessageType.REMOVE, message.getId(), message.getChatChannel().getId()));
+                EventTrackingService.post(event);
         }
     }
 
@@ -871,14 +805,11 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
 
         public void afterCompletion(int status) {
             Event event = null;
-            event = eventTrackingService.newEvent(ChatFunctions.CHAT_FUNCTION_NEW, 
+            event = EventTrackingService.newEvent(ChatFunctions.CHAT_FUNCTION_NEW, 
                     message.getReference(), false);
 
             if (event != null)
-                eventTrackingService.post(event);
-            
-            addMessageToMap(new TransferableChatMessage(message));
-
+                EventTrackingService.post(event);
         }
     }
 
@@ -896,11 +827,11 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
 
         public void afterCompletion(int status) {
             Event event = null;
-            event = eventTrackingService.newEvent(ChatFunctions.CHAT_FUNCTION_DELETE_CHANNEL, 
+            event = EventTrackingService.newEvent(ChatFunctions.CHAT_FUNCTION_DELETE_CHANNEL, 
                     channel.getReference(), false);
 
             if (event != null)
-                eventTrackingService.post(event);
+                EventTrackingService.post(event);
         }
     }
 
@@ -918,13 +849,82 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
 
         public void afterCompletion(int status) {
             Event event = null;
-            event = eventTrackingService.newEvent(ChatFunctions.CHAT_FUNCTION_DELETE_ANY, 
+            event = EventTrackingService.newEvent(ChatFunctions.CHAT_FUNCTION_DELETE_ANY, 
                     channel.getReference(), false);
 
             if (event != null)
-                eventTrackingService.post(event);
+                EventTrackingService.post(event);
+        }
+    }
 
-            addMessageToMap(new TransferableChatMessage(TransferableChatMessage.MessageType.REMOVE, "*", channel.getId()));
+    /**
+     * This method is called whenever the observed object is changed. An
+     * application calls an <tt>Observable</tt> object's
+     * <code>notifyObservers</code> method to have all the object's
+     * observers notified of the change.
+     * 
+     * This operates within its own Thread so normal rules and conditions don't apply
+     *
+     * @param o   the observable object.
+     * @param arg an argument passed to the <code>notifyObservers</code>
+     *            method.
+     */
+    @SuppressWarnings("unchecked")
+    public void update(Observable o, Object arg) {
+        if (arg instanceof Event) {
+            Event event = (Event)arg;
+
+            Reference ref = getEntityManager().newReference(event.getResource());
+
+            if (event.getEvent().equals(ChatFunctions.CHAT_FUNCTION_NEW)) {
+
+                // get the actual message and distribute it. Otherwise each
+                // observer will fetch their own copy of the message.
+
+                String id = ref.getId();
+                if (id == null)
+                    return;
+                ChatMessage message = getMessage(ref.getId());
+                if (message == null)
+                    return;
+
+                //String[] messageParams = event.getResource().split(":");
+
+                ArrayList<RoomObserver> observers = (ArrayList<RoomObserver>) roomListeners.get(ref.getContainer());
+
+                // originally we did the iteration inside synchronized.
+                // however that turns out to hold the lock too long
+                // a shallow copy of an arraylist shouldn't be bad.
+                // we currently call removeRoom from receivedMessage in
+                // some cases, so it can't be locked or we will deadlock
+                if(observers != null) {
+                    synchronized(observers) {
+                        observers = (ArrayList)observers.clone();
+                    }
+                    for(Iterator<RoomObserver> i = observers.iterator(); i.hasNext(); ) {
+                        RoomObserver observer = i.next();
+
+                        observer.receivedMessage(ref.getContainer(), message);
+                    }
+                }
+
+
+            } else if (event.getEvent().equals(ChatFunctions.CHAT_FUNCTION_DELETE_CHANNEL)) {
+                //String chatChannelId = event.getResource();
+
+                ArrayList<RoomObserver> observers = (ArrayList<RoomObserver>) roomListeners.get(ref.getId());
+
+                if(observers != null) {
+                    synchronized(observers) {
+                        observers = (ArrayList)observers.clone();
+                    }
+                    for(Iterator<RoomObserver> i = observers.iterator(); i.hasNext(); ) {
+                        RoomObserver observer = i.next();
+
+                        observer.roomDeleted(ref.getId());
+                    }
+                }
+            }
         }
     }
 
@@ -934,16 +934,43 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
      */
     protected void resetPlacementDefaultChannel(String context, String placement) {
         Session session = null;
+        Connection conn = null;
+        PreparedStatement statement = null;
 
-        try {
-            session = getSessionFactory().getCurrentSession();
-            Query query = session.createSQLQuery("update CHAT2_CHANNEL c set c.placementDefaultChannel = :channel, c.PLACEMENT_ID = NULL WHERE c.context = :context and c.PLACEMENT_ID = :placement");
-            query.setBoolean("channel", false);
-            query.setString("context", context);
-            query.setString("placement", placement);
-            query.executeUpdate();
-        } catch(Exception e) {
-            log.warn(e.getMessage());
+
+        String query="update CHAT2_CHANNEL c set c.placementDefaultChannel=?, c.PLACEMENT_ID=? " +
+        "WHERE c.context=? and c.PLACEMENT_ID=?";
+
+        try{
+            session = getSession();
+            conn = session.connection();
+
+            statement = conn.prepareStatement(query);
+            statement.setBoolean(1, false);
+            statement.setString(2, null);
+            statement.setString(3, context);
+            statement.setString(4, placement);
+            statement.executeUpdate();
+        }
+        catch(Exception e){
+            logger.warn(e.getMessage());
+        }
+        finally{
+            if (statement != null) {
+                //ensure the statement is closed
+                try {
+                    statement.close();
+                } 
+                catch (Exception e) {
+                    logger.debug(e.getMessage());
+                }
+            }
+            try{
+                if (conn !=null) conn.close();
+            }
+            catch(Exception ex){
+                logger.warn(ex.getMessage());
+            }
         }
     }
 
@@ -962,29 +989,29 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
                 updateChannel(channel, false);
             }
             catch (PermissionException e) {
-                log.debug("Ignoring PermissionException since it is unchecked here.");
+                logger.debug("Ignoring PermissionException since it is unchecked here.");
             }
         }
     }
 
     protected void checkPermission(String function, String context) throws PermissionException {
 
-        if (!securityService.unlock(function, siteService.siteReference(context)))
+        if (!SecurityService.unlock(function, SiteService.siteReference(context)))
         {
-            String user = sessionManager.getCurrentSessionUserId();
+            String user = SessionManager.getCurrentSessionUserId();
             throw new PermissionException(user, function, context);
         }
     }
 
     protected boolean can(String function, String context) {      
-        return securityService.unlock(function, siteService.siteReference(context));
+        return SecurityService.unlock(function, SiteService.siteReference(context));
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean isMaintainer(String context) {
-        return securityService.unlock(SiteService.SECURE_UPDATE_SITE, siteService.siteReference(context));
+        return SecurityService.unlock(SiteService.SECURE_UPDATE_SITE, SiteService.siteReference(context));
     }
 
 
@@ -992,12 +1019,9 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
     {
         String body = item.getBody();
         if ( body.length() > 50 ) body = body.substring(1,49);
-        User user = userDirectoryService.getUser(item.getOwner());
-        
-        ZonedDateTime ldt = ZonedDateTime.ofInstant(item.getMessageDate().toInstant(), ZoneId.of(getUserTimeZone()));
-        Locale locale = rl.getLocale();
-        
-        String newText = body + ", " + user.getDisplayName() + ", " + ldt.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(locale));
+        User user = UserDirectoryService.getUser(item.getOwner());
+        Time messageTime = TimeService.newTime(item.getMessageDate().getTime());
+        String newText = body + ", " + user.getDisplayName() + ", " + messageTime.toStringLocalFull();
         return newText;
     }
 
@@ -1013,16 +1037,14 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
         List<ChatMessage> messages = getChannelMessages(getChatChannel(channel), new Date(startTime), 0, items, true);
 
         Iterator<ChatMessage> iMsg = messages.iterator();
-        ZonedDateTime pubDate = null;
+        Time pubDate = null;
         String summaryText = null;
         Map<String,String> m = new HashMap<String,String>();
-        Locale locale = rl.getLocale();
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z").withLocale(locale);
         while (iMsg.hasNext()) {
             ChatMessage item  = iMsg.next();
             //MessageHeader header = item.getHeader();
-            ZonedDateTime newTime = ZonedDateTime.ofInstant(item.getMessageDate().toInstant(), ZoneId.of(getUserTimeZone()));
-            if ( pubDate == null || newTime.isBefore(pubDate) ) pubDate = newTime;
+            Time newTime = TimeService.newTime(item.getMessageDate().getTime());
+            if ( pubDate == null || newTime.before(pubDate) ) pubDate = newTime;
             try {
                 String newText = getSummaryFromHeader(item);
                 if ( summaryText == null ) {
@@ -1032,17 +1054,32 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
                 }
             }
             catch (UserNotDefinedException e) {
-                log.warn("Skipping the chat message for user: " + item.getOwner() + " since they cannot be found");
+                logger.warn("Skipping the chat message for user: " + item.getOwner() + " since they cannot be found");
             }
         }
         if ( pubDate != null ) {
-            m.put(Summary.PROP_PUBDATE, pubDate.format(dtf));
+            m.put(Summary.PROP_PUBDATE, pubDate.toStringRFC822Local());
         }
         if ( summaryText != null ) {
             m.put(Summary.PROP_DESCRIPTION, summaryText);
             return m;
         }
         return null;
+    }
+
+
+    /**
+     * @return the entityManager
+     */
+    public EntityManager getEntityManager() {
+        return entityManager;
+    }
+
+    /**
+     * @param entityManager the entityManager to set
+     */
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     /**
@@ -1054,7 +1091,7 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
      */
     protected String getAccessPoint(boolean relative)
     {
-        return (relative ? "" : serverConfigurationService.getAccessUrl()) + REFERENCE_ROOT;
+        return (relative ? "" : ServerConfigurationService.getAccessUrl()) + REFERENCE_ROOT;
     } // getAccessPoint
 
 
@@ -1081,357 +1118,25 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
         return CHAT;
     }
 
-    //********************************************************************
     /**
      * {@inheritDoc}
      */
-    public List<SimpleUser> getPresentUsers(String siteId, String channelId){
-        Set<SimpleUser> presentUsers = new HashSet<SimpleUser>();
-
-        if (StringUtils.isNotBlank(siteId)) {
-
-            // refresh our presence at the location and retrieve the present users
-            String location = siteId + "-presence";
-            presenceService.setPresence(location);
-
-            for(UsageSession us : presenceService.getPresence(siteId + "-presence")){
-                //check if still online in the heartbeat map
-                if (isOnline(channelId, us.getId())) {
-                    TransferableChatMessage tcm = heartbeatMap.getIfPresent(channelId).getIfPresent(us.getId());
-                    String sessionUserId = getUserIdFromSessionKey(tcm.getId());
-                    
-                    String displayName = us.getUserDisplayId();
-                    String userId = us.getUserId();
-                    try {
-                        displayName = userDirectoryService.getUser(us.getUserId()).getDisplayName();
-                        //if user stored in heartbeat is different to the presence one
-                        if(!userId.equals(sessionUserId)) {
-                            userId += ":"+sessionUserId;
-                            displayName += " (" + userDirectoryService.getUser(sessionUserId).getDisplayName() + ")";
-                        }
-                    }catch(Exception e){
-                        log.error("Error getting user "+sessionUserId, e);
-                    }
-
-                    presentUsers.add(new SimpleUser(userId, formattedText.escapeHtml(displayName, true)));
-                }
-                else {
-                    log.debug("Heartbeat not found for sessionId {}, so not adding to presentUsers", us.getId());
-                }
-            }
-            
-        }
-        List<SimpleUser> ret = new ArrayList<>(presentUsers);
-        ret.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
-        return ret;
+    public ChatChannel getDefaultChannelSettings() {
+        return defaultChannelSettings;
     }
 
     /**
      * {@inheritDoc}
      */
-    public Map<String,Object> handleChatData(String siteId, String channelId, String sessionKey) {
-
-        Map<String,Object> data = new HashMap<String,Object>();
-        
-        if(StringUtils.isNotBlank(sessionKey)) {
-            //current user is requesting data -> is online in that channel
-            TransferableChatMessage hb = addHeartBeat(channelId, sessionKey);
-    
-            sendToCluster(hb);
-    
-            List<SimpleUser> presentUsers = getPresentUsers(siteId, channelId);
-    
-            ChatChannel channel = null;
-    
-            if (channelId != null) {
-                channel = getChatChannel(channelId);
-            } else if (siteId != null) {
-                channel = getDefaultChannel(siteId, null);
+    public void setDefaultChannelSettings(ChatChannel defaultChannelSettings) {
+        this.defaultChannelSettings = defaultChannelSettings;
     }
 
-            List<ChatMessage> messages = new ArrayList<ChatMessage>();
-            List<DeleteMessage> delete = new ArrayList<DeleteMessage>();
-            //as guava cache is synchronized, maybe this is not necessary
-            synchronized (messageMap){
-                if (messageMap.getIfPresent(sessionKey) != null) {
-                    try {
-                        if(messageMap.getIfPresent(sessionKey).get(channelId) != null) {
-                            for(TransferableChatMessage tcm : messageMap.getIfPresent(sessionKey).get(channelId)){
-                                switch(tcm.getType()){
-                                    case CHAT:
-                                        messages.add(tcm.toChatMessage(channel));
-                                        break;
-                                    case REMOVE:
-                                        delete.add(new DeleteMessage(tcm.getId(), tcm.getChannelId()));
-                                        break;
-                                }
-                            }
-                        }
-                    } catch(Exception e){
-                        log.error("Error getting messages in channel "+channelId+" for session_key "+sessionKey, e);
+    public void setMessagesMax(int messagesMax) {
+        this.messagesMax = messagesMax;
     }
 
-                    //clear all messages for this user
-                    messageMap.invalidate(sessionKey);
-                }
-            }
-            //sort messages by date
-            messages.sort((a, b) -> a.getMessageDate().compareTo(b.getMessageDate()));
-    
-            //send clear message to jGroups
-            sendToCluster(new TransferableChatMessage(TransferableChatMessage.MessageType.CLEAR, sessionKey));        
-    
-            data.put("messages", messages);
-            data.put("deletedMessages", delete);
-            data.put("presentUsers", presentUsers);
-        }
-
-        return data;
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public int getPollInterval(){
-        return pollInterval;
-    }
-    
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getSessionKey(){
-        try {
-            UsageSession usageSession = usageSessionService.getSession();
-            String sessionId = usageSession.getId();
-            //this is different from usageSession.getUserId(), because we want to know both users (real and login as)
-            String sessionUser = sessionManager.getCurrentSessionUserId();
-    
-            return sessionId+":"+sessionUser;
-        } catch(Exception e){
-            log.error("Error getting current session key", e);
-        }
-        return null;
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public MessageDateString getMessageDateString(ChatMessage msg){
-        ZonedDateTime ldt = ZonedDateTime.ofInstant(msg.getMessageDate().toInstant(), ZoneId.of(getUserTimeZone()));
-
-        Locale locale = rl.getLocale();
-
-        DateTimeFormatter dtf = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale);
-        DateTimeFormatter dtf2 = DateTimeFormatter.ofLocalizedTime(FormatStyle.LONG).withLocale(locale);
-        DateTimeFormatter dtf3 = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS", locale);
-
-        return  new MessageDateString(ldt.format(dtf), ldt.format(dtf2), ldt.format(dtf3));
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public String getUserTimeZone() {
-		String userId = sessionManager.getCurrentSessionUserId();
-		if (userId == null) { return ZoneId.systemDefault().getId(); }
-		
-		String elementCacheId = "TZ_"+userId;
-		String element = timezoneCache.getIfPresent(elementCacheId);
-		if(element != null) {
-			return element;
-		}
-		
-		Preferences prefs = preferencesService.getPreferences(userId);
-		ResourceProperties tzProps = prefs.getProperties(TimeService.APPLICATION_ID);
-		String timeZone = tzProps.getProperty(TimeService.TIMEZONE_KEY);
-		
-		try {
-			if (StringUtils.isNotBlank(timeZone)) {
-				ZoneId.of(timeZone);
-			}
-		} catch(java.time.zone.ZoneRulesException e){
-			try {
-				//maybe the given zoneId was a shortId (like 'CST')
-				timeZone = ZoneId.SHORT_IDS.get(timeZone);
-			}catch(Exception ex){
-				timeZone = null;
-			}
-		} catch(java.time.DateTimeException e) {
-			timeZone = null;
-		}
-		
-		if(StringUtils.isBlank(timeZone)) {
-			timeZone = ZoneId.systemDefault().getId();
-		}
-		
-		timezoneCache.put(elementCacheId, timeZone);
-		
-		return timeZone;
-	}
-    
-
-    /**
-     * JGroups message listener.
-     */
-    public void receive(Message msg) {
-        Object o = msg.getObject();
-        if (o instanceof TransferableChatMessage) {
-            TransferableChatMessage message = (TransferableChatMessage) o;
-
-            String id = message.getId();
-            String channelId = message.getChannelId();
-
-            switch(message.getType()){
-            case CHAT : 
-                log.debug("Received message {} from cluster ...", id);
-                addMessageToMap(message);
-                break;
-            case HEARTBEAT :
-                log.debug("Received heartbeat {} - {} from cluster ...", id, channelId);
-                addHeartBeat(channelId, id);
-                break;
-            case CLEAR :
-                log.debug("Received clear message {} from cluster ...", id);
-                //as guava cache is synchronized, maybe this is not necessary
-                synchronized (messageMap){
-                    messageMap.invalidate(id);
-                }
-                break;
-            case REMOVE :
-                log.debug("Received remove message {} from cluster ...", id);
-                addMessageToMap(message); 
-                break;
-            }
-        }
-    }
-    
-    //********************************************************************
-    // private utility functions
-    
-    /**
-     * Implements a threadsafe addition to the message map
-     */
-    private void addMessageToMap(TransferableChatMessage msg) {
-        String channelId = msg.getChannelId();
-        //as guava cache is synchronized, maybe this is not necessary
-        synchronized (messageMap){
-            //get all users (sessions) present in the channel where the message goes to
-            Cache<String, TransferableChatMessage> sessionsInChannel = heartbeatMap.getIfPresent(channelId);
-            if(sessionsInChannel != null) {
-                for(String sessionId : sessionsInChannel.asMap().keySet()) {
-                    TransferableChatMessage tcm = sessionsInChannel.getIfPresent(sessionId);
-                    String sessionKey = tcm.getId();
-                    try {
-                        Map<String, List<TransferableChatMessage>> channelMap = messageMap.get(sessionKey, () -> {
-                            return new HashMap<String, List<TransferableChatMessage>>();
-                        });
-    
-                        if(channelMap.get(channelId) == null) {
-                            channelMap.put(channelId, new ArrayList<TransferableChatMessage>());
-                        }
-                        channelMap.get(channelId).add(msg);
-    
-                        log.debug("Added chat message to channel={}, sessionKey={}", channelId, sessionKey);
-                    } catch(Exception e){
-                        log.warn("Failed to add chat message to channel={}, sessionKey={}", channelId, sessionKey);
-                    }
-                }
-            }
-        }
-    }
-    
-    /**
-     * Set/Update the heartbeat for given sessionKey (indexed by channelId and sessionId)
-     * @param channelId
-     * @param sessionKey
-     * @return
-     */
-    private TransferableChatMessage addHeartBeat(String channelId, String sessionKey){
-        TransferableChatMessage ret = null;
-        
-        String sessionId = getSessionIdFromSessionKey(sessionKey);        
-
-        try {
-            ret = TransferableChatMessage.HeartBeat(channelId, sessionKey);
-            heartbeatMap.get(channelId, () -> {
-                return CacheBuilder.newBuilder()
-                        .expireAfterWrite(1, TimeUnit.HOURS)
-                        .build();
-            }).put(sessionId, ret);
-        } catch(Exception e){
-            log.error("Error adding heartbet in channel : "+channelId+" and session_key : "+sessionKey);
-        }
-        return ret;
-    }
-
-    /** Check if given userId is online in the channel.
-     * 
-     * @param channelId
-     * @param userId
-     * @return
-     */
-    private boolean isOnline(String channelId, String sessionId) {
-        if(heartbeatMap.getIfPresent(channelId) == null) {
-            return false;
-        }
-
-        // Check to see how active the user has been
-        TransferableChatMessage userHeartbeat = heartbeatMap.getIfPresent(channelId).getIfPresent(sessionId);
-        if (userHeartbeat == null || userHeartbeat.getTimestamp() < 1L) {
-            return false;
-        }
-
-        long timeDiff = ((new Date()).getTime()) - userHeartbeat.getTimestamp();
-        log.debug("Heartbeat diff for {} is {}; interval={}", sessionId, timeDiff, pollInterval*2);
-        // Safari seems to back off on setTimeout calls when in background for 60 seconds
-        return timeDiff <= 60000 + (pollInterval*2);
-    }
-    
-    private void sendToCluster(TransferableChatMessage message){
-        if (clustered) {
-            try {
-                log.debug("Sending message ({}) id:{}, channelId:{} to cluster ...", message.getType(), message.getId(), message.getChannelId());
-                Message msg = new Message(null, message);
-                clusterChannel.send(msg);
-            } catch (Exception e) {
-                log.error("Error sending JGroups message", e);
-            }
-        }
-    }
-
-
-    private String getSessionIdFromSessionKey(String sessionKey){
-        return  sessionKey.substring(0, sessionKey.indexOf(":"));
-    }
-    private String getUserIdFromSessionKey(String sessionKey){
-        return sessionKey.substring(sessionKey.indexOf(":") + 1);
-    }
-    
-    //********************************************************************
-    // jGroups override functions
-
-    @Override
-    public void getState(OutputStream output) throws Exception {
-    }
-
-    @Override
-    public void setState(InputStream input) throws Exception {
-    }
-
-    @Override
-    public void block() {
-    }
-
-    @Override
-    public void suspect(Address arg0) {
-    }
-
-    @Override
-    public void unblock() {
-    }
-
-    @Override
-    public void viewAccepted(View arg0) {
+    public int getMessagesMax() {
+        return messagesMax;
     }
 }

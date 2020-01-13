@@ -1,12 +1,14 @@
 package org.sakaiproject.sms.logic.stubs.commands;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.sms.logic.incoming.ParsedMessage;
 import org.sakaiproject.sms.logic.incoming.ShortMessageCommand;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class MultipleBodySmsCommand implements ShortMessageCommand {
+
+	private static final Log LOG = LogFactory
+			.getLog(MultipleBodySmsCommand.class);
 
 	public String param1;
 	public String param2;
@@ -15,7 +17,7 @@ public class MultipleBodySmsCommand implements ShortMessageCommand {
 
 		String[] body = msg.getBodyParameters();
 
-		log.debug(getCommandKey() + " command called with parameters: ("
+		LOG.debug(getCommandKey() + " command called with parameters: ("
 				+ msg.getSite() + ", " + msg.getIncomingUserId() + ", " + body[0] + ", " + body[1]
 				+ ")");
 		param1 = body[0];

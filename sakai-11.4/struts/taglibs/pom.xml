@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <parent>
+    <artifactId>Struts-base</artifactId>
+    <groupId>org.sakaiproject</groupId>
+    <version>11.4</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.sakaiproject</groupId>
+  <artifactId>sakai-struts-taglibs</artifactId>
+  <packaging>jar</packaging>
+  <name>sakai-struts-taglib</name>
+  <inceptionYear>2005</inceptionYear>
+  <organization>
+    <name>University of South Africa</name>
+    <url>http://www.unisa.ac.za</url>
+  </organization>
+  <build>
+    <resources>
+      	<resource>
+				<directory>${basedir}/src/bundle</directory>
+				<includes>
+					<include>**/*.properties</include>
+				</includes>
+			</resource>
+
+			<!-- Needed to get the widget bundle (localizable text) into the jar from the src directory -->
+			<resource>
+				<directory>${basedir}/src/java</directory>
+				<includes>
+					<include>**/*.properties</include>
+					<include>**/*.tld</include>
+				</includes>
+			</resource>
+
+			<resource>
+				<directory>${basedir}/src</directory>
+				<includes>
+					<include>META-INF/*.tld</include>
+					<include>META-INF/*.xml</include>
+				</includes>
+			</resource>
+    </resources>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.sakaiproject.kernel</groupId>
+      <artifactId>sakai-kernel-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.sakaiproject.kernel</groupId>
+      <artifactId>sakai-component-manager</artifactId>
+    </dependency>
+ 	<dependency>
+      <groupId>struts</groupId>
+      <artifactId>struts</artifactId>
+      <version>1.2.9</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+	<dependency>
+		<groupId>javax.servlet.jsp</groupId>
+		<artifactId>jsp-api</artifactId>
+		<version>2.2</version>
+	</dependency>
+  </dependencies>
+</project>

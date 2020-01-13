@@ -32,24 +32,16 @@ import java.util.TreeSet;
 import java.util.Stack;
 import java.util.Vector;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.syllabus.GatewaySyllabus;
 import org.sakaiproject.api.app.syllabus.SyllabusAttachment;
 import org.sakaiproject.api.app.syllabus.SyllabusData;
 import org.sakaiproject.api.app.syllabus.SyllabusItem;
 import org.sakaiproject.api.app.syllabus.SyllabusManager;
 import org.sakaiproject.api.app.syllabus.SyllabusService;
-import org.sakaiproject.authz.api.FunctionManager;
-//permission convert
-import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentHostingService;
@@ -73,7 +65,11 @@ import org.sakaiproject.exception.TypeException;
 //permission convert
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
+
 import org.sakaiproject.site.api.SiteService;
+/*
+import org.sakaiproject.site.tool.SiteAction;
+*/
 import org.sakaiproject.time.cover.TimeService;
 import org.sakaiproject.tool.api.Placement;
 import org.sakaiproject.tool.cover.SessionManager;
@@ -81,13 +77,22 @@ import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.user.cover.UserDirectoryService;
 import org.sakaiproject.util.BaseResourcePropertiesEdit;
 import org.sakaiproject.util.Validator;
+
 import org.sakaiproject.util.cover.LinkMigrationHelper;
+import org.sakaiproject.authz.api.FunctionManager;
+//permission convert
+import org.sakaiproject.authz.api.SecurityService;
+
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * @author rshastri TODO To change the template for this generated type comment go to Window -
  *         Preferences - Java - Code Style - Code Templates
  */
-@Slf4j
 public class SyllabusServiceImpl implements SyllabusService, EntityTransferrer, EntityTransferrerRefMigrator
 {
   private static final String SYLLABUS = "syllabus";
@@ -116,7 +121,10 @@ public class SyllabusServiceImpl implements SyllabusService, EntityTransferrer, 
   private ContentHostingService contentHostingService;
   private SiteService siteService;
   private EntityManager entityManager;
-
+ 
+  /** Dependency: a logger component. */
+  private Logger logger = LoggerFactory.getLogger(SyllabusServiceImpl.class);
+   
   protected NotificationService notificationService = null;
   protected String m_relativeAccessPoint = null;
   private SecurityService securityService;
@@ -348,7 +356,8 @@ public class SyllabusServiceImpl implements SyllabusService, EntityTransferrer, 
 		}
 		catch (Exception e) 
 		{
-			log.error("SyllabusServiceImpl:getEntityAuthzGroups - " + e);
+			logger.error("SyllabusServiceImpl:getEntityAuthzGroups - " + e);
+			e.printStackTrace();
 		}
 
 		return rv;
@@ -439,9 +448,9 @@ public class SyllabusServiceImpl implements SyllabusService, EntityTransferrer, 
                           try {
                                   cr = contentHostingService.getResource(s.getAttachmentId());
                           } catch (PermissionException e) {
-                                  log.warn("Permission error fetching resource: " + s.getAttachmentId());
+                                  logger.warn("Permission error fetching resource: " + s.getAttachmentId());
                           } catch (TypeException e) {
-                        	  log.warn("TypeException error fetching resource: " + s.getAttachmentId());
+                        	  logger.warn("TypeException error fetching resource: " + s.getAttachmentId());
                           }
 
                           if (cr != null) {
@@ -460,7 +469,7 @@ public class SyllabusServiceImpl implements SyllabusService, EntityTransferrer, 
                       }
                       catch(Exception e)
                       {
-                        log.warn("Encode Syllabus - " + e);
+                        logger.warn("Encode Syllabus - " + e);
                       }
                       
                       
@@ -488,11 +497,11 @@ public class SyllabusServiceImpl implements SyllabusService, EntityTransferrer, 
     }
     catch (DOMException e)
     {
-      log.error(e.getMessage(), e);
+      logger.error(e.getMessage(), e);
     }
     catch (IdUnusedException e)
     {
-      log.error(e.getMessage(), e);
+      logger.error(e.getMessage(), e);
     }
     return results.toString();
   }
@@ -625,7 +634,7 @@ public class SyllabusServiceImpl implements SyllabusService, EntityTransferrer, 
                                         }
                                         catch (Exception e)
                                         {
-                                          log.warn("Decode Syllabus: " + e);
+                                          logger.warn("Decode Syllabus: " + e);
                                         }
                                       }
                                       
@@ -701,14 +710,14 @@ public class SyllabusServiceImpl implements SyllabusService, EntityTransferrer, 
       }
       catch (DOMException e)
       {
-        log.error(e.getMessage(), e);
+        logger.error(e.getMessage(), e);
         results.append("merging " + getLabel()
             + " failed during xml parsing.\n");
 
       }
       catch (Exception e)
       {
-        log.error(e.getMessage(), e);
+        logger.error(e.getMessage(), e);
         results.append("merging " + getLabel() + " failed.\n");
       }
     }
@@ -734,7 +743,7 @@ public class SyllabusServiceImpl implements SyllabusService, EntityTransferrer, 
   public void importEntities(String fromSiteId, String toSiteId, List resourceIds)
   {
 	  try {
-          log.debug("importResources: Begin importing syllabus data");
+          logger.debug("importResources: Begin importing syllabus data");
 
           String fromPage = fromSiteId;
           SyllabusItem fromSyllabusItem = syllabusManager.getSyllabusItemByContextId(fromPage);
@@ -779,15 +788,15 @@ public class SyllabusServiceImpl implements SyllabusService, EntityTransferrer, 
             }
             else
             {
-              log.debug("importResources: no data found for syllabusItem id"
+              logger.debug("importResources: no data found for syllabusItem id"
                   + fromSyllabusItem.getSurrogateKey().toString());
             }
         }
-        log.debug("importResources: End importing syllabus data");
+        logger.debug("importResources: End importing syllabus data");
    }
    catch(Exception e)
    {
-     log.error(e.getMessage(),e);
+     logger.error(e.getMessage(),e);
    }
 
   }
@@ -1161,7 +1170,7 @@ public class SyllabusServiceImpl implements SyllabusService, EntityTransferrer, 
 		
 		try 
 		{
-			log.debug("transfer copy syllbus itmes by transferCopyEntitiesRefMigrator");
+			logger.debug("transfer copy syllbus itmes by transferCopyEntitiesRefMigrator");
 			String fromPage = fromContext;
 			SyllabusItem fromSyllabusItem = syllabusManager
 					.getSyllabusItemByContextId(fromPage);
@@ -1230,17 +1239,18 @@ public class SyllabusServiceImpl implements SyllabusService, EntityTransferrer, 
 				} 
 				else 
 				{
-					log.debug("importResources: no data found for syllabusItem id"
+					logger.debug("importResources: no data found for syllabusItem id"
 									+ fromSyllabusItem.getSurrogateKey()
 											.toString());
 				}
 			
-			log.debug("importResources: End importing syllabus data");
+			logger.debug("importResources: End importing syllabus data");
 		  }
 		}
 		catch (Exception e) 
 		{
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		
 		return transversalMap;
@@ -1382,7 +1392,7 @@ public class SyllabusServiceImpl implements SyllabusService, EntityTransferrer, 
 		}
 		catch (Exception e)
 		{
-			log.debug("Syllabus transferCopyEntitiesRefMigrator failed" + e);
+			logger.debug("Syllabus transferCopyEntitiesRefMigrator failed" + e);
 		}
 		transversalMap.putAll(transferCopyEntitiesRefMigrator(fromContext, toContext, ids));
 		
@@ -1474,7 +1484,7 @@ public class SyllabusServiceImpl implements SyllabusService, EntityTransferrer, 
 			}
 			catch (Exception e)
 			{
-				log.debug("Syllabus updateEntityReferences failed" + e);
+				logger.debug("Syllabus updateEntityReferences failed" + e);
 			}
 		}		  		  		
 	}

@@ -24,10 +24,10 @@ package org.sakaiproject.provider.authzGroup;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.authz.api.GroupProvider;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * <p>
@@ -40,9 +40,10 @@ import org.sakaiproject.authz.api.GroupProvider;
  * </ul>
  * </p>
  */
-@Slf4j
 public class AllHandsGroupProvider implements GroupProvider
 {
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(AllHandsGroupProvider.class);
 
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Init and Destroy
@@ -55,11 +56,11 @@ public class AllHandsGroupProvider implements GroupProvider
 	{
 		try
 		{
-			log.info("init()");
+			M_log.info("init()");
 		}
 		catch (Throwable t)
 		{
-			log.warn("init(): ", t);
+			M_log.warn("init(): ", t);
 		}
 	}
 
@@ -68,7 +69,7 @@ public class AllHandsGroupProvider implements GroupProvider
 	 */
 	public void destroy()
 	{
-		log.info("destroy()");
+		M_log.info("destroy()");
 	}
 
 	/**********************************************************************************************************************************************************************************************************************************************************
@@ -87,7 +88,7 @@ public class AllHandsGroupProvider implements GroupProvider
 	 */
 	public String getRole(String id, String user)
 	{
-		log.info("getRole() id="+id+" user="+user);
+		M_log.info("getRole() id="+id+" user="+user);
 		// Apparently this is not called ???
 		return null;
 	}
@@ -135,7 +136,7 @@ public class AllHandsGroupProvider implements GroupProvider
 
 	public Map<String, String> getGroupRolesForUser(String userId)
 	{
-		log.info("getGroupRolesForUser() user="+userId);
+		M_log.info("getGroupRolesForUser() user="+userId);
 
 		Map<String, String> rv = new HashMap<String, String>();
 

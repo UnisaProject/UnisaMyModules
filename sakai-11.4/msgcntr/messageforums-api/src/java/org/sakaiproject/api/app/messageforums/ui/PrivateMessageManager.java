@@ -199,8 +199,7 @@ public interface PrivateMessageManager {
     public boolean isAllowToViewHiddenGroups();
     public boolean isAllowToFieldUsers();
     public boolean isAllowToFieldMyGroups();    
-    public boolean isAllowToFieldMyGroupMembers();
-    public boolean isAllowToFieldMyGroupRoles();
+    public boolean isAllowToFieldMyGroupMembers(); 
 
     public PrivateMessage getNextMessage(PrivateMessage message);
     public PrivateMessage getPreviousMessage(PrivateMessage message);

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>search</artifactId>
         <groupId>org.sakaiproject.search</groupId>
-        <version>12.6</version><!-- ProjectVersion -->
+        <version>11.4</version><!-- ProjectVersion -->
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.sakaiproject.search.elasticsearch</groupId>
@@ -24,9 +24,8 @@
 
 
     <modules>
-        <module>api</module>
-        <module>util</module>
         <module>impl</module>
+        <module>pack</module>
     </modules>
 
     <dependencyManagement>
@@ -41,6 +40,12 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>11.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>1.9.5</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

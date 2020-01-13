@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.entitybroker.EntityReference;
 import org.sakaiproject.entitybroker.entityprovider.CoreEntityProvider;
@@ -32,15 +34,13 @@ import org.sakaiproject.qna.logic.AnswerLogic;
 import org.sakaiproject.qna.logic.ExternalLogic;
 import org.sakaiproject.qna.model.QnaAnswer;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Entity provider for answers  
  */
-@Slf4j
 public class AnswerEntityProvider extends AbstractEntityProvider implements CoreEntityProvider, RESTful, Statisticable {
 	public final static String ENTITY_PREFIX = "qna-answer";
 
+	private static Log log = LogFactory.getLog(AnswerEntityProvider.class);
 	/**
 	 * Injected services
 	 */

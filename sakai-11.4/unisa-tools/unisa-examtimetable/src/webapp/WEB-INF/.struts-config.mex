@@ -1,0 +1,70 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="15,60" dimension="242,88" />
+  <StrutsActivity path="/WEB-INF/jsp/examtimetabledisplay.jsp" location="0,450" dimension="219,49" />
+  <StrutsActivity path="/WEB-INF/jsp/examtimetableinput.jsp" location="315,450" dimension="210,49" />
+  <StrutsActivity path="/displayExamTimetable.do" location="15,225" dimension="408,88" />
+  <StrutsTransition id="/WEB-INF/jsp/examtimetableinput.jsp,null,/DisplayExamTimetable.do,2" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="420,450" />
+      <AbsolutePoint location="360,239" />
+      <AbsolutePoint location="241,239" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/DisplayExamTimetable.do,examtimetableinputforward,/WEB-INF/jsp/examtimetableinput.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="241,269" />
+      <AbsolutePoint location="330,269" />
+      <AbsolutePoint location="390,450" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/displayExamTimetable.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="136,148" />
+      <AbsolutePoint location="136,225" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/DisplayExamTimetable.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="136,148" />
+      <AbsolutePoint location="136,195" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayExamTimetable.do,displayforward,/WEB-INF/jsp/examtimetabledisplay.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="204,313" />
+      <AbsolutePoint location="204,450" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayExamTimetable.do,inputforward,/WEB-INF/jsp/examtimetableinput.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="330,313" />
+      <AbsolutePoint location="330,450" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/WEB-INF/jsp/examtimetableinput.jsp,null,/displayExamTimetable.do,2" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="408,450" />
+      <AbsolutePoint location="408,313" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/DisplayExamTimetable.do,examtimetabledisplayforward,/WEB-INF/jsp/examtimetabledisplay.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="128,283" />
+      <AbsolutePoint location="128,450" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayExamTimetable.do,examtimetableinputforward,/WEB-INF/jsp/examtimetableinput.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="115,313" />
+      <AbsolutePoint location="510,450" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayExamTimetable.do,examtimetabledisplayforward,/WEB-INF/jsp/examtimetabledisplay.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="219,313" />
+      <AbsolutePoint location="554,358" />
+      <AbsolutePoint location="109,358" />
+      <AbsolutePoint location="109,450" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

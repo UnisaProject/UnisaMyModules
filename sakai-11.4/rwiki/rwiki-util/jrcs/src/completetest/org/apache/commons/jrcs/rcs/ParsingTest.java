@@ -57,7 +57,6 @@
 
 package org.apache.commons.jrcs.rcs;
 
-import lombok.extern.slf4j.Slf4j;
 import junit.framework.TestCase;
 
 import java.io.InputStream;
@@ -65,8 +64,8 @@ import java.io.InputStream;
 /**
  * @author Matt Quail (matt_quail AT yahoo DOT com)
  */
-@Slf4j
 public class ParsingTest extends TestCase {
+
 
   public ParsingTest(String testName) {
     super(testName);
@@ -79,7 +78,7 @@ public class ParsingTest extends TestCase {
     throws Exception
   {
     InputStream is = getClass().getResourceAsStream("idchar.testfile");
-    log.info("\n\n basedir=" + System.getProperty("basedir"));
+    System.out.println("\n\n basedir=" + System.getProperty("basedir"));
     assertNotNull(is);
     Archive ar = new Archive("idchar_test.txt,v", is);
   }

@@ -8,17 +8,17 @@
   <groupId>org.sakaiproject.pasystem</groupId>
   <artifactId>pasystem-impl</artifactId>
   
-  <packaging>sakai-component</packaging>
+  <packaging>jar</packaging>
   
   <parent>
     <artifactId>pasystem-base</artifactId>
     <groupId>org.sakaiproject.pasystem</groupId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <properties>
-    <deploy.target>components</deploy.target>
+    <deploy.target/>
   </properties>
 
 
@@ -41,7 +41,7 @@
     <dependency>
       <groupId>com.github.jknack</groupId>
       <artifactId>handlebars</artifactId>
-      <version>${handlebars4.version}</version>
+      <version>2.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>

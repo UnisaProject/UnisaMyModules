@@ -96,6 +96,10 @@ public abstract class OAuthSignatureMethod {
     throws OAuthException, IOException, URISyntaxException {
         String baseString = getBaseString(message);
         String signature = getSignature(baseString);
+        // Logger log = Logger.getLogger(getClass().getName());
+        // if (log.isLoggable(Level.FINE)) {
+        // log.fine(signature + "=getSignature(" + baseString + ")");
+        // }
         return signature;
     }
 

@@ -23,15 +23,9 @@ package org.sakaiproject.site.impl;
 
 import java.util.*;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.commons.lang3.StringUtils;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.entity.api.ResourcePropertiesEdit;
 import org.sakaiproject.site.api.Site;
@@ -40,15 +34,21 @@ import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.util.BaseResourceProperties;
 import org.sakaiproject.util.BaseResourcePropertiesEdit;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * <p>
  * BaseSitePage is an implementation of the Site API SitePage.
  * </p>
  */
-@Slf4j
 public class BaseSitePage implements SitePage, Identifiable
 {
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(BaseSitePage.class);
+
 	/** A fixed class serian number. */
 	private static final long serialVersionUID = 1L;
 
@@ -86,22 +86,7 @@ public class BaseSitePage implements SitePage, Identifiable
 	protected String m_skin = null;
    
 	private BaseSiteService siteService;
-	
-	protected String[] SAKAI_DEFAULT_EXCEPTION_IDS = {"sakai.iframe","sakai.rutgers.linktool","sakai.news"};
-	/** String array of default exception ids to not override the title */
-	protected String[] m_titleExceptionIds;
 
-	/**
-	 * Private constructor to setup some defaults
-	 */
-	private BaseSitePage (BaseSiteService siteService) {
-		this.siteService = siteService;
-		m_titleExceptionIds = siteService.serverConfigurationService().getStrings("site.tool.custom.titles");
-		if (m_titleExceptionIds == null) {
-			m_titleExceptionIds = SAKAI_DEFAULT_EXCEPTION_IDS;
-		}
-	}
-	
 	/**
 	 * Construct. Auto-generate the id.
 	 * 
@@ -110,7 +95,7 @@ public class BaseSitePage implements SitePage, Identifiable
 	 */
 	protected BaseSitePage(BaseSiteService siteService, Site site)
 	{
-		this(siteService);
+		this.siteService = siteService;
 		m_site = site;
 		m_id = siteService.idManager().createUuid();
 		m_properties = new BaseResourcePropertiesEdit();
@@ -134,7 +119,7 @@ public class BaseSitePage implements SitePage, Identifiable
 	protected BaseSitePage(BaseSiteService siteService, Site site, String id, String title, String layout,
 			boolean popup)
 	{
-		this(siteService);
+		this.siteService = siteService;
 		m_site = site;
 		m_id = id;
 
@@ -178,7 +163,7 @@ public class BaseSitePage implements SitePage, Identifiable
 	protected BaseSitePage(BaseSiteService siteService, String pageId, String title, String layout, boolean popup,
 			String siteId, String skin)
 	{
-		this(siteService);
+		this.siteService = siteService;
 
 		m_site = null;
 		m_id = pageId;
@@ -220,7 +205,7 @@ public class BaseSitePage implements SitePage, Identifiable
 	 */
 	protected BaseSitePage(BaseSiteService siteService, SitePage other, Site site, boolean exact)
 	{
-		this(siteService);
+		this.siteService = siteService;
 
 		BaseSitePage bOther = (BaseSitePage) other;
 
@@ -291,7 +276,7 @@ public class BaseSitePage implements SitePage, Identifiable
 	 */
 	protected BaseSitePage(BaseSiteService siteService, Element el, Site site)
 	{
-		this(siteService);
+		this.siteService = siteService;
 
 		m_site = site;
 
@@ -389,28 +374,9 @@ public class BaseSitePage implements SitePage, Identifiable
 		}
 
         //If all this fails, return something
-        if (log.isDebugEnabled()) log.debug("Returning default m_title:" + m_title + " for toolId:" + toolId);
+        if (M_log.isDebugEnabled()) M_log.debug("Returning default m_title:" + m_title + " for toolId:" + toolId);
 
         return m_title;
-	}
-	
-	/** 
-	 * Checks to see if this is a title exception 
-	 * @param toolId
-	 * @return
-	 */
-	public boolean isTitleToolException(String toolId) {
-		if (toolId == null) {
-			return false;
-		}
-
-		for (String titleExceptionId : m_titleExceptionIds) {
-			if (titleExceptionId.equals(toolId) || toolId.startsWith(titleExceptionId)) {
-				return true;
-			}
-					
-		}
-		return false;
 	}
 
 	/**
@@ -587,7 +553,7 @@ public class BaseSitePage implements SitePage, Identifiable
 		if (getTools().size() > 0 && getProperties().getProperty(IS_HOME_PAGE) == null)
 		{
 			String toolId = ( (BaseToolConfiguration) (getTools().get(0))).getToolId();
-			return isTitleToolException(toolId);
+			return  "sakai.iframe".equals(toolId) || "sakai.news".equals(toolId) || "sakai.rutgers.linktool".equals(toolId);
 		}
 		return false;
 	}
@@ -646,7 +612,7 @@ public class BaseSitePage implements SitePage, Identifiable
 			m_layout = layout;
 		}
 		else
-			log.warn("setLayout(): set to invalid value: " + layout);
+			M_log.warn("setLayout(): set to invalid value: " + layout);
 	}
 
 	/**
@@ -735,9 +701,8 @@ public class BaseSitePage implements SitePage, Identifiable
 		if (m_site == null) return;
 		List<SitePage> pageList = m_site.getPages();
 		//KNL-250 if the position is greater than the number of pages make it last to avoid an exception
-		int pageSize = pageList.size();
-		if (pos >= pageSize) {
-			pos = pageSize - 1;
+		if (pos > pageList.size()) {
+			pos = pageList.size() +1;
 		}
 		((ResourceVector) pageList).moveTo(this, pos);
 	}

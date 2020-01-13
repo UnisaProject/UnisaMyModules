@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.entitybroker.EntityReference;
 import org.sakaiproject.entitybroker.entityprovider.CoreEntityProvider;
 import org.sakaiproject.entitybroker.entityprovider.capabilities.CollectionResolvable;
@@ -37,17 +39,15 @@ import org.sakaiproject.qna.logic.exceptions.AttachmentException;
 import org.sakaiproject.qna.model.QnaAnswer;
 import org.sakaiproject.qna.model.QnaQuestion;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Entity provider for questions
  */
-@Slf4j
 public class QuestionEntityProvider extends AbstractEntityProvider implements CoreEntityProvider, RESTful, 
 				Statisticable, RedirectDefinable {
 	
 	public final static String ENTITY_PREFIX = "qna-question";
 
+	private static Log log = LogFactory.getLog(QuestionEntityProvider.class);
 	
 	/**
 	 * Injected services
@@ -163,7 +163,8 @@ public class QuestionEntityProvider extends AbstractEntityProvider implements Co
 	        try {
 				questionLogic.removeQuestion(q.getId(), q.getLocation());
 			} catch (AttachmentException e) {
-				log.warn(e.getLocalizedMessage(), e);
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		
 	}

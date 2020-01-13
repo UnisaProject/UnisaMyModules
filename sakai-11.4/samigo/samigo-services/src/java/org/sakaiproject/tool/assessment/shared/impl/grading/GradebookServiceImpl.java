@@ -19,16 +19,17 @@
  *
  **********************************************************************************/
 
+
 package org.sakaiproject.tool.assessment.shared.impl.grading;
 
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAssessmentData;
 import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.PublishedAssessmentIfc;
 import org.sakaiproject.tool.assessment.facade.PublishedAssessmentFacade;
-import org.sakaiproject.tool.assessment.shared.api.grading.GradebookServiceAPI;
 import org.sakaiproject.tool.assessment.services.GradingServiceException;
 import org.sakaiproject.tool.assessment.services.assessment.PublishedAssessmentService;
 import org.sakaiproject.tool.assessment.services.gradebook.GradebookServiceHelper;
+import org.sakaiproject.tool.assessment.shared.api.grading.GradebookServiceAPI;
 
 /**
  * The GradebookServiceAPI describes an interface for gradebook information
@@ -40,6 +41,8 @@ import org.sakaiproject.tool.assessment.services.gradebook.GradebookServiceHelpe
  */
 public class GradebookServiceImpl implements GradebookServiceAPI
 {
+  //private Logger log = LoggerFactory.getLogger(GradebookServiceImpl.class);
+
 
   public boolean isAssignmentDefined(String assessmentTitle)
   {
@@ -149,4 +152,5 @@ public class GradebookServiceImpl implements GradebookServiceAPI
       throw new GradingServiceException(ex);
     }
   }
+
 }

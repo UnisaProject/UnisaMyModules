@@ -4,8 +4,6 @@
                  org.sakaiproject.site.cover.SiteService,
                  org.sakaiproject.tool.cover.ToolManager" %>
 <%@ page import="org.sakaiproject.component.cover.ServerConfigurationService" %>
-<%@ page import="org.slf4j.Logger,org.slf4j.LoggerFactory" %>
-<%! static final Logger log = LoggerFactory.getLogger("dfAllMessagesDirect.jsp"); %>
 <%
 
   FacesContext context = FacesContext.getCurrentInstance();
@@ -26,7 +24,7 @@
       return;
     }
     catch (Exception e) {
-      log.error(e.getMessage(), e);
+      e.printStackTrace();
     }
   }
 
@@ -42,7 +40,7 @@ if(forumTool.getHasTopicAccessPrivileges(request.getParameter("topicId"))){
     dispatcher.forward(request, response);
   }
   catch (ServletException e) {
-    log.error(e.getMessage(), e);
+    e.printStackTrace();
   }
 
   }else{
@@ -60,7 +58,7 @@ if(forumTool.getHasTopicAccessPrivileges(request.getParameter("topicId"))){
 		    dispatcher.forward(request, response);
 		  }
 		  catch (ServletException e) {
-		    log.error(e.getMessage(), e);
+		    e.printStackTrace();
 		  }		
 
 

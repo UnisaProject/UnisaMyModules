@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		<form-bean name="tutorStudentGroupForm" 
+		 	type="za.ac.unisa.lms.tools.tutorstudentgrouping.forms.TutorStudentGroupForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.tutorstudentgrouping.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/tutorStudentGrouping.do?act=initial"
+				contextRelative="true" />
+		</action>
+		<action
+				name="tutorStudentGroupForm"
+				attribute="tutorStudentGroupForm"
+				parameter="act"
+				path="/tutorStudentGrouping"
+				type="za.ac.unisa.lms.tools.tutorstudentgrouping.actions.TutorStudentGroupingAction"
+				validate="false">
+				<forward
+					name="input"
+					path="/WEB-INF/jsp/inputAction.jsp"
+					contextRelative="true" />	
+				<forward
+					name="inputUploadGroup"
+					path="/WEB-INF/jsp/inputUploadGroup.jsp"
+					contextRelative="true" />		
+				<forward
+					name="verifyUploadGroup"
+					path="/WEB-INF/jsp/verifyUploadGroup.jsp"
+					contextRelative="true" />	
+				<forward
+					name="confirmUploadGroup"
+					path="/WEB-INF/jsp/confirmUploadGroup.jsp"
+					contextRelative="true" />	
+				<forward
+					name="viewInvalidRecords"
+					path="/WEB-INF/jsp/viewInvalidRecords.jsp"
+					contextRelative="true" />
+				<forward
+					name="inputReassignStudent"
+					path="/WEB-INF/jsp/inputReassignStudent.jsp"
+					contextRelative="true" />	
+				<forward
+					name="selectNewGroupReassignStudent"
+					path="/WEB-INF/jsp/selectNewGroupReassignStudent.jsp"
+					contextRelative="true" />	
+				<forward
+					name="inputReplaceTutor"
+					path="/WEB-INF/jsp/inputReplaceTutor.jsp"
+					contextRelative="true" />
+				<forward
+					name="selectNewTutorReplaceTutor"
+					path="/WEB-INF/jsp/selectNewTutorReplaceTutor.jsp"
+					contextRelative="true" />
+				<forward
+					name="confirmReplaceTutor"
+					path="/WEB-INF/jsp/confirmReplaceTutor.jsp"
+					contextRelative="true" />	
+				<forward
+					name="inputSwitchTutor"
+					path="/WEB-INF/jsp/inputSwitchTutor.jsp"
+					contextRelative="true" />
+				<forward
+					name="selectNewTutorSwitchTutor"
+					path="/WEB-INF/jsp/selectNewTutorSwitchTutor.jsp"
+					contextRelative="true" />	
+				<forward
+					name="confirmSwitchTutor"
+					path="/WEB-INF/jsp/confirmSwitchTutor.jsp"
+					contextRelative="true" />					
+				<forward
+					name="cancel"
+					path="/WEB-INF/jsp/inputAction.jsp"
+					contextRelative="true" />
+				<forward
+					name="errorPage"
+					path="/WEB-INF/jsp/errorPage.jsp"
+					contextRelative="true" />	
+			</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.tutorstudentgrouping.ApplicationResources" />
+	
+</struts-config>

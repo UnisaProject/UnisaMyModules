@@ -33,7 +33,8 @@ import javax.faces.component.UIComponentBase;
 import javax.faces.context.FacesContext;
 import javax.faces.el.ValueBinding;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simple looping component which encodes all its children for every record in
@@ -43,8 +44,10 @@ import lombok.extern.slf4j.Slf4j;
  *    ...
  * </gbx:iterator>
  */
-@Slf4j
+
 public class IteratorComponent extends UIComponentBase implements NamingContainer {
+	private static final Logger log = LoggerFactory.getLogger(IteratorComponent.class);
+
 	public final static String COMPONENT_TYPE = "org.sakaiproject.tool.gradebook.jsf.iterator";
 	public final static String COMPONENT_FAMILY = "javax.faces.Data";
 

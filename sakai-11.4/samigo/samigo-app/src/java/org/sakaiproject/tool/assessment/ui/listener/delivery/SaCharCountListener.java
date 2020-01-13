@@ -1,19 +1,3 @@
-/**
- * Copyright (c) 2005-2016 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.sakaiproject.tool.assessment.ui.listener.delivery;
 
 import java.util.ArrayList;
@@ -26,8 +10,8 @@ import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.tool.assessment.data.dao.grading.ItemGradingData;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
 import org.sakaiproject.tool.assessment.ui.bean.delivery.DeliveryBean;
@@ -35,9 +19,11 @@ import org.sakaiproject.tool.assessment.ui.bean.delivery.ItemContentsBean;
 import org.sakaiproject.tool.assessment.ui.bean.delivery.SectionContentsBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 
-@Slf4j
+
 public class SaCharCountListener implements ActionListener
 {
+	private static Logger log = LoggerFactory.getLogger(SaCharCountListener.class);
+
 	public void processAction(ActionEvent ae) throws AbortProcessingException
 	{
 		DeliveryBean delivery = (DeliveryBean) ContextUtil.lookupBean("delivery");
@@ -51,14 +37,20 @@ public class SaCharCountListener implements ActionListener
 			delivery.setShowTimeWarning(false);
 		}
 		
-		for (SectionContentsBean part : delivery.getPageContents().getPartsContents()) {
+		Iterator iter = delivery.getPageContents().getPartsContents().iterator();
+		while (iter.hasNext()) {
+			SectionContentsBean part = (SectionContentsBean) iter.next();
 			String partSeq = part.getNumber();
 			redrawAnchorName.append(partSeq);
-			for (ItemContentsBean item : part.getItemContents()) {
+			Iterator iter2 = part.getItemContents().iterator();
+			while (iter2.hasNext()) {
+				ItemContentsBean item = (ItemContentsBean) iter2.next();
 				ItemDataIfc itemData = item.getItemData();
 				List<ItemGradingData> itemGradingDataArray = item.getItemGradingDataArray();
-				if (itemGradingDataArray != null && !itemGradingDataArray.isEmpty()) {
-					for (ItemGradingData itemGrading : itemGradingDataArray) {
+				if (itemGradingDataArray != null && itemGradingDataArray.size() != 0) {
+					Iterator<ItemGradingData> iter3 = itemGradingDataArray.iterator();
+					while (iter3.hasNext()) {
+						ItemGradingData itemGrading = iter3.next();
 						if (itemData != null) {
 							if (itemId.equals(itemData.getItemIdString()) && itemGrading.getAnswerText() != null) {
 								if (itemGrading.getAnswerText() != null) {

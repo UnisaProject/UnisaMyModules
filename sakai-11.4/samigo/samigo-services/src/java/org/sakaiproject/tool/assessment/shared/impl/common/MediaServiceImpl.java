@@ -19,11 +19,16 @@
  *
  **********************************************************************************/
 
+
 package org.sakaiproject.tool.assessment.shared.impl.common;
 
-import org.sakaiproject.tool.assessment.shared.api.common.MediaServiceAPI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.sakaiproject.tool.assessment.services.shared.MediaService;
 import org.sakaiproject.tool.assessment.services.CommonServiceException;
+import org.sakaiproject.tool.assessment.shared.api.common.MediaServiceAPI;
+
 
 /**
  * Implements the shared interface to control media information.
@@ -31,6 +36,7 @@ import org.sakaiproject.tool.assessment.services.CommonServiceException;
  */
 public class MediaServiceImpl implements MediaServiceAPI
 {
+  private Logger log = LoggerFactory.getLogger(MediaServiceImpl.class);
 
   public void remove(String mediaId)
   {
@@ -44,4 +50,5 @@ public class MediaServiceImpl implements MediaServiceAPI
       throw new CommonServiceException(ex);
     }
   }
+
 }

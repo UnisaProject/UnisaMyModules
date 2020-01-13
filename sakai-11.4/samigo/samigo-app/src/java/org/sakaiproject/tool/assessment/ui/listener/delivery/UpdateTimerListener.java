@@ -28,12 +28,13 @@ import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.tool.assessment.data.dao.grading.AssessmentGradingData;
-import org.sakaiproject.tool.assessment.services.GradingService;
 import org.sakaiproject.tool.assessment.ui.bean.delivery.DeliveryBean;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
+import org.sakaiproject.tool.assessment.services.GradingService;
 
 /**
  * <p>Title: Samigo</p>
@@ -42,9 +43,10 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
  * @author Ed Smiley
  * @version $Id$
  */
-@Slf4j
+
 public class UpdateTimerListener implements ActionListener
 {
+  private static Logger log = LoggerFactory.getLogger(UpdateTimerListener.class);
   private static ContextUtil cu;
 
   /**

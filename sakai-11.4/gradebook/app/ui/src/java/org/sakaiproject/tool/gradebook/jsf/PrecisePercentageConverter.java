@@ -26,7 +26,8 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.NumberConverter;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.util.ResourceLoader;
 
@@ -42,8 +43,9 @@ import org.sakaiproject.util.ResourceLoader;
  * decimals with more than 4 decimal places prior to conversion to %.
  * 
  */
-@Slf4j
 public class PrecisePercentageConverter extends NumberConverter {
+	private static final Logger log = LoggerFactory.getLogger(PrecisePercentageConverter.class);
+
 	public PrecisePercentageConverter() {
 		setType("percent");
 		setMaxFractionDigits(2); // beware because this rounds at 2 decimals

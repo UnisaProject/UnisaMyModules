@@ -34,24 +34,28 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.api.app.help.HelpManager;
+import org.sakaiproject.component.api.ServerConfigurationService;
+
+import org.sakaiproject.api.app.help.Resource;
+
+import org.sakaiproject.component.cover.ComponentManager;
 
 import org.apache.commons.lang.StringUtils;
-
-import org.sakaiproject.api.app.help.HelpManager;
-import org.sakaiproject.api.app.help.Resource;
-import org.sakaiproject.component.api.ServerConfigurationService;
-import org.sakaiproject.component.cover.ComponentManager;
 
 /**
  * Content Servlet serves help documents to document frame.
  * @version $Id$
  */
-@Slf4j
 public class ContentServlet extends HttpServlet
 {
 
   private static final long serialVersionUID = 1L;
+	
+  /** Our log (commons). */
+  private static Logger M_log = LoggerFactory.getLogger(ContentServlet.class);
 
   private static final String DOC_ID = "docId";
   
@@ -82,8 +86,8 @@ public class ContentServlet extends HttpServlet
        	  resource = getHelpManager().getResourceByDocId(docId);
           //Possibly a fileURL
           if (resource == null && docId != null && docId.indexOf('/') >= 0) {
-        	  if (log.isDebugEnabled())
-        		  log.debug("Adding new resource:"+docId);
+        	  if (M_log.isDebugEnabled())
+        		  M_log.debug("Adding new resource:"+docId);
         	  resource = getHelpManager().createResource();
         	  resource.setLocation("/"+docId);
         	  resource.setDocId(docId);
@@ -100,7 +104,7 @@ public class ContentServlet extends HttpServlet
     	  		boolean localFileIsFile = false;
     	  		String localFileCanonicalPath = localFile.getCanonicalPath();
     	  		if(localFileCanonicalPath.contains(localHelpPath) && localFile.isFile()) { 
-    	  			log.debug("Local help file overrides: "+resource.getLocation());
+    	  			M_log.debug("Local help file overrides: "+resource.getLocation());
     	  			localFileIsFile = true;
     	  		}
 
@@ -140,14 +144,14 @@ public class ContentServlet extends HttpServlet
                     	  
 
                       if (url == null) {
-                    	  log.warn("Help document " + docId + " not found at: " + resource.getLocation());
+                    	  M_log.warn("Help document " + docId + " not found at: " + resource.getLocation());
                       } else {
                     	  BufferedReader br = null;
                     	  try {
                     		  br = new BufferedReader(new InputStreamReader(url.openStream(),"UTF-8"));
                     	  }
                     	  catch (ConnectException e){
-                    		  log.info("ConnectException on " + url.getPath());
+                    		  M_log.info("ConnectException on " + url.getPath());
                     		  res.sendRedirect(resource.getLocation());
                     		  return;
                     	  }

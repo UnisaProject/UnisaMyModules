@@ -15,19 +15,8 @@
  */
 package org.sakaiproject.webservices;
 
-import java.util.List;
-
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.messageforums.Area;
 import org.sakaiproject.api.app.messageforums.DiscussionForum;
 import org.sakaiproject.api.app.messageforums.DiscussionTopic;
@@ -37,9 +26,18 @@ import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.tool.api.Session;
 
+import javax.jws.WebMethod;
+import javax.jws.WebParam;
+import javax.jws.WebService;
+import javax.jws.soap.SOAPBinding;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import java.util.List;
+
 @WebService
 @SOAPBinding(style = SOAPBinding.Style.RPC, use = SOAPBinding.Use.LITERAL)
-@Slf4j
 public class MessageForums extends AbstractWebService {
 
     /**
@@ -51,6 +49,8 @@ public class MessageForums extends AbstractWebService {
      * Key in the ThreadLocalManager for binding our current tool.
      */
     protected final static String CURRENT_TOOL = "sakai:ToolComponent:current.tool";
+
+    private static Logger LOG = LoggerFactory.getLogger(MessageForums.class);
 
     /**
      * Adds a message to an existing forum or if there are no forums to add, adds a forum
@@ -105,7 +105,7 @@ public class MessageForums extends AbstractWebService {
             for (DiscussionForum dForum : forums) {
                 anyForum = dForum;
                 if (forum.equals(dForum.getTitle())) selectedForum = dForum;
-                log.debug("forum = " + dForum + " ID=" + dForum.getId());
+                LOG.debug("forum = " + dForum + " ID=" + dForum.getId());
             }
 
             if (selectedForum == null) selectedForum = anyForum;
@@ -125,7 +125,7 @@ public class MessageForums extends AbstractWebService {
                     area.setSendEmailOut(Boolean.TRUE);
                     area.setAvailabilityRestricted(Boolean.FALSE);
                     areaManager.saveArea(area);
-                    log.debug("Created area...");
+                    LOG.debug("Created area...");
                 }
 
                 selectedForum = messageForumsForumManager.createDiscussionForum();
@@ -136,18 +136,18 @@ public class MessageForums extends AbstractWebService {
                 selectedForum.setModerated(false);
                 selectedForum.setPostFirst(false);
                 messageForumsForumManager.saveDiscussionForum(selectedForum);
-                log.debug("Created forum=" + forum);
+                LOG.debug("Created forum=" + forum);
                 dTopic = messageForumsForumManager.createDiscussionForumTopic(selectedForum);
                 dTopic.setTitle(topic);
                 dTopic.setCreatedBy(user);
                 messageForumsForumManager.saveDiscussionForumTopic(dTopic, false);
-                log.debug("Created topic=" + topic);
+                LOG.debug("Created topic=" + topic);
                 forums = messageForumsForumManager.getForumsForMainPage();
                 selectedForum = null;
                 for (DiscussionForum dForum : forums) {
                     anyForum = dForum;
                     if (forum.equals(dForum.getTitle())) selectedForum = dForum;
-                    log.debug("forum = " + dForum + " ID=" + dForum.getId());
+                    LOG.debug("forum = " + dForum + " ID=" + dForum.getId());
                 }
             }
 
@@ -159,7 +159,7 @@ public class MessageForums extends AbstractWebService {
                 anyTopic = dTopic;
                 if (topic.equals(dTopic.getTitle())) selectedTopic = dTopic;
                 if (dTopic.getDraft().equals(Boolean.FALSE)) {
-                    log.debug("Topic ID=" + dTopic.getId() + " title=" + dTopic.getTitle());
+                    LOG.debug("Topic ID=" + dTopic.getId() + " title=" + dTopic.getTitle());
                 }
             }
 
@@ -188,7 +188,7 @@ public class MessageForums extends AbstractWebService {
             discussionForumManager.saveMessage(aMsg);
             return "Success";
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            e.printStackTrace();
         }
 
         return "Failure";

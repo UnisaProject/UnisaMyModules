@@ -24,6 +24,8 @@ package org.sakaiproject.component.common.edu.person;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.common.edu.person.SakaiPerson;
 import org.sakaiproject.api.common.edu.person.SakaiPersonManager;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -33,21 +35,36 @@ import org.sakaiproject.event.api.Event;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.user.api.UserDirectoryService;
 
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * This observer watches for user.del events and removes the profiles associated with the user
  * @author dhorwitz
  *
  */
-@Setter @Slf4j
 public class SakaiPersonObserver implements Observer {
 
+	private static Logger log = LoggerFactory.getLogger(SakaiPersonObserver.class);
+	
 	private EventTrackingService eventTrackingService;	
+	public void setEventTrackingService(EventTrackingService eventTrackingService) {
+		this.eventTrackingService = eventTrackingService;
+	}
+
+	
 	private SakaiPersonManager sakaiPersonManager;	
+	public void setSakaiPersonManager(SakaiPersonManager sakaiPersonManager) {
+		this.sakaiPersonManager = sakaiPersonManager;
+	}
+
 	private EntityManager entityManager;	
+	public void setEntityManager(EntityManager entityManager) {
+		this.entityManager = entityManager;
+	}
+
 	private ServerConfigurationService serverConfigurationService;
+	public void setServerConfigurationService(
+			ServerConfigurationService serverConfigurationService) {
+		this.serverConfigurationService = serverConfigurationService;
+	}
 
 	public void init() {
 		log.info("init()");
@@ -91,6 +108,13 @@ public class SakaiPersonObserver implements Observer {
 			if (sp != null) {
 				sakaiPersonManager.delete(sp);
 			}
+			
+			
 		}
+		
+		
+		
+		
 	}
+
 }

@@ -27,6 +27,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.entity.api.ResourcePropertiesEdit;
 import org.sakaiproject.portal.api.Portal;
 import org.sakaiproject.portal.api.PortalHandler;
@@ -38,8 +40,6 @@ import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.util.ResourceLoader;
-import lombok.extern.slf4j.Slf4j;
-
 
 /**
  * Abstract class to hold common base methods for portal handlers.
@@ -49,9 +49,10 @@ import lombok.extern.slf4j.Slf4j;
  * @version $Rev$
  * 
  */
-@Slf4j
 public abstract class BasePortalHandler implements PortalHandler
 {
+	private static final Logger log = LoggerFactory.getLogger(BasePortalHandler.class);
+
 	public BasePortalHandler()
 	{
 		urlFragment = "none";
@@ -165,20 +166,26 @@ public abstract class BasePortalHandler implements PortalHandler
 
 			locale_string = props.getProperty("locale_string");
 
-			log.debug("setSiteLanguage - locale_string property: {}", locale_string);
+			if (log.isDebugEnabled()) {
+				log.debug("setSiteLanguage - locale_string property: " + locale_string);
+			}
 		}
 		Locale loc = null;
 		// if no language was specified when creating the site, set default language to session
 		if(locale_string == null || locale_string == "")
 		{
-			log.debug("setSiteLanguage - no locale, setting null.");
+			if(log.isDebugEnabled()){
+				log.debug("setSiteLanguage - no locale, setting null.");
+			}
 		}
 		
 		// if you have indicated a language when creating the site, set selected language to session
 		else
 		{
 			loc = getLocaleFromString(locale_string);
-			log.debug("setSiteLanguage - locale: {}", loc);
+			if(log.isDebugEnabled()){
+				log.debug("setSiteLanguage - locale: " + loc.toString());
+			}
 		}
 
 		loc = rl.setContextLocale(loc);
@@ -197,7 +204,9 @@ public abstract class BasePortalHandler implements PortalHandler
 		}
 
 		Locale locale = setSiteLanguage(site);
-		log.debug("Locale for site {} = {}", site.getId(), locale);
+		if(log.isDebugEnabled()) {
+			log.debug("Locale for site " + site.getId() + " = " + locale.toString());
+		}
 		String localeString = locale.getLanguage();
 		String country = locale.getCountry();
 		if(country.length() > 0) localeString += "-" + country;

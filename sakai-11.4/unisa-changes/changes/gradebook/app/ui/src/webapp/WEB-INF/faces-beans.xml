@@ -22,6 +22,11 @@
 			<value>#{org_sakaiproject_section_api_SectionAwareness}</value>
 		</managed-property>
 		<managed-property>
+			<description>User Directory Service</description>
+			<property-name>userDirectoryService</property-name>
+			<value>#{org_sakaiproject_tool_gradebook_facades_UserDirectoryService}</value>
+		</managed-property>
+		<managed-property>
 			<description>Authn Service</description>
 			<property-name>authnService</property-name>
 			<value>#{org_sakaiproject_tool_gradebook_facades_Authn}</value>
@@ -30,6 +35,16 @@
 			<description>Authz Service</description>
 			<property-name>authzService</property-name>
 			<value>#{org_sakaiproject_tool_gradebook_facades_Authz}</value>
+		</managed-property>
+		<managed-property>
+			<description>ContextManagement Service</description>
+			<property-name>contextManagementService</property-name>
+			<value>#{org_sakaiproject_tool_gradebook_facades_ContextManagement}</value>
+		</managed-property>
+        <managed-property>
+			<description>Event Tracking Service</description>
+			<property-name>eventTrackingService</property-name>
+			<value>#{org_sakaiproject_tool_gradebook_facades_EventTrackingService}</value>
 		</managed-property>
 		<managed-property>
 			<description>Gradebook Permission Service</description>
@@ -271,8 +286,8 @@
 			<value>graderRules</value>
 		</managed-property>
 	</managed-bean>
-
-		<!-- Unisa Changes:2018/04/26:Added gradebookSync managed Bean -->
+	
+	<!-- Unisa Changes:2018/04/26:Added gradebookSync managed Bean -->
 	<managed-bean>
 		<managed-bean-name>gradebookSyncBean</managed-bean-name>
 		<managed-bean-class>org.sakaiproject.tool.gradebook.ui.GradebookSyncBean</managed-bean-class>

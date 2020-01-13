@@ -58,7 +58,7 @@ public interface EntityTransferrer
 	 *        The destination context
 	 * @param ids
 	 *        when null, all entities will be imported; otherwise, only entities with those ids will be imported
-	 * @param cleanup If true empty content in destination first
+	 * @param cleanup
 	 *        
 	 */
 	void transferCopyEntities(String fromContext, String toContext, List<String> ids, boolean cleanup);

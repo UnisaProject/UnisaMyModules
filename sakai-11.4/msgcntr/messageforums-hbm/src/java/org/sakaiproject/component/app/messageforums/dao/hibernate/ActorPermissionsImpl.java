@@ -22,15 +22,16 @@ package org.sakaiproject.component.app.messageforums.dao.hibernate;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.api.app.messageforums.ActorPermissions;
 import org.sakaiproject.api.app.messageforums.MessageForumsUser;
 import org.sakaiproject.api.app.messageforums.UniqueArrayList;
 
-@Slf4j
 public class ActorPermissionsImpl implements ActorPermissions {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ActorPermissionsImpl.class);
+    
     private List contributors = new UniqueArrayList();
     private List accessors = new UniqueArrayList();
     private List moderators = new UniqueArrayList();
@@ -84,8 +85,8 @@ public class ActorPermissionsImpl implements ActorPermissions {
     ////////////////////////////////////////////////////////////////////////
     
     public void addContributor(MessageForumsUser user) {
-        if (log.isDebugEnabled()) {
-            log.debug("addContributor(MessageForumsUser " + user + ")");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("addContributor(MessageForumsUser " + user + ")");
         }
         
         if (user == null) {
@@ -97,8 +98,8 @@ public class ActorPermissionsImpl implements ActorPermissions {
     }
 
     public void removeContributor(MessageForumsUser user) {
-        if (log.isDebugEnabled()) {
-            log.debug("removeContributor(MessageForumsUser " + user + ")");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("removeContributor(MessageForumsUser " + user + ")");
         }
         
         if (user == null) {
@@ -110,8 +111,8 @@ public class ActorPermissionsImpl implements ActorPermissions {
     }
     
     public void addAccesssor(MessageForumsUser user) {
-        if (log.isDebugEnabled()) {
-            log.debug("addAccesssor(MessageForumsUser " + user + ")");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("addAccesssor(MessageForumsUser " + user + ")");
         }
         
         if (user == null) {
@@ -123,8 +124,8 @@ public class ActorPermissionsImpl implements ActorPermissions {
     }
 
     public void removeAccessor(MessageForumsUser user) {
-        if (log.isDebugEnabled()) {
-            log.debug("removeAccessor(MessageForumsUser " + user + ")");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("removeAccessor(MessageForumsUser " + user + ")");
         }
         
         if (user == null) {
@@ -136,8 +137,8 @@ public class ActorPermissionsImpl implements ActorPermissions {
     }    
     
     public void addModerator(MessageForumsUser user) {
-        if (log.isDebugEnabled()) {
-            log.debug("addModerator(MessageForumsUser " + user + ")");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("addModerator(MessageForumsUser " + user + ")");
         }
         
         if (user == null) {
@@ -149,8 +150,8 @@ public class ActorPermissionsImpl implements ActorPermissions {
     }
 
     public void removeModerator(MessageForumsUser user) {
-        if (log.isDebugEnabled()) {
-            log.debug("removeModerator(MessageForumsUser " + user + ")");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("removeModerator(MessageForumsUser " + user + ")");
         }
         
         if (user == null) {

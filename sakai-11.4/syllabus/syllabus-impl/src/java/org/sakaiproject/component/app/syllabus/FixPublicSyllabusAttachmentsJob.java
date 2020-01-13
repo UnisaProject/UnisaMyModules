@@ -19,11 +19,11 @@ package org.sakaiproject.component.app.syllabus;
 
 import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
 import org.sakaiproject.api.app.syllabus.SyllabusData;
 import org.sakaiproject.api.app.syllabus.SyllabusManager;
 import org.sakaiproject.authz.api.AuthzGroupService;
@@ -32,9 +32,10 @@ import org.sakaiproject.event.cover.UsageSessionService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.cover.SessionManager;
 
-@Slf4j
+
 public class FixPublicSyllabusAttachmentsJob implements Job {
 
+	private static final Logger LOG = LoggerFactory.getLogger(FixPublicSyllabusAttachmentsJob.class);
 	private SyllabusManager syllabusManager;
 	private AuthzGroupService authzGroupService;
 	private String userId = "admin";
@@ -43,9 +44,9 @@ public class FixPublicSyllabusAttachmentsJob implements Job {
 		loginToSakai();
 
 		Set<SyllabusData> syllabi = syllabusManager.findPublicSyllabusData();
-		if (log.isInfoEnabled()) {
-			log.info("Executing FixPublicSyllabusAttachmentsJob now");
-			log.info("Number of public syllabus found: "+syllabi.size());
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Executing FixPublicSyllabusAttachmentsJob now");
+			LOG.info("Number of public syllabus found: "+syllabi.size());
 		}
 		for (SyllabusData syllabus: syllabi) {
 			syllabusManager.updateSyllabusAttachmentsViewState(syllabus);

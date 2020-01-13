@@ -22,6 +22,8 @@ import static org.sakaiproject.qna.logic.test.TestDataPreload.USER_UPDATE;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,8 +38,6 @@ import org.sakaiproject.qna.logic.test.stubs.ExternalLogicStub;
 import org.sakaiproject.qna.logic.test.stubs.QnaBundleLogicStub;
 import org.sakaiproject.qna.model.QnaCategory;
 import org.sakaiproject.qna.model.QnaQuestion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
@@ -52,7 +52,7 @@ public class CategoryLogicImplTest extends AbstractTransactionalJUnit4SpringCont
 	QuestionLogicImpl questionLogic;
 	PermissionLogicImpl permissionLogic;
 
-	private static Logger log = LoggerFactory.getLogger(CategoryLogicImplTest.class);
+	private static Log log = LogFactory.getLog(CategoryLogicImplTest.class);
 	
 	private ExternalLogicStub externalLogicStub = new ExternalLogicStub();
 	private ExternalEventLogicStub externalEventLogicStub = new ExternalEventLogicStub();

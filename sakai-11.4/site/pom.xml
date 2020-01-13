@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.sakaiproject</groupId>
     <artifactId>master</artifactId>
-    <version>12.6</version>
+    <version>11.4</version>
     <relativePath>../master/pom.xml</relativePath>
   </parent>
 
@@ -15,8 +15,18 @@
 
   <modules>
     <module>admin-perms-tool</module>
+    <module>site-tool/tool</module>
     <module>sakai-message-bundle-manager-tool</module>
     <module>mergedlist-util/util</module>
   </modules>
+
+
+  <distributionManagement>
+    <site>
+      <id>sakai-site</id>
+      <name>Sakai release Site</name>
+      <url>scp://source.sakaiproject.org/var/www/html/release/site/${project.version}</url>
+    </site>
+  </distributionManagement>
 
 </project>

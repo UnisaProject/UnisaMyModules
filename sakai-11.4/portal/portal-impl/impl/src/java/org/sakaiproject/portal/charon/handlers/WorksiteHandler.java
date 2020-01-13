@@ -27,6 +27,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
@@ -39,7 +41,6 @@ import org.sakaiproject.site.api.SitePage;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.ToolException;
 import org.sakaiproject.portal.util.URLUtils;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 
@@ -48,7 +49,6 @@ import lombok.extern.slf4j.Slf4j;
  * @version $Rev$
  * 
  */
-@Slf4j
 public class WorksiteHandler extends PageHandler
 {
 	private static final String INCLUDE_WORKSITE = "include-worksite";
@@ -57,6 +57,8 @@ public class WorksiteHandler extends PageHandler
 
 	private static final String URL_FRAGMENT = "worksite";
 	
+	private static final Logger log = LoggerFactory.getLogger(WorksiteHandler.class);
+
 	public WorksiteHandler()
 	{
 		setUrlFragment(WorksiteHandler.URL_FRAGMENT);
@@ -155,7 +157,7 @@ public class WorksiteHandler extends PageHandler
 		// start the response
 		String siteType = portal.calcSiteType(siteId);
 		PortalRenderContext rcontext = portal.startPageContext(siteType, title, site
-				.getSkin(), req, site);
+				.getSkin(), req);
 		
 		addLocale(rcontext, site);
 

@@ -40,9 +40,7 @@ should be included in file importing DeliveryMessages
         <h:column>
           <%-- Show answer text --%>
 		  <h:graphicImage id="image1" url="/images/radiounchecked.gif"/>
-          <h:outputText escape="false" value="#{answer.text}" >
-           <f:converter converterId="org.sakaiproject.tool.assessment.jsf.convert.AnswerSurveyConverter" />
-         </h:outputText>
+          <h:outputText escape="false" value="#{answer.text}" />
 	    </h:column>
 	    <h:column>
 	       <%-- Show feedback answer --%>

@@ -32,7 +32,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.radeox.util.Encoder;
 
 /**
@@ -41,9 +42,11 @@ import org.radeox.util.Encoder;
  * @author Stephan J. Schmidt
  * @version $Id$
  */
-@Slf4j
+
 public class InterWiki
 {
+	private static Logger log = LoggerFactory.getLogger(InterWiki.class);
+
 	private static InterWiki instance;
 
 	private Map interWiki;

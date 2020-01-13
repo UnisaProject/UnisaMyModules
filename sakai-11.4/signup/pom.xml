@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.sakaiproject</groupId>
 		<artifactId>master</artifactId>
-		<version>12.6</version>
+		<version>11.4</version>
 		<relativePath>../master/pom.xml</relativePath>
 	</parent>
 
@@ -47,8 +47,17 @@
 	<modules>
 		<module>api</module>
 		<module>impl</module>
+		<module>pack</module>
 		<module>tool</module>
 	</modules>
+
+	<distributionManagement>
+		<site>
+			<id>sakai-site</id>
+			<name>Sakai release Site</name>
+			<url>scpexe://source.sakaiproject.org/var/www/html/release/signup/${project.version}</url>
+		</site>
+	</distributionManagement>
 
 	<dependencyManagement>
 		<dependencies>
@@ -105,15 +114,21 @@
 				<version>${reflectutils.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.easymock</groupId>
+				<groupId>easymock</groupId>
 				<artifactId>easymock</artifactId>
-				<version>3.4</version>
+				<version>1.2_Java1.3</version>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>jta</groupId>
+				<artifactId>jta</artifactId>
+				<version>h2.1.8</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.myfaces.tomahawk</groupId>
 				<artifactId>tomahawk</artifactId>
-				<version>1.1.14</version>
+				<version>1.1.11</version>
 				<scope>compile</scope>
 			</dependency>
 			<dependency>
@@ -121,11 +136,6 @@
 				<artifactId>poi</artifactId>
 				<version>${sakai.poi.version}</version>
 				<scope>compile</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.poi</groupId>
-				<artifactId>poi-ooxml</artifactId>
-				<version>${sakai.poi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
@@ -149,6 +159,12 @@
 				<groupId>oro</groupId>
 				<artifactId>oro</artifactId>
 				<version>2.0.8</version>
+				<scope>compile</scope>
+			</dependency>
+			<dependency>
+				<groupId>net.sf.opencsv</groupId>
+				<artifactId>opencsv</artifactId>
+				<version>2.3</version>
 				<scope>compile</scope>
 			</dependency>
 		</dependencies>

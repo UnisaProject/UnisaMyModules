@@ -29,6 +29,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.user.api.*;
+import org.apache.commons.lang.StringUtils;
+
 import com.novell.ldap.LDAPConnection;
 import com.novell.ldap.LDAPEntry;
 import com.novell.ldap.LDAPException;
@@ -36,10 +41,6 @@ import com.novell.ldap.LDAPJSSESecureSocketFactory;
 import com.novell.ldap.LDAPSearchConstraints;
 import com.novell.ldap.LDAPSearchResults;
 import com.novell.ldap.LDAPSocketFactory;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-
-import org.sakaiproject.user.api.*;
 
 /**
  * <p>
@@ -51,7 +52,6 @@ import org.sakaiproject.user.api.*;
  * @author David Ross, Albany Medical College
  * @author Rishi Pande, Virginia Tech
  */
-@Slf4j
 public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnectionManagerConfig, ExternalUserSearchUDP, UsersShareEmailUDP, DisplayAdvisorUDP, AuthenticationIdUDP
 {
 	/** Default LDAP connection port */
@@ -94,6 +94,9 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	public static final boolean DEFAULT_ALLOW_AUTHENTICATION = true;
 	
 	public static final boolean DEFAULT_AUTHENTICATE_WITH_PROVIDER_FIRST = false;
+
+	/** Class-specific logger */
+	private static Logger M_log = LoggerFactory.getLogger(JLDAPDirectoryProvider.class);
 
 	/** LDAP host address */
 	private String ldapHost;
@@ -214,8 +217,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	private boolean authenticateWithProviderFirst = DEFAULT_AUTHENTICATE_WITH_PROVIDER_FIRST;
 
 	public JLDAPDirectoryProvider() {
-		if ( log.isDebugEnabled() ) {
-			log.debug("instantating JLDAPDirectoryProvider");
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("instantating JLDAPDirectoryProvider");
 		}
 	}
 
@@ -230,14 +233,14 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	public void init()
 	{
 
-		if ( log.isDebugEnabled() ) {
-			log.debug("init()");
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("init()");
 		}
 
 		// We don't want to allow people to break their config by setting the batch size to be more than the maxResultsSize.
 		if (batchSize > maxResultSize) {
 			batchSize = maxResultSize;
-			log.warn("JLDAP batchSize is larger than maxResultSize, batchSize has been reduced from: "+ batchSize + " to: "+ maxResultSize);
+			M_log.warn("JLDAP batchSize is larger than maxResultSize, batchSize has been reduced from: "+ batchSize + " to: "+ maxResultSize);
 		}
 
 		initLdapConnectionManager();
@@ -259,8 +262,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	 */
 	protected void initLdapConnectionManager() {
 
-		if ( log.isDebugEnabled() ) {
-			log.debug("initLdapConnectionManager()");
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("initLdapConnectionManager()");
 		}
 
 		// all very awkward b/c of the mixed-in config implementation
@@ -285,8 +288,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	 */
 	protected void initLdapAttributeMapper() {
 
-		if ( log.isDebugEnabled() ) {
-			log.debug("initLdapAttributeMapper()");
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("initLdapAttributeMapper()");
 		}
 
 		if ( ldapAttributeMapper == null ) {
@@ -306,14 +309,14 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	 */
 	protected LdapConnectionManager newDefaultLdapConnectionManager() {
 		if (this.isPooling()) {
-			if ( log.isDebugEnabled() ) {
-				log.debug(
+			if ( M_log.isDebugEnabled() ) {
+				M_log.debug(
 				"newDefaultLdapConnectionManager(): returning a new PoolingLdapConnectionManager");
 			}
 			return new PoolingLdapConnectionManager();
 		} else {
-			if ( log.isDebugEnabled() ) {
-				log.debug(
+			if ( M_log.isDebugEnabled() ) {
+				M_log.debug(
 				"newDefaultLdapConnectionManager(): returning a new SimpleLdapConnectionManager");
 			}
 			return new SimpleLdapConnectionManager();
@@ -328,8 +331,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	 * @return a new {@link LdapAttributeMapper}
 	 */
 	protected LdapAttributeMapper newDefaultLdapAttributeMapper() {
-		if ( log.isDebugEnabled() ) {
-			log.debug(
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug(
 			"newDefaultLdapAttributeMapper(): returning a new SimpleLdapAttributeMapper");
 		}
 		return new SimpleLdapAttributeMapper();
@@ -341,8 +344,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	 */
 	public void destroy()
 	{
-		if ( log.isDebugEnabled() ) {
-			log.debug("destroy()");
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("destroy()");
 		}
 
 	}
@@ -372,19 +375,19 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	 */
 	public boolean authenticateUser(final String userLogin, final UserEdit edit, final String password)
 	{
-		if ( log.isDebugEnabled() ) {
-			log.debug("authenticateUser(): [userLogin = " + userLogin + "]");
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("authenticateUser(): [userLogin = " + userLogin + "]");
 		}
 
 		if ( !(allowAuthentication) ) {
-			log.debug("authenticateUser(): denying authentication attempt [userLogin = " + userLogin + "]. All authentication has been disabled via configuration");
+			M_log.debug("authenticateUser(): denying authentication attempt [userLogin = " + userLogin + "]. All authentication has been disabled via configuration");
 			return false;
 		}
 		
 		if ( StringUtils.isBlank(password) )
 		{
-			if ( log.isDebugEnabled() ) {
-				log.debug("authenticateUser(): returning false, blank password");
+			if ( M_log.isDebugEnabled() ) {
+				M_log.debug("authenticateUser(): returning false, blank password");
 			}
 			return false;
 		}
@@ -395,8 +398,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 		{
 
 			// conn is implicitly bound as manager, if necessary
-			if ( log.isDebugEnabled() ) {
-				log.debug("authenticateUser(): allocating connection for login [userLogin = " + userLogin + "]");
+			if ( M_log.isDebugEnabled() ) {
+				M_log.debug("authenticateUser(): allocating connection for login [userLogin = " + userLogin + "]");
 			}
 			conn = ldapConnectionManager.getConnection();
 
@@ -407,25 +410,25 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 			final String endUserDN = lookupUserBindDn(userLogin, conn);
 
 			if ( endUserDN == null ) {
-				if ( log.isDebugEnabled() ) {
-					log.debug("authenticateUser(): failed to find bind dn for login [userLogin = " + userLogin + "], returning false");
+				if ( M_log.isDebugEnabled() ) {
+					M_log.debug("authenticateUser(): failed to find bind dn for login [userLogin = " + userLogin + "], returning false");
 				}
 				return false;
 			}
 
-			if ( log.isDebugEnabled() ) {
-				log.debug("authenticateUser(): returning connection to pool [userLogin = " + userLogin + "]");
+			if ( M_log.isDebugEnabled() ) {
+				M_log.debug("authenticateUser(): returning connection to pool [userLogin = " + userLogin + "]");
 			}
 			ldapConnectionManager.returnConnection(conn);
 			conn = null;
-			if ( log.isDebugEnabled() ) {
-				log.debug("authenticateUser(): attempting to allocate bound connection [userLogin = " + 
+			if ( M_log.isDebugEnabled() ) {
+				M_log.debug("authenticateUser(): attempting to allocate bound connection [userLogin = " + 
 						userLogin + "][bind dn [" + endUserDN + "]");
 			}
 			conn = ldapConnectionManager.getBoundConnection(endUserDN, password);
 
-			if ( log.isDebugEnabled() ) {
-				log.debug("authenticateUser(): successfully allocated bound connection [userLogin = " + 
+			if ( M_log.isDebugEnabled() ) {
+				M_log.debug("authenticateUser(): successfully allocated bound connection [userLogin = " + 
 						userLogin + "][bind dn [" + endUserDN + "]");
 			}
 			return true;
@@ -435,10 +438,10 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 		{
 			switch (e.getResultCode()) {
 				case LDAPException.INVALID_CREDENTIALS:
-					log.warn("authenticateUser(): invalid credentials [userLogin = " + userLogin + "]");
+					M_log.warn("authenticateUser(): invalid credentials [userLogin = " + userLogin + "]");
 					return false;
 				case LDAPException.UNWILLING_TO_PERFORM:
-					log.warn("authenticateUser(): ldap service is unwilling to authenticate [userLogin = " + userLogin + "][reason = " + e.getLDAPErrorMessage() + "]");
+					M_log.warn("authenticateUser(): ldap service is unwilling to authenticate [userLogin = " + userLogin + "][reason = " + e.getLDAPErrorMessage() + "]");
 					return false;
 				default:
 					throw new RuntimeException(
@@ -452,8 +455,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 					+ userLogin + "]", e);
 		} finally {
 			if ( conn != null ) {
-				if ( log.isDebugEnabled() ) {
-					log.debug("authenticateUser(): returning connection to connection manager");
+				if ( M_log.isDebugEnabled() ) {
+					M_log.debug("authenticateUser(): returning connection to connection manager");
 				}
 				ldapConnectionManager.returnConnection(conn);
 			}
@@ -494,7 +497,7 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 					}
 					resolvedEntry = getUserByEid(eid, null);
 				} catch ( InvalidEmailAddressException e ) {
-					log.error("findUserByEmail(): Attempted to look up user at an invalid email address [" + email + "]", e);
+					M_log.error("findUserByEmail(): Attempted to look up user at an invalid email address [" + email + "]", e);
 					useStdFilter = true; // fall back to std processing, we cant derive an EID from this addr
 				}
 			}
@@ -510,14 +513,14 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 			}
 		
 			if ( resolvedEntry == null ) {
-				if ( log.isDebugEnabled() ) {
-					log.debug("findUserByEmail(): failed to find user by email [email = " + email + "]");
+				if ( M_log.isDebugEnabled() ) {
+					M_log.debug("findUserByEmail(): failed to find user by email [email = " + email + "]");
 				}
 				return false;
 			}
 
-			if ( log.isDebugEnabled() ) {
-				log.debug("findUserByEmail(): found user by email [email = " + email + "]");
+			if ( M_log.isDebugEnabled() ) {
+				M_log.debug("findUserByEmail(): found user by email [email = " + email + "]");
 			}
 
 			if ( edit != null ) {
@@ -527,15 +530,15 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 			return true;
 		
 		} catch ( Exception e ) {
-			log.error("findUserByEmail(): failed [email = " + email + "]");
-			log.debug("Exception: ", e);
+			M_log.error("findUserByEmail(): failed [email = " + email + "]");
+			M_log.debug("Exception: ", e);
 			return false;
 		}
 		
 		/*
 		
-		if ( log.isDebugEnabled() ) {
-			log.debug("findUserByEmail(): [email = " + email + "]");
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("findUserByEmail(): [email = " + email + "]");
 		}
 
 		try {
@@ -549,14 +552,14 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 						null, null, null, null);
 
 			if ( mappedEntry == null ) {
-				if ( log.isDebugEnabled() ) {
-					log.debug("findUserByEmail(): failed to find user by email [email = " + email + "]");
+				if ( M_log.isDebugEnabled() ) {
+					M_log.debug("findUserByEmail(): failed to find user by email [email = " + email + "]");
 				}
 				return false;
 			}
 
-			if ( log.isDebugEnabled() ) {
-				log.debug("findUserByEmail(): found user by email [email = " + email + "]");
+			if ( M_log.isDebugEnabled() ) {
+				M_log.debug("findUserByEmail(): found user by email [email = " + email + "]");
 			}
 
 			if ( edit != null ) {
@@ -566,7 +569,7 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 			return true;
 
 		} catch (Exception e) {
-			log.error("findUserByEmail(): failed [email = " + email + "]", e);
+			M_log.error("findUserByEmail(): failed [email = " + email + "]", e);
 			return false;
 		}
 		
@@ -586,7 +589,7 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 		try {
 			return getUserByEid(edit, edit.getEid(), null);
 		} catch ( LDAPException e ) {
-			log.error("getUser() failed [eid: " + edit.getEid() + "]", e);
+			M_log.error("getUser() failed [eid: " + edit.getEid() + "]", e);
 			return false;
 		}
 
@@ -615,7 +618,7 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 			mappedEntry = (LdapUserData) searchDirectoryForSingleEntry(filter,
 					conn, null, null, null);
 		} catch (LDAPException e) {
-			log.error("Failed to find user for AID: " + aid, e);
+			M_log.error("Failed to find user for AID: " + aid, e);
 		}
 		return mappedEntry;
 	}
@@ -633,8 +636,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	 */
 	public void getUsers(Collection<UserEdit> users)
 	{
-		if ( log.isDebugEnabled() ) {
-			log.debug("getUsers(): [Collection size = " + users.size() + "]");
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("getUsers(): [Collection size = " + users.size() + "]");
 		}
 
 		LDAPConnection conn = null;
@@ -694,8 +697,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 			
 			// Finally clean up the original collection and remove and users we could not find
 			for (UserEdit userRemove : usersToRemove) {
-				if (log.isDebugEnabled()) {
-					log.debug("JLDAP getUsers could not find user: " + userRemove.getEid());
+				if (M_log.isDebugEnabled()) {
+					M_log.debug("JLDAP getUsers could not find user: " + userRemove.getEid());
 				}
 				users.remove(userRemove);
 			}
@@ -714,16 +717,16 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 		} finally {
 
 			if ( conn != null ) {
-				if ( log.isDebugEnabled() ) {
-					log.debug("getUsers(): returning connection to connection manager");
+				if ( M_log.isDebugEnabled() ) {
+					M_log.debug("getUsers(): returning connection to connection manager");
 				}
 				ldapConnectionManager.returnConnection(conn);
 			}
 
 			// no sense in returning a partially complete search result
 			if ( abortiveSearch ) {
-				if ( log.isDebugEnabled() ) {
-					log.debug("getUsers(): abortive search, clearing received users collection");
+				if ( M_log.isDebugEnabled() ) {
+					M_log.debug("getUsers(): abortive search, clearing received users collection");
 				}
 				users.clear();
 			}
@@ -747,8 +750,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	 */
 	public boolean userExists(String eid)
 	{
-		if ( log.isDebugEnabled() ) {
-			log.debug("userExists(): [eid = " + eid + "]");
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("userExists(): [eid = " + eid + "]");
 		}
 
 		try {
@@ -756,7 +759,7 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 			return getUserByEid(null, eid, null);
 
 		} catch ( LDAPException e ) {
-			log.error("userExists() failed: [eid = " + eid + "]", e);
+			M_log.error("userExists() failed: [eid = " + eid + "]", e);
 			return false;
 		}
 	}
@@ -799,17 +802,17 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	 */
 	protected LdapUserData getUserByEid(String eid, LDAPConnection conn) 
 	throws LDAPException {
-		if ( log.isDebugEnabled() ) {
-			log.debug("getUserByEid(): [eid = " + eid + "]");
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("getUserByEid(): [eid = " + eid + "]");
 		}
 
 		if ( !(isSearchableEid(eid)) ) {
 			if (eid == null)
 			{
-				log.debug("User EID not searchable (eid is null)");
+				M_log.debug("User EID not searchable (eid is null)");
 			}
-			else if ( log.isInfoEnabled() ) {
-				log.info("User EID not searchable (possibly blacklisted or otherwise syntactically invalid) [" + eid + "]");
+			else if ( M_log.isInfoEnabled() ) {
+				M_log.info("User EID not searchable (possibly blacklisted or otherwise syntactically invalid) [" + eid + "]");
 			}
 			return null;
 		}
@@ -855,8 +858,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	protected String lookupUserBindDn(String eid, LDAPConnection conn) 
 	throws LDAPException {
 
-		if ( log.isDebugEnabled() ) {
-			log.debug("lookupUserEntryDN(): [eid = " + eid + 
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("lookupUserEntryDN(): [eid = " + eid + 
 					"][reusing conn = " + (conn != null) + "]");
 		}
 
@@ -868,8 +871,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 		}
 
 		if ( foundUserData == null ) {
-			if ( log.isDebugEnabled() ) {
-				log.debug("lookupUserEntryDN(): no directory entried found [eid = " + 
+			if ( M_log.isDebugEnabled() ) {
+				M_log.debug("lookupUserEntryDN(): no directory entried found [eid = " + 
 						eid + "]");
 			}
 			return null;
@@ -897,8 +900,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 			String searchBaseDn)
 	throws LDAPException {
 
-		if ( log.isDebugEnabled() ) {
-			log.debug("searchDirectoryForSingleEntry(): [filter = " + filter + 
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("searchDirectoryForSingleEntry(): [filter = " + filter + 
 					"][reusing conn = " + (conn != null) + "]");
 		}
 
@@ -947,8 +950,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 
 		boolean receivedConn = conn != null;
 
-		if ( log.isDebugEnabled() ) {
-			log.debug("searchDirectory(): [filter = " + filter + 
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("searchDirectory(): [filter = " + filter + 
 					"][reusing conn = " + receivedConn + "]");
 		}
 
@@ -985,8 +988,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 			constraints.setBatchSize(0);
 			constraints.setMaxResults(maxResults);
 
-			if ( log.isDebugEnabled() ) {
-				log.debug("searchDirectory(): [baseDN = " + 
+			if ( M_log.isDebugEnabled() ) {
+				M_log.debug("searchDirectory(): [baseDN = " + 
 						searchBaseDn + "][filter = " + filter + 
 						"][return attribs = " + 
 						Arrays.toString(searchResultPhysicalAttributeNames) + 
@@ -1013,8 +1016,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 				}
 				mappedResults.add((LdapUserData) mappedResult);
 			}
-			if (log.isDebugEnabled()) {
-				log.debug("Query took: "+ (System.currentTimeMillis() - start)+ "ms.");
+			if (M_log.isDebugEnabled()) {
+				M_log.debug("Query took: "+ (System.currentTimeMillis() - start)+ "ms.");
 			}
 			
 			return mappedResults;
@@ -1029,8 +1032,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 					"][max results = " + maxResults + "]", e);
 		} finally {
 			if ( !(receivedConn) && conn != null ) {
-				if ( log.isDebugEnabled() ) {
-					log.debug("searchDirectory(): returning connection to connection manager");
+				if ( M_log.isDebugEnabled() ) {
+					M_log.debug("searchDirectory(): returning connection to connection manager");
 				}
 				ldapConnectionManager.returnConnection(conn);
 			}
@@ -1095,8 +1098,8 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	 */
 	protected LdapUserData mapLdapEntryOntoUserData(LDAPEntry ldapEntry) {
 
-		if ( log.isDebugEnabled() ) {
-			log.debug("mapLdapEntryOntoUserData() [dn = " + ldapEntry.getDN() + "]");
+		if ( M_log.isDebugEnabled() ) {
+			M_log.debug("mapLdapEntryOntoUserData() [dn = " + ldapEntry.getDN() + "]");
 		}
 
 		LdapUserData userData = newLdapUserData();
@@ -1125,9 +1128,9 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	 */
 	protected void mapUserDataOntoUserEdit(LdapUserData userData, UserEdit userEdit) {
 
-		if ( log.isDebugEnabled() ) {
+		if ( M_log.isDebugEnabled() ) {
 			//  std. UserEdit impl has no meaningful toString() impl
-			log.debug("mapUserDataOntoUserEdit() [userData = " + userData + "]");
+			M_log.debug("mapUserDataOntoUserEdit() [userData = " + userData + "]");
 		}
 
 		// delegate to the LdapAttributeMapper since it knows the most
@@ -1389,7 +1392,7 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	 * {@inheritDoc}
 	 */
 	public void setMaxObjectsToQueryFor (int maxObjectsToQueryFor) {
-		log.info("maxObjectToQueryFor is deprecated please use " + "batchSize@org.sakaiproject.user.api.UserDirectoryProvider instead");
+		M_log.info("maxObjectToQueryFor is deprecated please use " + "batchSize@org.sakaiproject.user.api.UserDirectoryProvider instead");
 		setBatchSize(maxObjectsToQueryFor);
 	}
 
@@ -1622,7 +1625,7 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 	 * @deprecated
 	**/
 	public void setMemoryService(org.sakaiproject.memory.api.MemoryService ignore) {
-		log.warn("DEPRECATION WARNING: memoryService is deprecated. Please remove it from your jldap-beans.xml configuration.");
+		M_log.warn("DEPRECATION WARNING: memoryService is deprecated. Please remove it from your jldap-beans.xml configuration.");
 	}
 
 	/** 
@@ -1639,7 +1642,7 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
      * record range given (sorted by sort name). 
      */  
 	//public List<User> searchUsers(String criteria, int first, int last) {
-	//	log.error("Not yet implemented");
+	//	M_log.error("Not yet implemented");
 	//	return null;
 	//}
 
@@ -1685,7 +1688,7 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 			}
 
 		} catch (LDAPException e) {
-			log.warn("An error occurred searching for users: " + e.getClass().getName() + ": (" + e.getResultCode() + ") " + e.getMessage());
+			M_log.warn("An error occurred searching for users: " + e.getClass().getName() + ": (" + e.getResultCode() + ") " + e.getMessage());
 			return null;
 		}
 		
@@ -1718,7 +1721,7 @@ public class JLDAPDirectoryProvider implements UserDirectoryProvider, LdapConnec
 				users.add(user);
 			}
 		} catch (LDAPException e) {
-			log.warn("An error occurred finding users by email: " + e.getClass().getName() + ": (" + e.getResultCode() + ") " + e.getMessage());
+			M_log.warn("An error occurred finding users by email: " + e.getClass().getName() + ": (" + e.getResultCode() + ") " + e.getMessage());
 			return null;
 		}
 		return users;

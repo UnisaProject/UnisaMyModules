@@ -22,7 +22,6 @@ import java.util.Map;
 import org.sakaiproject.api.common.edu.person.SakaiPerson;
 import org.sakaiproject.profile2.model.MimeTypeByteArray;
 import org.sakaiproject.site.api.Site;
-import org.sakaiproject.site.api.SiteService.SiteTitleValidationStatus;
 import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.user.api.User;
 
@@ -460,18 +459,6 @@ public interface SakaiProxy {
 	public String getDirectUrlToProfileComponent(String userId, String component, Map<String, String> extraParams);
 
 	/**
-	 * Creates a direct URL to a component (profile, messages etc) of a user's profile page
-	 * from another user's My Workspace.
-	 *
-	 * @param viewerUuid uuid of the viewing user
-	 * @param viewedUuid uuid of the user being viewed
-	 * @param component - currently only 'viewprofile' is supported.
-	 * @param extraParams a map of params that each component may need, used to build the URL
-	 * @return
-	 */
-	public String getDirectUrlToProfileComponent(String viewerUuid, String viewedUuid, String component, Map<String, String> extraParams);
-
-	/**
 	 * Check if a user is allowed to update their account. The User could come from LDAP so updates not allowed. This will check if any
 	 * updates are allowed.
 	 *
@@ -493,11 +480,8 @@ public interface SakaiProxy {
 	/**
 	 * Is the profile2.wall.enabled flag set in sakai.properties? If not set, defaults to <code>false</code>.
 	 *
-	 * DEPRECATED: UNLESS THERE IS AN EXPRESSED DESIRE FOR THIS FUNCTIONALITY THE WALL WILL BE REMOVED FOR 13.
-	 *
 	 * @return <code>true</code> if the profile2.wall.enabled flag is set, otherwise returns <code>false</code>.
 	 */
-	@Deprecated
 	public boolean isWallEnabledGlobally();
 
 	/**
@@ -1061,12 +1045,4 @@ public interface SakaiProxy {
 	 * @return <code>true</code> if the profile2.onlineStatus.enabled flag is set, otherwise returns <code>false</code>.
 	 */
 	public boolean isOnlineStatusEnabledGlobally();
-
-	/**
-	 * Given the original and stripped site titles, determine that validation status of the stripped string.
-	 * @param orig the original, unaltered text as input by the user
-	 * @param stripped the HTML stripped text
-	 * @return {@link SiteTitleValidationStatus}
-	 */
-	public SiteTitleValidationStatus validateSiteTitle(String orig, String stripped);
 }

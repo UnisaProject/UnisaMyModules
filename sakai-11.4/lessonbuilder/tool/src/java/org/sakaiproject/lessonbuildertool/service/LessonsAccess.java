@@ -22,41 +22,64 @@
 package org.sakaiproject.lessonbuildertool.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
+import java.util.Date;
 
-import lombok.extern.slf4j.Slf4j;
-
-import uk.org.ponder.messageutil.MessageLocator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.authz.api.SecurityService;
-import org.sakaiproject.content.api.ContentHostingService;
-import org.sakaiproject.lessonbuildertool.SimplePage;
-import org.sakaiproject.lessonbuildertool.SimplePageItem;
-import org.sakaiproject.lessonbuildertool.SimpleStudentPage;
-import org.sakaiproject.lessonbuildertool.model.SimplePageToolDao;
-import org.sakaiproject.lessonbuildertool.tool.beans.SimplePageBean;
-import org.sakaiproject.memory.api.Cache;
-import org.sakaiproject.memory.api.MemoryService;
+import org.sakaiproject.authz.api.SecurityAdvisor;
+import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.entity.api.EntityManager;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
 import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.user.cover.UserDirectoryService;
+import org.sakaiproject.user.api.User;
+import org.sakaiproject.db.cover.SqlService;
+import org.sakaiproject.db.api.SqlReader;
+
+import org.sakaiproject.memory.api.Cache;
+import org.sakaiproject.memory.api.CacheRefresher;
+import org.sakaiproject.memory.api.MemoryService;
+
+import org.sakaiproject.lessonbuildertool.SimplePageItem;
+import org.sakaiproject.lessonbuildertool.SimplePage;
+import org.sakaiproject.lessonbuildertool.model.SimplePageToolDao;
+import org.sakaiproject.lessonbuildertool.SimpleStudentPage;
+import org.sakaiproject.lessonbuildertool.tool.beans.SimplePageBean;
+
+import uk.org.ponder.messageutil.MessageLocator;
 import org.sakaiproject.tool.api.ToolManager;
-import org.sakaiproject.user.api.UserDirectoryService;
+import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.content.api.ContentHostingService;
+import org.sakaiproject.memory.api.MemoryService;
 
 // This class is used to check whether a page or item should be
 // accessible for the user. It checks all conditions. SimplePageBean
 // has individual checks for them, but this puts them all together,
 // for use in services where individual checks aren't needed.
 // In general this will be used by services such as /access or /direct
-@Slf4j
+
 public class LessonsAccess {
+
+    private Logger log = LoggerFactory.getLogger(LessonsAccess.class);
+
     // caching
-    private static Cache<String, Set<?>> cache = null;
+    private static Cache cache = null;
     // currently using 10 sec. The real goal is to prevent continual
     // reevaluation of items as we follow different paths. I.e. we mostly
     // care about it during a single transaction. But I'm using the normal
@@ -72,12 +95,11 @@ public class LessonsAccess {
     private AuthzGroupService authzGroupService;
     private SecurityService securityService;
     private MemoryService memoryService;
-    private UserDirectoryService userDirectoryService;
 
     public void init() {
 	if (useCache) {
 	cache = memoryService
-	    .getCache("org.sakaiproject.lessonbuildertool.service.LessonsAccess.cache");
+	    .newCache("org.sakaiproject.lessonbuildertool.service.LessonsAccess.cache");
 	}
         log.info("init()");
     }
@@ -263,7 +285,7 @@ public class LessonsAccess {
 
 	// if it's a student page, have to handle specially. Find item that has the student content section
 	// if usePrerequistes false, this can't happen, since no graded items will occur there
-	if (page.getOwner() != null && !page.isOwned()) {
+	if (page.getOwner() != null) {
 	    SimpleStudentPage student = dao.findStudentPage(page.getTopParent());
 	    SimplePageItem item = dao.findItem(student.getItemId());
 	    items = new ArrayList<SimplePageItem>();
@@ -550,7 +572,7 @@ public class LessonsAccess {
 	    group = "/site/" + page.getSiteId() + "/group/" + group;
 	if (owner == null)
 	    return false;
-	String currentUserId = userDirectoryService.getCurrentUser().getId();
+	String currentUserId = UserDirectoryService.getCurrentUser().getId();
 	if (group == null)
 	    return owner.equals(currentUserId);
 	else
@@ -581,10 +603,6 @@ public class LessonsAccess {
 	memoryService = m;
     }
 
-    public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
-		this.userDirectoryService = userDirectoryService;
-	}
-    
     public MessageLocator messageLocator;
 
     public void setMessageLocator(MessageLocator s) {
@@ -645,3 +663,4 @@ public class LessonsAccess {
     }
 
 }
+

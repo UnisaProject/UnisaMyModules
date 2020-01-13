@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans >
+    	<form-bean name="studentStatusForm" type="za.ac.unisa.lms.tools.studentstatus.forms.StudentStatusForm" />
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+
+	<action-mappings>
+	
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.studentstatus.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/studentStatus.do?act=walkthrough"
+       	 		contextRelative="true" />
+       	 	<forward
+				name="studentStatus"
+				path="/studentStatus.do?act=walkthrough"
+       	 		contextRelative="true" />
+		</action>
+		
+    	<action
+     		attribute="studentStatusForm"
+     		name="studentStatusForm"
+     		parameter="act"
+     		scope="session"
+     		path="/studentStatus"
+    		type="za.ac.unisa.lms.tools.studentstatus.actions.StudentStatusAction"
+     		validate="false">
+     		<forward
+				name="input"
+				path="/studentStatus.do?act=walkthrough"
+       	 		contextRelative="true" />
+       	 	<forward
+				name="default"
+				path="/studentStatus.do?act=walkthrough"
+       	 		contextRelative="true" />
+        	<forward
+      	  		name="applyLogin"
+       	 		path="/WEB-INF/jsp/applyLogin.jsp"
+        		contextRelative="true" />
+       	 	<forward
+       	 		name="applyStatus"
+        		path="/WEB-INF/jsp/applyStatus.jsp"
+       	 		contextRelative="true" />
+    	</action>
+
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.studentstatus.ApplicationResources" />
+
+</struts-config>

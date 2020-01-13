@@ -27,11 +27,11 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
-import lombok.extern.slf4j.Slf4j;
 
 /**
 * A blob is a Binary Large OBject.
@@ -51,7 +51,6 @@ import lombok.extern.slf4j.Slf4j;
 * @deprecated (KNL-898)
 *
 */
-@Slf4j
 public class Blob implements Cloneable, Serializable {
 
 	/**
@@ -1783,7 +1782,7 @@ public class Blob implements Cloneable, Serializable {
 
 	/**
 	* Prints the contents of this Blob.
-	* Formats the data neatly and debug it.
+	* Formats the data neatly and prints it to System.out.
 	* @see #toString
 	*
 	*/
@@ -1795,20 +1794,24 @@ public class Blob implements Cloneable, Serializable {
 		byte b;
 		long cksum = checksum();
 
+		// where to go?
+		PrintStream o = System.out;
+
 		// current output width
 		int currWidth = 86;
 
 		holdStr = ("Blob: length = " + size +
 		           " -- Checksum = " + toHex(cksum) + " ");
-		log.debug("{}{}", holdStr, strstr((currWidth - holdStr.length()), '-'));
+		o.print(holdStr);
+		o.println(strstr((currWidth - holdStr.length()), '-'));
 
 		// If no data, just print the last line and get outta' here
 		if (size == 0) {
-			log.debug(strstr(currWidth, '-'));
+			o.println(strstr(currWidth, '-'));
 			return;
 		}
 
-		log.debug("     0 | ");
+		o.print("     0 | ");
 
 		bytesPast = 0;
 		beginEnumeration(0);
@@ -1816,7 +1819,7 @@ public class Blob implements Cloneable, Serializable {
 
 				// print next byte
 				b = nextByte();
-				log.debug(toHex(b));
+				o.print(toHex(b));
 
 				// get the representation
 				if (between(b, 32, 126)) {
@@ -1830,26 +1833,26 @@ public class Blob implements Cloneable, Serializable {
 
 				if ((bytesPast % 16) == 0) {
 					// print out representation
-					log.debug("   <");
+					o.print("   <");
 					for (x = 0 ; x < 16 ; x++) {
-						log.debug("{}", rep[x]);
+						o.print(rep[x]);
 					}
-					log.debug(">");
+					o.println(">");
 
 					// Start of new line
 					if (hasMoreBytes()) {
 						holdStr = Integer.toString(bytesPast);
-						log.debug(spaces(6 - holdStr.length()));
-						log.debug(holdStr);
-						log.debug(" | ");
+						o.print(spaces(6 - holdStr.length()));
+						o.print(holdStr);
+						o.print(" | ");
 					}
 
 				} else if ((bytesPast % 4) == 0) {
 					// end of 4-byte chunk
-					log.debug("   ");
+					o.print("   ");
 
 				} else {
-					log.debug(" ");
+					o.print(' ');
 				} // endif
 
 		} // endwhile
@@ -1857,31 +1860,31 @@ public class Blob implements Cloneable, Serializable {
 		if ((bytesPast % 16) != 0) {
 			// write out some filler spaces
 			for (x = (bytesPast % 16) ; x < 16 ; x++) {
-				log.debug("  ");
+				o.print("  ");
 				rep[x] = ' ';
 
 				if ((x % 4) == 0) {
 					// end of (what would have been a) 4-byte chunk
-					log.debug("   ");
+					o.print("   ");
 				} else {
-					log.debug(" ");
+					o.print(' ');
 				} // endif
 			}
 
 			// print out representation
-			log.debug("   <");
+			o.print("   <");
 			for (x = 0 ; x < 16 ; x++) {
-				log.debug("{}", rep[x]);
+				o.print(rep[x]);
 			}
-			log.debug(">");
+			o.println(">");
 		}
 
 		// Write last dashed line
 		holdStr = ("---------------" +
 		           strstr(String.valueOf(size).length(), '-') +
 		           "--- Checksum = " + toHex(cksum) + " ");
-		log.debug(holdStr);
-		log.debug(strstr((currWidth - holdStr.length()), '-'));
+		o.print(holdStr);
+		o.println(strstr((currWidth - holdStr.length()), '-'));
 	}
 
 	////////////////////////////////////////////////////////////
@@ -2068,6 +2071,104 @@ public class Blob implements Cloneable, Serializable {
 		tail = head;
 		size = a.length;
 	}
+
+/*
+	// to test blob as an input stream ...
+	public static void main(String args[])
+		throws Exception
+	{
+		Blob b1 = new Blob();
+		Blob b2 = new Blob();
+		Blob b3 = new Blob();
+
+		int size = 2048;
+		try
+		{
+			size = Integer.parseInt(args[0]);
+		}
+		catch (Exception ignore) {}
+
+		System.out.println("size: " + size);
+
+		// load b1
+		for (int i = 0; i < size; i++)
+		{
+			int c = i;
+			b1.append((byte)c);
+			// System.out.println(i + ": appending: " + c + " " + (int)(b1.byteAt(i)));
+		}
+
+		// load b2 from b1 via the input stream
+		b2.read(b1.inputStream());
+
+		// load b3 from b1 (not using stream)
+		b3.append(b1);
+
+		System.out.println("b1 size: " + b1.length());
+		System.out.println("b2 size: " + b2.length());
+		System.out.println("b3 size: " + b3.length());
+
+		// compare
+		if (b2.equals(b1))
+		{
+			System.out.println(" b2.equals(b1) passed");
+		}
+		else
+		{
+			System.out.println(" b2.equals(b1) failed");
+		}
+
+		// compare
+		if (b3.equals(b1))
+		{
+			System.out.println(" b3.equals(b1) passed");
+		}
+		else
+		{
+			System.out.println(" b3.equals(b1) failed");
+		}
+
+		try
+		{
+			System.out.println("comparing b1 and b2 byte by byte");
+			for (int i = 0; i < b1.length(); i++)
+			{
+				if (b1.byteAt(i) != b2.byteAt(i))
+				{
+					System.out.println("mismatch at: " + i + " : b1 = " + b1.byteAt(i) + " : b2 = " + b2.byteAt(i));
+				}
+			}
+			System.out.println(b1.length() + " bytes compared");
+		}
+		catch (Exception e) { System.out.println(e); }
+
+		try
+		{
+			System.out.println("comparing b1 and b3 byte by byte");
+			for (int i = 0; i < b1.length(); i++)
+			{
+				if (b1.byteAt(i) != b3.byteAt(i))
+				{
+					System.out.println("mismatch at: " + i + " : b1 = " + b1.byteAt(i) + " : b3 = " + b3.byteAt(i));
+				}
+			}
+			System.out.println(b1.length() + " bytes compared");
+		}
+		catch (Exception e) { System.out.println(e); }
+
+		InputStream in = b1.inputStream();
+		for (int i = 0; i < b1.length(); i++)
+		{
+			int available = in.available();
+			int b = in.read();
+			System.out.println(i + " : avail= " + available + " : read = " + b);
+		}
+		System.out.println("final avail= " + in.available());
+		in.close();
+
+	}	// main
+*/
+
 } // end Blob
 
 
@@ -2146,3 +2247,6 @@ class BlobNode implements Cloneable, Serializable {
 	}
 
 } // end BlobNode
+
+
+

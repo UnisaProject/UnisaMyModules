@@ -21,12 +21,11 @@ package org.sakaiproject.content;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentResource;
@@ -47,8 +46,9 @@ import org.sakaiproject.tool.api.SessionManager;
  * @author buckett
  * 
  */
-@Slf4j
 public class CleanupDeletedContent implements Job {
+
+	private static final Logger log = LoggerFactory.getLogger(CleanupDeletedContent.class);
 
 	private ContentHostingService chs;
 	private ServerConfigurationService scs;

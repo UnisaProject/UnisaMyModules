@@ -23,8 +23,7 @@ should be included in file importing DeliveryMessages
 **********************************************************************************/
 --%>
 -->
-<h:outputText value="<fieldset>" escape="false"/>
-<h:outputText value="<legend class='samigo-legend'> #{question.text} </legend>" escape="false"/>
+  <h:outputText value="#{question.text}"  escape="false"/>
   <!-- ATTACHMENTS -->
   <%@ include file="/jsf/delivery/item/attachment.jsp" %>
 
@@ -41,15 +40,16 @@ should be included in file importing DeliveryMessages
       </h:panelGroup>
     </t:column>
     <t:column>
-      <h:selectBooleanCheckbox id="samigo-mc-mc" value="#{selection.response}"
-        disabled="#{delivery.actionString=='reviewAssessment' || delivery.actionString=='gradeAssessment'}" />
-      <h:panelGroup layout="block" styleClass="mcAnswerText">
-        <span class="samigo-answer-label strong" aria-hidden="true">
-          <h:outputText value=" #{selection.answer.label}" escape="false" />
-          <h:outputText value="#{deliveryMessages.dot} " rendered="#{selection.answer.label ne ''}" />
-        </span>
-        <h:outputLabel for="samigo-mc-mc" value="#{selection.answer.text}" escape="false" />
-      </h:panelGroup>
+     <f:verbatim><label></f:verbatim>
+     <h:selectBooleanCheckbox value="#{selection.response}"
+        disabled="#{delivery.actionString=='reviewAssessment'
+                 || delivery.actionString=='gradeAssessment'}" />
+     <f:verbatim><div class="mcAnswerText"></f:verbatim>
+     <h:outputText value=" #{selection.answer.label}" escape="false" />
+     <h:outputText value="#{deliveryMessages.dot}" rendered="#{selection.answer.label ne ''}" />
+     <h:outputText value=" #{selection.answer.text}" escape="false" />
+     <f:verbatim></div></f:verbatim>
+     <f:verbatim></label></f:verbatim>
     </t:column>
     <t:column>
       <h:panelGroup rendered="#{delivery.feedback eq 'true' &&
@@ -129,5 +129,3 @@ should be included in file importing DeliveryMessages
     </h:panelGroup>
   </h:panelGrid>
 </h:panelGroup>
-
-<h:outputText value="</fieldset>" escape="false"/>

@@ -60,7 +60,6 @@ package org.apache.commons.jrcs.rcs;
 import java.io.*;
 import java.util.*;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.jrcs.diff.Diff;
 import org.apache.commons.jrcs.diff.DiffException;
 import org.apache.commons.jrcs.diff.PatchFailedException;
@@ -139,7 +138,7 @@ import org.apache.commons.jrcs.util.ToString;
  *   String versionNumber = "1.2";
  *   {@link Line Line[]} text = archive.getRevision(versionNumber);
  *   for(int i = 0; i &lt; text.length(); i++)
- *       log.info(text[i].revision.version);
+ *       System.out.println(text[i].revision.version);
  * </pre></code>
  * </p>
  *
@@ -149,7 +148,6 @@ import org.apache.commons.jrcs.util.ToString;
  * @version $Id$
  * @author <a href="mailto:juanco@suigeneris.org">Juanco Anez</a>
  */
-@Slf4j
 public class Archive
         extends ToString
 {

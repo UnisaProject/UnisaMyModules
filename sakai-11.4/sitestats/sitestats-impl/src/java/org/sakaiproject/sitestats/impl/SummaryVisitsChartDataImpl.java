@@ -133,7 +133,7 @@ public class SummaryVisitsChartDataImpl implements SummaryVisitsChartData {
 			cal.setTime(sv.getDate());
 			int thisDay = cal.get(Calendar.DAY_OF_YEAR);
 			if(desiredDay == thisDay){
-				//log.debug("SummaryVisitsChartDataImpl.getDataForDay: "+(new Date(dateInMs).toGMTString()) +" matches "+sv.getDate().toGMTString()+" => "+sv.getTotalVisits()+" / "+sv.getTotalUnique());
+				//System.out.println("SummaryVisitsChartDataImpl.getDataForDay: "+(new Date(dateInMs).toGMTString()) +" matches "+sv.getDate().toGMTString()+" => "+sv.getTotalVisits()+" / "+sv.getTotalUnique());
 				return sv;
 			}
 		}
@@ -149,7 +149,7 @@ public class SummaryVisitsChartDataImpl implements SummaryVisitsChartData {
 			cal.setTime(sv.getDate());
 			int thisMonth = cal.get(Calendar.MONTH);
 			if(desiredMonth == thisMonth){
-				//log.debug("SummaryVisitsChartDataImpl.getDataForMonth: "+(new Date(dateInMs).toGMTString()) +" matches "+sv.getDate().toGMTString()+" => "+sv.getTotalVisits()+" / "+sv.getTotalUnique());
+				//System.out.println("SummaryVisitsChartDataImpl.getDataForMonth: "+(new Date(dateInMs).toGMTString()) +" matches "+sv.getDate().toGMTString()+" => "+sv.getTotalVisits()+" / "+sv.getTotalUnique());
 				return sv;
 			}
 		}

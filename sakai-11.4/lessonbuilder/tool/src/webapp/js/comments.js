@@ -66,21 +66,19 @@ $(function() {
 		width: 400,
 		modal: false,
 		resizable: false,
-		buttons:[{
-			text: msg("simplepage.cancel_message"),
-			click: function() {
+		buttons: {
+			"Cancel": function() {
 				if(originalDeleteDialogText !== null) {
 					$("#delete-comment-confirm").text(originalDeleteDialogText);
 				}
-			
+				
 				$(this).dialog("close");
+			},
+			
+			"Delete Comment": function() {
+				confirmDelete();
 			}
-		},{
-			text: msg("simplepage.delete_comment"),
-			click: function() {
-				deleteButton();
-			}
-		}]
+		}
 	});
 });
 
@@ -298,7 +296,7 @@ function deleteComment(link) {
 	//setMainFrameHeight(window.name);
 }
 
-function deleteButton() {
+function confirmDelete() {
 	$(commentToReload).load(deleteDialogCommentURL, commentsLoaded);
 	//$("#delete-dialog").parents(".replaceWithComments").load($(dialog).children(".delete-dialog-comment-url").text());
 	setMainFrameHeight(window.name);

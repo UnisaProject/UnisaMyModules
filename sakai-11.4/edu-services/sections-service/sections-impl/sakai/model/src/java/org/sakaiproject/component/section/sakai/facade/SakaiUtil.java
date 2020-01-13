@@ -20,8 +20,8 @@
  **********************************************************************************/
 package org.sakaiproject.component.section.sakai.facade;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.section.api.coursemanagement.User;
 import org.sakaiproject.component.section.sakai.UserImpl;
 import org.sakaiproject.site.cover.SiteService;
@@ -30,8 +30,9 @@ import org.sakaiproject.tool.cover.ToolManager;
 import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.user.cover.UserDirectoryService;
 
-@Slf4j
 public class SakaiUtil {
+	private static final Logger log = LoggerFactory.getLogger(SakaiUtil.class);
+
 	/**
 	 * Gets a User from Sakai's UserDirectory (legacy) service.
 	 * 
@@ -63,12 +64,14 @@ public class SakaiUtil {
 		return user;
 	}
 	
-	/**
-	 * @return The current sakai authz reference
-	 */
-	public static final String getSiteReference() {
-		Placement placement = ToolManager.getCurrentPlacement();
-		String context = placement.getContext();
-		return SiteService.siteReference(context);
-	}
+    /**
+     * @return The current sakai authz reference
+     */
+    public static final String getSiteReference() {
+        Placement placement = ToolManager.getCurrentPlacement();
+        String context = placement.getContext();
+        return SiteService.siteReference(context);
+    }
+
+
 }

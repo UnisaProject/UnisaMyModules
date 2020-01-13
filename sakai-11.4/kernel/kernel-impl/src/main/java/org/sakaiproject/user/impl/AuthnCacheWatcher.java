@@ -21,11 +21,8 @@
 
 package org.sakaiproject.user.impl;
 
-import java.util.Observable;
-import java.util.Observer;
-
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.Reference;
@@ -36,6 +33,8 @@ import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
 
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * This observer watches for user.add and user.upd events to invalidate the Authn cache
@@ -43,20 +42,24 @@ import org.sakaiproject.user.api.UserNotDefinedException;
  * @author dhorwitz
  *
  */
-@Slf4j
 public class AuthnCacheWatcher implements Observer {
+
+	private static final Logger log = LoggerFactory.getLogger(AuthnCacheWatcher.class);
+	//Copied from DbUserService as they are private
+	private static final String EIDCACHE = "eid:";
+	private static final String IDCACHE = "id:";
 	private AuthenticationCache authenticationCache;
 	private UserDirectoryService userDirectoryService;
 	private EventTrackingService eventTrackingService;
 	private EntityManager entityManager;
-	private MemoryService memoryService;
+    private MemoryService memoryService;
 	private Cache userCache = null;
 	
-	public void setMemoryService(MemoryService memoryService) {
-		this.memoryService = memoryService;
-	}
+    public void setMemoryService(MemoryService memoryService) {
+        this.memoryService = memoryService;
+    }
 
-	public void setUserCache(Cache userCache) {
+		public void setUserCache(Cache userCache) {
 		this.userCache = userCache;
 	}
 
@@ -83,9 +86,9 @@ public class AuthnCacheWatcher implements Observer {
 
 	public void init() {
 		log.info("init()");
-		if (userCache == null) { // this is the user id->eid mapping cache
-			userCache = memoryService.getCache("org.sakaiproject.user.api.UserDirectoryService");
-		}
+        if (userCache == null) { // this is the user id->eid mapping cache
+            userCache = memoryService.getCache("org.sakaiproject.user.api.UserDirectoryService");
+        }
 		eventTrackingService.addObserver(this);
 	}
 	
@@ -100,10 +103,11 @@ public class AuthnCacheWatcher implements Observer {
 		if (!(arg instanceof Event))
 			return;
 		Event event = (Event) arg;
-
+		
+		
 		// check the event function against the functions we have notifications watching for
 		String function = event.getEvent();
-
+		
 		//we err on the side of caution here in checking all events that might invalidate the data in the cache -DH
 		if (UserDirectoryService.SECURE_ADD_USER.equals(function) || UserDirectoryService.SECURE_UPDATE_USER_OWN_PASSWORD.equals(function)
 				|| UserDirectoryService.SECURE_UPDATE_USER_ANY.equals(function) || UserDirectoryService.SECURE_UPDATE_USER_OWN.equals(function)) {
@@ -117,8 +121,8 @@ public class AuthnCacheWatcher implements Observer {
 				String eid = userDirectoryService.getUserEid(refId);
 				log.debug("removing " + eid + " from cache");
 				authenticationCache.removeAuthentification(eid);
-				userCache.remove(UserDirectoryService.IDCACHE + eid);
-				userCache.remove(UserDirectoryService.EIDCACHE + refId);
+				userCache.remove(EIDCACHE + eid);
+				userCache.remove(IDCACHE + refId);
 			} catch (UserNotDefinedException e) {
 				//not sure how we'd end up here
 				log.warn(e.getMessage(), e);

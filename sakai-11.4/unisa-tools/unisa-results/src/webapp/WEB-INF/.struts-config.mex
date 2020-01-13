@@ -1,0 +1,41 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="242,88" />
+  <StrutsActivity path="/displayresults.do" location="650,50" dimension="386,104" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="350,50" dimension="150,49" />
+  <StrutsActivity path="/WEB-INF/jsp/resultsdisplay.jsp" location="50,450" dimension="219,53" />
+  <StrutsActivity path="/WEB-INF/jsp/resultsinput.jsp" location="350,450" dimension="206,53" />
+  <StrutsActivity path="/WEB-INF/jsp/lecturer/results/resultsdisplay.jsp" location="50,250" dimension="309,53" />
+  <StrutsActivity path="/WEB-INF/jsp/lecturer/results/resultsinput.jsp" location="650,250" dimension="296,53" />
+  <StrutsTransition id="/default.do,default,/displayresuts.do.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="292,114" />
+      <AbsolutePoint location="601,114" />
+      <AbsolutePoint location="601,488" />
+      <AbsolutePoint location="650,488" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/displayresults.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="292,114" />
+      <AbsolutePoint location="650,114" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayresults.do,display,/WEB-INF/jsp/resultsdisplay.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="0,0" />
+      <AbsolutePoint location="0,0" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/displayresults.do,input,/WEB-INF/jsp/resultsinput.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="0,0" />
+      <AbsolutePoint location="0,0" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/WEB-INF/jsp/default.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="292,84" />
+      <AbsolutePoint location="350,84" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

@@ -31,7 +31,8 @@ public class OAuthApplication extends WebApplication {
     @Override
     protected void init() {
         // Configure for Spring injection
-        getComponentInstantiationListeners().add(new SpringComponentInjector(this));
+        addComponentInstantiationListener(new SpringComponentInjector(this));
+        // getComponentInstantiationListeners().add(new SpringComponentInjector(this));
     }
 
     @Override

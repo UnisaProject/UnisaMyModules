@@ -23,19 +23,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.sms.logic.external.ExternalLogic;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * A Utility class to convert a List of java beans to a CSV list, does not fetch
  * nested objects
  * 
  */
- @Slf4j
 public class BeanToCSVReflector {
 
+	private static Log log = LogFactory.getLog(BeanToCSVReflector.class);
 	private static final String NOT_FOUND = "N/A";
 	private static final String IS = "is";
 	private static final String GET = "get";

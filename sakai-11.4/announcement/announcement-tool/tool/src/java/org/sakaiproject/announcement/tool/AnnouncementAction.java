@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,13 +34,9 @@ import java.util.Properties;
 import java.util.Stack;
 import java.util.Vector;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.lang.StringUtils;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.announcement.api.AnnouncementChannel;
 import org.sakaiproject.announcement.api.AnnouncementChannelEdit;
 import org.sakaiproject.announcement.api.AnnouncementMessage;
@@ -51,7 +46,6 @@ import org.sakaiproject.announcement.api.AnnouncementMessageHeaderEdit;
 import org.sakaiproject.announcement.cover.AnnouncementService;
 import org.sakaiproject.alias.api.AliasService;
 import org.sakaiproject.alias.api.Alias;
-import org.sakaiproject.announcement.tool.MenuBuilder.ActiveTab;
 import org.sakaiproject.authz.api.PermissionsHelper;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
@@ -61,6 +55,11 @@ import org.sakaiproject.cheftool.JetspeedRunData;
 import org.sakaiproject.cheftool.PagedResourceActionII;
 import org.sakaiproject.cheftool.RunData;
 import org.sakaiproject.cheftool.VelocityPortlet;
+import org.sakaiproject.cheftool.api.Menu;
+import org.sakaiproject.cheftool.api.MenuItem;
+import org.sakaiproject.cheftool.menu.MenuDivider;
+import org.sakaiproject.cheftool.menu.MenuEntry;
+import org.sakaiproject.cheftool.menu.MenuImpl;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.content.api.FilePickerHelper;
@@ -109,21 +108,25 @@ import org.sakaiproject.util.ParameterParser;
 import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.SortedIterator;
 import org.sakaiproject.util.StringUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * AnnouncementAction is an implementation of Announcement service, which provides the complete function of announcements. User could check the announcements, create own new and manage all the announcement items, under certain permission check.
  */
-@Slf4j
 public class AnnouncementAction extends PagedResourceActionII
 {
+	/** Our logger. */
+	private static Logger M_log = LoggerFactory.getLogger(AnnouncementAction.class);
+	
 	/** Resource bundle using current language locale */
 	private static ResourceLoader rb = new ResourceLoader("announcement");
 
-	public static final String CONTEXT_ENABLED_MENU_ITEM_EXISTS = "EnabledMenuItemExists";
+	private static final String CONTEXT_ENABLED_MENU_ITEM_EXISTS = "EnabledMenuItemExists";
 
-	public static final String CONTEXT_ENABLE_ITEM_CHECKBOXES = "EnableItemCheckBoxes";
+	private static final String CONTEXT_ENABLE_ITEM_CHECKBOXES = "EnableItemCheckBoxes";
 
-	public static final String ENABLED_MENU_ITEM_EXISTS = CONTEXT_ENABLED_MENU_ITEM_EXISTS;
+	private static final String ENABLED_MENU_ITEM_EXISTS = CONTEXT_ENABLED_MENU_ITEM_EXISTS;
 
 	private static final String NOT_SELECTED_FOR_REVISE_STATUS = "noSelectedForRevise";
 
@@ -140,16 +143,6 @@ public class AnnouncementAction extends PagedResourceActionII
 	private static final String REORDER_STATUS = "reorder";
 
 	private static final String OPTIONS_STATUS = "options";
-
-	private static final String LIST_STATUS = "view";
-
-	private static final String VIEW_STATUS = "showMetadata";
-
-	private static final String ADD_STATUS = "new";
-
-	private static final String EDIT_STATUS = "goToReviseAnnouncement";
-
-	private static final String DELETE_STATUS = "deleteAnnouncement";
 
 	private static final String SSTATE_NOTI_VALUE = "noti_value";
 
@@ -173,18 +166,19 @@ public class AnnouncementAction extends PagedResourceActionII
 
 	public static final String SORT_FOR = "for";
 
+	public static String SORT_CURRENTORDER = "date";
 
 	private static final String CONTEXT_VAR_DISPLAY_OPTIONS = "displayOptions";
 
 	private static final String VELOCITY_DISPLAY_OPTIONS = CONTEXT_VAR_DISPLAY_OPTIONS;
 
-	public static final String PERMISSIONS_BUTTON_HANDLER = "doPermissions";
+	private static final String PERMISSIONS_BUTTON_HANDLER = "doPermissions";
 	
-	public static final String REORDER_BUTTON_HANDLER = "doReorder";
+	private static final String REORDER_BUTTON_HANDLER = "doReorder";
 	
-	public static final String REFRESH_BUTTON_HANDLER = "doCancel";
+	private static final String REFRESH_BUTTON_HANDLER = "doCancel";
 
-	public static final String MERGE_BUTTON_HANDLER = "doMerge";
+	private static final String MERGE_BUTTON_HANDLER = "doMerge";
 
 	private static final String SSTATE_ATTRIBUTE_MERGED_CHANNELS = "mergedChannels";
 
@@ -230,9 +224,9 @@ public class AnnouncementAction extends PagedResourceActionII
    private static final String SYNOPTIC_ANNOUNCEMENT_TOOL = "sakai.synoptic.announcement";
  
    private static final String UPDATE_PERMISSIONS = "site.upd";
-
-   public static final String SAK_PROP_ANNC_REORDER = "sakai.announcement.reorder";
-   public static final boolean SAK_PROP_ANNC_REORDER_DEFAULT = true;
+   
+	/** Used to retrieve non-notification sites for MyWorkspace page */
+	private static final String TABS_EXCLUDED_PREFS = "sakai:portal:sitenav";
 	
 	private final String TAB_EXCLUDED_SITES = "exclude";
 
@@ -266,12 +260,12 @@ public class AnnouncementAction extends PagedResourceActionII
 	 */
 	public String getCurrentOrder() {
 		
-		boolean enableReorder=serverConfigurationService.getBoolean(SAK_PROP_ANNC_REORDER, SAK_PROP_ANNC_REORDER_DEFAULT);
-		String sortCurrentOrder = SORT_DATE;
-		if (enableReorder){
-			sortCurrentOrder=SORT_MESSAGE_ORDER;
-		}
-		return sortCurrentOrder;
+		String enableReorder=serverConfigurationService.getString("sakai.announcement.reorder", "true");
+		
+		if (enableReorder.equals("true")){
+			SORT_CURRENTORDER="message_order";
+		}			
+		return SORT_CURRENTORDER;
 	}
 
 	/**
@@ -322,7 +316,7 @@ public class AnnouncementAction extends PagedResourceActionII
 			}
 			catch (PermissionException e)
 			{
-				log.warn("Permission denied for '{}' on '{}'", SessionManager.getCurrentSessionUserId(), channelReference);
+				M_log.warn(String.format("Permission denied for '%s' on '%s'", SessionManager.getCurrentSessionUserId(), channelReference));
 				return null;
 			} finally {
 				m_securityService.popAdvisor(advisor);
@@ -347,18 +341,18 @@ public class AnnouncementAction extends PagedResourceActionII
 	class EntryProvider extends MergedListEntryProviderBase
 	{
 		/** announcement channels from hidden sites */
-		private final List<String> hiddenSites = new ArrayList<String>();
+		private final List excludedSites = new ArrayList();
 
 		public EntryProvider() {
 			this(false);
 		}
 
-		public EntryProvider(boolean includeHiddenSites) {
-			if (includeHiddenSites) {
+		public EntryProvider(boolean excludeHiddenSites) {
+			if (excludeHiddenSites) {
 				List<String> excludedSiteIds = getExcludedSitesFromTabs();
 				if (excludedSiteIds != null) {
 					for (String siteId : excludedSiteIds) {
-						hiddenSites.add(AnnouncementService.channelReference(siteId, SiteService.MAIN_CONTAINER));
+						excludedSites.add(AnnouncementService.channelReference(siteId, SiteService.MAIN_CONTAINER));
 					}
 				}
 			}
@@ -403,7 +397,7 @@ public class AnnouncementAction extends PagedResourceActionII
 			SecurityAdvisor advisor = getChannelAdvisor(ref);
 			try {
 				m_securityService.pushAdvisor(advisor);
-				return (!hiddenSites.contains(ref) && AnnouncementService.allowGetChannel(ref));
+				return (!excludedSites.contains(ref) && AnnouncementService.allowGetChannel(ref));
 			} finally {
 				m_securityService.popAdvisor(advisor);
 			}
@@ -983,11 +977,11 @@ public class AnnouncementAction extends PagedResourceActionII
 		catch (IdUnusedException e)
 		{
 			// No site available.
-			log.debug(this+".buildMainPanelContext ", e);
+			M_log.debug(this+".buildMainPanelContext ", e);
 		}
 		catch (NullPointerException e)
 		{
-			log.error(this+".buildMainPanelContext ", e);
+			M_log.error(this+".buildMainPanelContext ", e);
 		}
 
 		// get the current channel ID from state object or prolet initial parameter
@@ -1043,7 +1037,7 @@ public class AnnouncementAction extends PagedResourceActionII
 						// this checks for any possibility of an add, channel or any site group
 						menu_new = channel.allowAddMessage();
 	
-						List<AnnouncementWrapper> messages = null;
+						List messages = null;
 	
 						String view = (String) sstate.getAttribute(STATE_SELECTED_VIEW);
 	
@@ -1124,7 +1118,7 @@ public class AnnouncementAction extends PagedResourceActionII
 		}
 		catch (PermissionException error)
 		{
-			log.error(this+".buildMainPanelContext ", error);
+			M_log.error(this+".buildMainPanelContext ", error);
 		}
 		catch (IdUnusedException error)
 		{
@@ -1138,7 +1132,7 @@ public class AnnouncementAction extends PagedResourceActionII
 				}
 				catch (IdUsedException err)
 				{
-					log.debug(this+".buildMainPanelContext ", err);
+					M_log.debug(this+".buildMainPanelContext ", err);
 				}
 				catch (IdInvalidException err)
 				{
@@ -1163,7 +1157,7 @@ public class AnnouncementAction extends PagedResourceActionII
 		
 		AnnouncementActionState.DisplayOptions displayOptions = state.getDisplayOptions();
 		
-		if(VIEW_STATUS.equals(statusName) && channel != null)
+		if(statusName=="showMetadata" && channel!=null)
 		{
 			String messageReference = state.getMessageReference();
 			AnnouncementMessage message;
@@ -1173,7 +1167,7 @@ public class AnnouncementAction extends PagedResourceActionII
 				menu_delete = channel.allowRemoveMessage(message);
 				menu_revise = channel.allowEditMessage(message.getId());
 			} catch (IdUnusedException | PermissionException e) {
-				log.error(e.getMessage());
+				M_log.error(e.getMessage());
 			}
 
 		}
@@ -1182,43 +1176,9 @@ public class AnnouncementAction extends PagedResourceActionII
 		boolean showMerge = !isMotd(channelId) && isOkToShowMergeButton(statusName);
 		boolean showPermissions = !isMotd(channelId) && isOkToShowPermissionsButton(statusName);
 		boolean showOptions = this.isOkToShowOptionsButton(statusName);
-
-		ActiveTab activeTab = ActiveTab.LIST;
-		if(statusName != null) switch(statusName) {
-			case VIEW_STATUS:
-				activeTab = ActiveTab.VIEW;
-				break;
-			case LIST_STATUS:
-				activeTab = ActiveTab.LIST;
-				break;
-			case CANCEL_STATUS:
-				activeTab = ActiveTab.LIST;
-				break;
-			case ADD_STATUS:
-				activeTab = ActiveTab.ADD;
-				break;
-			case MERGE_STATUS:
-				activeTab = ActiveTab.MERGE;
-				break;
-			case REORDER_STATUS:
-				activeTab = ActiveTab.REORDER;
-				break;
-			case OPTIONS_STATUS:
-				activeTab = ActiveTab.OPTIONS;
-				break;
-			case EDIT_STATUS:
-				activeTab = ActiveTab.EDIT;
-				break;
-			case DELETE_STATUS:
-				activeTab = ActiveTab.DELETE;
-				break;
-		}
-
-		// "View" announcement menu bar has already been built by this point (buildShowMetadataContext)
-		if( !ActiveTab.VIEW.equals(activeTab)) {
-			MenuBuilder.buildMenuForGeneral(portlet, rundata, activeTab, rb, context, menu_new, showMerge, showPermissions, showOptions, displayOptions);
-		}
-
+		buildMenu(portlet, context, rundata, state, menu_new, menu_delete, menu_revise, showMerge,
+					showPermissions, showOptions, displayOptions);
+			
 		// added by zqian for toolbar
 		context.put("allow_new", Boolean.valueOf(menu_new));
 		context.put("allow_delete", Boolean.valueOf(menu_delete));
@@ -1292,24 +1252,24 @@ public class AnnouncementAction extends PagedResourceActionII
 	public void buildSortedContext(VelocityPortlet portlet, Context context, RunData rundata, SessionState sstate)
 	{
 		//SAK-21532: making one list of messages in order to allow uniform sorting
-		Vector<AnnouncementWrapper> messageList = new Vector<>();
+		Vector messageList = new Vector();
 		Vector showMessagesList = new Vector();
 
-		List<AnnouncementWrapper> messages = prepPage(sstate);
+		List messages = prepPage(sstate);
 		for (int i = 0; i < messages.size(); i++)
 		{
-			final AnnouncementWrapper m = messages.get(i);
+			final AnnouncementMessage m = (AnnouncementMessage) messages.get(i);
 			messageList.addElement(m);
 		}
 
 		AnnouncementActionState state = (AnnouncementActionState) getState(portlet, rundata, AnnouncementActionState.class);
 
-		SortedIterator<AnnouncementWrapper> sortedMessageIterator;
+		SortedIterator sortedMessageIterator;
 		//For Announcement in User's MyWorkspace, the sort order for announcement is by date SAK-22667
 		if (isOnWorkspaceTab()){
-			sortedMessageIterator = new SortedIterator<>(messageList.iterator(), new AnnouncementWrapperComparator(SORT_DATE, state.getCurrentSortAsc()));
+			sortedMessageIterator = new SortedIterator(messageList.iterator(), new AnnouncementComparator(SORT_DATE, state.getCurrentSortAsc()));
 		} else {
-			sortedMessageIterator = new SortedIterator<>(messageList.iterator(), new AnnouncementWrapperComparator(state
+			sortedMessageIterator = new SortedIterator(messageList.iterator(), new AnnouncementComparator(state
 					.getCurrentSortedBy(), state.getCurrentSortAsc()));
 		}
 		
@@ -1345,14 +1305,7 @@ public class AnnouncementAction extends PagedResourceActionII
 
 			context.put("announcementItemRangeArray", viewValues);
 		}
-
-		if (sstate.getAttribute("updating_sort") == Boolean.TRUE) {
-			state.setCurrentSortedBy(SORT_MESSAGE_ORDER);
-			state.setCurrentSortAsc(false);
-			sstate.setAttribute(STATE_CURRENT_SORTED_BY, SORT_MESSAGE_ORDER);
-			sstate.setAttribute(STATE_CURRENT_SORT_ASC, Boolean.FALSE);
-			sstate.setAttribute("updating_sort", Boolean.FALSE);
-		}
+		// context.put("jsfutil", JsfUtil.this);
 
 	} // buildSortedContext
 
@@ -1366,12 +1319,12 @@ public class AnnouncementAction extends PagedResourceActionII
 		{
 			template = buildDeleteAnnouncementContext(portlet, context, rundata, state);
 		}
-		else if (statusName.equals(VIEW_STATUS))
+		else if (statusName.equals("showMetadata"))
 		{
 			template = buildShowMetadataContext(portlet, context, rundata, state, sstate);
 		}
 		else if ((statusName.equals("goToReviseAnnouncement")) || (statusName.equals("backToReviseAnnouncement"))
-				|| (ADD_STATUS.equals(statusName)) || ("stayAtRevise".equals(statusName)))
+				|| (statusName.equals("new")) || (statusName.equals("stayAtRevise")))
 		{
 			template = buildReviseAnnouncementContext(portlet, context, rundata, state, sstate);
 		}
@@ -1457,6 +1410,10 @@ public class AnnouncementAction extends PagedResourceActionII
 		{
 			return true;
 		}
+		if (state.getStatus().equals(MERGE_STATUS))
+		{
+			return false;
+		}
 		else
 		{
 			String channelID = getChannelIdFromReference(selectedMessageReference);
@@ -1472,7 +1429,16 @@ public class AnnouncementAction extends PagedResourceActionII
 	 */
 	private boolean isOkToShowOptionsButton(String statusName)
 	{
-		return SiteService.allowUpdateSite(ToolManager.getCurrentPlacement().getContext()) && !isOnWorkspaceTab();
+		if (SiteService.allowUpdateSite(ToolManager.getCurrentPlacement().getContext()) && !isOnWorkspaceTab())
+		{
+			return (statusName == null || statusName.equals(CANCEL_STATUS) || statusName.equals(POST_STATUS)
+					|| statusName.equals(DELETE_ANNOUNCEMENT_STATUS) || statusName.equals(FINISH_DELETING_STATUS)
+					|| statusName.equals("noSelectedForDeletion") || statusName.equals(NOT_SELECTED_FOR_REVISE_STATUS));
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	/*
@@ -1490,7 +1456,16 @@ public class AnnouncementAction extends PagedResourceActionII
 		if(displayMerge != null && !displayMerge.equals("1"))
 			return false;
 		
-		return SiteService.allowUpdateSite(ToolManager.getCurrentPlacement().getContext()) && !isOnWorkspaceTab();
+		if (SiteService.allowUpdateSite(ToolManager.getCurrentPlacement().getContext()) && !isOnWorkspaceTab())
+		{
+			return (statusName == null || statusName.equals(CANCEL_STATUS) || statusName.equals(POST_STATUS)
+					|| statusName.equals(DELETE_ANNOUNCEMENT_STATUS) || statusName.equals(FINISH_DELETING_STATUS)
+					|| statusName.equals("noSelectedForDeletion") || statusName.equals(NOT_SELECTED_FOR_REVISE_STATUS));
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	/**
@@ -1498,7 +1473,16 @@ public class AnnouncementAction extends PagedResourceActionII
 	 */
 	private boolean isOkToShowPermissionsButton(String statusName)
 	{
-		return SiteService.allowUpdateSite(ToolManager.getCurrentPlacement().getContext());
+		if (SiteService.allowUpdateSite(ToolManager.getCurrentPlacement().getContext()))
+		{
+			return (statusName == null || statusName.equals(CANCEL_STATUS) || statusName.equals(POST_STATUS)
+					|| statusName.equals(DELETE_ANNOUNCEMENT_STATUS) || statusName.equals(FINISH_DELETING_STATUS)
+					|| statusName.equals("noSelectedForDeletion") || statusName.equals(NOT_SELECTED_FOR_REVISE_STATUS));
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	/**
@@ -1560,7 +1544,7 @@ public class AnnouncementAction extends PagedResourceActionII
 									channelIdStrArray.add(channeIDD);
 								}
 							} catch(Exception e) {
-								log.warn(e.getMessage());
+								M_log.warn(e.getMessage());
 							}
 						}
 						if (channelIdStrArray.size()>0) {
@@ -1574,7 +1558,7 @@ public class AnnouncementAction extends PagedResourceActionII
 						}
 					}
 					mergedAnnouncementList.loadChannelsFromDelimitedString(isOnWorkspaceTab(), new MergedListEntryProviderFixedListWrapper(
-							new EntryProvider(false), state.getChannelId(), channelArrayFromConfigParameterValue,
+							new EntryProvider(true), state.getChannelId(), channelArrayFromConfigParameterValue,
 							new AnnouncementReferenceToChannelConverter()), StringUtil.trimToZero(SessionManager
 							.getCurrentSessionUserId()), channelArrayFromConfigParameterValue, m_securityService.isSuperUser(),
 							ToolManager.getCurrentPlacement().getContext());
@@ -1653,11 +1637,11 @@ public class AnnouncementAction extends PagedResourceActionII
 			}
 			catch (IdUnusedException e)
 			{
-				log.debug("{}.getMessages()", this, e);
+				M_log.debug(this + ".getMessages()", e);
 			}
 			catch (PermissionException e)
 			{
-				log.debug("{}.getMessages()", this, e);
+				M_log.debug(this + ".getMessages()", e);
 			} finally {
 				m_securityService.popAdvisor(advisor);
 			}
@@ -1687,15 +1671,15 @@ public class AnnouncementAction extends PagedResourceActionII
 	 * 
 	 * @throws PermissionException
 	 */
-	private List<AnnouncementWrapper> getMessagesByGroups(Site site, AnnouncementChannel defaultChannel, Filter filter, boolean ascending,
+	private List getMessagesByGroups(Site site, AnnouncementChannel defaultChannel, Filter filter, boolean ascending,
 			AnnouncementActionState state, VelocityPortlet portlet) throws PermissionException
 	{
-		List<AnnouncementWrapper> messageList = getMessages(defaultChannel, filter, ascending, state, portlet);
-		List<AnnouncementWrapper> rv = new Vector<>();
+		List messageList = getMessages(defaultChannel, filter, ascending, state, portlet);
+		List rv = new Vector();
 
 		for (int i = 0; i < messageList.size(); i++)
 		{
-			AnnouncementWrapper aMessage = messageList.get(i);
+			AnnouncementWrapper aMessage = (AnnouncementWrapper) messageList.get(i);
 			String pubview = aMessage.getProperties().getProperty(ResourceProperties.PROP_PUBVIEW);
 			if (pubview != null && Boolean.valueOf(pubview).booleanValue())
 			{
@@ -1735,15 +1719,15 @@ public class AnnouncementAction extends PagedResourceActionII
 	 * 
 	 * @throws PermissionException
 	 */
-	private List<AnnouncementWrapper> getMessagesPublic(Site site, AnnouncementChannel defaultChannel, Filter filter, boolean ascending,
+	private List getMessagesPublic(Site site, AnnouncementChannel defaultChannel, Filter filter, boolean ascending,
 			AnnouncementActionState state, VelocityPortlet portlet) throws PermissionException
 	{
-		List<AnnouncementWrapper> messageList = getMessages(defaultChannel, filter, ascending, state, portlet);
-		List<AnnouncementWrapper> rv = new Vector<>();
+		List messageList = getMessages(defaultChannel, filter, ascending, state, portlet);
+		List rv = new Vector();
 
 		for (int i = 0; i < messageList.size(); i++)
 		{
-			AnnouncementWrapper aMessage = messageList.get(i);
+			AnnouncementMessage aMessage = (AnnouncementMessage) messageList.get(i);
 			String pubview = aMessage.getProperties().getProperty(ResourceProperties.PROP_PUBVIEW);
 			if (pubview != null && Boolean.valueOf(pubview).booleanValue())
 			{
@@ -1759,18 +1743,18 @@ public class AnnouncementAction extends PagedResourceActionII
 	/**
 	 * This will limit the maximum number of announcements that is shown.
 	 */
-	private List<AnnouncementWrapper> trimListToMaxNumberOfAnnouncements(List<AnnouncementWrapper> messageList, AnnouncementActionState.DisplayOptions options)
+	private List trimListToMaxNumberOfAnnouncements(List messageList, AnnouncementActionState.DisplayOptions options)
 	{
 		if (options !=null && options.isEnforceNumberOfAnnouncementsLimit() && !isOnWorkspaceTab())
 		{
 			int numberOfAnnouncements = options.getNumberOfAnnouncements();
-			ArrayList<AnnouncementWrapper> destList = new ArrayList<>();
+			ArrayList destList = new ArrayList();
 
 			// We need to go backwards through the list, limiting it to the number
 			// of announcements that we're allowed to display.
 			for (int i = 0, curAnnouncementCount = 0; i < messageList.size() && curAnnouncementCount < numberOfAnnouncements; i++)
 			{
-				AnnouncementWrapper message = messageList.get(i);
+				AnnouncementMessage message = (AnnouncementMessage) messageList.get(i);
 
 				destList.add(message);
 					
@@ -1937,7 +1921,7 @@ public class AnnouncementAction extends PagedResourceActionII
 			context.put("annToGroups", allGroupString);
 			
 		} catch (IdUnusedException e1) {
-			log.error(e1.getMessage());
+			M_log.error(e1.getMessage());
 		}
 		}
 		
@@ -2120,13 +2104,13 @@ public class AnnouncementAction extends PagedResourceActionII
 		}
 		catch (Exception ignore)
 		{
-			log.debug(ignore.getMessage());
+			M_log.debug(ignore.getMessage());
 		}
 
 		List attachments = state.getAttachments();
 
 		// if this a new annoucement, get the subject and body from temparory record
-		if (state.getStatus().equals(ADD_STATUS))
+		if (state.getStatus().equals("new"))
 		{
 			context.put("new", "true");
 			context.put("tempSubject", state.getTempSubject());
@@ -2373,8 +2357,8 @@ public class AnnouncementAction extends PagedResourceActionII
 			} 
 			catch (Exception e) {
 				// no release date, ignore
-				if (log.isDebugEnabled()) {
-					log.debug("buildShowMetadataContext releaseDate is empty for message id {}", message.getId());
+				if (M_log.isDebugEnabled()) {
+					M_log.debug("buildShowMetadataContext releaseDate is empty for message id " + message.getId());
 				}
 			}
 			
@@ -2384,8 +2368,8 @@ public class AnnouncementAction extends PagedResourceActionII
 			} 
 			catch (Exception e) {
 				// no retract date, ignore
-				if (log.isDebugEnabled()) {
-					log.debug("buildShowMetadataContext retractDate is empty for message id {}", message.getId());
+				if (M_log.isDebugEnabled()) {
+					M_log.debug("buildShowMetadataContext retractDate is empty for message id " + message.getId());
 				}
 			}
 
@@ -2448,12 +2432,12 @@ public class AnnouncementAction extends PagedResourceActionII
                             } 
                             catch (EntityNotFoundException e) {
                                 ret = null;
-						        log.info("Assignment {} not found {}", assignmentReference, e.getMessage());
+						        M_log.info("Assignment " + assignmentReference + " not found" + e.getMessage());
                             }
 							catch (SecurityException e) {
 								ret = null;
-								if (log.isDebugEnabled()) {
-									log.debug("Assignment {} not found {}", assignmentReference, e.getMessage());
+								if (M_log.isDebugEnabled()) {
+									M_log.debug("Assignment " + assignmentReference + " not found" + e.getMessage());
 								}
 							}
                             if (ret != null && ret.getEntityData() != null) {
@@ -2464,11 +2448,13 @@ public class AnnouncementAction extends PagedResourceActionII
                             context.put("assignmenttitle", assignData.get("assignmentTitle"));
 			}
 
-			ActiveTab activeTab = ActiveTab.VIEW;
-			if (EDIT_STATUS.equals(state.getStatus())) {
-				activeTab = ActiveTab.EDIT;
-			}
-			MenuBuilder.buildMenuForMetaDataView(portlet, rundata, state.getDisplayOptions(), activeTab, rb, context, menu_new, menu_revise, menu_delete);
+			// check the state status to decide which vm to render
+			String statusName = state.getStatus();
+
+			AnnouncementActionState.DisplayOptions displayOptions = state.getDisplayOptions();
+
+			buildMenu(portlet, context, rundata, state, menu_new, menu_delete, menu_revise, this.isOkToShowMergeButton(statusName),
+					this.isOkToShowPermissionsButton(statusName), this.isOkToShowOptionsButton(statusName), displayOptions);
 
 			context.put("allow_new", Boolean.valueOf(menu_new));
 			context.put("allow_delete", Boolean.valueOf(menu_delete));
@@ -2504,16 +2490,16 @@ public class AnnouncementAction extends PagedResourceActionII
 		}
 		catch (IdUnusedException e)
 		{
-			if (log.isDebugEnabled()) log.debug("{}.buildShowMetadataContext()", this, e);
+			if (M_log.isDebugEnabled()) M_log.debug(this + ".buildShowMetadataContext()" + e);
 		}
 		catch (PermissionException e)
 		{
-			if (log.isDebugEnabled()) log.debug("{}.buildShowMetadataContext()", this, e);
+			if (M_log.isDebugEnabled()) M_log.debug(this + ".buildShowMetadataContext()" + e);
 			addAlert(sstate, rb.getFormattedMessage("java.youmess.pes", e.toString()));
 		}
 		finally {
-			m_securityService.popAdvisor(messageAdvisor);
 			m_securityService.popAdvisor(channelAdvisor);
+			m_securityService.popAdvisor(messageAdvisor);
 		}
 
 		String template = (String) getContext(rundata).get("template");
@@ -2641,7 +2627,7 @@ public class AnnouncementAction extends PagedResourceActionII
 
 		state.setIsListVM(false);
 		state.setIsNewAnnouncement(false);
-		state.setStatus(VIEW_STATUS);
+		state.setStatus("showMetadata");
 
 		// disable auto-updates while in view mode
 		disableObservers(sstate);
@@ -2707,7 +2693,7 @@ public class AnnouncementAction extends PagedResourceActionII
 		state.setIsNewAnnouncement(true);
 		state.setTempBody("");
 		state.setTempSubject("");
-		state.setStatus(ADD_STATUS);
+		state.setStatus("new");
 
 		sstate.setAttribute(AnnouncementAction.SSTATE_PUBLICVIEW_VALUE, null);
 		sstate.setAttribute(AnnouncementAction.SSTATE_NOTI_VALUE, null);
@@ -3225,11 +3211,11 @@ public class AnnouncementAction extends PagedResourceActionII
 			}
 			catch (IdUnusedException e)
 			{
-				if (log.isDebugEnabled()) log.debug("{}doPost()", this, e);
+				if (M_log.isDebugEnabled()) M_log.debug(this + "doPost()", e);
 			}
 			catch (PermissionException e)
 			{
-				if (log.isDebugEnabled()) log.debug("{}doPost()", this, e);
+				if (M_log.isDebugEnabled()) M_log.debug(this + "doPost()", e);
 				addAlert(sstate, rb.getFormattedMessage("java.alert.youpermi.subject", subject));
 			}
 
@@ -3341,15 +3327,15 @@ public class AnnouncementAction extends PagedResourceActionII
 			}
 			catch (IdUnusedException e)
 			{
-				if (log.isDebugEnabled()) log.debug("{}.doDeleteannouncement()", this, e);
+				if (M_log.isDebugEnabled()) M_log.debug(this + ".doDeleteannouncement()", e);
 			}
 			catch (PermissionException e)
 			{
-				if (log.isDebugEnabled()) log.debug("{}.doDeleteannouncement()", this, e);
+				if (M_log.isDebugEnabled()) M_log.debug(this + ".doDeleteannouncement()", e);
 			}
 			catch (NoSuchElementException e)
 			{
-				if (log.isDebugEnabled()) log.debug("{}.doDeleteannouncement()", this, e);
+				if (M_log.isDebugEnabled()) M_log.debug(this + ".doDeleteannouncement()", e);
 			}
 		}
 
@@ -3396,12 +3382,12 @@ public class AnnouncementAction extends PagedResourceActionII
 					}
 					catch (IdUnusedException e)
 					{
-						if (log.isDebugEnabled()) log.debug("{}.doDeleteannouncement()", this, e);
+						if (M_log.isDebugEnabled()) M_log.debug(this + ".doDeleteannouncement()", e);
 						// addAlert(sstate, e.toString());
 					}
 					catch (PermissionException e)
 					{
-						if (log.isDebugEnabled()) log.debug("{}.doDeleteannouncement()", this, e);
+						if (M_log.isDebugEnabled()) M_log.debug(this + ".doDeleteannouncement()", e);
 						addAlert(sstate, rb.getFormattedMessage("java.alert.youdelann.ref", messageReferences[i]));
 					}
 				}
@@ -3443,12 +3429,12 @@ public class AnnouncementAction extends PagedResourceActionII
 			}
 			catch (IdUnusedException e)
 			{
-				if (log.isDebugEnabled()) log.debug("{}doDeleteannouncement()", this, e);
+				if (M_log.isDebugEnabled()) M_log.debug(this + "doDeleteannouncement()", e);
 				// addAlert(sstate, e.toString());
 			}
 			catch (PermissionException e)
 			{
-				if (log.isDebugEnabled()) log.debug("{}doDeleteannouncement()", this, e);
+				if (M_log.isDebugEnabled()) M_log.debug(this + "doDeleteannouncement()", e);
 				addAlert(sstate, rb.getString("java.alert.youdelann2"));
 			}
 
@@ -3498,11 +3484,11 @@ public class AnnouncementAction extends PagedResourceActionII
 		}
 		catch (IdUnusedException e)
 		{
-			if (log.isDebugEnabled()) log.debug("{}doDeleteannouncement()", this, e);
+			if (M_log.isDebugEnabled()) M_log.debug(this + "doDeleteannouncement()", e);
 		}
 		catch (PermissionException e)
 		{
-			if (log.isDebugEnabled()) log.debug("{}doDeleteannouncement()", this, e);
+			if (M_log.isDebugEnabled()) M_log.debug(this + "doDeleteannouncement()", e);
 			addAlert(sstate, rb.getString("java.alert.youdelann2"));
 		}
 
@@ -3553,20 +3539,20 @@ public class AnnouncementAction extends PagedResourceActionII
 		}
 		catch (IdUnusedException e)
 		{
-			if (log.isDebugEnabled()) log.debug("{}announcementRevise", this, e);
+			if (M_log.isDebugEnabled()) M_log.debug(this + "announcementRevise", e);
 			// addAlert(sstate, e.toString());
 		}
 		catch (PermissionException e)
 		{
-			if (log.isDebugEnabled()) log.debug("{}announcementRevise", this, e);
-			state.setStatus(VIEW_STATUS);
+			if (M_log.isDebugEnabled()) M_log.debug(this + "announcementRevise", e);
+			state.setStatus("showMetadata");
 		}
 		catch (InUseException err)
 		{
-			if (log.isDebugEnabled()) log.debug("{}.doReviseannouncementfrommenu", this, err);
+			if (M_log.isDebugEnabled()) M_log.debug(this + ".doReviseannouncementfrommenu", err);
 			addAlert(sstate, rb.getString("java.alert.thisitem"));
 			// "This item is being edited by another user. Please try again later.");
-			state.setStatus(VIEW_STATUS);
+			state.setStatus("showMetadata");
 		}
 		state.setIsNewAnnouncement(false);
 
@@ -3636,21 +3622,21 @@ public class AnnouncementAction extends PagedResourceActionII
 					}
 					catch (IdUnusedException e)
 					{
-						if (log.isDebugEnabled()) log.debug("{}announcementReviseFromMenu", this, e);
+						if (M_log.isDebugEnabled()) M_log.debug(this + "announcementReviseFromMenu", e);
 					}
 					catch (PermissionException e)
 					{
-						if (log.isDebugEnabled()) log.debug("{}announcementReviseFromMenu", this, e);
+						if (M_log.isDebugEnabled()) M_log.debug(this + "announcementReviseFromMenu", e);
 						addAlert(sstate, rb.getFormattedMessage("java.alert.youacc.pes", e.toString()));
 					}
 					// %%% -ggolden catch(InUseException err)
 					catch (InUseException err)
 					{
-						if (log.isDebugEnabled())
-							log.debug("{}.doReviseannouncementfrommenu", this, err);
+						if (M_log.isDebugEnabled())
+							M_log.debug(this + ".doReviseannouncementfrommenu", err);
 						addAlert(sstate, rb.getString("java.alert.thisis"));
 						state.setIsListVM(false);
-						state.setStatus(VIEW_STATUS);
+						state.setStatus("showMetadata");
 
 						// make sure auto-updates are enabled
 						disableObservers(sstate);
@@ -3697,20 +3683,20 @@ public class AnnouncementAction extends PagedResourceActionII
 			}
 			catch (IdUnusedException e)
 			{
-				if (log.isDebugEnabled()) log.debug("{}announcementReviseFromMenu", this, e);
+				if (M_log.isDebugEnabled()) M_log.debug(this + "announcementReviseFromMenu", e);
 				// addAlert(sstate, e.toString());
 			}
 			catch (PermissionException e)
 			{
-				if (log.isDebugEnabled()) log.debug("{}announcementReviseFromMenu", this, e);
+				if (M_log.isDebugEnabled()) M_log.debug(this + "announcementReviseFromMenu", e);
 				addAlert(sstate, rb.getFormattedMessage("java.alert.youacc.pes", e.toString()));
 			}
 			catch (InUseException err)
 			{
-				if (log.isDebugEnabled()) log.debug("{}.doReviseannouncementfrommenu", this, err);
+				if (M_log.isDebugEnabled()) M_log.debug(this + ".doReviseannouncementfrommenu", err);
 				addAlert(sstate, rb.getString("java.alert.thisis"));
 				state.setIsListVM(false);
-				state.setStatus(VIEW_STATUS);
+				state.setStatus("showMetadata");
 
 				// disable auto-updates while in view mode
 				disableObservers(sstate);
@@ -3820,11 +3806,11 @@ public class AnnouncementAction extends PagedResourceActionII
 		}
 		catch (IdUnusedException e)
 		{
-			if (log.isDebugEnabled()) log.debug("{}doCancel()", this, e);
+			if (M_log.isDebugEnabled()) M_log.debug(this + "doCancel()", e);
 		}
 		catch (PermissionException e)
 		{
-			if (log.isDebugEnabled()) log.debug("{}doCancel()", this, e);
+			if (M_log.isDebugEnabled()) M_log.debug(this + "doCancel()", e);
 		}
 
 		// make sure auto-updates are enabled
@@ -3893,13 +3879,11 @@ public class AnnouncementAction extends PagedResourceActionII
 		}
 		else
 		{
-			// if the messages are not already sorted by field, reset the sort sequence to be ascending
+			// if the messages are not already sorted by subject, set the sort sequence to be descending
 			state.setCurrentSortedBy(field);
 			state.setCurrentSortAsc(true);
-			sstate.setAttribute(STATE_CURRENT_SORT_ASC, Boolean.TRUE);
+			sstate.setAttribute(STATE_CURRENT_SORT_ASC, Boolean.FALSE);
 		}
-
-		resetPaging(sstate);
 	} // setupSort
 
 	/**
@@ -3934,6 +3918,11 @@ public class AnnouncementAction extends PagedResourceActionII
 		setupSort(rundata, context, SORT_DATE);
 	} // doSortbydate
 	
+	public void doSortbymessage_order(RunData rundata, Context context)
+	{
+		setupSort(rundata, context, SORT_MESSAGE_ORDER);
+	} // doSortbymessage_order
+
 	public void doSortbyreleasedate(RunData rundata, Context context)
 	{
 		setupSort(rundata, context, SORT_RELEASEDATE);
@@ -3963,6 +3952,154 @@ public class AnnouncementAction extends PagedResourceActionII
 	} // doSortbyfor
 
 	// ********* ending for sorting *********
+
+	/**
+	 * Action is to parse the function calls
+	 */
+	/*
+	 * public void doParse_list_announcement(RunData data, Context context) { SessionState state = ((JetspeedRunData)data).getPortletSessionState(((JetspeedRunData)data).getJs_peid()); ParameterParser params = data.getParameters(); String source =
+	 * params.getString("source"); if (source.equalsIgnoreCase("new")) { // create new announcement doNewannouncement(data, context); } else if (source.equalsIgnoreCase("revise")) { // revise announcement doReviseannouncementfrommenu(data, context); }
+	 * else if (source.equalsIgnoreCase("delete")) { // delete announcement doDeleteannouncement(data, context); } } // doParse_list_announcement
+	 */
+
+	private int seperatorMatrix(boolean a, boolean b, boolean c)
+	{
+		int i = 0;
+		if (a) i = i + 100;
+		if (b) i = i + 10;
+		if (c) i = i + 1;
+
+		if (i == 111) return 11;
+		if ((i == 110) || (i == 101)) return 10;
+		if (i == 11) return 1;
+		if ((i == 100) || (i == 10) || (i == 1) || (i == 0)) return 0;
+		return 11;
+	}
+
+	/**
+	 * Build the menu.
+	 */
+	private void buildMenu(VelocityPortlet portlet, Context context, RunData rundata, AnnouncementActionState state,
+			boolean menu_new, boolean menu_delete, boolean menu_revise, boolean menu_merge, boolean menu_permissions,
+			boolean menu_options, AnnouncementActionState.DisplayOptions displayOptions)
+	{
+		Menu bar = new MenuImpl(portlet, rundata, "AnnouncementAction");
+		boolean buttonRequiringCheckboxesPresent = false;
+		Properties placementProperties = ToolManager.getCurrentPlacement().getPlacementConfig();
+		String sakaiReorderProperty= serverConfigurationService.getString("sakai.announcement.reorder", "true");
+
+		//if (!displayOptions.isShowOnlyOptionsButton()) ##SAK-13434
+		if (displayOptions != null && !displayOptions.isShowOnlyOptionsButton())
+		{
+			String statusName = state.getStatus();
+			if (statusName != null)
+			{
+				if (statusName.equals("showMetadata"))
+				{
+					boolean s1 = true;
+					boolean s2 = true;
+					// int m = seperatorMatrix(menu_new, menu_delete, menu_revise);
+					int m = seperatorMatrix(menu_new, menu_revise, menu_delete);
+					if (m == 10) s2 = false; // 10
+					if (m == 1) s1 = false; // 01
+					if (m == 0) s1 = s2 = false; // 00
+
+					bar.add(new MenuEntry(rb.getString("gen.new"), null, menu_new, MenuItem.CHECKED_NA, "doNewannouncement"));
+					if (s1) bar.add(new MenuDivider());
+					bar.add(new MenuEntry(rb.getString("gen.revise"), null, menu_revise, MenuItem.CHECKED_NA,
+							"doReviseannouncementfrommenu"));
+					if (s2) bar.add(new MenuDivider());
+					bar.add(new MenuEntry(rb.getString("gen.delete2"), null, menu_delete, MenuItem.CHECKED_NA,
+							"doDeleteannouncement"));
+					buttonRequiringCheckboxesPresent = true;
+				}
+				else if (statusName.equals("reorder"))
+				{
+					bar.add(new MenuEntry(rb.getString("java.refresh"), REFRESH_BUTTON_HANDLER));
+				}
+				else
+				{
+					bar.add(new MenuEntry(rb.getString("gen.new"), null, menu_new, MenuItem.CHECKED_NA, "doNewannouncement"));
+					buttonRequiringCheckboxesPresent = true;
+
+				} // if (statusName.equals("showMetadata"))
+			}
+			else
+			{
+				bar.add(new MenuEntry(rb.getString("gen.new"), null, menu_new, MenuItem.CHECKED_NA, "doNewannouncement"));
+				buttonRequiringCheckboxesPresent = true;
+			} // if-else (statusName != null)
+
+			// add merge button, if allowed
+			if (menu_merge)
+			{
+				bar.add(new MenuEntry(rb.getString("java.merge"), MERGE_BUTTON_HANDLER));
+			}
+		} // if-else (!displayOptions.isShowOnlyOptionsButton())
+		
+		//re-orderer link in the announcementlist view
+		if ((placementProperties.containsKey("enableReorder") && placementProperties.getProperty("enableReorder").equalsIgnoreCase("true")) 
+				&& menu_new && state.getStatus()!="reorder" && state.getStatus()!="showMetadata")
+		{
+			bar.add(new MenuEntry(rb.getString("java.reorder"), REORDER_BUTTON_HANDLER));
+		}
+		else if ((!placementProperties.containsKey("enableReorder")|| !placementProperties.getProperty("enableReorder").equalsIgnoreCase("false")) && menu_new && state.getStatus()!="reorder" && state.getStatus()!="showMetadata")
+		{			
+			if (sakaiReorderProperty.equalsIgnoreCase("true")){
+				bar.add(new MenuEntry(rb.getString("java.reorder"), REORDER_BUTTON_HANDLER));
+			}
+		}
+
+		// add options if allowed
+		if (menu_options)
+		{
+			addOptionsMenu(bar, (JetspeedRunData) rundata);
+		}
+
+		// let the permissions button to be the last one in the toolbar
+		if (displayOptions != null && !displayOptions.isShowOnlyOptionsButton())
+		{
+			// add permissions, if allowed
+			if (menu_permissions)
+			{
+				bar.add(new MenuEntry(rb.getString("java.permissions"), PERMISSIONS_BUTTON_HANDLER));
+			}
+		}
+		
+		// Set menu state attribute
+		SessionState stateForMenus = ((JetspeedRunData) rundata).getPortletSessionState(portlet.getID());
+		stateForMenus.setAttribute(MenuItem.STATE_MENU, bar);
+
+		Iterator it = bar.getItems().iterator();
+
+		// See if we have any enabled menu items.
+		boolean enabledItemExists = false;
+
+		while (it.hasNext())
+		{
+			MenuItem menuItem = (MenuItem) it.next();
+			if (menuItem.getIsEnabled())
+			{
+				enabledItemExists = true;
+				break;
+			}
+		}
+
+		// Set a flag in the context to indicate that at least one menu item is enabled.
+		context.put(ENABLED_MENU_ITEM_EXISTS, Boolean.valueOf(enabledItemExists));
+
+		context.put(CONTEXT_ENABLE_ITEM_CHECKBOXES, Boolean.valueOf(enabledItemExists && buttonRequiringCheckboxesPresent));
+		context.put(CONTEXT_ENABLED_MENU_ITEM_EXISTS, Boolean.valueOf(enabledItemExists));
+
+		context.put(Menu.CONTEXT_MENU, bar);
+		context.put(Menu.CONTEXT_ACTION, "AnnouncementAction");
+		context.put("tlang", rb);
+		
+		//SAK-19700 put name of tool into context so it can be rendered with the option link, for screenreaders
+		context.put("toolTitle", ToolManager.getCurrentPlacement().getTitle());
+
+	} // buildMenu
+
 	/*
 	 * what i've done to make this tool automaticlly updated includes some corresponding imports in buildMail, tell observer just the page is just refreshed in the do() functions related to show the list, enable the obeserver in other do() functions
 	 * related to not show the list, disable the obeserver in the do(), define the session sstate object, and protlet. add initState add updateObservationOfChannel() add state attribute STATE_CHANNEL_REF
@@ -4051,7 +4188,7 @@ public class AnnouncementAction extends PagedResourceActionII
 			}
 
 			mergedAnnouncementList.loadChannelsFromDelimitedString(isOnWorkspaceTab(), new MergedListEntryProviderFixedListWrapper(
-					new EntryProvider(false), annState.getChannelId(), channelArrayFromConfigParameterValue,
+					new EntryProvider(true), annState.getChannelId(), channelArrayFromConfigParameterValue,
 					new AnnouncementReferenceToChannelConverter()),
 					StringUtil.trimToZero(SessionManager.getCurrentSessionUserId()), channelArrayFromConfigParameterValue,
 					m_securityService.isSuperUser(), ToolManager.getCurrentPlacement().getContext());
@@ -4238,7 +4375,7 @@ public class AnnouncementAction extends PagedResourceActionII
 		
 		if (!SiteService.allowUpdateSite(ToolManager.getCurrentPlacement().getContext()))  // SAK-18202
 		{	
-			log.debug("{}.doUpdate - Do not have permission to update", this);
+			M_log.debug(this + ".doUpdate - Do not have permission to update");
 			state.setStatus(CANCEL_STATUS); 
 			return;
 		}
@@ -4257,7 +4394,7 @@ public class AnnouncementAction extends PagedResourceActionII
 		}
 		else
 		{
-			log.debug("{}.doUpdate - Unexpected status", this);
+			M_log.debug(this + ".doUpdate - Unexpected status");
 		}
 	}
 
@@ -4281,9 +4418,9 @@ public class AnnouncementAction extends PagedResourceActionII
 		}
 		else
 		{
-			if (log.isDebugEnabled())
+			if (M_log.isDebugEnabled())
 			{
-				log.debug("{}.doUpdate mergedChannelList == null", this);
+				M_log.debug(this + ".doUpdate mergedChannelList == null");
 			}
 		}
 
@@ -4331,9 +4468,9 @@ public class AnnouncementAction extends PagedResourceActionII
 		String peid = ((JetspeedRunData) rundata).getJs_peid();
 		SessionState sstate = ((JetspeedRunData) rundata).getPortletSessionState(peid);
 
-		// set updating_sort state so state.getCurrentSortedBy() and state.getCurrentSortAsc() can be reset after buildSortedContext() finishes
-		sstate.setAttribute("updating_sort", Boolean.TRUE);
-
+		// get the channel and message id information from state object
+		String messageReference = state.getMessageReference();
+		
 		// Storing the re-ordered sequence of the announcements
 		if (state.getIsListVM())
 		{
@@ -4345,7 +4482,7 @@ public class AnnouncementAction extends PagedResourceActionII
 				
 				try {
 				//grab all messages before the order changes:	
-				List<AnnouncementMessage> allMessages = AnnouncementService.getChannel(state.getChannelId()).getMessages(null, true);
+				List<Message> allMessages = AnnouncementService.getChannel(state.getChannelId()).getMessages(null, true);
 				int msgCount =  allMessages.size(); //used to find msg order number
 				//store the updated message ids so we know which ones didn't get updated
 				List<String> updatedMessageIds = new ArrayList<String>();
@@ -4378,12 +4515,12 @@ public class AnnouncementAction extends PagedResourceActionII
 					}
 					catch (IdUnusedException e)
 					{
-						if (log.isDebugEnabled()) log.debug("{}.doDeleteannouncement()", this, e);
+						if (M_log.isDebugEnabled()) M_log.debug(this + ".doDeleteannouncement()", e);
 						// addAlert(sstate, e.toString());
 					}
 					catch (PermissionException e)
 					{
-						if (log.isDebugEnabled()) log.debug("{}.doDeleteannouncement()", this, e);
+						if (M_log.isDebugEnabled()) M_log.debug(this + ".doDeleteannouncement()", e);
 						addAlert(sstate, rb.getFormattedMessage("java.alert.youdelann.ref", messageReferences2[i]));
 					}
 				}
@@ -4391,12 +4528,11 @@ public class AnnouncementAction extends PagedResourceActionII
 					//need to update the message order of the remaining untouched messages (only sorts the top 10)
 				
 					//order by message order:
-					Comparator<AnnouncementMessage> comparing = Comparator.comparing(o -> (o.getAnnouncementHeader().getMessage_order()));
-					SortedIterator<AnnouncementMessage> messagesSorted = new SortedIterator<>(allMessages.iterator(), comparing);
+					SortedIterator messagesSorted = new SortedIterator(allMessages.iterator(), new AnnouncementComparator(SORT_MESSAGE_ORDER, true));
 					//start at last message and increment up
 					int messageOrder = 1;
 					while(messagesSorted.hasNext()){
-						Message message = messagesSorted.next();
+						Message message = (Message) messagesSorted.next();
 						if(!updatedMessageIds.contains(message.getId())){
 							//since this list is ordered, we can assign the message order in order:
 							AnnouncementChannel channel2 = AnnouncementService.getAnnouncementChannel(this
@@ -4413,7 +4549,7 @@ public class AnnouncementAction extends PagedResourceActionII
 					}
 				}
 				} catch (PermissionException | IdUnusedException e1) {
-					log.error(e1.getMessage());
+					M_log.error(e1.getMessage());
 				}
 			}
 		}
@@ -4487,7 +4623,7 @@ public class AnnouncementAction extends PagedResourceActionII
 		catch (Exception e)
 		{
 			addAlert(sstate, rb.getString("java.alert.unknown"));
-			log.error("{}.doOptionsUpdate", this, e);
+			M_log.error(this+".doOptionsUpdate", e);
 		}
 		
 		// We're omitting processing of the "showAnnouncementBody" since these
@@ -4590,7 +4726,7 @@ public class AnnouncementAction extends PagedResourceActionII
 		}
 		catch (Exception e)
 		{
-			log.error("{}.processFormattedTextFromBrowser ", this, e);
+			M_log.error( this + ".processFormattedTextFromBrowser ", e);
 			return strFromBrowser;
 		}
 	}
@@ -4600,10 +4736,10 @@ public class AnnouncementAction extends PagedResourceActionII
 	 * 
 	 * @see org.sakaiproject.cheftool.PagedResourceActionII#readResourcesPage(org.sakaiproject.service.framework.session.SessionState, int, int)
 	 */
-	protected List<AnnouncementWrapper> readResourcesPage(SessionState state, int first, int last)
+	protected List readResourcesPage(SessionState state, int first, int last)
 	{
-		List<AnnouncementWrapper> rv = (List) state.getAttribute("messages");
-		if (rv == null) return new Vector<>();
+		List rv = (List) state.getAttribute("messages");
+		if (rv == null) return new Vector();
 
 		String sortedBy = "";
 		if (state.getAttribute(STATE_CURRENT_SORTED_BY) != null) sortedBy = state.getAttribute(STATE_CURRENT_SORTED_BY).toString();
@@ -4617,7 +4753,7 @@ public class AnnouncementAction extends PagedResourceActionII
 			sortedBy = isOnWorkspaceTab() ? SORT_DATE : getCurrentOrder();
 			asc = false;
 		}
-		SortedIterator<AnnouncementWrapper> rvSorted = new SortedIterator<>(rv.iterator(), new AnnouncementWrapperComparator(sortedBy, asc));
+		SortedIterator rvSorted = new SortedIterator(rv.iterator(), new AnnouncementComparator(sortedBy, asc));
 
 		PagingPosition page = new PagingPosition(first, last);
 		page.validate(rv.size());
@@ -4715,7 +4851,7 @@ public class AnnouncementAction extends PagedResourceActionII
 	{
 		if (portlet == null)
 		{
-			log.warn("{}.getState(): portlet null", this);
+			M_log.warn(this + ".getState(): portlet null");
 			return null;
 		}
 
@@ -4738,7 +4874,7 @@ public class AnnouncementAction extends PagedResourceActionII
 	{
 		if (peid == null)
 		{
-			log.warn("{}.getState(): peid null", this);
+			M_log.warn(this + ".getState(): peid null");
 			return null;
 		}
 
@@ -4763,7 +4899,7 @@ public class AnnouncementAction extends PagedResourceActionII
 		}
 		catch (Exception e)
 		{
-			log.error("{}.getState", this, e);
+			M_log.error(this+ ".getState", e);
 		}
 
 		return null;
@@ -4827,7 +4963,7 @@ public class AnnouncementAction extends PagedResourceActionII
 		}
 		catch (Exception e)
 		{
-			log.error("", e);
+			M_log.error("", e);
 		}
 
 	} // releaseState
@@ -4840,7 +4976,7 @@ public class AnnouncementAction extends PagedResourceActionII
 	private List<String> getExcludedSitesFromTabs() {
 	    PreferencesService m_pre_service = (PreferencesService) ComponentManager.get(PreferencesService.class.getName());
 	    final Preferences prefs = m_pre_service.getPreferences(SessionManager.getCurrentSessionUserId());
-	    final ResourceProperties props = prefs.getProperties(PreferencesService.SITENAV_PREFS_KEY);
+	    final ResourceProperties props = prefs.getProperties(TABS_EXCLUDED_PREFS);
 	    final List<String> l = props.getPropertyList(TAB_EXCLUDED_SITES);
 	    return l;
 	}

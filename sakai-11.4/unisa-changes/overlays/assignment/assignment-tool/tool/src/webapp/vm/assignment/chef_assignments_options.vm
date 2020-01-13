@@ -1,17 +1,18 @@
+<!-- $Id$ -->
 <!-- start: chef_assignments_options.vm  -->
 <script type="text/javascript">
 	focus_path = [ "$form-notify" ];
 </script>
 
 <div class="portletBody container-fluid">
-	#navBarHREF( $allowAddAssignment $withGrade $allowGradeSubmission $allowAddAssignment $allowRecoverAssignment $allowAllGroups $assignmentscheck $allowUpdateSite $enableViewOption $view "options" )
+	#navBarHREF( $allowAddAssignment $withGrade $allowGradeSubmission $allowAddAssignment $allowAllGroups $assignmentscheck $allowUpdateSite $enableViewOption $view "options" )
 
- 	#* Unisa Changes:2018/10/18:Change page-header class to unisaToolHeading and H1 to H3  
+	<!-- Unisa Changes:2018/10/18:Change page-header class to unisaToolHeading and H1 to H3 -->
 	<!-- <div class="page-header"> -->
     <!--     <h1> -->
 	<!-- 		$tlang.getString("options") -->
 	<!-- 	</h1> -->
-	<!-- </div> *#
+	<!-- </div> -->
 	<div class="unisaToolHeading">
         <h3>
 			$tlang.getString("options")
@@ -19,7 +20,7 @@
 	</div>	
 	<!-- Unisa Changes:2018/10/18 -->
 
-	#if ($alertMessage)<div class="alertMessage"><strong>$tlang.getString("gen.alert")</strong> $alertMessage</div><div class="clear"></div>#end
+	#if ($alertMessage)<div class="alertMessage">$tlang.getString("gen.alert") $alertMessage</div><div class="clear"></div>#end
 	<form action="#toolForm("$action")" method="post" name="optionsForm">
  		<fieldset class="indnt2">
             <legend><h3>$tlang.getString("options_instruction")</h3></legend>

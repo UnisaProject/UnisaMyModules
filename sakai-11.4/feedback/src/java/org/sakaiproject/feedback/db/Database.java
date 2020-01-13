@@ -24,12 +24,13 @@ package org.sakaiproject.feedback.db;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.sakaiproject.db.api.SqlService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class Database {
+
+    private Logger logger = LoggerFactory.getLogger(Database.class);
 
     public final static String DB_ERROR = "DB_ERROR";
 
@@ -65,7 +66,7 @@ public class Database {
             
             sqlService.dbWrite(conn, insertReportSql, new String[] {userId, email, siteId, type, title, content});
         } catch (SQLException sqlException){
-            log.error("Failed to insert feedback report. Caught sql exception while generating report. '" + DB_ERROR + "' will be returned to the client.", sqlException);
+            logger.error("Failed to insert feedback report. Caught sql exception while generating report. '" + DB_ERROR + "' will be returned to the client.", sqlException);
             throw sqlException;
         } finally {
             if (conn != null) {

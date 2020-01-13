@@ -21,6 +21,7 @@
 
 package org.sakaiproject.importer.impl.handlers;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,10 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import javax.activation.MimetypesFileTypeMap;
-
-import lombok.extern.slf4j.Slf4j;
 
 import org.sakaiproject.exception.IdInvalidException;
 import org.sakaiproject.exception.IdUsedException;
@@ -69,7 +66,11 @@ import org.sakaiproject.entity.api.ResourcePropertiesEdit;
 import org.sakaiproject.event.api.NotificationService;
 import org.sakaiproject.util.Validator;
 
-@Slf4j
+import javax.activation.MimetypesFileTypeMap;
+
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 public class ResourcesHandler implements HandlesImportable {
 	private static final String COPYRIGHT = "(c) 2007";
 	private final int BUFFER = 2048;
@@ -78,6 +79,8 @@ public class ResourcesHandler implements HandlesImportable {
 	private SessionManager sessionManager;
 	private SecurityService securityService;
 	private ServerConfigurationService serverConfigurationService;
+	
+	private Logger m_log = LoggerFactory.getLogger(org.sakaiproject.importer.impl.handlers.ResourcesHandler.class);
 
 	public boolean canHandleType(String typeName) {
 		return (("sakai-file-resource".equals(typeName) || ("sakai-folder".equals(typeName)) || 
@@ -147,8 +150,8 @@ public class ResourcesHandler implements HandlesImportable {
 						
 				}
 				else {
-					if(log.isDebugEnabled()) {
-						log.debug("import ResourcesHandler about to add file entitled '{}'", title);
+					if(m_log.isDebugEnabled()) {
+						m_log.debug("import ResourcesHandler about to add file entitled '" + title + "'");
 					}
 					resourceProps.put(ResourceProperties.PROP_DISPLAY_NAME, title);
 					addContentResource(id, contentType, contents, resourceProps, notifyOption);
@@ -174,8 +177,8 @@ public class ResourcesHandler implements HandlesImportable {
 				resourceProps.put(ResourceProperties.PROP_DESCRIPTION, description);
 				resourceProps.put(ResourceProperties.PROP_HAS_CUSTOM_SORT, Boolean.TRUE.toString());
 				resourceProps.put(ResourceProperties.PROP_CONTENT_PRIORITY, Integer.toString(((WebLink)thing).getSequenceNum()));
-				if(log.isDebugEnabled()){ 
-					log.debug("import ResourcesHandler about to add web link entitled '{}'", title);
+				if(m_log.isDebugEnabled()){ 
+					m_log.debug("import ResourcesHandler about to add web link entitled '" + title + "'");
 				}
 				ContentResource contentResource = addContentResource(id, contentType, contents, resourceProps, notifyOption);
 				if (contentResource != null) {
@@ -185,7 +188,7 @@ public class ResourcesHandler implements HandlesImportable {
 						contentHostingService.commitResource(cre, notifyOption);
 
 					} catch (Exception e1) {
-						log.error("import ResourcesHandler tried to set Resource Type of web link and failed", e1);
+						m_log.error("import ResourcesHandler tried to set Resource Type of web link and failed", e1);
 					}
 				}
 
@@ -195,8 +198,8 @@ public class ResourcesHandler implements HandlesImportable {
 				id = contentHostingService.getSiteCollection(siteId) + thing.getContextPath();
 				contentType = "text/html";
 				resourceProps.put(ResourceProperties.PROP_DISPLAY_NAME, title);
-				if(log.isDebugEnabled()){ 
-					log.debug("import ResourcesHandler about to add html document entitled '{}'", title);
+				if(m_log.isDebugEnabled()){ 
+					m_log.debug("import ResourcesHandler about to add html document entitled '" + title + "'");
 				}
 				addContentResource(id, contentType, contents, resourceProps, notifyOption);
 			} else if ("sakai-text-document".equals(thing.getTypeName())) {
@@ -205,8 +208,8 @@ public class ResourcesHandler implements HandlesImportable {
 				id = contentHostingService.getSiteCollection(siteId) + thing.getContextPath();
 				contentType = "text/plain";
 				resourceProps.put(ResourceProperties.PROP_DISPLAY_NAME, title);
-				if(log.isDebugEnabled()){ 
-					log.debug("import ResourcesHandler about to add text document entitled '{}'", title);
+				if(m_log.isDebugEnabled()){ 
+					m_log.debug("import ResourcesHandler about to add text document entitled '" + title + "'");
 				}
 				addContentResource(id, contentType, contents, resourceProps, notifyOption);
 			} 
@@ -249,8 +252,8 @@ public class ResourcesHandler implements HandlesImportable {
 				}
 				resourceProps.put(ResourceProperties.PROP_DISPLAY_NAME, title);
 				resourceProps.put(ResourceProperties.PROP_COPYRIGHT, COPYRIGHT);
-				if(log.isDebugEnabled()) {
-					log.debug("import ResourcesHandler about to add file entitled '{}'", title);
+				if(m_log.isDebugEnabled()) {
+					m_log.debug("import ResourcesHandler about to add file entitled '" + title + "'");
 				}
 
 				int count;
@@ -272,7 +275,7 @@ public class ResourcesHandler implements HandlesImportable {
 				
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage(), e);
+			e.printStackTrace();
 		} 
 	}
 
@@ -292,23 +295,30 @@ public class ResourcesHandler implements HandlesImportable {
 			}
 			return contentHostingService.addResource(id, contentType, contents, resourceProps, notifyOption);
 		} catch (PermissionException e) {
-			log.error("ResourcesHandler.addContentResource: {}", e.toString());
+			m_log.error("ResourcesHandler.addContentResource: " + e.toString());
 		} catch (IdUsedException e) {
-			log.warn("ResourcesHandler.addContentResource IdUsedException: {}", e.toString());
+			m_log.warn("ResourcesHandler.addContentResource IdUsedException: " + e.toString());
 		} catch (IdInvalidException e) {
-			log.error(e.getMessage(), e);
+//			TODO Auto-generated catch block
+            e.printStackTrace();
 		} catch (InconsistentException e) {
-			log.error(e.getMessage(), e);
+//			TODO Auto-generated catch block
+            e.printStackTrace();
 		} catch (OverQuotaException e) {
-			log.error(e.getMessage(), e);
+//			TODO Auto-generated catch block
+            e.printStackTrace();
 		} catch (ServerOverloadException e) {
-			log.error(e.getMessage(), e);
+//			TODO Auto-generated catch block
+            e.printStackTrace();
 		} catch (IdUnusedException e) {
-			log.error(e.getMessage(), e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (TypeException e) {
-			log.error(e.getMessage(), e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (InUseException e) {
-			log.error(e.getMessage(), e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		return null;
@@ -320,9 +330,10 @@ public class ResourcesHandler implements HandlesImportable {
 		} catch (IdUnusedException e) {
 			return false;
 		} catch (TypeException e) {
-			log.error(e.getMessage(), e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (PermissionException e) {
-			log.error("ResourcesHandler.existsDirectory: {}", e.toString());
+			m_log.error("ResourcesHandler.existsDirectory: " + e.toString());
 		}
 		return true;
 	}
@@ -363,21 +374,28 @@ public class ResourcesHandler implements HandlesImportable {
 //				} catch (PermissionException e1) {
 //					m_log.error("ResourcesHandler.addContentCollection: " + e.toString());
 //				} catch (IdUnusedException e1) {
-//		           		log.error(e1.getMessage(), e1);
+//		           // TODO Auto-generated catch block
+//		           e1.printStackTrace();
 //				} catch (TypeException e1) {
-//		           		log.error(e1.getMessage(), e1);
+//		           // TODO Auto-generated catch block
+//		           e1.printStackTrace();
 //				} catch (InUseException e1) {
-//		           		log.error(e1.getMessage(), e1);
+//		           // TODO Auto-generated catch block
+//		           e1.printStackTrace();
 //				} catch (ServerOverloadException e1) {
-//		           		log.error(e1.getMessage(), e1);
+//		           // TODO Auto-generated catch block
+//		           e1.printStackTrace();
 //				}
 
 			} catch (IdInvalidException e) {
-	           		log.error(e.getMessage(), e);
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			} catch (PermissionException e) {
-	           		log.error(e.getMessage(), e);
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			} catch (InconsistentException e) {
-	           		log.error(e.getMessage(), e);
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			} 
 	}
 	
@@ -400,8 +418,8 @@ public class ResourcesHandler implements HandlesImportable {
 			// add a timestamp to differentiate it (+14 chars)
 			Format f = new SimpleDateFormat("yyyyMMddHHmmss");
 			rv.append(f.format(new Date()));
-			if (log.isDebugEnabled()) {
-				log.debug("makeIdCleanAndLengthCompliant truncated from {} to {}", path, rv.toString());
+			if (m_log.isDebugEnabled()) {
+				m_log.debug("makeIdCleanAndLengthCompliant truncated from " + path + " to " + rv.toString());
 			}
 		}
 		

@@ -1,17 +1,16 @@
 package coza.opencollab.sakai.cloudcontent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Closeables;
 import com.google.common.io.CountingInputStream;
 import com.google.inject.Module;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-
-import lombok.extern.slf4j.Slf4j;
 
 import org.jclouds.apis.ApiMetadata;
 import org.jclouds.ContextBuilder;
@@ -27,10 +26,8 @@ import org.jclouds.openstack.swift.v1.features.ObjectApi;
 import org.jclouds.openstack.swift.v1.options.CreateContainerOptions;
 import org.jclouds.openstack.swift.v1.options.PutOptions;
 import org.jclouds.osgi.ApiRegistry;
-
-import org.springframework.util.FileCopyUtils;
-
 import org.sakaiproject.content.api.FileSystemHandler;
+import org.springframework.util.FileCopyUtils;
 
 /**
  * The cloud implementation of FileSystemHandler.
@@ -39,7 +36,6 @@ import org.sakaiproject.content.api.FileSystemHandler;
  *
  * @author OpenCollab
  */
-@Slf4j
 public class SwiftFileSystemHandler implements FileSystemHandler {
 
     /**
@@ -462,6 +458,9 @@ public class SwiftFileSystemHandler implements FileSystemHandler {
      * A simple implementation that uses typical commons-logging.
      */
     class DefaultLogger implements CommonLogger {
+
+        private final Logger log = LoggerFactory.getLogger(SwiftFileSystemHandler.class);
+
         @Override
         public void warningOnAccountSize(long warningLimitInBytes, long bytesUsed) {
             log.warn("Warning on Swift account size -- warningLimit: {}, bytesUsed: {}", warningLimitInBytes, bytesUsed);

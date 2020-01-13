@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2005 Sakai Foundation Licensed under the
+    Educational Community License, Version 2.0 (the "License"); you may
+    not use this file except in compliance with the License. You may
+    obtain a copy of the License at
+
+    http://www.osedu.org/licenses/ECL-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an "AS IS"
+    BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+    or implied. See the License for the specific language governing
+    permissions and limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- email notifications -->
+    <bean id="org.sakaiproject.evaluation.logic.EvalEmailsLogic"
+        class="org.sakaiproject.evaluation.logic.EvalEmailsLogicImpl"
+        init-method="init">
+        <property name="commonLogic"
+            ref="org.sakaiproject.evaluation.logic.EvalCommonLogic" />
+        <property name="settings" ref="org.sakaiproject.evaluation.logic.EvalSettings" />
+        <property name="evaluationService"
+            ref="org.sakaiproject.evaluation.logic.EvalEvaluationService" />
+    </bean>
+
+    <!-- jobs processing -->
+    <bean id="org.sakaiproject.evaluation.logic.EvalJobLogic"
+        class="org.sakaiproject.evaluation.logic.scheduling.EvalJobLogicImpl">
+        <property name="commonLogic"
+            ref="org.sakaiproject.evaluation.logic.EvalCommonLogic" />
+        <property name="evaluationService"
+            ref="org.sakaiproject.evaluation.logic.EvalEvaluationService" />
+        <property name="evaluationSetupService"
+            ref="org.sakaiproject.evaluation.logic.EvalEvaluationSetupService" />
+        <property name="settings" ref="org.sakaiproject.evaluation.logic.EvalSettings" />
+        <property name="emails" ref="org.sakaiproject.evaluation.logic.EvalEmailsLogic" />
+    </bean>
+
+    <!-- imports -->
+    <!-- REMOVED for now to fix circular dependencies, and to get rid of beans that make invalid direct use of Sakai -AZ
+        <bean id="org.sakaiproject.evaluation.logic.imports.EvalImport"
+        class="org.sakaiproject.evaluation.logic.imports.EvalImportImpl"
+        init-method="init">
+        <property name="EvalEvaluationSetupService" ref="org.sakaiproject.evaluation.logic.EvalEvaluationSetupService" />
+        <property name="evalEmailsLogic" ref="org.sakaiproject.evaluation.logic.EvalEmailsLogic" />
+        <property name="evalEvaluationsLogic" ref="org.sakaiproject.evaluation.logic.EvalEvaluationSetupService" />
+        <property name="externalLogic" ref="org.sakaiproject.evaluation.logic.externals.EvalExternalLogic" />
+        <property name="authoringService"
+        ref="org.sakaiproject.evaluation.logic.EvalAuthoringService" />
+        <property name="contentHostingService" ref="org.sakaiproject.content.api.ContentHostingService" />
+        <property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager" />
+        </bean>
+        
+        <bean id="org.sakaiproject.evaluation.logic.imports.EvalImportLogic"
+        class="org.sakaiproject.evaluation.logic.imports.EvalImportLogicImpl"
+        init-method="init"> 
+        <property name="externalLogic" ref="org.sakaiproject.evaluation.logic.externals.EvalExternalLogic" />
+        <property name="evalImport"
+        ref="org.sakaiproject.evaluation.logic.imports.EvalImport" />
+        <property name="evalImportJob"
+        ref="org.sakaiproject.evaluation.logic.imports.EvalImportJob" />
+        </bean>
+    -->
+
+    <bean id="org.sakaiproject.evaluation.logic.scheduling.GroupMembershipSync" 
+    	class="org.sakaiproject.evaluation.logic.scheduling.GroupMembershipSyncImpl" 
+    	init-method="init">
+		<property name="evaluationService"
+			ref="org.sakaiproject.evaluation.logic.EvalEvaluationService" />
+        <property name="evaluationSetupService"
+            ref="org.sakaiproject.evaluation.logic.EvalEvaluationSetupService" />
+        <property name="evalSettings" ref="org.sakaiproject.evaluation.logic.EvalSettings" />
+        <property name="externalLogic" 
+        	ref="org.sakaiproject.evaluation.logic.externals.EvalExternalLogic" />
+    </bean>
+    
+    <!-- this is the helper that will register the above bean with the job scheduler -->
+    <bean id="org.sakaiproject.api.app.scheduler.JobBeanWrapper.GroupMembershipSync"
+        class="org.sakaiproject.component.app.scheduler.jobs.SpringJobBeanWrapper"
+        init-method="init">
+        <property name="beanId">
+            <value>org.sakaiproject.evaluation.logic.scheduling.GroupMembershipSync</value>
+        </property>
+        <property name="jobName">
+            <value>Group Membership Sync</value>
+        </property>
+        <property name="schedulerManager">
+            <ref bean="org.sakaiproject.api.app.scheduler.SchedulerManager" />
+        </property>
+    </bean>
+    
+    <bean id="org.sakaiproject.evaluation.logic.scheduling.ConsolidatedNotificationsJob"
+    	class="org.sakaiproject.evaluation.logic.scheduling.ConsolidatedNotificationsJobImpl"
+    	init-method="init">
+    	<property name="emailLogic"
+    		ref="org.sakaiproject.evaluation.logic.EvalEmailsLogic" />
+		<property name="evalSettings" 
+			ref="org.sakaiproject.evaluation.logic.EvalSettings" />
+        <property name="externalLogic" 
+        	ref="org.sakaiproject.evaluation.logic.externals.EvalExternalLogic" />
+        <property name="evalLockManager" 
+        	ref="org.sakaiproject.evaluation.logic.EvalLockManager" />
+    </bean>
+
+    <!-- this is the helper that will register the above bean with the job scheduler -->
+    <bean id="org.sakaiproject.api.app.scheduler.JobBeanWrapper.ConsolidatedNotificationsJob"
+        class="org.sakaiproject.component.app.scheduler.jobs.SpringJobBeanWrapper"
+		init-method="init">
+        <property name="beanId">
+            <value>org.sakaiproject.evaluation.logic.scheduling.ConsolidatedNotificationsJob</value>
+        </property>
+        <property name="jobName">
+            <value>Consolidated Notifications</value>
+        </property>
+        <property name="schedulerManager">
+            <ref bean="org.sakaiproject.api.app.scheduler.SchedulerManager" />
+        </property>
+    </bean>
+
+    <bean id="org.sakaiproject.evaluation.logic.scheduling.ExportEvaluationReportsJob"
+      class="org.sakaiproject.evaluation.logic.scheduling.ExportEvaluationReportsImpl"
+      init-method="init">
+      <property name="evaluationService"
+        ref="org.sakaiproject.evaluation.logic.EvalEvaluationService" />
+      <property name="evalLockManager" 
+        ref="org.sakaiproject.evaluation.logic.EvalLockManager" />
+      <property name="serverConfigurationService"
+        ref="org.sakaiproject.component.api.ServerConfigurationService" />
+      <property name="siteService"
+        ref="org.sakaiproject.site.api.SiteService" />
+      <property name="reportingPermissions"
+          ref="org.sakaiproject.evaluation.logic.ReportingPermissions" />
+      <property name="sessionManager" 
+        ref="org.sakaiproject.tool.api.SessionManager" />
+    </bean>
+
+
+    <!-- this is the helper that will register the above bean with the job scheduler -->
+    <bean id="org.sakaiproject.api.app.scheduler.JobBeanWrapper.ExportEvaluationReportsJob"
+      class="org.sakaiproject.component.app.scheduler.jobs.SpringConfigurableJobBeanWrapper"
+      init-method="init">
+      <property name="beanId">
+        <value>org.sakaiproject.evaluation.logic.scheduling.ExportEvaluationReportsJob</value>
+      </property>
+      <property name="jobName">
+        <value>Evaluation - Export Evaluations by Term ID (Must have Term ID option enabled)</value>
+      </property>
+      <property name="schedulerManager">
+        <ref bean="org.sakaiproject.api.app.scheduler.SchedulerManager" />
+      </property>
+      <property name="resourceBundleBase" value="org.sakaiproject.evaluation.logic.scheduling.Messages"/>
+      <property name="configurableJobProperties">
+        <set>
+          <bean class="org.sakaiproject.component.app.scheduler.jobs.SpringConfigurableJobProperty">
+            <property name="required" value="true"/>
+            <property name="labelResourceKey" value="term.id"/>
+            <property name="descriptionResourceKey" value="term.id.description"/>
+            <property name="defaultValue" value=""/>
+          </bean>
+          <bean class="org.sakaiproject.component.app.scheduler.jobs.SpringConfigurableJobProperty">
+            <property name="required" value="true"/>
+            <property name="labelResourceKey" value="merge.groups"/>
+            <property name="descriptionResourceKey" value="merge.groups.description"/>
+            <property name="defaultValue" value="true"/>
+          </bean>
+        </set>
+      </property>
+    </bean>
+
+    <bean id="org.sakaiproject.evaluation.logic.scheduling.DeleteEvaluationsJob"
+      class="org.sakaiproject.evaluation.logic.scheduling.DeleteEvaluationsImpl"
+      init-method="init">
+      <property name="evalSettings" 
+        ref="org.sakaiproject.evaluation.logic.EvalSettings" />
+      <property name="evaluationService"
+        ref="org.sakaiproject.evaluation.logic.EvalEvaluationService" />
+      <property name="evaluationSetupService"
+        ref="org.sakaiproject.evaluation.logic.EvalEvaluationSetupService" />
+      <property name="externalLogic" 
+        ref="org.sakaiproject.evaluation.logic.externals.EvalExternalLogic" />
+      <property name="evalLockManager" 
+        ref="org.sakaiproject.evaluation.logic.EvalLockManager" />
+    
+    </bean>
+
+
+    <!-- this is the helper that will register the above bean with the job scheduler -->
+    <bean id="org.sakaiproject.api.app.scheduler.JobBeanWrapper.DeleteEvaluationsJob"
+      class="org.sakaiproject.component.app.scheduler.jobs.SpringConfigurableJobBeanWrapper"
+      init-method="init">
+      <property name="beanId">
+        <value>org.sakaiproject.evaluation.logic.scheduling.DeleteEvaluationsJob</value>
+      </property>
+      <property name="jobName">
+        <value>Evaluation - Delete Evaluations by Term ID (Must have Term ID option enabled)</value>
+      </property>
+      <property name="schedulerManager">
+        <ref bean="org.sakaiproject.api.app.scheduler.SchedulerManager" />
+      </property>
+      <property name="resourceBundleBase" value="org.sakaiproject.evaluation.logic.scheduling.Messages"/>
+      <property name="configurableJobProperties">
+        <set>
+          <bean class="org.sakaiproject.component.app.scheduler.jobs.SpringConfigurableJobProperty">
+            <property name="required" value="true"/>
+            <property name="labelResourceKey" value="term.id"/>
+            <property name="descriptionResourceKey" value="term.id.description"/>
+            <property name="defaultValue" value=""/>
+          </bean>
+        </set>
+      </property>
+    </bean>
+    
+</beans>

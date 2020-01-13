@@ -23,7 +23,8 @@
 
 package org.radeox.macro;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Plugin loader for macros
@@ -31,9 +32,11 @@ import lombok.extern.slf4j.Slf4j;
  * @author Stephan J. Schmidt
  * @version $Id$
  */
-@Slf4j
+
 public class MacroLoader extends PluginLoader
 {
+	private static Logger log = LoggerFactory.getLogger(MacroLoader.class);
+
 	public Class getLoadClass()
 	{
 		return Macro.class;

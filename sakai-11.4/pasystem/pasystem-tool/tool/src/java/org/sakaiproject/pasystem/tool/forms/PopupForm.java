@@ -28,57 +28,56 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import javax.servlet.http.HttpServletRequest;
-
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.fileupload.disk.DiskFileItem;
-
 import org.sakaiproject.pasystem.api.Errors;
 import org.sakaiproject.pasystem.api.PASystem;
 import org.sakaiproject.pasystem.api.MissingUuidException;
 import org.sakaiproject.pasystem.api.Popup;
 import org.sakaiproject.pasystem.api.TemplateStream;
 import org.sakaiproject.pasystem.tool.handlers.CrudHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Maps to and from the popup HTML form and a popup data object.
  */
 @Data
-@Slf4j
 public class PopupForm extends BaseForm {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PopupForm.class);
 
     private final String descriptor;
     private final boolean isOpenCampaign;
-    private final List<String> assignToEids;
+    private final List<String> assignToUsers;
     private final Optional<DiskFileItem> templateItem;
 
     private PopupForm(String uuid,
                       String descriptor,
                       long startTime, long endTime,
                       boolean isOpenCampaign,
-                      List<String> assignToEids,
+                      List<String> assignees,
                       Optional<DiskFileItem> templateItem) {
         this.uuid = uuid;
         this.descriptor = descriptor;
         this.startTime = startTime;
         this.endTime = endTime;
         this.isOpenCampaign = isOpenCampaign;
-        this.assignToEids = assignToEids;
+        this.assignToUsers = assignees;
         this.templateItem = templateItem;
     }
 
     public static PopupForm fromPopup(Popup existingPopup, PASystem paSystem) {
         try {
             String uuid = existingPopup.getUuid();
-            List<String> assignToEids = paSystem.getPopups().getAssigneeEids(uuid);
+            List<String> assignees = paSystem.getPopups().getAssignees(uuid);
 
             return new PopupForm(uuid, existingPopup.getDescriptor(),
                     existingPopup.getStartTime(),
                     existingPopup.getEndTime(),
                     existingPopup.isOpenCampaign(),
-                    assignToEids,
+                    assignees,
                     Optional.empty());
         } catch (MissingUuidException e) {
             throw new RuntimeException(e);
@@ -92,11 +91,11 @@ public class PopupForm extends BaseForm {
         long startTime = "".equals(request.getParameter("start_time")) ? 0 : parseTime(request.getParameter("start_time_selected_datetime"));
         long endTime = "".equals(request.getParameter("end_time")) ? 0 : parseTime(request.getParameter("end_time_selected_datetime"));
 
-        List<String> assignToEids = new ArrayList<String>();
+        List<String> assignees = new ArrayList<String>();
         if (request.getParameter("distribution") != null) {
             for (String user : request.getParameter("distribution").split("[\r\n]+")) {
                 if (!user.isEmpty()) {
-                    assignToEids.add(user);
+                    assignees.add(user);
                 }
             }
         }
@@ -107,7 +106,7 @@ public class PopupForm extends BaseForm {
             templateItem = Optional.of(dfi);
         }
 
-        return new PopupForm(uuid, descriptor, startTime, endTime, isOpenCampaign, assignToEids, templateItem);
+        return new PopupForm(uuid, descriptor, startTime, endTime, isOpenCampaign, assignees, templateItem);
     }
 
     public Errors validate(CrudHandler.CrudMode mode) {
@@ -140,7 +139,7 @@ public class PopupForm extends BaseForm {
                         templateItem.get().getSize()));
             }
         } catch (IOException e) {
-            log.error("IOException while fetching template stream", e);
+            LOG.error("IOException while fetching template stream", e);
         }
 
         return Optional.empty();

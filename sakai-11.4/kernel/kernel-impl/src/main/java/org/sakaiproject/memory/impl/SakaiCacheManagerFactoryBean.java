@@ -21,19 +21,14 @@
 
 package org.sakaiproject.memory.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-
-import lombok.extern.slf4j.Slf4j;
-
 import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.*;
-
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sakaiproject.component.api.ServerConfigurationService;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -41,7 +36,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
-import org.sakaiproject.component.api.ServerConfigurationService;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
 
 /**
  * NOTE: This file was modeled after org/springframework/cache/ehcache/EhCacheManagerFactoryBean.java from URL
@@ -69,7 +66,6 @@ import org.sakaiproject.component.api.ServerConfigurationService;
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  */
-@Slf4j
 public class SakaiCacheManagerFactoryBean implements FactoryBean<CacheManager>, InitializingBean, DisposableBean {
 
     // Check whether EhCache 2.1+ CacheManager.create(Configuration) method is available...
@@ -79,6 +75,7 @@ public class SakaiCacheManagerFactoryBean implements FactoryBean<CacheManager>, 
     private final static String DEFAULT_CACHE_SERVER_URL = "localhost:9510";
     private final static int DEFAULT_CACHE_TIMEOUT = 600; // 10 mins
     private final static int DEFAULT_CACHE_MAX_OBJECTS = 10000;
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected ServerConfigurationService serverConfigurationService;
     private Resource configLocation;
     private boolean shared = false;
@@ -170,7 +167,7 @@ public class SakaiCacheManagerFactoryBean implements FactoryBean<CacheManager>, 
      * Use '-Dcom.tc.tc.config.total.timeout=10000' to specify how long we should try to connect to the TC server
      */
     public void afterPropertiesSet() throws IOException {
-        log.info("Initializing EhCache CacheManager");
+        logger.info("Initializing EhCache CacheManager");
         InputStream is = (this.configLocation != null ? this.configLocation.getInputStream() : null);
         if (this.cacheEnabled == null) {
             this.cacheEnabled = serverConfigurationService.getBoolean("memory.cluster.enabled", false);
@@ -188,7 +185,7 @@ public class SakaiCacheManagerFactoryBean implements FactoryBean<CacheManager>, 
 
             // use Terracotta server if running and available
             if (this.cacheEnabled) {
-                log.info("Attempting to load cluster caching using Terracotta at: "+
+                logger.info("Attempting to load cluster caching using Terracotta at: "+
                         serverConfigurationService.getString("memory.cluster.server.urls", DEFAULT_CACHE_SERVER_URL)+".");
                 // set the URL to the server
                 String[] serverUrls = serverConfigurationService.getStrings("memory.cluster.server.urls");
@@ -219,7 +216,7 @@ public class SakaiCacheManagerFactoryBean implements FactoryBean<CacheManager>, 
                 // This block contains the original code from org/springframework/cache/ehcache/EhCacheManagerFactoryBean.java
                 // A bit convoluted for EhCache 1.x/2.0 compatibility.
                 // To be much simpler once we require EhCache 2.1+
-                log.info("Attempting to load default cluster caching.");
+                logger.info("Attempting to load default cluster caching.");
                 configuration.addTerracottaConfig(terracottaConfig);
                 if (this.cacheManagerName != null) {
                     if (this.shared && createWithConfiguration == null) {
@@ -245,14 +242,14 @@ public class SakaiCacheManagerFactoryBean implements FactoryBean<CacheManager>, 
         } catch (CacheException ce) {
             // this is thrown if we can't connect to the Terracotta server on initialization
             if (this.cacheEnabled && this.cacheManager == null) {
-                log.error("You have cluster caching enabled in sakai.properties, but do not have a Terracotta server running at "+
+                logger.error("You have cluster caching enabled in sakai.properties, but do not have a Terracotta server running at "+
                         serverConfigurationService.getString("memory.cluster.server.urls", DEFAULT_CACHE_SERVER_URL)+
                         ". Please ensure the server is running and available.", ce);
                 // use the default cache instead
                 this.cacheEnabled = false;
                 afterPropertiesSet();
             } else {
-                log.error("An error occurred while creating the cache manager: ", ce);
+                logger.error("An error occurred while creating the cache manager: ", ce);
             }
         } finally {
             if (is != null) {
@@ -274,7 +271,7 @@ public class SakaiCacheManagerFactoryBean implements FactoryBean<CacheManager>, 
     }
 
     public void destroy() {
-        log.info("Shutting down EhCache CacheManager");
+        logger.info("Shutting down EhCache CacheManager");
         this.cacheManager.shutdown();
     }
 

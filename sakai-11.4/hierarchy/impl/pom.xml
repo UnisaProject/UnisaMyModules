@@ -5,17 +5,13 @@
     <parent>
         <artifactId>hierarchy</artifactId>
         <groupId>org.sakaiproject</groupId>
-        <version>12.6</version>
+        <version>11.4</version>
     </parent>
 
     <name>Sakai Hierarchy Implementation</name>
     <groupId>org.sakaiproject.hierarchy</groupId>
     <artifactId>hierarchy-impl</artifactId>
-    <packaging>sakai-component</packaging>
-    <properties>
-        <deploy.target>components</deploy.target>
-    </properties>
-
+    <packaging>jar</packaging>
 
     <profiles>
         <profile>
@@ -118,8 +114,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>javax.transaction</groupId>
+            <groupId>jta</groupId>
             <artifactId>jta</artifactId>
+            <version>h2.1.8</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -146,9 +143,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.easymock</groupId>
+            <groupId>easymock</groupId>
             <artifactId>easymock</artifactId>
-            <version>3.4</version>
+            <version>1.2_Java1.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -156,6 +153,7 @@
             <artifactId>commons-lang</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -191,7 +189,7 @@
         </plugins>
         <testResources>
             <testResource>
-                <directory>${basedir}/src/webapp/WEB-INF</directory>
+                <directory>${basedir}/../pack/src/webapp/WEB-INF</directory>
                 <includes>
                     <include>spring-hibernate.xml</include>
                     <include>logic-support.xml</include>

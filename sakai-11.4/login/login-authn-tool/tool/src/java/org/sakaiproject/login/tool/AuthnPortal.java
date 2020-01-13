@@ -30,8 +30,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.tool.api.ActiveTool;
 import org.sakaiproject.tool.api.Placement;
@@ -51,9 +51,11 @@ import org.sakaiproject.util.Web;
  * @author University of Michigan, Sakai Software Development Team
  * @version $Revision$
  */
-@Slf4j
 public class AuthnPortal extends HttpServlet
 {
+	/** Our log (commons). */
+	private static Logger M_log = LoggerFactory.getLogger(AuthnPortal.class);
+
 	/** messages. */
 	private static ResourceLoader rb = new ResourceLoader("sitenav");
 
@@ -75,7 +77,7 @@ public class AuthnPortal extends HttpServlet
 	 */
 	public void destroy()
 	{
-		log.info("destroy()");
+		M_log.info("destroy()");
 
 		super.destroy();
 	}
@@ -285,7 +287,7 @@ public class AuthnPortal extends HttpServlet
 	{
 		super.init(config);
 
-		log.info("init()");
+		M_log.info("init()");
 	}
 
 	protected PrintWriter startResponse(HttpServletResponse res, String title, String skin) throws IOException

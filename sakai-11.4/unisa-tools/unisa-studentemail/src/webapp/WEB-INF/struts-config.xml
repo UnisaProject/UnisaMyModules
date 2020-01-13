@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+  <data-sources />
+  <form-beans >
+    <form-bean name="displayemailForm" type="za.ac.unisa.lms.tools.studentemail.forms.DisplayemailForm" />
+    
+
+  </form-beans>
+
+  <global-exceptions />
+  <global-forwards />
+  <action-mappings >
+    <action
+      parameter="action"
+      path="/default"
+      type="za.ac.unisa.lms.tools.studentemail.actions.DefaultAction">
+      <forward
+        name="default"
+        path="/displayemail.do?action=input"
+        contextRelative="true" />
+    </action>
+    <action
+      attribute="displayemailForm"
+      name="displayemailForm"
+      parameter="action"
+      path="/displayemail"
+      type="za.ac.unisa.lms.tools.studentemail.actions.DisplayemailAction"
+      validate="false">
+      <forward name="displayStudent" path="/WEB-INF/jsp/displaystudent.jsp" />
+      <forward name="displayLecturer" path="/WEB-INF/jsp/displaylecturer.jsp" />
+      <forward name="displayPreview" path="/WEB-INF/jsp/displayemail.jsp" />
+    </action>
+    
+
+  </action-mappings>
+
+  <message-resources parameter="za.ac.unisa.lms.tools.studentemail.ApplicationResources" />
+  
+  	<!--  Validator plugin -->
+	<plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+		<set-property property="pathnames" value="/WEB-INF/validator-rules.xml, /WEB-INF/validation.xml" />
+		<set-property property="stopOnFirstError" value="true"/>
+	</plug-in>
+</struts-config>
+

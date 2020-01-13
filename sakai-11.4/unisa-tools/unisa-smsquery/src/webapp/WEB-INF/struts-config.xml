@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN" "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+
+<struts-config>
+	<data-sources />
+	<form-beans>
+		<form-bean name="smsQueryForm" 
+			type="za.ac.unisa.lms.tools.smsquery.forms.SmsQueryForm"/>
+	</form-beans>
+
+	<global-exceptions />
+	<global-forwards />
+	
+	<action-mappings>
+		<action
+			parameter="action"
+			path="/default"
+			type="za.ac.unisa.lms.tools.smsquery.actions.DefaultAction">
+			<forward
+				name="default"
+				path="/smsQuery.do?action=initial"
+				contextRelative="true" />
+		</action>
+		<action
+			name="smsQueryForm"
+			attribute="smsQueryForm"
+			parameter="action"
+			path="/smsQuery"
+			type="za.ac.unisa.lms.tools.smsquery.actions.SmsQueryAction"
+			validate="false">
+			<forward
+				name="startPage"
+				path="/WEB-INF/jsp/startPage.jsp"
+				contextRelative="true" />	
+			<forward
+				name="batchListPage"
+				path="/WEB-INF/jsp/batchListPage.jsp"
+				contextRelative="true" />	
+			<forward
+				name="stuNumSelectedPage"
+				path="/WEB-INF/jsp/stuNumSelectedPage.jsp"
+				contextRelative="true" />
+			<forward
+				name="cellNumSelectedPage"
+				path="/WEB-INF/jsp/cellNumSelectedPage.jsp"
+				contextRelative="true" />
+			<forward
+				name="batchNumSelectedPage"
+				path="/WEB-INF/jsp/batchNumSelectedPage.jsp"
+				contextRelative="true" />
+			<forward
+				name="displayLogEntryDetail"
+				path="/WEB-INF/jsp/logEntryDetail.jsp"
+				contextRelative="true" />	
+			</action>
+	</action-mappings>
+
+	<message-resources
+		parameter="za.ac.unisa.lms.tools.smsquery.ApplicationResources" />
+
+
+</struts-config>

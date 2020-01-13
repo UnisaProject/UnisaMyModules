@@ -64,8 +64,7 @@
 		<t:dataTable
 			value="#{SiteListBean.userSitesRows}"
 			var="row1"
-			styleClass="table table-hover table-striped table-bordered"
-			columnClasses="visible,visible,visible,hidden-xs,hidden-xs,hidden-xs,hidden-xs,visible"
+			styleClass="listHier narrowTable"
 			sortColumn="#{SiteListBean.sitesSortColumn}"
             sortAscending="#{SiteListBean.sitesSortAscending}"
             rendered="#{SiteListBean.renderTable}" >
@@ -88,38 +87,38 @@
 		        </f:facet>
 				<h:outputText value="#{row1.groups}"/>
 			</h:column>
-			<t:column id="siteType" headerstyleClass="hidden-xs">
+			<h:column id="siteType">
 				<f:facet name="header">
 		            <t:commandSortHeader columnName="siteType" immediate="true" arrow="true">
 		                <h:outputText value="#{msgs.site_type}"/>
 		            </t:commandSortHeader>
 		        </f:facet>
 				<h:outputText value="#{row1.siteType}"/>
-			</t:column>
-			<t:column id="siteTerm" headerstyleClass="hidden-xs">
+			</h:column>
+			<h:column id="siteTerm">
 				<f:facet name="header">
 		            <t:commandSortHeader columnName="siteTerm" immediate="true" arrow="true">
 		                <h:outputText value="#{msgs.site_term}"/>
 		            </t:commandSortHeader>
 		        </f:facet>
 				<h:outputText value="#{row1.siteTerm}"/>
-			</t:column>
-			<t:column id="roleID" headerstyleClass="hidden-xs">
+			</h:column>
+			<h:column id="roleID">
 				<f:facet name="header">
 		            <t:commandSortHeader columnName="roleId" immediate="true" arrow="true">
 		                <h:outputText value="#{msgs.role_name}"/>
 		            </t:commandSortHeader>
 		        </f:facet>
 				<h:outputText value="#{row1.roleName}"/>
-			</t:column>
-			<t:column id="pubView" headerstyleClass="hidden-xs">
+			</h:column>
+			<h:column id="pubView">
 				<f:facet name="header">
 		            <t:commandSortHeader columnName="published" immediate="true" arrow="true">
 		                <h:outputText value="#{msgs.status}"/>
 		            </t:commandSortHeader>
 		        </f:facet>
 				<h:outputText value="#{row1.pubView}"/>
-			</t:column>
+			</h:column>
 			<h:column id="userStatus">
 				<f:facet name="header">
 		            <t:commandSortHeader columnName="userStatus" immediate="true" arrow="true">

@@ -25,10 +25,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.sakaiproject.sms.util.DateUtil;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Each Sakai site will have its own set of accounts for billing outgoing
@@ -38,7 +36,6 @@ import lombok.extern.slf4j.Slf4j;
  * @version 1.0
  * @created 19-Nov-2008
  */
-@Slf4j
 public class SmsAccount extends BaseModel {
 
 	/**
@@ -214,7 +211,7 @@ public class SmsAccount extends BaseModel {
 				enddate = parsedDate;
 			}
 		} catch (ParseException e) {
-			log.warn(e.getLocalizedMessage(), e);
+			e.printStackTrace();
 		}
 	}
 

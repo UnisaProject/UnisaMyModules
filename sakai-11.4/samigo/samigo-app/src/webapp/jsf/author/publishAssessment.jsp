@@ -187,9 +187,8 @@
 			<f:param value="#{assessmentSettings.submissionsAllowed}" />
 		</h:outputFormat>
 		
-		<h:outputText value=" #{assessmentSettingsMessages.record_highest}" rendered="#{assessmentSettings.scoringType eq '1'}" />
-		<h:outputText value=" #{assessmentSettingsMessages.record_last}" rendered="#{assessmentSettings.scoringType eq '2'}" />
-		<h:outputText value=" #{assessmentSettingsMessages.record_average}" rendered="#{assessmentSettings.scoringType eq '4'}" />
+		<h:outputText value=" #{assessmentSettingsMessages.record_highest}" rendered="#{assessmentSettings.scoringType eq '1'}" />	
+		<h:outputText value=" #{assessmentSettingsMessages.record_last}" rendered="#{assessmentSettings.scoringType eq '2'}" />	
 	</h:panelGroup>
 		
 	<f:verbatim><br/></f:verbatim>   
@@ -249,9 +248,8 @@
 				<f:param value="#{publishedSettings.submissionsAllowed}" />
 			</h:outputFormat>
 			
-			<h:outputText value=" #{assessmentSettingsMessages.record_highest}" rendered="#{publishedSettings.scoringType eq '1'}" />
-			<h:outputText value=" #{assessmentSettingsMessages.record_last}" rendered="#{publishedSettings.scoringType eq '2'}" />
-			<h:outputText value=" #{assessmentSettingsMessages.record_average}" rendered="#{publishedSettings.scoringType eq '4'}" />
+			<h:outputText value=" #{assessmentSettingsMessages.record_highest}" rendered="#{publishedSettings.scoringType eq '1'}" />	
+			<h:outputText value=" #{assessmentSettingsMessages.record_last}" rendered="#{publishedSettings.scoringType eq '2'}" />	
 		</h:panelGroup>
 		
 	<f:verbatim><br/></f:verbatim>

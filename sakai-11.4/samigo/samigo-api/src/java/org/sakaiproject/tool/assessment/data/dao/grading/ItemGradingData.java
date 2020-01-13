@@ -30,16 +30,17 @@ import java.util.Set;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A response to a specific question and its associated data
  * 
  * 
  */
-@Slf4j
 public class ItemGradingData implements java.io.Serializable {
 
+    private static Logger log = LoggerFactory.getLogger(ItemGradingData.class);
 	private static final long serialVersionUID = 7526471155622776147L;
 	private Long itemGradingId;
 	private Long assessmentGradingId;

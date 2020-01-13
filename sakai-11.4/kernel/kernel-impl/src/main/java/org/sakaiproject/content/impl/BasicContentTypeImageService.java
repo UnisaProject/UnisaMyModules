@@ -33,8 +33,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentTypeImageService;
 import org.sakaiproject.util.Resource;
@@ -45,10 +45,12 @@ import org.sakaiproject.util.ResourceLoader;
  * BasicContentTypeImage implements the ContentTypeImageService.
  * </p>
  */
-@Slf4j
 public class BasicContentTypeImageService implements ContentTypeImageService
 {
 	private ServerConfigurationService serverConfigurationService = null;
+	
+	/** Our logger. */
+	private static Logger M_log = LoggerFactory.getLogger(BasicContentTypeImageService.class);
 
 	/** Map content type to image file name. */
 	//protected Properties m_contentTypeImages = null;
@@ -69,9 +71,6 @@ public class BasicContentTypeImageService implements ContentTypeImageService
 
 	/** Default image file for unknown types. */
 	protected static final String DEFAULT_IMAGE = "/sakai/generic.gif";
-	
-	/** Default image file for unknown types. */
-	protected static final String DEFAULT_IMAGE_CLASS = "fa fa-file-o";
 	
 	/** Default file display name for unknown types. */
 	protected static final String DEFAULT_DISPLAY_NAME = "Unknown";
@@ -95,17 +94,14 @@ public class BasicContentTypeImageService implements ContentTypeImageService
 	private static final String DEFAULT_RESOURCECLASS = "org.sakaiproject.localization.util.ContentTypeProperties";
 	private static final String DEFAULT_EXTENSIONFILEBUNDLE = "org.sakaiproject.localization.bundle.content_type.content_type_extensions";
 	private static final String DEFAULT_IMAGEFILEBUNDLE = "org.sakaiproject.localization.bundle.content_type.content_type_images";
-	private static final String DEFAULT_IMAGECLASSFILEBUNDLE = "org.sakaiproject.localization.bundle.content_type.content_type_classes";
 	private static final String DEFAULT_NAMEFILEBUNDLE = "org.sakaiproject.localization.bundle.content_type.content_type_names";
 	private static final String RESOURCECLASS = "resource.class.contenttype";
 	private static final String EXTENSIONFILEBUNDLE = "resource.bundle.contenttype.extensionfile";
 	private static final String IMAGEFILEBUNDLE = "resource.bundle.contenttype.imagefile";
-	private static final String IMAGECLASSFILEBUNDLE = "resource.bundle.contenttype.imageclassfile";
 	private static final String NAMEFILEBUNDLE = "resource.bundle.contenttype.namefile";
 	
 	protected ResourceLoader m_contentTypeExtensions = null;
 	protected ResourceLoader m_contentTypeImages = null;
-	protected ResourceLoader m_contentTypeImageClasses = null;
 	protected ResourceLoader m_contentTypeDisplayNames = null;
 
 	/**********************************************************************************************************************************************************************************************************************************************************
@@ -171,12 +167,10 @@ public class BasicContentTypeImageService implements ContentTypeImageService
 		String resourceClass = serverConfigurationService.getString(RESOURCECLASS, DEFAULT_RESOURCECLASS);
 		String extensionFileBundle = serverConfigurationService.getString(EXTENSIONFILEBUNDLE, DEFAULT_EXTENSIONFILEBUNDLE);
 		String imageFileBundle = serverConfigurationService.getString(IMAGEFILEBUNDLE, DEFAULT_IMAGEFILEBUNDLE);
-		String imageClassFileBundle = serverConfigurationService.getString(IMAGECLASSFILEBUNDLE, DEFAULT_IMAGECLASSFILEBUNDLE);
 		String nameFileBundle = serverConfigurationService.getString(NAMEFILEBUNDLE, DEFAULT_NAMEFILEBUNDLE);
 		
 		m_contentTypeExtensions = new Resource().getLoader(resourceClass, extensionFileBundle);
 		m_contentTypeImages = new Resource().getLoader(resourceClass, imageFileBundle);
-		m_contentTypeImageClasses = new Resource().getLoader(resourceClass, imageClassFileBundle);
 		m_contentTypeDisplayNames = new Resource().getLoader(resourceClass, nameFileBundle);
 		
 		// read the content type extensions file, using extension as the key
@@ -225,11 +219,11 @@ public class BasicContentTypeImageService implements ContentTypeImageService
 				}
 				
 				// Debug
-				log.debug(entry.getKey() + " : " + entry.getValue());
+				M_log.debug(entry.getKey() + " : " + entry.getValue());
 			}
 		}
 		else {
-			log.warn("init(): Resource loader failed to load content type extensions bundle");
+			M_log.warn("init(): Resource loader failed to load content type extensions bundle");
 		}
 			
 	} // init
@@ -240,8 +234,6 @@ public class BasicContentTypeImageService implements ContentTypeImageService
 	public void destroy()
 	{
 		m_contentTypeImages = null;
-		
-		m_contentTypeImageClasses = null;
 
 		m_contentTypeDisplayNames = null;
 
@@ -259,7 +251,7 @@ public class BasicContentTypeImageService implements ContentTypeImageService
 			m_mimetypes = null;
 		}
 
-		log.info("destroy()");
+		M_log.info("destroy()");
 
 	} // shutdown
 
@@ -282,28 +274,8 @@ public class BasicContentTypeImageService implements ContentTypeImageService
 		{
 			image = m_contentTypeImages.getString(contentType.toLowerCase());
 		}
-		
-		return image;
-		
-	} // getContentTypeImage
-	
-	/**
-	 * Get the font-awesome image class name based on the content type.
-	 * 
-	 * @param contentType
-	 *        The content type string.
-	 * @return The font-awesome image class name based on the content type.
-	 */
-	public String getContentTypeImageClass(String contentType)
-	{
-		String imageClass = DEFAULT_IMAGE_CLASS;
-		
-		if (contentType != null && m_contentTypeImageClasses.getIsValid(contentType.toLowerCase()))
-		{
-			imageClass = m_contentTypeImageClasses.getString(contentType.toLowerCase());
-		}
 
-		return imageClass;
+		return image;
 
 	} // getContentTypeImage
 

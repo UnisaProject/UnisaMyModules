@@ -19,19 +19,22 @@
  *
  **********************************************************************************/
 
+
+
 package org.sakaiproject.tool.assessment.ui.bean.evaluation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import javax.faces.event.ActionEvent;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.sakaiproject.jsf.model.PhaseAware;
 import org.sakaiproject.tool.assessment.business.entity.RecordingData;
 import org.sakaiproject.tool.assessment.services.assessment.PublishedAssessmentService;
@@ -39,12 +42,12 @@ import org.sakaiproject.tool.assessment.ui.bean.util.Validator;
 import org.sakaiproject.tool.assessment.ui.listener.evaluation.SubmissionStatusListener;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 
+
 /**
  * <p>Description: class form for evaluating submission status</p>
  *
  *
  */
-@Slf4j
 public class SubmissionStatusBean
   implements Serializable, PhaseAware
 {
@@ -72,12 +75,13 @@ public class SubmissionStatusBean
   private RecordingData recordingData;
   private String totalPeople;
   private String firstItem;
-  private Map answeredItems;
+  private HashMap answeredItems;
+  private static Logger log = LoggerFactory.getLogger(SubmissionStatusBean.class);
   
   //private String selectedSectionFilterValue = TotalScoresBean.ALL_SECTIONS_SELECT_VALUE;
   private String selectedSectionFilterValue = null;
 
-  private List allAgents;
+  private ArrayList allAgents;
   
   // Paging.
   private int firstScoreRow;
@@ -111,7 +115,7 @@ public class SubmissionStatusBean
 			allAgents = getAllAgents();
 		}
 		
-		List matchingAgents;
+		ArrayList matchingAgents;
 		if (isFilteredSearch()) {
 			matchingAgents = findMatchingAgents(searchString);
 		}
@@ -119,7 +123,7 @@ public class SubmissionStatusBean
 			matchingAgents = allAgents;
 		}
 		scoreDataRows = matchingAgents.size();
-		List newAgents = new ArrayList();
+		ArrayList newAgents = new ArrayList();
 		if (maxDisplayedScoreRows == 0) {
 			newAgents = matchingAgents;
 		} else {
@@ -578,7 +582,7 @@ public class SubmissionStatusBean
    * This returns a map of which items actually have answers.
    * Used by QuestionScores.
    */
-  public Map getAnsweredItems()
+  public HashMap getAnsweredItems()
   {
     return answeredItems;
   }
@@ -587,7 +591,7 @@ public class SubmissionStatusBean
    * This stores a map of which items actually have answers.
    * Used by QuestionScores.
    */
-  public void setAnsweredItems(Map newItems)
+  public void setAnsweredItems(HashMap newItems)
   {
     answeredItems = newItems;
   }
@@ -630,11 +634,11 @@ public class SubmissionStatusBean
       return scoreDataRows;
   }
   
-  public void setAllAgents(List allAgents) {
+  public void setAllAgents(ArrayList allAgents) {
 	  this.allAgents = allAgents;
   }
 
-  public List getAllAgents()
+  public ArrayList getAllAgents()
   {
     log.debug("getAllAgents()");
     TotalScoresBean totalScoresBean = (TotalScoresBean) ContextUtil.lookupBean("totalScores");
@@ -675,8 +679,8 @@ public class SubmissionStatusBean
         return !StringUtils.equals(searchString, defaultSearchString);
 	}
 
-	public List findMatchingAgents(final String pattern) {
-		List filteredList = new ArrayList();
+	public ArrayList findMatchingAgents(final String pattern) {
+		ArrayList filteredList = new ArrayList();
 		// name1 example: John Doe
 		StringBuilder name1;
 		// name2 example: Doe, John

@@ -37,7 +37,7 @@
 
   	      <h:dataTable
                     rows="#{schedulerTool.eventPager.pageSize}"
-                    value="#{schedulerTool.eventPager.events}" var="event" styleClass="table table-hover table-striped table-bordered">
+                    value="#{schedulerTool.eventPager.events}" var="event" styleClass="table table-striped">
   	        <h:column>
     	        <f:facet name="header">
     	          <h:outputText value="#{msgs.job_name}"/>

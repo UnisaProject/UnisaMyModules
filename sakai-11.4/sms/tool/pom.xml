@@ -17,16 +17,16 @@
 	    <parent>
         <groupId>org.sakaiproject.sms</groupId>
         <artifactId>sms</artifactId>
-        <version>12.6</version>
+        <version>11.4</version><!--Sms.version-->
     </parent>
     
 	<dependencies>
 
 		<!-- email dependencies -->
 		<dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-        </dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+		</dependency>
 
 		<!--  For sending email -->
 		<dependency>
@@ -46,6 +46,10 @@
 			<artifactId>sms-stubs</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>		
+		</dependency>
 
 		<!-- To avoid to copying jar to shared/lib -->
 		<dependency>
@@ -53,10 +57,13 @@
 			<artifactId>jsmpp</artifactId>
 		</dependency>
 
-
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
 
                 <!-- RSF dependencies -->
-        <!-- RSF dependencies -->
+ <!-- RSF dependencies -->
         <dependency>
             <groupId>org.sakaiproject.rsf</groupId>
             <artifactId>sakai-rsf-core</artifactId>
@@ -84,8 +91,8 @@
 			<artifactId>spring-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.supercsv</groupId>
@@ -95,10 +102,12 @@
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
+			<version>1.8.3</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
+			<version>1.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>

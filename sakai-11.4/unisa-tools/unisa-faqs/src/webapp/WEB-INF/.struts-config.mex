@@ -1,0 +1,128 @@
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/default.do" location="50,50" dimension="325,104" />
+  <StrutsActivity path="/faqcategory.do" location="650,50" dimension="363,104" />
+  <StrutsActivity path="/faqcontent.do" location="-15,285" dimension="356,104" />
+  <StrutsActivity path="/faqlist.do" location="50,650" dimension="331,104" />
+  <StrutsActivity path="/WEB-INF/jsp/editfaqcategory.jsp" location="950,250" dimension="228,53" />
+  <StrutsActivity path="/WEB-INF/jsp/inputfaqcategory.jsp" location="350,450" dimension="235,53" />
+  <StrutsActivity path="/WEB-INF/jsp/viewspecificfaq.jsp" location="50,850" dimension="229,53" />
+  <StrutsActivity path="/WEB-INF/jsp/inputfaqcontent.jsp" location="650,450" dimension="228,53" />
+  <StrutsActivity path="/WEB-INF/jsp/editfaqcontent.jsp" location="650,850" dimension="187,49" />
+  <StrutsActivity path="/WEB-INF/jsp/viewfaqlist.jsp" location="650,650" dimension="201,53" />
+  <StrutsActivity path="/WEB-INF/jsp/confirmremove.jsp" location="950,650" dimension="225,53" />
+  <StrutsActivity path="/WEB-INF/jsp/default.jsp" location="650,250" dimension="178,53" />
+  <StrutsActivity path="/WEB-INF/jsp/viewfaq.jsp" location="50,450" dimension="184,53" />
+  <StrutsActivity path="/WEB-INF/jsp/editfaq.jsp" location="950,450" dimension="178,53" />
+  <StrutsActivity path="/WEB-INF/jsp/editfaqcontentjsp" location="350,850" dimension="217,53" />
+  <StrutsActivity path="/faqcopy.do" location="950,850" dimension="299,104" />
+  <StrutsActivity path="/WEB-INF/jsp/copied.jsp" location="650,950" dimension="177,53" />
+  <StrutsTransition id="/faqcategory.do,canceleditcategory,/default.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="813,154" />
+      <AbsolutePoint location="813,199" />
+      <AbsolutePoint location="258,199" />
+      <AbsolutePoint location="258,154" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/faqcontent.do,save,/default.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="163,285" />
+      <AbsolutePoint location="163,154" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/faqcopy.do,copiedforward,/WEB-INF/jsp/copied.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="950,918" />
+      <AbsolutePoint location="738,918" />
+      <AbsolutePoint location="738,950" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/faqcontent.do,edit,/WEB-INF/jsp/editfaqcontent.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="341,367" />
+      <AbsolutePoint location="630,367" />
+      <AbsolutePoint location="630,874" />
+      <AbsolutePoint location="650,874" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/faqcontent.do,view,/WEB-INF/jsp/viewspecificfaq.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="35,389" />
+      <AbsolutePoint location="35,876" />
+      <AbsolutePoint location="50,876" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/faqcategory.do,cancels,/default.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="650,102" />
+      <AbsolutePoint location="375,102" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/faqcategory.do,editcategory,/WEB-INF/jsp/editfaqcategory.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="965,154" />
+      <AbsolutePoint location="965,250" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/faqcontent.do,cancel,/default.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="288,285" />
+      <AbsolutePoint location="288,154" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/faqcategory.do,saveeditcategory,/default.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="843,154" />
+      <AbsolutePoint location="843,229" />
+      <AbsolutePoint location="228,229" />
+      <AbsolutePoint location="228,154" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/faqlist.do,confirmremove,/WEB-INF/jsp/confirmremove.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="381,732" />
+      <AbsolutePoint location="1062,732" />
+      <AbsolutePoint location="1062,703" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/faqcategory.do,inputcategory,/WEB-INF/jsp/inputfaqcategory.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="650,132" />
+      <AbsolutePoint location="506,132" />
+      <AbsolutePoint location="506,450" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/faqcontent.do,input,/WEB-INF/jsp/inputfaqcontent.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="341,337" />
+      <AbsolutePoint location="764,337" />
+      <AbsolutePoint location="764,450" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/faqlist.do,view,/WEB-INF/jsp/viewfaqlist.jsp,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="381,688" />
+      <AbsolutePoint location="650,688" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/default.do,default,/faqlist.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="50,102" />
+      <AbsolutePoint location="-175,102" />
+      <AbsolutePoint location="-175,702" />
+      <AbsolutePoint location="50,702" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/faqcontent.do,editfaq,/default.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="193,285" />
+      <AbsolutePoint location="193,154" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/faqcategory.do,save,/default.do,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="650,72" />
+      <AbsolutePoint location="375,72" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>

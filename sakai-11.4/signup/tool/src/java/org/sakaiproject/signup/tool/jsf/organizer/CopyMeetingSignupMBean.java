@@ -24,17 +24,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 
-import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.signup.logic.SignupUser;
 import org.sakaiproject.signup.logic.SignupUserActionException;
@@ -49,7 +45,7 @@ import org.sakaiproject.signup.tool.jsf.TimeslotWrapper;
 import org.sakaiproject.signup.tool.jsf.organizer.action.CreateMeetings;
 import org.sakaiproject.signup.tool.jsf.organizer.action.CreateSitesGroups;
 import org.sakaiproject.signup.tool.util.Utilities;
-import org.sakaiproject.util.DateFormatterUtil;
+//import com.sun.corba.se.spi.legacy.connection.GetEndPointInfoAgainException;
 
 /**
  * <p>
@@ -60,7 +56,6 @@ import org.sakaiproject.util.DateFormatterUtil;
  * 
  * </P>
  */
-@Slf4j
 public class CopyMeetingSignupMBean extends SignupUIBaseBean {
 
 	private SignupMeeting signupMeeting;
@@ -80,9 +75,6 @@ public class CopyMeetingSignupMBean extends SignupUIBaseBean {
 
 	/* singup deadline before this minutes/hours/days */
 	private int deadlineTime;
-	
-	//Meeting title
-	private String title;
 	
 	//Location selected from the dropdown
 	private String selectedLocation;
@@ -143,13 +135,6 @@ public class CopyMeetingSignupMBean extends SignupUIBaseBean {
  	private List<SelectItem> categories = null;
  	private List<SelectItem> locations=null;
 
-	private String startTimeString;
-	private String endTimeString;
-	private String repeatUntilString;
-	private static String HIDDEN_ISO_STARTTIME = "startTimeISO8601";
-	private static String HIDDEN_ISO_ENDTIME = "endTimeISO8601";
-	private static String HIDDEN_ISO_UNTILTIME = "untilISO8601";
-
 	/**
 	 * this reset information which contains in this UIBean lived in a session
 	 * scope
@@ -166,7 +151,7 @@ public class CopyMeetingSignupMBean extends SignupUIBaseBean {
 		}
 		
 		//sendEmailAttendeeOnly = false;
-		sendEmailToSelectedPeopleOnly = DEFAULT_SEND_EMAIL_TO_SELECTED_PEOPLE_ONLY;
+		sendEmailToSelectedPeopleOnly = SEND_EMAIL_ALL_PARTICIPANTS;
 		publishToCalendar= DEFAULT_EXPORT_TO_CALENDAR_TOOL;
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(new Date());
@@ -187,10 +172,7 @@ public class CopyMeetingSignupMBean extends SignupUIBaseBean {
 		/*refresh copy of original*/
 		this.signupMeeting = signupMeetingService.loadSignupMeeting(meetingWrapper.getMeeting().getId(), sakaiFacade
 				.getCurrentUserId(), sakaiFacade.getCurrentLocationId());
-
-		/*get meeting title*/
-		title = this.signupMeeting.getTitle();
-
+		
 		/*prepare new attachments*/		
 		assignMainAttachmentsCopyToSignupMeeting();
 		//TODO not consider copy time slot attachment yet
@@ -324,14 +306,14 @@ public class CopyMeetingSignupMBean extends SignupUIBaseBean {
 			this.signupMeeting.getSignupAttachments().clear();
 
 		} catch (PermissionException e) {
-			log.info(Utilities.rb.getString("no.permission_create_event") + " - " + e.getMessage());
+			logger.info(Utilities.rb.getString("no.permission_create_event") + " - " + e.getMessage());
 			Utilities.addErrorMessage(Utilities.rb.getString("no.permission_create_event"));
 			return ORGANIZER_MEETING_PAGE_URL;
 		} catch (SignupUserActionException ue) {
 			Utilities.addErrorMessage(ue.getMessage());
 			return COPTY_MEETING_PAGE_URL;
 		} catch (Exception e) {
-			log.error(Utilities.rb.getString("error.occurred_try_again") + " - " + e.getMessage());
+			logger.error(Utilities.rb.getString("error.occurred_try_again") + " - " + e.getMessage());
 			Utilities.addErrorMessage(Utilities.rb.getString("error.occurred_try_again"));
 			return ORGANIZER_MEETING_PAGE_URL;
 		}
@@ -349,38 +331,9 @@ public class CopyMeetingSignupMBean extends SignupUIBaseBean {
 	 *            an ActionEvent object.
 	 */
 	public void validateCopyMeeting(ActionEvent e) {
-		Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-
-		String isoStartTime = params.get(HIDDEN_ISO_STARTTIME);
-
-		if(DateFormatterUtil.isValidISODate(isoStartTime)){
-			this.signupMeeting.setStartTime(DateFormatterUtil.parseISODate(isoStartTime));
-		}
-
-		String isoEndTime = params.get(HIDDEN_ISO_ENDTIME);
-
-		if(DateFormatterUtil.isValidISODate(isoEndTime)){
-			this.signupMeeting.setEndTime(DateFormatterUtil.parseISODate(isoEndTime));
-		}
-
-		String isoUntilTime = params.get(HIDDEN_ISO_UNTILTIME);
-
-		if(DateFormatterUtil.isValidISODate(isoUntilTime)){
-			setRepeatUntil(DateFormatterUtil.parseISODate(isoUntilTime));
-		}
 		Date eventEndTime = signupMeeting.getEndTime();
 		Date eventStartTime = signupMeeting.getStartTime();
 		
-		//Set Title		
-		if (StringUtils.isNotBlank(title)){
-			log.debug("title set: " + title);
-			this.signupMeeting.setTitle(title);
-		}else{
-			validationError = true;
-			Utilities.addErrorMessage(Utilities.rb.getString("event.title_cannot_be_blank"));
-			return;
-		}
-
 		/*user defined own TS case*/
 		if(isUserDefinedTS()){
 			eventEndTime= getUserDefineTimeslotBean().getEventEndTime();
@@ -813,15 +766,7 @@ public class CopyMeetingSignupMBean extends SignupUIBaseBean {
 	public void setDeadlineTimeType(String deadlineTimeType) {
 		this.deadlineTimeType = deadlineTimeType;
 	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
+	
 	/**
 	 * This is a getter method to provide selected location.
 	 * 
@@ -904,30 +849,6 @@ public class CopyMeetingSignupMBean extends SignupUIBaseBean {
 
 	public void setRepeatUntil(Date repeatUntil) {
 		this.repeatUntil = repeatUntil;
-	}
-
-	public String getStartTimeString() {
-		return startTimeString;
-	}
-
-	public String getEndTimeString() {
-		return endTimeString;
-	}
-
-	public void setStartTimeString(String startTimeString) {
-		this.startTimeString = startTimeString;
-	}
-
-	public void setEndTimeString(String endTimeString) {
-		this.endTimeString = endTimeString;
-	}
-
-	public String getRepeatUntilString() {
-		return repeatUntilString;
-	}
-
-	public void setRepeatUntilString(String repeatUntilString) {
-		this.repeatUntilString = repeatUntilString;
 	}
 
 	public String getRepeatType() {

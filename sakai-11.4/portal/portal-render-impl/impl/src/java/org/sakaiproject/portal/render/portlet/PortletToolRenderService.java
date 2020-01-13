@@ -38,7 +38,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.pluto.PortletContainer;
 import org.apache.pluto.PortletContainerException;
 import org.apache.pluto.PortletContainerFactory;
@@ -48,8 +49,6 @@ import org.apache.pluto.descriptors.portlet.PortletDD;
 import org.apache.pluto.descriptors.portlet.SupportsDD;
 import org.apache.pluto.spi.PortalCallbackService;
 import org.apache.pluto.spi.PortletURLProvider;
-import org.w3c.tidy.Tidy;
-
 import org.sakaiproject.util.Web;
 import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.portal.api.Portal;
@@ -71,6 +70,8 @@ import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.tool.api.Placement;
 
+import org.w3c.tidy.Tidy;
+
 /**
  * @author ddwolf
  * @author ieb
@@ -78,9 +79,13 @@ import org.sakaiproject.tool.api.Placement;
  * @since Sakai 2.4
  * @version $Rev$
  */
-@Slf4j
 public class PortletToolRenderService implements ToolRenderService
 {
+
+	/**
+	 * Logger instance used for all instances of this service.
+	 */
+	private static final Logger LOG = LoggerFactory.getLogger(PortletToolRenderService.class);
 
 	/**
 	 * Portlet Container instance used by this service.
@@ -122,11 +127,17 @@ public class PortletToolRenderService implements ToolRenderService
 		PortletState state = portletStateEncoder.decode(stateParam);
 		PortletStateAccess.setPortletState(request, state);
 
-		log.debug("New Portlet State retrieved for Tool '{}'.", state.getId());
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("New Portlet State retrieved for Tool '" + state.getId() + ".");
+		}
 
 		if (state.isAction())
 		{
-			log.debug("Processing action for placement id {}", state.getId());
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Processing action for placement id " + state.getId());
+			}
 
 			PortletStateAccess.setPortletState(request, state);
 			SakaiPortletWindow window = isIn168TestMode(request) ? createPortletWindow(state
@@ -173,7 +184,10 @@ public class PortletToolRenderService implements ToolRenderService
 		PortletState state = PortletStateAccess.getPortletState(request, window.getId()
 				.getStringId());
 
-		log.debug("Retrieved PortletState from request cache.  Applying to window.");
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Retrieved PortletState from request cache.  Applying to window.");
+		}
 
 		if (portalService.isResetRequested(request))
 		{
@@ -219,8 +233,9 @@ public class PortletToolRenderService implements ToolRenderService
 			if (isPortletModeAllowed(toolConfiguration, "edit"))
 			{
 				pup = pcs.getPortletURLProvider(request, window);
-				log.debug("pup = {}", pup);
+				// System.out.println("pup = "+pup);
 				pup.setPortletMode(new PortletMode("edit"));
+				// System.out.println("pup edit="+pup.toString());
 				editUrl = pup.toString();
 			}
 
@@ -228,7 +243,7 @@ public class PortletToolRenderService implements ToolRenderService
 			{
 				pup = pcs.getPortletURLProvider(request, window);
 				pup.setPortletMode(new PortletMode("help"));
-				log.debug("pup help={}", pup);
+				// System.out.println("pup help="+pup.toString());
 				helpUrl = pup.toString();
 			}
 
@@ -308,7 +323,7 @@ public class PortletToolRenderService implements ToolRenderService
 			{
 				final Writer result = new StringWriter();
 				final PrintWriter printWriter = new PrintWriter(result);
-				log.error(bufferedException.getMessage(), bufferedException);
+				bufferedException.printStackTrace(printWriter);
 				String storedContent = "<div class=\"portlettraceback\">\n" +
 					FormattedText.escapeHtml(result.toString(),true) +
 					"\n</pre>\n";
@@ -447,16 +462,19 @@ public class PortletToolRenderService implements ToolRenderService
 		{
 			return false;
 		}
-		log.debug("Checking context for potential portlet ");
-		ServletContext crossContext = context.getContext(window.getContextPath());
-		if (log.isDebugEnabled())
+		if (LOG.isDebugEnabled())
 		{
-			log.debug("Got servlet context as  " + crossContext);
-			log.debug("Getting Context for path " + window.getContextPath());
-			log.debug("Base Path " + crossContext.getRealPath("/"));
-			log.debug("Context Name " + crossContext.getServletContextName());
-			log.debug("Server Info " + crossContext.getServerInfo());
-			log.debug("      and it is a portlet ? :"
+			LOG.debug("Checking context for potential portlet ");
+		}
+		ServletContext crossContext = context.getContext(window.getContextPath());
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Got servlet context as  " + crossContext);
+			LOG.debug("Getting Context for path " + window.getContextPath());
+			LOG.debug("Base Path " + crossContext.getRealPath("/"));
+			LOG.debug("Context Name " + crossContext.getServletContextName());
+			LOG.debug("Server Info " + crossContext.getServerInfo());
+			LOG.debug("      and it is a portlet ? :"
 					+ (crossContext.getResource("/WEB-INF/portlet.xml") != null));
 		}
 		return crossContext.getResource("/WEB-INF/portlet.xml") != null;
@@ -469,25 +487,31 @@ public class PortletToolRenderService implements ToolRenderService
 		{
 			if (isIn168TestMode(request))
 			{
-				log.warn("In portlet test mode");
+				LOG.warn("In portlet test mode");
 				return true;
 			}
 			if (isPortletApplication(context, configuration))
 			{
-				log.debug("Tool {} is a portlet", configuration.getToolId());
+				if (LOG.isDebugEnabled())
+				{
+					LOG.debug("Tool " + configuration.getToolId() + " is a portlet");
+				}
 				return true;
 			}
-			log.debug("Tool {} is not a portlet", configuration.getToolId());
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Tool " + configuration.getToolId() + " is not a portlet");
+			}
 			return false;
 		}
 		catch (MalformedURLException e)
 		{
-			log.error("Failed to render ", e);
+			LOG.error("Failed to render ", e);
 			return false;
 		}
 		catch (ToolRenderException e)
 		{
-			log.error("Failed to render ", e);
+			LOG.error("Failed to render ", e);
 			return false;
 		}
 	}
@@ -506,14 +530,14 @@ public class PortletToolRenderService implements ToolRenderService
 
 		if (toolProperties != null)
 		{
-			log.debug("tp = {}", toolProperties);
+			// System.out.println("tp = "+toolProperties);
 			portletName = toolProperties.getProperty(PortalService.TOOL_PORTLET_NAME);
 			appName = toolProperties.getProperty(PortalService.TOOL_PORTLET_APP_NAME);
 			fred = toolProperties.getProperty("FRED");
 		}
-		log.debug("appName={}", appName);
-		log.debug("portletName={}", portletName);
-		log.debug("fred={}", fred);
+		// System.out.println("appName="+appName);
+		// System.out.println("portletName="+portletName);
+		// System.out.println("fred="+fred);
 		Properties configProperties = placement.getConfig();
 		if (configProperties != null)
 		{
@@ -528,11 +552,11 @@ public class PortletToolRenderService implements ToolRenderService
 						.getProperty(PortalService.TOOL_PORTLET_APP_NAME);
 			}
 		}
-		log.debug("appName={}", appName);
-		log.debug("portletName={}", portletName);
+		// System.out.println("appName="+appName);
+		// System.out.println("portletName="+portletName);
 		PortletDD pdd = PortletContextManager.getManager().getPortletDescriptor(appName,
 				portletName);
-		log.debug("pdd={}", pdd);
+		// System.out.println("pdd="+pdd);
 		return pdd;
 	}
 

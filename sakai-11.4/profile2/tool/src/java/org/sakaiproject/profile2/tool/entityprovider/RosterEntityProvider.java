@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2008-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.sakaiproject.profile2.tool.entityprovider;
 
 import java.util.ArrayList;
@@ -125,11 +110,27 @@ public class RosterEntityProvider extends AbstractEntityProvider implements
 		String paramValue = (String) params.get(OFFICIAL_IMAGES_PARAM);
 		boolean officialImage = Boolean.valueOf(paramValue);
 
-		// Get the member set
-		Set<Member> members = site.getMembers();
-		return convertToRosterItems(members, officialImage);
-	}
+		// get members in site, create list
+		List<RosterItem> rosterList = new ArrayList<RosterItem>();
 
+		try {
+			// Get the member set
+			Set<Member> members = authzGroupService.getAuthzGroup(
+					site.getReference()).getMembers();
+			for (Member member : members) {
+				if (member.isActive()) {
+					Person person = profileLogic.getPerson(member.getUserId());
+					RosterItem item = new RosterItem(person, officialImage);
+					rosterList.add(item);
+				}
+			}
+		} catch (GroupNotDefinedException e) {
+			log.error("getUsersInAllSections: " + e.getMessage(), e);
+		}
+
+		Collections.sort(rosterList);
+		return rosterList;
+	}
 
 	/**
 	 * site/siteId
@@ -163,6 +164,7 @@ public class RosterEntityProvider extends AbstractEntityProvider implements
 		boolean officialImage = Boolean.valueOf(paramValue);
 
 		// get members in site, create list
+		List<RosterItem> rosterList = new ArrayList<RosterItem>();
 
 		// find the group by group id first
 		Group group = site.getGroup(groupId);
@@ -178,34 +180,21 @@ public class RosterEntityProvider extends AbstractEntityProvider implements
 
 			// still could not find the group
 			if (group == null) {
-			    throw new EntityNotFoundException("Invalid group: "+ groupId, siteId);
+				log.warn("Group " + groupId + " not found");
+				return rosterList;
 			}
 		}
 
 		// Get the member set
 		Set<Member> members = group.getMembers();
-		return convertToRosterItems(members, officialImage);
-	}
-
-	/**
-	 * Utility method to convert members to a list of RosterItem. Returned list may be smaller than
-	 * the supplied collection due to deleted/inactive members.
-	 *
-	 * @param members The members to be converted, can contain users who aren't found.
-	 * @param officialImage If <code>true</code> official images are used.
-	 * @return A sorted list of RosterItems for the members.
-	 */
-	private List<RosterItem> convertToRosterItems(Collection<Member> members, boolean officialImage) {
-		List<RosterItem> rosterList = new ArrayList<>();
 		for (Member member : members) {
 			if (member.isActive()) {
 				Person person = profileLogic.getPerson(member.getUserId());
-				if (person != null) {
-					RosterItem item = new RosterItem(person, officialImage);
-					rosterList.add(item);
-				}
+				RosterItem item = new RosterItem(person, officialImage);
+				rosterList.add(item);
 			}
 		}
+
 		Collections.sort(rosterList);
 		return rosterList;
 	}

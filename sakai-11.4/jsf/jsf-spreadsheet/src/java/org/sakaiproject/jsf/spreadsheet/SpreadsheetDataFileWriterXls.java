@@ -29,26 +29,24 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.BorderStyle;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.hssf.util.HSSFColor;
 
 import org.sakaiproject.component.cover.ServerConfigurationService;
 
 /**
- * @deprecated use {@link org.sakaiproject.jsf.spreadsheet.SpreadsheetDateFileWriterXlsx} , this will be removed after 12 - Oct 2017
+ *
  */
-@Deprecated
-@Slf4j
 public class SpreadsheetDataFileWriterXls implements SpreadsheetDataFileWriter {
+	private static final Logger log = LoggerFactory.getLogger(SpreadsheetDataFileWriter.class);
+
 	public void writeDataToResponse(List<List<Object>> spreadsheetData, String fileName, HttpServletResponse response) {
 		response.setContentType("application/vnd.ms-excel");
 		SpreadsheetUtil.setEscapedAttachmentHeader(response, fileName + ".xls");
@@ -69,20 +67,21 @@ public class SpreadsheetDataFileWriterXls implements SpreadsheetDataFileWriter {
 		}
 	}
 	
-	private Workbook getAsWorkbook(List<List<Object>> spreadsheetData) {
-		Workbook wb = new HSSFWorkbook();
-		Sheet sheet = wb.createSheet();
-		CellStyle headerCs = wb.createCellStyle();
+	private HSSFWorkbook getAsWorkbook(List<List<Object>> spreadsheetData) {
+		HSSFWorkbook wb = new HSSFWorkbook();
+		HSSFSheet sheet = wb.createSheet();
+		HSSFCellStyle headerCs = wb.createCellStyle();
 		Iterator<List<Object>> dataIter = spreadsheetData.iterator();
 		
 		// Set the header style
-		headerCs.setBorderBottom(BorderStyle.THICK);
-		headerCs.setFillBackgroundColor(IndexedColors.BLUE_GREY.getIndex());
+		headerCs.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+		headerCs.setFillBackgroundColor(HSSFColor.BLUE_GREY.index);
+
 		// Set the font
-		CellStyle cellStyle = null;
+		HSSFCellStyle cellStyle = null;
 		String fontName = ServerConfigurationService.getString("spreadsheet.font");
 		if (fontName != null) {
-			Font font = wb.createFont();
+			HSSFFont font = wb.createFont();
 			font.setFontName(fontName);
 			headerCs.setFont(font);
 			cellStyle = wb.createCellStyle();
@@ -90,10 +89,10 @@ public class SpreadsheetDataFileWriterXls implements SpreadsheetDataFileWriter {
 		}
 
 		// By convention, the first list in the list contains column headers.
-		Row headerRow = sheet.createRow((short)0);
+		HSSFRow headerRow = sheet.createRow((short)0);
 		List<Object> headerList = dataIter.next();
 		for (short i = 0; i < headerList.size(); i++) {
-			Cell headerCell = createCell(headerRow, i);
+			HSSFCell headerCell = createCell(headerRow, i);
 			headerCell.setCellValue((String)headerList.get(i));
 			headerCell.setCellStyle(headerCs);
 			sheet.autoSizeColumn(i);
@@ -102,9 +101,9 @@ public class SpreadsheetDataFileWriterXls implements SpreadsheetDataFileWriter {
 		short rowPos = 1;
 		while (dataIter.hasNext()) {
 			List<Object> rowData = dataIter.next();
-			Row row = sheet.createRow(rowPos++);
+			HSSFRow row = sheet.createRow(rowPos++);
 			for (short i = 0; i < rowData.size(); i++) {
-				Cell cell = createCell(row, i);
+				HSSFCell cell = createCell(row, i);
 				Object data = rowData.get(i);
 				if (data != null) {
 					if (data instanceof Double) {
@@ -122,8 +121,8 @@ public class SpreadsheetDataFileWriterXls implements SpreadsheetDataFileWriter {
 		return wb;
 	}
 
-	private Cell createCell(Row row, short column) {
-		Cell cell = row.createCell(Integer.valueOf(column).intValue());
+	private HSSFCell createCell(HSSFRow row, short column) {
+		HSSFCell cell = row.createCell(Integer.valueOf(column).intValue());
 		return cell;
 	}
 

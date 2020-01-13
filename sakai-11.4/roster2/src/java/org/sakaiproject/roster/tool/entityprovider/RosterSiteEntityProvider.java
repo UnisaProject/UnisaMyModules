@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2010-2017 The Apereo Foundation
- *
- * Licensed under the Educational Community License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://opensource.org/licenses/ecl2
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 /*
 * Licensed to The Apereo Foundation under one or more contributor license
 * agreements. See the NOTICE file distributed with this work for
@@ -40,9 +25,8 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sakaiproject.entitybroker.EntityReference;
 import org.sakaiproject.entitybroker.EntityView;
 import org.sakaiproject.entitybroker.entityprovider.annotations.EntityCustomAction;
@@ -60,6 +44,8 @@ import org.sakaiproject.roster.api.SakaiProxy;
 import org.sakaiproject.sitestats.api.SitePresenceTotal;
 import org.sakaiproject.user.api.User;
 
+import lombok.Setter;
+
 /**
  * <code>EntityProvider</code> to allow Roster to access site, membership, and
  * enrollment data for the current user. The provider respects Roster
@@ -68,10 +54,12 @@ import org.sakaiproject.user.api.User;
  * 
  * @author d.b.robinson@lancaster.ac.uk
  */
-@Slf4j
 public class RosterSiteEntityProvider extends AbstractEntityProvider implements
 		AutoRegisterEntityProvider, ActionsExecutable, Outputable {
 
+	@SuppressWarnings("unused")
+	private static final Logger log = LoggerFactory.getLogger(RosterSiteEntityProvider.class);
+	
 	public final static String ENTITY_PREFIX		= "roster-membership";
 	public final static String DEFAULT_ID			= ":ID:";
 	
@@ -162,7 +150,7 @@ public class RosterSiteEntityProvider extends AbstractEntityProvider implements
         if (returnAll) {
             subList = membership;
         } else {
-            int pageSize = sakaiProxy.getPageSize();
+            int pageSize = 10;
             int start  = page * pageSize;
             log.debug("start: {}", start);
 
@@ -184,7 +172,6 @@ public class RosterSiteEntityProvider extends AbstractEntityProvider implements
         RosterData data = new RosterData();
         data.setMembers(subList);
         data.setMembersTotal(membershipsSize);
-        data.setPageSize(sakaiProxy.getPageSize());
 
         boolean showVisits = sakaiProxy.getShowVisits();
 
@@ -285,29 +272,15 @@ public class RosterSiteEntityProvider extends AbstractEntityProvider implements
 	}
 
 	@EntityCustomAction(action = "get-search-index", viewKey = EntityView.VIEW_SHOW)
-	public Object getSearchIndex(final EntityReference reference, final Map<String, Object> actionParams) {
+	public Object getSearchIndex(EntityReference reference) {
 
-		final String siteId = reference.getId();
+        String siteId = reference.getId();
 
 		if (null == siteId || DEFAULT_ID.equals(siteId)) {
 			throw new EntityException(ERROR_INVALID_SITE, reference.getReference());
 		}
 
-		final String userId = developerHelperService.getCurrentUserId();
-		String groupId = null;
-		String roleId = null;
-		String enrollmentSetId = null;
-		String enrollmentStatus = "all";
-		
-		if(actionParams != null){
-			groupId = (String) actionParams.get(KEY_GROUP_ID);
-			roleId = (String) actionParams.get(KEY_ROLE_ID);
-			enrollmentSetId = (String) actionParams.get(KEY_ENROLLMENT_SET_ID);
-			if(actionParams.get(KEY_ENROLLMENT_STATUS) != null) {
-				enrollmentStatus = (String) actionParams.get(KEY_ENROLLMENT_STATUS);
-			}
-		}
-		return sakaiProxy.getSearchIndex(siteId, userId, groupId, roleId, enrollmentSetId, enrollmentStatus);
+        return sakaiProxy.getSearchIndex(siteId);
 	}
 
     /*

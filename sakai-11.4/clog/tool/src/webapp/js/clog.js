@@ -27,7 +27,7 @@ clog.SORT_COMMENTS_UP = 'sortcommentsup';
 clog.SORT_COMMENTS_DOWN = 'sortcommentsdown';
 clog.sortByComments = clog.SORT_COMMENTS_DOWN;
 // Sorting keys end
-//
+
 clog.LOCAL_STORAGE_KEY = 'clog';
 clog.AJAX_TIMEOUT = 100000; //unisa change
 
@@ -37,10 +37,6 @@ clog.states = {
 };
 
 clog.switchState = function (state,arg) {
-
-    // CLOG-200
-    // We don't want infinite scroll for everything. Views that need it will switch it back on
-    $(window).off('scroll.clog');
 
 	// Clear the autosave interval
 	if (clog.autosave_id) {
@@ -117,7 +113,6 @@ clog.switchState = function (state,arg) {
             };
 
         clog.utils.renderTemplate('group_posts', templateData, 'clog_content');
-
         // renderPageOfPosts uses this. Set it to the start page
         clog.page = 0;
         clog.postsRendered = 0;
@@ -184,7 +179,6 @@ clog.switchState = function (state,arg) {
                 clog.utils.renderPageOfMembers({ sort: clog.sortByComments });
             });
         });
-
         // renderPageOfMembers uses this. Set it to the start page
         clog.page = 0;
         clog.postsRendered = 0;
@@ -205,13 +199,8 @@ clog.switchState = function (state,arg) {
 			userId = arg.userId;
         }
 
-        if (arg && !arg.userDisplayName) {
-            arg.userDisplayName = userId;
-        }
-
         var templateData = {
-                userId: userId,
-                userDisplayName: arg.userDisplayName,
+                creatorId: userId,
                 showRSS: (userId !== clog.userId && !clog.onGateway),
                 onGateway: clog.onGateway,
                 siteId: clog.siteId,
@@ -219,6 +208,12 @@ clog.switchState = function (state,arg) {
             };
 
         clog.utils.renderTemplate('all_user_posts', templateData, 'clog_content');
+
+        $(document).ready(function () {
+
+            var profileMarkup = clog.sakai.getProfileMarkup(userId);
+            $('#clog-author-profile').html(profileMarkup);
+        });
 
         // renderPageOfPosts uses this. Set it to the start page
         clog.page = 0;
@@ -235,6 +230,12 @@ clog.switchState = function (state,arg) {
 		var userId = clog.userId;
 
         clog.utils.renderTemplate('all_user_posts', {'creatorId': userId}, 'clog_content');
+
+        $(document).ready(function () {
+
+            var profileMarkup = clog.sakai.getProfileMarkup(userId);
+            $('#clog-author-profile').html(profileMarkup);
+        });
 
         // renderPageOfPosts uses this. Set it to the start page
         clog.page = 0;
@@ -264,7 +265,7 @@ clog.switchState = function (state,arg) {
                 $(document).ready(function () {
 
                     $('#clog_user_posts_link').click(function (e) {
-                        clog.switchState('userPosts',{'userId' : clog.currentPost.creatorId, userDisplayName: clog.currentPost.creatorDisplayName});
+                        clog.switchState('userPosts',{'userId' : clog.currentPost.creatorId});
                     });
 
                     $('.content').show();
@@ -274,8 +275,8 @@ clog.switchState = function (state,arg) {
             };
 
 		if (arg && arg.postId) {
-			clog.utils.findPost(arg.postId, postCallback, arg.fromSamepage);
-		}
+			clog.utils.findPost(arg.postId, postCallback);
+        }
 	} else if ('createPost' === state) {
 	    $('#clog_toolbar > li > span').removeClass('current');
 	    $('#clog_create_post_link > span').addClass('current');
@@ -402,7 +403,7 @@ clog.switchState = function (state,arg) {
                 });
             };
 
-		clog.utils.findPost(arg.postId, commentCallback, arg.fromSamepage);
+        clog.utils.findPost(arg.postId, commentCallback);
 	} else if ('permissions' === state) {
 	    $('#clog_toolbar > li > span').removeClass('current');
 	    $('#clog_permissions_link > span').addClass('current');
@@ -475,13 +476,11 @@ clog.setLocalStorageSetting = function (key, value) {
 clog.toggleFullContent = function (v) {
 
 	if (v.checked) {
-		$('.clog-body').hide();
-		$('.postOptionsPanel').hide();
+		$('.clog_body').hide();
         // CLOG-59
         this.setLocalStorageSetting('showBody', false);
     } else {
-		$('.clog-body').show();
-		$('.postOptionsPanel').show();
+		$('.clog_body').show();
         // CLOG-59
         this.setLocalStorageSetting('showBody', true);
     }
@@ -500,7 +499,7 @@ clog.toggleFullContent = function (v) {
 
     var languagesLoaded = function () {
 
-        clog.i18n = portal.i18n.translations["clog"];
+        clog.i18n = $.i18n.map;
 
         clog.i18n.months = clog.i18n.months.split(',');
 
@@ -551,7 +550,7 @@ clog.toggleFullContent = function (v) {
             });
 
             $('#clog_my_clog_link>span>a').click(function (e) {
-                return clog.switchState('userPosts', {userDisplayName: clog.userDisplayName});
+                return clog.switchState('userPosts');
             });
 
             if (clog.publicAllowed) {
@@ -649,15 +648,16 @@ clog.toggleFullContent = function (v) {
         }
     };
 
-    $(function () {
-
-        portal.i18n.loadProperties({
-            resourceClass: 'org.sakaiproject.clog.api.ClogManager',
-            resourceBundle: 'org.sakaiproject.clog.bundle.ui',
-            namespace: 'clog',
-            callback: function () {
-              languagesLoaded();
-            }
-        });
+    $.i18n.properties({
+        name:'ui',
+        path:'/clog-tool/i18n/',
+        mode: 'both',
+        checkAvailableLanguages: true,
+        async: true,
+        language: sakai.locale.userLocale || "en",
+        callback: function () {
+            languagesLoaded();
+        }
     });
 })(jQuery);
+

@@ -26,10 +26,4 @@ public interface SamigoETSProvider {
     void init();
 
     void notify(String templateKey, Map<String, Object> notificationValues, Event event);
-
-    /**
-     * Notifies by email that the AutoSubmit job encountered errors
-     * @param count the number of errors
-     */
-    void notifyAutoSubmitFailures(int count);
 }
