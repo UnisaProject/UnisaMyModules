@@ -325,7 +325,8 @@ public class ONLImportJob extends SingleClusterInstanceJob implements StatefulJo
           toolIds.add("unisa.welcome");
           toolIds.add("sakai.gradebook.tool");
           toolIds.add("sakai.yaft");
-          toolIds.add("sakai.melete");         
+          toolIds.add("sakai.melete");      
+          toolIds.add("sakai.lessonbuildertool");  		//Added sakai.lessonbuildertool on 20-01-2020 by Vijay  		  
           toolIds.add("sakai.resources");
           
           System.out.println("*************** importToolIntoSite("+masterSiteId+", "+toSiteId+")");
