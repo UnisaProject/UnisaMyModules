@@ -59,7 +59,7 @@ public abstract class GradebookDependentBean extends InitializableBean {
 	private boolean isExistingConflictScale = false;
     /**Unisa Changes:2018/04/26:Added syncing variable for breadcrumbs*/
     private Boolean syncing;
-
+    
 	protected final String BREADCRUMBPAGE = "breadcrumbPage";
 
 	/**

@@ -1,29 +1,21 @@
-/**********************************************************************************
-*
-* $Id$
-*
-***********************************************************************************
-*
- * Copyright (c) 2005, 2006, 2007, 2008, 2009 The Sakai Foundation, The MIT Corporation
+/**
+ * Copyright (c) 2003-2017 The Apereo Foundation
  *
  * Licensed under the Educational Community License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.opensource.org/licenses/ECL-2.0
+ *             http://opensource.org/licenses/ecl2
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*
-**********************************************************************************/
+ */
 
 package org.sakaiproject.tool.gradebook.business.impl;
 
-import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,22 +28,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.StaleObjectStateException;
 import org.hibernate.TransientObjectException;
+import org.hibernate.criterion.Restrictions;
 import org.sakaiproject.component.gradebook.GradebookServiceHibernateImpl;
+import org.sakaiproject.hibernate.HibernateCriterionUtils;
 import org.sakaiproject.service.gradebook.shared.ConflictingAssignmentNameException;
 import org.sakaiproject.service.gradebook.shared.ConflictingSpreadsheetNameException;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.service.gradebook.shared.MultipleAssignmentSavingException;
 import org.sakaiproject.service.gradebook.shared.StaleObjectModificationException;
+import org.sakaiproject.thread_local.cover.ThreadLocalManager;
 import org.sakaiproject.tool.gradebook.AbstractGradeRecord;
-import org.sakaiproject.tool.gradebook.Assignment;
 import org.sakaiproject.tool.gradebook.AssignmentGradeRecord;
 import org.sakaiproject.tool.gradebook.Category;
 import org.sakaiproject.tool.gradebook.Comment;
@@ -59,51 +51,46 @@ import org.sakaiproject.tool.gradebook.CourseGrade;
 import org.sakaiproject.tool.gradebook.CourseGradeRecord;
 import org.sakaiproject.tool.gradebook.GradableObject;
 import org.sakaiproject.tool.gradebook.Gradebook;
+import org.sakaiproject.tool.gradebook.GradebookAssignment;
 import org.sakaiproject.tool.gradebook.GradingEvent;
 import org.sakaiproject.tool.gradebook.GradingEvents;
 import org.sakaiproject.tool.gradebook.LetterGradePercentMapping;
 import org.sakaiproject.tool.gradebook.Spreadsheet;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException;
-
-/** synchronize from external application*/
 import org.sakaiproject.tool.gradebook.business.GbSynchronizer;
 import org.sakaiproject.tool.gradebook.business.GradebookManager;
-import org.sakaiproject.thread_local.cover.ThreadLocalManager;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.hibernate4.HibernateCallback;
+import org.springframework.orm.hibernate4.HibernateOptimisticLockingFailureException;
 
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Manages Gradebook persistence via hibernate.
- * 
- * Note that many of these methods are duplicates of those in the gradebook service API code.
+ * synchronize from external application
  */
+@Slf4j
 public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibernateImpl
         implements GradebookManager {
-
-    private static final Logger log = LoggerFactory.getLogger(GradebookManagerHibernateImpl.class);
-    
-    // Special logger for data contention analysis.
-    private static final Logger logData = LoggerFactory.getLogger(GradebookManagerHibernateImpl.class.getName() + ".GB_DATA");
 
     /** synchronize from external application*/
     GbSynchronizer synchronizer = null;
 
     @Override
     public void removeAssignment(final Long assignmentId) throws StaleObjectModificationException {
-        HibernateCallback hc = new HibernateCallback() {
+        final HibernateCallback hc = new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException {
-                Assignment asn = (Assignment)session.load(Assignment.class, assignmentId);
-                Gradebook gradebook = asn.getGradebook();
+            public Object doInHibernate(final Session session) throws HibernateException {
+                final GradebookAssignment asn = (GradebookAssignment)session.load(GradebookAssignment.class, assignmentId);
+                final Gradebook gradebook = asn.getGradebook();
                 asn.setRemoved(true);
                 session.update(asn);
                 /** synchronize from external application*/
-                if ( (synchronizer != null) && (!synchronizer.isProjectSite()))
+                if ( (GradebookManagerHibernateImpl.this.synchronizer != null) && (!GradebookManagerHibernateImpl.this.synchronizer.isProjectSite()))
                 {
-                	synchronizer.deleteLegacyAssignment(asn.getName());
+                	GradebookManagerHibernateImpl.this.synchronizer.deleteLegacyAssignment(asn.getName());
                 }
-                if(log.isInfoEnabled()) log.info("Assignment " + asn.getName() + " has been removed from " + gradebook);
+                if(log.isInfoEnabled()) {
+					log.info("GradebookAssignment " + asn.getName() + " has been removed from " + gradebook);
+                }
                 return null;
             }
         };
@@ -111,20 +98,22 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     }
 
     @Override
-    public List getAssignmentGradeRecords(final Assignment assignment, final Collection studentUids) {
-        HibernateCallback hc = new HibernateCallback() {
+    public List getAssignmentGradeRecords(final GradebookAssignment assignment, final Collection studentUids) {
+        final HibernateCallback hc = new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException {
+            public Object doInHibernate(final Session session) throws HibernateException {
                 if(studentUids == null || studentUids.size() == 0) {
-                    if(log.isInfoEnabled()) log.info("Returning no grade records for an empty collection of student UIDs");
+                    if(log.isInfoEnabled()) {
+						log.info("Returning no grade records for an empty collection of student UIDs");
+					}
                     return new ArrayList();
                 } else if (assignment.isRemoved()) {
-                    return new ArrayList();                	
+                    return new ArrayList();
                 }
 
-                Query q = session.createQuery("from AssignmentGradeRecord as agr where agr.gradableObject.id=:gradableObjectId order by agr.pointsEarned");
+                final Query q = session.createQuery("from AssignmentGradeRecord as agr where agr.gradableObject.id=:gradableObjectId order by agr.pointsEarned");
                 q.setLong("gradableObjectId", assignment.getId().longValue());
-                List records = filterGradeRecordsByStudents(q.list(), studentUids);
+                final List records = filterGradeRecordsByStudents(q.list(), studentUids);
                 return records;
             }
         };
@@ -133,11 +122,11 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     
     @Override
     public CourseGradeRecord getPointsEarnedCourseGradeRecords(final CourseGrade courseGrade, final String studentUid) {
-    	Set<String> oneStudent = new HashSet<String>(1);
+    	final Set<String> oneStudent = new HashSet<String>(1);
     	oneStudent.add(studentUid);
 
-    	List<CourseGradeRecord> list = getPointsEarnedCourseGradeRecords(courseGrade, oneStudent);
-    	for (CourseGradeRecord cgr : list) {
+    	final List<CourseGradeRecord> list = getPointsEarnedCourseGradeRecords(courseGrade, oneStudent);
+    	for (final CourseGradeRecord cgr : list) {
     		return cgr;
     	}
 		return null;
@@ -147,8 +136,8 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     public List getPointsEarnedCourseGradeRecordsWithStats(final CourseGrade courseGrade, final Collection studentUids) {
     	// Get good class-wide statistics by including all students, whether
     	// the caller is specifically interested in their grade records or not.
-    	Long gradebookId = courseGrade.getGradebook().getId();
-    	Set allStudentUids = getAllStudentUids(getGradebookUid(gradebookId));
+    	final Long gradebookId = courseGrade.getGradebook().getId();
+    	final Set allStudentUids = getAllStudentUids(getGradebookUid(gradebookId));
     	List courseGradeRecords = getPointsEarnedCourseGradeRecords(courseGrade, allStudentUids);
     	courseGrade.calculateStatistics(courseGradeRecords, allStudentUids.size());
 
@@ -159,13 +148,13 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     }
 
     @Override
-    public void addToGradeRecordMap(Map gradeRecordMap, List gradeRecords) {
-		for (Iterator iter = gradeRecords.iterator(); iter.hasNext(); ) {
-			AbstractGradeRecord gradeRecord = (AbstractGradeRecord)iter.next();
+    public void addToGradeRecordMap(final Map gradeRecordMap, final List gradeRecords) {
+		for (final Iterator iter = gradeRecords.iterator(); iter.hasNext(); ) {
+			final AbstractGradeRecord gradeRecord = (AbstractGradeRecord)iter.next();
 			if (gradeRecord instanceof AssignmentGradeRecord) {
 				((AssignmentGradeRecord)gradeRecord).setUserAbleToView(true);
 			}
-			String studentUid = gradeRecord.getStudentId();
+			final String studentUid = gradeRecord.getStudentId();
 			Map studentMap = (Map)gradeRecordMap.get(studentUid);
 			if (studentMap == null) {
 				studentMap = new HashMap();
@@ -176,18 +165,18 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     }
     
     @Override
-    public void addToGradeRecordMap(Map gradeRecordMap, List gradeRecords, Map studentIdItemIdFunctionMap) {
-		for (Iterator iter = gradeRecords.iterator(); iter.hasNext(); ) {
-			AbstractGradeRecord gradeRecord = (AbstractGradeRecord)iter.next();
-			String studentUid = gradeRecord.getStudentId();
+    public void addToGradeRecordMap(final Map gradeRecordMap, final List gradeRecords, final Map studentIdItemIdFunctionMap) {
+		for (final Iterator iter = gradeRecords.iterator(); iter.hasNext(); ) {
+			final AbstractGradeRecord gradeRecord = (AbstractGradeRecord)iter.next();
+			final String studentUid = gradeRecord.getStudentId();
 			Map studentMap = (Map)gradeRecordMap.get(studentUid);
 			if (studentMap == null) {
 				studentMap = new HashMap();
 				gradeRecordMap.put(studentUid, studentMap);
 			}
-			Long itemId = gradeRecord.getGradableObject().getId();
+			final Long itemId = gradeRecord.getGradableObject().getId();
 			// check to see if this item is included in the items that the current user is able to view/grade
-			Map itemIdFunctionMap = (Map)studentIdItemIdFunctionMap.get(studentUid);
+			final Map itemIdFunctionMap = (Map)studentIdItemIdFunctionMap.get(studentUid);
 			if (gradeRecord instanceof AssignmentGradeRecord) {
 				
 				if (itemIdFunctionMap != null && itemIdFunctionMap.get(itemId) != null) {
@@ -206,32 +195,33 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     }
     
     @Override
-    public void addToCategoryResultMap(Map categoryResultMap, List categories, Map gradeRecordMap, Map enrollmentMap) {    	
-    	if (gradeRecordMap == null || gradeRecordMap.isEmpty())
+    public void addToCategoryResultMap(final Map categoryResultMap, final List categories, final Map gradeRecordMap, final Map enrollmentMap) {
+    	if (gradeRecordMap == null || gradeRecordMap.isEmpty()) {
     		return;
+		}
     	
-    	for (Iterator stuIter = enrollmentMap.keySet().iterator(); stuIter.hasNext(); ){
-    		String studentUid = (String) stuIter.next();
-    		Map studentMap = (Map) gradeRecordMap.get(studentUid);
+    	for (final Iterator stuIter = enrollmentMap.keySet().iterator(); stuIter.hasNext(); ){
+    		final String studentUid = (String) stuIter.next();
+    		final Map studentMap = (Map) gradeRecordMap.get(studentUid);
     		
     		if (studentMap != null) {
-	    		for (Iterator iter = categories.iterator(); iter.hasNext(); ){
-	    			Object obj = iter.next();
+	    		for (final Iterator iter = categories.iterator(); iter.hasNext(); ){
+	    			final Object obj = iter.next();
 	    			if(!(obj instanceof Category)){
 	    				continue;
 	    			}
-	    			Category category = (Category) obj; 		
+	    			final Category category = (Category) obj;
 		    		
-		    		List categoryAssignments = category.getAssignmentList();
+		    		final List categoryAssignments = category.getAssignmentList();
 		    		if (categoryAssignments == null){
 		    			continue;
 		    		}
 		    		
-		    		List gradeRecords = new ArrayList();
+		    		final List gradeRecords = new ArrayList();
 									
-		    		for (Iterator assignmentsIter = categoryAssignments.iterator(); assignmentsIter.hasNext(); ){
-		    			Assignment assignment = (Assignment) assignmentsIter.next();
-		    			AbstractGradeRecord gradeRecord = (AbstractGradeRecord) studentMap.get(assignment.getId());
+		    		for (final Iterator assignmentsIter = categoryAssignments.iterator(); assignmentsIter.hasNext(); ){
+		    			final GradebookAssignment assignment = (GradebookAssignment) assignmentsIter.next();
+		    			final AbstractGradeRecord gradeRecord = (AbstractGradeRecord) studentMap.get(assignment.getId());
 		    			gradeRecords.add(gradeRecord);
 				
 		    		}
@@ -243,7 +233,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
 			    		studentCategoryMap = new HashMap();
 			    		categoryResultMap.put(studentUid, studentCategoryMap);
 			    	}
-			    	Map stats = new HashMap();
+			    	final Map stats = new HashMap();
 			    	stats.put("studentAverageScore", category.getAverageScore());
 			    	stats.put("studentAverageTotalPoints", category.getAverageTotalPoints());
 			    	stats.put("studentMean", category.getMean());
@@ -260,11 +250,11 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     }
 
     @Override
-    public AssignmentGradeRecord getAssignmentGradeRecordById(Long id) {
-    	AssignmentGradeRecord agr = (AssignmentGradeRecord)getHibernateTemplate().load(AssignmentGradeRecord.class, id);
+    public AssignmentGradeRecord getAssignmentGradeRecordById(final Long id) {
+    	final AssignmentGradeRecord agr = getHibernateTemplate().load(AssignmentGradeRecord.class, id);
     	AssignmentGradeRecord agrCalculated = new AssignmentGradeRecord();
     	if (agr != null){
-    		List assignRecordsFromDB = new ArrayList();
+    		final List assignRecordsFromDB = new ArrayList();
     		assignRecordsFromDB.add(agr);
     		List agrs = this.convertPointsToLetterGrade(agr.getAssignment(), agr.getAssignment().getGradebook(), assignRecordsFromDB);
     		agrs = this.convertPointsToPercentage(agr.getAssignment(), agr.getAssignment().getGradebook(), agrs);
@@ -276,30 +266,32 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     }
     
     @Override
-    public Comment getCommentById(Long id) {
-    	return (Comment) getHibernateTemplate().load(Comment.class, id);
+    public Comment getCommentById(final Long id) {
+    	return getHibernateTemplate().load(Comment.class, id);
     }
     
     @Override
-    public AssignmentGradeRecord getAssignmentGradeRecordForAssignmentForStudent(final Assignment assignment, final String studentUid) {
-	    HibernateCallback hc = new HibernateCallback() {
+    public AssignmentGradeRecord getAssignmentGradeRecordForAssignmentForStudent(final GradebookAssignment assignment, final String studentUid) {
+	    final HibernateCallback hc = new HibernateCallback() {
 	        @Override
-            public Object doInHibernate(Session session) throws HibernateException {
+            public Object doInHibernate(final Session session) throws HibernateException {
 	            if(studentUid == null) {
-	                if(log.isInfoEnabled()) log.info("Returning no grade records for a null student UID");
+	                if(log.isInfoEnabled()) {
+						log.info("Returning no grade records for a null student UID");
+					}
 	                return new ArrayList();
 	            } else if (assignment.isRemoved()) {
-	                return new ArrayList();                	
+	                return new ArrayList();
 	            }
-	
-	            Query q = session.createQuery("from AssignmentGradeRecord as agr where agr.gradableObject.id=:gradableObjectId " +
+
+	            final Query q = session.createQuery("from AssignmentGradeRecord as agr where agr.gradableObject.id=:gradableObjectId " +
 	            		"and agr.studentId=:student");
 	            q.setLong("gradableObjectId", assignment.getId().longValue());
 	            q.setString("student", studentUid);
 	            return q.list();
 	        }
 	    };
-	    List results = (List) getHibernateTemplate().execute(hc);
+	    final List results = (List) getHibernateTemplate().execute(hc);
 	    if (results.size() > 0){
 	    	return (AssignmentGradeRecord)results.get(0);
 	    } else {
@@ -308,13 +300,13 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
 	}
     
     @Override
-    public List getAllAssignmentGradeRecordsConverted(Long gradebookId, Collection studentUids)
+    public List getAllAssignmentGradeRecordsConverted(final Long gradebookId, final Collection studentUids)
     {
-    	List allAssignRecordsFromDB = getAllAssignmentGradeRecords(gradebookId, studentUids);
-    	Gradebook gradebook = getGradebook(gradebookId);
-    	if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_POINTS)
+    	final List allAssignRecordsFromDB = getAllAssignmentGradeRecords(gradebookId, studentUids);
+    	final Gradebook gradebook = getGradebook(gradebookId);
+    	if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_POINTS) {
     		return allAssignRecordsFromDB;
-    	else if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_PERCENTAGE)
+		} else if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_PERCENTAGE)
     	{
     		return convertPointsToPercentage(gradebook, allAssignRecordsFromDB);
     	}
@@ -329,7 +321,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
      * @return Returns set of student UIDs who were given scores higher than the assignment's value.
      */
     @Override
-    public Set updateAssignmentGradeRecords(final Assignment assignment, final Collection gradeRecordsFromCall)
+    public Set updateAssignmentGradeRecords(final GradebookAssignment assignment, final Collection gradeRecordsFromCall)
             throws StaleObjectModificationException {
         // If no grade records are sent, don't bother doing anything with the db
         if(gradeRecordsFromCall.size() == 0) {
@@ -337,45 +329,47 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
             return new HashSet();
         }
 
-        if (logData.isDebugEnabled()) logData.debug("BEGIN: Update " + gradeRecordsFromCall.size() + " scores for gradebook=" + assignment.getGradebook().getUid() + ", assignment=" + assignment.getName());
+        if (log.isDebugEnabled()) {
+			log.debug("BEGIN: Update " + gradeRecordsFromCall.size() + " scores for gradebook=" + assignment.getGradebook().getUid() + ", assignment=" + assignment.getName());
+		}
 
-        HibernateCallback hc = new HibernateCallback() {
+        final HibernateCallback hc = new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException {
-                Date now = new Date();
-                String graderId = authn.getUserUid();
+            public Object doInHibernate(final Session session) throws HibernateException {
+                final Date now = new Date();
+                String graderId = GradebookManagerHibernateImpl.this.authn.getUserUid();
 
-                Set studentsWithUpdatedAssignmentGradeRecords = new HashSet();
-                Set studentsWithExcessiveScores = new HashSet();
-                
+                final Set studentsWithUpdatedAssignmentGradeRecords = new HashSet();
+                final Set studentsWithExcessiveScores = new HashSet();
+
                 /** synchronize from external application*/
-                if(synchronizer != null)
+                if(GradebookManagerHibernateImpl.this.synchronizer != null)
                 {
-                	boolean isUpdateAll = Boolean.TRUE.equals(ThreadLocalManager.get("iquiz_update_all"));
-                	boolean isIquizCall = Boolean.TRUE.equals(ThreadLocalManager.get("iquiz_call"));
-                	boolean isStudentView = Boolean.TRUE.equals(ThreadLocalManager.get("iquiz_student_view"));
+                	final boolean isUpdateAll = Boolean.TRUE.equals(ThreadLocalManager.get("iquiz_update_all"));
+                	final boolean isIquizCall = Boolean.TRUE.equals(ThreadLocalManager.get("iquiz_call"));
+                	final boolean isStudentView = Boolean.TRUE.equals(ThreadLocalManager.get("iquiz_student_view"));
 
-                	Map iquizAssignmentMap = null;            
-                	List legacyUpdates = new ArrayList();            
+                	Map iquizAssignmentMap = null;
+                	final List legacyUpdates = new ArrayList();
                 	Map convertedEidUidRecordMap = null;
 
-                	convertedEidUidRecordMap = synchronizer.convertEidUid(gradeRecordsFromCall);
-                	if (!isUpdateAll && synchronizer !=null && !synchronizer.isProjectSite()){
-                		iquizAssignmentMap = synchronizer.getLegacyAssignmentWithStats(assignment.getName());
+                	convertedEidUidRecordMap = GradebookManagerHibernateImpl.this.synchronizer.convertEidUid(gradeRecordsFromCall);
+                	if (!isUpdateAll && GradebookManagerHibernateImpl.this.synchronizer !=null && !GradebookManagerHibernateImpl.this.synchronizer.isProjectSite()){
+                		iquizAssignmentMap = GradebookManagerHibernateImpl.this.synchronizer.getLegacyAssignmentWithStats(assignment.getName());
                 	}
                 	Map recordsFromCLDb = null;
-                	if(synchronizer != null && isIquizCall && isUpdateAll)
+                	if(GradebookManagerHibernateImpl.this.synchronizer != null && isIquizCall && isUpdateAll)
                 	{
-                		recordsFromCLDb = synchronizer.getPersistentRecords(assignment.getId());
+                		recordsFromCLDb = GradebookManagerHibernateImpl.this.synchronizer.getPersistentRecords(assignment.getId());
                 	}
 
-                	for(Iterator iter = gradeRecordsFromCall.iterator(); iter.hasNext();) {
+                	for(final Iterator iter = gradeRecordsFromCall.iterator(); iter.hasNext();) {
                 		AssignmentGradeRecord gradeRecordFromCall = (AssignmentGradeRecord)iter.next();
 
                 		boolean updated = false;
-                		if(isIquizCall && synchronizer != null)
+                		if(isIquizCall && GradebookManagerHibernateImpl.this.synchronizer != null)
                 		{
-                			gradeRecordFromCall = synchronizer.convertIquizRecordToUid(gradeRecordFromCall, convertedEidUidRecordMap, isUpdateAll, graderId);
+                			gradeRecordFromCall = GradebookManagerHibernateImpl.this.synchronizer.convertIquizRecordToUid(gradeRecordFromCall, convertedEidUidRecordMap, isUpdateAll, graderId);
                 		}
                 		else
                 		{
@@ -388,7 +382,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
                 			{
                 				if(gradeRecordFromCall.getId() == null && isIquizCall && isUpdateAll && recordsFromCLDb != null)
                 				{
-                					AssignmentGradeRecord returnedPersistentItem = (AssignmentGradeRecord) recordsFromCLDb.get(gradeRecordFromCall.getStudentId());
+                					final AssignmentGradeRecord returnedPersistentItem = (AssignmentGradeRecord) recordsFromCLDb.get(gradeRecordFromCall.getStudentId());
                 					if(returnedPersistentItem != null && returnedPersistentItem.getPointsEarned() != null && gradeRecordFromCall.getPointsEarned() != null
                 							&& !returnedPersistentItem.getPointsEarned().equals(gradeRecordFromCall.getPointsEarned()))
                 					{
@@ -412,18 +406,21 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
                 					session.saveOrUpdate(gradeRecordFromCall);
                 				}
                 			}
-                			if (!isUpdateAll && !isStudentView && synchronizer != null && !synchronizer.isProjectSite())
+                			if (!isUpdateAll && !isStudentView && GradebookManagerHibernateImpl.this.synchronizer != null && !GradebookManagerHibernateImpl.this.synchronizer.isProjectSite())
                 			{
-                				Object updateIquizRecord = synchronizer.getNeededUpdateIquizRecord(assignment, gradeRecordFromCall);
-                				if(updateIquizRecord != null)
+                				final Object updateIquizRecord = GradebookManagerHibernateImpl.this.synchronizer.getNeededUpdateIquizRecord(assignment, gradeRecordFromCall);
+                				if(updateIquizRecord != null) {
                 					legacyUpdates.add(updateIquizRecord);
                 			}
-                		} catch (TransientObjectException e) {
+                			}
+                		} catch (final TransientObjectException e) {
                 			// It's possible that a previously unscored student
                 			// was scored behind the current user's back before
                 			// the user saved the new score. This translates
                 			// that case into an optimistic locking failure.
-                			if(log.isInfoEnabled()) log.info("An optimistic locking failure occurred while attempting to add a new assignment grade record");
+                			if(log.isInfoEnabled()) {
+								log.info("An optimistic locking failure occurred while attempting to add a new assignment grade record");
+							}
                 			throw new StaleObjectModificationException(e);
                 		}
 
@@ -432,7 +429,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
                 		if(gradeRecordFromCall != null && updated == true)
                 		{
                 			if (gradeRecordFromCall.getPointsEarned() != null &&
-                					!assignment.getUngraded() && 
+                					!assignment.getUngraded() &&
                 					gradeRecordFromCall.getPointsEarned().compareTo(assignment.getPointsPossible()) > 0) {
                 				studentsWithExcessiveScores.add(gradeRecordFromCall.getStudentId());
                 			}
@@ -442,51 +439,57 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
                 		}
 
                 		/** synchronize external records */
-                		if (legacyUpdates.size() > 0 && synchronizer != null)
+                		if (legacyUpdates.size() > 0 && GradebookManagerHibernateImpl.this.synchronizer != null)
                 		{
-                			synchronizer.updateLegacyGradeRecords(assignment.getName(), legacyUpdates);
+                			GradebookManagerHibernateImpl.this.synchronizer.updateLegacyGradeRecords(assignment.getName(), legacyUpdates);
                 		}
                 	}
 
                 }
                 else
                 {
-                	for(Iterator iter = gradeRecordsFromCall.iterator(); iter.hasNext();) {
-                		AssignmentGradeRecord gradeRecordFromCall = (AssignmentGradeRecord)iter.next();
+                	for(final Iterator iter = gradeRecordsFromCall.iterator(); iter.hasNext();) {
+                		final AssignmentGradeRecord gradeRecordFromCall = (AssignmentGradeRecord)iter.next();
                 		gradeRecordFromCall.setGraderId(graderId);
                 		gradeRecordFromCall.setDateRecorded(now);
                 		try {
                 			session.saveOrUpdate(gradeRecordFromCall);
-                		} catch (TransientObjectException e) {
+                		} catch (final TransientObjectException e) {
                 			// It's possible that a previously unscored student
                 			// was scored behind the current user's back before
                 			// the user saved the new score. This translates
                 			// that case into an optimistic locking failure.
-                			if(log.isInfoEnabled()) log.info("An optimistic locking failure occurred while attempting to add a new assignment grade record");
+                			if(log.isInfoEnabled()) {
+								log.info("An optimistic locking failure occurred while attempting to add a new assignment grade record");
+							}
                 			throw new StaleObjectModificationException(e);
                 		}
 
                 		// Check for excessive (AKA extra credit) scoring.
                 		if (gradeRecordFromCall.getPointsEarned() != null &&
-                				!assignment.getUngraded() && 
+                				!assignment.getUngraded() &&
                 				gradeRecordFromCall.getPointsEarned().compareTo(assignment.getPointsPossible()) > 0) {
                 			studentsWithExcessiveScores.add(gradeRecordFromCall.getStudentId());
                 		}
 
                 		// Logger the grading event, and keep track of the students with saved/updated grades
                 		logAssignmentGradingEvent(gradeRecordFromCall, graderId, assignment, session);
-                		
+
                 		studentsWithUpdatedAssignmentGradeRecords.add(gradeRecordFromCall.getStudentId());
                 	}
                 }
-                if (logData.isDebugEnabled()) logData.debug("Updated " + studentsWithUpdatedAssignmentGradeRecords.size() + " assignment score records");
+                if (log.isDebugEnabled()) {
+					log.debug("Updated " + studentsWithUpdatedAssignmentGradeRecords.size() + " assignment score records");
+				}
 
                 return studentsWithExcessiveScores;
             }
         };
 
-        Set studentsWithExcessiveScores = (Set)getHibernateTemplate().execute(hc);
-        if (logData.isDebugEnabled()) logData.debug("END: Update " + gradeRecordsFromCall.size() + " scores for gradebook=" + assignment.getGradebook().getUid() + ", assignment=" + assignment.getName());
+        final Set studentsWithExcessiveScores = (Set)getHibernateTemplate().execute(hc);
+        if (log.isDebugEnabled()) {
+			log.debug("END: Update " + gradeRecordsFromCall.size() + " scores for gradebook=" + assignment.getGradebook().getUid() + ", assignment=" + assignment.getName());
+		}
         return studentsWithExcessiveScores;
     }
     
@@ -505,44 +508,46 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
             return new HashSet();
         }
 
-        if (logData.isDebugEnabled()) logData.debug("BEGIN: Update " + gradeRecordsFromCall.size());
+        if (log.isDebugEnabled()) {
+			log.debug("BEGIN: Update " + gradeRecordsFromCall.size());
+		}
 
-        HibernateCallback hc = new HibernateCallback() {
+        final HibernateCallback hc = new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException {
-                Date now = new Date();
-                String graderId = authn.getUserUid();
+            public Object doInHibernate(final Session session) throws HibernateException {
+                final Date now = new Date();
+                String graderId = GradebookManagerHibernateImpl.this.authn.getUserUid();
 
-                Set studentsWithUpdatedAssignmentGradeRecords = new HashSet();
-                Set assignmentsWithExcessiveScores = new HashSet();
+                final Set studentsWithUpdatedAssignmentGradeRecords = new HashSet();
+                final Set assignmentsWithExcessiveScores = new HashSet();
                 
                 /** synchronize from external application*/
-                if(synchronizer != null)
+                if(GradebookManagerHibernateImpl.this.synchronizer != null)
                 {
-                	boolean isUpdateAll = Boolean.TRUE.equals(ThreadLocalManager.get("iquiz_update_all"));
-                	boolean isIquizCall = Boolean.TRUE.equals(ThreadLocalManager.get("iquiz_call"));
-                	boolean isStudentView = Boolean.TRUE.equals(ThreadLocalManager.get("iquiz_student_view"));
+                	final boolean isUpdateAll = Boolean.TRUE.equals(ThreadLocalManager.get("iquiz_update_all"));
+                	final boolean isIquizCall = Boolean.TRUE.equals(ThreadLocalManager.get("iquiz_call"));
+                	final boolean isStudentView = Boolean.TRUE.equals(ThreadLocalManager.get("iquiz_student_view"));
            
-                	List legacyUpdates = new ArrayList();            
-                	Map convertedEidUidRecordMap = synchronizer.convertEidUid(gradeRecordsFromCall);
+                	final List legacyUpdates = new ArrayList();
+                	final Map convertedEidUidRecordMap = GradebookManagerHibernateImpl.this.synchronizer.convertEidUid(gradeRecordsFromCall);
      
                 	Map recordsFromCLDb = null;
-                	if(synchronizer != null && isIquizCall && isUpdateAll)
+                	if(GradebookManagerHibernateImpl.this.synchronizer != null && isIquizCall && isUpdateAll)
                 	{
-                		recordsFromCLDb = synchronizer.getPersistentRecordsForStudent(studentId);
+                		recordsFromCLDb = GradebookManagerHibernateImpl.this.synchronizer.getPersistentRecordsForStudent(studentId);
                 	}
 
-                	for(Iterator iter = gradeRecordsFromCall.iterator(); iter.hasNext();) {
+                	for(final Iterator iter = gradeRecordsFromCall.iterator(); iter.hasNext();) {
                 		AssignmentGradeRecord gradeRecordFromCall = (AssignmentGradeRecord)iter.next();
-                		Assignment assignment = null;
+                		GradebookAssignment assignment = null;
                 		if (gradeRecordFromCall != null) {
                 			assignment = gradeRecordFromCall.getAssignment();
                 		}
 
                 		boolean updated = false;
-                		if(isIquizCall && synchronizer != null)
+                		if(isIquizCall && GradebookManagerHibernateImpl.this.synchronizer != null)
                 		{
-                			gradeRecordFromCall = synchronizer.convertIquizRecordToUid(gradeRecordFromCall, convertedEidUidRecordMap, isUpdateAll, graderId);
+                			gradeRecordFromCall = GradebookManagerHibernateImpl.this.synchronizer.convertIquizRecordToUid(gradeRecordFromCall, convertedEidUidRecordMap, isUpdateAll, graderId);
                 		}
                 		else
                 		{
@@ -555,7 +560,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
                 			{
                 				if(gradeRecordFromCall.getId() == null && isIquizCall && isUpdateAll && recordsFromCLDb != null)
                 				{
-                					AssignmentGradeRecord returnedPersistentItem = (AssignmentGradeRecord) recordsFromCLDb.get(gradeRecordFromCall.getGradableObject().getId());
+                					final AssignmentGradeRecord returnedPersistentItem = (AssignmentGradeRecord) recordsFromCLDb.get(gradeRecordFromCall.getGradableObject().getId());
                 					if(returnedPersistentItem != null && returnedPersistentItem.getPointsEarned() != null && gradeRecordFromCall.getPointsEarned() != null
                 							&& !returnedPersistentItem.getPointsEarned().equals(gradeRecordFromCall.getPointsEarned()))
                 					{
@@ -579,18 +584,21 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
                 					session.saveOrUpdate(gradeRecordFromCall);
                 				}
                 			}
-                			if (assignment != null && !isUpdateAll && !isStudentView && synchronizer != null && !synchronizer.isProjectSite())
+                			if (assignment != null && !isUpdateAll && !isStudentView && GradebookManagerHibernateImpl.this.synchronizer != null && !GradebookManagerHibernateImpl.this.synchronizer.isProjectSite())
                 			{
-                				Object updateIquizRecord = synchronizer.getNeededUpdateIquizRecord(assignment, gradeRecordFromCall);
-                				if(updateIquizRecord != null)
+                				final Object updateIquizRecord = GradebookManagerHibernateImpl.this.synchronizer.getNeededUpdateIquizRecord(assignment, gradeRecordFromCall);
+                				if(updateIquizRecord != null) {
                 					legacyUpdates.add(updateIquizRecord);
                 			}
-                		} catch (TransientObjectException e) {
+                			}
+                		} catch (final TransientObjectException e) {
                 			// It's possible that a previously unscored student
                 			// was scored behind the current user's back before
                 			// the user saved the new score. This translates
                 			// that case into an optimistic locking failure.
-                			if(log.isInfoEnabled()) log.info("An optimistic locking failure occurred while attempting to add a new assignment grade record");
+                			if(log.isInfoEnabled()) {
+								log.info("An optimistic locking failure occurred while attempting to add a new assignment grade record");
+							}
                 			throw new StaleObjectModificationException(e);
                 		}
 
@@ -611,9 +619,9 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
                 		}
 
                 		/** synchronize external records */
-                		if (legacyUpdates.size() > 0 && synchronizer != null && assignment != null)
+                		if (legacyUpdates.size() > 0 && GradebookManagerHibernateImpl.this.synchronizer != null && assignment != null)
                 		{
-                			synchronizer.updateLegacyGradeRecords(assignment.getName(), legacyUpdates);
+                			GradebookManagerHibernateImpl.this.synchronizer.updateLegacyGradeRecords(assignment.getName(), legacyUpdates);
                 		}
                 	}
 
@@ -621,21 +629,23 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
                 else
                 {
 
-	                for(Iterator iter = gradeRecordsFromCall.iterator(); iter.hasNext();) {
-	                	AssignmentGradeRecord gradeRecordFromCall = (AssignmentGradeRecord)iter.next();
-	                	Assignment assignment = gradeRecordFromCall.getAssignment();
-	                	Double pointsPossible = assignment.getPointsPossible();
+	                for(final Iterator iter = gradeRecordsFromCall.iterator(); iter.hasNext();) {
+	                	final AssignmentGradeRecord gradeRecordFromCall = (AssignmentGradeRecord)iter.next();
+	                	final GradebookAssignment assignment = gradeRecordFromCall.getAssignment();
+	                	final Double pointsPossible = assignment.getPointsPossible();
 	                	
 	                	gradeRecordFromCall.setGraderId(graderId);
 	                	gradeRecordFromCall.setDateRecorded(now);
 	                	try {
 	                		session.saveOrUpdate(gradeRecordFromCall);
-	                	} catch (TransientObjectException e) {
+	                	} catch (final TransientObjectException e) {
 	                		// It's possible that a previously unscored student
 	                		// was scored behind the current user's back before
 	                		// the user saved the new score. This translates
 	                		// that case into an optimistic locking failure.
-	                		if(log.isInfoEnabled()) log.info("An optimistic locking failure occurred while attempting to add a new assignment grade record");
+	                		if(log.isInfoEnabled()) {
+								log.info("An optimistic locking failure occurred while attempting to add a new assignment grade record");
+							}
 	                		throw new StaleObjectModificationException(e);
 	                	}
 	
@@ -652,22 +662,26 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
 	                	studentsWithUpdatedAssignmentGradeRecords.add(gradeRecordFromCall.getStudentId());
 	                }
                 }
-				if (logData.isDebugEnabled()) logData.debug("Updated " + studentsWithUpdatedAssignmentGradeRecords.size() + " assignment score records");
+				if (log.isDebugEnabled()) {
+					log.debug("Updated " + studentsWithUpdatedAssignmentGradeRecords.size() + " assignment score records");
+				}
 
                 return assignmentsWithExcessiveScores;
             }
         };
 
-        Set assignmentsWithExcessiveScores = (Set)getHibernateTemplate().execute(hc);
-        if (logData.isDebugEnabled()) logData.debug("END: Update " + gradeRecordsFromCall.size());
+        final Set assignmentsWithExcessiveScores = (Set)getHibernateTemplate().execute(hc);
+        if (log.isDebugEnabled()) {
+			log.debug("END: Update " + gradeRecordsFromCall.size());
+		}
         return assignmentsWithExcessiveScores;
     }
 
     @Override
-	public Set updateAssignmentGradesAndComments(Assignment assignment, Collection gradeRecords, Collection comments) throws StaleObjectModificationException {
+	public Set updateAssignmentGradesAndComments(final GradebookAssignment assignment, final Collection gradeRecords, final Collection comments) throws StaleObjectModificationException {
 		//Set studentsWithExcessiveScores = updateAssignmentGradeRecords(assignment, gradeRecords);
-		Gradebook gradebook = getGradebook(assignment.getGradebook().getId());
-		Set studentsWithExcessiveScores = updateAssignmentGradeRecords(assignment, gradeRecords, gradebook.getGrade_type());
+		final Gradebook gradebook = getGradebook(assignment.getGradebook().getId());
+		final Set studentsWithExcessiveScores = updateAssignmentGradeRecords(assignment, gradeRecords, gradebook.getGrade_type());
 		
 		updateComments(comments);
 		
@@ -677,17 +691,17 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     @Override
 	public void updateComments(final Collection comments) throws StaleObjectModificationException {
         final Date now = new Date();
-        final String graderId = authn.getUserUid();
+        final String graderId = this.authn.getUserUid();
 
         // Unlike the complex grade update logic, this method assumes that
 		// the client has done the work of filtering out any unchanged records
 		// and isn't interested in throwing an optimistic locking exception for untouched records
 		// which were changed by other sessions.
-		HibernateCallback hc = new HibernateCallback() {
+		final HibernateCallback hc = new HibernateCallback() {
 			@Override
-            public Object doInHibernate(Session session) throws HibernateException {
-				for (Iterator iter = comments.iterator(); iter.hasNext();) {
-					Comment comment = (Comment)iter.next();
+            public Object doInHibernate(final Session session) throws HibernateException {
+				for (final Iterator iter = comments.iterator(); iter.hasNext();) {
+					final Comment comment = (Comment)iter.next();
 					comment.setGraderId(graderId);
 					comment.setDateRecorded(now);
 					session.saveOrUpdate(comment);
@@ -697,7 +711,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
 		};
 		try {
 			getHibernateTemplate().execute(hc);
-		} catch (DataIntegrityViolationException e) {
+		} catch (final DataIntegrityViolationException e) {
 			// If a student hasn't yet received a comment for this
 			// assignment, and two graders try to save a new comment record at the
 			// same time, the database should report a unique constraint violation.
@@ -705,7 +719,9 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
 			// are trying to update an existing comment record at the same
 			// same time, this method translates the exception into an
 			// optimistic locking failure.
-			if(log.isInfoEnabled()) log.info("An optimistic locking failure occurred while attempting to update comments");
+			if(log.isInfoEnabled()) {
+				log.info("An optimistic locking failure occurred while attempting to update comments");
+			}
 			throw new StaleObjectModificationException(e);
 		}
 	}
@@ -721,29 +737,33 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
             return;
         }
         
-        if (logData.isDebugEnabled()) logData.debug("BEGIN: Update " + gradeRecordsFromCall.size() + " course grades for gradebook=" + courseGrade.getGradebook().getUid());
+        if (log.isDebugEnabled()) {
+			log.debug("BEGIN: Update " + gradeRecordsFromCall.size() + " course grades for gradebook=" + courseGrade.getGradebook().getUid());
+		}
 
-        HibernateCallback hc = new HibernateCallback() {
+        final HibernateCallback hc = new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException {
-                for(Iterator iter = gradeRecordsFromCall.iterator(); iter.hasNext();) {
+            public Object doInHibernate(final Session session) throws HibernateException {
+                for(final Iterator iter = gradeRecordsFromCall.iterator(); iter.hasNext();) {
                     session.evict(iter.next());
                 }
 
-                Date now = new Date();
-                String graderId = authn.getUserUid();
+                final Date now = new Date();
+                final String graderId = GradebookManagerHibernateImpl.this.authn.getUserUid();
                 int numberOfUpdatedGrades = 0;
 
-                for(Iterator iter = gradeRecordsFromCall.iterator(); iter.hasNext();) {
+                for(final Iterator iter = gradeRecordsFromCall.iterator(); iter.hasNext();) {
                     // The modified course grade record
-                    CourseGradeRecord gradeRecordFromCall = (CourseGradeRecord)iter.next();
+                    final CourseGradeRecord gradeRecordFromCall = (CourseGradeRecord)iter.next();
                     gradeRecordFromCall.setGraderId(graderId);
                     gradeRecordFromCall.setDateRecorded(now);
                     try {
                         session.saveOrUpdate(gradeRecordFromCall);
                         session.flush();
-                    } catch (StaleObjectStateException sose) {
-                        if(log.isInfoEnabled()) log.info("An optimistic locking failure occurred while attempting to update course grade records");
+                    } catch (final StaleObjectStateException sose) {
+                        if(log.isInfoEnabled()) {
+							log.info("An optimistic locking failure occurred while attempting to update course grade records");
+						}
                         throw new StaleObjectModificationException(sose);
                     }
 
@@ -752,63 +772,61 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
                     
                     numberOfUpdatedGrades++;
                 }
-                if (logData.isDebugEnabled()) logData.debug("Changed " + numberOfUpdatedGrades + " course grades for gradebook=" + courseGrade.getGradebook().getUid());
+                if (log.isDebugEnabled()) {
+					log.debug("Changed " + numberOfUpdatedGrades + " course grades for gradebook=" + courseGrade.getGradebook().getUid());
+				}
                 return null;
             }
         };
+
         try {
 	        getHibernateTemplate().execute(hc);
-	        if (logData.isDebugEnabled()) logData.debug("END: Update " + gradeRecordsFromCall.size() + " course grades for gradebook=" + courseGrade.getGradebook().getUid());
-		} catch (DataIntegrityViolationException e) {
+	        if (log.isDebugEnabled()) {
+				log.debug("END: Update " + gradeRecordsFromCall.size() + " course grades for gradebook=" + courseGrade.getGradebook().getUid());
+			}
+		} catch (final DataIntegrityViolationException e) {
 			// It's possible that a previously ungraded student
 			// was graded behind the current user's back before
 			// the user saved the new grade. This translates
 			// that case into an optimistic locking failure.
-			if(log.isInfoEnabled()) log.info("An optimistic locking failure occurred while attempting to update course grade records");
+			if(log.isInfoEnabled()) {
+				log.info("An optimistic locking failure occurred while attempting to update course grade records");
+			}
 			throw new StaleObjectModificationException(e);
 		}
     }
 
     @Override
     public boolean isEnteredAssignmentScores(final Long assignmentId) {
-        HibernateCallback hc = new HibernateCallback() {
-            @Override
-            public Object doInHibernate(Session session) throws HibernateException {
-                List totalList = (List)session.createQuery(
-                        "select agr from AssignmentGradeRecord as agr where agr.gradableObject.id=? and agr.pointsEarned is not null").
-                        setLong(0, assignmentId.longValue()).list();
-                Integer total = new Integer(totalList.size());
-                if (log.isDebugEnabled()) log.debug("assignment " + assignmentId + " has " + total + " entered scores");
-                return total;
-            }
-        };
-        return ((Integer)getHibernateTemplate().execute(hc)).intValue() > 0;
+        final HibernateCallback<List<AssignmentGradeRecord>> hcb = session -> session.createQuery(
+                    "select agr from AssignmentGradeRecord as agr where agr.gradableObject.id = :id and agr.pointsEarned is not null").
+                    setLong("id", assignmentId)
+                    .list();
+		final List<AssignmentGradeRecord> list = getHibernateTemplate().execute(hcb);
+		final Integer total = list.size();
+		log.debug("assignment {} has {} entered scores", assignmentId, total);
+        return total > 0;
     }
 
     /**
      */
     @Override
-    public List getStudentGradeRecords(final Long gradebookId, final String studentId) {
-        HibernateCallback hc = new HibernateCallback() {
-            @Override
-            public Object doInHibernate(Session session) throws HibernateException {
-                return session.createQuery(
-                        "from AssignmentGradeRecord as agr where agr.studentId=? and agr.gradableObject.removed=false and agr.gradableObject.gradebook.id=?").
-                        setString(0, studentId).
-                        setLong(1, gradebookId.longValue()).
-                        list();
-            }
-        };
-        return (List)getHibernateTemplate().execute(hc);
+    public List<AssignmentGradeRecord> getStudentGradeRecords(final Long gradebookId, final String studentId) {
+        final HibernateCallback<List<AssignmentGradeRecord>> hc = session -> session.createQuery(
+                "from AssignmentGradeRecord as agr where agr.studentId = :studentid and agr.gradableObject.removed=false and agr.gradableObject.gradebook.id = :gradebookid").
+                setString("studentid", studentId).
+                setLong("gradebookid", gradebookId).
+                list();
+        return getHibernateTemplate().execute(hc);
     }
     
     @Override
     public List getStudentGradeRecordsConverted(final Long gradebookId, final String studentId) {
-    	List studentGradeRecsFromDB = getStudentGradeRecords(gradebookId, studentId);
-    	Gradebook gradebook = getGradebook(gradebookId);
-    	if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_POINTS)
+    	final List studentGradeRecsFromDB = getStudentGradeRecords(gradebookId, studentId);
+    	final Gradebook gradebook = getGradebook(gradebookId);
+    	if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_POINTS) {
     		return studentGradeRecsFromDB;
-    	else if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_PERCENTAGE)
+		} else if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_PERCENTAGE)
     	{
     		return convertPointsToPercentage(gradebook, studentGradeRecsFromDB);
     	}
@@ -820,23 +838,6 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     	return null;
     }
     
-    private double getTotalPointsEarnedInternal(final Long gradebookId, final String studentId, final Session session) {
-        double totalPointsEarned = 0;
-        Iterator scoresIter = session.createQuery(
-        		"select agr.pointsEarned from AssignmentGradeRecord agr, Assignment asn where agr.gradableObject=asn and agr.studentId=:student and asn.gradebook.id=:gbid and asn.removed=false and asn.notCounted=false and asn.ungraded=false and asn.pointsPossible > 0").
-        		setParameter("student", studentId).
-        		setParameter("gbid", gradebookId).
-        		list().iterator();
-       	while (scoresIter.hasNext()) {
-       		Double pointsEarned = (Double)scoresIter.next();
-       		if (pointsEarned != null) {
-       			totalPointsEarned += pointsEarned.doubleValue();
-       		}
-       	}
-       	if (log.isDebugEnabled()) log.debug("getTotalPointsEarnedInternal for studentId=" + studentId + " returning " + totalPointsEarned);
-       	return totalPointsEarned;
-    }
-
     /**
      * 
      * @param studentId
@@ -850,34 +851,34 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
      * [1] is (Double) totalPointsEarned
      * [2] is (Double) literalTotalPointsEarned
      */
-    abstract List getTotalPointsEarnedInternal(final String studentId, final Gradebook gradebook, final List categories, final List<AssignmentGradeRecord> gradeRecs, List<Assignment> countedAssigns);
+    abstract List getTotalPointsEarnedInternal(final String studentId, final Gradebook gradebook, final List categories, final List<AssignmentGradeRecord> gradeRecs, List<GradebookAssignment> countedAssigns);
 
     //for testing
     public double getTotalPointsEarnedInternal(final Long gradebookId, final String studentId, final Gradebook gradebook, final List categories) 
     {
-    	HibernateCallback hc = new HibernateCallback() {
+    	final HibernateCallback hc = new HibernateCallback() {
     		@Override
-            public Object doInHibernate(Session session) throws HibernateException {
+            public Object doInHibernate(final Session session) throws HibernateException {
     			double totalPointsEarned = 0;
-    			Iterator scoresIter = session.createQuery(
+    			final Iterator scoresIter = session.createQuery(
     			"select agr.pointsEarned, asn from AssignmentGradeRecord agr, Assignment asn where agr.gradableObject=asn and agr.studentId=:student and asn.gradebook.id=:gbid and asn.removed=false and asn.notCounted=false and asn.ungraded=false and asn.pointsPossible > 0").
     			setParameter("student", studentId).
     			setParameter("gbid", gradebookId).
     			list().iterator();
 
-    			List assgnsList = session.createQuery(
-    			"from Assignment as asn where asn.gradebook.id=:gbid and asn.removed=false and asn.notCounted=false and asn.ungraded=false and asn.pointsPossible > 0").
+    			final List assgnsList = session.createQuery(
+    			"from GradebookAssignment as asn where asn.gradebook.id=:gbid and asn.removed=false and asn.notCounted=false and asn.ungraded=false and asn.pointsPossible > 0").
     			setParameter("gbid", gradebookId).
     			list();
 
-    			Map cateScoreMap = new HashMap();
-    			Map cateTotalScoreMap = new HashMap();
+    			final Map cateScoreMap = new HashMap();
+    			final Map cateTotalScoreMap = new HashMap();
 
-    			Set assignmentsTaken = new HashSet();
+    			final Set assignmentsTaken = new HashSet();
     			while (scoresIter.hasNext()) {
-    				Object[] returned = (Object[])scoresIter.next();
-    				Double pointsEarned = (Double)returned[0];
-    				Assignment go = (Assignment) returned[1];
+    				final Object[] returned = (Object[])scoresIter.next();
+    				final Double pointsEarned = (Double)returned[0];
+    				final GradebookAssignment go = (GradebookAssignment) returned[1];
     				if (pointsEarned != null) {
     					if(gradebook.getCategory_type() == GradebookService.CATEGORY_TYPE_NO_CATEGORY)
     					{
@@ -893,7 +894,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     					{
     						for(int i=0; i<categories.size(); i++)
     						{
-    							Category cate = (Category) categories.get(i);
+    							final Category cate = (Category) categories.get(i);
     							if(cate != null && !cate.isRemoved() && go.getCategory() != null && cate.getId().equals(go.getCategory().getId()))
     							{
             				assignmentsTaken.add(go.getId());
@@ -914,15 +915,15 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     			
     			if(gradebook.getCategory_type() == GradebookService.CATEGORY_TYPE_WEIGHTED_CATEGORY && categories != null)
     			{
-    				Iterator assgnsIter = assgnsList.iterator();
+    				final Iterator assgnsIter = assgnsList.iterator();
     				while (assgnsIter.hasNext()) 
     				{
-    					Assignment asgn = (Assignment)assgnsIter.next();
+    					final GradebookAssignment asgn = (GradebookAssignment)assgnsIter.next();
     					if(assignmentsTaken.contains(asgn.getId()))
     					{
     						for(int i=0; i<categories.size(); i++)
     						{
-    							Category cate = (Category) categories.get(i);
+    							final Category cate = (Category) categories.get(i);
     							if(cate != null && !cate.isRemoved() && asgn.getCategory() != null && cate.getId().equals(asgn.getCategory().getId()))
     							{
     								if(cateTotalScoreMap.get(cate.getId()) == null)
@@ -939,14 +940,15 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     				}
     			}
 
-    			if(assignmentsTaken.isEmpty())
+    			if(assignmentsTaken.isEmpty()) {
     				totalPointsEarned = -1;
+				}
     			
     			if(gradebook.getCategory_type() == GradebookService.CATEGORY_TYPE_WEIGHTED_CATEGORY)
     			{
     				for(int i=0; i<categories.size(); i++)
     				{
-    					Category cate = (Category) categories.get(i);
+    					final Category cate = (Category) categories.get(i);
     					if(cate != null && !cate.isRemoved() && cateScoreMap.get(cate.getId()) != null && cateTotalScoreMap.get(cate.getId()) != null)
     					{
     						totalPointsEarned += ((Double)cateScoreMap.get(cate.getId())).doubleValue() * cate.getWeight().doubleValue() / ((Double)cateTotalScoreMap.get(cate.getId())).doubleValue();
@@ -954,7 +956,9 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     				}
     			}
 
-    			if (log.isDebugEnabled()) log.debug("getTotalPointsEarnedInternal for studentId=" + studentId + " returning " + totalPointsEarned);
+    			if (log.isDebugEnabled()) {
+					log.debug("getTotalPointsEarnedInternal for studentId=" + studentId + " returning " + totalPointsEarned);
+				}
     			return totalPointsEarned;
     		}
     	};
@@ -970,45 +974,27 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
             return new GradingEvents();
         }
 
-        HibernateCallback hc = new HibernateCallback() {
-            @Override
-            public Object doInHibernate(Session session) throws HibernateException, SQLException {
-                List eventsList;
-                if (studentIds.size() <= MAX_NUMBER_OF_SQL_PARAMETERS_IN_LIST) {
-                    Query q = session.createQuery("from GradingEvent as ge where ge.gradableObject=:go and ge.studentId in (:students)");
-                    q.setParameter("go", gradableObject, Hibernate.entity(GradableObject.class));
-                    q.setParameterList("students", studentIds);
-                    eventsList = q.list();
-                } else {
-                    Query q = session.createQuery("from GradingEvent as ge where ge.gradableObject=:go");
-                    q.setParameter("go", gradableObject, Hibernate.entity(GradableObject.class));
-                    eventsList = new ArrayList();
-                    for (Iterator iter = q.list().iterator(); iter.hasNext(); ) {
-                        GradingEvent event = (GradingEvent)iter.next();
-                        if (studentIds.contains(event.getStudentId())) {
-                            eventsList.add(event);
-                        }
-                    }
-                }
-                return eventsList;
-            }
-        };
+        final HibernateCallback<List<GradingEvent>> hc = session -> session.createCriteria(GradingEvent.class)
+				.add(Restrictions.eq("gradableObject", gradableObject))
+				.add(HibernateCriterionUtils.CriterionInRestrictionSplitter("studentId", studentIds))
+				.list();
 
-        List list = (List)getHibernateTemplate().execute(hc);
+        final List<GradingEvent> list = getHibernateTemplate().execute(hc);
 
-        GradingEvents events = new GradingEvents();
+        final GradingEvents events = new GradingEvents();
 
-        for(Iterator iter = list.iterator(); iter.hasNext();) {
-            GradingEvent event = (GradingEvent)iter.next();
-            events.addEvent(event);
-        }
+		for (final GradingEvent event : list) {
+			events.addEvent(event);
+		}
         return events;
     }
     
     @Override
     public Map getGradingEventsForStudent(final String studentId, final Collection gradableObjects) {
-    	if (log.isDebugEnabled()) log.debug("getGradingEventsForStudent called for studentId:" + studentId);
-    	Map goEventListMap = new HashMap();
+    	if (log.isDebugEnabled()) {
+			log.debug("getGradingEventsForStudent called for studentId:" + studentId);
+		}
+    	final Map goEventListMap = new HashMap();
     	
         // Don't attempt to run the query if there are no gradableObjects or student id
         if(gradableObjects == null || gradableObjects.size() == 0) {
@@ -1021,49 +1007,27 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
         }
         
         
-        for (Iterator goIter = gradableObjects.iterator(); goIter.hasNext();) {
-        	GradableObject go = (GradableObject) goIter.next();
+        for (final Iterator goIter = gradableObjects.iterator(); goIter.hasNext();) {
+        	final GradableObject go = (GradableObject) goIter.next();
         	goEventListMap.put(go, new ArrayList());
         }
 
-        HibernateCallback hc = new HibernateCallback() {
-            @Override
-            public Object doInHibernate(Session session) throws HibernateException, SQLException {
-                List eventsList;
-                if (gradableObjects.size() <= MAX_NUMBER_OF_SQL_PARAMETERS_IN_LIST) {
-                    Query q = session.createQuery("from GradingEvent as ge where ge.studentId=:studentId and ge.gradableObject in (:gradableObjects)");
-                    q.setParameterList("gradableObjects", gradableObjects, Hibernate.entity(GradableObject.class));
-                    q.setParameter("studentId", studentId);
-                    eventsList = q.list();
-                } else {
-                    Query q = session.createQuery("from GradingEvent as ge where ge.studentId=:studentId");
-                    q.setParameter("studentId", studentId);
-                    eventsList = new ArrayList();
-                    for (Iterator iter = q.list().iterator(); iter.hasNext(); ) {
-                        GradingEvent event = (GradingEvent)iter.next();
-                        if (gradableObjects.contains(event.getGradableObject())) {
-                            eventsList.add(event);
-                        }
-                    }
-                }
-                return eventsList;
-            }
-        };
+		final HibernateCallback<List<GradingEvent>> hc = session -> session.createCriteria(GradingEvent.class)
+				.add(Restrictions.eq("studentId", studentId))
+				.add(HibernateCriterionUtils.CriterionInRestrictionSplitter("gradableObject", gradableObjects))
+				.list();
 
-        List list = (List)getHibernateTemplate().execute(hc);
+        final List<GradingEvent> list = getHibernateTemplate().execute(hc);
 
-        for(Iterator iter = list.iterator(); iter.hasNext();) {
-            GradingEvent event = (GradingEvent)iter.next();
-            GradableObject go = event.getGradableObject();
-            List goEventList = (List) goEventListMap.get(go);
-            if (goEventList != null) {
-            	goEventList.add(event);
-                goEventListMap.put(go, goEventList);
-            } 
-            else {
-            	log.debug("event retrieved by getGradingEventsForStudent not associated with passed go list");
-            }
-        }
+		for (final GradingEvent event : list) {
+			final GradableObject go = event.getGradableObject();
+			final List goEventList = (List) goEventListMap.get(go);
+			if (goEventList != null) {
+				goEventList.add(event);
+			} else {
+				log.debug("event retrieved by getGradingEventsForStudent not associated with passed go list");
+			}
+		}
         
         return goEventListMap;
     }
@@ -1073,25 +1037,18 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
      */
     @Override
     public List getAssignments(final Long gradebookId, final String sortBy, final boolean ascending) {
-        return (List)getHibernateTemplate().execute(new HibernateCallback() {
-            @Override
-            public Object doInHibernate(Session session) throws HibernateException {
-                List assignments = getAssignments(gradebookId, session);
-                
-                /** synchronize from external application*/
-                if (synchronizer != null)
-                {
-                	synchronizer.synchrornizeAssignments(assignments);
+		List assignments = super.getAssignments(gradebookId);
+		/** synchronize from external application*/
+		if (this.synchronizer != null) {
+			this.synchronizer.synchrornizeAssignments(assignments);
 
-                    assignments = getAssignments(gradebookId, session);
-                }
-                /** end synchronize from external application*/
+			assignments = super.getAssignments(gradebookId);
+		}
+		/** end synchronize from external application*/
 
-                sortAssignments(assignments, sortBy, ascending);
-                return assignments;
-            }
-        });
-    }
+		sortAssignments(assignments, sortBy, ascending);
+		return assignments;
+	}
 
 
     /**
@@ -1104,12 +1061,12 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     /**
      */
     public List getAssignmentsWithStats(final Long gradebookId, final String sortBy, final boolean ascending, final boolean includeDroppedScores) {
-        Set studentUids = getAllStudentUids(getGradebookUid(gradebookId));
-        List<AssignmentGradeRecord> gradeRecords = getAllAssignmentGradeRecords(gradebookId, studentUids);
+        final Set studentUids = getAllStudentUids(getGradebookUid(gradebookId));
+        final List<AssignmentGradeRecord> gradeRecords = getAllAssignmentGradeRecords(gradebookId, studentUids);
         if(!includeDroppedScores) {
             applyDropScores(gradeRecords);
         }
-        List assignments = getAssignmentsWithStats(gradebookId, sortBy, ascending, gradeRecords);
+        final List assignments = getAssignmentsWithStats(gradebookId, sortBy, ascending, gradeRecords);
         return assignments;
     }
     
@@ -1125,11 +1082,11 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
      */
     
     private List getAssignmentsWithStats(final Long gradebookId, final String sortBy, 
-            final boolean ascending, List<AssignmentGradeRecord> gradeRecords) {
+            final boolean ascending, final List<AssignmentGradeRecord> gradeRecords) {
 
-        List assignments = getAssignments(gradebookId);
-        for (Iterator iter = assignments.iterator(); iter.hasNext(); ) {
-            Assignment assignment = (Assignment)iter.next();
+        final List assignments = getAssignments(gradebookId);
+        for (final Iterator iter = assignments.iterator(); iter.hasNext(); ) {
+            final GradebookAssignment assignment = (GradebookAssignment)iter.next();
             assignment.calculateStatistics(gradeRecords);
         }
         sortAssignments(assignments, sortBy, ascending);
@@ -1138,20 +1095,20 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
 
     @Override
     public List getAssignmentsAndCourseGradeWithStats(final Long gradebookId, final String sortBy, final boolean ascending) {
-        Set studentUids = getAllStudentUids(getGradebookUid(gradebookId));
-        List assignments = getAssignments(gradebookId);
-        CourseGrade courseGrade = getCourseGrade(gradebookId);
-        Map gradeRecordMap = new HashMap();
-        List<AssignmentGradeRecord> gradeRecords = getAllAssignmentGradeRecords(gradebookId, studentUids);
+        final Set studentUids = getAllStudentUids(getGradebookUid(gradebookId));
+        final List assignments = getAssignments(gradebookId);
+        final CourseGrade courseGrade = getCourseGrade(gradebookId);
+        final Map gradeRecordMap = new HashMap();
+        final List<AssignmentGradeRecord> gradeRecords = getAllAssignmentGradeRecords(gradebookId, studentUids);
         applyDropScores(gradeRecords);
         addToGradeRecordMap(gradeRecordMap, gradeRecords);
         
-        for (Iterator iter = assignments.iterator(); iter.hasNext(); ) {
-        	Assignment assignment = (Assignment)iter.next();
+        for (final Iterator iter = assignments.iterator(); iter.hasNext(); ) {
+        	final GradebookAssignment assignment = (GradebookAssignment)iter.next();
         	assignment.calculateStatistics(gradeRecords);
         }
         
-        List<CourseGradeRecord> courseGradeRecords = getPointsEarnedCourseGradeRecords(courseGrade, studentUids, assignments, gradeRecordMap);
+        final List<CourseGradeRecord> courseGradeRecords = getPointsEarnedCourseGradeRecords(courseGrade, studentUids, assignments, gradeRecordMap);
         courseGrade.calculateStatistics(courseGradeRecords, studentUids.size());
         
         sortAssignments(assignments, sortBy, ascending);
@@ -1162,19 +1119,19 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
         return assignments;
     }
 
-    protected List filterAndPopulateCourseGradeRecordsByStudents(CourseGrade courseGrade, Collection gradeRecords, Collection studentUids) {
-		List filteredRecords = new ArrayList();
-		Set missingStudents = new HashSet(studentUids);
-		for (Iterator iter = gradeRecords.iterator(); iter.hasNext(); ) {
-			CourseGradeRecord cgr = (CourseGradeRecord)iter.next();
+    protected List filterAndPopulateCourseGradeRecordsByStudents(final CourseGrade courseGrade, final Collection gradeRecords, final Collection studentUids) {
+		final List filteredRecords = new ArrayList();
+		final Set missingStudents = new HashSet(studentUids);
+		for (final Iterator iter = gradeRecords.iterator(); iter.hasNext(); ) {
+			final CourseGradeRecord cgr = (CourseGradeRecord)iter.next();
 			if (studentUids.contains(cgr.getStudentId())) {
 				filteredRecords.add(cgr);
 				missingStudents.remove(cgr.getStudentId());
 			}
 		}
-		for (Iterator iter = missingStudents.iterator(); iter.hasNext(); ) {
-			String studentUid = (String)iter.next();
-			CourseGradeRecord cgr = new CourseGradeRecord(courseGrade, studentUid);
+		for (final Iterator iter = missingStudents.iterator(); iter.hasNext(); ) {
+			final String studentUid = (String)iter.next();
+			final CourseGradeRecord cgr = new CourseGradeRecord(courseGrade, studentUid);
 			filteredRecords.add(cgr);
 		}
 		return filteredRecords;
@@ -1187,24 +1144,24 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
      * @param sortBy
      * @param ascending
      */
-    private void sortAssignments(List assignments, String sortBy, boolean ascending) {
+    private void sortAssignments(final List assignments, final String sortBy, final boolean ascending) {
         // WARNING: AZ - this method is duplicated in GradebookManagerHibernateImpl
         Comparator comp;
-        if (Assignment.SORT_BY_NAME.equals(sortBy)) {
+        if (GradebookAssignment.SORT_BY_NAME.equals(sortBy)) {
             comp = GradableObject.nameComparator;
-        } else if(Assignment.SORT_BY_DATE.equals(sortBy)){
+        } else if(GradebookAssignment.SORT_BY_DATE.equals(sortBy)){
             comp = GradableObject.dateComparator;
-        } else if(Assignment.SORT_BY_MEAN.equals(sortBy)) {
+        } else if(GradebookAssignment.SORT_BY_MEAN.equals(sortBy)) {
             comp = GradableObject.meanComparator;
-        } else if(Assignment.SORT_BY_POINTS.equals(sortBy)) {
-            comp = Assignment.pointsComparator;
-        } else if(Assignment.SORT_BY_RELEASED.equals(sortBy)){
-            comp = Assignment.releasedComparator;
-        } else if(Assignment.SORT_BY_COUNTED.equals(sortBy)){
-            comp = Assignment.countedComparator;
-        } else if(Assignment.SORT_BY_EDITOR.equals(sortBy)){
-            comp = Assignment.gradeEditorComparator;
-        } else if (Assignment.SORT_BY_SORTING.equals(sortBy)) {
+        } else if(GradebookAssignment.SORT_BY_POINTS.equals(sortBy)) {
+            comp = GradebookAssignment.pointsComparator;
+        } else if(GradebookAssignment.SORT_BY_RELEASED.equals(sortBy)){
+            comp = GradebookAssignment.releasedComparator;
+        } else if(GradebookAssignment.SORT_BY_COUNTED.equals(sortBy)){
+            comp = GradebookAssignment.countedComparator;
+        } else if(GradebookAssignment.SORT_BY_EDITOR.equals(sortBy)){
+            comp = GradebookAssignment.gradeEditorComparator;
+        } else if (GradebookAssignment.SORT_BY_SORTING.equals(sortBy)) {
             comp = GradableObject.sortingComparator;
         } else {
             comp = GradableObject.defaultComparator;
@@ -1221,25 +1178,25 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     /**
      */
     @Override
-    public List getAssignments(Long gradebookId) {
-        return getAssignments(gradebookId, Assignment.DEFAULT_SORT, true);
+    public List getAssignments(final Long gradebookId) {
+        return getAssignments(gradebookId, GradebookAssignment.DEFAULT_SORT, true);
     }
 
     /**
      */
     @Override
-    public Assignment getAssignmentWithStats(Long assignmentId) {
+    public GradebookAssignment getAssignmentWithStats(final Long assignmentId) {
         return getAssignmentWithStats(assignmentId, false);
     }
     
     /**
      */
-    public Assignment getAssignmentWithStats(Long assignmentId, boolean includeDroppedScores) {
+    public GradebookAssignment getAssignmentWithStats(final Long assignmentId, final boolean includeDroppedScores) {
 
-    	Assignment assignment = getAssignment(assignmentId);
-    	Long gradebookId = assignment.getGradebook().getId();
-        Set studentUids = getAllStudentUids(getGradebookUid(gradebookId));
-        List<AssignmentGradeRecord> gradeRecords = getAssignmentGradeRecords(assignment, studentUids);
+    	final GradebookAssignment assignment = getAssignment(assignmentId);
+    	final Long gradebookId = assignment.getGradebook().getId();
+        final Set studentUids = getAllStudentUids(getGradebookUid(gradebookId));
+        final List<AssignmentGradeRecord> gradeRecords = getAssignmentGradeRecords(assignment, studentUids);
         if(!includeDroppedScores) {
             applyDropScores(gradeRecords);
         }
@@ -1250,31 +1207,26 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     /**
      */
     @Override
-    public void updateAssignment(final Assignment assignment)
+    public void updateAssignment(final GradebookAssignment assignment)
         throws ConflictingAssignmentNameException, StaleObjectModificationException {
-        HibernateCallback hc = new HibernateCallback() {
-            @Override
-            public Object doInHibernate(Session session) throws HibernateException {
-            	updateAssignment(assignment, session);
-                return null;
-            }
-        };
+       	super.updateAssignment(assignment);
         try {
         	/** synchronize from external application*/
         	String oldTitle = null;
-        	if(synchronizer != null)
+        	if(this.synchronizer != null)
         	{
-        		Assignment assign = getAssignment(assignment.getId());
+        		final GradebookAssignment assign = getAssignment(assignment.getId());
         		oldTitle = assign.getName();
         	}
-            getHibernateTemplate().execute(hc);
         	/** synchronize from external application*/
-        	if(synchronizer != null && oldTitle != null  && !synchronizer.isProjectSite())
+        	if(this.synchronizer != null && oldTitle != null  && !this.synchronizer.isProjectSite())
         	{
-        		synchronizer.updateAssignment(oldTitle, assignment.getName(), assignment.getGradebook().getGrade_type());
+        		this.synchronizer.updateAssignment(oldTitle, assignment.getName(), assignment.getGradebook().getGrade_type());
         	}
-        } catch (HibernateOptimisticLockingFailureException holfe) {
-            if(log.isInfoEnabled()) log.info("An optimistic locking failure occurred while attempting to update an assignment");
+        } catch (final HibernateOptimisticLockingFailureException holfe) {
+            if(log.isInfoEnabled()) {
+				log.info("An optimistic locking failure occurred while attempting to update an assignment");
+        	}
             throw new StaleObjectModificationException(holfe);
         }
     }
@@ -1287,57 +1239,52 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     @Override
     public void updateCategoryAndAssignmentsPointsPossible(final Long gradebookId, final Category category)
         throws ConflictingAssignmentNameException, StaleObjectModificationException {
-        HibernateCallback hc = new HibernateCallback() {
-            @Override
-            public Object doInHibernate(Session session) throws HibernateException {
-                updateCategory(category, session);
-                
-                // get assignments for this category
-                Iterator iter = session.createQuery(
-                "select asn from Assignment asn where asn.gradebook.id=:gbid and asn.category=:category and asn.removed = false").
-                setParameter("gbid", gradebookId).
-                setParameter("category", category).
-                list().iterator();
-                while (iter.hasNext()) {
-                    Assignment assignment = (Assignment) iter.next();
-                    session.evict(assignment);
-                    if(assignment.getGradebook().getGrade_type() == GradebookService.GRADE_TYPE_LETTER) {
-                        assignment.setUngraded(true);
-                    }
-                    if(assignment.getUngraded())
-                        assignment.setNotCounted(true);
-                    // for drop score categories pointsPossible comes from the category
-                    assignment.setPointsPossible(category.getItemValue());
-                    updateAssignment(assignment, session);
-                }
-                return null;
-            }
-        };
-        try {
+		updateCategory(category);
+            // get assignments for this category
+        final HibernateCallback<List<GradebookAssignment>> hc = session -> session
+				.createQuery("select asn from GradebookAssignment asn where asn.gradebook.id=:gbid and asn.category=:category and asn.removed = false")
+				.setParameter("gbid", gradebookId)
+				.setParameter("category", category)
+				.list();
+		final List<GradebookAssignment> list = getHibernateTemplate().execute(hc);
+        for (final GradebookAssignment assignment : list) {
+			if (assignment.getGradebook().getGrade_type() == GradebookService.GRADE_TYPE_LETTER) {
+				assignment.setUngraded(true);
+			}
+			if (assignment.getUngraded()) {
+				assignment.setNotCounted(true);
+			}
+			// for drop score categories pointsPossible comes from the category
+			assignment.setPointsPossible(category.getItemValue());
+			super.updateAssignment(assignment);
+		}
+		try {
             /** synchronize from external application*/
             
-            Map oldTitles = new HashMap();
-            List assignments = category.getAssignmentList();
-            if(synchronizer != null) {
-                for(Iterator iter = assignments.iterator(); iter.hasNext();) {
-                    Assignment assignment = (Assignment) iter.next();
-                    Assignment assign = getAssignment(assignment.getId());
+            final Map oldTitles = new HashMap();
+            final List assignments = category.getAssignmentList();
+            if(this.synchronizer != null) {
+                for(final Iterator iter = assignments.iterator(); iter.hasNext();) {
+                    final GradebookAssignment assignment = (GradebookAssignment) iter.next();
+                    final GradebookAssignment assign = getAssignment(assignment.getId());
                     oldTitles.put(assignment.getId(), assign.getName());
                 }
             }
             getHibernateTemplate().execute(hc);
             
             /** synchronize from external application*/
-            for(Iterator iter = assignments.iterator(); iter.hasNext();) {
-                Assignment assignment = (Assignment) iter.next();
-                String oldTitle = (String)oldTitles.get(assignment.getId());
+            for(final Iterator iter = assignments.iterator(); iter.hasNext();) {
+                final GradebookAssignment assignment = (GradebookAssignment) iter.next();
+                final String oldTitle = (String)oldTitles.get(assignment.getId());
                 assignment.setPointsPossible(category.getItemValue());
-                if(synchronizer != null && oldTitle != null  && !synchronizer.isProjectSite() && !assignment.getUngraded()) {
-                    synchronizer.updateAssignment(oldTitle, assignment.getName(), assignment.getGradebook().getGrade_type());
+                if(this.synchronizer != null && oldTitle != null  && !this.synchronizer.isProjectSite() && !assignment.getUngraded()) {
+                    this.synchronizer.updateAssignment(oldTitle, assignment.getName(), assignment.getGradebook().getGrade_type());
                 }
+                }
+        } catch (final HibernateOptimisticLockingFailureException holfe) {
+            if(log.isInfoEnabled()) {
+				log.info("An optimistic locking failure occurred while attempting to update an assignment");
             }
-        } catch (HibernateOptimisticLockingFailureException holfe) {
-            if(log.isInfoEnabled()) log.info("An optimistic locking failure occurred while attempting to update an assignment");
             throw new StaleObjectModificationException(holfe);
         }
     }
@@ -1347,11 +1294,11 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
      */
     @Override
     public double getTotalPoints(final Long gradebookId) {
-    	Double totalPoints = (Double)getHibernateTemplate().execute(new HibernateCallback() {
+    	final Double totalPoints = (Double)getHibernateTemplate().execute(new HibernateCallback() {
     		@Override
-            public Object doInHibernate(Session session) throws HibernateException {
-    			Gradebook gradebook = getGradebook(gradebookId);
-    			List cates = getCategoriesWithAssignments(gradebookId);
+            public Object doInHibernate(final Session session) throws HibernateException {
+    			final Gradebook gradebook = getGradebook(gradebookId);
+    			final List cates = getCategoriesWithAssignments(gradebookId);
     			return new Double(getLiteralTotalPointsInternal(gradebookId, session, gradebook, cates));
     			//return new Double(getTotalPointsInternal(gradebookId, session));
     		}
@@ -1359,43 +1306,30 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     	return totalPoints.doubleValue();
     }
  
-    private double getTotalPointsInternal(Long gradebookId, Session session) {
-        double totalPointsPossible = 0;
-    	Iterator assignmentPointsIter = session.createQuery(
-        		"select asn.pointsPossible from Assignment asn where asn.gradebook.id=:gbid and asn.removed=false and asn.notCounted=false and asn.ungraded=false").
-        		setParameter("gbid", gradebookId).
-        		list().iterator();
-        while (assignmentPointsIter.hasNext()) {
-        	Double pointsPossible = (Double)assignmentPointsIter.next();
-        	totalPointsPossible += pointsPossible.doubleValue();
-        }
-        return totalPointsPossible;
-    }
-
     //for testing
     public double getTotalPointsInternal(final Long gradebookId, final Gradebook gradebook, final List categories, final String studentId) 
     {
-    	HibernateCallback hc = new HibernateCallback() {
+    	final HibernateCallback hc = new HibernateCallback() {
     		@Override
-            public Object doInHibernate(Session session) throws HibernateException {
+            public Object doInHibernate(final Session session) throws HibernateException {
     			double totalPointsPossible = 0;
-    			List assgnsList = session.createQuery(
-    			"select asn from Assignment asn where asn.gradebook.id=:gbid and asn.removed=false and asn.notCounted=false and asn.ungraded=false and asn.pointsPossible > 0").
+    			final List assgnsList = session.createQuery(
+    			"select asn from GradebookAssignment asn where asn.gradebook.id=:gbid and asn.removed=false and asn.notCounted=false and asn.ungraded=false and asn.pointsPossible > 0").
     			setParameter("gbid", gradebookId).
     			list();
     			
-    			Iterator scoresIter = session.createQuery(
+    			final Iterator scoresIter = session.createQuery(
     			"select agr.pointsEarned, asn from AssignmentGradeRecord agr, Assignment asn where agr.gradableObject=asn and agr.studentId=:student and asn.gradebook.id=:gbid and asn.removed=false and asn.notCounted=false and asn.ungraded=false and asn.pointsPossible > 0").
     			setParameter("student", studentId).
     			setParameter("gbid", gradebookId).
     			list().iterator();
 
-    			Set categoryTaken = new HashSet();
-    			Set assignmentsTaken = new HashSet();
+    			final Set categoryTaken = new HashSet();
+    			final Set assignmentsTaken = new HashSet();
     			while (scoresIter.hasNext()) {
-    				Object[] returned = (Object[])scoresIter.next();
-    				Double pointsEarned = (Double)returned[0];
-    				Assignment go = (Assignment) returned[1];
+    				final Object[] returned = (Object[])scoresIter.next();
+    				final Double pointsEarned = (Double)returned[0];
+    				final GradebookAssignment go = (GradebookAssignment) returned[1];
     				if (pointsEarned != null) {
     					if(gradebook.getCategory_type() == GradebookService.CATEGORY_TYPE_NO_CATEGORY)
     					{
@@ -1409,7 +1343,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     					{
     						for(int i=0; i<categories.size(); i++)
     						{
-    							Category cate = (Category) categories.get(i);
+    							final Category cate = (Category) categories.get(i);
     							if(cate != null && !cate.isRemoved() && go.getCategory() != null && cate.getId().equals(go.getCategory().getId()))
     							{
             				assignmentsTaken.add(go.getId());
@@ -1427,7 +1361,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     				{
   		    		for(int i=0; i<categories.size(); i++)
   		    		{
-  		    			Category cate = (Category) categories.get(i);
+  		    			final Category cate = (Category) categories.get(i);
   		    			if(cate != null && !cate.isRemoved() && categoryTaken.contains(cate.getId()) )
   		    			{
   		    				totalPointsPossible += cate.getWeight().doubleValue();
@@ -1435,12 +1369,12 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
   		    		}
   		    		return totalPointsPossible;
     				}
-    				Iterator assignmentIter = assgnsList.iterator();
+    				final Iterator assignmentIter = assgnsList.iterator();
     				while (assignmentIter.hasNext()) {
-    					Assignment asn = (Assignment) assignmentIter.next();
+    					final GradebookAssignment asn = (GradebookAssignment) assignmentIter.next();
     					if(asn != null)
     					{
-    						Double pointsPossible = asn.getPointsPossible();
+    						final Double pointsPossible = asn.getPointsPossible();
 
     						if(gradebook.getCategory_type() == GradebookService.CATEGORY_TYPE_NO_CATEGORY && assignmentsTaken.contains(asn.getId()))
     						{
@@ -1452,9 +1386,9 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     						}
     					}
     				}
-    			}
-    			else
+    			} else {
     				totalPointsPossible = -1;
+				}
     			
     			return totalPointsPossible;
     		}
@@ -1473,24 +1407,25 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
      * null or doesn't exist for a counted assignment, then that assignment does not count toward the course grade
      * for this particular student. 
      */
-    public abstract double getTotalPointsInternal(final Gradebook gradebook, final List categories, final String studentId, List<AssignmentGradeRecord> studentGradeRecs, List<Assignment> countedAssigns, boolean literalTotal);
+    @Override
+    public abstract double getTotalPointsInternal(final Gradebook gradebook, final List categories, final String studentId, List<AssignmentGradeRecord> studentGradeRecs, List<GradebookAssignment> countedAssigns, boolean literalTotal);
 
     //for test
     public double getLiteralTotalPointsInternal(final Long gradebookId, final Gradebook gradebook, final List categories)
     {
-    	HibernateCallback hc = new HibernateCallback() {
+    	final HibernateCallback hc = new HibernateCallback() {
     		@Override
-            public Object doInHibernate(Session session) throws HibernateException {
+            public Object doInHibernate(final Session session) throws HibernateException {
     			double totalPointsPossible = 0;
-    			Iterator assignmentIter = session.createQuery(
-    			"select asn from Assignment asn where asn.gradebook.id=:gbid and asn.removed=false and asn.notCounted=false and asn.ungraded=false").
+    			final Iterator assignmentIter = session.createQuery(
+    			"select asn from GradebookAssignment asn where asn.gradebook.id=:gbid and asn.removed=false and asn.notCounted=false and asn.ungraded=false").
     			setParameter("gbid", gradebookId).
     			list().iterator();
     			while (assignmentIter.hasNext()) {
-    				Assignment asn = (Assignment) assignmentIter.next();
+    				final GradebookAssignment asn = (GradebookAssignment) assignmentIter.next();
     				if(asn != null)
     				{
-    					Double pointsPossible = asn.getPointsPossible();
+    					final Double pointsPossible = asn.getPointsPossible();
 
     					if(gradebook.getCategory_type() == GradebookService.CATEGORY_TYPE_NO_CATEGORY)
     					{
@@ -1504,7 +1439,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     					{
     						for(int i=0; i<categories.size(); i++)
     						{
-    							Category cate = (Category) categories.get(i);
+    							final Category cate = (Category) categories.get(i);
     							if(cate != null && !cate.isRemoved() && asn.getCategory() != null && cate.getId().equals(asn.getCategory().getId()))
     							{
     								totalPointsPossible += pointsPossible.doubleValue();
@@ -1520,34 +1455,36 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     	return (Double)getHibernateTemplate().execute(hc);    	
     }
 
-    private double getLiteralTotalPointsInternal(final Long gradebookId, Session session, final Gradebook gradebook, final List categories)
+    private double getLiteralTotalPointsInternal(final Long gradebookId, final Session session, final Gradebook gradebook, final List categories)
     {
     	double totalPointsPossible = 0;
-    	Map<Long,Integer> numAssignments = new HashMap<Long,Integer>();
+    	final Map<Long,Integer> numAssignments = new HashMap<Long,Integer>();
         
-    	Iterator assignmentIter = session.createQuery(
-    			"select asn from Assignment asn where asn.gradebook.id=:gbid and asn.removed=false and asn.notCounted=false and asn.ungraded=false and (asn.extraCredit=false or asn.extraCredit is null)").
+    	final Iterator assignmentIter = session.createQuery(
+    			"select asn from GradebookAssignment asn where asn.gradebook.id=:gbid and asn.removed=false and asn.notCounted=false and asn.ungraded=false and (asn.extraCredit=false or asn.extraCredit is null)").
     			setParameter("gbid", gradebookId).
     			list().iterator();
         
     	while (assignmentIter.hasNext()) {
-    		Assignment asn = (Assignment) assignmentIter.next();
+    		final GradebookAssignment asn = (GradebookAssignment) assignmentIter.next();
     		if(asn != null)
     		{
-    			Double pointsPossible = asn.getPointsPossible();
+    			final Double pointsPossible = asn.getPointsPossible();
 
     			if(gradebook.getCategory_type() == GradebookService.CATEGORY_TYPE_NO_CATEGORY)
     			{
-    				if (pointsPossible!=null)
+    				if (pointsPossible!=null) {
     					totalPointsPossible += pointsPossible.doubleValue();
+    			}
     			}
     			else if(gradebook.getCategory_type() == GradebookService.CATEGORY_TYPE_ONLY_CATEGORY)
 				{
-                    if (pointsPossible!=null && !asn.getCategory().getIsExtraCredit())
+				if (pointsPossible!=null && asn.getCategory() != null && !asn.getCategory().getIsExtraCredit()) {
     					totalPointsPossible += pointsPossible.doubleValue();
+				}
                     for(int i=0; i<categories.size(); i++)
                     {
-                        Category cate = (Category) categories.get(i);
+                        final Category cate = (Category) categories.get(i);
                         if(cate != null && !cate.isRemoved() && asn.getCategory() != null && cate.getId().equals(asn.getCategory().getId()))
                         {
                             
@@ -1565,11 +1502,12 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     			{
     				for(int i=0; i<categories.size(); i++)
     				{
-    					Category cate = (Category) categories.get(i);
+    					final Category cate = (Category) categories.get(i);
     					if(cate != null && !cate.isRemoved() && asn.getCategory() != null && cate.getId().equals(asn.getCategory().getId()))
     					{
-							if (pointsPossible!=null && !asn.getCategory().getIsExtraCredit())
+							if (pointsPossible!=null && !asn.getCategory().getIsExtraCredit()) {
     							totalPointsPossible += pointsPossible.doubleValue();
+							}
     						
     						Integer num = numAssignments.get(cate.getId()); // to calculate totalPointsToDrop, must know the number of assignments for each category
                             if(num == null) {
@@ -1586,14 +1524,14 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
         double totalPointsToDrop = 0;
         
         for(int i=0; i<categories.size(); i++) {
-            Category category = (Category) categories.get(i);
+            final Category category = (Category) categories.get(i);
             if(category != null && !category.isRemoved() && category.isDropScores()) {
-                Double itemValue = category.getItemValue();
-                Integer dropHighest = category.getDropHighest();
-                Integer dropLowest = category.getDrop_lowest();
-                Integer keepHighest = category.getKeepHighest();
+                final Double itemValue = category.getItemValue();
+                final Integer dropHighest = category.getDropHighest();
+				Integer dropLowest = category.getDropLowest();
+                final Integer keepHighest = category.getKeepHighest();
                 
-                Integer assignmentCount = numAssignments.get(category.getId());
+                final Integer assignmentCount = numAssignments.get(category.getId());
                 if(keepHighest != null && keepHighest > 0) {
                     if(assignmentCount != null && assignmentCount > 0) {
                         dropLowest = assignmentCount - keepHighest; // dropLowest and keepHighest will not occur at the same time
@@ -1616,11 +1554,11 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
 //    {
 //    	double totalPointsPossible = 0;
 //    	Iterator assignmentIter = session.createQuery(
-//    			"select asn from Assignment asn where asn.gradebook.id=:gbid and asn.removed=false and asn.notCounted=false and asn.ungraded=false").
+//    			"select asn from GradebookAssignment asn where asn.gradebook.id=:gbid and asn.removed=false and asn.notCounted=false and asn.ungraded=false").
 //    			setParameter("gbid", gradebookId).
 //    			list().iterator();
 //    	while (assignmentIter.hasNext()) {
-//    		Assignment asn = (Assignment) assignmentIter.next();
+//    		GradebookAssignment asn = (GradebookAssignment) assignmentIter.next();
 //    		if(asn != null)
 //    		{
 //    			Double pointsPossible = asn.getPointsPossible();
@@ -1654,8 +1592,8 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     public Gradebook getGradebookWithGradeMappings(final Long id) {
 		return (Gradebook)getHibernateTemplate().execute(new HibernateCallback() {
 			@Override
-            public Object doInHibernate(Session session) throws HibernateException {
-				Gradebook gradebook = (Gradebook)session.load(Gradebook.class, id);
+            public Object doInHibernate(final Session session) throws HibernateException {
+				final Gradebook gradebook = (Gradebook)session.load(Gradebook.class, id);
 				Hibernate.initialize(gradebook.getGradeMappings());
 				return gradebook;
 			}
@@ -1670,7 +1608,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
      */
     @Override
     public Spreadsheet getSpreadsheet(final Long spreadsheetId) {
-        return (Spreadsheet)getHibernateTemplate().load(Spreadsheet.class, spreadsheetId);
+        return getHibernateTemplate().load(Spreadsheet.class, spreadsheetId);
     }
 
     /**
@@ -1682,8 +1620,8 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     public List getSpreadsheets(final Long gradebookId) {
         return (List)getHibernateTemplate().execute(new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException {
-                List spreadsheets = getSpreadsheets(gradebookId, session);
+            public Object doInHibernate(final Session session) throws HibernateException {
+                final List spreadsheets = getSpreadsheets(gradebookId, session);
                 return spreadsheets;
             }
         });
@@ -1696,12 +1634,14 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     @Override
     public void removeSpreadsheet(final Long spreadsheetId)throws StaleObjectModificationException {
 
-        HibernateCallback hc = new HibernateCallback() {
+        final HibernateCallback hc = new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException {
-                Spreadsheet spt = (Spreadsheet)session.load(Spreadsheet.class, spreadsheetId);
+            public Object doInHibernate(final Session session) throws HibernateException {
+                final Spreadsheet spt = (Spreadsheet)session.load(Spreadsheet.class, spreadsheetId);
                 session.delete(spt);
-                if(log.isInfoEnabled()) log.info("Spreadsheet " + spt.getName() + " has been removed from gradebook" );
+                if(log.isInfoEnabled()) {
+					log.info("Spreadsheet " + spt.getName() + " has been removed from gradebook" );
+				}
 
                 return null;
             }
@@ -1715,20 +1655,21 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
      * @param spreadsheet
      */
     public void updateSpreadsheet(final Spreadsheet spreadsheet)throws ConflictingAssignmentNameException, StaleObjectModificationException  {
-            HibernateCallback hc = new HibernateCallback() {
+            final HibernateCallback hc = new HibernateCallback() {
                 @Override
-                public Object doInHibernate(Session session) throws HibernateException {
+                public Object doInHibernate(final Session session) throws HibernateException {
                     // Ensure that we don't have the assignment in the session, since
                     // we need to compare the existing one in the db to our edited assignment
                     session.evict(spreadsheet);
 
-                    Spreadsheet sptFromDb = (Spreadsheet)session.load(Spreadsheet.class, spreadsheet.getId());
-                    List conflictList = ((List)session.createQuery(
-                            "select spt from Spreadsheet as spt where spt.name = ? and spt.gradebook = ? and spt.id != ?").
-                            setString(0, spreadsheet.getName()).
-                            setEntity(1, spreadsheet.getGradebook()).
-                            setLong(2, spreadsheet.getId().longValue()).list());
-                		int numNameConflicts = conflictList.size();
+                    final Spreadsheet sptFromDb = (Spreadsheet)session.load(Spreadsheet.class, spreadsheet.getId());
+                    final List conflictList = session.createQuery(
+                            "select spt from Spreadsheet as spt where spt.name = :name and spt.gradebook = :gradebook and spt.id != :id").
+                            setString("name", spreadsheet.getName()).
+                            setEntity("gradebook", spreadsheet.getGradebook()).
+                            setLong("id", spreadsheet.getId())
+							.list();
+					final int numNameConflicts = conflictList.size();
                     if(numNameConflicts > 0) {
                         throw new ConflictingAssignmentNameException("You can not save multiple spreadsheets in a gradebook with the same name");
                     }
@@ -1741,29 +1682,31 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
             };
             try {
                 getHibernateTemplate().execute(hc);
-            } catch (HibernateOptimisticLockingFailureException holfe) {
-                if(log.isInfoEnabled()) log.info("An optimistic locking failure occurred while attempting to update a spreadsheet");
+            } catch (final HibernateOptimisticLockingFailureException holfe) {
+                if(log.isInfoEnabled()) {
+					log.info("An optimistic locking failure occurred while attempting to update a spreadsheet");
+				}
                 throw new StaleObjectModificationException(holfe);
             }
     }
 
     @Override
-    public Long createSpreadsheet(final Long gradebookId, final String name, final String creator, Date dateCreated, final String content) throws ConflictingSpreadsheetNameException,StaleObjectModificationException {
+    public Long createSpreadsheet(final Long gradebookId, final String name, final String creator, final Date dateCreated, final String content) throws ConflictingSpreadsheetNameException,StaleObjectModificationException {
 
-        HibernateCallback hc = new HibernateCallback() {
+        final HibernateCallback hc = new HibernateCallback() {
             @Override
-            public Object doInHibernate(Session session) throws HibernateException {
-                Gradebook gb = (Gradebook)session.load(Gradebook.class, gradebookId);
-                List conflictList = ((List)session.createQuery(
-                        "select spt from Spreadsheet as spt where spt.name = ? and spt.gradebook = ? ").
-                        setString(0, name).
-                        setEntity(1, gb).list());
-            		int numNameConflicts = conflictList.size();
+            public Object doInHibernate(final Session session) throws HibernateException {
+                final Gradebook gb = (Gradebook)session.load(Gradebook.class, gradebookId);
+                final List conflictList = (session.createQuery(
+                        "select spt from Spreadsheet as spt where spt.name = :name and spt.gradebook = :gradebook").
+                        setString("name", name).
+                        setEntity("gradebook", gb).list());
+            		final int numNameConflicts = conflictList.size();
                 if(numNameConflicts > 0) {
                     throw new ConflictingSpreadsheetNameException("You can not save multiple spreadsheets in a gradebook with the same name");
                 }
 
-                Spreadsheet spt = new Spreadsheet();
+                final Spreadsheet spt = new Spreadsheet();
                 spt.setGradebook(gb);
                 spt.setName(name);
                 spt.setCreator(creator);
@@ -1771,7 +1714,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
                 spt.setContent(content);
 
                 // Save the new assignment
-                Long id = (Long)session.save(spt);
+                final Long id = (Long)session.save(spt);
                 return id;
             }
         };
@@ -1780,68 +1723,60 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
 
     }
 
-    protected List getSpreadsheets(Long gradebookId, Session session) throws HibernateException {
-        List spreadsheets = session.createQuery(
-                "from Spreadsheet as spt where spt.gradebook.id=? ").
-                setLong(0, gradebookId.longValue()).
+    protected List getSpreadsheets(final Long gradebookId, final Session session) throws HibernateException {
+        final List spreadsheets = session.createQuery(
+                "from Spreadsheet as spt where spt.gradebook.id = :id").
+                setLong("id", gradebookId.longValue()).
                 list();
         return spreadsheets;
     }
 
     @Override
-    public List getStudentAssignmentComments(final String studentId, final Long gradebookId) {
-        return (List)getHibernateTemplate().execute(new HibernateCallback() {
-            @Override
-            public Object doInHibernate(Session session) throws HibernateException {
-                List comments;
-                comments = new ArrayList();
-                Query q = session.createQuery("from Comment as c where c.studentId=:studentId and c.gradableObject.gradebook.id=:gradebookId");
-                q.setParameter("studentId", studentId);
-                q.setParameter("gradebookId",gradebookId);
-                List allComments = q.list();
-                for (Iterator iter = allComments.iterator(); iter.hasNext(); ) {
-                    Comment comment = (Comment)iter.next();
-                    comments.add(comment);
-                }
-                return comments;
-            }
-        });
+    public List<Comment> getStudentAssignmentComments(final String studentId, final Long gradebookId) {
+        final HibernateCallback<List<Comment>> hcb =  session -> session
+				.createQuery("from Comment as c where c.studentId=:studentId and c.gradableObject.gradebook.id=:gradebookId")
+				.setParameter("studentId", studentId)
+				.setParameter("gradebookId",gradebookId)
+				.list();
+		return getHibernateTemplate().execute(hcb);
     }
     
     @Override
-    public boolean validateCategoryWeighting(Long gradebookId)
+    public boolean validateCategoryWeighting(final Long gradebookId)
     {
-    	Gradebook gradebook = getGradebook(gradebookId);
-    	if(gradebook.getCategory_type() != GradebookService.CATEGORY_TYPE_WEIGHTED_CATEGORY)
+    	final Gradebook gradebook = getGradebook(gradebookId);
+    	if(gradebook.getCategory_type() != GradebookService.CATEGORY_TYPE_WEIGHTED_CATEGORY) {
     		return true;
-    	List cats = getCategories(gradebookId);
+		}
+    	final List cats = getCategories(gradebookId);
     	double weight = 0.0;
     	for(int i=0; i<cats.size(); i++)
     	{
-    		Category cat = (Category) cats.get(i);
+    		final Category cat = (Category) cats.get(i);
     		if(cat != null)
     		{
     			weight += cat.getWeight().doubleValue();
     		}
     	}
-    	if(Math.rint(weight) == 1)
+    	if(Math.rint(weight) == 1) {
     		return true;
-    	else
+		} else {
     		return false;
+    }
     }
     
     @Override
-    public Set updateAssignmentGradeRecords(Assignment assignment, Collection gradeRecords, int grade_type)
+    public Set updateAssignmentGradeRecords(final GradebookAssignment assignment, final Collection gradeRecords, final int grade_type)
     {
-    	if(grade_type == GradebookService.GRADE_TYPE_POINTS)
+    	if(grade_type == GradebookService.GRADE_TYPE_POINTS) {
     		return updateAssignmentGradeRecords(assignment, gradeRecords);
-    	else if(grade_type == GradebookService.GRADE_TYPE_PERCENTAGE)
+		} else if(grade_type == GradebookService.GRADE_TYPE_PERCENTAGE)
     	{
-    		Collection convertList = new ArrayList();
-    		for(Iterator iter = gradeRecords.iterator(); iter.hasNext();) 
+    		final Collection convertList = new ArrayList();
+    		for(final Iterator iter = gradeRecords.iterator(); iter.hasNext();)
     		{
-    			AssignmentGradeRecord agr = (AssignmentGradeRecord) iter.next();
-    			Double doubleValue = calculateDoublePointForRecord(agr);
+    			final AssignmentGradeRecord agr = (AssignmentGradeRecord) iter.next();
+    			final Double doubleValue = calculateDoublePointForRecord(agr);
     			if(agr != null && doubleValue != null)
     			{
     				agr.setPointsEarned(doubleValue);
@@ -1857,11 +1792,11 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     	}
     	else if(grade_type == GradebookService.GRADE_TYPE_LETTER)
     	{
-    		Collection convertList = new ArrayList();
-    		for(Iterator iter = gradeRecords.iterator(); iter.hasNext();) 
+    		final Collection convertList = new ArrayList();
+    		for(final Iterator iter = gradeRecords.iterator(); iter.hasNext();)
     		{
-    			AssignmentGradeRecord agr = (AssignmentGradeRecord) iter.next();
-    			Double doubleValue = calculateDoublePointForLetterGradeRecord(agr);
+    			final AssignmentGradeRecord agr = (AssignmentGradeRecord) iter.next();
+    			final Double doubleValue = calculateDoublePointForLetterGradeRecord(agr);
     			if(agr != null && doubleValue != null)
     			{
         		agr.setPointsEarned(doubleValue);
@@ -1874,10 +1809,9 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
         	}
         }
         return updateAssignmentGradeRecords(assignment, convertList);
-    	}
-
-    	else
+    	} else {
     		return null;
+    }
     }
     
     /**
@@ -1890,17 +1824,17 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
      * @return
      */
     @Override
-    public Set updateStudentGradeRecords(Collection gradeRecords, int grade_type, String studentId)
+    public Set updateStudentGradeRecords(final Collection gradeRecords, final int grade_type, final String studentId)
     {
-    	if(grade_type == GradebookService.GRADE_TYPE_POINTS)
+    	if(grade_type == GradebookService.GRADE_TYPE_POINTS) {
     		return updateStudentGradeRecords(gradeRecords, studentId);
-    	else if(grade_type == GradebookService.GRADE_TYPE_PERCENTAGE)
+		} else if(grade_type == GradebookService.GRADE_TYPE_PERCENTAGE)
     	{
-    		Collection convertList = new ArrayList();
-    		for(Iterator iter = gradeRecords.iterator(); iter.hasNext();) 
+    		final Collection convertList = new ArrayList();
+    		for(final Iterator iter = gradeRecords.iterator(); iter.hasNext();)
     		{
-    			AssignmentGradeRecord agr = (AssignmentGradeRecord) iter.next();
-    			Double doubleValue = calculateDoublePointForRecord(agr);
+    			final AssignmentGradeRecord agr = (AssignmentGradeRecord) iter.next();
+    			final Double doubleValue = calculateDoublePointForRecord(agr);
     			if(agr != null && doubleValue != null)
     			{
     				agr.setPointsEarned(doubleValue);
@@ -1916,11 +1850,11 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     	}
     	else if(grade_type == GradebookService.GRADE_TYPE_LETTER)
     	{
-    		Collection convertList = new ArrayList();
-    		for(Iterator iter = gradeRecords.iterator(); iter.hasNext();) 
+    		final Collection convertList = new ArrayList();
+    		for(final Iterator iter = gradeRecords.iterator(); iter.hasNext();)
     		{
-    			AssignmentGradeRecord agr = (AssignmentGradeRecord) iter.next();
-    			Double doubleValue = calculateDoublePointForLetterGrade(agr);
+    			final AssignmentGradeRecord agr = (AssignmentGradeRecord) iter.next();
+    			final Double doubleValue = calculateDoublePointForLetterGrade(agr);
     			if(agr != null && doubleValue != null)
     			{
     				agr.setPointsEarned(doubleValue);
@@ -1933,14 +1867,14 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     			}
     		}
     		return updateStudentGradeRecords(convertList, studentId);
-    	}
-    	else
+    	} else {
     		return null;
     }
+    }
 
-    private Double calculateDoublePointForRecord(AssignmentGradeRecord gradeRecordFromCall)
+    private Double calculateDoublePointForRecord(final AssignmentGradeRecord gradeRecordFromCall)
     {
-    	Assignment assign = getAssignment(gradeRecordFromCall.getAssignment().getId()); 
+    	final GradebookAssignment assign = getAssignment(gradeRecordFromCall.getAssignment().getId());
     	if(gradeRecordFromCall.getPercentEarned() != null)
     	{
     		if(gradeRecordFromCall.getPercentEarned().doubleValue() / 100.0 < 0)
@@ -1948,21 +1882,21 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     			throw new IllegalArgumentException("percent for record is less than 0 for percentage points in GradebookManagerHibernateImpl.calculateDoublePointForRecord");
     		}
     		return new Double(assign.getPointsPossible().doubleValue() * (gradeRecordFromCall.getPercentEarned().doubleValue() / 100.0));
-    	}
-    	else
+    	} else {
     		return null;
     }
+    }
     
-    private Double calculateDoublePointForLetterGradeRecord(AssignmentGradeRecord gradeRecordFromCall)
+    private Double calculateDoublePointForLetterGradeRecord(final AssignmentGradeRecord gradeRecordFromCall)
     {
-    	Assignment assign = getAssignment(gradeRecordFromCall.getAssignment().getId()); 
-    	Gradebook gradebook = getGradebook(assign.getGradebook().getId());
+    	final GradebookAssignment assign = getAssignment(gradeRecordFromCall.getAssignment().getId());
+    	final Gradebook gradebook = getGradebook(assign.getGradebook().getId());
     	if(gradeRecordFromCall.getLetterEarned() != null)
     	{
-    		LetterGradePercentMapping lgpm = getLetterGradePercentMapping(gradebook);
+    		final LetterGradePercentMapping lgpm = getLetterGradePercentMapping(gradebook);
     		if(lgpm != null && lgpm.getGradeMap() != null)
     		{
-    			Double doublePercentage = lgpm.getValue(gradeRecordFromCall.getLetterEarned());
+    			final Double doublePercentage = lgpm.getValue(gradeRecordFromCall.getLetterEarned());
     			if(doublePercentage == null)
     			{
     				log.error("percentage for " + gradeRecordFromCall.getLetterEarned() + " is not found in letter grade mapping in GradebookManagerHibernateImpl.calculateDoublePointForLetterGradeRecord");
@@ -1972,20 +1906,20 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     			return calculateEquivalentPointValueForPercent(assign.getPointsPossible(), doublePercentage);
     		}
     		return null;
-    	}
-    	else
+    	} else {
     		return null;
     }
+    }
 
-    private Double calculateDoublePointForLetterGrade(AssignmentGradeRecord gradeRecordFromCall)
+    private Double calculateDoublePointForLetterGrade(final AssignmentGradeRecord gradeRecordFromCall)
     {
-    	Assignment assign = getAssignment(gradeRecordFromCall.getAssignment().getId()); 
+    	final GradebookAssignment assign = getAssignment(gradeRecordFromCall.getAssignment().getId());
     	if(gradeRecordFromCall.getLetterEarned() != null)
     	{
-    		LetterGradePercentMapping lgpm = getLetterGradePercentMapping(assign.getGradebook());
+    		final LetterGradePercentMapping lgpm = getLetterGradePercentMapping(assign.getGradebook());
     		if(lgpm != null && lgpm.getGradeMap() != null)
     		{
-    			Double doublePercentage = lgpm.getValue(gradeRecordFromCall.getLetterEarned());
+    			final Double doublePercentage = lgpm.getValue(gradeRecordFromCall.getLetterEarned());
     			if(doublePercentage == null)
     			{
     				log.error("percentage for " + gradeRecordFromCall.getLetterEarned() + " is not found in letter grade mapping in GradebookManagerHibernateImpl.calculateDoublePointForLetterGrade");
@@ -1995,19 +1929,19 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     			return calculateEquivalentPointValueForPercent(assign.getPointsPossible(), doublePercentage);
     		}
     		return null;
-    	}
-    	else
+    	} else {
     		return null;
+    }
     }
     
     @Override
-    public List getAssignmentGradeRecordsConverted(Assignment assignment, Collection studentUids)
+    public List getAssignmentGradeRecordsConverted(final GradebookAssignment assignment, final Collection studentUids)
     {
-    	List assignRecordsFromDB = getAssignmentGradeRecords(assignment, studentUids);
-    	Gradebook gradebook = getGradebook(assignment.getGradebook().getId());
-    	if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_POINTS)
+    	final List assignRecordsFromDB = getAssignmentGradeRecords(assignment, studentUids);
+    	final Gradebook gradebook = getGradebook(assignment.getGradebook().getId());
+    	if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_POINTS) {
     		return assignRecordsFromDB;
-    	else if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_PERCENTAGE)
+		} else if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_PERCENTAGE)
     	{
     		return convertPointsToPercentage(assignment, gradebook, assignRecordsFromDB);
     	}
@@ -2018,16 +1952,16 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     	return null;
     }
 
-    private List convertPointsToPercentage(Assignment assignment, Gradebook gradebook, List assignRecordsFromDB)
+    private List convertPointsToPercentage(final GradebookAssignment assignment, final Gradebook gradebook, final List assignRecordsFromDB)
     {
-    	Double pointPossible = assignment.getPointsPossible();
-    	List percentageList = new ArrayList();
+    	final Double pointPossible = assignment.getPointsPossible();
+    	final List percentageList = new ArrayList();
     	if(pointPossible.doubleValue() > 0)
     	{
 
     		for(int i=0; i<assignRecordsFromDB.size(); i++)
     		{
-    			AssignmentGradeRecord agr = (AssignmentGradeRecord) assignRecordsFromDB.get(i);
+    			final AssignmentGradeRecord agr = (AssignmentGradeRecord) assignRecordsFromDB.get(i);
     			if(agr != null) {
         			agr.setDateRecorded(agr.getDateRecorded());
         			agr.setGraderId(agr.getGraderId());
@@ -2047,23 +1981,23 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     	return percentageList;
     }
     
-    private List convertPointsToLetterGrade(Assignment assignment, Gradebook gradebook, List assignRecordsFromDB)
+    private List convertPointsToLetterGrade(final GradebookAssignment assignment, final Gradebook gradebook, final List assignRecordsFromDB)
     {
-    	Double pointPossible = assignment.getPointsPossible();
+    	final Double pointPossible = assignment.getPointsPossible();
     	if(pointPossible.doubleValue() > 0)
     	{
-    		List letterGradeList = new ArrayList();
-    		LetterGradePercentMapping lgpm = getLetterGradePercentMapping(assignment.getGradebook());
+    		final List letterGradeList = new ArrayList();
+    		final LetterGradePercentMapping lgpm = getLetterGradePercentMapping(assignment.getGradebook());
     		for(int i=0; i<assignRecordsFromDB.size(); i++)
     		{
-    			AssignmentGradeRecord agr = (AssignmentGradeRecord) assignRecordsFromDB.get(i);
+    			final AssignmentGradeRecord agr = (AssignmentGradeRecord) assignRecordsFromDB.get(i);
       		if(agr != null) {
       		    agr.setDateRecorded(agr.getDateRecorded());
                 agr.setGraderId(agr.getGraderId());
       		}
       		if(agr != null && agr.getPointsEarned() != null )
       		{
-        		String letterGrade = lgpm.getGrade(calculateEquivalentPercent(pointPossible, agr.getPointsEarned()));
+        		final String letterGrade = lgpm.getGrade(calculateEquivalentPercent(pointPossible, agr.getPointsEarned()));
       			agr.setLetterEarned(letterGrade);
       			letterGradeList.add(agr);
       		}
@@ -2079,21 +2013,21 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     }
     
     @Override
-    public List getAssignmentsCategoriesAndCourseGradeWithStats(Long gradebookId, 
-            String assignmentSort, boolean assignAscending, String categorySort, boolean categoryAscending) {
-        List catAssignCGList = new ArrayList();
+    public List getAssignmentsCategoriesAndCourseGradeWithStats(final Long gradebookId,
+            String assignmentSort, final boolean assignAscending, final String categorySort, final boolean categoryAscending) {
+        final List catAssignCGList = new ArrayList();
         
-        Set<String> allStudentUids = getAllStudentUids(getGradebookUid(gradebookId));
-        List<AssignmentGradeRecord> gradeRecords = getAllAssignmentGradeRecords(gradebookId, allStudentUids);
+        final Set<String> allStudentUids = getAllStudentUids(getGradebookUid(gradebookId));
+        final List<AssignmentGradeRecord> gradeRecords = getAllAssignmentGradeRecords(gradebookId, allStudentUids);
         
         if (assignmentSort == null) {
-            assignmentSort = Assignment.DEFAULT_SORT;
+            assignmentSort = GradebookAssignment.DEFAULT_SORT;
         }
         
-        List<Assignment> allAssignments = getAssignmentsWithStats(gradebookId, assignmentSort, assignAscending, gradeRecords);
+        final List<GradebookAssignment> allAssignments = getAssignmentsWithStats(gradebookId, assignmentSort, assignAscending, gradeRecords);
 
         // this method also returns the course grade
-        List categoriesPlusCG = getCategoriesWithStats(gradebookId, assignmentSort, 
+        final List categoriesPlusCG = getCategoriesWithStats(gradebookId, assignmentSort,
                 assignAscending, categorySort, categoryAscending, gradeRecords, allAssignments);
         
         // we will add assignments, then categories, then course grade (which is included in cate list)
@@ -2121,22 +2055,21 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
      * this method is useful if you have already retrieved all grade recs and
      * all assignments with stats to avoid repeated calls
      */
-    private List getCategoriesWithStats(Long gradebookId, String assignmentSort, boolean assignAscending, 
-            String categorySort, boolean categoryAscending, List<AssignmentGradeRecord> gradeRecs,
-            List<Assignment> assignmentsWithStats){
-    	Set studentUids = getAllStudentUids(getGradebookUid(gradebookId));
+    private List getCategoriesWithStats(final Long gradebookId, final String assignmentSort, final boolean assignAscending,
+            final String categorySort, final boolean categoryAscending, final List<AssignmentGradeRecord> gradeRecs,
+            final List<GradebookAssignment> assignmentsWithStats){
+    	final Set studentUids = getAllStudentUids(getGradebookUid(gradebookId));
     	return getCategoriesWithStats(gradebookId, assignmentSort, assignAscending, categorySort, categoryAscending, gradeRecs, assignmentsWithStats, studentUids);
 	}
     
-    private List getCategoriesWithStats(Long gradebookId, String assignmentSort, boolean assignAscending, 
-            String categorySort, boolean categoryAscending, List<AssignmentGradeRecord> gradeRecs,
-            List<Assignment> assignmentsWithStats, Set studentUids) {
-        List categories = getCategories(gradebookId);
+    private List getCategoriesWithStats(final Long gradebookId, final String assignmentSort, final boolean assignAscending,
+                                        final String categorySort, final boolean categoryAscending, final List<AssignmentGradeRecord> gradeRecs,
+                                        final List<GradebookAssignment> assignmentsWithStats, final Set studentUids) {
+        final List categories = getCategories(gradebookId);
 
-        Map cateMap = new HashMap();
-        for (Iterator iter = assignmentsWithStats.iterator(); iter.hasNext(); )
-        {
-            Assignment assign = (Assignment) iter.next();
+        final Map cateMap = new HashMap();
+        for (final Object element : assignmentsWithStats) {
+            final GradebookAssignment assign = (GradebookAssignment) element;
             if(assign != null)
             {
             	// the assigns already have stats calculated
@@ -2144,7 +2077,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
 
                 if(assign.getCategory() != null && cateMap.get(assign.getCategory().getId()) == null)
                 {
-                    List assignList = new ArrayList();
+                    final List assignList = new ArrayList();
                     assignList.add(assign);
                     cateMap.put(assign.getCategory().getId(), assignList);
                 }
@@ -2152,7 +2085,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
                 {
                     if(assign.getCategory() != null)
                     {
-                        List assignList = (List) cateMap.get(assign.getCategory().getId());
+                        final List assignList = (List) cateMap.get(assign.getCategory().getId());
                         assignList.add(assign);
                         cateMap.put(assign.getCategory().getId(),assignList);
                     }
@@ -2160,9 +2093,9 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
             }
         }
         
-        for (Iterator iter = categories.iterator(); iter.hasNext(); )
+        for (final Iterator iter = categories.iterator(); iter.hasNext(); )
         {
-            Category cate = (Category) iter.next();
+            final Category cate = (Category) iter.next();
             if(cate != null && cateMap.get(cate.getId()) != null)
             {
                 cate.calculateStatistics((List) cateMap.get(cate.getId()));
@@ -2170,16 +2103,17 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
             }
         }
         
-        if(categorySort != null)
+        if(categorySort != null) {
             sortCategories(categories, categorySort, categoryAscending);
-        else
+		} else {
             sortCategories(categories, Category.SORT_BY_NAME, categoryAscending);
+		}
 
-        CourseGrade courseGrade = getCourseGrade(gradebookId);
-        Map gradeRecordMap = new HashMap();
+        final CourseGrade courseGrade = getCourseGrade(gradebookId);
+        final Map gradeRecordMap = new HashMap();
         addToGradeRecordMap(gradeRecordMap, gradeRecs);
         //      List<CourseGradeRecord> courseGradeRecords = getPointsEarnedCourseGradeRecords(courseGrade, studentUids, releasedAssignments, gradeRecordMap);
-        List<CourseGradeRecord> courseGradeRecords = getPointsEarnedCourseGradeRecords(courseGrade, studentUids, assignmentsWithStats, gradeRecordMap);
+        final List<CourseGradeRecord> courseGradeRecords = getPointsEarnedCourseGradeRecords(courseGrade, studentUids, assignmentsWithStats, gradeRecordMap);
         courseGrade.calculateStatistics(courseGradeRecords, studentUids.size());
 
         categories.add(courseGrade);
@@ -2188,29 +2122,29 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     }
     
     @Override
-    public List getCategoriesWithStats(Long gradebookId, String assignmentSort, boolean assignAscending, String categorySort, boolean categoryAscending) {
+    public List getCategoriesWithStats(final Long gradebookId, final String assignmentSort, final boolean assignAscending, final String categorySort, final boolean categoryAscending) {
     	return getCategoriesWithStats(gradebookId, assignmentSort, assignAscending, categorySort, categoryAscending, false);
     }
     
     @Override
-    public List getCategoriesWithStats(Long gradebookId, String assignmentSort,
-			boolean assignAscending, String categorySort,
-			boolean categoryAscending, boolean includeDroppedScores){
-        Set studentUids = getAllStudentUids(getGradebookUid(gradebookId));
+    public List getCategoriesWithStats(final Long gradebookId, final String assignmentSort,
+			final boolean assignAscending, final String categorySort,
+			final boolean categoryAscending, final boolean includeDroppedScores){
+        final Set studentUids = getAllStudentUids(getGradebookUid(gradebookId));
         return getCategoriesWithStats(gradebookId, assignmentSort, assignAscending, categorySort, categoryAscending, includeDroppedScores, studentUids);
     }
     
     @Override
-    public List getCategoriesWithStats(Long gradebookId, String assignmentSort,
-			boolean assignAscending, String categorySort,
-			boolean categoryAscending, boolean includeDroppedScores, Set studentUids){
+    public List getCategoriesWithStats(final Long gradebookId, String assignmentSort,
+			final boolean assignAscending, final String categorySort,
+			final boolean categoryAscending, final boolean includeDroppedScores, final Set studentUids){
     	List allAssignments;
     	
     	if (assignmentSort == null) {
-    	    assignmentSort = Assignment.DEFAULT_SORT;
+    	    assignmentSort = GradebookAssignment.DEFAULT_SORT;
     	}
     	
-        List gradeRecords = getAllAssignmentGradeRecords(gradebookId, studentUids);
+        final List gradeRecords = getAllAssignmentGradeRecords(gradebookId, studentUids);
         if(!includeDroppedScores) {
             applyDropScores(gradeRecords);
         }
@@ -2220,7 +2154,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     	        categorySort, categoryAscending, gradeRecords, allAssignments, studentUids);
     }
 
-    private void sortCategories(List categories, String sortBy, boolean ascending) 
+    private void sortCategories(final List categories, final String sortBy, final boolean ascending)
     {
     	Comparator comp;
     	if(Category.SORT_BY_NAME.equals(sortBy)) 
@@ -2247,62 +2181,57 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     }
 
     @Override
-    public List getAssignmentsWithNoCategory(final Long gradebookId, String assignmentSort, boolean assignAscending)
+    public List<GradebookAssignment> getAssignmentsWithNoCategory(final Long gradebookId, final String assignmentSort, final boolean assignAscending)
     {
-    	HibernateCallback hc = new HibernateCallback() {
-    		@Override
-            public Object doInHibernate(Session session) throws HibernateException {
-    			List assignments = session.createQuery(
-    					"from Assignment as asn where asn.gradebook.id=? and asn.removed=false and asn.category is null").
-    					setLong(0, gradebookId.longValue()).
-    					list();
-    			return assignments;
-    		}
-    	};
-    	
-    	List assignList = (List)getHibernateTemplate().execute(hc);
-    	if(assignmentSort != null)
+	HibernateCallback<List<GradebookAssignment>> hc = session -> session
+			.createQuery("from GradebookAssignment as asn where asn.gradebook.id = :id and asn.removed=false and asn.category is null")
+			.setLong("id", gradebookId)
+			.list();
+
+    	final List<GradebookAssignment> assignList = getHibernateTemplate().execute(hc);
+    	if(assignmentSort != null) {
     		sortAssignments(assignList, assignmentSort, assignAscending);
-    	else
-    		sortAssignments(assignList, Assignment.DEFAULT_SORT, assignAscending);
+		} else {
+    		sortAssignments(assignList, GradebookAssignment.DEFAULT_SORT, assignAscending);
+		}
     	
     	return assignList;
     }
 
     @Override
-    public List getAssignmentsWithNoCategoryWithStats(Long gradebookId, String assignmentSort, boolean assignAscending)
+    public List getAssignmentsWithNoCategoryWithStats(final Long gradebookId, final String assignmentSort, final boolean assignAscending)
     {
-    	Set studentUids = getAllStudentUids(getGradebookUid(gradebookId));
-    	List assignments = getAssignmentsWithNoCategory(gradebookId, assignmentSort, assignAscending);
-    	List<AssignmentGradeRecord> gradeRecords = getAllAssignmentGradeRecords(gradebookId, studentUids);
+    	final Set studentUids = getAllStudentUids(getGradebookUid(gradebookId));
+    	final List assignments = getAssignmentsWithNoCategory(gradebookId, assignmentSort, assignAscending);
+    	final List<AssignmentGradeRecord> gradeRecords = getAllAssignmentGradeRecords(gradebookId, studentUids);
         applyDropScores(gradeRecords);
-    	for (Iterator iter = assignments.iterator(); iter.hasNext(); ) {
-    		Assignment assignment = (Assignment)iter.next();
+    	for (final Iterator iter = assignments.iterator(); iter.hasNext(); ) {
+    		final GradebookAssignment assignment = (GradebookAssignment)iter.next();
     		assignment.calculateStatistics(gradeRecords);
     	}
     	// AZ - fixing bug, sorts based on stats need to be resorted
         if (assignmentSort != null) {
             sortAssignments(assignments, assignmentSort, assignAscending);
         } else {
-            sortAssignments(assignments, Assignment.DEFAULT_SORT, assignAscending);
+            sortAssignments(assignments, GradebookAssignment.DEFAULT_SORT, assignAscending);
         }
     	return assignments;
     }
 
     @Override
-    public void convertGradingEventsConverted(Assignment assign, GradingEvents events, List studentUids, int grade_type)
+    public void convertGradingEventsConverted(final GradebookAssignment assign, final GradingEvents events, final List studentUids, final int grade_type)
     {
     	LetterGradePercentMapping lgpm = new LetterGradePercentMapping();
     	if (grade_type == GradebookService.GRADE_TYPE_LETTER) {
     		lgpm = getLetterGradePercentMapping(assign.getGradebook());
     	}
     	
-    	for(Iterator iter = studentUids.iterator(); iter.hasNext();)
+    	for(final Iterator iter = studentUids.iterator(); iter.hasNext();)
     	{
-    		List gradingEvents = events.getEvents((String)iter.next());
-    		for(Iterator eventIter = gradingEvents.iterator(); eventIter.hasNext();)
+    		final List gradingEvents = events.getEvents((String)iter.next());
+    		for(final Iterator eventIter = gradingEvents.iterator(); eventIter.hasNext();)
     		{
-    			GradingEvent ge = (GradingEvent) eventIter.next();
+    			final GradingEvent ge = (GradingEvent) eventIter.next();
     			if (ge.getGrade() != null) {
 	    			if(grade_type == GradebookService.GRADE_TYPE_PERCENTAGE)
 	    			{
@@ -2320,7 +2249,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     }
     
     @Override
-    public void convertGradingEventsConvertedForStudent(Gradebook gradebook, Map gradableObjectEventListMap, int grade_type) {
+    public void convertGradingEventsConvertedForStudent(final Gradebook gradebook, final Map gradableObjectEventListMap, final int grade_type) {
     	if (gradableObjectEventListMap == null || gradableObjectEventListMap.isEmpty()) {
     		return;
     	}
@@ -2330,19 +2259,19 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     		lgpm = getLetterGradePercentMapping(gradebook);
     	}
     	
-    	for (Iterator<Map.Entry<GradableObject, List>> goIter = gradableObjectEventListMap.entrySet().iterator(); goIter.hasNext();) {
-            Map.Entry<GradableObject, List> entry = goIter.next();
-            GradableObject go = entry.getKey();
+    	for (final Iterator<Map.Entry<GradableObject, List>> goIter = gradableObjectEventListMap.entrySet().iterator(); goIter.hasNext();) {
+            final Map.Entry<GradableObject, List> entry = goIter.next();
+            final GradableObject go = entry.getKey();
 
-    		if (go instanceof Assignment) {
-    			Assignment assign = (Assignment) go;
-    			Double pointsPossible = assign.getPointsPossible();
+    		if (go instanceof GradebookAssignment) {
+    			final GradebookAssignment assign = (GradebookAssignment) go;
+    			final Double pointsPossible = assign.getPointsPossible();
     			
-	    		List eventList = (List) gradableObjectEventListMap.get(go);
+	    		final List eventList = (List) gradableObjectEventListMap.get(go);
 	    		if (eventList != null && eventList.size() > 0) {
-	    			for(Iterator eventIter = eventList.iterator(); eventIter.hasNext();)
+	    			for(final Iterator eventIter = eventList.iterator(); eventIter.hasNext();)
 	        		{
-	        			GradingEvent ge = (GradingEvent) eventIter.next();
+	        			final GradingEvent ge = (GradingEvent) eventIter.next();
 	        			if (ge.getGrade() != null) {
 	    	    			if(grade_type == GradebookService.GRADE_TYPE_PERCENTAGE)
 	    	    			{
@@ -2362,45 +2291,48 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     }
     
     @Override
-    public boolean checkStuendsNotSubmitted(Gradebook gradebook)
+    public boolean checkStuendsNotSubmitted(final Gradebook gradebook)
     {
-    	Set studentUids = getAllStudentUids(getGradebookUid(gradebook.getId()));
+    	final Set studentUids = getAllStudentUids(getGradebookUid(gradebook.getId()));
     	if(gradebook.getCategory_type() == GradebookService.CATEGORY_TYPE_NO_CATEGORY || gradebook.getCategory_type() == GradebookService.CATEGORY_TYPE_ONLY_CATEGORY)
     	{
-    		List records = getAllAssignmentGradeRecords(gradebook.getId(), studentUids);
-    		List assigns = getAssignments(gradebook.getId(), Assignment.DEFAULT_SORT, true);
-    		List filteredAssigns = new ArrayList();
-    		for(Iterator iter = assigns.iterator(); iter.hasNext();)
+    		final List records = getAllAssignmentGradeRecords(gradebook.getId(), studentUids);
+    		final List assigns = getAssignments(gradebook.getId(), GradebookAssignment.DEFAULT_SORT, true);
+    		final List filteredAssigns = new ArrayList();
+    		for(final Iterator iter = assigns.iterator(); iter.hasNext();)
     		{
-    			Assignment assignment = (Assignment)iter.next();
-    			if(assignment.isCounted() && !assignment.getUngraded())
+    			final GradebookAssignment assignment = (GradebookAssignment)iter.next();
+    			if(assignment.isCounted() && !assignment.getUngraded()) {
     				filteredAssigns.add(assignment);
     		}
-    		List filteredRecords = new ArrayList();
-    		for(Iterator iter = records.iterator(); iter.hasNext();)
+    		}
+    		final List filteredRecords = new ArrayList();
+    		for(final Iterator iter = records.iterator(); iter.hasNext();)
     		{
-    			AssignmentGradeRecord agr = (AssignmentGradeRecord)iter.next();
+    			final AssignmentGradeRecord agr = (AssignmentGradeRecord)iter.next();
     			if(!agr.isCourseGradeRecord() && agr.getAssignment().isCounted() && !agr.getAssignment().getUngraded())
     			{
-    				if(agr.getPointsEarned() == null)
+    				if(agr.getPointsEarned() == null) {
     					return true;
+					}
     				filteredRecords.add(agr);
     			}
     		}
 
-    		if(filteredRecords.size() < (filteredAssigns.size() * studentUids.size()))
+    		if(filteredRecords.size() < (filteredAssigns.size() * studentUids.size())) {
     			return true;
+			}
     		
     		return false;
     	}
     	else
     	{
-      	List assigns = getAssignments(gradebook.getId(), Assignment.DEFAULT_SORT, true);
-      	List records = getAllAssignmentGradeRecords(gradebook.getId(), studentUids);
-      	Set filteredAssigns = new HashSet();
-      	for (Iterator iter = assigns.iterator(); iter.hasNext(); )
+      	final List assigns = getAssignments(gradebook.getId(), GradebookAssignment.DEFAULT_SORT, true);
+      	final List records = getAllAssignmentGradeRecords(gradebook.getId(), studentUids);
+      	final Set filteredAssigns = new HashSet();
+      	for (final Iterator iter = assigns.iterator(); iter.hasNext(); )
       	{
-      		Assignment assign = (Assignment) iter.next();
+      		final GradebookAssignment assign = (GradebookAssignment) iter.next();
       		if(assign != null && assign.isCounted() && !assign.getUngraded())
       		{
       			if(assign.getCategory() != null && !assign.getCategory().isRemoved())
@@ -2410,33 +2342,35 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
       		}
       	}
       	
-    		List filteredRecords = new ArrayList();
-    		for(Iterator iter = records.iterator(); iter.hasNext();)
+    		final List filteredRecords = new ArrayList();
+    		for(final Iterator iter = records.iterator(); iter.hasNext();)
     		{
-    			AssignmentGradeRecord agr = (AssignmentGradeRecord)iter.next();
+    			final AssignmentGradeRecord agr = (AssignmentGradeRecord)iter.next();
     			if(filteredAssigns.contains(agr.getAssignment().getId()) && !agr.isCourseGradeRecord())
     			{
-    				if(agr.getPointsEarned() == null)
+    				if(agr.getPointsEarned() == null) {
     					return true;
+					}
     				filteredRecords.add(agr);
     			}
     		}
     		
-    		if(filteredRecords.size() < filteredAssigns.size() * studentUids.size())
+    		if(filteredRecords.size() < filteredAssigns.size() * studentUids.size()) {
     			return true;
+			}
     		
     		return false;
     	}
     }
     
     @Override
-    public void fillInZeroForNullGradeRecords(Gradebook gradebook)
+    public void fillInZeroForNullGradeRecords(final Gradebook gradebook)
     {
     	finalizeNullGradeRecords(gradebook);
     }
 
     @Override
-    public void convertGradePointsForUpdatedTotalPoints(Gradebook gradebook, Assignment assignment, Double newTotal, List studentUids)
+    public void convertGradePointsForUpdatedTotalPoints(final Gradebook gradebook, final GradebookAssignment assignment, final Double newTotal, final List studentUids)
     {
   		if(newTotal == null || assignment == null || gradebook == null)
   		{
@@ -2444,10 +2378,10 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
   		}
     	if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_PERCENTAGE && assignment.getPointsPossible() != null)
     	{
-    		List records = getAssignmentGradeRecordsConverted(assignment, studentUids);
-    		for(Iterator iter = records.iterator(); iter.hasNext(); )
+    		final List records = getAssignmentGradeRecordsConverted(assignment, studentUids);
+    		for(final Iterator iter = records.iterator(); iter.hasNext(); )
     		{
-    			AssignmentGradeRecord agr = (AssignmentGradeRecord) iter.next();
+    			final AssignmentGradeRecord agr = (AssignmentGradeRecord) iter.next();
     			if(agr != null && agr.getPercentEarned() != null)
     			{
     				agr.setPointsEarned(calculateEquivalentPointValueForPercent(newTotal, agr.getPercentEarned()));
@@ -2457,14 +2391,14 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     	}
     	else if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_LETTER && assignment.getPointsPossible() != null)
     	{
-    		List records = getAssignmentGradeRecordsConverted(assignment, studentUids);
-    		LetterGradePercentMapping lgpm = getLetterGradePercentMapping(gradebook);
-    		for(Iterator iter = records.iterator(); iter.hasNext(); )
+    		final List records = getAssignmentGradeRecordsConverted(assignment, studentUids);
+    		final LetterGradePercentMapping lgpm = getLetterGradePercentMapping(gradebook);
+    		for(final Iterator iter = records.iterator(); iter.hasNext(); )
     		{
-    			AssignmentGradeRecord agr = (AssignmentGradeRecord) iter.next();
+    			final AssignmentGradeRecord agr = (AssignmentGradeRecord) iter.next();
     			if(agr != null && agr.getLetterEarned() != null)
 	    		{	
-    				Double doublePercentage = lgpm.getValue(agr.getLetterEarned());
+    				final Double doublePercentage = lgpm.getValue(agr.getLetterEarned());
     				if (doublePercentage != null) {
 	    				agr.setPointsEarned(calculateEquivalentPointValueForPercent(newTotal, doublePercentage));
     				} else {
@@ -2477,50 +2411,50 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     }
 
     @Override
-    protected Long saveNewAssignment(final Long gradebookId, final Long categoryId, final Assignment asn) throws ConflictingAssignmentNameException
+    protected Long saveNewAssignment(final Long gradebookId, final Long categoryId, final GradebookAssignment asn) throws ConflictingAssignmentNameException
     {
-        Long result = super.saveNewAssignment(gradebookId, categoryId, asn);
+        final Long result = super.saveNewAssignment(gradebookId, categoryId, asn);
         
         syncAssignment(asn.getName());
         
         return result;
     }    
     
-    private void syncAssignment(String asnName)
+    private void syncAssignment(final String asnName)
     {
         /** synchronize from external application */
-        if (synchronizer != null && !synchronizer.isProjectSite())
+        if (this.synchronizer != null && !this.synchronizer.isProjectSite())
         {
-                synchronizer.addLegacyAssignment(asnName);
+                this.synchronizer.addLegacyAssignment(asnName);
         }
      }
 
     /** synchronize from external application */
-    public void setSynchronizer(GbSynchronizer synchronizer) 
+    public void setSynchronizer(final GbSynchronizer synchronizer)
     {
     	this.synchronizer = synchronizer;
     }
     
     @Override
-    public void createAssignments(Long gradebookId, List assignList) throws MultipleAssignmentSavingException
+    public void createAssignments(final Long gradebookId, final List assignList) throws MultipleAssignmentSavingException
     {
-    	List assignIds = new ArrayList();
+    	final List assignIds = new ArrayList();
     	try
     	{
-    		for(Iterator iter = assignList.iterator(); iter.hasNext();)
+    		for(final Iterator iter = assignList.iterator(); iter.hasNext();)
     		{
-    			Assignment assign = (Assignment) iter.next();
+    			final GradebookAssignment assign = (GradebookAssignment) iter.next();
     			if(assign.getCategory() == null)
     			{
-    				assignIds.add(createAssignment(gradebookId, assign.getName(), assign.getPointsPossible(), assign.getDueDate(), assign.isNotCounted(), assign.isReleased(), assign.isExtraCredit()));
-    			}
-    			else
-    				assignIds.add(createAssignmentForCategory(gradebookId, assign.getCategory().getId(), assign.getName(), assign.getPointsPossible(), assign.getDueDate(), assign.isNotCounted(), assign.isReleased(), assign.isExtraCredit()));
+    				assignIds.add(createAssignment(gradebookId, assign.getName(), assign.getPointsPossible(), assign.getDueDate(), assign.isNotCounted(), assign.isReleased(), assign.isExtraCredit(), assign.getSortOrder()));
+    			} else {
+    				assignIds.add(createAssignmentForCategory(gradebookId, assign.getCategory().getId(), assign.getName(), assign.getPointsPossible(), assign.getDueDate(), assign.isNotCounted(), assign.isReleased(), assign.isExtraCredit(), assign.getCategorizedSortOrder()));
     		}
     	}
-    	catch(Exception e)
+    	}
+    	catch(final Exception e)
     	{
-    		for(Iterator iter = assignIds.iterator(); iter.hasNext();)
+    		for(final Iterator iter = assignIds.iterator(); iter.hasNext();)
     		{
     			removeAssignment((Long)iter.next());
     		}
@@ -2530,47 +2464,44 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     }
     
     @Override
-    public boolean checkValidName(final Long gradebookId, final Assignment assignment)
+    public boolean checkValidName(final Long gradebookId, final GradebookAssignment assignment)
     {
-    	HibernateCallback hc = new HibernateCallback() {
-    		@Override
-            public Object doInHibernate(Session session) throws HibernateException {
-    			Gradebook gb = (Gradebook)session.load(Gradebook.class, gradebookId);
-    			List conflictList = ((List)session.createQuery(
-    					"select go from GradableObject as go where go.name = ? and go.gradebook = ? and go.removed=false").
-    					setString(0, assignment.getName()).
-    					setEntity(1, gb).list());
-    			int numNameConflicts = conflictList.size();
+    	final HibernateCallback<List<GradableObject>> hc = session -> {
+            final Gradebook gb = (Gradebook) session.load(Gradebook.class, gradebookId);
+            return session.createQuery(
+                    "select go from GradableObject as go where go.name = :name and go.gradebook = :gradebook and go.removed = false").
+                    setString("name", assignment.getName()).
+                    setEntity("gradebook", gb)
+					.list();
+        };
 
-    			return new Integer(numNameConflicts);
-    		}
-    	};
-
-    	Integer conflicts =  (Integer) getHibernateTemplate().execute(hc);
+    	final Integer conflicts = getHibernateTemplate().execute(hc).size();
     	
-    	if(conflicts.intValue() > 0)
-    		return false;
-    	else
-    		return true;
+    	if (conflicts > 0) {
+			return false;
+		}
+    	return true;
     }
 	
-	private void logAssignmentGradingEvent(AssignmentGradeRecord gradeRecord, String graderId, Assignment assignment, Session session) {
+	private void logAssignmentGradingEvent(final AssignmentGradeRecord gradeRecord, final String graderId, final GradebookAssignment assignment, final Session session) {
 		if (gradeRecord == null || assignment == null) {
 			throw new IllegalArgumentException("null gradeRecord or assignment passed to logAssignmentGradingEvent");
 		}
 		
 		// Logger the grading event, and keep track of the students with saved/updated grades
 		// we need to log what the user entered depending on the grade entry type
-		Gradebook gradebook = assignment.getGradebook();
+		final Gradebook gradebook = assignment.getGradebook();
 		String gradeEntry = null;
 		if (gradebook.getGrade_type() == GradebookService.GRADE_TYPE_LETTER) {
 			gradeEntry = gradeRecord.getLetterEarned();
 		} else if (gradebook.getGrade_type() == GradebookService.GRADE_TYPE_PERCENTAGE) {
-			if (gradeRecord.getPercentEarned() != null)
+			if (gradeRecord.getPercentEarned() != null) {
 				gradeEntry = gradeRecord.getPercentEarned().toString();
+			}
 		} else {
-			if (gradeRecord.getPointsEarned() != null)
+			if (gradeRecord.getPointsEarned() != null) {
 				gradeEntry = gradeRecord.getPointsEarned().toString();
+		}
 		}
 		
 		session.save(new GradingEvent(assignment, graderId, gradeRecord.getStudentId(), gradeEntry));
@@ -2580,7 +2511,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
      * Unisa Changes:2018/04/26:Added-Check if gradebook settings for module site is set to record
      * percentages and not points: grade_type = 2
      */
-    public boolean checkGradeType(Assignment assignment){
+    public boolean checkGradeType(GradebookAssignment assignment){
     	if(assignment == null){
     		throw new IllegalArgumentException("null assignment passed to checkGradeType");
     	}
