@@ -2524,5 +2524,4 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     		return false;
     }	// End Unisa Changes
 
-
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package org.sakaiproject.tool.gradebook.business;
 
 import java.util.*;
@@ -421,7 +421,7 @@ public interface GradebookManager {
     * @return id of the new category
     * @throws ConflictingAssignmentNameException StaleObjectModificationException
     */
-    public Long createCategory(final Long gradebookId, final String name, final Double weight, final Integer drop_lowest, final Integer dropHighest, final Integer keepHighest, final Boolean is_extra_credit) 
+    public Long createCategory(final Long gradebookId, final String name, final Double weight, final Integer dropLowest, final Integer dropHighest, final Integer keepHighest, final Boolean is_extra_credit) 
     throws ConflictingCategoryNameException, StaleObjectModificationException;
     
     /**method to get all categories for a gradebook
@@ -495,7 +495,7 @@ public interface GradebookManager {
     /**
      * Updates the grade records in the GradeRecordSet.
      * This method calls public Set updateAssignmentGradeRecords(GradebookAssignment assignment, Collection gradeRecords) for DB udpates.
-     * Method of public Set updateAssignmentGradeRecords(GradebookAssignment assignment, Collection gradeRecords) should not be 
+     * Method of public Set updateAssignmentGradeRecords(GradebookAssignment assignment, Collection gradeRecords) should not be
      * called outside of impl of GradebookManager anymore later.
      *
      * @param assignment
@@ -509,7 +509,7 @@ public interface GradebookManager {
     /**
      * Updates the grade records in the GradeRecordSet for a student.
      * This method calls public Set updateStudentGradeRecords(GradebookAssignment assignment, Collection gradeRecords) for DB udpates.
-     * Method of public Set updateStudentGradeRecords(GradebookAssignment assignment, Collection gradeRecords) should not be 
+     * Method of public Set updateStudentGradeRecords(GradebookAssignment assignment, Collection gradeRecords) should not be
      * called outside of impl of GradebookManager anymore later.
      *
      * @param assignment

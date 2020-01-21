@@ -104,7 +104,7 @@
 							<h:outputText id="removeAssignment" value="#{msgs.assignment_details_remove}"/>
 						<f:param name="assignmentId" value="#{assignmentDetailsBean.assignment.id}"/>
 					</h:commandLink>
-					
+
 					<%/*  Unisa Changes: Added:2018/04/26: Link for Request Gradebook item sync:BEGIN */%>
 					<h:commandLink
 						action="#{assignmentDetailsBean.navigateToGradebookSync}"
@@ -116,7 +116,7 @@
 						</h:outputFormat>
 						<f:param name="assignmentId" value="#{assignmentDetailsBean.assignment.id}"/>
 					</h:commandLink>
-					<%/*  End Unisa Changes */%>					
+					<%/*  End Unisa Changes */%>		
 
 					<h:outputLink
 						value="#{assignmentDetailsBean.assignment.externalInstructorLink}"
