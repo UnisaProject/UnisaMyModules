@@ -224,8 +224,10 @@ public class SakaiProxyImpl implements SakaiProxy {
     public String getDisplayNameForTheUser(String userId) {
         try {
             User sakaiUser = userDirectoryService.getUser(userId);
-            // CLOG-24
-            return FormattedText.escapeHtmlFormattedText(sakaiUser.getDisplayName());
+            //UNISA CHANGE
+            String name = sakaiUser.getFirstName().trim().substring(0,1).toUpperCase()+" "+sakaiUser.getLastName().trim().toUpperCase();
+            //return FormattedText.escapeHtmlFormattedText(sakaiUser.getDisplayName());
+            return FormattedText.escapeHtmlFormattedText(name);
         } catch (Exception e) {
             return userId; // this can happen if the user does not longer exist
             // in the system
