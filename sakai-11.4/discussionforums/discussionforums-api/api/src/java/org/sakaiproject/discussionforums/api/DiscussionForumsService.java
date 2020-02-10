@@ -24,6 +24,7 @@ package org.sakaiproject.discussionforums.api;
 import java.util.List;
 import org.sakaiproject.discussionforums.api.model.Forum;
 import org.sakaiproject.discussionforums.api.model.ForumTopicDetails;
+import org.sakaiproject.discussionforums.api.model.ForumMessage;
 
 public interface DiscussionForumsService
 {
@@ -44,6 +45,14 @@ public interface DiscussionForumsService
 	public void deleteTopic(Integer topicId);
 	public List getTopicContent(Integer topicId);
 	public List getTopics(Integer forumId, String sortby, String sortorder);
+	public int getTopicCount(String topicName, Integer forumId);
+	
+	public void insertMessage(ForumMessage forumMessage);
+	public void deleteMessage(Integer messageId);
+	public List getMessageList(Integer topicId);
+	public ForumMessage getTopicPosting(Integer topicId);
+	public ForumMessage getMessageDetail(Integer messageId);
+	
 	
 	String getCurrentUserName();
 	

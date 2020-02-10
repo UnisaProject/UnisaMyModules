@@ -1,49 +1,106 @@
 ## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
 <div class="portletBody">
-#if($addForum)
+
 	#if($menu)
 		#toolbar($menu)
 	#end
-#end
-
-<div>
-	<h3>
-		$forumName
-	</h3>
-<div>
-
-<div class="instruction">
- $tlang.getString("forum.topic.information")
- $tlang.getString("forum.topicview.prompt")
-</div>
-
-<form name="ForumTopicsForm" action="#toolForm("DiscussionForumsAction")" method="post">
-	<table class ="listHier lines nolines" cellspacing="0" summary="$tlang.getString('gen.tablecaptionsite')">
-			<tr>
-				<th>$tlang.getString("forum.topic.label.topic")</th>
-				<th>$tlang.getString("forum.topic.label.replies")</th>
-				<th>$tlang.getString("forum.topic.label.author")</th>
-				<th>$tlang.getString("forum.topic.label.lastPost")</th>			
-			</tr>
-
-   #foreach ($topic in $forumTopics)
-      <tr>	
-		<td>
-		<a href="#toolLinkParam("DiscussionForumsAction" "showMessages" "topicId=$topic.topicId")">$topic.topicTitle</a>
-		<a href="#toolLinkParam("DiscussionForumsAction" "editTopic" "editTopic=false&topicId=$topic.topicId")"><img src="/sakai-discussionforums-tool/images/delete.gif" alt="Click to delete the topic"/></a>
-		<a href="#toolLinkParam("DiscussionForumsAction" "editTopic" "editTopic=true&topicId=$topic.topicId")"><img src="/sakai-discussionforums-tool/images/edit.gif" alt="Click to edit a topic"/></a>
-	    </td>
-		<td>$topic.replies</td>
-		<td></td>
-		<td>$topic.lastPostDate by $topic.lastPostUser</td>
-	  </tr>
 	
-   #end
-					
-	</table>
-	<p class="act">
-		<input type="submit" name="eventSubmit_doCancel" value=" $tlang.getString("button.backToForums") " accesskey="x"  />
-	</p>
-	<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
-</form>
+	<!-- Unisa Changes:2018/10/10: Add styling for table border used in sakai:flat_list tag -->
+	<!-- Style can be added in body according to this: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style#A_scoped_stylesheet -->
+	<style type="text/css">
+		table.listHier, tr, th, td{
+			border: none !important
+		}
+	</style>
+	<!-- End Unisa Changes -->
+
+	<div>
+		<h3>
+			#if ($forumName)
+				$forumName
+			#end
+		</h3>
+	</div>
+
+	#if ($t_numberOfItems=='0')
+		$tlang.getString("forum.topicsNotAvailable")
+	#else
+		<form name="ForumTopicsForm" action="#toolForm("DiscussionForumsAction")" method="post">
+			<div class="instruction">
+				$tlang.getString("forum.topic.information")
+				$tlang.getString("forum.topicview.prompt")
+			</div>
+			<table class ="listHier lines nolines" cellspacing="0">
+				<tr>
+					<td align="right">
+						$tlang.getString("label.view")
+						$t_start
+						$tlang.getString("label.hypen")
+						$t_end
+						$tlang.getString("label.of")
+						$t_numberOfItems
+						$tlang.getString("label.views")
+					</td>
+				</tr>
+				
+				<tr class="act">
+					<td align="right">
+						<input type="submit" name="eventSubmit_firstTopics" value=" $tlang.getString("button.first")" />
+						<input type="submit" name="eventSubmit_previousTopics" value=" $tlang.getString("button.previous")" />
+						<select name="records">
+							<option value="10">Show 10 items </option>			 
+							<option value="20">Show 20 items </option>				
+							<option value="30">Show 30 items </option>
+							<option value="50">Show 50 items </option>								
+						</select>
+						<input type="submit" name="eventSubmit_nextTopics" value=" $tlang.getString("button.next")" />
+						<input type="submit" name="eventSubmit_lastTopics" value=" $tlang.getString("button.last")" />			
+					</td>
+				</tr>
+			</table>
+			
+			<table class ="listHier lines nolines" cellspacing="0">
+				<tr>
+					<th>$tlang.getString("forum.topic.label.topic")</th>
+					<th>$tlang.getString("forum.topic.label.replies")</th>
+					<th>$tlang.getString("forum.topic.label.author")</th>
+					<th>$tlang.getString("forum.topic.label.lastPost")</th>
+					<td></td>
+				</tr>
+
+		   #foreach ($topic in $forumTopicForm.topics)
+			  <tr>	
+				<td>
+				<a href="#toolLinkParam("DiscussionForumsAction" "showMessages" "topicId=$topic.topicId&topicTitle=$topic.topicTitle&hidden=0&upload=no")">$topic.topicTitle</a>
+				#if ($deleteAnyTopic)
+					#if ($topic.topicTitle!='General Discussions')
+						<a href="#toolLinkParam("DiscussionForumsAction" "editTopic" "editTopic=false&topicId=$topic.topicId")"><img src="/sakai-discussionforums-tool/images/delete.gif" alt="Click to delete the topic"/></a>
+						<a href="#toolLinkParam("DiscussionForumsAction" "editTopic" "editTopic=true&topicId=$topic.topicId")"><img src="/sakai-discussionforums-tool/images/edit.gif" alt="Click to edit a topic"/></a>
+					#end
+				#end
+				#if (!$deleteAnyTopic)
+					#if ($topic.topicTitle!='General Discussions')
+						#if ($userID==$topic.userId)
+							<a href="#toolLinkParam("DiscussionForumsAction" "editTopic" "editTopic=false&topicId=$topic.topicId")"><img src="/sakai-discussionforums-tool/images/delete.gif" alt="Click to delete the topic"/></a>
+							<a href="#toolLinkParam("DiscussionForumsAction" "editTopic" "editTopic=true&topicId=$topic.topicId")"><img src="/sakai-discussionforums-tool/images/edit.gif" alt="Click to edit a topic"/></a>
+						#end
+					#end
+				#end
+				</td>
+				<td>$topic.replies</td>
+				<td>$topic.topicAuthor</td>
+				#if (!$topic.lastPostDate)
+					<td>No Posting</td>
+				#else
+					<td>$topic.lastPostDate by $topic.lastPostUser</td>
+				#end
+			  </tr>
+		   #end			
+			</table>
+			<p class="act">
+				<input type="submit" name="eventSubmit_doCancel" value=" $tlang.getString("button.backToForums") " accesskey="x"  />
+			</p>
+			<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+		</form>
+	#end
 </div>

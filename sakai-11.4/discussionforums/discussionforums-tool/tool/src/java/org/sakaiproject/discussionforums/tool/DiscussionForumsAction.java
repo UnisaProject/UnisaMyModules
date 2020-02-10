@@ -23,7 +23,17 @@ package org.sakaiproject.discussionforums.tool;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -53,8 +63,10 @@ import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.discussionforums.cover.DiscussionForumsService;
 import org.sakaiproject.discussionforums.api.model.Forum;
 import org.sakaiproject.discussionforums.api.model.ForumTopicDetails;
+import org.sakaiproject.discussionforums.api.model.ForumMessage;
 import org.sakaiproject.discussionforums.api.model.ForumDetailsForm;
 import org.sakaiproject.discussionforums.api.model.ForumTopicsForm;
+import org.sakaiproject.discussionforums.api.model.ForumMessageForm;
 import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.user.api.User;
@@ -77,9 +89,12 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 	private static ResourceLoader rb = new ResourceLoader("discussionforums");
 	protected static final String STATE_DISPLAY_MODE = "display_mode";
 	private EventTrackingService eventTrackingService = null;
-	
+	protected static final String uploadPath = "/data/sakai/content/discussionForums/";
 	ForumDetailsForm forumDetailsForm = new ForumDetailsForm();
 	ForumTopicsForm forumTopicForm = new ForumTopicsForm();
+	ForumMessageForm forumMessageForm = new ForumMessageForm();
+	
+	private int start;//start of the page to be viewed;
 
 	/**
 	 * Populate the state object, if needed.
@@ -106,7 +121,6 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 		String siteReference = "";
 		int pages = 0;
 		Integer pageNo;
-		boolean generalForumCreated = false;
 		String siteTitle="";
 		int generalForum = -1;
 		
@@ -174,53 +188,20 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 			forumDetailsForm.setSortOrder("Desc");
 		}
         
-		List siteForums = DiscussionForumsService.getForumList(forumDetailsForm.getForum().getSiteId(), forumDetailsForm.getSortBy(), forumDetailsForm.getSortOrder());
-		Iterator i = siteForums.iterator();
-		if(siteForums.isEmpty()) {
+		generalForum = DiscussionForumsService.getForumCount("General Subject Related Discussions", siteId);
+		
+		if(generalForum == 0)
+		{
+			System.out.println("The general forum count value:>>>> " + generalForum);
 			Forum forum = new Forum();
 			forum.setForumName("General Subject Related Discussions");
 			forum.setForumDescription("A forum on general discussion about the subject content");
 			forum.setSiteId(siteId);
 			forum.setUserId("admin");
-					
-			generalForum = DiscussionForumsService.getForumCount(forum.getForumName(),siteId);
-			
-			System.out.println("The inside general forum count value:>>>> " + generalForum);
-						
-			if(generalForum == 0)
-			{
-				DiscussionForumsService.insertForum(forum);
-				generalForumCreated = true;
-				//forums = forumDao.getForumList(forumDetailsForm.getForum().getSiteId(),forumDetailsForm.getSortBy(),forumDetailsForm.getSortOrder());
-				//if(forums.isEmpty()) {
-				//	logger.debug("Forum List is STILL empty after trying to insert default forum");
-				//}
-			}
-		} else {
-			while(i.hasNext()){
-				Forum fm = (Forum) i.next();
-				if (fm.getForumName().equalsIgnoreCase("General Subject Related Discussions")){
-					generalForumCreated = true;
-				}
-			}
-			
-			Forum forum = new Forum();
-			if (!generalForumCreated){
-				forum.setForumName("General Subject Related Discussions");
-				forum.setForumDescription("A forum on general discussion about the subject content");
-				forum.setSiteId(siteId);
-				forum.setUserId("admin");
-				
-				generalForum = DiscussionForumsService.getForumCount(forum.getForumName(),siteId);
-				
-				if(generalForum == 0){
-					DiscussionForumsService.insertForum(forum);
-					generalForumCreated = true;
-				}
-				
-				//forums = forumDao.getForumList(forumDetailsForm.getForum().getSiteId(),forumDetailsForm.getSortBy(),forumDetailsForm.getSortOrder());
-			}
+			DiscussionForumsService.insertForum(forum);
 		}
+		
+		List siteForums = DiscussionForumsService.getForumList(forumDetailsForm.getForum().getSiteId(), forumDetailsForm.getSortBy(), forumDetailsForm.getSortOrder());
 		
 		try {
 			totalPages = DiscussionForumsService.getForumsPerSiteCounter(siteId);
@@ -259,6 +240,8 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 				template = buildDisplayTopicMessagesModeContext(portlet, context, rundata, state);
 		} else if ("DELETE_MESSAGE".equals(state.getAttribute(STATE_DISPLAY_MODE))) {
 				template = buildDeleteMessageModeContext(portlet, context, rundata, state);
+		} else if ("ADD_ATTACHMENT".equals(state.getAttribute(STATE_DISPLAY_MODE))) {
+				template = buildMessageAttachmentModeContext(portlet, context, rundata, state);
 		} else {
 			template = buildDisplayForumsModeContext(portlet, context, rundata, state);
 		}
@@ -306,6 +289,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 	{
 		context.put("tlang", rb);
 	    buildMenu(context);
+		context.put("message", state.getAttribute("message"));
 	    return "_viewforums";
 	}
 	
@@ -458,13 +442,119 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 	public String buildDisplayForumTopicsModeContext(VelocityPortlet portlet, Context context, RunData rundata, SessionState state) 
 	{
 		context.put("tlang", rb);
+		context.put("forumName", state.getAttribute("forumName"));
+		
+		String siteReference = "";
+		Integer numberOfRecords;
+		int generalTopic = -1;
+		Integer forumId = Integer.parseInt(state.getAttribute("forumId").toString());
+		
+		try {
+			siteReference = SiteService.getSite(forumDetailsForm.getForum().getSiteId()).getReference();
+		} catch (IdUnusedException e) {
+			context.put("nopermission", rb.getString("discussionforums.permissionerror"));
+			return "_noaccess";
+		}
+		
+		context.put("addTopic", SecurityService.unlock("discuss.addtopic", siteReference));
+		context.put("deleteAnyTopic", SecurityService.unlock("discuss.deletetopic.any", siteReference));
+		
+		System.out.println("The addTopic to show:>>>> " + SecurityService.unlock("discuss.addtopic", siteReference));
+		System.out.println("The deleteAnyTopic to show:>>>> " + SecurityService.unlock("discuss.deletetopic.any", siteReference));
+		
+		forumTopicForm.setTopicAddable(SecurityService.unlock("discuss.addtopic", siteReference));
+		forumTopicForm.setTopicDeletable(SecurityService.unlock("discuss.deletetopic.any", siteReference));
+		forumTopicForm.getForumTopicDetails().setForumId(forumId);
+		forumTopicForm.setTopicForumName(state.getAttribute("forumName").toString());
+		
+		if (forumTopicForm.getSortBy() == null && forumTopicForm.getSortOrder() == null) {
+			forumTopicForm.setSortBy("Modification_Date");
+			forumTopicForm.setSortOrder("Asc");
+		}
+		
+		if (forumTopicForm.getSortIcon() == null) {
+			forumTopicForm.setSortIcon("0");
+		} else if (forumTopicForm.getSortIcon().equalsIgnoreCase("1")) {
+			forumTopicForm.setSortOrder("Asc");
+		} else if (forumTopicForm.getSortIcon().equalsIgnoreCase("2")) {
+			forumTopicForm.setSortOrder("Desc");
+		} else if (forumTopicForm.getSortIcon().equalsIgnoreCase("3")) {
+			forumTopicForm.setSortOrder("Asc");
+		} else if (forumTopicForm.getSortIcon().equalsIgnoreCase("4")) {
+			forumTopicForm.setSortOrder("Desc");
+		}
+		
+		if (forumTopicForm.getTopicForumName().equals("General Subject Related Discussions")) {
+		
+			generalTopic = DiscussionForumsService.getTopicCount("General Discussions", forumId);
+		
+			if (generalTopic == 0)
+			{
+				System.out.println("The general topic count value:>>>> " + generalTopic);
+				ForumTopicDetails forumTopicDetails = new ForumTopicDetails();
+				forumTopicDetails.setForumId(forumId);
+				forumTopicDetails.setTopicTitle("General Discussions");
+				forumTopicDetails.setTopicMessage("Welcome to the General Discussions topic. In this topic you can correspond with your fellow class members on any issues regarding this course. Use the Your Message box below to add your message to the list. If you want to start a totally new topic of discussion, use the Add New Topic link which you will find in the Topics List.");
+				forumTopicDetails.setTopicAuthor("admin");
+				forumTopicDetails.setSiteId(state.getAttribute("siteId").toString());		
+				DiscussionForumsService.insertTopic(forumTopicDetails);
+			}
+		
+		}
+		
+		String topicNavigateButton = state.getAttribute("topicNavigateButton").toString();
+		
+		if (topicNavigateButton.equals("false")) {
+			String records = rundata.getParameters().getString("records");
+			if (records == null) {
+				numberOfRecords = new Integer("10");
+			} else {
+				numberOfRecords = new Integer(records);
+			}
+			forumTopicForm.setRecords(numberOfRecords.toString());
+		
+			List forumTopics = DiscussionForumsService.getTopics(forumTopicForm.getForumTopicDetails().getForumId(), forumTopicForm.getSortBy(), forumTopicForm.getSortOrder());	
+						
+			forumTopicForm.setAllTopics(forumTopics);
+			forumTopicForm.setTopics(pager(0,numberOfRecords,forumTopics));
+			forumTopicForm.setNumberOfItems(forumTopics.size());
+			forumTopicForm.setStart(1);
+			forumTopicForm.setEnd(Math.min(numberOfRecords,forumTopicForm.getNumberOfItems()));
+			if (forumTopicForm.getNumberOfItems() < 1){
+				forumTopicForm.setStart(0);
+				forumTopicForm.setEnd(0);
+			}
+			context.put("forumTopicForm", forumTopicForm);
+			context.put("t_start", forumTopicForm.getStart());
+			context.put("t_end", forumTopicForm.getEnd());
+			context.put("t_numberOfItems", forumTopicForm.getNumberOfItems());
+			
+		} else {
+			numberOfRecords = Integer.parseInt(forumTopicForm.getRecords());
+			forumTopicForm.setRecords(numberOfRecords.toString());
+			List forumTopics = forumTopicForm.getAllTopics();
+			forumTopicForm.setTopics(pager(forumTopicForm.getStart(),numberOfRecords,forumTopics));
+			if (forumTopicForm.getNumberOfItems() < 1){
+				forumTopicForm.setStart(0);
+				forumTopicForm.setEnd(0);
+			}
+			context.put("forumTopicForm", forumTopicForm);
+			context.put("t_start", forumTopicForm.getStart());
+			context.put("t_end", forumTopicForm.getEnd());
+			context.put("t_numberOfItems", forumTopicForm.getNumberOfItems());
+		}
+		
 		// build the menu
 	    Menu bar = new MenuImpl();
-	    bar.add(new MenuEntry(rb.getString("forum.link.returnToForums"), "doCancel"));    
-	    bar.add(new MenuEntry(rb.getString("forum.link.createTopic"), "createTopic"));
+		if (forumTopicForm.isTopicAddable()) {
+			bar.add(new MenuEntry(rb.getString("forum.link.returnToForums"), "doCancel"));    
+			bar.add(new MenuEntry(rb.getString("forum.link.createTopic"), "createTopic"));
+		} else {
+			bar.add(new MenuEntry(rb.getString("forum.link.returnToForums"), "doCancel"));
+		}
 		context.put(Menu.CONTEXT_MENU, bar);
 	    context.put(Menu.CONTEXT_ACTION, "DiscussionForumsAction");
-		context.put("forumName", state.getAttribute("forumName"));
+		
 	    return "_viewtopics";
 	}
 	
@@ -501,12 +591,10 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 		String peid = ((JetspeedRunData) rundata).getJs_peid();
 		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
 		Integer forumId = Integer.parseInt(rundata.getParameters().getString("forumId").trim());
+		state.setAttribute("forumId", forumId);
 		state.setAttribute("forumName", rundata.getParameters().getString("forumName").trim());
-		state.setAttribute("forumTopics", DiscussionForumsService.getTopics(forumId, "ft.Creation_Date", "Asc"));
+		state.setAttribute("topicNavigateButton", "false");
 		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_TOPICS");
-		
-		forumTopicForm.getForumTopicDetails().setForumId(forumId);
-		
 	}
 	
 	public void createTopic(RunData data, Context context) 
@@ -558,8 +646,6 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 		
 		forumTopicForm.getForumTopicDetails().setTopicTitle(topicName);
 		forumTopicForm.getForumTopicDetails().setTopicMessage(topicMessage);
-		System.out.println("The saveTopic userID to show:>>>> " + forumDetailsForm.getForum().getUserId());
-		System.out.println("The saveTopic siteID to show:>>>> " + forumDetailsForm.getForum().getSiteId());
 		forumTopicForm.getForumTopicDetails().setTopicAuthor(forumDetailsForm.getForum().getUserId());
 		forumTopicForm.getForumTopicDetails().setSiteId(forumDetailsForm.getForum().getSiteId());
 		
@@ -619,6 +705,139 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 					eventTrackingService.newEvent("EventTrackingTypes.EVENT_DISCUSSIONFORUMS_DELETE_TOPIC", ToolManager.getCurrentPlacement().getContext()+" Topic id: "+topicId+" was deleted", false));
 	
 	}
+	
+	public void firstTopics(RunData data, Context context)
+	{
+		String peid = ((JetspeedRunData) data).getJs_peid();
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
+		
+		int numberOfRecords = new Integer(forumTopicForm.getRecords()).intValue();
+		List forumTopics = forumTopicForm.getAllTopics();
+				
+		forumTopicForm.setStart(1);
+		forumTopicForm.setTopics(pager(0,numberOfRecords,forumTopics));
+		forumTopicForm.setEnd(Math.min(numberOfRecords, forumTopicForm.getNumberOfItems()));
+		if (forumTopicForm.getNumberOfItems() < 1) {
+			forumTopicForm.setStart(0);
+		}
+		
+		state.setAttribute("topicNavigateButton", "true");
+		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_TOPICS");
+	}
+	
+	public void previousTopics(RunData data, Context context)
+	{
+		String peid = ((JetspeedRunData) data).getJs_peid();
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
+		
+		int start = forumTopicForm.getStart();
+		int numberOfRecords = new Integer(forumTopicForm.getRecords()).intValue();
+		List forumTopics = forumTopicForm.getAllTopics();
+		if ((start - numberOfRecords) <= 0){
+			forumTopicForm.setStart(1);
+			forumTopicForm.setTopics(pager(0,numberOfRecords,forumTopics));
+			forumTopicForm.setEnd(Math.min(numberOfRecords, forumTopicForm.getNumberOfItems()));
+		} else if ((start + numberOfRecords) < forumTopicForm.getNumberOfItems()){
+			int end = forumTopicForm.getStart() - 1;
+			start = forumTopicForm.getStart() - forumTopicForm.getNumberOfItems();
+			forumTopicForm.setTopics(pager(start,numberOfRecords,forumTopics));
+			forumTopicForm.setStart(start);
+			forumTopicForm.setEnd(Math.min(end , forumTopicForm.getNumberOfItems()));
+		} else {
+			int end = forumTopicForm.getStart() - 1;
+			start = forumTopicForm.getStart()- numberOfRecords;
+			forumTopicForm.setTopics(pager(start,numberOfRecords,forumTopics));
+			forumTopicForm.setStart(start);
+			forumTopicForm.setEnd(Math.min(end , forumTopicForm.getNumberOfItems()));
+		}
+		
+		if (forumTopicForm.getNumberOfItems() < 1){
+			forumTopicForm.setStart(0);
+		}
+		state.setAttribute("topicNavigateButton", "true");
+		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_TOPICS");
+	}
+	
+	public void nextTopics(RunData data, Context context)
+	{
+		String peid = ((JetspeedRunData) data).getJs_peid();
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
+		
+		int start = forumTopicForm.getStart();
+		int numberOfRecords = new Integer(forumTopicForm.getRecords()).intValue();
+		List forumTopics = forumTopicForm.getAllTopics();
+				
+		if (start+numberOfRecords > forumTopicForm.getNumberOfItems()){
+			forumTopicForm.setStart(start);
+			forumTopicForm.setTopics(pager(start,numberOfRecords,forumTopics));
+			forumTopicForm.setEnd(forumTopicForm.getNumberOfItems());
+		} else if ((start+numberOfRecords - 1) <= forumTopicForm.getNumberOfItems()){  
+			start = forumTopicForm.getEnd()+1;
+			int end = (start + numberOfRecords - 1);
+			forumTopicForm.setStart(start);
+			forumTopicForm.setTopics(pager(start, numberOfRecords,forumTopics));
+			end=Math.min(end,forumTopicForm.getNumberOfItems());
+			forumTopicForm.setEnd(end);
+		} else {
+			start = forumTopicForm.getEnd();
+			int end = start + numberOfRecords - 1;
+			forumTopicForm.setStart(start);
+			forumTopicForm.setTopics(pager(start, numberOfRecords,forumTopics));
+			end = Math.min(end,forumTopicForm.getNumberOfItems());
+			forumTopicForm.setEnd(end);
+		 }
+		
+		if ((forumTopicForm.getStart() + numberOfRecords - 1) == forumTopicForm.getNumberOfItems()){
+			start=forumTopicForm.getStart();
+			int end = forumTopicForm.getNumberOfItems();
+			end=Math.min(end,forumTopicForm.getNumberOfItems());
+			forumTopicForm.setEnd(end);
+			forumTopicForm.setTopics(forumTopics.subList(start-1, end));
+		}
+		
+		if (forumTopicForm.getNumberOfItems() < 1){
+			forumTopicForm.setStart(0);
+		}
+		
+		state.setAttribute("topicNavigateButton", "true");
+		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_TOPICS");
+	}
+	
+	public void lastTopics(RunData data, Context context)
+	{
+		String peid = ((JetspeedRunData) data).getJs_peid();
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
+		
+		int start = forumTopicForm.getStart();
+		int numberOfRecords = new Integer(forumTopicForm.getRecords()).intValue();
+		List forumTopics = forumTopicForm.getAllTopics();
+		
+		if (forumTopicForm.getNumberOfItems() == 0){
+			state.setAttribute(STATE_DISPLAY_MODE, "SHOW_TOPICS");
+			return;
+		}
+		
+		if ((forumTopicForm.getStart() + numberOfRecords-1) == forumTopicForm.getNumberOfItems()){
+			start = forumTopicForm.getStart();
+			int end = forumTopicForm.getNumberOfItems();
+			end = Math.min(end , forumTopicForm.getNumberOfItems());
+			forumTopicForm.setEnd(end);
+			forumTopicForm.setTopics(forumTopics.subList(start, end));
+		} else {
+			start = (1 + forumTopicForm.getNumberOfItems()) - (forumTopicForm.getNumberOfItems() % numberOfRecords);
+			forumTopicForm.setTopics(pager(start, numberOfRecords,forumTopics));
+			forumTopicForm.setStart(start);
+			forumTopicForm.setEnd(forumTopicForm.getNumberOfItems());
+		}
+		
+		if ((forumTopicForm.getStart()-1) == forumTopicForm.getNumberOfItems()){
+			start = forumTopicForm.getNumberOfItems() - numberOfRecords + 1;
+			forumTopicForm.setTopics(forumTopics.subList(start, forumTopicForm.getNumberOfItems()));
+			forumTopicForm.setStart(forumTopicForm.getNumberOfItems() - numberOfRecords + 1);
+		}
+		state.setAttribute("topicNavigateButton", "true");
+		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_TOPICS");
+	}
 	/////////////////// Topic Details End /////////////////////////////////
 	
 	/////////////////// Message Details Start/////////////////////////////////
@@ -632,7 +851,161 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 	    bar.add(new MenuEntry(rb.getString("forum.link.returnToTopics"), "doTopicCancel"));
 		context.put(Menu.CONTEXT_MENU, bar);
 	    context.put(Menu.CONTEXT_ACTION, "DiscussionForumsAction");
+		context.put("message", state.getAttribute("message"));
 		context.put("forumName", state.getAttribute("forumName"));
+		context.put("topicId", state.getAttribute("topicId"));
+		Integer topicId = Integer.parseInt(state.getAttribute("topicId").toString());
+		context.put("topicTitle", state.getAttribute("topicTitle"));
+		String topicTitle = state.getAttribute("topicTitle").toString();
+		context.put("hidden", state.getAttribute("hidden"));
+		context.put("upload", state.getAttribute("upload"));
+		ForumMessage forumMessage = new ForumMessage();
+		Vector messages = new Vector();
+		Integer numberOfRecords;
+		String siteReference = "";
+		int count = 0;
+		
+		if (forumMessageForm.getUpload().equals("upload")) {
+		
+			String attachFile = state.getAttribute("attachFile").toString();
+		
+			if (attachFile.equals("true"))
+			{
+				context.put("messageReply", state.getAttribute("messageReply"));
+				context.put("inputFileName", state.getAttribute("inputFileName"));
+				context.put("addressLink", state.getAttribute("addressLink"));
+			}
+			forumMessageForm.setFilename(forumMessageForm.getFilename());
+			
+		} else {
+			String clearAttach = state.getAttribute("clearAttach").toString();
+			if (clearAttach.equals("true"))
+			{
+				context.put("clearAttach", state.getAttribute("clearAttach"));
+				context.put("messageReply", state.getAttribute("messageReply"));
+			}
+			else
+			{
+				forumMessageForm.setFilename("");
+				state.setAttribute("messageReply", "");
+				state.setAttribute("inputFileName", "");
+				state.setAttribute("addressLink", "");
+			}
+		}
+		
+		try {
+			siteReference = SiteService.getSite(forumDetailsForm.getForum().getSiteId()).getReference();
+		} catch (IdUnusedException e) {
+			context.put("nopermission", rb.getString("discussionforums.permissionerror"));
+			return "_noaccess";
+		}
+		
+		context.put("addReply", SecurityService.unlock("discuss.addreply", siteReference));
+		context.put("deleteAnyReply", SecurityService.unlock("discuss.deletereply.any", siteReference));
+		
+		System.out.println("The addReply to show:>>>> " + SecurityService.unlock("discuss.addreply", siteReference));
+		System.out.println("The deleteAnyReply to show:>>>> " + SecurityService.unlock("discuss.deletereply.any", siteReference));
+		
+		forumMessageForm.setReplyAddable(SecurityService.unlock("discuss.addreply", siteReference));
+		forumMessageForm.setAnyReplyDeledable(SecurityService.unlock("discuss.deletereply.any", siteReference));
+		
+		forumMessageForm.getForumMessage().setTopicId(topicId);
+		
+		forumMessage = DiscussionForumsService.getTopicPosting(forumMessageForm.getForumMessage().getTopicId());
+		
+		if (forumMessage.getAuthor()== null){
+			forumMessage.setAuthor("Not Available");
+		}
+		if (forumMessage.getAuthor().equalsIgnoreCase("admin")){
+			forumMessage.setAuthor("MyUnisa Administrator");
+		} else if (forumMessage.getAuthor().equalsIgnoreCase("NotAvailable")) {
+			forumMessage.setAuthor("Not Available");
+		}
+		context.put("forumMessage", forumMessage);
+		forumMessageForm.setForumMessage(forumMessage);
+		forumMessageForm.setMessageTopic(topicTitle);
+		forumMessageForm.setForumId(state.getAttribute("forumId").toString());
+		forumMessageForm.setForumName(state.getAttribute("forumName").toString());
+		
+		String messageNavigateButton = state.getAttribute("messageNavigateButton").toString();
+		
+		if (messageNavigateButton.equals("false")) {		
+			String msgRecords = rundata.getParameters().getString("msgRecords");
+			System.out.println("The msgRecords to show:>>>> " + msgRecords);
+			if (msgRecords == null){
+				numberOfRecords = new Integer("10");
+			} else {
+				numberOfRecords = new Integer(msgRecords);
+			}
+			
+			forumMessageForm.setMsgRecords(numberOfRecords.toString());
+			System.out.println("The numberOfRecords to show:>>>> " + numberOfRecords);
+			
+			List topicMessages = DiscussionForumsService.getMessageList(topicId);
+			forumMessageForm.setallMessages(topicMessages);
+			forumMessageForm.setNumberOfItems(topicMessages.size());
+			forumMessageForm.setStart(1);
+			forumMessageForm.setTopicMessages(pager(0,numberOfRecords,topicMessages));
+			forumMessageForm.setEnd(Math.min(numberOfRecords.intValue(), new Integer(forumMessageForm.getNumberOfItems()).intValue()));
+			/* Iterator messageList = forumMessageForm.getTopicMessages().iterator();
+			while(messageList.hasNext()){
+				ForumMessage msg = (ForumMessage) messageList.next();
+				if (count % 2 == 0){
+					msg.setColoured("1");
+					context.put("coloured", msg.getColoured());
+				} else {
+					msg.setColoured("0");
+					context.put("coloured", msg.getColoured());
+				}
+				messages.addElement(msg);
+				count++;
+			}
+			forumMessageForm.setTopicMessages(messages);
+				
+			String hidden = state.getAttribute("hidden").toString();
+			if (hidden.equals("0")){
+				forumMessageForm.setHidden("0");
+			} */
+			
+			if (forumMessageForm.getNumberOfItems() < 1){
+				forumMessageForm.setStart(0);
+				forumMessageForm.setEnd(0);
+			}
+			context.put("forumMessageForm", forumMessageForm);
+			context.put("start", forumMessageForm.getStart());
+			context.put("end", forumMessageForm.getEnd());
+			context.put("numberOfItems", forumMessageForm.getNumberOfItems());
+		} else {
+			/* Iterator messageList = forumMessageForm.getTopicMessages().iterator();
+			while(messageList.hasNext()){
+				ForumMessage msg = (ForumMessage) messageList.next();
+				if (count % 2 == 0){
+					msg.setColoured("1");
+					context.put("coloured", msg.getColoured());
+				} else {
+					msg.setColoured("0");
+					context.put("coloured", msg.getColoured());
+				}
+				messages.addElement(msg);
+				count++;
+			}
+			forumMessageForm.setTopicMessages(messages); */
+				
+			/* String hidden = state.getAttribute("hidden").toString();
+			if (hidden.equals("0")){
+				forumMessageForm.setHidden("0");
+			} */
+			
+			if (forumMessageForm.getNumberOfItems() < 1){
+				forumMessageForm.setStart(0);
+				forumMessageForm.setEnd(0);
+			}
+			context.put("forumMessageForm", forumMessageForm);
+			context.put("start", forumMessageForm.getStart());
+			context.put("end", forumMessageForm.getEnd());
+			context.put("numberOfItems", forumMessageForm.getNumberOfItems());
+		}
+		
 	    return "_viewmessages";
 	}
 	
@@ -640,39 +1013,653 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 	public String buildDeleteMessageModeContext(VelocityPortlet portlet, Context context, RunData rundata, SessionState state) 
 	{
 		context.put("tlang", rb);
-		//context.put("forum", state.getAttribute("forumList"));
-		//context.put("message", state.getAttribute("message"));
-	    context.put("systemDate", new Timestamp(new Date().getTime()));
+		context.put("message", state.getAttribute("message"));
+		context.put("forumMessage", state.getAttribute("forumMessage"));
 	    return "_deletemessage";
+	}
+	
+	/** build the context for message attachment */
+	public String buildMessageAttachmentModeContext(VelocityPortlet portlet, Context context, RunData rundata, SessionState state) 
+	{
+		context.put("tlang", rb);
+		context.put("message", state.getAttribute("message"));
+	    return "_addattachment";
 	}
 	
 	public void showMessages(RunData rundata, Context context) {
 		String peid = ((JetspeedRunData) rundata).getJs_peid();
 		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
-		Integer forumId = Integer.parseInt(rundata.getParameters().getString("forumId").trim());
-		state.setAttribute("forumName", rundata.getParameters().getString("forumName").trim());
-		state.setAttribute("forumTopics", DiscussionForumsService.getTopics(forumId, "ft.Creation_Date", "Asc"));
+		Integer topicId = Integer.parseInt(rundata.getParameters().getString("topicId").trim());
+		state.setAttribute("topicId", topicId);
+		state.setAttribute("topicTitle", rundata.getParameters().getString("topicTitle").trim());
+		forumMessageForm.setHidden(rundata.getParameters().getString("hidden").trim());
+		state.setAttribute("hidden", forumMessageForm.getHidden());
+		forumMessageForm.setUpload(rundata.getParameters().getString("upload").trim());
+		state.setAttribute("upload", forumMessageForm.getUpload());
+		state.setAttribute("clearAttach", "false");
+		
+		if (forumMessageForm.getUpload().equalsIgnoreCase("no")){
+			forumMessageForm.setFilename("");
+			forumMessageForm.setAddressLink("");
+			forumMessageForm.getForumMessage().setAttachment("");
+		}
+		state.setAttribute("messageNavigateButton", "false");
 		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_MESSAGES");
 	}
+	
+	public void saveMessage(RunData data, Context context)
+	{
+		String peid = ((JetspeedRunData) data).getJs_peid();
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
+		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_MESSAGES");
+		Integer topicId = Integer.parseInt(data.getParameters().getString("topicId").trim());
+		String messageReply = data.getParameters().getString("messageReply").trim();
+		String attachment = "";
+				
+		forumMessageForm.setTopicId(topicId);
+		forumMessageForm.getForumMessage().setTopicId(forumMessageForm.getTopicId());
+				
+		forumMessageForm.setForumId(state.getAttribute("forumId").toString());
+		forumMessageForm.getForumMessage().setForumId(forumMessageForm.getForumId());
 		
+		if (messageReply == null || messageReply.length() < 1) {
+			addAlert(state, rb.getString("message.alert.nomessagereply"));
+			state.setAttribute("message", "emptyAddMessageReply");
+			state.setAttribute(STATE_DISPLAY_MODE, "SHOW_MESSAGES");
+			return;
+		}
+		forumMessageForm.getForumMessage().setMessageReply(messageReply);
+		boolean test =false;
+		boolean test1 =false;
+		boolean test2 =false;
+		boolean test3 =false;
+		boolean test4 =false;
+		boolean test5 =false;
+		CharSequence s ="width:100%;height:100%";
+		CharSequence s1="width: 100%; bottom: 0px; height: 100%";
+		CharSequence s2 ="height:100%";
+		CharSequence s3 ="height: 100%";
+		CharSequence s4 ="width:100%";
+		CharSequence s5 ="width: 100%";
+		test = messageReply.contains(s);
+		test1 = messageReply.contains(s1);
+		test2 = messageReply.contains(s2);
+		test3 = messageReply.contains(s3);
+		test4 = messageReply.contains(s4);
+		test5 = messageReply.contains(s5);
+		
+		if(test==true||test1==true||test2==true||test3==true||test4==true||test5==true){
+			addAlert(state, rb.getString("message.alert.incorrectWidth"));
+			state.setAttribute("message", "incorrectWidthMessageReply");
+			state.setAttribute(STATE_DISPLAY_MODE, "SHOW_MESSAGES");
+			return;
+		}
+		
+		if (forumMessageForm.getUpload().equals("upload")){
+			if (!forumMessageForm.getFilename().equals("")){
+				attachment = state.getAttribute("siteId").toString()+"/"+forumMessageForm.getTopicId()+"/"+forumMessageForm.getFilename();
+				forumMessageForm.getForumMessage().setAttachment(attachment);
+				forumMessageForm.getForumMessage().setFileType("F");
+			} else {
+				if (!forumMessageForm.getAddressLink().equals("")){
+					forumMessageForm.getForumMessage().setAttachment(forumMessageForm.getAddressLink().toLowerCase());
+					forumMessageForm.getForumMessage().setFileType("L");
+				}
+			}
+		}
+		else
+		{
+			forumMessageForm.getForumMessage().setAttachment(" ");
+			forumMessageForm.getForumMessage().setFileType(" ");
+		}
+		
+		forumMessageForm.getForumMessage().setAuthor(state.getAttribute("userID").toString());
+		if(isInteger(forumMessageForm.getForumMessage().getAuthor())){
+			forumMessageForm.getForumMessage().setUserType("S");
+		} else {
+			forumMessageForm.getForumMessage().setUserType("L");
+		}
+		
+		//if topic id is zero
+		if(forumMessageForm.getTopicId() == null||forumMessageForm.getTopicId().equals(0)){
+			addAlert(state, rb.getString("message.alert.zeroTopicId"));
+			state.setAttribute("message", "zeroTopicId");
+			state.setAttribute(STATE_DISPLAY_MODE, "SHOW_MESSAGES");
+			return;
+		}
+		
+		//save message to db
+		DiscussionForumsService.insertMessage(forumMessageForm.getForumMessage());
+		
+		forumMessageForm.getForumMessage().setMessageReply("");
+		if (eventTrackingService == null) {
+			eventTrackingService = (EventTrackingService) ComponentManager
+					.get("org.sakaiproject.event.api.EventTrackingService");
+		}
+		eventTrackingService.post(
+					eventTrackingService.newEvent("EventTrackingTypes.EVENT_DISCUSSIONFORUMS_ADD_REPLY", ToolManager.getCurrentPlacement().getContext()+" Message id: "+forumMessageForm.getForumMessage().getMessageId()+" was added", false));
+		forumMessageForm.setHidden("0");
+		forumMessageForm.setUpload("no");
+		forumMessageForm.setAddressLink("");
+		//forumMessageForm.setTheFile(null);
+		forumMessageForm.setCancel("no");
+		state.setAttribute("clearAttach", "false");
+	}
+	
 	public void confirmDeleteMessage(RunData rundata, Context context) {
 		String peid = ((JetspeedRunData) rundata).getJs_peid();
 		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
-		Integer topicId = Integer.parseInt(rundata.getParameters().getString("topicId").trim());
-		Boolean editTopic =  Boolean.parseBoolean(rundata.getParameters().getString("editTopic").trim());
-		//state.setAttribute("topicList", DiscussionForumsService.getForumContent(topicId));
-		state.setAttribute(STATE_DISPLAY_MODE, "DELETE_MESSAGE");
-	}
-		
-	public void saveMessage(RunData data, Context context)
-	{
-	
+		ForumMessage forumMessage = new ForumMessage();
+		Integer messageId = Integer.parseInt(rundata.getParameters().getString("messageId").trim());
+		forumMessage = DiscussionForumsService.getMessageDetail(messageId);	
+		state.setAttribute("forumMessage", forumMessage);
+		String loginUser = state.getAttribute("userID").toString();
+		System.out.println("The confirmDeleteMessage loginUser value to show:>>>> " + loginUser);
+		String userCreatedMessage = forumMessage.getUserId();
+		System.out.println("The confirmDeleteMessage userCreatedMessage value to show:>>>> " + userCreatedMessage);
+		System.out.println("The confirmDeleteMessage forumMessageForm.isAnyReplyDeledable() value to show:>>>> " + forumMessageForm.isAnyReplyDeledable());
+		if (forumMessageForm.isAnyReplyDeledable()) {
+			addAlert(state, rb.getString("message.alert.confirmdeletemessage"));
+			state.setAttribute("message", "deleteMessage");
+			forumMessageForm.setForumMessage(forumMessage);
+			state.setAttribute(STATE_DISPLAY_MODE, "DELETE_MESSAGE");
+		} else {
+			if (loginUser.equals(userCreatedMessage)) {
+				addAlert(state, rb.getString("message.alert.confirmdeletemessage"));
+				state.setAttribute("message", "deleteMessage");
+				forumMessageForm.setForumMessage(forumMessage);
+				state.setAttribute(STATE_DISPLAY_MODE, "DELETE_MESSAGE");
+			} else {
+				addAlert(state, rb.getString("message.alert.forbiddendeletemessage"));
+				state.setAttribute("message", "forbiddendeletemessage");
+				state.setAttribute(STATE_DISPLAY_MODE, null);
+			}
+		}
 	}
 	
 	public void deleteMessage(RunData data, Context context) 
 	{
-	
+		String peid = ((JetspeedRunData) data).getJs_peid();
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
+		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_MESSAGES");
+		Integer messageId = Integer.parseInt(data.getParameters().getString("messageId").trim());
+		String attach="";
+		
+		// delete message
+		DiscussionForumsService.deleteMessage(messageId);
+				
+		if (forumMessageForm.getForumMessage().getFileType().equals("F"))
+		{
+			String currentDir = forumMessageForm.getForumMessage().getAttachment().substring(0, forumMessageForm.getForumMessage().getAttachment().lastIndexOf("/")-1);
+			attach = uploadPath+forumMessageForm.getForumMessage().getAttachment();
+			
+			File file = new File(attach);
+			if (file.exists()){
+				file.delete();
+			}
+			File listDir = new File(uploadPath+currentDir);
+			if (listDir.isDirectory()){
+				if (listDir.listFiles().length < 1){
+					listDir.delete();
+				}
+			}
+		}
+		
+		if (eventTrackingService == null) {
+			eventTrackingService = (EventTrackingService) ComponentManager
+					.get("org.sakaiproject.event.api.EventTrackingService");
+		}
+		eventTrackingService.post(
+					eventTrackingService.newEvent("EventTrackingTypes.EVENT_DISCUSSIONFORUMS_DELETE_REPLY", ToolManager.getCurrentPlacement().getContext()+" Message id: "+messageId+" was deleted", false));
+		
+		forumMessageForm.getForumMessage().setMessageReply("");
+		forumMessageForm.setHidden("0");
 	}
+	
+	public void doMessageCancel(RunData data, Context context) 
+	{
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
+		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_MESSAGES");
+	}
+	
+	public void addAttachment(RunData rundata, Context context) {
+		String peid = ((JetspeedRunData) rundata).getJs_peid();
+		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);		
+		String messageReply = rundata.getParameters().getString("messageReply").trim();
+		state.setAttribute("messageReply", messageReply);
+		state.setAttribute(STATE_DISPLAY_MODE, "ADD_ATTACHMENT");
+	}
+	
+	public void attachFile(RunData rundata, Context context) {
+		String peid = ((JetspeedRunData) rundata).getJs_peid();
+		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
+		
+		String readFile = "";
+		String writeFile = "";
+		FileInputStream buffIn = null;
+		FileOutputStream buffout = null;
+		String fileDir;
+		
+		String upload = rundata.getParameters().getString("upload").trim();	
+		Integer topicId = Integer.parseInt(rundata.getParameters().getString("topicId").trim());
+		//String inputFileName = rundata.getParameters().getString("theFile").trim();
+		String addressLink = rundata.getParameters().getString("addressLink").trim();
+		
+		String fullFileName = "C:\\Users\\mphahsm\\Desktop\\EFT Refund Form on Letterhead.doc";
+		String inputFileName = "EFT Refund Form on Letterhead.doc";
+		
+		System.out.println("The topicId from attachFile value to show:>>>> " + topicId);
+		System.out.println("The inputFileName from attachFile value to show:>>>> " + inputFileName);
+		
+		if ((inputFileName == null || inputFileName.length() < 1) && (addressLink == null || addressLink.length() < 1))  {
+			addAlert(state, rb.getString("message.alert.noattachment"));
+			state.setAttribute("message", "emptyAddAttachment");
+			state.setAttribute(STATE_DISPLAY_MODE, "ADD_ATTACHMENT");
+			return;
+		} else if ((inputFileName.length() > 1) && (addressLink.length() > 1))  {
+			addAlert(state, rb.getString("message.alert.bothattachment"));
+			state.setAttribute("message", "bothAddAttachment");
+			state.setAttribute(STATE_DISPLAY_MODE, "ADD_ATTACHMENT");
+			return;
+		}
+		
+		forumMessageForm.setUpload(upload);
+		state.setAttribute("upload", forumMessageForm.getUpload());
+		
+		forumMessageForm.setTopicId(topicId);
+		forumMessageForm.getForumMessage().setTopicId(forumMessageForm.getTopicId());
+		state.setAttribute("topicId", topicId);
+		
+		state.setAttribute("attachFile", "true");
+		
+		String extensions = "exe,zip,avi";
+		String[] extList = extensions.split(",");
+				
+		if (inputFileName.length() > 0)  {
+		
+			boolean notAllowed = false;
+			forumMessageForm.setFilename(inputFileName);
+			File testSize = new File(fullFileName);
+			for(int i=0; i < extList.length; i++){
+				if (inputFileName.substring(inputFileName.lastIndexOf(".")+1).equalsIgnoreCase(extList[i])){
+					notAllowed = true;
+				}
+			}
+			
+			System.out.println("The notAllowed from attacFile value to show:>>>> " + notAllowed);
+			
+			if (notAllowed){
+				addAlert(state, rb.getString("message.alert.wrongfileformat"));
+				state.setAttribute("message", "wrongfileformat");
+				state.setAttribute(STATE_DISPLAY_MODE, "ADD_ATTACHMENT");
+				return;
+			}
+			
+			System.out.println("The file size from attacFile value to show:>>>> " + testSize.length());
+			
+			if (testSize.length() > 6291456){
+				addAlert(state, rb.getString("message.alert.bigfile"));
+				state.setAttribute("message", "bigfile");
+				state.setAttribute(STATE_DISPLAY_MODE, "ADD_ATTACHMENT");
+				return;
+			} else {
+				try {
+					buffIn = new FileInputStream(fullFileName);
+					System.out.println("The buffIn from attacFile value to show:>>>> " + buffIn);
+					fileDir = uploadPath+state.getAttribute("siteId").toString()+"/"+forumMessageForm.getTopicId()+"/";
+					System.out.println("The fileDir from attacFile value to show:>>>> " + fileDir);
+					File file = new File(fileDir);
+					if (!file.exists()){
+						file.mkdirs();
+					}
+					buffout = new FileOutputStream(fileDir+inputFileName);
+					System.out.println("The buffout from attacFile value to show:>>>> " + buffout);
+					boolean eof = false;
+					while(!eof){
+						int line = buffIn.read();
+						if (line == -1){
+							eof  = true;
+						} else {
+							buffout.write(line);
+						}
+					}
+					state.setAttribute("inputFileName", inputFileName);
+					buffIn.close();
+					buffout.close();
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (NullPointerException ne) {						
+					ne.printStackTrace();						
+				} catch (IOException ioe){
+					ioe.printStackTrace();
+				} finally {
+					try{
+						if (buffIn != null){
+							buffIn.close();
+							buffout.close();
+						}
+					} catch(IOException ie){
+						ie.printStackTrace();
+					}catch(NullPointerException ne){
+						ne.printStackTrace();
+					}
+				}
+			}
+		
+		} else if (addressLink.length() > 0) {
+		
+			if (!addressLink.startsWith("http://")){	
+				forumMessageForm.setAddressLink("");
+				addAlert(state, rb.getString("message.alert.wrongURL"));
+				state.setAttribute("message", "wrongURL");
+				state.setAttribute(STATE_DISPLAY_MODE, "ADD_ATTACHMENT");
+				return;
+			} else {
+				forumMessageForm.setAddressLink(addressLink);
+				state.setAttribute("addressLink", addressLink);
+			}
+			
+		}
+		forumMessageForm.setHidden("0");
+		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_MESSAGES");
+	}
+	
+	public void clearAttachment(RunData rundata, Context context) 
+	{
+		String peid = ((JetspeedRunData) rundata).getJs_peid();
+		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
+		String clearAttach = rundata.getParameters().getString("fname").trim();
+		if (!(clearAttach.equals("clearUrl"))){
+			String fileName = uploadPath+state.getAttribute("siteId").toString()+"/"+state.getAttribute("topicId").toString()+"/"+clearAttach;
+			File file = new File(fileName);
+			if (file.exists()){
+				file.delete();
+			}
+			state.setAttribute("inputFileName", "");
+		} else {
+			forumMessageForm.setAddressLink("");
+			state.setAttribute("addressLink", "");
+		}
+		forumMessageForm.setUpload("no");
+		state.setAttribute("upload", forumMessageForm.getUpload());
+		state.setAttribute("clearAttach", "true");
+		forumMessageForm.setFilename("");
+		
+		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_MESSAGES");
+	}
+	
+	public void readAttachment(RunData rundata, Context context) 
+	{
+		String peid = ((JetspeedRunData) rundata).getJs_peid();
+		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
+		//ServletContext application;
+		DataInputStream in = null;
+		ServletOutputStream sos = null;
+		
+		HttpServletRequest req = rundata.getRequest();
+		System.out.println("The request from readAttachment value to show:>>>> " + req);
+		//String type = null;			
+		//String fileDir = null;
+		//String fileName = null;
+		
+		String attachment = rundata.getParameters().getString("attachment");
+		String type = attachment.substring(attachment.lastIndexOf(".")+1);
+		String fileName = attachment.substring(attachment.lastIndexOf("/")+1);
+		
+		/* BufferedInputStream in = null;
+		FileOutputStream fileOutputStream = null;
+		try {
+			in = new BufferedInputStream(new FileInputStream(uploadPath+attachment));
+			fileOutputStream = new FileOutputStream(fileName);
+
+			final byte dataBuffer[] = new byte[1024];
+			int bytesRead;
+			while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+				fileOutputStream.write(dataBuffer, 0, bytesRead);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try
+			{
+				if (in != null) {
+					in.close();
+				}
+				if (fileOutputStream != null) {
+					fileOutputStream.close();
+				}
+			}
+			catch (IOException ie) {
+				ie.printStackTrace();
+			}
+		} */
+		
+		//fileDir = getServlet().getServletContext().getInitParameter("forumFullPath")+"/";
+		//type = request.getParameter("attachment").substring(request.getParameter("attachment").lastIndexOf(".")+1);
+		//fileName = request.getParameter("attachment").substring(request.getParameter("attachment").lastIndexOf("/")+1);
+		
+		/* try 
+		{
+			in = new DataInputStream(new FileInputStream(new File(uploadPath+attachment)));
+			sos = response.getOutputStream();
+		} 
+		catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} */
+		
+		/* Added by mphahsm on 2016/05 to handle any file content type and download file instead of opening it inline*/
+		//response.setContentType("application/octet-stream");
+		//response.addHeader("content-disposition", "attachment; filename="+fileName); 
+		/* End of mphahsm Add*/
+		
+		/* int w;
+		try {
+			w = in.read();
+			while (w != -1) {
+				sos.write(w);
+				w = in.read();
+			}
+			sos.flush();
+			sos.close();
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} */
+		
+	}
+	
+	public void firstMessages(RunData data, Context context)
+	{
+		String peid = ((JetspeedRunData) data).getJs_peid();
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
+		
+		forumMessageForm.getForumMessage().setForumId(forumMessageForm.getForumId());
+				
+		int numberOfRecords = new Integer(forumMessageForm.getMsgRecords()).intValue();
+		List forumMessages = forumMessageForm.getAllMessages();
+				
+		forumMessageForm.setStart(1);
+		forumMessageForm.setTopicMessages(pager(0,numberOfRecords,forumMessages));
+		forumMessageForm.setEnd(Math.min(numberOfRecords, forumMessageForm.getNumberOfItems()));
+		if (forumMessageForm.getNumberOfItems() < 1){
+			forumMessageForm.setStart(0);
+		}
+		state.setAttribute("messageNavigateButton", "true");
+		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_MESSAGES");
+	}
+	
+	public void previousMessages(RunData data, Context context)
+	{
+		String peid = ((JetspeedRunData) data).getJs_peid();
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
+		
+		forumMessageForm.getForumMessage().setForumId(forumMessageForm.getForumId());
+		
+		int start = forumMessageForm.getStart();
+		int numberOfRecords = new Integer(forumMessageForm.getMsgRecords()).intValue();
+		List forumMessages = forumMessageForm.getAllMessages();
+		if ((start - numberOfRecords) <= 0){
+			forumMessageForm.setStart(1);
+			forumMessageForm.setTopicMessages(pager(0,numberOfRecords,forumMessages));
+			forumMessageForm.setEnd(Math.min(numberOfRecords, forumMessageForm.getNumberOfItems()));
+		} else if ((start + numberOfRecords) < forumMessageForm.getNumberOfItems()){
+			int end = forumMessageForm.getStart() - 1;
+			start = forumMessageForm.getStart() - numberOfRecords;
+			forumMessageForm.setTopicMessages(pager(start,numberOfRecords,forumMessages));
+			forumMessageForm.setStart(start);
+			forumMessageForm.setEnd(Math.min(end , forumMessageForm.getNumberOfItems()));
+		} else {
+			int end = forumMessageForm.getStart() - 1;
+			start = forumMessageForm.getStart()- numberOfRecords;
+			forumMessageForm.setTopicMessages(pager(start,numberOfRecords,forumMessages));
+			forumMessageForm.setStart(start);
+			forumMessageForm.setEnd(Math.min(end , forumMessageForm.getNumberOfItems()));
+		}
+		
+		if (forumMessageForm.getNumberOfItems() < 1){
+			forumMessageForm.setStart(0);
+		}
+		
+		state.setAttribute("messageNavigateButton", "true");
+		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_MESSAGES");
+	}
+	
+	public void nextMessages(RunData data, Context context)
+	{
+		String peid = ((JetspeedRunData) data).getJs_peid();
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
+		
+		forumMessageForm.getForumMessage().setForumId(forumMessageForm.getForumId());
+				
+		int start = forumMessageForm.getStart();
+		int numberOfRecords = new Integer(forumMessageForm.getMsgRecords()).intValue();
+		List forumMessages = forumMessageForm.getAllMessages();
+				
+		if (start+numberOfRecords > forumMessageForm.getNumberOfItems()){
+			forumMessageForm.setStart(start);
+			forumMessageForm.setTopicMessages(pager(start,numberOfRecords,forumMessages));
+			forumMessageForm.setEnd(forumMessageForm.getNumberOfItems());
+		} else if ((start+numberOfRecords - 1) <= forumMessageForm.getNumberOfItems()){  
+			start = forumMessageForm.getEnd()+1;
+			int end = (start + numberOfRecords - 1);
+			forumMessageForm.setStart(start);
+			forumMessageForm.setTopicMessages(pager(start, numberOfRecords,forumMessages));
+			end=Math.min(end,forumMessageForm.getNumberOfItems());
+			forumMessageForm.setEnd(end);
+		} else {
+			start = forumMessageForm.getEnd();
+			int end = start + numberOfRecords - 1;
+			forumMessageForm.setStart(start);
+			forumMessageForm.setTopicMessages(pager(start, numberOfRecords,forumMessages));
+			end = Math.min(end,forumMessageForm.getNumberOfItems());
+			forumMessageForm.setEnd(end);
+		 }
+		
+		if ((forumMessageForm.getStart() + numberOfRecords - 1) == forumMessageForm.getNumberOfItems()){
+			start=forumMessageForm.getStart();
+			int end = forumMessageForm.getNumberOfItems();
+			end=Math.min(end,forumMessageForm.getNumberOfItems());
+			forumMessageForm.setEnd(end);
+			forumMessageForm.setTopicMessages(forumMessages.subList(start, end));
+		}
+		
+		if (forumMessageForm.getNumberOfItems() < 1){
+			forumMessageForm.setStart(0);
+		}
+		
+		state.setAttribute("messageNavigateButton", "true");
+		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_MESSAGES");
+	}
+	
+	public void lastMessages(RunData data, Context context)
+	{
+		String peid = ((JetspeedRunData) data).getJs_peid();
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(peid);
+		
+		forumMessageForm.getForumMessage().setForumId(forumMessageForm.getForumId());
+		
+		int start = forumMessageForm.getStart();
+		int numberOfRecords = new Integer(forumMessageForm.getMsgRecords()).intValue();
+		List forumMessages = forumMessageForm.getAllMessages();
+		
+		if (forumMessageForm.getNumberOfItems() == 0){
+			state.setAttribute(STATE_DISPLAY_MODE, "SHOW_MESSAGES");
+			return;
+		}
+		
+		if ((forumMessageForm.getStart() + numberOfRecords-1) == forumMessageForm.getNumberOfItems()){
+			start = forumMessageForm.getStart();
+			int end = forumMessageForm.getNumberOfItems();
+			end = Math.min(end , forumMessageForm.getNumberOfItems());
+			forumMessageForm.setEnd(end);
+			forumMessageForm.setTopicMessages(forumMessages.subList(start, end));
+		} else {
+			start = (1 + forumMessageForm.getNumberOfItems()) - (forumMessageForm.getNumberOfItems() % numberOfRecords);
+			forumMessageForm.setTopicMessages(pager(start, numberOfRecords,forumMessages));
+			forumMessageForm.setStart(start);
+			forumMessageForm.setEnd(forumMessageForm.getNumberOfItems());
+		}
+		
+		if ((forumMessageForm.getStart()-1) == forumMessageForm.getNumberOfItems()){
+			start = forumMessageForm.getNumberOfItems() - numberOfRecords + 1;
+			forumMessageForm.setTopicMessages(forumMessages.subList(start, forumMessageForm.getNumberOfItems()));
+			forumMessageForm.setStart(forumMessageForm.getNumberOfItems() - numberOfRecords + 1);
+		}
+		
+		state.setAttribute("messageNavigateButton", "true");
+		state.setAttribute(STATE_DISPLAY_MODE, "SHOW_MESSAGES");
+	}
+	
 	/////////////////// Message Details End /////////////////////////////////
+	
+	private List pager(int start,int records,List listofItems)
+	{
+		int end = start+records;
+		int listSize=0;
+		try{
+		 listSize = listofItems.size();
+		} catch(NullPointerException ne){}
+		if (start<0){
+			start=1;
+		}
+		if (listSize == 0){
+			start=0;
+			return listofItems;
+		} else if (listSize <=records){
+			start = 0;
+			listofItems = listofItems.subList(start,listSize);
+			end=listSize;
+		} else {
+			if(listSize > records){ 
+				if (start+records <= listSize){
+					if (start==0)
+					{
+						start=1;
+					}
+			        listofItems=listofItems.subList(start-1,start+records-1);
+			        end =start+records-1;
+				} else if( start+records > listSize){
+					start =listSize - (listSize%records);
+					listofItems=listofItems.subList(start,listSize);
+					end=listSize;
+				}
+			}
+		}
+		this.start = start;
+		return listofItems;
+	}		
+	
+	private boolean isInteger(String i)
+	{
+		try{
+			Integer.parseInt(i);
+			return true;
+		}catch(NumberFormatException nfe)
+		{
+			return false;
+		}
+	}
 
 } //DiscussionForumsAction

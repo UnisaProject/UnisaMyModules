@@ -36,6 +36,10 @@ import org.slf4j.LoggerFactory;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.discussionforums.api.model.Forum;
 import org.sakaiproject.discussionforums.api.model.ForumTopicDetails;
+import org.sakaiproject.discussionforums.api.model.ForumMessage;
+import org.sakaiproject.user.api.User;
+import org.sakaiproject.user.api.UserNotDefinedException;
+import org.sakaiproject.user.cover.UserDirectoryService;
 
 
 public class DbDiscussionForumsService extends BaseDiscussionForumsService {
@@ -77,14 +81,26 @@ public class DbDiscussionForumsService extends BaseDiscussionForumsService {
 			List results = new ArrayList();
 			Connection dbConnection = null;
 			ResultSet rs = null;
+			sortby = "uf." + sortby;
 			try {
 				dbConnection = m_sqlService.borrowConnection();
 
-				String statement = "select Forum_Id,Forum_Name,Description,User_Id,DATE_FORMAT(Creation_Date,'%Y-%m-%d %H:%i') as Creation_Date, "
+				/* String statement = "select Forum_Id,Forum_Name,Description,User_Id,DATE_FORMAT(Creation_Date,'%Y-%m-%d %H:%i') as Creation_Date, "
 						+ "Site_Id,DATE_FORMAT(Last_Post_Date,'%Y-%m-%d %H:%i') as Last_Post_Date,ifnull(Last_Post_User,'') as Last_Post_User "
 						+ "from UFORUM_FORUM where SITE_ID = ? "
 						+ "and Hide_Status = 'N' "
-						+ " order by upper("+sortby+") "+sortorder;
+						+ " order by upper("+sortby+") "+sortorder; */
+				
+				String statement = "select uf.Forum_Id,Forum_Name,Description,User_Id,DATE_FORMAT(uf.Creation_Date,'%Y-%m-%d %H:%i') as Creation_Date, "
+						+ "Site_Id,DATE_FORMAT(uf.Last_Post_Date,'%Y-%m-%d %H:%i') as Last_Post_Date,ifnull(uf.Last_Post_User,'') as Last_Post_User, "
+						+ "(select count(Topic_Id) from uforum_topic where forum_id = uf.forum_id and Hide_Status = 'N') topicsCount, "
+						+ "(select count(Message_Id) from uforum_topic ft, uforum_message fm where ft.topic_id = fm.topic_id and ft.forum_id = uf.forum_id and ft.Hide_Status = 'N' and fm.first_topic_msg = 'N') forumPosts "
+						+ "from UFORUM_FORUM AS uf LEFT JOIN UFORUM_TOPIC AS ut "
+						+ "on uf.Forum_Id = ut.Forum_Id "
+						+ "where SITE_ID = ? "
+						+ "and uf.Hide_Status = 'N' "
+						+ "group by uf.Forum_Id "
+						+ "order by upper("+sortby+") "+sortorder;
 				PreparedStatement pstmt = dbConnection.prepareStatement(statement);
 				pstmt.setString(1, siteId);
 				rs = pstmt.executeQuery();
@@ -101,6 +117,8 @@ public class DbDiscussionForumsService extends BaseDiscussionForumsService {
 						forum.setHideStatus("N");
 						forum.setLastPostDate(rs.getString("Last_Post_Date"));
 						forum.setLastPoster(rs.getString("Last_Post_User"));
+						forum.setForumTopicsCount(new Integer(rs.getInt("topicsCount")));
+						forum.setForumPosts(new Integer(rs.getInt("forumPosts")));
 						results.add(forum);
 					}
 				}
@@ -293,7 +311,6 @@ public class DbDiscussionForumsService extends BaseDiscussionForumsService {
 				try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
 					if (generatedKeys.next()) {
 						topicId = generatedKeys.getLong(1);
-						System.out.println("The insertTopic new topic id to show:>>>> " + generatedKeys.getLong(1) + "and topicId: " + topicId);
 						forumTopicDetails.setTopicId(topicId);
 					}
 					else {
@@ -417,17 +434,19 @@ public class DbDiscussionForumsService extends BaseDiscussionForumsService {
 			List results = new ArrayList();
 			Connection dbConnection = null;
 			ResultSet rs = null;
+			String userCreatedTopic = "";
+			User user = null;
 			try {
 				dbConnection = m_sqlService.borrowConnection();
 
 				String statement = "select ft.Topic_Id, ft.Forum_Id, ft.Topic_Subject, ft.Creation_Date, ft.Modification_Date, ifnull(ft.View_Count,0) as View_Count, "
-						+ "ft.Hide_Status, DATE_FORMAT(ft.Last_Post_Date,'%Y-%m-%d %H:%i') as Last_Post_Date, ft.Last_Post_User, "
-						+ "count(fm.Topic_Id) as messagesCount, (count(fm.Message_Id)-1) replycount "
+						+ "ft.Hide_Status, DATE_FORMAT(ft.Last_Post_Date,'%Y-%m-%d %H:%i') as Last_Post_Date, ft.Last_Post_User, fm.User_Id, "
+						+ "(select count(Message_Id)-1 from UFORUM_MESSAGE where topic_id = fm.Topic_Id) replycount "
 						+ "from UFORUM_TOPIC ft, UFORUM_MESSAGE fm "
 						+ "where ft.Forum_Id = ? and ft.Topic_Id = fm.Topic_Id "
 						+ "and ft.Hide_Status = 'N' "
-						+ "group by  ft.Topic_Id, ft.Forum_Id, ft.Topic_Subject, ft.Creation_Date, ft.Modification_Date,ifnull(ft.View_Count,0), ft.Hide_Status, DATE_FORMAT(ft.Last_Post_Date,'%Y-%m-%d %H:%i'), ft.Last_Post_User "
-						+ " order by ft.Topic_Id, upper("+sortby+") "+sortorder;
+						+ "and fm.First_Topic_MSG = 'Y' "
+						+ "order by ft.Topic_Id, upper("+sortby+") "+sortorder;
 				PreparedStatement pstmt = dbConnection.prepareStatement(statement);
 				pstmt.setInt(1, forumId);
 				rs = pstmt.executeQuery();
@@ -444,7 +463,15 @@ public class DbDiscussionForumsService extends BaseDiscussionForumsService {
 						forumTopic.setHideStatus("N");
 						forumTopic.setLastPostDate(rs.getString("Last_Post_Date"));
 						forumTopic.setLastPostUser(rs.getString("Last_Post_User"));
+						forumTopic.setUserId(rs.getString("User_Id"));
 						forumTopic.setReplies(new Integer(rs.getInt("replycount")));
+						try	{
+							user = UserDirectoryService.getUserByEid(rs.getString("User_Id"));
+						} catch (Exception e) {	
+							e.printStackTrace();}
+						
+						userCreatedTopic = user.getDisplayName();
+						forumTopic.setTopicAuthor(userCreatedTopic);
 						results.add(forumTopic);
 					}
 				}
@@ -458,7 +485,271 @@ public class DbDiscussionForumsService extends BaseDiscussionForumsService {
 			return results;
 
 		}
+		
+		public int getTopicCount(String topicName, Integer forumId) {
+			
+			Object[] fields = new Object[2];
+			fields[0] = topicName;
+			fields[1] = forumId;
+			
+			int returnCount = 0;
+			
+			String statement = "select count(Topic_Subject) from UFORUM_TOPIC where Topic_Subject = ? and Forum_Id = ? and Hide_Status = 'N'";
+			List returnCounts = m_sqlService.dbRead(statement, fields, null);
+
+			if(!returnCounts.isEmpty())
+			{
+				returnCount = Integer.parseInt(returnCounts.get(0).toString());
+			}
+						
+			return returnCount;
+		}
 		/////// Topic Details End ///////
+		
+		/////// Message Details Start ///////
+		public void insertMessage(ForumMessage forumMessage) {
+			Connection dbConnection = null;
+			ResultSet rs = null;
+			Long messageId;
+			String lastPostUserName = "";
+			User user = null;
+			
+			try {
+				dbConnection = m_sqlService.borrowConnection();
+				
+				try	{
+					user = UserDirectoryService.getUserByEid(forumMessage.getAuthor());
+				}
+				catch (Exception e)
+				{e.printStackTrace();}
+				
+				lastPostUserName = user.getDisplayName();
+				
+				String statement = "insert into UFORUM_MESSAGE (Message_Id,Topic_Id,Content,Creation_Date,User_Id,User_Identifier,Msg_Url,File_Type,First_Topic_MSG) "
+									+ "values(NULL,?,?,sysdate(),?,?,?,?,'N')";
+				PreparedStatement pstmt = dbConnection.prepareStatement(statement, PreparedStatement.RETURN_GENERATED_KEYS);
+				pstmt.setInt(1, forumMessage.getTopicId());
+				pstmt.setString(2, forumMessage.getMessageReply());
+				pstmt.setString(3, forumMessage.getAuthor());
+				pstmt.setString(4, forumMessage.getUserType());
+				pstmt.setString(5, forumMessage.getAttachment());
+				pstmt.setString(6, forumMessage.getFileType());
+				
+				int affectedRows = pstmt.executeUpdate();
+				if (affectedRows == 0) {
+					throw new SQLException("Creating new message reply failed, no rows affected.");
+				}
+				
+				try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+					if (generatedKeys.next()) {
+						messageId = generatedKeys.getLong(1);
+						forumMessage.setMessageId(messageId);
+					}
+					else {
+						throw new SQLException("Creating new message reply failed, no ID obtained.");
+					}
+				}
+				
+				pstmt.close();
+				
+				String statement1 = "update UFORUM_TOPIC set Last_Post_Date = sysdate() , Last_Post_user = ? Where Topic_ID = ? ";
+				PreparedStatement pstmt1 = dbConnection.prepareStatement(statement1);
+				pstmt1.setString(1, lastPostUserName);
+				pstmt1.setInt(2, forumMessage.getTopicId());
+				pstmt1.executeUpdate();
+				pstmt1.close();
+				
+				String statement2 = "update UFORUM_FORUM set Last_Post_Date = sysdate() , Last_Post_user = ? Where Forum_ID = ? ";
+				PreparedStatement pstmt2 = dbConnection.prepareStatement(statement2);
+				pstmt2.setString(1, lastPostUserName);
+				pstmt2.setInt(2, Integer.parseInt(forumMessage.getForumId()));
+				pstmt2.executeUpdate();
+				pstmt2.close();
+				
+			} catch (SQLException e) {
+				M_log.error(this+" Error on insertMessage for the topic "+forumMessage.getTopicId()+ " userID " +forumMessage.getAuthor()+ " and error "+e.getMessage());
+				e.printStackTrace();
+			} finally {
+				m_sqlService.returnConnection(dbConnection);
+			}
+		}
+		
+		public void deleteMessage(Integer messageId) {
+			Connection dbConnection = null;
+			ResultSet rs = null;
+			
+			try {
+				dbConnection = m_sqlService.borrowConnection();
+				String statement = "delete FROM UFORUM_MESSAGE WHERE Message_Id = ? ";
+
+				PreparedStatement pstmt = dbConnection.prepareStatement(statement);
+				pstmt.setInt(1, messageId);
+				pstmt.executeUpdate();
+				pstmt.close();
+			} catch (SQLException e) {
+				M_log.error(this+" Error on deleteMessage for the message "+messageId+" error is "+e.getMessage());
+				e.printStackTrace();
+			} finally {
+				m_sqlService.returnConnection(dbConnection);
+			}
+		}
+		
+		public List getMessageList(Integer topicId) {
+			List results = new ArrayList();
+			Connection dbConnection = null;
+			ResultSet rs = null;
+			String userCreatedMessage = "";
+			User user = null;
+			try {
+				dbConnection = m_sqlService.borrowConnection();
+
+				String statement = "SELECT Message_Id, Topic_Id, Content, DATE_FORMAT(Creation_Date,'%Y-%m-%d %H:%i:%s') as Creation_Date, User_Id, User_Identifier, "
+						+ "ifnull(Msg_Url,' ') as Msg_Url, ifnull(File_Type,' ') as File_Type, first_topic_msg "
+						+ "FROM UFORUM_MESSAGE WHERE Topic_Id = ? "
+						+ "AND first_topic_msg = 'N' "
+						+ "ORDER BY creation_date DESC";
+				PreparedStatement pstmt = dbConnection.prepareStatement(statement);
+				pstmt.setInt(1, topicId);
+				rs = pstmt.executeQuery();
+				pstmt.close();
+				if (rs != null) {
+					while (rs.next()) {
+						ForumMessage forumMessage = new ForumMessage();
+						forumMessage.setMessageId(new Long(rs.getLong("Message_Id")));
+						forumMessage.setTopicId(new Integer(rs.getInt("Topic_Id")));
+						forumMessage.setMessage(rs.getString("Content"));
+						forumMessage.setMessageDate(rs.getString("Creation_Date"));
+						forumMessage.setUserId(rs.getString("User_Id"));
+						forumMessage.setUserType(rs.getString("User_Identifier"));
+						forumMessage.setAttachment(rs.getString("Msg_Url"));
+						forumMessage.setFileType(rs.getString("File_Type"));
+						try	{
+							user = UserDirectoryService.getUserByEid(rs.getString("User_Id"));
+						} catch (Exception e) {	
+							e.printStackTrace();}
+						
+						userCreatedMessage = user.getDisplayName();
+						forumMessage.setAuthor(userCreatedMessage);
+						results.add(forumMessage);
+					}
+				}
+
+			} catch (SQLException e) {
+				M_log.error(this+" Error on getMessageList for the topic "+topicId+" error is "+e.getMessage());
+				e.printStackTrace();
+			} finally {
+				m_sqlService.returnConnection(dbConnection);
+			}
+			return results;
+
+		}
+		
+		public ForumMessage getTopicPosting(Integer topicId) {
+			List results = new ArrayList();
+			Connection dbConnection = null;
+			ResultSet rs = null;
+			ForumMessage forumMessage = new ForumMessage();
+			String userCreatedMessage = "";
+			User user = null;
+			try {
+				dbConnection = m_sqlService.borrowConnection();
+
+				String statement = "SELECT Message_Id, Topic_Id, Content, DATE_FORMAT(Creation_Date,'%Y-%m-%d %H:%i:%s') as Creation_Date, User_Id, User_Identifier, "
+						+ "ifnull(Msg_Url,' ') as Msg_Url, ifnull(File_Type,' ') as File_Type, first_topic_msg "
+						+ "FROM UFORUM_MESSAGE WHERE Topic_Id = ? "
+						+ "AND first_topic_msg = 'Y'";
+				PreparedStatement pstmt = dbConnection.prepareStatement(statement);
+				pstmt.setInt(1, topicId);
+				rs = pstmt.executeQuery();
+				pstmt.close();
+				if (rs != null) {
+					while (rs.next()) {
+						forumMessage.setMessageId(new Long(rs.getLong("Message_Id")));
+						forumMessage.setTopicId(new Integer(rs.getInt("Topic_Id")));
+						forumMessage.setMessage(rs.getString("Content"));
+						forumMessage.setMessageDate(rs.getString("Creation_Date"));
+						forumMessage.setUserId(rs.getString("User_Id"));
+						forumMessage.setUserType(rs.getString("User_Identifier"));
+						forumMessage.setAttachment(rs.getString("Msg_Url"));
+						forumMessage.setFileType(rs.getString("File_Type"));
+						try	{
+							user = UserDirectoryService.getUserByEid(rs.getString("User_Id"));
+						} catch (Exception e) {	
+							e.printStackTrace();}
+						userCreatedMessage = user.getDisplayName();
+						forumMessage.setAuthor(userCreatedMessage);
+						results.add(forumMessage);
+					}
+				}
+				
+				Iterator i = results.iterator();
+				if (i.hasNext()){
+					forumMessage = (ForumMessage) i.next();
+				}
+
+			} catch (SQLException e) {
+				M_log.error(this+" Error on getTopicPosting for the topic "+topicId+" error is "+e.getMessage());
+				e.printStackTrace();
+			} finally {
+				m_sqlService.returnConnection(dbConnection);
+			}
+			return forumMessage;
+
+		}
+		
+		public ForumMessage getMessageDetail(Integer messageId) {
+			List results = new ArrayList();
+			Connection dbConnection = null;
+			ResultSet rs = null;
+			ForumMessage forumMessage = new ForumMessage();
+			String userCreatedMessage = "";
+			User user = null;
+			try {
+				dbConnection = m_sqlService.borrowConnection();
+
+				String statement = "SELECT Message_Id, Topic_Id, Content, DATE_FORMAT(Creation_Date,'%Y-%m-%d %H:%i:%s') as Creation_Date, User_Id, User_Identifier, "
+						+ "ifnull(Msg_Url,' ') as Msg_Url, ifnull(File_Type,' ') as File_Type "
+						+ "FROM UFORUM_MESSAGE WHERE Message_Id = ? "
+						+ "AND first_topic_msg = 'N'";
+				PreparedStatement pstmt = dbConnection.prepareStatement(statement);
+				pstmt.setInt(1, messageId);
+				rs = pstmt.executeQuery();
+				pstmt.close();
+				if (rs != null) {
+					while (rs.next()) {
+						forumMessage.setMessageId(new Long(rs.getLong("Message_Id")));
+						forumMessage.setTopicId(new Integer(rs.getInt("Topic_Id")));
+						forumMessage.setMessage(rs.getString("Content"));
+						forumMessage.setMessageDate(rs.getString("Creation_Date"));
+						forumMessage.setUserId(rs.getString("User_Id"));
+						forumMessage.setUserType(rs.getString("User_Identifier"));
+						forumMessage.setAttachment(rs.getString("Msg_Url"));
+						forumMessage.setFileType(rs.getString("File_Type"));
+						try	{
+							user = UserDirectoryService.getUserByEid(rs.getString("User_Id"));
+						} catch (Exception e) {	
+							e.printStackTrace();}
+						userCreatedMessage = user.getDisplayName();
+						forumMessage.setAuthor(userCreatedMessage);
+						results.add(forumMessage);
+					}
+				}
+				
+				Iterator i = results.iterator();
+				if (i.hasNext()){
+					forumMessage = (ForumMessage) i.next();
+				}
+
+			} catch (SQLException e) {
+				M_log.error(this+" Error on getMessageDetail for the message "+messageId+" error is "+e.getMessage());
+				e.printStackTrace();
+			} finally {
+				m_sqlService.returnConnection(dbConnection);
+			}
+			return forumMessage;
+
+		}
+		/////// Message Details End ///////
 		
 		private boolean isInteger(String i) {
                 try {

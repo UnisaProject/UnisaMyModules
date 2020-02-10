@@ -26,6 +26,7 @@ import org.sakaiproject.event.api.UsageSession;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.discussionforums.api.model.Forum;
 import org.sakaiproject.discussionforums.api.model.ForumTopicDetails;
+import org.sakaiproject.discussionforums.api.model.ForumMessage;
 import java.util.List;
 
 /**
@@ -145,7 +146,51 @@ private static org.sakaiproject.discussionforums.api.DiscussionForumsService m_i
 
 		return service.getTopics(forumId, sortby, sortorder);
 	}
+	
+	public static java.lang.Integer getTopicCount(String topicName, Integer forumId) {
+		org.sakaiproject.discussionforums.api.DiscussionForumsService service = getInstance();
+		if (service == null)
+			return null;
+
+		return service.getTopicCount(topicName, forumId);
+	}
 	/////// Topic Details End ///////
+	
+	/////// Message Details Start ///////
+	public static void insertMessage(ForumMessage forumMessage) {
+		org.sakaiproject.discussionforums.api.DiscussionForumsService service = getInstance();
+		service.insertMessage(forumMessage);
+	}
+	
+	public static void deleteMessage(Integer messageId) {
+		org.sakaiproject.discussionforums.api.DiscussionForumsService service = getInstance();
+		service.deleteMessage(messageId);
+	}
+	
+	public static List getMessageList(Integer topicId) {
+		org.sakaiproject.discussionforums.api.DiscussionForumsService service = getInstance();
+		if (service == null)
+			return null;
+
+		return service.getMessageList(topicId);
+	}
+	
+	public static ForumMessage getTopicPosting(Integer topicId) {
+		org.sakaiproject.discussionforums.api.DiscussionForumsService service = getInstance();
+		if (service == null)
+			return null;
+
+		return service.getTopicPosting(topicId);
+	}
+	
+	public static ForumMessage getMessageDetail(Integer messageId) {
+		org.sakaiproject.discussionforums.api.DiscussionForumsService service = getInstance();
+		if (service == null)
+			return null;
+
+		return service.getMessageDetail(messageId);
+	}
+	/////// Message Details End ///////
 	
 	public static java.lang.String getCurrentUserName() {
 		org.sakaiproject.discussionforums.api.DiscussionForumsService service = getInstance();

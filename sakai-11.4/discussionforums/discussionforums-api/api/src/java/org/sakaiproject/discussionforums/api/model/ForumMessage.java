@@ -3,7 +3,7 @@ package org.sakaiproject.discussionforums.api.model;
 public class ForumMessage {
 
 	private String message;
-	private Integer messageId;
+	private Long messageId;
 	private Integer topicId;
 	private String messageDate;
 	private String author;
@@ -56,11 +56,11 @@ public class ForumMessage {
 		this.messageReply = messageReply;
 	}
 
-	public Integer getMessageId() {
+	public Long getMessageId() {
 		return messageId;
 	}
 
-	public void setMessageId(Integer messageId) {
+	public void setMessageId(Long messageId) {
 		this.messageId = messageId;
 	}
 

@@ -38,6 +38,7 @@ import org.sakaiproject.event.api.UsageSessionService;
 import org.sakaiproject.discussionforums.api.DiscussionForumsService;
 import org.sakaiproject.discussionforums.api.model.Forum;
 import org.sakaiproject.discussionforums.api.model.ForumTopicDetails;
+import org.sakaiproject.discussionforums.api.model.ForumMessage;
 import org.sakaiproject.tool.api.Session; 
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.user.api.UserDirectoryService;
@@ -201,7 +202,50 @@ public abstract class BaseDiscussionForumsService implements DiscussionForumsSer
 		return topics;
 
 	}
+	
+	public int getTopicCount(String topicName, Integer forumId)
+	{
+		int returnCount = m_storage.getTopicCount(topicName, forumId);
+		return returnCount;
+	}
 	/////// Topic Details End ///////
+	
+	/////// Message Details Start ///////
+	public void insertMessage(ForumMessage forumMessage)
+	{
+		 m_storage.insertMessage(forumMessage);
+	}
+	
+	public void deleteMessage(Integer messageId)
+	{
+		m_storage.deleteMessage(messageId);
+	}
+	
+	public List getMessageList(Integer topicId)
+	{
+		
+		List topics = m_storage.getMessageList(topicId);
+
+		return topics;
+
+	}
+	
+	public ForumMessage getTopicPosting(Integer topicId)
+	{
+		ForumMessage forumMessage = new ForumMessage();
+		forumMessage = m_storage.getTopicPosting(topicId);
+
+		return forumMessage;
+	}
+	
+	public ForumMessage getMessageDetail(Integer messageId)
+	{
+		ForumMessage forumMessage = new ForumMessage();
+		forumMessage = m_storage.getMessageDetail(messageId);
+
+		return forumMessage;
+	}
+	/////// Message Details End ///////
 	
 	public String getCurrentUserName() 
 	{
@@ -276,6 +320,13 @@ public abstract class BaseDiscussionForumsService implements DiscussionForumsSer
 		void deleteTopic(Integer topicId);
 		List getTopicContent(Integer topicId);
 		List getTopics(Integer forumId, String sortby, String sortorder);
+		int getTopicCount(String topicName, Integer forumId);
+		
+		void insertMessage(ForumMessage forumMessage);
+		void deleteMessage(Integer topicId);
+		List getMessageList(Integer topicId);
+		ForumMessage getTopicPosting(Integer topicId);
+		ForumMessage getMessageDetail(Integer messageId);
 		
 	}
 	
