@@ -1803,8 +1803,21 @@
         <version>${sakai.version}</version>
         <scope>provided</scope>
       </dependency>
+	  
+	  <dependency>
+		<groupId>org.sakaiproject.discussionforums</groupId>
+		<artifactId>sakai-discussionforums-api</artifactId>
+		<version>${sakai.version}</version>
+		<scope>provided</scope>
+	  </dependency>
+	  
+	  <dependency>
+		<groupId>org.sakaiproject.discussionforums</groupId>
+		<artifactId>sakai-discussionforums-util</artifactId>
+		<version>${sakai.version}</version>
+	  </dependency>
       
-         <dependency>
+      <dependency>
         <groupId>org.sakaiproject.prescribedbooks</groupId>
         <artifactId>sakai-prescribedbooks-api</artifactId>
         <version>${sakai.version}</version>
