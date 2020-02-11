@@ -1,0 +1,31 @@
+## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
+<div class="portletBody">
+	#if ($message=='emptyEditTopic')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("topic.alert.notopicname", $alertMessage)</div>#end
+	#end
+	<h3>Edit Topic Title</h3>
+
+	<form name="ForumTopicsForm" action="#toolForm("DiscussionForumsAction")" method="post">
+		<div>
+		<table>
+		#foreach ($topic in $topicList)
+			<tr>
+				<td>
+					<label for="editTopic">$tlang.getString("forum.label.topicTitle")</label>
+				</td>
+				<td>
+					<input type="text" id="topicTitle" name="topicTitle" value="$topic.topicTitle" size="75" maxlength="250">
+					<input type="hidden" id="topicId" name="topicId" value="$topic.topicId">
+				</td>
+			</tr>
+		#end
+		</table>
+		</div>
+
+		<p class="act">
+			<input type="submit" class="active" name="eventSubmit_updateTopic" value=" $tlang.getString("button.edit")"  accesskey="s"/>
+			<input type="submit" name="eventSubmit_doTopicCancel" value=" $tlang.getString("button.back") " accesskey="x"  />
+		</p>
+		<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+	</form>
+</div>

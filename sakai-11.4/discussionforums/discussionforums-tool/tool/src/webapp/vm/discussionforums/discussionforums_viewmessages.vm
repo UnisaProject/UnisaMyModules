@@ -1,0 +1,168 @@
+## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
+<div class="portletBody">
+	#if($menu)
+		#toolbar($menu)
+	#end
+
+	#if ($message=='emptyAddMessageReply')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("message.alert.nomessagereply", $alertMessage)</div>#end
+	#elseif ($message=='incorrectWidthMessageReply')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("message.alert.incorrectWidth", $alertMessage)</div>#end
+	#elseif ($message=='zeroTopicId')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("message.alert.zeroTopicId", $alertMessage)</div>#end
+	#end
+	
+	<!-- Unisa Changes:2018/10/10: Add styling for table border used in sakai:flat_list tag -->
+	<!-- Style can be added in body according to this: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style#A_scoped_stylesheet -->
+	<style type="text/css">
+		table.listHier, tr, th, td{
+			border: none !important
+		}
+	</style>
+	<!-- End Unisa Changes -->
+	
+	<div>
+		<h3>
+			$forumName: $topicTitle
+		</h3>
+	</div>
+
+	<div class="instruction">
+	 $tlang.getString("forum.message.information")<br>
+	 $tlang.getString("forum.messageview.prompt")
+	</div>
+
+	<form name="ForumMessageForm" action="#toolForm("DiscussionForumsAction")" method="post">
+		<table class ="listHier lines nolines" cellspacing="0">
+			<tr>
+				<td align="right">
+					$tlang.getString("label.view")
+					$start
+					$tlang.getString("label.hypen")
+					$end
+					$tlang.getString("label.of")
+					$numberOfItems
+					$tlang.getString("label.views")
+				</td>
+			</tr>
+			<tr class="act">
+				<td align="right">
+					<input type="submit" name="eventSubmit_firstMessages" value=" $tlang.getString("button.first")" />
+					<input type="submit" name="eventSubmit_previousMessages" value=" $tlang.getString("button.previous")" />
+					<select name="msgRecords" onchange = "submit();">
+						<option value="10">Show 10 items </option>			 
+						<option value="20">Show 20 items </option>				
+						<option value="30">Show 30 items </option>
+						<option value="50">Show 50 items </option>								
+					</select>
+					<input type="submit" name="eventSubmit_nextMessages" value=" $tlang.getString("button.next")" />
+					<input type="submit" name="eventSubmit_lastMessages" value=" $tlang.getString("button.last")" />			
+				</td>
+			</tr>
+		</table>
+	
+		<table class ="listHier lines nolines" cellspacing="0">
+			<tr>
+				<th>$tlang.getString("forum.topic.label.author")</th>
+				<th>$tlang.getString("forum.topic.label.message")</th>		
+			</tr>
+			
+			<tr bgcolor="#FFDAB5">
+				<td width="20%">$forumMessage.author</td>
+				<td>$forumMessage.message<br>$forumMessage.messageDate</td>
+			</tr>
+		   #foreach ($message in $forumMessageForm.topicMessages)
+				#if ($coloured=='0')
+					<tr>
+				#end
+				#if ($coloured=='1')
+					<tr bgcolor="#eeeeee">
+				#end
+						<td width="20%" valign="top">$message.author</td>
+						<td>
+							$message.message<br>
+							$message.messageDate
+							#if ($deleteAnyReply)
+								<a href="#toolLinkParam("DiscussionForumsAction" "confirmDeleteMessage" "messageId=$message.messageId")"><img src="/sakai-discussionforums-tool/images/delete.gif" alt="Click to delete the message"/></a>
+							#end
+							#if (!$deleteAnyReply)
+								#if ($userID==$message.userId)
+									<a href="#toolLinkParam("DiscussionForumsAction" "confirmDeleteMessage" "messageId=$message.messageId")"><img src="/sakai-discussionforums-tool/images/delete.gif" alt="Click to delete the message"/></a>
+								#end
+							#end
+							#if ($message.attachment!=' ')
+								#if ($message.fileType=='F')
+									<a href="#toolLinkParam("DiscussionForumsAction" "readAttachment" "attachment=$message.attachment")">Attachment</a>
+								#end
+								#if ($message.fileType=='L')
+									<a href="javascript:window.open('$message.attachment','_new')" target="_new">$message.attachment</a>
+								#end
+							#end
+						</td>
+					</tr>
+		   #end
+		</table>
+
+		<div>
+			<br/><br/>
+			#if ($addReply)
+				<h3>$tlang.getString("forum.label.messageReply")</h3>
+				<div class="instruction">
+					$tlang.getString("forum.message.add.prompt")
+				</div>
+					<table>
+						<tr bgcolor="#FFFDD0" cellpadding="0" cellspacing="0">
+							<td>
+								<label>$tlang.getString("forum.message.add.label")</label> <span class="reqStar">*</span>
+							</td>
+							<td>
+								#if ($upload=='no')
+									#if ($clearAttach=='false')
+										<textarea id="messageReply" name="messageReply" rows="6" cols="66" wrap="virtual"> </textarea>
+										#chef_setupformattedtextarea("messageReply")
+									#elseif ($clearAttach=='true')
+										<textarea id="messageReply" name="messageReply" rows="6" cols="66" wrap="virtual">$messageReply</textarea>
+										#chef_setupformattedtextarea("messageReply")
+									#end
+								#end
+								#if ($upload=='upload')
+									<textarea id="messageReply" name="messageReply" rows="6" cols="66" wrap="virtual">$messageReply</textarea>
+									#chef_setupformattedtextarea("messageReply")
+								#end
+							</td>
+						</tr>
+					</table>
+					<h3>$tlang.getString("forum.label.attachments")</h3>
+					<table>
+						#if ($upload=='no')
+							<tr><td><label>$tlang.getString("forum.info.attachments")</label></td></tr>
+						#end
+						#if ($upload=='upload')
+							#if ($inputFileName!='')
+								<tr>
+									<td>$inputFileName</td>
+									<td>&nbsp;&nbsp;&nbsp;<a href="#toolLinkParam("DiscussionForumsAction" "clearAttachment" "fname=$inputFileName")">Clear</a></td>
+								</tr>
+							#end
+							#if ($addressLink!='')
+								<tr>
+									<td><a href="javascript:window.open('$addressLink','_new')" target="_new">$addressLink</a></td>
+									<td>&nbsp;&nbsp;&nbsp;<a href="#toolLinkParam("DiscussionForumsAction" "clearAttachment" "fname=clearUrl")">Clear</a></td>
+								</tr>
+							#end
+						#end
+					</table>
+
+					<input type="hidden" name="topicId" value="$topicId"/>
+
+					<p class="act">
+						<input type="submit" name="eventSubmit_addAttachment" value=" $tlang.getString("button.add.attachment")" />
+						<br><hr><br>
+						<input type="submit" class="active" name="eventSubmit_saveMessage" value=" $tlang.getString("button.save")"  accesskey="s"/>
+						<input type="submit" name="eventSubmit_doTopicCancel" value=" $tlang.getString("button.back") " accesskey="x"  />
+					</p>
+					<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+			#end
+		</div>
+	</form>
+</div>
