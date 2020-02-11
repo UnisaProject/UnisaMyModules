@@ -1,0 +1,49 @@
+## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
+<div class="portletBody">
+	#if ($message=='emptyAddTopic')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("topic.alert.notopicname", $alertMessage)</div>#end
+	#elseif ($message=='emptyAddTopicMessage')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("topic.alert.notopicmessage", $alertMessage)</div>#end
+	#end
+
+	<h3>$tlang.getString("forum.label.createTopic") $forumName </h3>
+
+	<form name="ForumTopicsForm" action="#toolForm("DiscussionForumsAction")" method="post">
+		<div class="instruction">
+			$tlang.getString("forum.prompt.createTopic")<br>
+			$tlang.getString("forum.field.required") <span class="reqStar">*</span>
+		</div>
+
+		<div>
+		<table>
+			<tr>
+				<td>
+					<label for="addTopic">$tlang.getString("forum.label.topicTitle")</label> <span class="reqStar">*</span>
+				</td>
+				<td>
+					<input type="text" id="topicTitle" name="topicTitle" size="75" maxlength="250">
+				</td>
+			</tr>
+			<tr>
+			<td><br></td>
+			</tr>
+						
+			<tr>
+				<td>
+					<label>$tlang.getString("forum.label.topicMessage")</label> <span class="reqStar">*</span>
+				</td>
+				<td>
+					<textarea id="topicMessage" name="topicMessage" rows="30" cols="80" wrap="virtual"> </textarea>
+					#chef_setupformattedtextarea("topicMessage")
+				</td>
+			</tr>
+		</table>
+		</div>
+
+		<p class="act">
+			<input type="submit" class="active" name="eventSubmit_saveTopic" value=" $tlang.getString("button.save")"  accesskey="s"/>
+			<input type="submit" name="eventSubmit_doTopicCancel" value=" $tlang.getString("button.back") " accesskey="x"  />
+		</p>
+		<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+	</form>
+</div>

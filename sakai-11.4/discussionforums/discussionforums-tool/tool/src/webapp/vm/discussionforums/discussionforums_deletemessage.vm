@@ -1,0 +1,30 @@
+## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
+<div class="portletBody">
+	<h3>$tlang.getString("forum.message.delete")</h3>
+	#if ($message=='deleteMessage')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("message.alert.confirmdeletemessage", $alertMessage)</div>#end
+	#end
+	<form name="ForumMessageForm" action="#toolForm("DiscussionForumsAction")" method="post">
+		<div>
+			<table>
+				<tr>
+					<td>
+					<b>$forumName: $topicTitle</b>
+					$forumMessage.author
+					$forumMessage.messageDate
+					<input type="hidden" id="messageId" name="messageId" value="$forumMessage.messageId">
+					</td>
+				</tr>
+				<tr>
+					<td>$forumMessage.message</td>
+				</tr>
+			</table>
+		</div>
+
+		<p class="act">
+			<input type="submit" class="active" name="eventSubmit_deleteMessage" value=" $tlang.getString("button.delete")"  accesskey="s"/>
+			<input type="submit" name="eventSubmit_doMessageCancel" value=" $tlang.getString("button.back") " accesskey="x"  />
+		</p>
+		<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+	</form>
+</div>

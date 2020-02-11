@@ -1,0 +1,55 @@
+## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
+<div class="portletBody">
+	#if ($message=='emptyAddAttachment')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("message.alert.noattachment", $alertMessage)</div>#end
+	#elseif ($message=='bothAddAttachment')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("message.alert.bothattachment", $alertMessage)</div>#end
+	#elseif ($message=='wrongfileformat')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("message.alert.wrongfileformat", $alertMessage)</div>#end
+	#elseif ($message=='bigfile')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("message.alert.bigfile", $alertMessage)</div>#end
+	#elseif ($message=='wrongURL')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("message.alert.wrongURL", $alertMessage)</div>#end
+	#end
+
+	<h3>$tlang.getString("forum.add.attachment")</h3>
+
+	<form name="ForumTopicsForm" action="#toolForm("DiscussionForumsAction")" method="post" enctype="multipart/form-data">
+		<div class="instruction">
+			$tlang.getString("forum.attachment.instruction")
+		</div>
+		<input type="hidden" name="upload" value="upload"/>
+		<input type="hidden" name="topicId" value="$topicId"/>
+		<div>
+		<table>
+			<tr>
+				<td>
+					<label for="addFile">$tlang.getString("forum.label.upload.file")</label>
+				</td>
+				<td>
+					<input type="file" id="theFile" name="theFile">
+				</td>
+			</tr>
+			
+			<tr>
+			<td><br></td>
+			</tr>
+						
+			<tr>
+				<td>
+					<label>$tlang.getString("forum.label.upload.link")</label>
+				</td>
+				<td>
+					<input type="text" id="addressLink" name="addressLink" style="width: 350px" size="20" maxlength="60">
+				</td>
+			</tr>
+		</table>
+		</div>
+
+		<p class="act">
+			<input type="submit" class="active" name="eventSubmit_attachFile" value=" $tlang.getString("button.continue")"  accesskey="s"/>
+			<input type="submit" name="eventSubmit_doMessageCancel" value=" $tlang.getString("button.cancel") " accesskey="x"  />
+		</p>
+		<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+	</form>
+</div>
