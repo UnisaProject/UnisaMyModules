@@ -101,7 +101,7 @@
                 <value>spreadsheetEntireGBVerify</value>
                 <value>gradebookSetup</value>
                 <value>graderRules</value>
-                <!-- Unisa Changes:2018/04/26:Added gradebookSync -->
+                  <!-- Unisa Changes:2018/04/26:Added gradebookSync -->
                 <value>gradebookSync</value>
                 <!-- End Unisa changes -->
             </list>
@@ -116,9 +116,9 @@
 				<value>instructorView</value>
 				<value>studentView</value>
 				<value>calculateCourseGrades</value>
-				<!-- Unisa Changes:2018/04/26:Added gradebookSync -->
+					<!-- Unisa Changes:2018/04/26:Added gradebookSync -->
                 <value>gradebookSync</value>
-                <!-- End Unisa Changes -->				
+                <!-- End Unisa Changes -->	
 			</list>
 		</property>
 		<property name="userAbleToViewOwnGradesPages">

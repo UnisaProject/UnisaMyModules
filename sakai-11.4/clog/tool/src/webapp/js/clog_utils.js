@@ -562,18 +562,16 @@ clog.utils = {
                 $('#clog-authors').append(t({ 'authors': authors }));
 
                 $(document).ready(function () {
-
                     clog.utils.attachProfilePopup();
                     loadImage.hide();
                     
                     $("#clog_author_table")
-.tablesorter({widthFixed: true, widgets: ['zebra']})
-.tablesorterPager({ container: $("#clogAuthorPager"), positionFixed: false });
-                    $('.pagedisplay').prop('disabled', true);                    
-                    $(".pagesize").append('<option value="' + authors.length  + '">All</option>');
-                    
+						.tablesorter({widthFixed: true, widgets: ['zebra']})
+						.tablesorterPager({ container: $("#clogAuthorPager"), positionFixed: false });
+						$('.pagedisplay').prop('disabled', true);                    
+						$(".pagesize").append('<option value="' + authors.length + '">All</option>');
                 });
-
+				
             },
             error : function (xmlHttpRequest, status, errorThrown) {
                 alert("Failed to get authors. Reason: " + errorThrown);
