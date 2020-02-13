@@ -109,12 +109,13 @@
             <from-outcome>hideShowColumns</from-outcome>
             <to-view-id>/hideShowColumns.jsp</to-view-id>
         </navigation-case>
-        <!-- Unisa Changes:2018/04/26:Added gradebookSync navigation-case -->
+		
+		
+		      <!-- Unisa Changes:2018/04/26:Added gradebookSync navigation-case -->
         <navigation-case>
             <from-outcome>gradebookSync</from-outcome>
             <to-view-id>/gradebookSync.jsp</to-view-id>
         </navigation-case>
         <!-- End Unisa Changes -->
-		
     </navigation-rule>
 </faces-config>

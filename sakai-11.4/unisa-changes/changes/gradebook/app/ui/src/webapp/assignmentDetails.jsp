@@ -105,7 +105,7 @@
 						<f:param name="assignmentId" value="#{assignmentDetailsBean.assignment.id}"/>
 					</h:commandLink>
 
-					<%/*  Unisa Changes: Added:2018/04/26: Link for Request Gradebook item sync:BEGIN */%>
+	<%/*  Unisa Changes: Added:2018/04/26: Link for Request Gradebook item sync:BEGIN */%>
 					<h:commandLink
 						action="#{assignmentDetailsBean.navigateToGradebookSync}"
 						rendered="#{overviewBean.userAbleToGradeAll && assignmentDetailsBean.userAbleToEditAssessments}"
