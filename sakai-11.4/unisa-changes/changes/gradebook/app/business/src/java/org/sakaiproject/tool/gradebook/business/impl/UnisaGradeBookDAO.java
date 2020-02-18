@@ -37,6 +37,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * Data Access Object class to retrieve data from the UNISA Student System Database.
@@ -258,7 +259,7 @@ public class UnisaGradeBookDAO {
  	   i = queryList.iterator();							 
  	   if (i.hasNext()) {
 		  //ListOrderedMap data = (ListOrderedMap) i.next(); //Unisa Changes:2017/05/03:Removed
- 		  HashMap data = (HashMap) i.next();   				 //Unisa Changes:2017/05/03:Added
+ 		  LinkedCaseInsensitiveMap  data = (LinkedCaseInsensitiveMap) i.next();   				 //Unisa Changes:2017/05/03:Added
 		  if (data.get(field) == null){
 		  } else {
 			  result = data.get(field).toString();
