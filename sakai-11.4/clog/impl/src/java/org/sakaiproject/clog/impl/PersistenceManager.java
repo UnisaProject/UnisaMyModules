@@ -851,6 +851,7 @@ public class PersistenceManager {
             if (rs.next()) {
                 int totalPosts = rs.getInt(ISQLGenerator.TOTAL_POSTS);
                 int totalComments = rs.getInt(ISQLGenerator.TOTAL_COMMENTS);
+	
                 long lastPostDate = -1L;
                 Timestamp ts = rs.getTimestamp(ISQLGenerator.LAST_POST_DATE);
                 if (ts != null) {
