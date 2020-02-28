@@ -32,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -250,7 +251,6 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 	 } // buildMainPanelContext
 	
 	
-	
 	/////////////////// Forum Details Start/////////////////////////////////
 	/** build the context for add forum */
 	public String buildAddForumModeContext(VelocityPortlet portlet, Context context, RunData rundata, SessionState state) 
@@ -277,8 +277,6 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 	public String buildDeleteForumModeContext(VelocityPortlet portlet, Context context, RunData rundata, SessionState state) 
 	{
 		context.put("tlang", rb);
-		//context.put("forum", state.getAttribute("forumList"));
-		//context.put("message", state.getAttribute("message"));
 	    context.put("systemDate", new Timestamp(new Date().getTime()));
 	    return "_deleteforum";
 	}
@@ -379,7 +377,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 			eventTrackingService = (EventTrackingService) ComponentManager
 					.get("org.sakaiproject.event.api.EventTrackingService");
 		}
-		eventTrackingService.post(eventTrackingService.newEvent("discussionforums.forumadd",
+		eventTrackingService.post(eventTrackingService.newEvent("discussionforums.add",
 				ToolManager.getCurrentPlacement().getContext(), false));
 	}
 	
@@ -415,7 +413,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 			eventTrackingService = (EventTrackingService) ComponentManager
 					.get("org.sakaiproject.event.api.EventTrackingService");
 		}
-		eventTrackingService.post(eventTrackingService.newEvent("faqs.categoryedit",
+		eventTrackingService.post(eventTrackingService.newEvent("discussionforums.edit",
 				ToolManager.getCurrentPlacement().getContext(), false));
 	}
 	
@@ -431,7 +429,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 			eventTrackingService = (EventTrackingService) ComponentManager
 					.get("org.sakaiproject.event.api.EventTrackingService");
 		}
-		eventTrackingService.post(eventTrackingService.newEvent("faqs.categoryedit",
+		eventTrackingService.post(eventTrackingService.newEvent("discussionforums.delete",
 				ToolManager.getCurrentPlacement().getContext(), false));
 	}
 	/////////////////// Forum Details End/////////////////////////////////
@@ -582,7 +580,6 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 	{
 		context.put("tlang", rb);
 		context.put("topic", state.getAttribute("topicList"));
-		//context.put("message", state.getAttribute("message"));
 	    context.put("systemDate", new Timestamp(new Date().getTime()));
 	    return "_deletetopic";
 	}
@@ -601,8 +598,6 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 	{
 		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
 		state.setAttribute(STATE_DISPLAY_MODE, "ADD_TOPIC");
-		//forumDetailsForm.getForum().setForumName("");
-		//forumDetailsForm.getForum().setForumDescription("");
 	}
 	
 	public void editTopic(RunData rundata, Context context) {
@@ -657,7 +652,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 					.get("org.sakaiproject.event.api.EventTrackingService");
 		}
 		eventTrackingService.post(
-					eventTrackingService.newEvent("EventTrackingTypes.EVENT_DISCUSSIONFORUMS_ADD_TOPIC", ToolManager.getCurrentPlacement().getContext()+" Topic id: "+forumTopicForm.getForumTopicDetails().getTopicId()+" was created", false));
+					eventTrackingService.newEvent("discussionforums.addtopic", ToolManager.getCurrentPlacement().getContext()+" Topic id: "+forumTopicForm.getForumTopicDetails().getTopicId()+" was created", false));
 	
 	}
 	
@@ -684,7 +679,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 					.get("org.sakaiproject.event.api.EventTrackingService");
 		}
 		eventTrackingService.post(
-					eventTrackingService.newEvent("EventTrackingTypes.EVENT_DISCUSSIONFORUMS_EDIT", ToolManager.getCurrentPlacement().getContext()+" Topic id: "+topicId+" was edited", false));
+					eventTrackingService.newEvent("discussionforums.edit", ToolManager.getCurrentPlacement().getContext()+" Topic id: "+topicId+" was edited", false));
 	
 	}
 	
@@ -702,7 +697,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 					.get("org.sakaiproject.event.api.EventTrackingService");
 		}
 		eventTrackingService.post(
-					eventTrackingService.newEvent("EventTrackingTypes.EVENT_DISCUSSIONFORUMS_DELETE_TOPIC", ToolManager.getCurrentPlacement().getContext()+" Topic id: "+topicId+" was deleted", false));
+					eventTrackingService.newEvent("discussionforums.deletetopic", ToolManager.getCurrentPlacement().getContext()+" Topic id: "+topicId+" was deleted", false));
 	
 	}
 	
@@ -902,10 +897,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 		
 		context.put("addReply", SecurityService.unlock("discuss.addreply", siteReference));
 		context.put("deleteAnyReply", SecurityService.unlock("discuss.deletereply.any", siteReference));
-		
-		System.out.println("The addReply to show:>>>> " + SecurityService.unlock("discuss.addreply", siteReference));
-		System.out.println("The deleteAnyReply to show:>>>> " + SecurityService.unlock("discuss.deletereply.any", siteReference));
-		
+				
 		forumMessageForm.setReplyAddable(SecurityService.unlock("discuss.addreply", siteReference));
 		forumMessageForm.setAnyReplyDeledable(SecurityService.unlock("discuss.deletereply.any", siteReference));
 		
@@ -931,7 +923,6 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 		
 		if (messageNavigateButton.equals("false")) {		
 			String msgRecords = rundata.getParameters().getString("msgRecords");
-			System.out.println("The msgRecords to show:>>>> " + msgRecords);
 			if (msgRecords == null){
 				numberOfRecords = new Integer("10");
 			} else {
@@ -939,34 +930,14 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 			}
 			
 			forumMessageForm.setMsgRecords(numberOfRecords.toString());
-			System.out.println("The numberOfRecords to show:>>>> " + numberOfRecords);
-			
+						
 			List topicMessages = DiscussionForumsService.getMessageList(topicId);
 			forumMessageForm.setallMessages(topicMessages);
 			forumMessageForm.setNumberOfItems(topicMessages.size());
 			forumMessageForm.setStart(1);
 			forumMessageForm.setTopicMessages(pager(0,numberOfRecords,topicMessages));
 			forumMessageForm.setEnd(Math.min(numberOfRecords.intValue(), new Integer(forumMessageForm.getNumberOfItems()).intValue()));
-			/* Iterator messageList = forumMessageForm.getTopicMessages().iterator();
-			while(messageList.hasNext()){
-				ForumMessage msg = (ForumMessage) messageList.next();
-				if (count % 2 == 0){
-					msg.setColoured("1");
-					context.put("coloured", msg.getColoured());
-				} else {
-					msg.setColoured("0");
-					context.put("coloured", msg.getColoured());
-				}
-				messages.addElement(msg);
-				count++;
-			}
-			forumMessageForm.setTopicMessages(messages);
-				
-			String hidden = state.getAttribute("hidden").toString();
-			if (hidden.equals("0")){
-				forumMessageForm.setHidden("0");
-			} */
-			
+						
 			if (forumMessageForm.getNumberOfItems() < 1){
 				forumMessageForm.setStart(0);
 				forumMessageForm.setEnd(0);
@@ -975,27 +946,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 			context.put("start", forumMessageForm.getStart());
 			context.put("end", forumMessageForm.getEnd());
 			context.put("numberOfItems", forumMessageForm.getNumberOfItems());
-		} else {
-			/* Iterator messageList = forumMessageForm.getTopicMessages().iterator();
-			while(messageList.hasNext()){
-				ForumMessage msg = (ForumMessage) messageList.next();
-				if (count % 2 == 0){
-					msg.setColoured("1");
-					context.put("coloured", msg.getColoured());
-				} else {
-					msg.setColoured("0");
-					context.put("coloured", msg.getColoured());
-				}
-				messages.addElement(msg);
-				count++;
-			}
-			forumMessageForm.setTopicMessages(messages); */
-				
-			/* String hidden = state.getAttribute("hidden").toString();
-			if (hidden.equals("0")){
-				forumMessageForm.setHidden("0");
-			} */
-			
+		} else {	
 			if (forumMessageForm.getNumberOfItems() < 1){
 				forumMessageForm.setStart(0);
 				forumMessageForm.setEnd(0);
@@ -1137,7 +1088,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 					.get("org.sakaiproject.event.api.EventTrackingService");
 		}
 		eventTrackingService.post(
-					eventTrackingService.newEvent("EventTrackingTypes.EVENT_DISCUSSIONFORUMS_ADD_REPLY", ToolManager.getCurrentPlacement().getContext()+" Message id: "+forumMessageForm.getForumMessage().getMessageId()+" was added", false));
+					eventTrackingService.newEvent("discussionforums.addreply", ToolManager.getCurrentPlacement().getContext()+" Message id: "+forumMessageForm.getForumMessage().getMessageId()+" was added", false));
 		forumMessageForm.setHidden("0");
 		forumMessageForm.setUpload("no");
 		forumMessageForm.setAddressLink("");
@@ -1154,10 +1105,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 		forumMessage = DiscussionForumsService.getMessageDetail(messageId);	
 		state.setAttribute("forumMessage", forumMessage);
 		String loginUser = state.getAttribute("userID").toString();
-		System.out.println("The confirmDeleteMessage loginUser value to show:>>>> " + loginUser);
 		String userCreatedMessage = forumMessage.getUserId();
-		System.out.println("The confirmDeleteMessage userCreatedMessage value to show:>>>> " + userCreatedMessage);
-		System.out.println("The confirmDeleteMessage forumMessageForm.isAnyReplyDeledable() value to show:>>>> " + forumMessageForm.isAnyReplyDeledable());
 		if (forumMessageForm.isAnyReplyDeledable()) {
 			addAlert(state, rb.getString("message.alert.confirmdeletemessage"));
 			state.setAttribute("message", "deleteMessage");
@@ -1210,7 +1158,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 					.get("org.sakaiproject.event.api.EventTrackingService");
 		}
 		eventTrackingService.post(
-					eventTrackingService.newEvent("EventTrackingTypes.EVENT_DISCUSSIONFORUMS_DELETE_REPLY", ToolManager.getCurrentPlacement().getContext()+" Message id: "+messageId+" was deleted", false));
+					eventTrackingService.newEvent("discussionforums.deletereply", ToolManager.getCurrentPlacement().getContext()+" Message id: "+messageId+" was deleted", false));
 		
 		forumMessageForm.getForumMessage().setMessageReply("");
 		forumMessageForm.setHidden("0");
@@ -1229,7 +1177,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 		state.setAttribute("messageReply", messageReply);
 		state.setAttribute(STATE_DISPLAY_MODE, "ADD_ATTACHMENT");
 	}
-	
+		
 	public void attachFile(RunData rundata, Context context) {
 		String peid = ((JetspeedRunData) rundata).getJs_peid();
 		SessionState state = ((JetspeedRunData) rundata).getPortletSessionState(peid);
@@ -1242,12 +1190,15 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 		
 		String upload = rundata.getParameters().getString("upload").trim();	
 		Integer topicId = Integer.parseInt(rundata.getParameters().getString("topicId").trim());
-		//String inputFileName = rundata.getParameters().getString("theFile").trim();
+		String inputFileName = rundata.getParameters().getString("theFile").trim();
 		String addressLink = rundata.getParameters().getString("addressLink").trim();
 		
-		String fullFileName = "C:\\Users\\mphahsm\\Desktop\\EFT Refund Form on Letterhead.doc";
-		String inputFileName = "EFT Refund Form on Letterhead.doc";
+		String inputTextFileName = rundata.getParameters().getString("theFileText").trim();
+		System.out.println("The inputTextFileName from attachFile value to show:>>>> " + inputTextFileName);
 		
+		//String fullFileName = "C:\\Users\\mphahsm\\Desktop\\EFT Refund Form on Letterhead.doc";
+		//String inputFileName = "EFT Refund Form on Letterhead.doc";
+				
 		System.out.println("The topicId from attachFile value to show:>>>> " + topicId);
 		System.out.println("The inputFileName from attachFile value to show:>>>> " + inputFileName);
 		
@@ -1279,7 +1230,8 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 		
 			boolean notAllowed = false;
 			forumMessageForm.setFilename(inputFileName);
-			File testSize = new File(fullFileName);
+			File testSize = new File(inputFileName);
+			//File testSize = new File(fullFileName);
 			for(int i=0; i < extList.length; i++){
 				if (inputFileName.substring(inputFileName.lastIndexOf(".")+1).equalsIgnoreCase(extList[i])){
 					notAllowed = true;
@@ -1304,7 +1256,8 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 				return;
 			} else {
 				try {
-					buffIn = new FileInputStream(fullFileName);
+					buffIn = new FileInputStream(inputFileName);
+					//buffIn = new FileInputStream(fullFileName);
 					System.out.println("The buffIn from attacFile value to show:>>>> " + buffIn);
 					fileDir = uploadPath+state.getAttribute("siteId").toString()+"/"+forumMessageForm.getTopicId()+"/";
 					System.out.println("The fileDir from attacFile value to show:>>>> " + fileDir);
@@ -1312,7 +1265,9 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 					if (!file.exists()){
 						file.mkdirs();
 					}
-					buffout = new FileOutputStream(fileDir+inputFileName);
+					String outputFileName = "outputTest";
+					buffout = new FileOutputStream(fileDir+outputFileName);
+					//buffout = new FileOutputStream(fileDir+inputFileName);
 					System.out.println("The buffout from attacFile value to show:>>>> " + buffout);
 					boolean eof = false;
 					while(!eof){
@@ -1397,7 +1352,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 		ServletOutputStream sos = null;
 		
 		HttpServletRequest req = rundata.getRequest();
-		System.out.println("The request from readAttachment value to show:>>>> " + req);
+		System.out.println("The request object from readAttachment value to show:>>>> " + req);
 		//String type = null;			
 		//String fileDir = null;
 		//String fileName = null;
@@ -1406,6 +1361,10 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 		String type = attachment.substring(attachment.lastIndexOf(".")+1);
 		String fileName = attachment.substring(attachment.lastIndexOf("/")+1);
 		
+		System.out.println("The attachment from readAttachment value to show:>>>> " + attachment);
+		System.out.println("The type from readAttachment value to show:>>>> " + type);
+		System.out.println("The fileName from readAttachment value to show:>>>> " + fileName);
+				
 		/* BufferedInputStream in = null;
 		FileOutputStream fileOutputStream = null;
 		try {

@@ -9,7 +9,7 @@
 
 	<form name="forumDetailsForm" action="#toolForm("DiscussionForumsAction")" method="post">
 		<div class="instruction">
-			"Are you sure you want to delete the following forum and all its topics and messages?"
+			Are you sure you want to delete the following forum and all its topics and messages?
 		</div>
 
 		<div>
