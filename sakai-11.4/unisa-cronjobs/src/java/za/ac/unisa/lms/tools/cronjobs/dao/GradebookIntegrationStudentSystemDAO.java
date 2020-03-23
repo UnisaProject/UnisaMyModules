@@ -118,7 +118,7 @@ public class GradebookIntegrationStudentSystemDAO extends StudentSystemDAO {
 		/** select all bookings that will take place in 8 days. */
 
 		String select = "select upper(novell_user_id)||'#'||"+
-          		   "nvl((select usr.e_mail from usr where novell_user_code = usrsun.novell_user_id),'none')||'#'||"+
+          		   "nvl((select usr.e_mail from usr where novell_user_code = usrsun.novell_user_id and in_used_flag = 'Y'),'none')||'#'||"+
           		   "nvl((select staff.email_address from staff where NOVELL_USER_ID = usrsun.novell_user_id and resign_date is null),'none')||'#'||"+
           		   "nvl((select staff.email_address from staff where NOVELL_USER_ID = usrsun.novell_user_id and resign_date = (select max(resign_date) from staff where NOVELL_USER_ID = usrsun.novell_user_id)),'none') AS PRIML"+
 				   " FROM USRSUN"+ 
