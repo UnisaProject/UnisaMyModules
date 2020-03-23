@@ -126,7 +126,7 @@ public class SakaiProxyImpl implements SakaiProxy {
 
     public void init() {
 
-     	/*	 Unisa change: comment out 
+        /*	 Unisa change: comment out 
         NotificationEdit ne = notificationService.addTransientNotification();
         ne.setResourceFilter(ClogManager.REFERENCE_ROOT);
         ne.setFunction(ClogManager.CLOG_POST_CREATED);
@@ -224,8 +224,10 @@ public class SakaiProxyImpl implements SakaiProxy {
     public String getDisplayNameForTheUser(String userId) {
         try {
             User sakaiUser = userDirectoryService.getUser(userId);
-            // CLOG-24
-            return FormattedText.escapeHtmlFormattedText(sakaiUser.getDisplayName());
+            //UNISA CHANGE
+            String name = sakaiUser.getFirstName().trim().substring(0,1).toUpperCase()+" "+sakaiUser.getLastName().trim().toUpperCase();
+            //return FormattedText.escapeHtmlFormattedText(sakaiUser.getDisplayName());
+            return FormattedText.escapeHtmlFormattedText(name);
         } catch (Exception e) {
             return userId; // this can happen if the user does not longer exist
             // in the system
@@ -343,21 +345,6 @@ public class SakaiProxyImpl implements SakaiProxy {
 
         return map;
     }
-
-    public List<User> getUsersInGroups(String siteId, Collection<String> groups) {
-        List<User> users = new ArrayList<>();
-        Set<String> groupSet = new HashSet<>(groups);
-
-        try {
-            Collection<String> userIds = siteService.getSite(siteId).getMembersInGroups(groupSet);
-            users.addAll(userDirectoryService.getUsers(userIds));
-        } catch (IdUnusedException e) {
-            logger.error("Invalid site id. No users in group will be returned.");
-        }
-
-        return users;
-    }
-
 
     /*
      * public List<String> getEidMaintainerSiteMembers() { // TODO
@@ -608,7 +595,7 @@ public class SakaiProxyImpl implements SakaiProxy {
                     filteredFunctions.add(function);
             }
 
-            if (functions.contains("realm.upd")) {
+            if (functions.contains("realm.upd") && functions.contains("site.upd")) {
                 filteredFunctions.add(ClogFunctions.CLOG_MODIFY_PERMISSIONS);
             }
         }

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<crontab>
+
+      <!-- SITE CREATE /-->
+        <cronjob schedule="0 0 2 * * ?"                         class="za.ac.unisa.lms.tools.cronjobs.jobs.CourseImportJob"/>
+        <cronjob schedule="0 30 16 * * ?"                   class="za.ac.unisa.lms.tools.cronjobs.jobs.OnlineCourseImportJob"/>
+        <cronjob schedule="0 31 16 * * ?"     class="za.ac.unisa.lms.tools.cronjobs.jobs.ONLImportJob"/>
+      <!-- Commented out on 2014/06/26 -->
+      <!-- SITE UPDATE /-->
+        <cronjob schedule="0 0 6  * * ?"                        class="za.ac.unisa.lms.tools.cronjobs.jobs.OnlcourseOnlgroupGroupUpdateTermJob"/>
+        <cronjob schedule="0 0 4 * * ?"                         class="za.ac.unisa.lms.tools.cronjobs.jobs.MyUnisaStatsJob"/>
+       <!-- WEEKLY /-->
+        <!--cronjob schedule="0 3 00 ? * MON,WED,SAT"                   class="za.ac.unisa.lms.tools.cronjobs.jobs.GradebookIntegrationJob"/-->
+
+       <cronjob schedule="0 10 12 16 4 ?"  class="za.ac.unisa.lms.tools.cronjobs.jobs.GradebookIntegrationJob"/>
+        <!--cronjob schedule="0 33 0,10 * * ?" class="za.ac.unisa.lms.tools.cronjobs.jobs.PopulateMissingRecordsToSakaiJob"/-->
+
+</crontab>

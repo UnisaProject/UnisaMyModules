@@ -1,0 +1,48 @@
+## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
+<div class="portletBody">
+	#if ($message=='emptyAddForum')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("forum.alert.noforumname", $alertMessage)</div>#end
+	#elseif ($message=='existAddForum')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("forum.alert.sameforumname", $alertMessage)</div>#end
+	#end
+
+	<h3>$tlang.getString("forum.createforum.heading") $siteTitle </h3>
+
+	<form name="forumDetailsForm" action="#toolForm("DiscussionForumsAction")" method="post">
+		<div class="instruction">
+			$tlang.getString("forum.createforum.prompt1")
+			$tlang.getString("forum.createforum.prompt2")<br>
+			$tlang.getString("forum.field.required") <span class="reqStar">*</span>
+		</div>
+
+		<div>
+		<table>
+			<tr>
+				<td>
+					<label for="addForum">$tlang.getString("forum.label.forumName")</label> <span class="reqStar">*</span>
+				</td>
+				<td>
+					<input type="text" id="forumName" name="forumName" size="75" maxlength="100">
+				</td>
+			</tr>
+			<tr>
+			<td><br></td>
+			</tr>
+			<tr>
+				<td>
+					<label>$tlang.getString("forum.label.forumDescription")</label>
+				</td>
+				<td>
+					<textarea id="forumDescription" name="forumDescription" rows="4" cols="60" maxlength="250"> </textarea>
+				</td>
+			</tr>
+		</table>
+		</div>
+
+		<p class="act">
+			<input type="submit" class="active" name="eventSubmit_saveForum" value=" $tlang.getString("button.save")"  accesskey="s"/>
+			<input type="submit" name="eventSubmit_doCancel" value=" $tlang.getString("button.back") " accesskey="x"  />
+		</p>
+		<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+	</form>
+</div>

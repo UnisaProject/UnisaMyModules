@@ -1,0 +1,42 @@
+## $Header: /cvs/sakai2/legacy/tools/src/webapp/vm/admin/chef_aliases_list.vm,v 1.2 2005/05/19 19:53:01 gsilver.umich.edu Exp $
+<div class="portletBody">
+	#if ($message=='emptyEditForum')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("forum.alert.noforumname", $alertMessage)</div>#end
+	#elseif ($message=='existEditForum')
+		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("forum.alert.sameforumname", $alertMessage)</div>#end
+	#end
+	<h3>$tlang.getString("forum.delete")</h3>
+
+	<form name="forumDetailsForm" action="#toolForm("DiscussionForumsAction")" method="post">
+		<div class="instruction">
+			Are you sure you want to delete the following forum and all its topics and messages?
+		</div>
+
+		<div>
+		<table>
+		#foreach ($forum in $forumList)
+			<tr>
+				<td>
+					<b>$forum.forumName</b>
+					<input type="hidden" id="forumId" name="forumId" value="$forum.forumId">
+				</td>
+			</tr>
+			<tr>
+			<td><br></td>
+			</tr>
+			<tr>
+				<td>
+					$forum.forumDescription
+				</td>
+			</tr>
+		#end
+		</table>
+		</div>
+
+		<p class="act">
+			<input type="submit" class="active" name="eventSubmit_deleteForum" value=" $tlang.getString("button.delete")"  accesskey="s"/>
+			<input type="submit" name="eventSubmit_doCancel" value=" $tlang.getString("button.back") " accesskey="x"  />
+		</p>
+		<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
+	</form>
+</div>

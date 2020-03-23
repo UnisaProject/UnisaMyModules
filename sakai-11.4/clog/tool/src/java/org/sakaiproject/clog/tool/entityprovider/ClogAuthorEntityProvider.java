@@ -29,7 +29,7 @@ import org.sakaiproject.user.api.UserDirectoryService;
 
 @Setter
 public class ClogAuthorEntityProvider extends AbstractEntityProvider implements CoreEntityProvider, AutoRegisterEntityProvider, Outputable, Describeable, ActionsExecutable {
-    
+   
     public final static String ENTITY_PREFIX = "clog-author";
 
     protected final Logger LOG = Logger.getLogger(getClass());
@@ -38,7 +38,7 @@ public class ClogAuthorEntityProvider extends AbstractEntityProvider implements 
     private UserDirectoryService userDirectoryService;
 
     public boolean entityExists(String id) {
-        
+       
         if (LOG.isDebugEnabled()) {
             LOG.debug("entityExists(" + id + ")");
         }
@@ -100,10 +100,10 @@ public class ClogAuthorEntityProvider extends AbstractEntityProvider implements 
 
         try {
             List<ClogMember> authors = clogManager.getAuthors(siteId, sort);
-       	 	AuthorsData data = new AuthorsData();
-       	 	data.authorsTotal = authors.size();
-       	 	data.authors = authors;
-       	 	return data;
+        AuthorsData data = new AuthorsData();
+        data.authorsTotal = authors.size();
+        data.authors = authors;
+        return data;
 
         } catch (Exception e) {
             LOG.error("Caught exception whilst getting authors.", e);

@@ -2506,8 +2506,7 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
 		
 		session.save(new GradingEvent(assignment, graderId, gradeRecord.getStudentId(), gradeEntry));
 	}
-	
-    /**
+	   /**
      * Unisa Changes:2018/04/26:Added-Check if gradebook settings for module site is set to record
      * percentages and not points: grade_type = 2
      */
@@ -2523,5 +2522,4 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
     	else
     		return false;
     }	// End Unisa Changes
-
 }

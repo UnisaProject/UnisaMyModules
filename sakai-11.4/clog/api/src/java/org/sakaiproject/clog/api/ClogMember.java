@@ -36,9 +36,8 @@ public class ClogMember {
     }
 
     public String getUserDisplayName() {
-    //unisa change: Only show surname and initial
-      //  return sakaiUser.getLastName() + ", " + sakaiUser.getFirstName();
-      
-      return sakaiUser.getDisplayName();
+        //unisa change: Only show surname and initial
+      return sakaiUser.getFirstName().trim().substring(0,1).toUpperCase() +" "+sakaiUser.getLastName().trim().toUpperCase();
+      //return sakaiUser.getDisplayName();
     }
 }
