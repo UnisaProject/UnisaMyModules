@@ -13,6 +13,6 @@
   <packaging>pom</packaging>
   <modules>
     <module>unisa-calendar-impl/impl</module>
-    <module>unisa-calendar-impl/pack</module>
+  <!--   <module>unisa-calendar-impl/pack</module> -->
   </modules>
 </project>
