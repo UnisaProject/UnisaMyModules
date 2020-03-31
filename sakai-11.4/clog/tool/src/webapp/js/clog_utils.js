@@ -151,14 +151,14 @@ clog.utils = {
 
         if (title.length < 4) {
             if ('AUTOSAVE' !== visibility) {
-                alert(short_title_warning);
+                alert("The post title must be at least four characters in length");
             }
             return 0;
         }
         
         if (title.length > 255) {
             if ('AUTOSAVE' !== visibility) {
-                alert(long_title_warning);
+                alert("The post title must be less than 255 characters in length");
             }
             return 0;
         }
