@@ -1190,18 +1190,9 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 		
 		String upload = rundata.getParameters().getString("upload").trim();	
 		Integer topicId = Integer.parseInt(rundata.getParameters().getString("topicId").trim());
-		String inputFileName = rundata.getParameters().getString("theFile").trim();
+		String inputFileName = rundata.getRequest().getAttribute("theFile").toString();
 		String addressLink = rundata.getParameters().getString("addressLink").trim();
-		
-		String inputTextFileName = rundata.getParameters().getString("theFileText").trim();
-		System.out.println("The inputTextFileName from attachFile value to show:>>>> " + inputTextFileName);
-		
-		//String fullFileName = "C:\\Users\\mphahsm\\Desktop\\EFT Refund Form on Letterhead.doc";
-		//String inputFileName = "EFT Refund Form on Letterhead.doc";
 				
-		System.out.println("The topicId from attachFile value to show:>>>> " + topicId);
-		System.out.println("The inputFileName from attachFile value to show:>>>> " + inputFileName);
-		
 		if ((inputFileName == null || inputFileName.length() < 1) && (addressLink == null || addressLink.length() < 1))  {
 			addAlert(state, rb.getString("message.alert.noattachment"));
 			state.setAttribute("message", "emptyAddAttachment");
@@ -1223,22 +1214,37 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 		
 		state.setAttribute("attachFile", "true");
 		
+		String [] input = inputFileName.split(",");
+		String[] parseInput;
 		String extensions = "exe,zip,avi";
 		String[] extList = extensions.split(",");
-				
-		if (inputFileName.length() > 0)  {
+		
+		for (int i=0; i < input.length; i++){
+			parseInput = input[i].split("=");
+			if (parseInput.length > 1){
+				if (i == 0){						
+					String tmp = parseInput[1];
+					if (parseInput[1].lastIndexOf("\\") > 0 ){
+						tmp = parseInput[1].substring(parseInput[1].lastIndexOf("\\")+1);
+					}
+					writeFile = tmp;
+				} else if (i == 1){
+					readFile = parseInput[1];
+				}
+			}
+		}
+		
+		if (writeFile.length() > 0)  {
 		
 			boolean notAllowed = false;
-			forumMessageForm.setFilename(inputFileName);
-			File testSize = new File(inputFileName);
-			//File testSize = new File(fullFileName);
+			state.setAttribute("inputFileName", writeFile);
+			forumMessageForm.setFilename(writeFile);
+			File testSize = new File(readFile);
 			for(int i=0; i < extList.length; i++){
-				if (inputFileName.substring(inputFileName.lastIndexOf(".")+1).equalsIgnoreCase(extList[i])){
+				if (writeFile.substring(writeFile.lastIndexOf(".")+1).equalsIgnoreCase(extList[i])){
 					notAllowed = true;
 				}
 			}
-			
-			System.out.println("The notAllowed from attacFile value to show:>>>> " + notAllowed);
 			
 			if (notAllowed){
 				addAlert(state, rb.getString("message.alert.wrongfileformat"));
@@ -1246,9 +1252,7 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 				state.setAttribute(STATE_DISPLAY_MODE, "ADD_ATTACHMENT");
 				return;
 			}
-			
-			System.out.println("The file size from attacFile value to show:>>>> " + testSize.length());
-			
+						
 			if (testSize.length() > 6291456){
 				addAlert(state, rb.getString("message.alert.bigfile"));
 				state.setAttribute("message", "bigfile");
@@ -1256,19 +1260,13 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 				return;
 			} else {
 				try {
-					buffIn = new FileInputStream(inputFileName);
-					//buffIn = new FileInputStream(fullFileName);
-					System.out.println("The buffIn from attacFile value to show:>>>> " + buffIn);
+					buffIn = new FileInputStream(readFile);
 					fileDir = uploadPath+state.getAttribute("siteId").toString()+"/"+forumMessageForm.getTopicId()+"/";
-					System.out.println("The fileDir from attacFile value to show:>>>> " + fileDir);
 					File file = new File(fileDir);
 					if (!file.exists()){
 						file.mkdirs();
 					}
-					String outputFileName = "outputTest";
-					buffout = new FileOutputStream(fileDir+outputFileName);
-					//buffout = new FileOutputStream(fileDir+inputFileName);
-					System.out.println("The buffout from attacFile value to show:>>>> " + buffout);
+					buffout = new FileOutputStream(fileDir+writeFile);
 					boolean eof = false;
 					while(!eof){
 						int line = buffIn.read();
@@ -1278,7 +1276,6 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 							buffout.write(line);
 						}
 					}
-					state.setAttribute("inputFileName", inputFileName);
 					buffIn.close();
 					buffout.close();
 				} catch (FileNotFoundException e) {
@@ -1351,52 +1348,11 @@ public class DiscussionForumsAction extends VelocityPortletPaneledAction {
 		DataInputStream in = null;
 		ServletOutputStream sos = null;
 		
-		HttpServletRequest req = rundata.getRequest();
-		System.out.println("The request object from readAttachment value to show:>>>> " + req);
-		//String type = null;			
-		//String fileDir = null;
-		//String fileName = null;
-		
 		String attachment = rundata.getParameters().getString("attachment");
-		String type = attachment.substring(attachment.lastIndexOf(".")+1);
 		String fileName = attachment.substring(attachment.lastIndexOf("/")+1);
-		
-		System.out.println("The attachment from readAttachment value to show:>>>> " + attachment);
-		System.out.println("The type from readAttachment value to show:>>>> " + type);
+		System.out.println("The attachment from readAttachment value to show:>>>> " + attachment);		
 		System.out.println("The fileName from readAttachment value to show:>>>> " + fileName);
 				
-		/* BufferedInputStream in = null;
-		FileOutputStream fileOutputStream = null;
-		try {
-			in = new BufferedInputStream(new FileInputStream(uploadPath+attachment));
-			fileOutputStream = new FileOutputStream(fileName);
-
-			final byte dataBuffer[] = new byte[1024];
-			int bytesRead;
-			while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-				fileOutputStream.write(dataBuffer, 0, bytesRead);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try
-			{
-				if (in != null) {
-					in.close();
-				}
-				if (fileOutputStream != null) {
-					fileOutputStream.close();
-				}
-			}
-			catch (IOException ie) {
-				ie.printStackTrace();
-			}
-		} */
-		
-		//fileDir = getServlet().getServletContext().getInitParameter("forumFullPath")+"/";
-		//type = request.getParameter("attachment").substring(request.getParameter("attachment").lastIndexOf(".")+1);
-		//fileName = request.getParameter("attachment").substring(request.getParameter("attachment").lastIndexOf("/")+1);
-		
 		/* try 
 		{
 			in = new DataInputStream(new FileInputStream(new File(uploadPath+attachment)));
