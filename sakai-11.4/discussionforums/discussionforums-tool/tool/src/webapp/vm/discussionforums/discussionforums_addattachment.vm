@@ -12,13 +12,6 @@
 		#if ($alertMessage)<div class="alertMessage">$tlang.getFormattedMessage("message.alert.wrongURL", $alertMessage)</div>#end
 	#end
 	
-	<script language="JavaScript" type="text/javascript">
-		function setHiddenValue()
-		{
-		  document.getElementById('theFileText').value = document.getElementById('theFile').value;
-		}
-	</script>
-
 	<h3>$tlang.getString("forum.add.attachment")</h3>
 
 	<form name="ForumTopicsForm" action="#toolForm("DiscussionForumsAction")" method="post" enctype="multipart/form-data">
@@ -31,16 +24,10 @@
 		<table>
 			<tr>
 				<td>
-					<label for="addFile">$tlang.getString("forum.label.upload.file")</label>
+					<label>$tlang.getString("forum.label.upload.file")</label>
 				</td>
 				<td>
-					<input type="file" id="theFile" name="theFile" onChange="javascript:setHiddenValue();">
-				</td>
-			</tr>
-			
-			<tr>
-				<td>
-					<input type="text" id="theFileText" name="theFileText">
+					<input type="file" id="theFile" name="theFile">
 				</td>
 			</tr>
 			
