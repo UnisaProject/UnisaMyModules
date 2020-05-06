@@ -4,7 +4,7 @@
 
 	<tool
 			id="sakai.assignment.grades"
-			title="Assignments"
+			title="eAssessment"
 			description="For creating, posting, submitting and marking online assessments.">
 		
 		<category name="course" />
