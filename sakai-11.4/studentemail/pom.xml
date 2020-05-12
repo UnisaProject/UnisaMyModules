@@ -9,7 +9,7 @@
 		<relativePath>../master/pom.xml</relativePath>
     </parent>
 
-    <name>sakai-studentemail base   pom</name>
+    <name>sakai-studentemail base pom</name>
     <groupId>org.sakaiproject.studentemail</groupId>
     <artifactId>studentemail</artifactId>
     <packaging>pom</packaging>
