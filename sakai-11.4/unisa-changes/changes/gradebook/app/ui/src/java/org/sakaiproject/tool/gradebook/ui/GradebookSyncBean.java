@@ -28,6 +28,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -166,60 +170,70 @@ public class GradebookSyncBean extends GradebookDependentBean implements Seriali
 			FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_server_error"));
 		}	
 		
-		String serverUrl = ServerConfigurationService.getString("serverUrl");
-		String localPortal80 = LOCAL_URL_PORT80 + PORTAL_URL;
-		String localPortal82 = LOCAL_URL_PORT82 + PORTAL_URL;
-		//Check webapp environment and alter server url to correct environment (DEV or QA)
-		if ( serverUrl.equals(LOCAL_URL_PORT80) || serverUrl.equals(LOCAL_URL_PORT82)
-			|| serverUrl.equals(localPortal80) || serverUrl.equals(localPortal82) ) {
-			//serverUrl = "https://myqa.int.unisa.ac.za";		////////////CHANGE TO DEV (mydev) WHEN IMPLEMENTING!!!!!!!!!!
-			serverUrl="https://mydev.int.unisa.ac.za";
-		} 
-		
-		url = serverUrl;
-		url = url+WEBSERVICE_URL;
-		System.out.println("Gradebook SYNC URL = "+url);
 
-		GradebookSyncStudentSystemWebService_PortType events = null;
-		
-		/** Update student system with Sakai Gradebook results */
-		try {
-			URL url1 = new URL(url);
-			events = new GradebookSyncStudentSystemWebServiceServiceLocator().getGradebookSyncStudentSystemWebService(url1);	
-		} catch (MalformedURLException e1) {
-			e1.printStackTrace();
-			if (logger.isErrorEnabled()) logger.error("Web service URL marlformed!");
-			FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_server_error"));
-		} catch (ServiceException e3) {
-			e3.printStackTrace();
-			if (logger.isErrorEnabled()) logger.error("Web service creation error!");
-			FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_server_error"));
-		} catch (Exception e2) {
-			e2.printStackTrace();
-			if (logger.isErrorEnabled()) logger.error("Web exception!");
-			FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_server_error"));
-		} // end try
+		// Sonette add aSync job
+		CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+		    // Simulate a long-running Job   
 
-		//CALL Webservice IF AND ONLY IF all arguments in call are not null
-		try {
-			if (checkWebServiceArgs( moduleCode, moduleSite, acadYear, semPeriod,
-					assignmentNr, onlineType, primaryLecturer, primaryLecturerEmail)) {
-				
-				events.getGradebookMarks(moduleCode, moduleSite, acadYear, semPeriod, assignmentNr, onlineType, primaryLecturer, primaryLecturerEmail);
-				
-				if (logger.isInfoEnabled()) logger.info("Web service call was SUCCESSFULL on '"+new Date().toString()+"'!");
-				//Display sync success validation message on redirected webpage
-				FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_queued"));
-			}
+			String serverUrl = ServerConfigurationService.getString("serverUrl");
+			String localPortal80 = LOCAL_URL_PORT80 + PORTAL_URL;
+			String localPortal82 = LOCAL_URL_PORT82 + PORTAL_URL;
+			//Check webapp environment and alter server url to correct environment (DEV or QA)
+			if ( serverUrl.equals(LOCAL_URL_PORT80) || serverUrl.equals(LOCAL_URL_PORT82)
+				|| serverUrl.equals(localPortal80) || serverUrl.equals(localPortal82) ) {
+				//serverUrl = "https://myqa.int.unisa.ac.za";		////////////CHANGE TO DEV (mydev) WHEN IMPLEMENTING!!!!!!!!!!
+				serverUrl="https://mydev.int.unisa.ac.za";
+			} 
 			
-		}catch (Exception vE) {
-			vE.printStackTrace();
-			if (logger.isErrorEnabled()) logger.error("Exception in Web Service call on '"+new Date().toString()+"'!");
+			url = serverUrl;
+			url = url+WEBSERVICE_URL;
+			System.out.println("Gradebook SYNC URL = "+url);
+	
+			GradebookSyncStudentSystemWebService_PortType events = null;
 			
-			FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_server_error"));
-		} // end try getGradebookMarks
-		
-    	//Reset navigation
+			
+			
+			/** Update student system with Sakai Gradebook results */
+			try {
+				URL url1 = new URL(url);
+				events = new GradebookSyncStudentSystemWebServiceServiceLocator().getGradebookSyncStudentSystemWebService(url1);	
+			} catch (MalformedURLException e1) {
+				e1.printStackTrace();
+				if (logger.isErrorEnabled()) logger.error("Web service URL marlformed!");
+				FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_server_error"));
+			} catch (ServiceException e3) {
+				e3.printStackTrace();
+				if (logger.isErrorEnabled()) logger.error("Web service creation error!");
+				FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_server_error"));
+			} catch (Exception e2) {
+				e2.printStackTrace();
+				if (logger.isErrorEnabled()) logger.error("Web exception!");
+				FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_server_error"));
+			} // end try
+	
+			//CALL Webservice IF AND ONLY IF all arguments in call are not null
+			try {
+				if (checkWebServiceArgs( moduleCode, moduleSite, acadYear, semPeriod,
+						assignmentNr, onlineType, primaryLecturer, primaryLecturerEmail)) {
+					
+					events.getGradebookMarks(moduleCode, moduleSite, acadYear, semPeriod, assignmentNr, onlineType, primaryLecturer, primaryLecturerEmail);
+					
+					if (logger.isInfoEnabled()) logger.info("Web service call was SUCCESSFULL on '"+new Date().toString()+"'!");
+					//Display sync success validation message on redirected webpage
+					FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_queued"));
+				}
+				
+			}catch (Exception vE) {
+				vE.printStackTrace();
+				if (logger.isErrorEnabled()) logger.error("Exception in Web Service call on '"+new Date().toString()+"'!");
+				
+				FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_server_error"));
+			} // end try getGradebookMarks
+
+			System.out.println("Gradebook Manual sync run in a separate thread than the main thread.");
+		} // end of CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+
+		//Reset navigation
 		setNav("overview", "false", "false", "false", "");
 		final ToolSession session = SessionManager.getCurrentToolSession();
 		session.setAttribute("syncing", "false");

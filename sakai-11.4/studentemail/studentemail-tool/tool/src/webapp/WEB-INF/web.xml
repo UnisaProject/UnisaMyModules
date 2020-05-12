@@ -39,11 +39,11 @@
            unisa.studentemail
         </servlet-name>
         <servlet-class>
-            org.sakaiproject.welcome.tool.StudentemailAction
+            org.sakaiproject.studentemail.tool.StudentemailAction
         </servlet-class>
         <init-param>
             <param-name>template</param-name>
-            <param-value>studentemail/chef_studentemail_displaystudent</param-value>            
+            <param-value>studentemail/chef_studentemail</param-value>            
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
