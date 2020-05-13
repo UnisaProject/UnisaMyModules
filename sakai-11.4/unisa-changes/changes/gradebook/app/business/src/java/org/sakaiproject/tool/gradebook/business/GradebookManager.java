@@ -893,4 +893,4 @@ public interface GradebookManager {
      */
     public boolean checkGradeType(GradebookAssignment assignment); //End Unisa Changes
 }
-}
+

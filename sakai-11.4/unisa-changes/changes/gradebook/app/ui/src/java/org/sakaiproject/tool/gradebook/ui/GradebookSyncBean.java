@@ -170,11 +170,19 @@ public class GradebookSyncBean extends GradebookDependentBean implements Seriali
 			FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_server_error"));
 		}	
 		
+		final String tmpModuleCode = moduleCode;
+		final String tmpModuleSite = moduleSite;
+		final String tmpAcadYear = acadYear;
+		final String tmpSemPeriod = semPeriod;
+		final String tmpAssignmentNr = assignmentNr;
+		final String tmpOnlineType = onlineType;
+		final String tmpPrimaryLecturer = primaryLecturer;
+		final String tmpPrimaryLecturerEmail = primaryLecturerEmail;
 
 		// Sonette add aSync job
 		CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 		    // Simulate a long-running Job   
-
+			
 			String serverUrl = ServerConfigurationService.getString("serverUrl");
 			String localPortal80 = LOCAL_URL_PORT80 + PORTAL_URL;
 			String localPortal82 = LOCAL_URL_PORT82 + PORTAL_URL;
@@ -185,17 +193,17 @@ public class GradebookSyncBean extends GradebookDependentBean implements Seriali
 				serverUrl="https://mydev.int.unisa.ac.za";
 			} 
 			
-			url = serverUrl;
-			url = url+WEBSERVICE_URL;
-			System.out.println("Gradebook SYNC URL = "+url);
+			
+			String url_1 = serverUrl;
+			url_1 = url_1+WEBSERVICE_URL;
+			System.out.println("Gradebook SYNC URL = "+url_1);
 	
 			GradebookSyncStudentSystemWebService_PortType events = null;
 			
-			
-			
+						
 			/** Update student system with Sakai Gradebook results */
 			try {
-				URL url1 = new URL(url);
+				URL url1 = new URL(url_1);
 				events = new GradebookSyncStudentSystemWebServiceServiceLocator().getGradebookSyncStudentSystemWebService(url1);	
 			} catch (MalformedURLException e1) {
 				e1.printStackTrace();
@@ -204,7 +212,7 @@ public class GradebookSyncBean extends GradebookDependentBean implements Seriali
 			} catch (ServiceException e3) {
 				e3.printStackTrace();
 				if (logger.isErrorEnabled()) logger.error("Web service creation error!");
-				FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_server_error"));
+				FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_server_error")); 
 			} catch (Exception e2) {
 				e2.printStackTrace();
 				if (logger.isErrorEnabled()) logger.error("Web exception!");
@@ -212,11 +220,13 @@ public class GradebookSyncBean extends GradebookDependentBean implements Seriali
 			} // end try
 	
 			//CALL Webservice IF AND ONLY IF all arguments in call are not null
+			
 			try {
-				if (checkWebServiceArgs( moduleCode, moduleSite, acadYear, semPeriod,
-						assignmentNr, onlineType, primaryLecturer, primaryLecturerEmail)) {
+				if (checkWebServiceArgs (tmpModuleCode, tmpModuleSite, tmpAcadYear, tmpSemPeriod,
+						tmpAssignmentNr, tmpOnlineType, tmpPrimaryLecturer, tmpPrimaryLecturerEmail)) {
 					
-					events.getGradebookMarks(moduleCode, moduleSite, acadYear, semPeriod, assignmentNr, onlineType, primaryLecturer, primaryLecturerEmail);
+					events.getGradebookMarks(tmpModuleCode, tmpModuleSite, tmpAcadYear, tmpSemPeriod, tmpAssignmentNr, tmpOnlineType, tmpPrimaryLecturer, 
+							tmpPrimaryLecturerEmail);
 					
 					if (logger.isInfoEnabled()) logger.info("Web service call was SUCCESSFULL on '"+new Date().toString()+"'!");
 					//Display sync success validation message on redirected webpage
@@ -229,9 +239,10 @@ public class GradebookSyncBean extends GradebookDependentBean implements Seriali
 				
 				FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_sync_server_error"));
 			} // end try getGradebookMarks
-
+			
+			
 			System.out.println("Gradebook Manual sync run in a separate thread than the main thread.");
-		} // end of CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+		}); // end of CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 
 		//Reset navigation
 		setNav("overview", "false", "false", "false", "");
