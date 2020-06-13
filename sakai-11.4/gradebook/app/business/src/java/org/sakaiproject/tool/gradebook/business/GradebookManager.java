@@ -886,4 +886,11 @@ public interface GradebookManager {
     throws ConflictingAssignmentNameException, StaleObjectModificationException;    
     
     public void applyDropScores(Collection<AssignmentGradeRecord> gradeRecords);
+
+    /**
+     * Unisa Changes:2018/04/26:Added-Check if gradebook settings for module site is set to record
+     * percentages and not points: grade_type = 2
+     */
+    public boolean checkGradeType(GradebookAssignment assignment); //End Unisa Changes
 }
+

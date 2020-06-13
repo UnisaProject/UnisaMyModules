@@ -105,6 +105,19 @@
 						<f:param name="assignmentId" value="#{assignmentDetailsBean.assignment.id}"/>
 					</h:commandLink>
 
+	<%/*  Unisa Changes: Added:2018/04/26: Link for Request Gradebook item sync:BEGIN */%>
+					<h:commandLink
+						action="#{assignmentDetailsBean.navigateToGradebookSync}"
+						rendered="#{overviewBean.userAbleToGradeAll && assignmentDetailsBean.userAbleToEditAssessments}"
+						accesskey="y"
+						tabindex="10"
+						title="#{msgs.assignment_details_sync}">
+						<h:outputFormat id="gradebookSync" value="#{msgs.assignment_details_sync}">
+						</h:outputFormat>
+						<f:param name="assignmentId" value="#{assignmentDetailsBean.assignment.id}"/>
+					</h:commandLink>
+					<%/*  End Unisa Changes */%>		
+
 					<h:outputLink
 						value="#{assignmentDetailsBean.assignment.externalInstructorLink}"
 						rendered="#{assignmentDetailsBean.assignment.externallyMaintained && not empty assignmentDetailsBean.assignment.externalInstructorLink}"

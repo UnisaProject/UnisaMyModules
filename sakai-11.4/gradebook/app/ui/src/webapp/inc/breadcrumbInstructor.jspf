@@ -1,6 +1,7 @@
 <%-- For instructor view, generate the breadcrumb trail --%>
 
-<f:verbatim><span class="breadcrumb"><h3></f:verbatim>
+<f:verbatim><div class="breadcrumb"><p></f:verbatim> <%-- Unisa Changes:2019/02/14:Replace h3 tag with p tag and span with div tag to correct heading margins --%>
+
 
 	<%--  The root of the breadcrumb rendered here --%>
 	<h:commandLink action="#{bean.navigateToOverview}" value="#{msgs.breadcrumb_overview}" immediate="true" rendered="#{bean.breadcrumbPage eq 'overview'}" />
@@ -23,4 +24,4 @@
 		<f:param value="#{bean.userDisplayName}" />
 	</h:outputFormat>
 
-<f:verbatim></h3></span></f:verbatim>
+<f:verbatim></p></div></f:verbatim> <%-- Unisa Changes:2019/02/14:Replace h3 tag with p tag and span with div tag to correct heading margins --%>

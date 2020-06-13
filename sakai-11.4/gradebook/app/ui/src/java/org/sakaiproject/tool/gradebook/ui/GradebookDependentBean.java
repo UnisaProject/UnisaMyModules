@@ -57,7 +57,9 @@ public abstract class GradebookDependentBean extends InitializableBean {
 	private Boolean adding;
 	private Boolean middle;
 	private boolean isExistingConflictScale = false;
-
+    /**Unisa Changes:2018/04/26:Added syncing variable for breadcrumbs*/
+    private Boolean syncing;
+    
 	protected final String BREADCRUMBPAGE = "breadcrumbPage";
 
 	/**
@@ -490,6 +492,20 @@ public abstract class GradebookDependentBean extends InitializableBean {
 
 		return this.middle;
 	}
+	
+	/**
+	 * Unisa Changes:2018/04/26:Added getSyncing method
+     * Return if breadcrumb will display 'Sync request' piece
+     */
+    public Boolean getSyncing() {
+    	if(syncing == null){
+    		final ToolSession session = SessionManager.getCurrentToolSession();
+    		syncing = new Boolean((String) session.getAttribute("syncing"));
+    	}
+   		return syncing;
+    }
+    // End Unisa Changes
+    
 
 	/**
 	 * Generates a default filename (minus the extension) for a download from this Gradebook.

@@ -41,6 +41,11 @@ import org.sakaiproject.tool.gradebook.GradebookAssignment;
 import org.sakaiproject.tool.gradebook.GradingEvent;
 import org.sakaiproject.tool.gradebook.GradingEvents;
 import org.sakaiproject.tool.gradebook.jsf.FacesUtil;
+//Unisa Changes:2018/04/26:Added database dependency for UNISA Student system and GardeBookSync Bean
+import org.sakaiproject.tool.gradebook.business.impl.UnisaGradeBookDAO;
+import org.sakaiproject.tool.gradebook.ui.GradebookSyncBean;
+//End Unisa Changes
+
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -809,4 +814,90 @@ public class AssignmentDetailsBean extends EnrollmentTableBean {
 
 		return "instructorView";
 	}
+	
+	/**
+	 * Unisa Changes:2018/04/26:Added navigateToGradebookSync() method.
+	 * Go to gradebookSync page. State is kept in tool session, hence 
+	 * attribute setting. Method implemented here instead of GradebookDependantBean
+	 * since methods used require assignment object which is declared here
+	 */
+	public String navigateToGradebookSync() {
+		UnisaGradeBookDAO unisaStudentSysDao = new UnisaGradeBookDAO();
+		GradebookSyncBean gradebookSyncBean = new GradebookSyncBean();
+		String redirectPage = "assignmentDetails";
+		boolean gradebookTitleCheck = false, detailsCheck = false, gradeTypeCheck = false, 
+				dueDateCheck = false, assignmentExists = false;
+		
+		//Check if GB title is in format 'x assignment x'
+		gradebookTitleCheck = gradebookSyncBean.verifyGradebookTitle( assignment );
+		if( !gradebookTitleCheck ){
+			FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_exist_unisa_sys"));
+			if (log.isInfoEnabled()) log.info("Assignment does not exist in UNISA student system!");
+			return redirectPage;
+		}
+		
+		//Check if detailsParts string array contains int values for use in DB query.
+		String[] detailsParts = gradebookSyncBean.getAssignmentDetails(getGradebookManager().
+				getGradebookUid(assignment.getGradebook().getId()), assignment).split("#");
+		String moduleCode = detailsParts[0];
+		int acadYear = gradebookSyncBean.verifyAssignmentDetails(detailsParts[1], 1);
+		int semPeriod = gradebookSyncBean.verifyAssignmentDetails(detailsParts[2], 2);
+		int assignmentNr = gradebookSyncBean.verifyAssignmentDetails(detailsParts[3], 3);
+		
+		if ( (acadYear != -1) || (semPeriod != -1) || (assignmentNr != -1) )
+			detailsCheck = true;
+		if( !detailsCheck ){
+			FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_exist_unisa_sys"));
+			if (log.isInfoEnabled()) log.info("Assignment does not exist in UNISA student system!");
+			return redirectPage;
+		}
+		
+		//Check if grade_type setting is percentages and not points
+		gradeTypeCheck = getGradebookManager().checkGradeType( assignment );
+		if (!gradeTypeCheck){
+			FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_grade_type_setting"));
+			if (log.isInfoEnabled()) log.info("Assignment grade_type is set to points (1)!");
+			return redirectPage;
+		}
+		
+		//Check if assignment due date in UNISA Student System Database is in the past
+		try{
+			dueDateCheck = unisaStudentSysDao.checkDueDate( acadYear,semPeriod,moduleCode,assignmentNr );
+			if(!dueDateCheck){
+				FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_due_date"));
+				if (log.isInfoEnabled()) log.info("Assignment due date is NOT in the past!");
+				return redirectPage;
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+			if (log.isErrorEnabled()) log.error("Exception in checkDueDate() method!");
+		}
+		
+		//Check if assignment exists in UNISA Student System Database
+		try{
+			assignmentExists = unisaStudentSysDao.checkStudentSysAssignment( acadYear,semPeriod,moduleCode,assignmentNr );
+			if (!assignmentExists){
+				FacesUtil.addErrorMessage(FacesUtil.getLocalizedString("validation_assignment_exist_unisa_sys"));
+				if (log.isInfoEnabled()) log.info("Assignment does not exist in UNISA student system!");
+				return redirectPage;
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+			if (log.isErrorEnabled()) log.error("Exception in assignmentExists() method!");
+		}
+				
+		//Go to gradebookSync if all assignment details are in the correct format and grade type is 
+		//percentages and assignment due date is in past and assignment exists in UNISA Student System
+		if (gradebookTitleCheck && detailsCheck && gradeTypeCheck && dueDateCheck && assignmentExists){
+			setNav(null, "false", "false", "true", null);
+			final ToolSession session = SessionManager.getCurrentToolSession();
+			//Change 'syncing' breadcrumb here instead of setNav() to avoid modifying setNav() declaration.
+			session.setAttribute("syncing", "true");
+			
+			redirectPage = "gradebookSync";
+		}
+		
+		return redirectPage;
+	}
+	// End Unisa Changes
 }
