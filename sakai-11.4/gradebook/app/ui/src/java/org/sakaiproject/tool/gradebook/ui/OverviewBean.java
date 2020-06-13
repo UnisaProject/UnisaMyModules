@@ -233,6 +233,9 @@ public class OverviewBean extends GradebookDependentBean implements Serializable
 		session.removeAttribute("adding");
 		session.removeAttribute("editing");
 		session.removeAttribute("middle");
+		
+		// Unisa Changes:2018/04/26:Added-Remove attribute for navigation to 'syncing' page
+		session.removeAttribute("syncing");
 	}
 
     // Delegated sort methods

@@ -271,6 +271,21 @@
 			<value>graderRules</value>
 		</managed-property>
 	</managed-bean>
-
+	
+	<!-- Unisa Changes:2018/04/26:Added gradebookSync managed Bean -->
+	<managed-bean>
+		<managed-bean-name>gradebookSyncBean</managed-bean-name>
+		<managed-bean-class>org.sakaiproject.tool.gradebook.ui.GradebookSyncBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+		<managed-property>
+			<property-name>assignmentId</property-name>
+			<value>#{param.assignmentId}</value>
+		</managed-property>
+		<managed-property>
+			<property-name>pageName</property-name>
+			<value>gradebookSync</value>
+		</managed-property>
+	</managed-bean>
+	<!-- End Unisa Changes -->
 </faces-config>
 

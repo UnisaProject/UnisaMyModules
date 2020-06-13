@@ -2506,5 +2506,20 @@ public abstract class GradebookManagerHibernateImpl extends GradebookServiceHibe
 		
 		session.save(new GradingEvent(assignment, graderId, gradeRecord.getStudentId(), gradeEntry));
 	}
-
+	   /**
+     * Unisa Changes:2018/04/26:Added-Check if gradebook settings for module site is set to record
+     * percentages and not points: grade_type = 2
+     */
+    public boolean checkGradeType(GradebookAssignment assignment){
+    	if(assignment == null){
+    		throw new IllegalArgumentException("null assignment passed to checkGradeType");
+    	}
+    	
+    	// Get the grade_type for gradebook assignment
+    	Gradebook gradebook = assignment.getGradebook();
+    	if(gradebook.getGrade_type() == GradebookService.GRADE_TYPE_PERCENTAGE)
+    		return true;
+    	else
+    		return false;
+    }	// End Unisa Changes
 }

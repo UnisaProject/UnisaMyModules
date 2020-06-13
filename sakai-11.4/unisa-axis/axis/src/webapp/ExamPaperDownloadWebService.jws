@@ -1,0 +1,212 @@
+import java.sql.Types;
+import org.apache.commons.collections.map.ListOrderedMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+
+
+import org.w3c.dom.*;
+
+import org.apache.axis.AxisFault;
+import org.apache.axis.utils.JavaUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.email.api.EmailService;
+import org.sakaiproject.email.api.Attachment;
+import org.sakaiproject.email.api.RecipientType;
+import org.sakaiproject.event.cover.UsageSessionService;
+import org.sakaiproject.event.api.UsageSession;
+
+import za.ac.unisa.lms.db.StudentSystemDAO;
+import za.ac.unisa.lms.db.SakaiDAO;
+
+
+/**
+This webservice is used to sync the assignment marks from the myUnisa Gradebook to the Student assignment system
+*/
+public class ExamPaperDownloadWebService {
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	private EmailService emailService;
+	
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	// query to see if exam item exist for specific module,semester period and assignment
+	private static final String EXAM_PAPER_EXIST = " select ASSIGNMENT_ID,context,open_date,title ,SUBSTRING(context,1,7), draft "+
+												" from asn_assignment"+ 
+												" where context = ?"+ 
+												" and   upper(title) = upper(?)"+
+												" and   draft = 0";
+
+	private static final String GET_EXAM_PAPERS = " select asn_submission.submission_id AS SUBMISSION_ID, asn_submission_submitter.SUBMITTER, sakai_user_id_map.eid AS STNUMBER,"+
+												" asn_submission_attachments.attachment, CONCAT("/content ",asn_submission_attachments.attachment) AS FILEPATH"+
+												" from asn_submission, asn_submission_submitter, sakai_user_id_map, asn_submission_attachments"+
+												" where assignment_id = '39cd72bd-12ed-4423-b0ab-1275b577a306'"+
+												" and   asn_submission.submission_id = asn_submission_submitter.SUBMISSION_ID"+
+												" and   asn_submission_submitter.SUBMITTER = sakai_user_id_map.user_id"+
+												" and   asn_submission_attachments.submission_id = asn_submission_submitter.submission_id";
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	/** Download examPapers from sakai assignment tool (myModules & myExams)
+        Input:
+                        site_id 
+                        title 
+        */
+	public String getGradebookMarks(String siteId, String examTitle)throws AxisFault {
+                                                                               
+		//System.out.println("***** SY EXAMPAPERDOWNLOAD <br>");
+
+		/* =========== variables =========== */
+		boolean examFound = false;
+		siteId='SAV3601-20-EX06'
+		examTitle='SAV3601 May/June 2020 Mork Exam'
+		serverUrl.append(ServerConfigurationService.getString("serverUrl"));
+		
+		StringBuffer dbEnvironment = new StringBuffer();
+        
+        if (serverUrl.toString().equals("https://my.unisa.ac.za")) {
+                dbEnvironment.append("SAKAIPRD");
+        } else if (serverUrl.toString().equals("https://myqa.int.unisa.ac.za")) {
+                dbEnvironment.append("SAKAIQA");
+        } else {
+                dbEnvironment.append("SAKAIDEV");
+        }
+        
+		/* =========== end variables =========== */
+    
+		Log log = LogFactory.getLog(this.getClass());
+          
+        // find the eAssessment
+        try {
+                                                    
+			/* ************ For each online assignment retrieved, retrieve the matching Gradebook item ****************/
+			JdbcTemplate jdt1 = new JdbcTemplate(new SakaiDAO().getDataSource());
+			try {
+
+                List recordsGI = jdt1.queryForList(EXAM_PAPER_EXIST,
+                        new Object[] {siteId, examTitle});
+
+        
+        		/* **********************************************************/
+        		/* If no exam is found                            */
+        		/* **********************************************************/
+        		if (recordsGI.size() == 0) {
+                    examFound = false;
+        		} // end if (recordsGI.size() == 0)
+				
+				/* **********************************************************/
+        		/* If exam item is found */
+        		/* **********************************************************/
+        		List<String> examPaperListAL = new ArrayList<String>();
+        		
+                if (recordsGI.size() > 0) {
+                	examFound = true;
+                	Iterator recordsGI_it = recordsGI.iterator();
+                	
+                	// find and download submitted papers
+					while (recordsGI_it.hasNext()) {
+											
+						ListOrderedMap record_AssignmentID = (ListOrderedMap) recordsGI_it.next();
+                        String assignmentId = record_AssignmentID.get("ASSIGNMENT_ID").toString();
+
+						System.out.println("AssignmentId = "+assignmentId);
+						
+						JdbcTemplate jdt2 = new JdbcTemplate(new SakaiDAO().getDataSource());
+				
+						try {
+							List recordsExamPapers = jdt2.queryForList(GET_EXAM_PAPERS.toString());
+										                        
+							Iterator recordsExamPapers_it = recordsExamPapers.iterator();
+							
+							while (recordsExamPapers_it.hasNext()) {
+											ListOrderedMap record_ExamPaper = (ListOrderedMap) recordsExamPapers_it.next();
+											
+											StringBuffer submissionId = new StringBuffer();
+											StringBuffer studentNr = new StringBuffer(); //STUDENTNR
+											StringBuffer filePath = new StringBuffer(); //FILEPATH
+																					                                                                                
+											submissionId.append(record_GradebookResult.get("SUBMISSION_ID").toString());
+											studentNr.append(record_GradebookResult.get("STUDENTNR").toString());
+											filePath.append(record_GradebookResult.get("FILEPATH").toString());
+											
+											System.out.println("SY EXAM PAPERS: "+filePath);
+							} // end while
+						
+						} catch (Exception e) { // jdt2.queryForList(GET_EXAM_PAPERS.toString());
+							e.printStackTrace();
+							log.error(e);
+					
+							System.out.println("***** SY EXAMPAPERDOWNLOAD: error "+e);
+						} // jdt2.queryForList(GET_EXAM_PAPERS.toString());
+													
+					} // end while (recordsGI_it)
+                	//GET_EXAM_PAPERS
+        		} // end if (recordsGI.size() > 0)   
+        
+            } catch (Exception e) {
+                            e.printStackTrace();
+                            log.error(e);
+                            System.out.println("***** SY EXAMPAPER: error "+e);
+//                            String errorMessage = "GRADEBOOK INTEGRATION ERROR: "+ e.getMessage();
+//                            System.out.println("GRADEBOOK INTEGRATION ERROR: "+ e.getMessage());
+//                            sendEmail("GRADEBOOK INTEGRATION ERROR", errorMessage, "syzelle@unisa.ac.za"); 
+                            throw new AxisFault(e.getMessage());
+            } // end try -catch Exception jdt1.queryForList(EXAM_PAPER_EXIST
+        
+        return result.toString();
+
+	} // end getGradebookMarks
+
+
+	/* ----------------------------------------------------------------------------------------------------------------- */
+	/*public void sendEmail(String subject, String body, String emailAddress) throws AddressException {
+
+		emailService = (EmailService) ComponentManager.get(EmailService.class);
+		
+		String tmpEmailFrom = ServerConfigurationService.getString("noReplyEmailFrom");
+		
+		//System.out.println("GRADEBOOK email send: "+body);
+		
+		InternetAddress toEmail = new InternetAddress(emailAddress);
+		InternetAddress iaTo[] = new InternetAddress[1];
+		iaTo[0] = toEmail;
+		InternetAddress iaHeaderTo[] = new InternetAddress[1];
+		iaHeaderTo[0] = toEmail;
+		InternetAddress iaReplyTo[] = new InternetAddress[1];
+		iaReplyTo[0] = new InternetAddress(tmpEmailFrom);
+		List<String> contentList = new ArrayList<String>();
+		contentList.add("Content-Type: text/html");
+		
+		emailService.sendMail(iaReplyTo[0],iaTo,subject,body,iaHeaderTo,iaReplyTo,contentList);
+	} // end of sendEmail
+*/
+} // end of GradebookSyncStudentSystemWebService
