@@ -34,7 +34,7 @@
     <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
-      <version>3.2</version>
+      <version>3.2.2</version>
     </dependency>
     <!-- 31 Jan SY remove commons-dbcp dependancy and place in unisa-db main pom -->
     <dependency>
